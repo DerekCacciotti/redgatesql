@@ -1,0 +1,62 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[spEditTCID](@TCIDPK int=NULL,
+@BirthTerm char(2)=NULL,
+@BirthWtLbs int=NULL,
+@BirthWtOz int=NULL,
+@DeliveryType char(2)=NULL,
+@Ethnicity varchar(500)=NULL,
+@FedBreastMilk bit=NULL,
+@FSWFK int=NULL,
+@GestationalAge int=NULL,
+@HVCaseFK int=NULL,
+@IntensiveCare char(1)=NULL,
+@MultipleBirth bit=NULL,
+@NoImmunization bit=NULL,
+@NumberofChildren int=NULL,
+@ProgramFK int=NULL,
+@Race char(2)=NULL,
+@RaceSpecify varchar(500)=NULL,
+@SmokedPregnant char(1)=NULL,
+@TCDOB datetime=NULL,
+@TCDOD datetime=NULL,
+@TCFirstName varchar(200)=NULL,
+@TCGender char(2)=NULL,
+@TCIDEditor char(10)=NULL,
+@TCIDFormCompleteDate datetime=NULL,
+@TCIDPK_old int=NULL,
+@TCLastName varchar(200)=NULL,
+@VaricellaZoster bit=NULL)
+AS
+UPDATE TCID
+SET 
+BirthTerm = @BirthTerm, 
+BirthWtLbs = @BirthWtLbs, 
+BirthWtOz = @BirthWtOz, 
+DeliveryType = @DeliveryType, 
+Ethnicity = @Ethnicity, 
+FedBreastMilk = @FedBreastMilk, 
+FSWFK = @FSWFK, 
+GestationalAge = @GestationalAge, 
+HVCaseFK = @HVCaseFK, 
+IntensiveCare = @IntensiveCare, 
+MultipleBirth = @MultipleBirth, 
+NoImmunization = @NoImmunization, 
+NumberofChildren = @NumberofChildren, 
+ProgramFK = @ProgramFK, 
+Race = @Race, 
+RaceSpecify = @RaceSpecify, 
+SmokedPregnant = @SmokedPregnant, 
+TCDOB = @TCDOB, 
+TCDOD = @TCDOD, 
+TCFirstName = @TCFirstName, 
+TCGender = @TCGender, 
+TCIDEditor = @TCIDEditor, 
+TCIDFormCompleteDate = @TCIDFormCompleteDate, 
+TCIDPK_old = @TCIDPK_old, 
+TCLastName = @TCLastName, 
+VaricellaZoster = @VaricellaZoster
+WHERE TCIDPK = @TCIDPK
+GO

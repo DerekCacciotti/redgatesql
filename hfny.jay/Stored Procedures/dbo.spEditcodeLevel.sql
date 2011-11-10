@@ -1,0 +1,22 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[spEditcodeLevel](@codeLevelPK int=NULL,
+@CaseWeight numeric(4, 2)=NULL,
+@Enrolled bit=NULL,
+@LevelGroup char(10)=NULL,
+@LevelName char(30)=NULL,
+@MaximumVisit numeric(2, 0)=NULL,
+@MinimumVisit numeric(2, 0)=NULL)
+AS
+UPDATE codeLevel
+SET 
+CaseWeight = @CaseWeight, 
+Enrolled = @Enrolled, 
+LevelGroup = @LevelGroup, 
+LevelName = @LevelName, 
+MaximumVisit = @MaximumVisit, 
+MinimumVisit = @MinimumVisit
+WHERE codeLevelPK = @codeLevelPK
+GO
