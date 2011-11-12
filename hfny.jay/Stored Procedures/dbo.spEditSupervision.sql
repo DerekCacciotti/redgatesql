@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -43,8 +44,10 @@ CREATE PROCEDURE [dbo].[spEditSupervision](@SupervisionPK int=NULL,
 @SupervisionDate datetime=NULL,
 @SupervisionEditor char(10)=NULL,
 @SupervisionEndTime datetime=NULL,
+@SupervisionHours int=NULL,
+@SupervisionMinutes int=NULL,
 @SupervisionNotes varchar(max)=NULL,
-@SupervisionStartTime datetime=NULL,
+@SupervisionStartTime char(8)=NULL,
 @SupervisorFamilyEmergency bit=NULL,
 @SupervisorFK int=NULL,
 @SupervisorForgot bit=NULL,
@@ -103,6 +106,8 @@ Strengths = @Strengths,
 SupervisionDate = @SupervisionDate, 
 SupervisionEditor = @SupervisionEditor, 
 SupervisionEndTime = @SupervisionEndTime, 
+SupervisionHours = @SupervisionHours, 
+SupervisionMinutes = @SupervisionMinutes, 
 SupervisionNotes = @SupervisionNotes, 
 SupervisionStartTime = @SupervisionStartTime, 
 SupervisorFamilyEmergency = @SupervisorFamilyEmergency, 

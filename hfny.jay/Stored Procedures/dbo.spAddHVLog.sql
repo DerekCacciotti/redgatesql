@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -34,8 +35,8 @@ CREATE PROCEDURE [dbo].[spAddHVLog](@CAChildSupport bit=NULL,
 @CurriculumPAT bit=NULL,
 @CurriculumPATFocusFathers bit=NULL,
 @CurriculumSanAngelo bit=NULL,
-@FatherAdvocateParticipated nchar(10)=NULL,
-@FatherFigureParticipated nchar(10)=NULL,
+@FatherAdvocateParticipated bit=NULL,
+@FatherFigureParticipated bit=NULL,
 @FSWFK int=NULL,
 @GrandParentParticipated bit=NULL,
 @HCBreastFeeding bit=NULL,

@@ -1,6 +1,7 @@
 CREATE TABLE [dbo].[FormReviewOptions]
 (
 [FormReviewOptionsPK] [int] NOT NULL IDENTITY(1, 1),
+[FormReviewEndDate] [datetime] NULL,
 [FormReviewOptionsCreateDate] [datetime] NOT NULL CONSTRAINT [DF_FormReviewOptions_FormReviewOptionsCreateDate] DEFAULT (getdate()),
 [FormReviewOptionsCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [FormReviewOptionsEditDate] [datetime] NULL,
