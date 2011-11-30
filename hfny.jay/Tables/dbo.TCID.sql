@@ -29,7 +29,8 @@ CREATE TABLE [dbo].[TCID]
 [TCIDFormCompleteDate] [datetime] NOT NULL,
 [TCIDPK_old] [int] NOT NULL,
 [TCLastName] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[VaricellaZoster] [bit] NULL
+[VaricellaZoster] [bit] NULL,
+[NoImmunizationsReason] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
