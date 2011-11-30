@@ -12,21 +12,22 @@ CREATE TABLE [dbo].[HVScreen]
 [ReferralSourceSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Relation2TC] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [Relation2TCSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[RiskAbortionHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskAbortionTry] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskAdoption] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskDepressionHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskEducation] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskInadequateSupports] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskMaritalProblems] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskNoPhone] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[RiskAbortionHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskAbortionTry] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskAdoption] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskDepressionHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskEducation] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskInadequateSupports] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskMaritalProblems] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskNoPhone] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RiskNoPrenatalCare] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [RiskNotMarried] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskPartnerJobless] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[RiskPartnerJobless] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RiskPoor] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskPsychiatricHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskSubstanceAbuseHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskUnstableHousing] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[RiskPsychiatricHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskSubstanceAbuseHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskUnder21] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskUnstableHousing] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ScreenCreateDate] [datetime] NOT NULL CONSTRAINT [DF_HVScreen_ScreenCreateDate] DEFAULT (getdate()),
 [ScreenCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ScreenDate] [datetime] NOT NULL,
@@ -47,7 +48,7 @@ GO
 SET ANSI_NULLS ON
 GO
 Create TRIGGER [dbo].[fr_delete_screen]
-on [dbo].[HVScreen]
+on dbo.HVScreen
 After DELETE
 
 AS
@@ -65,7 +66,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE TRIGGER [dbo].[fr_hvscreen]
-on [dbo].[HVScreen]
+on dbo.HVScreen
 After insert
 
 AS
@@ -88,7 +89,7 @@ GO
 -- Description:	Updates FormReview Table with form date on Supervisor Review of Form
 -- =============================================
 CREATE TRIGGER [dbo].[fr_hvscreen_edit]
-on [dbo].[HVScreen]
+on dbo.HVScreen
 AFTER UPDATE
 
 AS
@@ -118,19 +119,11 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_ScreenEditDate ON HVScreen
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_ScreenEditDate] ON [dbo].[HVScreen]
+CREATE TRIGGER [dbo].[TR_ScreenEditDate] ON dbo.HVScreen
 For Update 
 AS
 Update HVScreen Set HVScreen.ScreenEditDate= getdate()
 From [HVScreen] INNER JOIN Inserted ON [HVScreen].[HVScreenPK]= Inserted.[HVScreenPK]
 GO
 ALTER TABLE [dbo].[HVScreen] ADD CONSTRAINT [PK__HVScreen__3751BFE51BC821DD] PRIMARY KEY CLUSTERED  ([HVScreenPK]) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[HVScreen] WITH NOCHECK ADD CONSTRAINT [FK_HVScreen_FAWFK] FOREIGN KEY ([FAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
-ALTER TABLE [dbo].[HVScreen] WITH NOCHECK ADD CONSTRAINT [FK_HVScreen_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
-GO
-ALTER TABLE [dbo].[HVScreen] WITH NOCHECK ADD CONSTRAINT [FK_HVScreen_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
-ALTER TABLE [dbo].[HVScreen] WITH NOCHECK ADD CONSTRAINT [FK_HVScreen_ReferralSourceFK] FOREIGN KEY ([ReferralSourceFK]) REFERENCES [dbo].[listReferralSource] ([listReferralSourcePK])
 GO
