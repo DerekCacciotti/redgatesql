@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +9,7 @@ GO
 -- Create date: <Mar 18, 2010>
 -- Description:	<gets all the Medical reasons for dropdownlists>
 -- =============================================
-create PROCEDURE [dbo].[spGetAllMedicalReasons]
+CREATE PROCEDURE [dbo].[spGetAllMedicalReasons]
 @reasonGroup varchar(50)= NULL 
 AS
 BEGIN
@@ -17,8 +18,8 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT DISTINCT ReasonGroup FROM codeMedicalReasons
-	SELECT * FROM codeMedicalReasons 
+	SELECT DISTINCT ReasonGroup FROM codeERHospitalReasons
+	SELECT * FROM codeERHospitalReasons
 	WHERE ReasonGroup=isnull(@reasonGroup,ReasonGroup)
 END
 GO
