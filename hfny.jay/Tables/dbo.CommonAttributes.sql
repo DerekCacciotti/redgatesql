@@ -68,7 +68,10 @@ CREATE TABLE [dbo].[CommonAttributes]
 [TCHIUnknown] [bit] NULL,
 [TCMedicalFacilityFK] [int] NULL,
 [TCMedicalProviderFK] [int] NULL,
-[TCReceivingMedicaid] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[TCReceivingMedicaid] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TimeBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[WasBreastFed] [bit] NULL,
+[WhyNotBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

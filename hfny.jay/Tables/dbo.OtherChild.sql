@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[OtherChild]
 [HVCaseFK] [int] NOT NULL,
 [LastName] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LivingArrangement] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LivingArrangementSpecify] [char] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [MultiBirth] [int] NULL,
 [OtherChildCreateDate] [datetime] NOT NULL CONSTRAINT [DF_OtherChild_OtherChildCreateDate] DEFAULT (getdate()),
 [OtherChildCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,

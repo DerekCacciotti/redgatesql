@@ -34,10 +34,7 @@ CREATE TABLE [dbo].[HVCase]
 [ScreenDate] [datetime] NOT NULL,
 [TCDOB] [datetime] NULL,
 [TCDOD] [datetime] NULL,
-[TCNumber] [int] NULL,
-[TimeBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[WasBreastFed] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[WhyNotBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[TCNumber] [int] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
