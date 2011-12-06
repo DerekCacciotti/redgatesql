@@ -31,7 +31,8 @@ CREATE TABLE [dbo].[Worker]
 [WorkerEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WorkerPK_old] [int] NOT NULL,
 [YoungestChild] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[Zip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[Zip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LoginCreated] [bit] NOT NULL CONSTRAINT [DF_Worker_LoginCreated] DEFAULT ((0))
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

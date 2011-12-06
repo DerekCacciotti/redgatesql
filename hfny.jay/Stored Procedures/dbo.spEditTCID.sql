@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -28,7 +29,8 @@ CREATE PROCEDURE [dbo].[spEditTCID](@TCIDPK int=NULL,
 @TCIDFormCompleteDate datetime=NULL,
 @TCIDPK_old int=NULL,
 @TCLastName varchar(200)=NULL,
-@VaricellaZoster bit=NULL)
+@VaricellaZoster bit=NULL,
+@NoImmunizationsReason char(2)=NULL)
 AS
 UPDATE TCID
 SET 
@@ -57,6 +59,7 @@ TCIDEditor = @TCIDEditor,
 TCIDFormCompleteDate = @TCIDFormCompleteDate, 
 TCIDPK_old = @TCIDPK_old, 
 TCLastName = @TCLastName, 
-VaricellaZoster = @VaricellaZoster
+VaricellaZoster = @VaricellaZoster, 
+NoImmunizationsReason = @NoImmunizationsReason
 WHERE TCIDPK = @TCIDPK
 GO

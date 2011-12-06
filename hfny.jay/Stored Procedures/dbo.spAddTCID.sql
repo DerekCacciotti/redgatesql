@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -27,7 +28,8 @@ CREATE PROCEDURE [dbo].[spAddTCID](@BirthTerm char(2)=NULL,
 @TCIDFormCompleteDate datetime=NULL,
 @TCIDPK_old int=NULL,
 @TCLastName varchar(200)=NULL,
-@VaricellaZoster bit=NULL)
+@VaricellaZoster bit=NULL,
+@NoImmunizationsReason char(2)=NULL)
 AS
 INSERT INTO TCID(
 BirthTerm,
@@ -55,7 +57,8 @@ TCIDCreator,
 TCIDFormCompleteDate,
 TCIDPK_old,
 TCLastName,
-VaricellaZoster
+VaricellaZoster,
+NoImmunizationsReason
 )
 VALUES(
 @BirthTerm,
@@ -83,7 +86,8 @@ VALUES(
 @TCIDFormCompleteDate,
 @TCIDPK_old,
 @TCLastName,
-@VaricellaZoster
+@VaricellaZoster,
+@NoImmunizationsReason
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

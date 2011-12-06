@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -20,7 +19,7 @@ WITH results(hvcasepk,pcpk,
 	dischargedate, caseprogress)
 AS
 (
-	SELECT TOP 100 PERCENT hvcasepk,pc.pcpk, 
+	SELECT TOP 100 hvcasepk,pc.pcpk, 
 		PC1ID,
 		pc.pcfirstname, pc.pclastname, pc.pcdob,
 		RTRIM(tcid.tcfirstname), RTRIM(tcid.tclastname), hvcase.tcdob,

@@ -20,10 +20,10 @@ CREATE TABLE [dbo].[HVScreen]
 [RiskInadequateSupports] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RiskMaritalProblems] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RiskNoPhone] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[RiskNoPrenatalCare] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[RiskNotMarried] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[RiskNoPrenatalCare] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskNotMarried] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RiskPartnerJobless] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[RiskPoor] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[RiskPoor] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RiskPsychiatricHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RiskSubstanceAbuseHistory] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RiskUnder21] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -48,7 +48,7 @@ GO
 SET ANSI_NULLS ON
 GO
 Create TRIGGER [dbo].[fr_delete_screen]
-on dbo.HVScreen
+on [dbo].[HVScreen]
 After DELETE
 
 AS
@@ -66,7 +66,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE TRIGGER [dbo].[fr_hvscreen]
-on dbo.HVScreen
+on [dbo].[HVScreen]
 After insert
 
 AS
@@ -89,7 +89,7 @@ GO
 -- Description:	Updates FormReview Table with form date on Supervisor Review of Form
 -- =============================================
 CREATE TRIGGER [dbo].[fr_hvscreen_edit]
-on dbo.HVScreen
+on [dbo].[HVScreen]
 AFTER UPDATE
 
 AS
@@ -119,7 +119,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_ScreenEditDate ON HVScreen
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_ScreenEditDate] ON dbo.HVScreen
+CREATE TRIGGER [dbo].[TR_ScreenEditDate] ON [dbo].[HVScreen]
 For Update 
 AS
 Update HVScreen Set HVScreen.ScreenEditDate= getdate()

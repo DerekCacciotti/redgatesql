@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -30,7 +31,8 @@ CREATE PROCEDURE [dbo].[spEditWorker](@WorkerPK int=NULL,
 @WorkerEditor char(10)=NULL,
 @WorkerPK_old int=NULL,
 @YoungestChild char(2)=NULL,
-@Zip char(10)=NULL)
+@Zip char(10)=NULL,
+@LoginCreated bit=NULL)
 AS
 UPDATE Worker
 SET 
@@ -61,6 +63,7 @@ WorkerDOB = @WorkerDOB,
 WorkerEditor = @WorkerEditor, 
 WorkerPK_old = @WorkerPK_old, 
 YoungestChild = @YoungestChild, 
-Zip = @Zip
+Zip = @Zip, 
+LoginCreated = @LoginCreated
 WHERE WorkerPK = @WorkerPK
 GO

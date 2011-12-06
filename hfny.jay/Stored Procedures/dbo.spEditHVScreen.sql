@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -28,6 +29,7 @@ CREATE PROCEDURE [dbo].[spEditHVScreen](@HVScreenPK int=NULL,
 @RiskPoor char(1)=NULL,
 @RiskPsychiatricHistory char(1)=NULL,
 @RiskSubstanceAbuseHistory char(1)=NULL,
+@RiskUnder21 char(1)=NULL,
 @RiskUnstableHousing char(1)=NULL,
 @ScreenDate datetime=NULL,
 @ScreenEditor char(10)=NULL,
@@ -67,6 +69,7 @@ RiskPartnerJobless = @RiskPartnerJobless,
 RiskPoor = @RiskPoor, 
 RiskPsychiatricHistory = @RiskPsychiatricHistory, 
 RiskSubstanceAbuseHistory = @RiskSubstanceAbuseHistory, 
+RiskUnder21 = @RiskUnder21, 
 RiskUnstableHousing = @RiskUnstableHousing, 
 ScreenDate = @ScreenDate, 
 ScreenEditor = @ScreenEditor, 
