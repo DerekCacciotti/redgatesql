@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -67,7 +68,10 @@ CREATE PROCEDURE [dbo].[spEditCommonAttributes](@CommonAttributesPK int=NULL,
 @TCHIUnknown bit=NULL,
 @TCMedicalFacilityFK int=NULL,
 @TCMedicalProviderFK int=NULL,
-@TCReceivingMedicaid char(1)=NULL)
+@TCReceivingMedicaid char(1)=NULL,
+@TimeBreastFed char(2)=NULL,
+@WasBreastFed bit=NULL,
+@WhyNotBreastFed char(2)=NULL)
 AS
 UPDATE CommonAttributes
 SET 
@@ -135,6 +139,9 @@ TCHIOtherSpecify = @TCHIOtherSpecify,
 TCHIUnknown = @TCHIUnknown, 
 TCMedicalFacilityFK = @TCMedicalFacilityFK, 
 TCMedicalProviderFK = @TCMedicalProviderFK, 
-TCReceivingMedicaid = @TCReceivingMedicaid
+TCReceivingMedicaid = @TCReceivingMedicaid, 
+TimeBreastFed = @TimeBreastFed, 
+WasBreastFed = @WasBreastFed, 
+WhyNotBreastFed = @WhyNotBreastFed
 WHERE CommonAttributesPK = @CommonAttributesPK
 GO

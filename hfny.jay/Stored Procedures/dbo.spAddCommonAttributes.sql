@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -66,7 +67,10 @@ CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyIncome numeric(4
 @TCHIUnknown bit=NULL,
 @TCMedicalFacilityFK int=NULL,
 @TCMedicalProviderFK int=NULL,
-@TCReceivingMedicaid char(1)=NULL)
+@TCReceivingMedicaid char(1)=NULL,
+@TimeBreastFed char(2)=NULL,
+@WasBreastFed bit=NULL,
+@WhyNotBreastFed char(2)=NULL)
 AS
 INSERT INTO CommonAttributes(
 AvailableMonthlyIncome,
@@ -133,7 +137,10 @@ TCHIOtherSpecify,
 TCHIUnknown,
 TCMedicalFacilityFK,
 TCMedicalProviderFK,
-TCReceivingMedicaid
+TCReceivingMedicaid,
+TimeBreastFed,
+WasBreastFed,
+WhyNotBreastFed
 )
 VALUES(
 @AvailableMonthlyIncome,
@@ -200,7 +207,10 @@ VALUES(
 @TCHIUnknown,
 @TCMedicalFacilityFK,
 @TCMedicalProviderFK,
-@TCReceivingMedicaid
+@TCReceivingMedicaid,
+@TimeBreastFed,
+@WasBreastFed,
+@WhyNotBreastFed
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

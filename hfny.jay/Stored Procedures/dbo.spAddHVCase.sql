@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -32,10 +33,7 @@ CREATE PROCEDURE [dbo].[spAddHVCase](@CaseProgress numeric(3, 1)=NULL,
 @ScreenDate datetime=NULL,
 @TCDOB datetime=NULL,
 @TCDOD datetime=NULL,
-@TCNumber int=NULL,
-@TimeBreastFed char(2)=NULL,
-@WasBreastFed char(1)=NULL,
-@WhyNotBreastFed char(2)=NULL)
+@TCNumber int=NULL)
 AS
 INSERT INTO HVCase(
 CaseProgress,
@@ -68,10 +66,7 @@ PrenatalCheckupsB4,
 ScreenDate,
 TCDOB,
 TCDOD,
-TCNumber,
-TimeBreastFed,
-WasBreastFed,
-WhyNotBreastFed
+TCNumber
 )
 VALUES(
 @CaseProgress,
@@ -104,10 +99,7 @@ VALUES(
 @ScreenDate,
 @TCDOB,
 @TCDOD,
-@TCNumber,
-@TimeBreastFed,
-@WasBreastFed,
-@WhyNotBreastFed
+@TCNumber
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
