@@ -37,6 +37,18 @@ CREATE TABLE [dbo].[HVCase]
 [TCNumber] [int] NULL
 ) ON [PRIMARY]
 GO
+CREATE STATISTICS [_dta_stat_165575628_2_33] ON [dbo].[HVCase] ([CaseProgress], [TCDOB])
+
+GO
+CREATE STATISTICS [_dta_stat_165575628_1_2_24] ON [dbo].[HVCase] ([HVCasePK], [CaseProgress], [PC1FK])
+
+GO
+CREATE STATISTICS [_dta_stat_165575628_33_1_2_24] ON [dbo].[HVCase] ([TCDOB], [HVCasePK], [CaseProgress], [PC1FK])
+
+GO
+CREATE STATISTICS [_dta_stat_165575628_33_24_1] ON [dbo].[HVCase] ([TCDOB], [PC1FK], [HVCasePK])
+
+GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON

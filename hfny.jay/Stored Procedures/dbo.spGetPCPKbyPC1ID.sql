@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,7 +11,7 @@ GO
 CREATE PROCEDURE [dbo].[spGetPCPKbyPC1ID] 
 	-- Add the parameters for the stored procedure here
 
-	@PC1ID as char(12) = NULL
+	@PC1ID as char(13) = NULL
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from

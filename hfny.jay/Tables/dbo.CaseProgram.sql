@@ -32,6 +32,17 @@ CREATE TABLE [dbo].[CaseProgram]
 [TransferredtoProgramFK] [int] NULL
 ) ON [PRIMARY]
 GO
+CREATE STATISTICS [_dta_stat_885578193_12_27] ON [dbo].[CaseProgram] ([DischargeDate], [PC1ID])
+
+GO
+CREATE STATISTICS [_dta_stat_885578193_27_28] ON [dbo].[CaseProgram] ([PC1ID], [ProgramFK])
+
+GO
+CREATE STATISTICS [_dta_stat_885578193_28_24_27_12] ON [dbo].[CaseProgram] ([ProgramFK], [HVCaseFK], [PC1ID], [DischargeDate])
+
+CREATE NONCLUSTERED INDEX [_dta_index_CaseProgram_18_885578193__K24_K27_K28_K12_8_9] ON [dbo].[CaseProgram] ([HVCaseFK], [PC1ID], [ProgramFK], [DischargeDate]) INCLUDE ([CurrentFAWFK], [CurrentFSWFK]) ON [PRIMARY]
+
+GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
