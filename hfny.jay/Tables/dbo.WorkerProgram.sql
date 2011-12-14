@@ -34,6 +34,9 @@ CREATE TABLE [dbo].[WorkerProgram]
 [YearHVExperience] [int] NULL
 ) ON [PRIMARY]
 GO
+CREATE STATISTICS [_dta_stat_1474104292_24_15] ON [dbo].[WorkerProgram] ([WorkerFK], [ProgramFK])
+
+GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
