@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -44,7 +45,6 @@ CREATE PROCEDURE [dbo].[spEditFollowUp](@FollowUpPK int=NULL,
 @IFSPParentHealthSafety char(1)=NULL,
 @LeadAssessment char(1)=NULL,
 @MonthsBirthControlUse int=NULL,
-@OBPInHome char(1)=NULL,
 @PC1InHome char(1)=NULL,
 @PC1IssuesFK int=NULL,
 @PC2InHome char(1)=NULL,
@@ -95,7 +95,6 @@ IFSPParentChildInteraction = @IFSPParentChildInteraction,
 IFSPParentHealthSafety = @IFSPParentHealthSafety, 
 LeadAssessment = @LeadAssessment, 
 MonthsBirthControlUse = @MonthsBirthControlUse, 
-OBPInHome = @OBPInHome, 
 PC1InHome = @PC1InHome, 
 PC1IssuesFK = @PC1IssuesFK, 
 PC2InHome = @PC2InHome, 

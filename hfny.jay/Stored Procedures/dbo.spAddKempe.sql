@@ -1,9 +1,9 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddKempe](@BioDadInHome bit=NULL,
-@DadBondingArea char(2)=NULL,
+CREATE PROCEDURE [dbo].[spAddKempe](@DadBondingArea char(2)=NULL,
 @DadChildHistoryArea char(2)=NULL,
 @DadCPSArea char(2)=NULL,
 @DadDisciplineArea char(2)=NULL,
@@ -72,7 +72,6 @@ CREATE PROCEDURE [dbo].[spAddKempe](@BioDadInHome bit=NULL,
 @SupervisorObservation bit=NULL)
 AS
 INSERT INTO Kempe(
-BioDadInHome,
 DadBondingArea,
 DadChildHistoryArea,
 DadCPSArea,
@@ -142,7 +141,6 @@ ProgramFK,
 SupervisorObservation
 )
 VALUES(
-@BioDadInHome,
 @DadBondingArea,
 @DadChildHistoryArea,
 @DadCPSArea,

@@ -1,7 +1,6 @@
 CREATE TABLE [dbo].[Kempe]
 (
 [KempePK] [int] NOT NULL IDENTITY(1, 1),
-[BioDadInHome] [bit] NULL,
 [DadBondingArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [DadChildHistoryArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [DadCPSArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
