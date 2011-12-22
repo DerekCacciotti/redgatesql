@@ -1,4 +1,7 @@
 SET IDENTITY_INSERT [dbo].[codeDischarge] ON
+INSERT INTO [dbo].[codeDischarge] ([codeDischargePK], [DischargeCode], [DischargeReason], [DischargeUsedWhere], [ReportDischargeText]) VALUES (41, '39', 'Previous participant (graduated, involved over two years with previous child, etc.)                 ', 'SC', 'Previous Participant          ')
+SET IDENTITY_INSERT [dbo].[codeDischarge] OFF
+SET IDENTITY_INSERT [dbo].[codeDischarge] ON
 INSERT INTO [dbo].[codeDischarge] ([codeDischargePK], [DischargeCode], [DischargeReason], [DischargeUsedWhere], [ReportDischargeText]) VALUES (1, '00', 'Case Open                                                                                           ', 'SYS', 'Case Open                     ')
 INSERT INTO [dbo].[codeDischarge] ([codeDischargePK], [DischargeCode], [DischargeReason], [DischargeUsedWhere], [ReportDischargeText]) VALUES (2, '01', 'No identifying information on Screen                                                                ', 'SYS', 'No ID Info on Scr             ')
 INSERT INTO [dbo].[codeDischarge] ([codeDischargePK], [DischargeCode], [DischargeReason], [DischargeUsedWhere], [ReportDischargeText]) VALUES (3, '02', 'Negative Screen                                                                                     ', 'SYS', 'Neg Scr                       ')

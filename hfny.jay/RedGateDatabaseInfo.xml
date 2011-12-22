@@ -42,6 +42,7 @@
       <AsymmetricKey>Security\Asymmetric Keys</AsymmetricKey>
       <CheckConstraint />
       <FullTextStoplist>Storage\Full Text Stoplists</FullTextStoplist>
+      <ExtendedProperty>Extended Properties</ExtendedProperty>
       <Data>Data</Data>
     </Prefixes>
     <DataWriteAllFilesInOneDirectory>true</DataWriteAllFilesInOneDirectory>
@@ -63,5 +64,4 @@
     <DataFile>dbo.codeSAT_Data.sql</DataFile>
     <DataFile>dbo.codeTraining_Data.sql</DataFile>
   </DataFileSet>
-  <ExtendedProperties />
 </DatabaseInformation>
