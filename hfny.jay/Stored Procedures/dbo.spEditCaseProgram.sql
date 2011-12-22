@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -25,7 +26,7 @@ CREATE PROCEDURE [dbo].[spEditCaseProgram](@CaseProgramPK int=NULL,
 @HVCaseFK int=NULL,
 @HVCaseFK_old int=NULL,
 @OldID char(23)=NULL,
-@PC1ID char(23)=NULL,
+@PC1ID char(13)=NULL,
 @ProgramFK int=NULL,
 @TransferredtoProgram varchar(30)=NULL,
 @TransferredtoProgramFK int=NULL)

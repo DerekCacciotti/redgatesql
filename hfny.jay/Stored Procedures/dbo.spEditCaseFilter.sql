@@ -1,9 +1,10 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditCaseFilter](@CaseFilterPK int=NULL,
-@CaseCriteriaFK int=NULL,
+@CaseFilterNameFK int=NULL,
 @CaseFilterEditor varchar(10)=NULL,
 @FilterValue varchar(50)=NULL,
 @HVCaseFK int=NULL,
@@ -11,7 +12,7 @@ CREATE PROCEDURE [dbo].[spEditCaseFilter](@CaseFilterPK int=NULL,
 AS
 UPDATE CaseFilter
 SET 
-CaseCriteriaFK = @CaseCriteriaFK, 
+CaseFilterNameFK = @CaseFilterNameFK, 
 CaseFilterEditor = @CaseFilterEditor, 
 FilterValue = @FilterValue, 
 HVCaseFK = @HVCaseFK, 
