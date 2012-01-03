@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -18,13 +19,31 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	select appCodeText AS FupIntervalText,appCode as FupInterval, FollowUpDate,  FollowUpPK, PC1InHome, PC2InHome, OBPInHome,FUPInWindow, ProgramFK, HVCaseFK
+	select appCodeText AS FupIntervalText
+			,appCode as FupInterval
+			,FollowUpDate
+			,FollowUpPK
+			,PC1InHome
+			,PC2InHome
+			,OBPInHome
+			,FUPInWindow
+			,ProgramFK
+			,HVCaseFK
 	from (select appCodeText,appCode 
 		from codeApp 
-		where appCodeGroup='AgeInterval' and appCodeUsedWhere like '%FU') a
-	Left outer join (select CONVERT(VARCHAR(20),FollowUpDate,101) AS FollowUpDate,FollowUpInterval as TCAge, FollowUpPK, 
-						PC1InHome, OBPInHome, PC2InHome,FUPInWindow, ProgramFK, HVCaseFK
-					from FollowUp where HVCaseFK =@HVCaseFK) b 
+		where appCodeGroup='TCAge' and appCodeUsedWhere like '%FU') a
+	Left outer join (select CONVERT(VARCHAR(20),FollowUpDate,101) AS FollowUpDate
+							,FollowUpInterval as TCAge
+							,FollowUpPK
+							,PC1InHome
+							,OBPInHome
+							,PC2InHome
+							,FUPInWindow
+							,fu.ProgramFK
+							,fu.HVCaseFK
+					from FollowUp fu
+					inner join CommonAttributes ca on ca.FormFK=fu.FollowUpPK and ca.FormInterval=fu.FollowUpInterval
+					where fu.HVCaseFK =@HVCaseFK) b 
 	on a.appCode=b.TCAge
 
 END
