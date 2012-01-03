@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +9,7 @@ GO
 -- Modified: 
 -- Description:	CaseFilter (Xtra-flds) by ProgramFK
 -- =============================================
-create PROCEDURE [dbo].[spGetAllCaseFilterByHVCaseFK]  (@HVCaseFK int)
+CREATE PROCEDURE [dbo].[spGetAllCaseFilterByHVCaseFK]  (@HVCaseFK int)
 
 AS
 BEGIN
@@ -18,16 +19,22 @@ BEGIN
 
     -- Insert statements for procedure here
 
-	SELECT FieldTitle, Hint, listCaseCriteriaPK as CaseCriteriaFK, FilterValue, CaseFilterPK, HVCaseFK, 
-		   listCaseCriteria.ProgramFK 
-	FROM listCaseCriteria 
+	select listCaseFilterNamePK
+          ,FieldTitle
+          ,FilterType
+          ,Hint
+          ,FilterValue
+          ,CaseFilterPK
+          ,HVCaseFK
+          ,cfn.ProgramFK
+	from listCaseFilterName cfn
 	LEFT OUTER JOIN 
-	(Select CaseCriteriaFK, FilterValue,CaseFilterPK,HVCaseFK,ProgramFK from CaseFilter 
+	(Select CaseFilterNameFK,FilterValue,CaseFilterPK,HVCaseFK,ProgramFK from CaseFilter 
 	 Where HVCaseFK=@HVCaseFK) a
-	 ON listCaseCriteria.ProgramFK= a.ProgramFK and 
-		listCaseCriteria.listCaseCriteriaPK= a.CaseCriteriaFK
+	 ON cfn.ProgramFK=a.ProgramFK and 
+		listCaseFilterNamePK= a.CaseFilterNameFK
 	ORDER BY FieldTitle
-	
+
 END
 
 
