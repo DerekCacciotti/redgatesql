@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[Kempe]
 [DadExpectationArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [DadPerceptionArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [DadSAMICHArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[DadScore] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[DadScore] [char] (3) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [DadSelfEsteemArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [DadStressorArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [DadViolentArea] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,

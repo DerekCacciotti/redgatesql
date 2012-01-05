@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -24,7 +25,8 @@ if @posclause is null and @negclause is null -- don't include filters
 		   sum(case when bday<=kempedate then 1 else 0 end) as postnatal,
            sum(case when cast(kempedate-bday as int) <=14 and cast(kempedate-bday as int) >= 0 then 1 else 0 end) as within2wks,
 		   sum(case when cast(kempedate-bday as int) <=14 then 1 else 0 end) as b4twoWks,
-           sum(case when cast(kempedate-bday as int) >14 then 1 else 0 end) as morethan2wks
+           sum(case when cast(kempedate-bday as int) >14 then 1 else 0 end) as morethan2wks,
+           sum(case when KempeResult=0 then 1 else 0 end) as NegativeKempes
 	from
 	(select kempe.*,isnull(hvcase.tcdob,hvcase.edc) as bday from kempe, hvcase
 	where kempe.hvcasefk=hvcasepk and Kempe.KempeDate>=@StartDate and Kempe.KempeDate<=@EndDate and 
@@ -35,7 +37,8 @@ else
 		   sum(case when bday<=kempedate then 1 else 0 end) as postnatal,
            sum(case when cast(kempedate-bday as int) <=14 and cast(kempedate-bday as int) >= 0 then 1 else 0 end) as within2wks,
 		   sum(case when cast(kempedate-bday as int) <=14 then 1 else 0 end) as b4twoWks,
-           sum(case when cast(kempedate-bday as int) >14 then 1 else 0 end) as morethan2wks
+           sum(case when cast(kempedate-bday as int) >14 then 1 else 0 end) as morethan2wks,
+           sum(case when KempeResult=0 then 1 else 0 end) as NegativeKempes
 	from
 	(select kempe.*,isnull(hvcase.tcdob,hvcase.edc) as bday from kempe, hvcase
 	where kempe.hvcasefk=hvcasepk and Kempe.KempeDate>=@StartDate and Kempe.KempeDate<=@EndDate and
