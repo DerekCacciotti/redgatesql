@@ -1,8 +1,10 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditReportHistory](@ReportHistoryPK int=NULL,
+@ProgramFK int=NULL,
 @ReportCategory char(2)=NULL,
 @ReportName char(100)=NULL,
 @ReportType char(2)=NULL,
@@ -11,6 +13,7 @@ CREATE PROCEDURE [dbo].[spEditReportHistory](@ReportHistoryPK int=NULL,
 AS
 UPDATE ReportHistory
 SET 
+ProgramFK = @ProgramFK, 
 ReportCategory = @ReportCategory, 
 ReportName = @ReportName, 
 ReportType = @ReportType, 
