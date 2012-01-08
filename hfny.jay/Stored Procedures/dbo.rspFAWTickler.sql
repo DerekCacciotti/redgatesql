@@ -1,134 +1,129 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- =============================================
+-- Author:		<Jay Robohn - original unknown>
+-- Create date: <Jan 6, 2012>
+-- Description:	<Reporting stored proc for FAW tickler>
+--				<Note: does not currently support multiple programfks>
+-- =============================================
+CREATE procedure [dbo].[rspFAWTickler](@programfk varchar(max)    = null,
+                                      @workerpk  int             = null
+                                      )
+as
+if @programfk is null
+begin
+	select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+									   from HVProgram
+									   for xml path ('')),2,8000)
+end
 
+set @programfk = REPLACE(@programfk,'"','')
 
+--declare @programfk int
+--declare @workerpk int=null
+--set @programfk=2
 
-
-
-CREATE PROCEDURE [dbo].[rspFAWTickler](@programfk VARCHAR(MAX) = NULL, @workerpk INT = NULL)
-AS
-
-IF @programfk IS NULL BEGIN
-	SELECT @programfk = 
-		SUBSTRING((SELECT ',' + LTRIM(RTRIM(STR(HVProgramPK))) 
-					FROM HVProgram
-					FOR XML PATH('')),2,8000)
-END
-
-SET @programfk = REPLACE(@programfk,'"','')
-
-DECLARE @tickler TABLE(
-	pc1id VARCHAR(13), 
-	pcfirstname VARCHAR(200), 
-	pclastname VARCHAR(200), 
-	pcstreet VARCHAR(200), 
-	pccity VARCHAR(200), 
-	pcstate VARCHAR(2), 
-	pczip VARCHAR(200), 
-	pcphone VARCHAR(200), 
-	screendate DATETIME,
-	tcdob DATETIME, 
-	natal VARCHAR(200),
-	worker VARCHAR(200), 
-	ReferralSourceName VARCHAR(200),
-	padate VARCHAR(12)
+declare @tickler table(
+	pc1id varchar(13),
+	pcfirstname varchar(200),
+	pclastname varchar(200),
+	pcstreet varchar(200),
+	pccity varchar(200),
+	pcstate varchar(2),
+	pczip varchar(200),
+	pcphone varchar(200),
+	screendate datetime,
+	tcdob datetime,
+	natal varchar(200),
+	worker varchar(200),
+	ReferralSourceName varchar(200),
+	padate varchar(12)
 )
 
-INSERT INTO @tickler
-SELECT 
-	pc1id, 
-	LTRIM(RTRIM(pc.pcfirstname)), 
-	LTRIM(RTRIM(pc.pclastname)),
-	pc.pcstreet, 
-	pc.pccity, 
-	pc.pcstate, 
-	pc.pczip,
-	pc.pcphone + 
-		CASE 
-			WHEN pc.PCEmergencyPhone IS NOT NULL THEN 
-				', EMR: ' + pc.PCEmergencyPhone 
-			ELSE 
-				'' 
-		END AS pcphone,
-	hvcase.ScreenDate,
-	CASE 
-		WHEN hvcase.tcdob IS NOT NULL THEN
-			hvcase.tcdob
-		ELSE
-			hvcase.edc
-	END tcdob,
-	CASE 
-		WHEN hvcase.tcdob IS NOT NULL THEN
-			'Post-Natal'
-		ELSE
-			'Pre-Natal'
-	END natal,
-	LTRIM(RTRIM(faw.firstname)) + ' ' + LTRIM(RTRIM(faw.lastname)) worker,
-	ReferralSourceName,
-	padate
-FROM hvcase
-INNER JOIN caseprogram
-ON caseprogram.hvcasefk = hvcasepk
-INNER JOIN hvscreen
-ON hvscreen.hvcasefk = caseprogram.hvcasefk
-AND hvscreen.programfk = caseprogram.programfk
-INNER JOIN listReferralSource
-ON ReferralSourceFK = listreferralsourcepk
-LEFT JOIN preassessment
-ON preassessment.hvcasefk = caseprogram.hvcasefk
-AND preassessment.programfk = caseprogram.programfk
-AND padate IN (
-	SELECT MAX(padate) 
-	FROM preassessment 
-	WHERE hvcasefk = caseprogram.hvcasefk 
-	AND programfk = caseprogram.programfk
-)
-LEFT JOIN kempe
-ON kempe.hvcasefk = caseprogram.hvcasefk
-AND kempe.programfk = caseprogram.programfk
-INNER JOIN pc
-ON pc.pcpk = pc1fk
-INNER JOIN worker faw
-ON CurrentFAWFK = faw.workerpk
-INNER JOIN workerprogram
-ON workerfk = faw.workerpk
-INNER JOIN dbo.SplitString(@programfk,',')
-ON caseprogram.programfk  = listitem
-WHERE workerfk = ISNULL(@workerpk, workerfk)
-AND dischargedate IS NULL
-AND kempe.kempedate IS NULL
-AND hvcase.ScreenDate IS NOT NULL
-AND casestartdate <= DATEADD(dd,1,DATEDIFF(dd,0,GETDATE()))
+insert
+	into @tickler
+	select pc1id
+		  ,LTRIM(RTRIM(pc.pcfirstname))
+		  ,LTRIM(RTRIM(pc.pclastname))
+		  ,pc.pcstreet
+		  ,pc.pccity
+		  ,pc.pcstate
+		  ,pc.pczip
+		  ,pc.pcphone+case
+						  when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
+							  ', EMR: '+pc.PCEmergencyPhone
+						  else
+							  ''
+					  end as pcphone
+		  ,hvcase.ScreenDate
+		  ,case
+			   when hvcase.tcdob is not null then
+				   hvcase.tcdob
+			   else
+				   hvcase.edc
+		   end as tcdob
+		  ,case
+			   when hvcase.tcdob is not null then
+				   'Post-Natal'
+			   else
+				   'Pre-Natal'
+		   end as natal
+		  ,LTRIM(RTRIM(faw.firstname))+' '+LTRIM(RTRIM(faw.lastname)) as worker
+		  ,ReferralSourceName
+		  ,padate
+		from hvcase
+			inner join caseprogram on caseprogram.hvcasefk = hvcasepk
+			inner join hvscreen on hvscreen.hvcasefk = caseprogram.hvcasefk and hvscreen.programfk = caseprogram.programfk
+			inner join listReferralSource on ReferralSourceFK = listreferralsourcepk
+			left join preassessment on preassessment.hvcasefk = caseprogram.hvcasefk and preassessment.programfk = caseprogram.programfk and padate in (select max(padate)
+																																							from preassessment
+																																							where hvcasefk = caseprogram.hvcasefk
+																																								 and programfk = caseprogram.programfk)
+			left join kempe on kempe.hvcasefk = caseprogram.hvcasefk and kempe.programfk = caseprogram.programfk
+			inner join pc on pc.pcpk = pc1fk
+			inner join worker faw on CurrentFAWFK = faw.workerpk
+			inner join workerprogram on workerfk = faw.workerpk
+		--INNER JOIN dbo.SplitString(@programfk,',') ON caseprogram.programfk  = listitem
+		where workerfk = isnull(@workerpk,workerfk)
+			 and dischargedate is null
+			 and kempe.kempedate is null
+			 and hvcase.ScreenDate is not null
+			 and casestartdate <= dateadd(dd,1,datediff(dd,0,GETDATE()))
+			 and CaseProgram.ProgramFK = @programfk
+
+--select *
+--	from @tickler
 
 -- Final Query
-SELECT
-	(SELECT COUNT(*) FROM @tickler t2 WHERE t2.worker = tickler.worker GROUP BY t2.worker) AS ttl,
-	pc1id, pcfirstname + ' ' + pclastname pc1, 
-	pcstreet, 
-	pccity, 
-	pcstate, 
-	pczip, 
-	pcphone, 
-	screendate,
-	tcdob,
-	natal,
-	worker,
-	ReferralSourceName,
-	DATEADD(dd, 14, tcdob) TargetDate,
-	DATEADD(dd, 91, tcdob) AgeOutDate,
-	CASE 
-		WHEN padate IS NOT NULL THEN
-			RIGHT('0' + RTRIM(MONTH(padate)),2) + '/' + RTRIM(YEAR(padate))
-		ELSE
-			'NONE'
-	END PADate
-FROM @tickler tickler
-ORDER BY worker, screendate ASC, pclastname
-
-
-
-
-
+select (select count(*)
+			from @tickler t2
+			where t2.worker = tickler.worker
+			group by t2.worker) as ttl
+	  ,pc1id
+	  ,pcfirstname+' '+pclastname pc1
+	  ,pcstreet
+	  ,pccity
+	  ,pcstate
+	  ,pczip
+	  ,pcphone
+	  ,screendate
+	  ,tcdob
+	  ,natal
+	  ,worker
+	  ,ReferralSourceName
+	  ,dateadd(dd,14,tcdob) TargetDate
+	  ,dateadd(dd,91,tcdob) AgeOutDate
+	  ,case
+		   when padate is not null then
+			   right('0'+RTRIM(month(padate)),2)+'/'+RTRIM(year(padate))
+		   else
+			   'NONE'
+	   end PADate
+	from @tickler tickler
+	order by worker
+			,screendate asc
+			,pclastname
 GO
