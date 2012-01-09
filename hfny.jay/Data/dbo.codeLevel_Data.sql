@@ -16,10 +16,12 @@ INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enr
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (15, 0.00, 'LEVEL1_TERM', 0, '          ', 'Level 1-term', NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (16, 1.00, 'LEVEL2', 1, '          ', 'Level 2', 1, 1)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (17, 0.00, 'LEVEL2_TERM', 0, '          ', 'Level 2-term', NULL, NULL)
-INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (18, 0.50, 'LEVEL3', 1, '          ', 'Level 3', 0, 0)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (19, 0.00, 'LEVEL3_TERM', 0, '          ', 'Level 3-term', NULL, NULL)
-INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (20, 0.25, 'LEVEL4', 1, '          ', 'Level 4', 0, 0)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (21, 0.00, 'LEVEL4_TERM', 0, '          ', 'Level 4-term', NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (22, 0.50, 'LEVELX', 1, '          ', 'Level X', 1, 0)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (23, 0.00, 'LEVELX_TERM', 0, '          ', 'Level X-term', NULL, NULL)
+SET IDENTITY_INSERT [dbo].[codeLevel] OFF
+SET IDENTITY_INSERT [dbo].[codeLevel] ON
+INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (18, 0.50, 'LEVEL3', 1, '          ', 'Level 3', 1, 1)
+INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit]) VALUES (20, 0.25, 'LEVEL4', 1, '          ', 'Level 4', 1, 0)
 SET IDENTITY_INSERT [dbo].[codeLevel] OFF
