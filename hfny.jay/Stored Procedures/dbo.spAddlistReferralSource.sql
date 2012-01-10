@@ -25,6 +25,16 @@ BEGIN
 	@RSIsActive,
 	@listReferralSourcePK_old
 	)
+	
+	SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
+	
 END
-SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
+ELSE 
+BEGIN 
+	-- get the existing ReferralSource so that we can SELECT in the dropdown list in HVSCreen.aspx
+	SELECT TOP 1 listReferralSourcePK  AS [SCOPE_IDENTITY] from listReferralSource
+	WHERE ProgramFK = @ProgramFK AND ReferralSourceName = @ReferralSourceName
+END 
+
+
 GO
