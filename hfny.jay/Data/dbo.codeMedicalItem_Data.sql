@@ -1,4 +1,7 @@
 SET IDENTITY_INSERT [dbo].[codeMedicalItem] ON
+INSERT INTO [dbo].[codeMedicalItem] ([codeMedicalItemPK], [MedicalItemCode], [MedicalItemGroup], [MedicalItemText], [MedicalItemTitle], [MedicalItemUsedWhere]) VALUES (19, '19', 'NULL', 'PC1 Primary Care Provider                                   ', 'PC1PC               ', 'PM')
+SET IDENTITY_INSERT [dbo].[codeMedicalItem] OFF
+SET IDENTITY_INSERT [dbo].[codeMedicalItem] ON
 INSERT INTO [dbo].[codeMedicalItem] ([codeMedicalItemPK], [MedicalItemCode], [MedicalItemGroup], [MedicalItemText], [MedicalItemTitle], [MedicalItemUsedWhere]) VALUES (1, '1 ', 'NULL', 'OB/Gyn Check-up                                             ', 'OB/GYN              ', 'PM')
 INSERT INTO [dbo].[codeMedicalItem] ([codeMedicalItemPK], [MedicalItemCode], [MedicalItemGroup], [MedicalItemText], [MedicalItemTitle], [MedicalItemUsedWhere]) VALUES (2, '2 ', 'NULL', 'PC1 Emergency Room Visit                                    ', 'PC1ER               ', 'PM')
 INSERT INTO [dbo].[codeMedicalItem] ([codeMedicalItemPK], [MedicalItemCode], [MedicalItemGroup], [MedicalItemText], [MedicalItemTitle], [MedicalItemUsedWhere]) VALUES (3, '3 ', 'NULL', 'PC1 Hospitalization                                         ', 'PC1Hos              ', 'PM')
