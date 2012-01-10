@@ -1,7 +1,6 @@
 CREATE TABLE [dbo].[WorkerProgram]
 (
 [WorkerProgramPK] [int] NOT NULL IDENTITY(1, 1),
-[AgencyComponent] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CommunityOutreach] [bit] NULL,
 [DirectParticipantServices] [bit] NULL,
 [FatherAdvocate] [bit] NULL,
@@ -18,6 +17,7 @@ CREATE TABLE [dbo].[WorkerProgram]
 [ProgramManager] [bit] NULL,
 [ProgramManagerEndDate] [datetime] NULL,
 [ProgramManagerStartDate] [datetime] NULL,
+[SiteFK] [int] NULL,
 [Supervisor] [bit] NULL,
 [SupervisorEndDate] [datetime] NULL,
 [SupervisorFK] [int] NULL,
@@ -33,10 +33,10 @@ CREATE TABLE [dbo].[WorkerProgram]
 [YearEarlyChildExperience] [int] NULL,
 [YearHVExperience] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[WorkerProgram] ADD
+CONSTRAINT [FK_WorkerProgram_SiteFK] FOREIGN KEY ([SiteFK]) REFERENCES [dbo].[listSite] ([listSitePK])
 GO
-CREATE STATISTICS [_dta_stat_1474104292_24_15] ON [dbo].[WorkerProgram] ([WorkerFK], [ProgramFK])
 
-GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
