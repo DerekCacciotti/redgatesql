@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,15 +5,16 @@ GO
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Jan 11, 2012>
--- Description:	<Copied originally from FamSys - see header below>
+-- Description:	<Get codeLevel values for Level Form from Case Home page>
+--				<Copied originally from FamSys - see prior header below>
 -- =============================================
 -- =============================================
--- Author:    <Chris Papas
--- Create date: <02/15/2010>
--- Description: <Get list of all Supervisors by Program>
+-- Author:    Chris Papas
+-- Create date: <Create Date,,>
+-- Description: <Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetWorkersbyProgram]
-  @ProgramFK int = NULL
+CREATE PROCEDURE [dbo].[spGetCodeLevel_LevelForm] 
+  -- Getting them all, don't need a parameter
 AS
 BEGIN
   -- SET NOCOUNT ON added to prevent extra result sets from
@@ -22,10 +22,8 @@ BEGIN
   SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-  SELECT FirstName, LastName, WorkerPK 
-  From Worker 
-  LEFT JOIN WorkerProgram ON WorkerProgram.WorkerFK=Worker.WorkerPK
-  WHERE WorkerProgram.ProgramFK=@ProgramFK
-  Order By LastName, FirstName
+  SELECT * FROM codelevel
+  WHERE enrolled=1
+  AND RIGHT(LTRIM(RTRIM(LevelName)), 4) <> 'term'
 END
 GO

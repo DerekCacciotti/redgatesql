@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -5,153 +6,167 @@ GO
 
 
 
-CREATE PROCEDURE [dbo].[rspFSWCaseList]( @programfk VARCHAR(MAX) = NULL, @supervisorfk INT = NULL, @workerfk INT = NULL)
+CREATE procedure [dbo].[rspFSWCaseList](@programfk    varchar(max)    = null,
+                                       @supervisorfk int             = null,
+                                       @workerfk     int             = null
+                                       )
 
-AS
+as
 
-IF @programfk IS NULL BEGIN
-	SELECT @programfk = 
-		SUBSTRING((SELECT ',' + LTRIM(RTRIM(STR(HVProgramPK))) 
-					FROM HVProgram
-					FOR XML PATH('')),2,8000)
-END
+	if @programfk is null
+	begin
+		select @programfk =
+			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+							  from HVProgram
+							  for xml path ('')),2,8000)
+	end
 
-SET @programfk = REPLACE(@programfk,'"','')
+	set @programfk = REPLACE(@programfk,'"','')
 
-DECLARE @caselist TABLE(
-	pc1id VARCHAR(13), 
-	codelevelpk INT, 
-	levelname VARCHAR(200), 
-	currentleveldate DATETIME, 
-	CaseWeight FLOAT, 
-	pcfirstname VARCHAR(200),
-	pclastname VARCHAR(200), 
-	street VARCHAR(200),
-	pccity VARCHAR(200), 
-	pcstate VARCHAR(2), 
-	pczip VARCHAR(200),
-	pcphone VARCHAR(200),
-	tcfirstname VARCHAR(200), 
-	tclastname VARCHAR(200), 
-	tcdob DATETIME, 
-	edc DATETIME,
-	worker VARCHAR(200),
-	supervisor VARCHAR(200)
-)
+	declare @caselist table(
+		pc1id varchar(13),
+		codelevelpk int,
+		levelname varchar(200),
+		currentleveldate datetime,
+		CaseWeight float,
+		pcfirstname varchar(200),
+		pclastname varchar(200),
+		street varchar(200),
+		pccity varchar(200),
+		pcstate varchar(2),
+		pczip varchar(200),
+		pcphone varchar(200),
+		tcfirstname varchar(200),
+		tclastname varchar(200),
+		tcdob datetime,
+		edc datetime,
+		worker varchar(200),
+		supervisor varchar(200)
+	)
 
-INSERT INTO @caselist
-SELECT TOP 100 PERCENT 
-	pc1id, 
-	codelevelpk, 
-	levelname, 
-	currentleveldate, 
-	CaseWeight,
-	LTRIM(RTRIM(pc.pcfirstname)), LTRIM(RTRIM(pc.pclastname)),
-	rtrim(pc.pcstreet) + CASE WHEN pcapt is null or pcapt='' THEN '' ELSE ', Apt: '+rtrim(pcapt) END as street,
-	pc.pccity, 
-	pc.pcstate, 
-	pc.pczip,
-	pc.pcphone + CASE WHEN pc.PCEmergencyPhone IS NOT NULL THEN ', EMR: ' + pc.PCEmergencyPhone ELSE '' END AS pcphone,
-	LTRIM(RTRIM(tcid.tcfirstname)), 
-	LTRIM(RTRIM(tcid.tclastname)),
-	hvcase.tcdob, 
-	hvcase.edc,
-	LTRIM(RTRIM(fsw.firstname)) + ' ' + LTRIM(RTRIM(fsw.lastname)) worker,
-	LTRIM(RTRIM(supervisor.firstname)) + ' ' + LTRIM(RTRIM(supervisor.lastname)) supervisor
-FROM hvcase
-INNER JOIN caseprogram
-ON caseprogram.hvcasefk = hvcasepk
-inner join workerassignment wa1
-on wa1.hvcasefk = caseprogram.hvcasefk 
-and wa1.programfk = caseprogram.programfk
-LEFT JOIN kempe
-ON kempe.hvcasefk = hvcasepk
-INNER JOIN codelevel
-ON codelevelpk = currentlevelfk
-INNER JOIN pc
-ON pc.pcpk = pc1fk
-LEFT JOIN tcid
-ON tcid.hvcasefk = hvcasepk
-INNER JOIN worker fsw
-ON CurrentFSWFK = fsw.workerpk
-INNER JOIN workerprogram
-ON workerprogram.workerfk = fsw.workerpk
-INNER JOIN worker supervisor
-ON supervisorfk = supervisor.workerpk
-INNER JOIN dbo.SplitString(@programfk,',')
-ON caseprogram.programfk  = listitem
-WHERE currentFSWFK = ISNULL(@workerfk, currentFSWFK)
-AND supervisorfk = ISNULL(@supervisorfk, supervisorfk)
-AND dischargedate IS NULL
---AND kempedate IS NOT NULL 'Chris Papas removed 1/28/2011 This was screwing up because there is no kempe date in kempe table once PreAssessment was done, but before Kempe added
-AND casestartdate <= DATEADD(dd,1,DATEDIFF(dd,0,GETDATE()))
+	insert
+		into @caselist
+		select top 100 percent pc1id
+							  ,codelevelpk
+							  ,levelname
+							  ,currentleveldate
+							  ,CaseWeight
+							  ,LTRIM(RTRIM(pc.pcfirstname))
+							  ,LTRIM(RTRIM(pc.pclastname))
+							  ,rtrim(pc.pcstreet)+case
+													  when pcapt is null or pcapt = '' then
+														  ''
+													  else
+														  ', Apt: '+rtrim(pcapt)
+												  end as street
+							  ,pc.pccity
+							  ,pc.pcstate
+							  ,pc.pczip
+							  ,pc.pcphone+case
+											  when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
+												  ', EMR: '+pc.PCEmergencyPhone
+											  else
+												  ''
+										  end as pcphone
+							  ,LTRIM(RTRIM(tcid.tcfirstname))
+							  ,LTRIM(RTRIM(tcid.tclastname))
+							  ,hvcase.tcdob
+							  ,hvcase.edc
+							  ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
+							  ,LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
+			from hvcase
+				inner join caseprogram on caseprogram.hvcasefk = hvcasepk
+				inner join workerassignment wa1 on wa1.hvcasefk = caseprogram.hvcasefk
+						  and wa1.programfk = caseprogram.programfk
+				left join kempe on kempe.hvcasefk = hvcasepk
+				inner join codelevel on codelevelpk = currentlevelfk
+				inner join pc on pc.pcpk = pc1fk
+				left join tcid on tcid.hvcasefk = hvcasepk
+				inner join worker fsw on CurrentFSWFK = fsw.workerpk
+				inner join workerprogram on workerprogram.workerfk = fsw.workerpk
+				inner join worker supervisor on supervisorfk = supervisor.workerpk
+				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+			where currentFSWFK = isnull(@workerfk,currentFSWFK)
+				 and supervisorfk = isnull(@supervisorfk,supervisorfk)
+				 and dischargedate is null
+				 --AND kempedate IS NOT NULL 'Chris Papas removed 1/28/2011 This was screwing up because there is no kempe date in kempe table once PreAssessment was done, but before Kempe added
+				 and casestartdate <= dateadd(dd,1,datediff(dd,0,GETDATE()))
 
--- Get a distinct list after concatenating tcid's
-DECLARE @caselist_distinct TABLE(
-	CaseWeight FLOAT, 
-	Enrolled_Cases INT, 
-	Preintake_Cases INT, 
-	pc1id VARCHAR(13), 
-	currentlevel VARCHAR(200),
-	pcfirstname VARCHAR(200),
-	pclastname VARCHAR(200), 
-	street VARCHAR(200),
-	pccity VARCHAR(200), 
-	pcstate VARCHAR(2), 
-	pczip VARCHAR(200),
-	pcphone VARCHAR(200),
-	TargetChild VARCHAR(200),
-	worker VARCHAR(200),
-	supervisor VARCHAR(200)
-)
+	-- Get a distinct list after concatenating tcid's
+	declare @caselist_distinct table(
+		CaseWeight float,
+		Enrolled_Cases int,
+		Preintake_Cases int,
+		pc1id varchar(13),
+		currentlevel varchar(200),
+		pcfirstname varchar(200),
+		pclastname varchar(200),
+		street varchar(200),
+		pccity varchar(200),
+		pcstate varchar(2),
+		pczip varchar(200),
+		pcphone varchar(200),
+		TargetChild varchar(200),
+		worker varchar(200),
+		supervisor varchar(200)
+	)
 
-INSERT INTO @caselist_distinct
-SELECT DISTINCT
-	CaseWeight,
-	(SELECT COUNT(DISTINCT PC1ID) FROM @caselist c2 WHERE codelevelpk >= 12 AND c2.worker = r1.worker) AS Enrolled_Cases,
-	(SELECT COUNT(DISTINCT PC1ID) FROM @caselist c2 WHERE codelevelpk IN(9, 10) AND c2.worker = r1.worker) AS Preintake_Cases,
-	pc1id, 
-	RTRIM(levelname) + ' (' + CONVERT(VARCHAR(12),currentleveldate, 101) + ')' currentlevel,
-	pcfirstname,
-	pclastname,
-	street,
-	pccity, 
-	pcstate, 
-	pczip,
-	pcphone,
-	CASE 
-		WHEN tcdob IS NOT NULL THEN
-			-- concatenate tcid's and hvcase.tcdob
-			SUBSTRING ((SELECT DISTINCT ', ' + tcfirstname + ' ' + tclastname FROM @caselist r2 WHERE r1.pc1id = r2.pc1id FOR XML PATH ( '' ) ), 3, 1000) + ' (' + CONVERT(VARCHAR(12),tcdob, 101) + ')'
-		ELSE 
-			'EDC: (' + CONVERT(VARCHAR(12),edc, 101) + ')' 
-	END TargetChild,
-	worker,
-	supervisor
-FROM @caselist r1	
+	insert
+		into @caselist_distinct
+		select distinct CaseWeight
+					   ,(select count(distinct PC1ID)
+							 from @caselist c2
+							 where codelevelpk >= 12
+								  and c2.worker = r1.worker) as Enrolled_Cases
+					   ,(select count(distinct PC1ID)
+							 from @caselist c2
+							 where codelevelpk in (9,10)
+								  and c2.worker = r1.worker) as Preintake_Cases
+					   ,pc1id
+					   ,RTRIM(levelname)+' ('+convert(varchar(12),currentleveldate,101)+')' currentlevel
+					   ,pcfirstname
+					   ,pclastname
+					   ,street
+					   ,pccity
+					   ,pcstate
+					   ,pczip
+					   ,pcphone
+					   ,case
+							when tcdob is not null then
+								-- concatenate tcid's and hvcase.tcdob
+								substring((select distinct ', '+tcfirstname+' '+tclastname
+											   from @caselist r2
+											   where r1.pc1id = r2.pc1id
+											   for xml path ('')),3,1000)+' ('+convert(varchar(12),tcdob,101)+')'
+							else
+								'EDC: ('+convert(varchar(12),edc,101)+')'
+						end TargetChild
+					   ,worker
+					   ,supervisor
+			from @caselist r1
 
--- Final Query
-SELECT 
-	@programfk programfk,
-	@supervisorfk supervisorfk,
-	@workerfk workerfk,
-	(SELECT ISNULL(SUM(CaseWeight), 0) FROM @caselist_distinct c2 WHERE c2.worker = r1.worker) AS CaseWeight_ttl, 
-	Enrolled_Cases,
-	Preintake_Cases,
-	PC1ID,
-	CurrentLevel,
-	LTRIM(RTRIM(pcfirstname)) + ' ' + LTRIM(RTRIM(pclastname)) AS PC1,
-	street,
-	PCCity, 
-	PCState, 
-	PCZip,
-	PCPhone,
-	TargetChild,
-	worker,
-	Supervisor
-FROM @caselist_distinct r1
-ORDER BY supervisor, worker, pclastname
-
-
-
+	-- Final Query
+	select @programfk programfk
+		  ,@supervisorfk supervisorfk
+		  ,@workerfk workerfk
+		  ,(select isnull(sum(CaseWeight),0)
+				from @caselist_distinct c2
+				where c2.worker = r1.worker) as CaseWeight_ttl
+		  ,Enrolled_Cases
+		  ,Preintake_Cases
+		  ,PC1ID
+		  ,CurrentLevel
+		  ,LTRIM(RTRIM(pcfirstname))+' '+LTRIM(RTRIM(pclastname)) as PC1
+		  ,street
+		  ,PCCity
+		  ,PCState
+		  ,PCZip
+		  ,PCPhone
+		  ,TargetChild
+		  ,worker
+		  ,Supervisor
+		from @caselist_distinct r1
+		order by supervisor
+				,worker
+				,pclastname
 GO

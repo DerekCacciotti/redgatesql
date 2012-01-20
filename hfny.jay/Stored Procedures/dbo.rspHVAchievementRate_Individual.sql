@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,69 +8,112 @@ GO
 -- Create date: <Jan 4, 2012>
 -- Description:	<Converted FamSys report - Home Visit Achievement Rate - Aggregate>
 -- =============================================
-create procedure [dbo].[rspHVAchievementRate_Individual](
-	@programfk varchar(max) = null, 
-	@sdate datetime, @edate datetime, 
-	@supervisorfk INT=NULL, @workerfk INT=NULL)
+CREATE procedure [dbo].[rspHVAchievementRate_Individual](@programfk    varchar(max)    = null,
+                                                        @sdate        datetime,
+                                                        @edate        datetime,
+                                                        @supervisorfk int             = null,
+                                                        @workerfk     int             = null
+                                                        )
 
 as
+begin
 
-IF @programfk IS NULL BEGIN
-	SELECT @programfk = 
-		SUBSTRING((SELECT ',' + LTRIM(RTRIM(STR(HVProgramPK))) 
-					FROM HVProgram
-					FOR XML PATH('')),2,8000)
-END;
+	if @programfk is null
+	begin
+		select @programfk =
+			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+							  from HVProgram
+							  for xml path ('')),2,8000)
+	end;
 
-WITH cteMain
-AS
-(SELECT distinct rtrim(firstname)+' '+rtrim(lastname) as workername, hvr.workerfk,
-	count(distinct casefk) as casecount, 
-	pc1id,startdate,enddate,hvr.levelname, 
-	(select max(hld.StartLevelDate) from hvleveldetail hld 
-		where hvr.casefk=hld.hvcasefk AND StartLevelDate<=@edate
-		and hvr.programfk = hld.programfk) as levelstart,
-	FLOOR(reqvisit) as expvisitcount, 
-	sum(case when visittype<>'001' then 1 Else 0 End) as actvisitcount,
-	sum(case when visittype='001' then 1 Else 0 End) as attvisitcount,
-	(dateadd(mi, sum(visitlengthminute), dateadd(hh, sum(visitlengthhour), '01/01/2001'))) DirectServiceTime,
-	sum(visitlengthminute) + sum(visitlengthhour)*60 as visitlengthminute,
-	sum(visitlengthhour) as visitlengthhour,
-	dischargedate,
-	pc1id+CONVERT(CHAR(10),hvr.workerfk) AS pc1wrkfk --use for a distinct unique field for the OVER(PARTITION BY) above	
-from [dbo].[udfHVRecords](@programfk, @sdate, @edate) hvr
-INNER JOIN worker
-ON workerpk = hvr.workerfk
-inner join workerprogram wp
-on wp.workerfk = workerpk
-INNER JOIN dbo.SplitString(@programfk,',')
-ON wp.programfk  = listitem
-where workerpk = isnull(@workerfk, workerpk)
-and supervisorfk = isnull(@supervisorfk, supervisorfk)
-and startdate<enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
-Group by firstname,lastname,hvr.workerfk,pc1id,startdate,enddate,hvr.levelname,reqvisit,dischargedate, hvr.casefk, hvr.programfk--,hld.StartLevelDate
-)
--- make the aggregate table
-		SELECT DISTINCT 
-		workername, workerfk, pc1id, casecount,
-		dateadd(yy,(2003-1900),0) + dateadd(mm,11-1,0) + 6-1 + dateadd(mi,minutes,0)as DirectServiceTime,
-		expvisitcount, startdate, enddate
-		, MAX(levelname) OVER(PARTITION BY pc1id) as levelname
-		--CHRIS PAPAS - below line was bringing in duplicates (ex. AL8713016704 for July 2010 - June 2011)
-		--, (SELECT TOP 1 levelname ORDER BY enddate) AS levelname
-		,levelstart, actvisitcount, attvisitcount,
-		dischargedate
-		FROM(
-		SELECT distinct workername, workerfk, pc1id, casecount
-		,SUM(visitlengthminute) OVER(PARTITION BY pc1wrkfk) AS 'Minutes'
-		,SUM(expvisitcount) OVER(PARTITION BY pc1wrkfk) AS expvisitcount,
-		MIN(startdate) OVER(PARTITION BY pc1wrkfk) AS 'startdate',
-		MAX(enddate) OVER(PARTITION BY pc1wrkfk) AS 'enddate'
-		,levelname
-		,MAX(levelstart) OVER(PARTITION BY pc1wrkfk) AS 'levelstart',
-		SUM(actvisitcount) OVER(PARTITION BY pc1wrkfk) AS actvisitcount,
-		SUM(attvisitcount) OVER(PARTITION BY pc1wrkfk) AS attvisitcount,
-		MAX(dischargedate) OVER(PARTITION BY pc1wrkfk) AS 'dischargedate'
-		FROM cteMain
-		) a
+	with cteMain
+	as
+	(select distinct rtrim(firstname)+' '+rtrim(lastname) as workername
+					,hvr.workerfk
+					,count(distinct casefk) as casecount
+					,pc1id
+					,startdate
+					,enddate
+					,hvr.levelname
+					,(select max(hld.StartLevelDate)
+						  from hvleveldetail hld
+						  where hvr.casefk = hld.hvcasefk
+							   and StartLevelDate <= @edate
+							   and hvr.programfk = hld.programfk) as levelstart
+					,FLOOR(reqvisit) as expvisitcount
+					,sum(case
+							 when visittype <> '001' then
+								 1
+							 else
+								 0
+						 end) as actvisitcount
+					,sum(case
+							 when visittype = '001' then
+								 1
+							 else
+								 0
+						 end) as attvisitcount
+					,(dateadd(mi,sum(visitlengthminute),dateadd(hh,sum(visitlengthhour),'01/01/2001'))) DirectServiceTime
+					,sum(visitlengthminute)+sum(visitlengthhour)*60 as visitlengthminute
+					,sum(visitlengthhour) as visitlengthhour
+					,dischargedate
+					,pc1id+convert(char(10),hvr.workerfk) as pc1wrkfk --use for a distinct unique field for the OVER(PARTITION BY) above	
+		 from [dbo].[udfHVRecords](@programfk,@sdate,@edate) hvr
+			 inner join worker on workerpk = hvr.workerfk
+			 inner join workerprogram wp on wp.workerfk = workerpk
+			 inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
+		 where workerpk = isnull(@workerfk,workerpk)
+			  and supervisorfk = isnull(@supervisorfk,supervisorfk)
+			  and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
+		 group by firstname
+				 ,lastname
+				 ,hvr.workerfk
+				 ,pc1id
+				 ,startdate
+				 ,enddate
+				 ,hvr.levelname
+				 ,reqvisit
+				 ,dischargedate
+				 ,hvr.casefk
+				 ,hvr.programfk --,hld.StartLevelDate
+	)
+	,
+	cteSummary
+	as
+	(select distinct workername
+					,workerfk
+					,pc1id
+					,casecount
+					,sum(visitlengthminute) over (partition by pc1wrkfk) as 'Minutes'
+					,sum(expvisitcount) over (partition by pc1wrkfk) as expvisitcount
+					,min(startdate) over (partition by pc1wrkfk) as 'startdate'
+					,max(enddate) over (partition by pc1wrkfk) as 'enddate'
+					,levelname
+					,max(levelstart) over (partition by pc1wrkfk) as 'levelstart'
+					,sum(actvisitcount) over (partition by pc1wrkfk) as actvisitcount
+					,sum(attvisitcount) over (partition by pc1wrkfk) as attvisitcount
+					,max(dischargedate) over (partition by pc1wrkfk) as 'dischargedate'
+		 from cteMain
+	)
+	-- make the aggregate table
+	select distinct workername
+				   ,workerfk
+				   ,pc1id
+				   ,casecount
+				   ,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,minutes,0) as DirectServiceTime
+				   ,expvisitcount
+				   ,startdate
+				   ,enddate
+				   ,max(levelname) over (partition by pc1id) as levelname
+				   --CHRIS PAPAS - below line was bringing in duplicates (ex. AL8713016704 for July 2010 - June 2011)
+					--, (SELECT TOP 1 levelname ORDER BY enddate) AS levelname
+					,levelstart
+				   ,actvisitcount
+				   ,attvisitcount
+				   ,dischargedate
+		from cteSummary
+		order by WorkerName
+				,pc1id
+
+end
 GO
