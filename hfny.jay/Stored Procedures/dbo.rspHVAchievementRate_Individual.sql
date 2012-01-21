@@ -26,7 +26,7 @@ begin
 							  for xml path ('')),2,8000)
 	end;
 
-	with cteMain
+	with cteHVRecords
 	as
 	(select distinct rtrim(firstname)+' '+rtrim(lastname) as workername
 					,hvr.workerfk
@@ -48,6 +48,12 @@ begin
 								 0
 						 end) as actvisitcount
 					,sum(case
+							 when visittype = '100' then
+								 1
+							 else
+								 0
+						 end) as inhomevisitcount
+					,sum(case
 							 when visittype = '001' then
 								 1
 							 else
@@ -58,6 +64,7 @@ begin
 					,sum(visitlengthhour) as visitlengthhour
 					,dischargedate
 					,pc1id+convert(char(10),hvr.workerfk) as pc1wrkfk --use for a distinct unique field for the OVER(PARTITION BY) above	
+					 ,hvr.casefk
 		 from [dbo].[udfHVRecords](@programfk,@sdate,@edate) hvr
 			 inner join worker on workerpk = hvr.workerfk
 			 inner join workerprogram wp on wp.workerfk = workerpk
@@ -78,6 +85,14 @@ begin
 				 ,hvr.programfk --,hld.StartLevelDate
 	)
 	,
+	cteLevelChanges
+	as
+	(select casefk
+		   ,count(casefk)-1 as LevelChanges
+		 from cteHVRecords
+		 group by casefk
+	)
+	,
 	cteSummary
 	as
 	(select distinct workername
@@ -91,27 +106,80 @@ begin
 					,levelname
 					,max(levelstart) over (partition by pc1wrkfk) as 'levelstart'
 					,sum(actvisitcount) over (partition by pc1wrkfk) as actvisitcount
+					,sum(inhomevisitcount) over (partition by pc1wrkfk) as inhomevisitcount
 					,sum(attvisitcount) over (partition by pc1wrkfk) as attvisitcount
 					,max(dischargedate) over (partition by pc1wrkfk) as 'dischargedate'
-		 from cteMain
+					,LevelChanges
+		 from cteHVRecords
+			 inner join cteLevelChanges on cteLevelChanges.casefk = cteHVRecords.casefk
 	)
+	,
+	cteMain
+	as
 	-- make the aggregate table
-	select distinct workername
-				   ,workerfk
-				   ,pc1id
-				   ,casecount
-				   ,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,minutes,0) as DirectServiceTime
-				   ,expvisitcount
-				   ,startdate
-				   ,enddate
-				   ,max(levelname) over (partition by pc1id) as levelname
-				   --CHRIS PAPAS - below line was bringing in duplicates (ex. AL8713016704 for July 2010 - June 2011)
-					--, (SELECT TOP 1 levelname ORDER BY enddate) AS levelname
-					,levelstart
-				   ,actvisitcount
-				   ,attvisitcount
-				   ,dischargedate
-		from cteSummary
+	(select distinct workername
+					,workerfk
+					,pc1id
+					,casecount
+					,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,minutes,0) as DirectServiceTime
+					,expvisitcount
+					,startdate
+					,enddate
+					,max(levelname) over (partition by pc1id) as levelname
+					--CHRIS PAPAS - below line was bringing in duplicates (ex. AL8713016704 for July 2010 - June 2011)
+					 --, (SELECT TOP 1 levelname ORDER BY enddate) AS levelname
+					 ,levelstart
+					,actvisitcount
+					,inhomevisitcount
+					,attvisitcount
+					,case
+						 when actvisitcount is null or actvisitcount = 0
+							 then
+							 0
+						 when expvisitcount is null or expvisitcount = 0
+							 then
+							 1
+						 else
+							case 
+								when (actvisitcount / (expvisitcount * 1.000)) > 1
+									then 
+									1
+								else
+									actvisitcount / (expvisitcount * 1.000)
+								end
+					 end as VisitRate
+					,case
+						 when inhomevisitcount is null or inhomevisitcount = 0
+							 then
+							 0
+						 when actvisitcount is null or actvisitcount = 0
+							 then
+							 1
+						 else
+							case
+								when (inhomevisitcount / (actvisitcount * 1.000)) > 1
+									then
+									1
+								else
+									inhomevisitcount / (actvisitcount * 1.000)
+							end
+						end as InHomeRate
+					,dischargedate
+					,LevelChanges
+		 from cteSummary
+	)
+	select *
+		  ,case
+			   when VisitRate >= .9 and InHomeRate >= .75
+				   then
+				   3
+			   when VisitRate >= .75 and InHomeRate >= .75
+				   then
+				   2
+			   else
+				   1
+		   end as ScoreForCase
+		from cteMain
 		order by WorkerName
 				,pc1id
 
