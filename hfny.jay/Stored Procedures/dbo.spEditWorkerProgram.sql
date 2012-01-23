@@ -1,9 +1,9 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditWorkerProgram](@WorkerProgramPK int=NULL,
-@AgencyComponent varchar(100)=NULL,
 @CommunityOutreach bit=NULL,
 @DirectParticipantServices bit=NULL,
 @FatherAdvocate bit=NULL,
@@ -20,6 +20,7 @@ CREATE PROCEDURE [dbo].[spEditWorkerProgram](@WorkerProgramPK int=NULL,
 @ProgramManager bit=NULL,
 @ProgramManagerEndDate datetime=NULL,
 @ProgramManagerStartDate datetime=NULL,
+@SiteFK int=NULL,
 @Supervisor bit=NULL,
 @SupervisorEndDate datetime=NULL,
 @SupervisorFK int=NULL,
@@ -34,7 +35,6 @@ CREATE PROCEDURE [dbo].[spEditWorkerProgram](@WorkerProgramPK int=NULL,
 AS
 UPDATE WorkerProgram
 SET 
-AgencyComponent = @AgencyComponent, 
 CommunityOutreach = @CommunityOutreach, 
 DirectParticipantServices = @DirectParticipantServices, 
 FatherAdvocate = @FatherAdvocate, 
@@ -51,6 +51,7 @@ ProgramFK = @ProgramFK,
 ProgramManager = @ProgramManager, 
 ProgramManagerEndDate = @ProgramManagerEndDate, 
 ProgramManagerStartDate = @ProgramManagerStartDate, 
+SiteFK = @SiteFK, 
 Supervisor = @Supervisor, 
 SupervisorEndDate = @SupervisorEndDate, 
 SupervisorFK = @SupervisorFK, 
