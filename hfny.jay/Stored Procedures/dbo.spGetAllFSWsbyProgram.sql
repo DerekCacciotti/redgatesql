@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -33,7 +34,7 @@ where programfk=@ProgramFK and
 select * from worker 
 where workerpk in
 (select workerfk from #WorkerinProgram)
-
+ORDER BY LastName 
 drop table #WorkerinProgram
 END
 
