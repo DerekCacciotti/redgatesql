@@ -140,13 +140,13 @@ begin
 							 then
 							 1
 						 else
-							case 
-								when (actvisitcount / (expvisitcount * 1.000)) > 1
-									then 
-									1
-								else
-									actvisitcount / (expvisitcount * 1.000)
-								end
+							 case
+								 when (actvisitcount/(expvisitcount*1.000)) > 1
+									 then
+									 1
+								 else
+									 actvisitcount/(expvisitcount*1.000)
+							 end
 					 end as VisitRate
 					,case
 						 when inhomevisitcount is null or inhomevisitcount = 0
@@ -156,20 +156,23 @@ begin
 							 then
 							 1
 						 else
-							case
-								when (inhomevisitcount / (actvisitcount * 1.000)) > 1
-									then
-									1
-								else
-									inhomevisitcount / (actvisitcount * 1.000)
-							end
-						end as InHomeRate
+							 case
+								 when (inhomevisitcount/(actvisitcount*1.000)) > 1
+									 then
+									 1
+								 else
+									 inhomevisitcount/(actvisitcount*1.000)
+							 end
+					 end as InHomeRate
 					,dischargedate
 					,LevelChanges
 		 from cteSummary
 	)
 	select *
 		  ,case
+			   when expvisitcount = 0
+				   then
+				   0
 			   when VisitRate >= .9 and InHomeRate >= .75
 				   then
 				   3
