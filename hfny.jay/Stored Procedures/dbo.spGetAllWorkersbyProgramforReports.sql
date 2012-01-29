@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,7 +20,7 @@ AS
 
 SET NOCOUNT ON;
 
-select * from 
+select rtrim(LastName) + ', ' + rtrim(FirstName) as WorkerName, WorkerPK from 
   (select *, 'FAW' as workertype
   from worker
   inner join workerprogram
