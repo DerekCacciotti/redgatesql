@@ -20,7 +20,7 @@ AS
 
 SET NOCOUNT ON;
 
-select rtrim(LastName) + ', ' + rtrim(FirstName) as WorkerName, WorkerPK from 
+select rtrim(LastName) + ', ' + rtrim(FirstName) as WorkerName, FirstName, LastName, WorkerPK from 
   (select *, 'FAW' as workertype
   from worker
   inner join workerprogram
