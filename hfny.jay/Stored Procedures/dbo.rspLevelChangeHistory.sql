@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -22,6 +23,11 @@ begin
 							  for xml path ('')),2,8000)
 	end;
 
+	if @pc1id = ''
+	begin
+		set @pc1id = nullif(@pc1id,'')
+	end;
+	
 	select PC1ID
 		  ,levelname
 		  ,StartLevelDate

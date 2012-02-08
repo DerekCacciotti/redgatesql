@@ -4,8 +4,8 @@ CREATE TABLE [dbo].[listCaseFilterNameOption]
 [CaseFilterNameFK] [int] NOT NULL,
 [FilterOption] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[listCaseFilterNameOption] WITH NOCHECK ADD
+CONSTRAINT [FK_listCaseFilterNameOption_CaseFilterNameFK] FOREIGN KEY ([CaseFilterNameFK]) REFERENCES [dbo].[listCaseFilterName] ([listCaseFilterNamePK])
 GO
 ALTER TABLE [dbo].[listCaseFilterNameOption] ADD CONSTRAINT [PK_listCaseFilterNameOption] PRIMARY KEY CLUSTERED  ([listCaseFilterNameOptionPK]) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[listCaseFilterNameOption] ADD CONSTRAINT [FK_listCaseFilterNameOption_CaseFilterNameFK] FOREIGN KEY ([CaseFilterNameFK]) REFERENCES [dbo].[listCaseFilterName] ([listCaseFilterNamePK])
 GO

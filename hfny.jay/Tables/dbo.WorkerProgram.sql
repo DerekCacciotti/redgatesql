@@ -33,8 +33,9 @@ CREATE TABLE [dbo].[WorkerProgram]
 [YearEarlyChildExperience] [int] NULL,
 [YearHVExperience] [int] NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[WorkerProgram] ADD
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_WorkerProgram_SiteFK] FOREIGN KEY ([SiteFK]) REFERENCES [dbo].[listSite] ([listSitePK])
+
 GO
 
 SET QUOTED_IDENTIFIER ON
