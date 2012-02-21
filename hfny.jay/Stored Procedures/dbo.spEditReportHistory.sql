@@ -6,6 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditReportHistory](@ReportHistoryPK int=NULL,
 @ProgramFK int=NULL,
 @ReportCategory char(2)=NULL,
+@ReportFK int=NULL,
 @ReportName char(100)=NULL,
 @ReportType char(2)=NULL,
 @TimeRun datetime=NULL,
@@ -15,6 +16,7 @@ UPDATE ReportHistory
 SET 
 ProgramFK = @ProgramFK, 
 ReportCategory = @ReportCategory, 
+ReportFK = @ReportFK, 
 ReportName = @ReportName, 
 ReportType = @ReportType, 
 TimeRun = @TimeRun, 
