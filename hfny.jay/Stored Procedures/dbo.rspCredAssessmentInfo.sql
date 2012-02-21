@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,7 +8,7 @@ GO
 -- Create date: <June 3, 2010>
 -- Description:	<report: Credentialing 1-1D. Assessment Info>
 -- =============================================
-CREATE PROCEDURE [dbo].[rspAssessmentInfo] (@StartDate datetime, @EndDate datetime, @programfks varchar(max),
+CREATE PROCEDURE [dbo].[rspCredAssessmentInfo] (@StartDate datetime, @EndDate datetime, @programfks varchar(max),
 	@posclause varchar(200),@negclause varchar(200))
 	-- Add the parameters for the stored procedure here
 AS
@@ -17,7 +16,21 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
-	
+
+set @posclause = case 
+					when @posclause = ''
+						then null
+					else
+						@posclause
+					end;
+
+set @negclause = case 
+					when @negclause = ''
+						then null
+					else
+						@negclause
+					end;
+					
 -- Insert statements for procedure here
 if @posclause is null and @negclause is null -- don't include filters
 	with cteTotals 

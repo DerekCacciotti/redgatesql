@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,12 +8,20 @@ GO
 -- Create date: Feb 5, 2010
 -- Description: Get all Agency Sites
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetAllListSites] (@programfk int)
-  -- Add the parameters for the stored procedure here
-AS
-BEGIN
-  SELECT * FROM dbo.listSite 
-  WHERE programfk = ISNULL(@ProgramFK,ProgramFK)
-  ORDER BY sitename
-END
+CREATE procedure [dbo].[spGetAllListSites]
+(
+    @programfk int
+)
+-- Add the parameters for the stored procedure here
+as
+begin
+	select listSitePK
+		  ,listSitePK_old
+		  ,ProgramFK
+		  ,SiteCode
+		  ,SiteName
+		from dbo.listSite
+		where programfk = isnull(@ProgramFK,ProgramFK)
+		order by sitename
+end
 GO
