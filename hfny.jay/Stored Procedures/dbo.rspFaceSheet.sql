@@ -8,127 +8,144 @@ GO
 -- Create date: <Jan 25, 2012>
 -- Description:	<Face Sheet report>
 -- =============================================
-CREATE procedure [dbo].[rspFaceSheet](@programfk    varchar(max)    = null,
-                                                        @pc1id		char(13)
-                                                        )
-
+CREATE procedure [dbo].[rspFaceSheet]
+(
+    @ProgramFK varchar(max)    = null,
+    @PC1ID     char(13),
+    @WorkerFK  int
+)
 as
 begin
-
-	if @programfk is null
+	if @ProgramFK is null
 	begin
-		select @programfk =
-			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
-							  from HVProgram
-							  for xml path ('')),2,8000)
+		select @ProgramFK = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
 	end;
 
-	if @pc1id=''
+	if @PC1ID = ''
 	begin
-		set @pc1id=null
+		set @PC1ID = null
 	end;
-	
+
 	with cteMain
-	as
-	(select HVCasePK
-			,PC1ID
-			,CurrentFSWFK
-			,CurrentLevelFK
-			,LevelName
-			,CurrentLevelDate
-			,case when IntakeDate is null then 0
-					else
-					case when DischargeDate is null 
-						then datediff(day,CurrentLevelDate,getdate())
-						else datediff(day,CurrentLevelDate,DischargeDate)
-					end
-			end as DaysOnCurrentLevel 
-			,isnull(datediff(month,IntakeDate,getdate()),000) as MonthsInProgram
-			,ScreenDate
-			,c.KempeDate
-			,IntakeDate
-			,DischargeDate
-			,cd.DischargeReason as DischargeReasonName
-			,CaseProgress
-			,PC1FK
-			,OBPFK
-			,OBPinHomeIntake
-			,PC2FK
-			,PC2inHomeIntake
-			,CPFK
-			,rtrim(PC1.PCFirstName)+' '+rtrim(PC1.PCLastName) as PC1FullName
-			,rtrim(PC1.PCStreet) + case when PC1.PCApt is null or PC1.PCApt = '' then ''
-										else ' (Apt. '+replace(replace(PC1.PCApt,'Apt.',''),'Apt','')+')'
-									end as PC1Street
-			,rtrim(PC1.PCCity)+', '+isnull(PC1.PCState,'NY')+'  '+rtrim(PC1.PCZip) as PC1CSZ
-			,PC1.PCPhone
-			,PC1.PCCellPhone
-			,case when PC1.SSNo is null
-					then 'Not on file'
-					else 'On file'
-					end
-			as SocialSecurityNumberOnFile
-			,PC1.PCDOB
-			,datediff(year,PC1.PCDOB,getdate()) as CurrentAge
-			,datediff(year,PC1.PCDOB,IntakeDate) as AgeAtIntake
-			,rtrim(w.FirstName) + ' ' + rtrim(w.LastName) as WorkerName
-			,w.FirstName
-			,w.LastName
-			,rtrim(sup.FirstName) + ' ' + rtrim(sup.LastName) as SupervisorName
-			,MomScore
-			,DadScore
-			,k.FAWFK
-			,rtrim(PCOBP.PCFirstName)+' '+rtrim(PCOBP.PCLastName) as OBPFullName
-			,PCOBP.PCDOB as OBPDOB
-			,rtrim(PCPC2.PCFirstName)+' '+rtrim(PCPC2.PCLastName) as PC2FullName
-			,PCPC2.PCDOB as PC2DOB
-			,rtrim(PCCP.PCFirstName)+' '+rtrim(PCCP.PCLastName) as CPFullName
-			,rtrim(PCCP.PCStreet) + case when PCCP.PCApt is null or PCCP.PCApt = '' then ''
-										else ' (Apt. '+replace(replace(PCCP.PCApt,'Apt.',''),'Apt','')+')'
+	as (select HVCasePK
+			  ,PC1ID
+			  ,CurrentFSWFK
+			  ,CurrentLevelFK
+			  ,LevelName
+			  ,CurrentLevelDate
+			  ,case
+				   when IntakeDate is null then
+					   0
+				   else
+					   case
+						   when DischargeDate is null then
+							   datediff(day,CurrentLevelDate,getdate())
+						   else
+							   datediff(day,CurrentLevelDate,DischargeDate)
+					   end
+			   end as DaysOnCurrentLevel
+			  ,isnull(datediff(month,IntakeDate,getdate()),000) as MonthsInProgram
+			  ,ScreenDate
+			  ,c.KempeDate
+			  ,IntakeDate
+			  ,DischargeDate
+			  ,cd.DischargeReason as DischargeReasonName
+			  ,CaseProgress
+			  ,PC1FK
+			  ,OBPFK
+			  ,OBPinHomeIntake
+			  ,PC2FK
+			  ,PC2inHomeIntake
+			  ,CPFK
+			  ,rtrim(PC1.PCFirstName)+' '+rtrim(PC1.PCLastName) as PC1FullName
+			  ,rtrim(PC1.PCStreet)+case
+									   when PC1.PCApt is null or PC1.PCApt = '' then
+										   ''
+									   else
+										   ' (Apt. '+replace(replace(PC1.PCApt,'Apt.',''),'Apt','')+')'
+								   end as PC1Street
+			  ,rtrim(PC1.PCCity)+', '+isnull(PC1.PCState,'NY')+'  '+rtrim(PC1.PCZip) as PC1CSZ
+			  ,PC1.PCPhone
+			  ,PC1.PCCellPhone
+			  ,case
+				   when PC1.SSNo is null then
+					   'Not on file'
+				   else
+					   'On file'
+			   end as SocialSecurityNumberOnFile
+			  ,PC1.PCDOB
+			  ,datediff(year,PC1.PCDOB,getdate()) as CurrentAge
+			  ,datediff(year,PC1.PCDOB,IntakeDate) as AgeAtIntake
+			  ,rtrim(w.FirstName)+' '+rtrim(w.LastName) as WorkerName
+			  ,w.FirstName
+			  ,w.LastName
+			  ,rtrim(sup.FirstName)+' '+rtrim(sup.LastName) as SupervisorName
+			  ,MomScore
+			  ,DadScore
+			  ,k.FAWFK
+			  ,rtrim(PCOBP.PCFirstName)+' '+rtrim(PCOBP.PCLastName) as OBPFullName
+			  ,PCOBP.PCDOB as OBPDOB
+			  ,rtrim(PCPC2.PCFirstName)+' '+rtrim(PCPC2.PCLastName) as PC2FullName
+			  ,PCPC2.PCDOB as PC2DOB
+			  ,rtrim(PCCP.PCFirstName)+' '+rtrim(PCCP.PCLastName) as CPFullName
+			  ,rtrim(PCCP.PCStreet)+case
+										when PCCP.PCApt is null or PCCP.PCApt = '' then
+											''
+										else
+											' (Apt. '+replace(replace(PCCP.PCApt,'Apt.',''),'Apt','')+')'
 									end as CPStreet
-			,rtrim(PCCP.PCCity)+', '+isnull(PCCP.PCState,'NY')+'  '+rtrim(PCCP.PCZip) as CPCSZ
-			,PCCP.PCDOB as CPDOB
-			,PCCP.PCPhone as CPPhone
-			,TCIDPK
-			,rtrim(TCFirstName)+' '+rtrim(TCLastName) as TCFullName
-			,t.TCDOB
-			,case when TCGender ='1' then 'Female'
-					when TCGender='2' then 'Male'
-			 end as TCGender
-			,(datediff(day,t.TCDOB,getdate()))/30.44 as TCChronologicalAge
-			,GestationalAge
-			,((datediff(day,t.TCDOB,getdate()))-((40-GestationalAge)*7))/30.44 as TCDevelopmentalAge
-			,NumberOfChildren
-			--,IIF(!EMPTY(tc_ssn) and !ISNULL(tc_ssn),"On file    ","Not on file") as tcss_of, ;
-			,case when t.TCDOD is null then 0 else 1 end as TCDeceased
-		from HVCase c
-		inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
-		inner join PC PC1 on PC1.PCPK = c.PC1FK
-		inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
-		left outer join PC PCOBP on PCOBP.PCPK = c.OBPFK
-		left outer join PC PCPC2 on PCPC2.PCPK = c.PC2FK
-		left outer join PC PCCP on PCCP.PCPK = c.CPFK
-		left outer join Kempe k on k.HVCaseFK = c.HVCasePK
-		left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
-		left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
-		left outer join Worker sup on sup.WorkerPK = wp.SupervisorFK
-		left outer join TCID t on t.HVCaseFK = c.HVCasePK
-		left outer join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
-		left outer join codeDischarge cd on cd.DischargeReason = cp.DischargeReason
-		where PC1ID=isnull(@pc1id,PC1ID)
-				and caseprogress >= 6
-				-- and PC1ID='SP80040113929'
-	)
-	,
+			  ,rtrim(PCCP.PCCity)+', '+isnull(PCCP.PCState,'NY')+'  '+rtrim(PCCP.PCZip) as CPCSZ
+			  ,PCCP.PCDOB as CPDOB
+			  ,PCCP.PCPhone as CPPhone
+			  ,TCIDPK
+			  ,rtrim(TCFirstName)+' '+rtrim(TCLastName) as TCFullName
+			  ,t.TCDOB
+			  ,case
+				   when TCGender = '1' then
+					   'Female'
+				   when TCGender = '2' then
+					   'Male'
+			   end as TCGender
+			  ,(datediff(day,t.TCDOB,getdate()))/30.44 as TCChronologicalAge
+			  ,GestationalAge
+			  ,((datediff(day,t.TCDOB,getdate()))-((40-GestationalAge)*7))/30.44 as TCDevelopmentalAge
+			  ,NumberOfChildren
+			  --,IIF(!EMPTY(tc_ssn) and !ISNULL(tc_ssn),"On file    ","Not on file") as tcss_of, ;
+			   ,case
+					when t.TCDOD is null then
+						0
+					else
+						1
+				end as TCDeceased
+			from HVCase c
+				inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
+				inner join PC PC1 on PC1.PCPK = c.PC1FK
+				inner join dbo.SplitString(@ProgramFK,',') on cp.programfk = listitem
+				left outer join PC PCOBP on PCOBP.PCPK = c.OBPFK
+				left outer join PC PCPC2 on PCPC2.PCPK = c.PC2FK
+				left outer join PC PCCP on PCCP.PCPK = c.CPFK
+				left outer join Kempe k on k.HVCaseFK = c.HVCasePK
+				left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
+				left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+				left outer join Worker sup on sup.WorkerPK = wp.SupervisorFK
+				left outer join TCID t on t.HVCaseFK = c.HVCasePK
+				left outer join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
+				left outer join codeDischarge cd on cd.DischargeReason = cp.DischargeReason
+			where PC1ID = isnull(@PC1ID,PC1ID)
+				 and CurrentFSWFK = isnull(@WorkerFK,CurrentFSWFK)
+				 and caseprogress >= 6
+	-- and PC1ID='SP80040113929'
+	),
 	cteFSWAssignDate
-	as
-	(select HVCaseFK
-			,max(WorkerAssignmentDate) as FSWAssignDate
-		from WorkerAssignment wa
-		inner join cteMain on HVCaseFK=HVCasePK
-		where WorkerFK=CurrentFSWFK
-		group by HVCaseFK
-	)	
+	as (select HVCaseFK
+			  ,max(WorkerAssignmentDate) as FSWAssignDate
+			from WorkerAssignment wa
+				inner join cteMain on HVCaseFK = HVCasePK
+			where WorkerFK = CurrentFSWFK
+			group by HVCaseFK
+	)
 	--,
 	--cteLevelChanges
 	--as
@@ -159,22 +176,23 @@ begin
 	--		 inner join cteLevelChanges on cteLevelChanges.casefk = cteHVRecords.casefk
 	--)
 	select Main.*
-			,FSWAssignDate
+		  ,FSWAssignDate
 		from cteMain Main
-		inner join cteFSWAssignDate on HVCaseFK=HVCasePK
-		order by LastName, FirstName
+			inner join cteFSWAssignDate on HVCaseFK = HVCasePK
+		order by LastName
+				,FirstName
 				,PC1ID
-		--order by WorkerName
-		--		,pc1id
+--order by WorkerName
+--		,pc1id
 
 end
 
-				
+
 --hvcase5.pc1_fk=pc5.pc_pk AND ("Level" $ cur_level OR "Preintake" $ cur_level);		
 
 --Medical Provider FK (PC1)
 --Medical Provider FK (TC)
-  --,mppc1_fk,mptc_fk,;
+--,mppc1_fk,mptc_fk,;
 
 /*
   IIF(PC1MA='1','MA','  ') as ma,;

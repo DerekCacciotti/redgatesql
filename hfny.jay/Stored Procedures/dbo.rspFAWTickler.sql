@@ -11,8 +11,9 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspFAWTickler]
 (
-    @programfk    varchar(max)    = null,
-    @workerpk     int             = null
+    @programfk varchar(max)    = null,
+    @workerpk  int             = null,
+    @sortorder int             = 1
 )
 as
 	if @programfk is null
@@ -23,6 +24,11 @@ as
 	end
 
 	set @programfk = REPLACE(@programfk,'"','')
+
+	--declare @sortdir varchar(4)
+	--set @sortdir = case when @sortorder = 1 then "desc"
+	--					else "asc"
+	--				end
 
 	declare @tickler table(
 		pc1id varchar(13),
@@ -38,20 +44,16 @@ as
 		padate varchar(12)
 	)
 
-	insert
-		into @tickler
+	insert into @tickler
 		select pc1id
 			  ,LTRIM(RTRIM(pc.pcfirstname))
 			  ,LTRIM(RTRIM(pc.pclastname))
-			  ,rtrim(PCStreet)
-			   +case
-					when PCApt is null or PCApt = '' then
-						''
-					else
-						' (Apt. '+rtrim(PCApt)+')'
-				end
-			   +', '+rtrim(pccity)+', NY  '+rtrim(pczip)
-			   as PCAddress
+			  ,rtrim(PCStreet)+case
+								   when PCApt is null or PCApt = '' then
+									   ''
+								   else
+									   ' (Apt. '+rtrim(PCApt)+')'
+							   end+', '+rtrim(pccity)+', NY  '+rtrim(pczip) as PCAddress
 			  ,pc.pcphone+case
 							  when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
 								  ', EMR: '+pc.PCEmergencyPhone
@@ -78,11 +80,10 @@ as
 				inner join caseprogram on caseprogram.hvcasefk = hvcasepk
 				inner join hvscreen on hvscreen.hvcasefk = caseprogram.hvcasefk and hvscreen.programfk = caseprogram.programfk
 				inner join listReferralSource on ReferralSourceFK = listreferralsourcepk
-				left join preassessment on preassessment.hvcasefk = caseprogram.hvcasefk and preassessment.programfk = caseprogram.programfk and 
-							padate in (select max(padate)
-										from preassessment
-										where hvcasefk = caseprogram.hvcasefk
-												and programfk = caseprogram.programfk)
+				left join preassessment on preassessment.hvcasefk = caseprogram.hvcasefk and preassessment.programfk = caseprogram.programfk and padate in (select max(padate)
+																																								from preassessment
+																																								where hvcasefk = caseprogram.hvcasefk
+																																									 and programfk = caseprogram.programfk)
 				left join kempe on kempe.hvcasefk = caseprogram.hvcasefk and kempe.programfk = caseprogram.programfk
 				inner join pc on pc.pcpk = pc1fk
 				inner join worker faw on CurrentFAWFK = faw.workerpk
@@ -122,6 +123,8 @@ as
 		   end PADate
 		from @tickler tickler
 		order by worker
-				,screendate asc
+				,case when @sortorder = 1 then screendate 
+					when @sortorder = 2 then dateadd(dd,14,tcdob)
+				end
 				,pclastname
 GO

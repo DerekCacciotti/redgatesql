@@ -16,7 +16,7 @@ GO
 CREATE procedure [dbo].[spGetAllPC1ids]
 -- Add the parameters for the stored procedure here
 (
-    @Programfks    varchar(100),
+    @ProgramFKs    varchar(100),
     @includeClosed bit
 )
 as
@@ -25,6 +25,9 @@ begin
 	-- interfering with SELECT statements.
 	set nocount on;
 
+	if charindex(',',@ProgramFKs) = 0
+		set @ProgramFKs = ',' + @ProgramFKs + ','
+	
 	-- Insert statements for procedure here
 	if @includeClosed = 1
 		select pc1id
