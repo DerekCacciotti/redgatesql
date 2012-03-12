@@ -17,7 +17,7 @@ WITH results(hvcasepk,pcpk,
 	pcfirstname, pclastname, pcdob,
 	tcfirstname, tclastname, tcdob,
 	workerlastname, workerfirstname,
-	dischargedate, caseprogress)
+	dischargedate, caseprogress,levelname)
 AS
 (
 	SELECT TOP 100 hvcasepk,pc.pcpk, 
@@ -25,15 +25,16 @@ AS
 		pc.pcfirstname, pc.pclastname, pc.pcdob,
 		RTRIM(tcid.tcfirstname), RTRIM(tcid.tclastname), hvcase.tcdob,
 		RTRIM(worker.lastname) AS workerlastname, RTRIM(worker.firstname) AS workerfirstname,
-		dischargedate, rtrim(cast(CaseProgress as char(4)))+'-'+ccp.CaseProgressBrief as CaseProgress
+		dischargedate, rtrim(cast(CaseProgress as char(4)))+'-'+ccp.CaseProgressBrief as CaseProgress, cdlvl.levelname
 	FROM caseprogram cp
+	INNER JOIN codeLevel cdlvl ON cdlvl.codeLevelPK = cp.CurrentLevelFK 
 	INNER JOIN hvcase ON hvcasefk = hvcasepk
 	INNER JOIN pc ON pc1fk = pc.pcpk
 	inner join codeCaseProgress ccp on CaseProgress=ccp.CaseProgressCode
 	LEFT JOIN tcid ON tcid.hvcasefk = hvcasepk
 	LEFT JOIN Workerprogram wp ON wp.workerfk = ISNULL(currentfswfk, currentfawfk) --IN(currentfswfk, currentfawfk)
 									AND wp.programfk = cp.programfk
-	LEFT JOIN worker ON workerpk = workerfk
+	LEFT JOIN worker ON workerpk = workerfk	
 	WHERE (pc1id LIKE '%' + @PC1ID + '%'
 	OR pcpk = @PCPK
 	OR pc.pcfirstname LIKE @PCFirstName + '%'
@@ -64,7 +65,7 @@ SELECT hvcasepk,pcpk,
 	--tc = SUBSTRING ((SELECT DISTINCT ', ' + tcfirstname + ' ' + tclastname FROM results r2 WHERE r1.pc1id = r2.pc1id FOR XML PATH ( '' ) ), 3, 1000),
 	tcdob,
 	workerfirstname + ' ' + workerlastname AS worker,
-	dischargedate, caseprogress, CASE WHEN dischargedate IS NULL THEN 0 ELSE 1 END
+	dischargedate, caseprogress,levelname, CASE WHEN dischargedate IS NULL THEN 0 ELSE 1 END
 FROM results r1
 ORDER BY CASE WHEN dischargedate IS NULL THEN 0 ELSE 1 END, dischargedate DESC, pc1id
 
