@@ -18,9 +18,7 @@ begin
 		  ,PersonalScore
 		  ,ProblemSolvingScore
 		  ,scoreASQPK
-		  ,SocialEmotionalScore
 		  ,TCAge
-		  ,MaximumASQSEScore
 		  ,MaximumASQScore
 		from scoreASQ
 		where TCAge = @TCAge
