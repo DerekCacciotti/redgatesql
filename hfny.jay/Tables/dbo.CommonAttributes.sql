@@ -66,6 +66,7 @@ CREATE TABLE [dbo].[CommonAttributes]
 [TCHIPrivateInsurance] [bit] NULL,
 [TCHIOther] [bit] NULL,
 [TCHIOtherSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TCHIUninsured] [bit] NULL,
 [TCHIUnknown] [bit] NULL,
 [TCMedicalFacilityFK] [int] NULL,
 [TCMedicalProviderFK] [int] NULL,
