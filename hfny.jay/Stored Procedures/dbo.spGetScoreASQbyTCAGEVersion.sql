@@ -1,30 +1,30 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 
-create PROCEDURE [dbo].[spGetScoreASQbyTCAGEVersion]
-@TCAge char(2) = NULL, @ASQVersion varchar(10)=NULL
+CREATE procedure [dbo].[spGetScoreASQbyTCAGEVersion]
+    @TCAge      char(2)        = null,
+    @ASQVersion varchar(10)    = null
+as
+begin
+	set nocount on;
 
-AS
-BEGIN
-SET NOCOUNT ON;
+	select ASQVersion
+		  ,CommunicationScore
+		  ,FineMotorScore
+		  ,GrossMotorScore
+		  ,PersonalScore
+		  ,ProblemSolvingScore
+		  ,scoreASQPK
+		  ,SocialEmotionalScore
+		  ,TCAge
+		  ,MaximumASQSEScore
+		  ,MaximumASQScore
+		from scoreASQ
+		where TCAge = @TCAge
+			 and ASQVersion = @ASQVersion
 
-
-SELECT AgeInterval , 
-ASQVersion, 
-CommunicationScore, 
-FineMotorScore, 
-GrossMotorScore, 
-PersonalScore, 
-ProblemSolvingScore, 
-scoreASQPK, 
-SocialEmotionalScore, 
-TCAge,
-MaximumASQSEScore,
-MaximumASQScore 
-FROM scoreASQ
-WHERE TCAge = @TCAge and ASQVersion = @ASQVersion
-
-END
+end
 GO

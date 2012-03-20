@@ -1,16 +1,13 @@
 CREATE TABLE [dbo].[scoreASQ]
 (
 [scoreASQPK] [int] NOT NULL IDENTITY(1, 1),
-[AgeInterval] [int] NOT NULL,
 [ASQVersion] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [CommunicationScore] [numeric] (4, 2) NULL,
 [FineMotorScore] [numeric] (4, 2) NULL,
 [GrossMotorScore] [numeric] (4, 2) NULL,
 [MaximumASQScore] [numeric] (3, 0) NULL,
-[MaximumASQSEScore] [numeric] (3, 0) NULL,
 [PersonalScore] [numeric] (4, 2) NULL,
 [ProblemSolvingScore] [numeric] (4, 2) NULL,
-[SocialEmotionalScore] [numeric] (6, 2) NULL,
 [TCAge] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
 GO
