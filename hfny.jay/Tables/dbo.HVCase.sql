@@ -19,7 +19,7 @@ CREATE TABLE [dbo].[HVCase]
 [IntakeLevel] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [IntakeWorkerFK] [int] NULL,
 [KempeDate] [datetime] NULL,
-[NoOBP] [bit] NULL,
+[OBPInformationAvailable] [bit] NULL,
 [OBPFK] [int] NULL,
 [OBPinHomeIntake] [bit] NULL,
 [OBPRelation2TC] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
