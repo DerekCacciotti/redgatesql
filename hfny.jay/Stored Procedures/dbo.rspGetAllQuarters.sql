@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -43,6 +44,7 @@ BEGIN
 			,QuarterStartDate
 			,QuarterEndDate
 			,convert(varchar(8),QuarterStartDate,1)+','+convert(varchar(8),QuarterEndDate,1) as QuarterDates
+			,'{"start":"'+convert(varchar(8),QuarterStartDate,1)+'","end":"'+convert(varchar(8),QuarterEndDate,1)+'"}' as QuarterData
 		from cteRawQuarters
 END
 GO
