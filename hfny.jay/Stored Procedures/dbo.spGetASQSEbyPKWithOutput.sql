@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -11,7 +12,7 @@ GO
 -- Description:	ASQSE data by ASQSEPK
 --				moved from FamSys Mar 20, 2012 by jrobohn
 -- =============================================
-create procedure [dbo].[spGetASQSEbyPKWithOutput]
+CREATE procedure [dbo].[spGetASQSEbyPKWithOutput]
     @ASQSEPK    int,
     @TCIDFK     int            output,
     @TCAGE      char(2)        output,
@@ -24,23 +25,7 @@ begin
 	set nocount on;
 
 	-- Insert statements for procedure here
-	select [ASQSECreateDate]
-		  ,[ASQSECreator]
-		  ,[ASQSEDateCompleted]
-		  ,[ASQSEEditDate]
-		  ,[ASQSEEditor]
-		  ,[ASQSEInWindow]
-		  ,[ASQSEPK]
-		  ,[ASQSEReceiving]
-		  ,[ASQSEReferred]
-		  ,[ASQSETCAge]
-		  ,[ASQSETotalScore]
-		  ,[ASQSEOverCutOff]
-		  ,[ASQSEVersion]
-		  ,[FSWFK]
-		  ,[HVCaseFK]
-		  ,[ProgramFK]
-		  ,[TCIDFK]
+	select *
 		from [dbo].[ASQSE]
 		where [ASQSEPK] = @ASQSEPK
 	select @tcidfk = [TCIDFK]
