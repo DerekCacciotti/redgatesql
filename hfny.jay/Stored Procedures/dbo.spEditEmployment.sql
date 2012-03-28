@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,7 +13,7 @@ CREATE PROCEDURE [dbo].[spEditEmployment](@EmploymentPK int=NULL,
 @FormType char(2)=NULL,
 @HVCaseFK int=NULL,
 @Interval char(2)=NULL,
-@MonthlyWages numeric(8, 2)=NULL,
+@EmploymentMonthlyWages numeric(8, 2)=NULL,
 @PCType char(3)=NULL,
 @ProgramFK int=NULL,
 @StillWorking char(1)=NULL)
@@ -28,7 +29,7 @@ FormFK = @FormFK,
 FormType = @FormType, 
 HVCaseFK = @HVCaseFK, 
 Interval = @Interval, 
-MonthlyWages = @MonthlyWages, 
+EmploymentMonthlyWages = @EmploymentMonthlyWages, 
 PCType = @PCType, 
 ProgramFK = @ProgramFK, 
 StillWorking = @StillWorking
