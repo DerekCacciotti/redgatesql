@@ -42,9 +42,11 @@ BEGIN
 							,fu.ProgramFK
 							,fu.HVCaseFK
 					from FollowUp fu
-					inner join CommonAttributes ca on ca.FormFK=fu.FollowUpPK and ca.FormInterval=fu.FollowUpInterval
-					where fu.HVCaseFK =@HVCaseFK) b 
+					inner join CommonAttributes ca on ca.FormFK=fu.FollowUpPK and ca.FormInterval=fu.FollowUpInterval AND FormType = 'FU'
+					where fu.HVCaseFK =@HVCaseFK		
+					) b 
 	on a.appCode=b.TCAge
+	ORDER BY FupInterval
 
 END
 
