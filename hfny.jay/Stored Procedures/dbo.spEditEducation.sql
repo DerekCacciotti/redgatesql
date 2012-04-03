@@ -5,7 +5,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditEducation](@EducationPK int=NULL,
 @EducationEditor char(10)=NULL,
-@EducationMonthlyHours smallint=NULL,
+@EducationMonthlyHours int=NULL,
 @FormDate datetime=NULL,
 @FormFK int=NULL,
 @FormType char(2)=NULL,

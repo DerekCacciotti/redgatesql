@@ -5,7 +5,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddEmployment](@EmploymentCreator char(10)=NULL,
 @EmploymentEndDate datetime=NULL,
-@EmploymentMonthlyHours smallint=NULL,
+@EmploymentMonthlyHours int=NULL,
 @EmploymentStartDate datetime=NULL,
 @FormDate datetime=NULL,
 @FormFK int=NULL,
