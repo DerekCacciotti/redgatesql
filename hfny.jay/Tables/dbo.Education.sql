@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[Education]
 [EducationCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [EducationEditDate] [datetime] NULL,
 [EducationEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[EducationMonthlyHours] [numeric] (4, 0) NULL,
+[EducationMonthlyHours] [int] NULL,
 [FormDate] [datetime] NOT NULL,
 [FormFK] [int] NOT NULL,
 [FormType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,

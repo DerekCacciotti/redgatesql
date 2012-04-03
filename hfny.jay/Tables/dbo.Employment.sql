@@ -6,7 +6,7 @@ CREATE TABLE [dbo].[Employment]
 [EmploymentEditDate] [datetime] NULL,
 [EmploymentEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [EmploymentEndDate] [datetime] NULL,
-[EmploymentMonthlyHours] [numeric] (4, 0) NULL,
+[EmploymentMonthlyHours] [int] NULL,
 [EmploymentStartDate] [datetime] NULL,
 [FormDate] [datetime] NOT NULL,
 [FormFK] [int] NOT NULL,

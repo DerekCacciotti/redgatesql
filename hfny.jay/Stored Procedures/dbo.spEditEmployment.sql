@@ -6,7 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditEmployment](@EmploymentPK int=NULL,
 @EmploymentEditor char(10)=NULL,
 @EmploymentEndDate datetime=NULL,
-@EmploymentMonthlyHours numeric(4, 0)=NULL,
+@EmploymentMonthlyHours smallint=NULL,
 @EmploymentStartDate datetime=NULL,
 @FormDate datetime=NULL,
 @FormFK int=NULL,

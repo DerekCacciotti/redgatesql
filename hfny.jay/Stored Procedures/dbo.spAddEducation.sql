@@ -1,9 +1,10 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddEducation](@EducationCreator char(10)=NULL,
-@EducationMonthlyHours numeric(4, 0)=NULL,
+@EducationMonthlyHours smallint=NULL,
 @FormDate datetime=NULL,
 @FormFK int=NULL,
 @FormType char(2)=NULL,
