@@ -44,6 +44,7 @@ CREATE TABLE [dbo].[FollowUp]
 [IFSPParentChildInteraction] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [IFSPParentHealthSafety] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LeadAssessment] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LiveBirths] [bit] NULL,
 [MonthsBirthControlUse] [int] NULL,
 [PC1InHome] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PC1IssuesFK] [int] NOT NULL,
