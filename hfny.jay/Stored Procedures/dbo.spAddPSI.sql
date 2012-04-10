@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,7 +20,7 @@ CREATE PROCEDURE [dbo].[spAddPSI](@DefensiveRespondingScore numeric(4, 0)=NULL,
 @PSIDateComplete datetime=NULL,
 @PSIInterval char(2)=NULL,
 @PSIInWindow bit=NULL,
-@PSILanguage char(1)=NULL,
+@PSILanguage char(2)=NULL,
 @PSIQ1 int=NULL,
 @PSIQ2 int=NULL,
 @PSIQ3 int=NULL,

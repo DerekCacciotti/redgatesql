@@ -21,7 +21,7 @@ CREATE TABLE [dbo].[PSI]
 [PSIEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PSIInterval] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PSIInWindow] [bit] NULL,
-[PSILanguage] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[PSILanguage] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PSIQ1] [int] NULL,
 [PSIQ2] [int] NULL,
 [PSIQ3] [int] NULL,
