@@ -17,6 +17,7 @@ CREATE TABLE [dbo].[FollowUp]
 [BCVaginalRing] [bit] NULL,
 [BCVasectomy] [bit] NULL,
 [BCWithdrawal] [bit] NULL,
+[BCRhythm] [bit] NULL,
 [BirthControlUse] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CPSACSReport] [bit] NULL,
 [DYFSOpenCase] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
