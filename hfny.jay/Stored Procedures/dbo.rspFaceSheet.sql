@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -11,8 +10,10 @@ GO
 CREATE procedure [dbo].[rspFaceSheet]
 (
     @ProgramFK varchar(max)    = null,
-    @PC1ID     char(13),
-    @WorkerFK  int
+    @PC1ID char(13),
+    @WorkerFK int,
+    @FAWFK int, 
+    @SupervisorFK int
 )
 as
 begin
@@ -79,6 +80,7 @@ begin
 			  ,datediff(year,PC1.PCDOB,getdate()) as CurrentAge
 			  ,datediff(year,PC1.PCDOB,IntakeDate) as AgeAtIntake
 			  ,rtrim(w.FirstName)+' '+rtrim(w.LastName) as WorkerName
+			  ,rtrim(w.LastName)+', '+rtrim(w.FirstName) as WorkerNameLast
 			  ,w.FirstName
 			  ,w.LastName
 			  ,rtrim(sup.FirstName)+' '+rtrim(sup.LastName) as SupervisorName
@@ -135,6 +137,8 @@ begin
 				left outer join codeDischarge cd on cd.DischargeReason = cp.DischargeReason
 			where PC1ID = isnull(@PC1ID,PC1ID)
 				 and CurrentFSWFK = isnull(@WorkerFK,CurrentFSWFK)
+				 and CurrentFAWFK = isnull(@FAWFK,CurrentFAWFK)
+				 and sup.WorkerPK = isnull(@SupervisorFK,sup.WorkerPK)
 				 and caseprogress >= 6
 	-- and PC1ID='SP80040113929'
 	),

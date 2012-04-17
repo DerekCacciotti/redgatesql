@@ -8,7 +8,7 @@ GO
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
 -- =============================================
-create procedure [dbo].[rspHomeVisitObservationBySupervisor]
+CREATE procedure [dbo].[rspHomeVisitObservationBySupervisor]
 (
     @programfk varchar(max)    = null
 )
@@ -58,29 +58,13 @@ as
 		  ,RTRIM(Worker.FirstName)+' '+RTRIM(Worker.LastName) fsw
 		  ,RTRIM(supervisor.FirstName)+' '+RTRIM(supervisor.LastName) supervisor
 		  ,case
-			   when substring(visitType,1,1) = '1' then
-				   'Home Visit'
-			   else
-				   ''
-		   end+case
-				   when substring(visitType,1,1) <> '0' and substring(visitType,2,1) <> '0' then
-					   ', '
-				   else
-					   ''
-			   end+case
-					   when substring(visitType,2,1) = '1' then
-						   'Group Meeting'
-					   else
-						   ''
-				   end+case
-						   when substring(visitType,2,1) <> '0' and substring(visitType,3,1) <> '0' then
-							   ', '
-						   else
-							   ''
-					   end+case
-							   when substring(visitType,3,1) = '1' then
-								   'Attempted - Family not home or unable to meet after visit to home'
-						   end as visitType
+				when substring(visitType,1,1) = '1' or substring(visitType,2,1) = '1' then
+					'Home Visit'
+				when substring(visitType,4,1) = '1' then
+					'Attempted - Family not home or unable to meet after visit to home'
+				else
+					''
+				end as visitType
 		from (select VisitStartTime
 					,hvcasepk
 					,visitType

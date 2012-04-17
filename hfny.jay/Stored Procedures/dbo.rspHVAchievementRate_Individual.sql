@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -42,19 +41,19 @@ begin
 							   and hvr.programfk = hld.programfk) as levelstart
 					,FLOOR(reqvisit) as expvisitcount
 					,sum(case
-							 when visittype <> '001' then
+							 when visittype <> '0001' then
 								 1
 							 else
 								 0
 						 end) as actvisitcount
 					,sum(case
-							 when visittype = '100' then
+							 when visittype = '1000' then
 								 1
 							 else
 								 0
 						 end) as inhomevisitcount
 					,sum(case
-							 when visittype = '001' then
+							 when visittype = '0001' then
 								 1
 							 else
 								 0

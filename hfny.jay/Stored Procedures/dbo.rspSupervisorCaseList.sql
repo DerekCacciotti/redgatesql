@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -14,7 +13,7 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspSupervisorCaseList]
 (
-    @programfk int,
+    @ProgramFK varchar(max) = null,
     @SupPK     int = null
 )
 -- Add the parameters for the stored procedure here
@@ -25,6 +24,16 @@ begin
 	set nocount on;
 
 	-- Insert statements for procedure here
+	if @ProgramFK is null
+	begin
+		select @ProgramFK =
+			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+							  from HVProgram
+							  for xml path ('')),2,8000)
+	end
+
+	set @ProgramFK = REPLACE(@ProgramFK,'"','')
+
 	select pc1id
 		  ,levelname
 		  ,caseweight
@@ -49,15 +58,15 @@ begin
 			inner join worker
 					  on caseprogram.currentFSWFK = worker.workerpk
 			inner join workerprogram wp
-					  on wp.workerfk = worker.workerpk and wp.programfk = @programfk
+					  on wp.workerfk = worker.workerpk
 			left outer join (select workerpk
 								  ,firstName as supfname
 								  ,LastName as suplname
 								from worker) sw
 						   on wp.supervisorfk = sw.workerpk
+			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 		where
 			 dischargedate is null
-			 and caseprogram.programfk = @programfk
 			 and sw.workerpk = isnull(@SupPK,sw.workerpk)
 		order by suplname
 				,supfname
