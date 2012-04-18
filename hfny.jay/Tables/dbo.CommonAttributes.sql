@@ -20,6 +20,7 @@ CREATE TABLE [dbo].[CommonAttributes]
 [HIPCAP] [bit] NULL,
 [HIPCAPCaseNumber] [varchar] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HIPrivate] [bit] NULL,
+[HIUninsured] [bit] NULL,
 [HIUnknown] [bit] NULL,
 [HoursPerMonth] [int] NULL,
 [HVCaseFK] [int] NOT NULL,
