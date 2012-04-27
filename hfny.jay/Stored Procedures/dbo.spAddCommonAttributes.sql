@@ -30,7 +30,7 @@ CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyIncome numeric(4
 @MonthlyIncomeUnknown bit=NULL,
 @NumberEmployed int=NULL,
 @NumberInHouse int=NULL,
-@OBPInHome char(1)=NULL,
+@OBPInHome bit=NULL,
 @OBPInvolvement char(2)=NULL,
 @OBPInvolvementSpecify varchar(500)=NULL,
 @Parity char(2)=NULL,

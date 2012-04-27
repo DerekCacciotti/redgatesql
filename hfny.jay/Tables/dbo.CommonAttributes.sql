@@ -31,7 +31,7 @@ CREATE TABLE [dbo].[CommonAttributes]
 [MonthlyIncomeUnknown] [bit] NULL,
 [NumberEmployed] [int] NULL,
 [NumberInHouse] [int] NULL,
-[OBPInHome] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OBPInHome] [bit] NULL,
 [OBPInvolvement] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OBPInvolvementSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Parity] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -162,18 +162,4 @@ Update CommonAttributes Set CommonAttributes.CommonAttributesEditDate= getdate()
 From [CommonAttributes] INNER JOIN Inserted ON [CommonAttributes].[CommonAttributesPK]= Inserted.[CommonAttributesPK]
 GO
 ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [PK__CommonAt__14761E7359FA5E80] PRIMARY KEY CLUSTERED  ([CommonAttributesPK]) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[CommonAttributes] WITH NOCHECK ADD CONSTRAINT [FK_CommonAttributes_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
-GO
-ALTER TABLE [dbo].[CommonAttributes] WITH NOCHECK ADD CONSTRAINT [FK_CommonAttributes_PC1MedicalFacilityFK] FOREIGN KEY ([PC1MedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
-GO
-ALTER TABLE [dbo].[CommonAttributes] WITH NOCHECK ADD CONSTRAINT [FK_CommonAttributes_PC1MedicalProviderFK] FOREIGN KEY ([PC1MedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
-GO
-ALTER TABLE [dbo].[CommonAttributes] WITH NOCHECK ADD CONSTRAINT [FK_CommonAttributes_PCFK] FOREIGN KEY ([PCFK]) REFERENCES [dbo].[PC] ([PCPK])
-GO
-ALTER TABLE [dbo].[CommonAttributes] WITH NOCHECK ADD CONSTRAINT [FK_CommonAttributes_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
-ALTER TABLE [dbo].[CommonAttributes] WITH NOCHECK ADD CONSTRAINT [FK_CommonAttributes_TCMedicalFacilityFK] FOREIGN KEY ([TCMedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
-GO
-ALTER TABLE [dbo].[CommonAttributes] WITH NOCHECK ADD CONSTRAINT [FK_CommonAttributes_TCMedicalProviderFK] FOREIGN KEY ([TCMedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
 GO
