@@ -57,12 +57,12 @@ AS
 	CASE WHEN workerpk = @WorkerPK THEN 1 ELSE 0 END DESC
 )
 
-SELECT hvcasepk,pcpk, 
+SELECT distinct hvcasepk,pcpk, 
 	PC1ID,
 	pcfirstname + ' ' + pclastname AS PC1,
 	pcdob,
-	tc = '',
-	--tc = SUBSTRING ((SELECT DISTINCT ', ' + tcfirstname + ' ' + tclastname FROM results r2 WHERE r1.pc1id = r2.pc1id FOR XML PATH ( '' ) ), 3, 1000),
+	--tc = '',
+	tc = SUBSTRING ((SELECT DISTINCT ', ' + tcfirstname + ' ' + tclastname FROM results r2 WHERE r1.pc1id = r2.pc1id FOR XML PATH ( '' ) ), 3, 1000),
 	tcdob,
 	workerfirstname + ' ' + workerlastname AS worker,
 	dischargedate, caseprogress,levelname, CASE WHEN dischargedate IS NULL THEN 0 ELSE 1 END
