@@ -36,6 +36,10 @@ CREATE TABLE [dbo].[HVCase]
 [TCDOD] [datetime] NULL,
 [TCNumber] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_HVCase_CaseProgress] ON [dbo].[HVCase] ([CaseProgress]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_HVCase_PC1FK] ON [dbo].[HVCase] ([PC1FK]) ON [PRIMARY]
+
 GO
 CREATE STATISTICS [_dta_stat_165575628_2_33] ON [dbo].[HVCase] ([CaseProgress], [TCDOB])
 

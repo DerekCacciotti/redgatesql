@@ -31,13 +31,14 @@ CREATE TABLE [dbo].[CaseProgram]
 [TransferredtoProgram] [varchar] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TransferredtoProgramFK] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_CaseProgram_CurrentLevelFK] ON [dbo].[CaseProgram] ([CurrentLevelFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_CaseProgram_HVCaseFK] ON [dbo].[CaseProgram] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_CaseProgram_ProgramFK] ON [dbo].[CaseProgram] ([ProgramFK]) ON [PRIMARY]
+
 GO
 
-
-
-CREATE NONCLUSTERED INDEX [_dta_index_CaseProgram_18_885578193__K24_K27_K28_K12_8_9] ON [dbo].[CaseProgram] ([HVCaseFK], [PC1ID], [ProgramFK], [DischargeDate]) INCLUDE ([CurrentFAWFK], [CurrentFSWFK]) ON [PRIMARY]
-
-GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
