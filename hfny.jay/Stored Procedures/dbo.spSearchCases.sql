@@ -3,7 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spSearchCases] ( @PC1ID VARCHAR(11) = NULL, @PCPK INT = NULL, 
+CREATE PROCEDURE [dbo].[spSearchCases] ( @PC1ID VARCHAR(13) = NULL, @PCPK INT = NULL, 
 @PCFirstName VARCHAR(20) = NULL, @PCLastName VARCHAR(30) = NULL,@PCDOB DATETIME = NULL, 
 @TCFirstName VARCHAR(20) = NULL, @TCLastName VARCHAR(30) = NULL,@TCDOB DATETIME = NULL,
 @WorkerPK INT = NULL, @ProgramFK INT = NULL)
@@ -62,7 +62,7 @@ AS
 
 )
 
-SELECT TOP 100 hvcasepk,pcpk, 
+SELECT DISTINCT TOP 100 hvcasepk,pcpk, 
 	PC1ID,
 	pcfirstname + ' ' + pclastname AS PC1,
 	pcdob,
