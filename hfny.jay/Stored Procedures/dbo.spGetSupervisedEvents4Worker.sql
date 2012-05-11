@@ -1,9 +1,10 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 
---[spGetSupervisedEvents4Worker] 14
+--[spGetSupervisedEvents4Worker] 115
 
 -- =============================================
 -- Author:		Devinder Singh Khalsa
@@ -29,8 +30,9 @@ as TakePlace,
 
 CASE -- convert into to string
 	WHEN s.SupervisionHours > 0 AND s.SupervisionMinutes > 0 THEN CONVERT(varchar(10),s.SupervisionHours) + ':' + CONVERT(varchar(10),s.SupervisionMinutes)
-	WHEN s.SupervisionHours > 0 AND s.SupervisionMinutes = 0 THEN CONVERT(varchar(10),s.SupervisionHours) + ':00'
-	WHEN s.SupervisionHours = 0 AND s.SupervisionMinutes > 0 THEN '00:' + CONVERT(varchar(10),s.SupervisionMinutes)
+	WHEN s.SupervisionHours > 0 AND (s.SupervisionMinutes = 0 OR s.SupervisionMinutes IS NULL) THEN CONVERT(varchar(10),s.SupervisionHours) + ':00'
+	WHEN (s.SupervisionHours = 0 OR s.SupervisionHours  IS NULL) AND s.SupervisionMinutes > 0 THEN '00:' + CONVERT(varchar(10),s.SupervisionMinutes)
+	--WHEN (s.SupervisionHours = 0 OR s.SupervisionHours  IS NULL) AND (s.SupervisionMinutes = 0 OR s.SupervisionMinutes IS NULL) THEN '00:00'
 	ELSE ' ' END
 
 as HoursMinutes,
