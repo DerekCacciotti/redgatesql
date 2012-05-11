@@ -27,7 +27,7 @@ AS
 		RTRIM(tcid.tcfirstname), RTRIM(tcid.tclastname), hv.tcdob,
 		RTRIM(worker.lastname) AS workerlastname, RTRIM(worker.firstname) AS workerfirstname,
 		dischargedate, rtrim(cast(CaseProgress as char(4)))+'-'+ccp.CaseProgressBrief as CaseProgress, cdlvl.levelname,WorkerPK
-	FROM caseprogram cp
+	FROM fnTableCaseProgram(@ProgramFK) cp  -- Note: fnTableCaseProgram is like a parameterised view ... Khalsa
 	
 	INNER JOIN codeLevel cdlvl ON cdlvl.codeLevelPK = cp.CurrentLevelFK 
 		
@@ -58,9 +58,9 @@ AS
 	OR tcid.tclastname LIKE @TCLastName + '%'
 	OR hv.tcdob = @TCDOB
 	OR workerpk = @WorkerPK)
-	AND cp.ProgramFK = ISNULL(@ProgramFK, cp.ProgramFK)
 
 )
+
 
 SELECT DISTINCT TOP 100 hvcasepk,pcpk, 
 	PC1ID,
