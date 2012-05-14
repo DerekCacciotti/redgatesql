@@ -32,15 +32,14 @@ as
 		pcfirstname varchar(200),
 		pclastname varchar(200),
 		street varchar(200),
-		pccity varchar(200),
-		pcstate varchar(2),
-		pczip varchar(200),
+		pccsz varchar(200),
 		pcphone varchar(200),
 		tcfirstname varchar(200),
 		tclastname varchar(200),
 		tcdob datetime,
 		edc datetime,
 		worker varchar(200),
+		workerlast varchar(200),
 		supervisor varchar(200)
 	)
 
@@ -59,9 +58,7 @@ as
 													  else
 														  ', Apt: '+rtrim(pcapt)
 												  end as street
-							  ,pc.pccity
-							  ,pc.pcstate
-							  ,pc.pczip
+							  ,rtrim(pc.pccity) + ', ' + pc.pcstate + ' ' + pc.pczip as pccsz
 							  ,pc.pcphone+case
 											  when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
 												  ', EMR: '+pc.PCEmergencyPhone
@@ -72,8 +69,9 @@ as
 							  ,LTRIM(RTRIM(tcid.tclastname))
 							  ,hvcase.tcdob
 							  ,hvcase.edc
-							  ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
-							  ,LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
+							  ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) as worker
+							  ,LTRIM(RTRIM(fsw.lastname))+', '+LTRIM(RTRIM(fsw.firstname)) as workerlast
+							  ,LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) as supervisor
 			from hvcase
 				inner join caseprogram on caseprogram.hvcasefk = hvcasepk
 				inner join workerassignment wa1 on wa1.hvcasefk = caseprogram.hvcasefk
@@ -102,12 +100,11 @@ as
 		pcfirstname varchar(200),
 		pclastname varchar(200),
 		street varchar(200),
-		pccity varchar(200),
-		pcstate varchar(2),
-		pczip varchar(200),
+		pccsz varchar(200),
 		pcphone varchar(200),
 		TargetChild varchar(200),
 		worker varchar(200),
+		workerlast varchar(200),
 		supervisor varchar(200)
 	)
 
@@ -116,20 +113,18 @@ as
 		select distinct CaseWeight
 					   ,(select count(distinct PC1ID)
 							 from @caselist c2
-							 where codelevelpk >= 12
+							 where codelevelpk >= 10
 								  and c2.worker = r1.worker) as Enrolled_Cases
 					   ,(select count(distinct PC1ID)
 							 from @caselist c2
-							 where codelevelpk in (9,10)
+							 where codelevelpk in (7,8,9)
 								  and c2.worker = r1.worker) as Preintake_Cases
 					   ,pc1id
 					   ,RTRIM(levelname)+' ('+convert(varchar(12),currentleveldate,101)+')' currentlevel
 					   ,pcfirstname
 					   ,pclastname
 					   ,street
-					   ,pccity
-					   ,pcstate
-					   ,pczip
+					   ,pccsz
 					   ,pcphone
 					   ,case
 							when tcdob is not null then
@@ -142,6 +137,7 @@ as
 								'EDC: ('+convert(varchar(12),edc,101)+')'
 						end TargetChild
 					   ,worker
+					   ,workerlast
 					   ,supervisor
 			from @caselist r1
 
@@ -158,15 +154,14 @@ as
 		  ,CurrentLevel
 		  ,LTRIM(RTRIM(pcfirstname))+' '+LTRIM(RTRIM(pclastname)) as PC1
 		  ,street
-		  ,PCCity
-		  ,PCState
-		  ,PCZip
+		  ,PCCSZ
 		  ,PCPhone
 		  ,TargetChild
 		  ,worker
+		  ,workerlast
 		  ,Supervisor
 		from @caselist_distinct r1
 		order by supervisor
-				,worker
-				,pclastname
+				,workerlast
+				,pc1id
 GO

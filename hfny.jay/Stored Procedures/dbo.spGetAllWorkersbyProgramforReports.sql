@@ -45,4 +45,5 @@ union all
   on workerpk=workerfk
   where programfk=@programfk and programmanager = 1)a
 where workertype=@workertype
+order by LastName, FirstName
 GO

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -54,12 +55,12 @@ begin
 			  ,DischargeDate
 			  ,cd.DischargeReason as DischargeReasonName
 			  ,CaseProgress
-			  ,PC1FK
-			  ,OBPFK
+			  ,isnull(PC1FK,0) as PC1FK
+			  ,isnull(OBPFK,0) as OBPFK
 			  ,OBPinHomeIntake
-			  ,PC2FK
+			  ,isnull(PC2FK,0) as PC2FK
 			  ,PC2inHomeIntake
-			  ,CPFK
+			  ,isnull(CPFK,0) as CPFK
 			  ,rtrim(PC1.PCFirstName)+' '+rtrim(PC1.PCLastName) as PC1FullName
 			  ,rtrim(PC1.PCStreet)+case
 									   when PC1.PCApt is null or PC1.PCApt = '' then
@@ -78,19 +79,22 @@ begin
 			   end as SocialSecurityNumberOnFile
 			  ,PC1.PCDOB
 			  ,datediff(year,PC1.PCDOB,getdate()) as CurrentAge
-			  ,datediff(year,PC1.PCDOB,IntakeDate) as AgeAtIntake
+			  ,floor(datediff(day,PC1.PCDOB,IntakeDate)/365.25) as AgeAtIntake
 			  ,rtrim(w.FirstName)+' '+rtrim(w.LastName) as WorkerName
 			  ,rtrim(w.LastName)+', '+rtrim(w.FirstName) as WorkerNameLast
 			  ,w.FirstName
 			  ,w.LastName
+			  ,rtrim(wk.FirstName)+' '+rtrim(wk.Lastname) as FAWName
 			  ,rtrim(sup.FirstName)+' '+rtrim(sup.LastName) as SupervisorName
 			  ,MomScore
 			  ,DadScore
 			  ,k.FAWFK
 			  ,rtrim(PCOBP.PCFirstName)+' '+rtrim(PCOBP.PCLastName) as OBPFullName
 			  ,PCOBP.PCDOB as OBPDOB
+			  ,PCOBP.Gender as OBPGender
 			  ,rtrim(PCPC2.PCFirstName)+' '+rtrim(PCPC2.PCLastName) as PC2FullName
 			  ,PCPC2.PCDOB as PC2DOB
+			  ,PCPC2.Gender as PC2Gender
 			  ,rtrim(PCCP.PCFirstName)+' '+rtrim(PCCP.PCLastName) as CPFullName
 			  ,rtrim(PCCP.PCStreet)+case
 										when PCCP.PCApt is null or PCCP.PCApt = '' then
@@ -129,6 +133,7 @@ begin
 				left outer join PC PCPC2 on PCPC2.PCPK = c.PC2FK
 				left outer join PC PCCP on PCCP.PCPK = c.CPFK
 				left outer join Kempe k on k.HVCaseFK = c.HVCasePK
+				left outer join Worker wk on wk.WorkerPK = k.FAWFK
 				left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
 				left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 				left outer join Worker sup on sup.WorkerPK = wp.SupervisorFK
@@ -179,7 +184,63 @@ begin
 	--	 from cteMain
 	--		 inner join cteLevelChanges on cteLevelChanges.casefk = cteHVRecords.casefk
 	--)
-	select Main.*
+	select Main.HVCasePK
+		  ,Main.PC1ID
+		  ,Main.CurrentFSWFK
+		  ,Main.CurrentLevelFK
+		  ,Main.LevelName
+		  ,Main.CurrentLevelDate
+		  ,Main.DaysOnCurrentLevel
+		  ,Main.MonthsInProgram
+		  ,Main.ScreenDate
+		  ,Main.KempeDate
+		  ,Main.IntakeDate
+		  ,Main.DischargeDate
+		  ,Main.DischargeReasonName
+		  ,Main.CaseProgress
+		  ,Main.PC1FK
+		  ,Main.OBPFK
+		  ,Main.OBPinHomeIntake
+		  ,Main.PC2FK
+		  ,Main.PC2inHomeIntake
+		  ,Main.CPFK
+		  ,Main.PC1FullName
+		  ,Main.PC1Street
+		  ,Main.PC1CSZ
+		  ,Main.PCPhone
+		  ,Main.PCCellPhone
+		  ,Main.SocialSecurityNumberOnFile
+		  ,Main.PCDOB
+		  ,Main.CurrentAge
+		  ,Main.AgeAtIntake
+		  ,Main.WorkerName
+		  ,Main.WorkerNameLast
+		  ,Main.FirstName
+		  ,Main.LastName
+		  ,Main.SupervisorName
+		  ,Main.MomScore
+		  ,Main.DadScore
+		  ,Main.FAWFK
+		  ,Main.OBPFullName
+		  ,Main.OBPDOB
+		  ,Main.OBPGender
+		  ,Main.PC2FullName
+		  ,Main.PC2DOB
+		  ,Main.PC2Gender
+		  ,Main.CPFullName
+		  ,Main.CPStreet
+		  ,Main.CPCSZ
+		  ,Main.CPDOB
+		  ,Main.CPPhone
+		  ,Main.TCIDPK
+		  ,Main.TCFullName
+		  ,Main.TCDOB
+		  ,Main.TCGender
+		  ,Main.TCChronologicalAge
+		  ,Main.GestationalAge
+		  ,Main.TCDevelopmentalAge
+		  ,Main.NumberofChildren
+		  ,Main.TCDeceased
 		  ,FSWAssignDate
 		from cteMain Main
 			inner join cteFSWAssignDate on HVCaseFK = HVCasePK

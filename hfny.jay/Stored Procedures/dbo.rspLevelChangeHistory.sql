@@ -9,7 +9,9 @@ GO
 -- Description:	<HFNY MIS report - Level Change History>
 -- =============================================
 CREATE procedure [dbo].[rspLevelChangeHistory](@programfk varchar(max)    = null,
-                                               @pc1id     varchar(13)     = null
+                                               @pc1id     varchar(13)     = null, 
+                                               @WorkerFK int = null,
+                                               @SupervisorFK int = null
                                                )
 
 as
@@ -32,12 +34,15 @@ begin
 		  ,levelname
 		  ,StartLevelDate
 		  ,isnull(EndLevelDate,current_timestamp) as EndLevelDate
-		  ,datediff(day,StartLevelDate,isnull(EndLevelDate,current_timestamp)) as DaysOnLevel
+		  ,datediff(day,StartLevelDate,isnull(EndLevelDate+1,current_timestamp)) as DaysOnLevel
 		  ,DischargeDate
 		from HVLevelDetail hld
 			inner join CaseProgram cp on cp.HVCaseFK = hld.hvcasefk
+			inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK
 			inner join dbo.SplitString(@programfk,',') on hld.programfk = listitem
 		where PC1ID = isnull(@PC1ID,pc1id)
+				and CurrentFSWFK = isnull(@WorkerFK, CurrentFSWFK)
+				and SupervisorFK = isnull(@SupervisorFK, SupervisorFK)
 		order by PC1ID
 				,StartLevelDate desc
 
