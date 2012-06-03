@@ -139,7 +139,7 @@ begin
 				left outer join Worker sup on sup.WorkerPK = wp.SupervisorFK
 				left outer join TCID t on t.HVCaseFK = c.HVCasePK
 				left outer join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
-				left outer join codeDischarge cd on cd.DischargeReason = cp.DischargeReason
+				left outer join codeDischarge cd on cd.DischargeCode = cp.DischargeReason
 			where PC1ID = isnull(@PC1ID,PC1ID)
 				 and CurrentFSWFK = isnull(@WorkerFK,CurrentFSWFK)
 				 and CurrentFAWFK = isnull(@FAWFK,CurrentFAWFK)
@@ -217,6 +217,7 @@ begin
 		  ,Main.WorkerNameLast
 		  ,Main.FirstName
 		  ,Main.LastName
+		  ,Main.FAWName
 		  ,Main.SupervisorName
 		  ,Main.MomScore
 		  ,Main.DadScore

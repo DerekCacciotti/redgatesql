@@ -34,16 +34,23 @@ begin
 			  ,hvcasefk
 			  ,programfk
 			from caseprogram
+				inner join hvcase
+						  on caseprogram.hvcasefk = hvcasepk
 			where @ProgramFKs like ('%,'+cast(ProgramFK as varchar(100))+',%')
+				 and caseprogress >= 9
+				 and intakedate is not null
 			order by pc1id
 	else
 		select pc1id
 			  ,hvcasefk
 			  ,programfk
 			from caseprogram
+				inner join hvcase
+						  on caseprogram.hvcasefk = hvcasepk
 			where dischargedate is null
-				 and
-				 @ProgramFKs like ('%,'+cast(ProgramFK as varchar(100))+',%')
+				 and @ProgramFKs like ('%,'+cast(ProgramFK as varchar(100))+',%')
+				 and caseprogress >= 9
+				 and intakedate is not null
 			order by pc1id
 end
 GO
