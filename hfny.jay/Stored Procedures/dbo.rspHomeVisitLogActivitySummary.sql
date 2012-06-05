@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -67,6 +68,14 @@ sum(CASE WHEN substring(CDToys,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CDToys]
 sum(CASE WHEN substring(CDToys,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CDToysNon],
 sum(CASE WHEN substring(CDOther,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CDOther],
 sum(CASE WHEN substring(CDOther,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CDOtherNon],
+sum(CASE WHEN substring(CDChildDevelopment,1,1) = '1'
+OR substring(CDToys,1,1) = '1'
+OR substring(CDOther,1,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [CD1],
+sum(CASE WHEN substring(CDChildDevelopment,2,1) = '1'
+OR  substring(CDToys,2,1) = '1'
+OR  substring(CDOther,2,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [CD2],
 
 -- parent/child interaction
 sum(CASE WHEN substring(PCChildInteraction,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [PCChildInteraction],
@@ -85,6 +94,25 @@ sum(CASE WHEN substring(PCShakenBabyVideo,1,1) = '1' THEN 1 ELSE 0 END) * 100 / 
 sum(CASE WHEN substring(PCShakenBabyVideo,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [PCShakenBabyVideoNon],
 sum(CASE WHEN substring(PCOther,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [PCOther],
 sum(CASE WHEN substring(PCOther,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [PCOtherNon],
+
+sum(CASE WHEN substring(PCChildInteraction,1,1) = '1' 
+OR substring(PCChildManagement,1,1) = '1'
+OR substring(PCFeelings,1,1) = '1'
+OR substring(PCStress,1,1) = '1'
+OR substring(PCBasicNeeds,1,1) = '1'
+OR substring(PCShakenBaby,1,1) = '1'
+OR substring(PCShakenBabyVideo,1,1) = '1'
+OR substring(PCOther,1,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [PC1],
+sum(CASE WHEN substring(PCChildInteraction,2,1) = '1' 
+OR substring(PCChildManagement,2,1) = '1'
+OR substring(PCFeelings,2,1) = '1'
+OR substring(PCStress,2,1) = '1'
+OR substring(PCBasicNeeds,2,1) = '1'
+OR substring(PCShakenBaby,2,1) = '1'
+OR substring(PCShakenBabyVideo,2,1) = '1'
+OR substring(PCOther,2,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [PC2],
 
 -- Health care
 sum(CASE WHEN substring(HCGeneral,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [HCGeneral],
@@ -120,6 +148,41 @@ sum(CASE WHEN substring(HCSIDS,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [HCSIDSN
 sum(CASE WHEN substring(HCOther,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [HCOther],
 sum(CASE WHEN substring(HCOther,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [HCOtherNon],
 
+sum(CASE WHEN substring(HCGeneral,1,1) = '1' 
+OR substring(HCChild,1,1) = '1'
+OR substring(HCDental,1,1) = '1'
+OR substring(HCFeeding,1,1) = '1'
+OR substring(HCBreastFeeding,1,1) = '1'
+OR substring(HCNutrition,1,1) = '1'
+OR substring(HCFamilyPlanning,1,1) = '1'
+OR substring(HCProviders,1,1) = '1'
+OR substring(HCFASD,1,1) = '1'
+OR substring(HCSexEducation,1,1) = '1'
+OR substring(HCPrenatalCare,1,1) = '1'
+OR substring(HCMedicalAdvocacy,1,1) = '1'
+OR substring(HCSafety,1,1) = '1'
+OR substring(HCSmoking,1,1) = '1'
+OR substring(HCSIDS,1,1) = '1'
+OR substring(HCOther,1,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [HC1],
+sum(CASE WHEN substring(HCGeneral,2,1) = '1' 
+OR substring(HCChild,2,1) = '1'
+OR substring(HCDental,2,1) = '1'
+OR substring(HCFeeding,2,1) = '1'
+OR substring(HCBreastFeeding,2,1) = '1'
+OR substring(HCNutrition,2,1) = '1'
+OR substring(HCFamilyPlanning,2,1) = '1'
+OR substring(HCProviders,2,1) = '1'
+OR substring(HCFASD,2,1) = '1'
+OR substring(HCSexEducation,2,1) = '1'
+OR substring(HCPrenatalCare,2,1) = '1'
+OR substring(HCMedicalAdvocacy,2,1) = '1'
+OR substring(HCSafety,2,1) = '1'
+OR substring(HCSmoking,2,1) = '1'
+OR substring(HCSIDS,2,1) = '1'
+OR substring(HCOther,2,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [HC2],
+
 -- family functioning
 sum(CASE WHEN substring(FFDomesticViolence,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [FFDomesticViolence],
 sum(CASE WHEN substring(FFDomesticViolence,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [FFDomesticViolenceNon],
@@ -133,6 +196,22 @@ sum(CASE WHEN substring(FFCommunication,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x
 sum(CASE WHEN substring(FFCommunication,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [FFCommunicationNon],
 sum(CASE WHEN substring(FFOther,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [FFOther],
 sum(CASE WHEN substring(FFOther,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [FFOtherNon],
+
+sum(CASE WHEN substring(FFDomesticViolence,1,1) = '1' 
+OR substring(FFFamilyRelations,1,1) = '1'
+OR substring(FFSubstanceAbuse,1,1) = '1'
+OR substring(FFMentalHealth,1,1) = '1'
+OR substring(FFCommunication,1,1) = '1'
+OR substring(FFOther,1,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [FF1],
+
+sum(CASE WHEN substring(FFDomesticViolence,2,1) = '1' 
+OR substring(FFFamilyRelations,2,1) = '1'
+OR substring(FFSubstanceAbuse,2,1) = '1'
+OR substring(FFMentalHealth,2,1) = '1'
+OR substring(FFCommunication,2,1) = '1'
+OR substring(FFOther,2,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [FF2],
 
 -- self sufficiency
 sum(CASE WHEN substring(SSCalendar,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [SSCalendar],
@@ -156,11 +235,43 @@ sum(CASE WHEN substring(SSJob,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [SSJobNon
 sum(CASE WHEN substring(SSOther,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [SSOther],
 sum(CASE WHEN substring(SSOther,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [SSOtherNon],
 
+sum(CASE WHEN substring(SSCalendar,1,1) = '1' 
+OR substring(SSHousekeeping,1,1) = '1'
+OR substring(SSTransportation,1,1) = '1'
+OR substring(SSEmployment,1,1) = '1'
+OR substring(SSMoneyManagement,1,1) = '1'
+OR substring(SSChildCare,1,1) = '1'
+OR substring(SSProblemSolving,1,1) = '1'
+OR substring(SSEducation,1,1) = '1'
+OR substring(SSJob,1,1) = '1'
+OR substring(SSOther,1,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [SS1],
+
+sum(CASE WHEN substring(SSCalendar,2,1) = '1' 
+OR substring(SSHousekeeping,2,1) = '1'
+OR substring(SSTransportation,2,1) = '1'
+OR substring(SSEmployment,2,1) = '1'
+OR substring(SSMoneyManagement,2,1) = '1'
+OR substring(SSChildCare,2,1) = '1'
+OR substring(SSProblemSolving,2,1) = '1'
+OR substring(SSEducation,2,1) = '1'
+OR substring(SSJob,2,1) = '1'
+OR substring(SSOther,2,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [SS2],
+
 -- crisis intervention
 sum(CASE WHEN substring(CIProblems,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CIProblems],
 sum(CASE WHEN substring(CIProblems,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CIProblemsNon],
 sum(CASE WHEN substring(CIOther,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CIOther],
 sum(CASE WHEN substring(CIOther,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CIOtherNon],
+
+sum(CASE WHEN substring(CIProblems,1,1) = '1' 
+OR substring(CIOther,1,1) = '1' 
+THEN 1 ELSE 0 END) * 100 / @x [CI1],
+
+sum(CASE WHEN substring(CIProblems,2,1) = '1' 
+OR substring(CIOther,2,1) = '1' 
+THEN 1 ELSE 0 END) * 100 / @x [CI2],
 
 -- program activities
 sum(CASE WHEN substring(PAForms,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [PAForms],
@@ -175,6 +286,24 @@ sum(CASE WHEN substring(PARecreation,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [P
 sum(CASE WHEN substring(PARecreation,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [PARecreationNon],
 sum(CASE WHEN substring(PAOther,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [PAOther],
 sum(CASE WHEN substring(PAOther,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [PAOtherNon],
+
+sum(CASE WHEN substring(PAForms,1,1) = '1' 
+OR substring(PAVideo,1,1) = '1'
+OR substring(PAGroups,1,1) = '1'
+OR substring(PAIFSP,1,1) = '1'
+OR substring(PARecreation,1,1) = '1'
+OR substring(PAOther,1,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [PA1],
+
+sum(CASE WHEN substring(PAForms,2,1) = '1' 
+OR substring(PAVideo,2,1) = '1'
+OR substring(PAGroups,2,1) = '1'
+OR substring(PAIFSP,2,1) = '1'
+OR substring(PARecreation,2,1) = '1'
+OR substring(PAOther,2,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [PA2],
+
+
 
 -- concrete activities
 sum(CASE WHEN substring(CATransportation,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CATransportation],
@@ -199,6 +328,32 @@ sum(CASE WHEN substring(CAVisitation,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [C
 sum(CASE WHEN substring(CAVisitation,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CAVisitationNon],
 sum(CASE WHEN substring(CAOther,1,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CAOther],
 sum(CASE WHEN substring(CAOther,2,1) = '1' THEN 1 ELSE 0 END) * 100 / @x [CAOtherNon],
+
+sum(CASE WHEN substring(CATransportation,1,1) = '1' 
+OR substring(CAGoods,1,1) = '1'
+OR substring(CALegal,1,1) = '1'
+OR substring(CALegal,1,1) = '1'
+OR substring(CAHousing,1,1) = '1'
+OR substring(CAAdvocacy,1,1) = '1'
+OR substring(CATranslation,1,1) = '1'
+OR substring(CALaborSupport,1,1) = '1'
+OR substring(CAChildSupport,2,1) = '1'
+OR substring(CAVisitation,1,1) = '1'
+OR substring(CAOther,1,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [CA1],
+
+sum(CASE WHEN substring(CATransportation,2,1) = '1' 
+OR substring(CAGoods,2,1) = '1'
+OR substring(CALegal,2,1) = '1'
+OR substring(CALegal,2,1) = '1'
+OR substring(CAHousing,2,1) = '1'
+OR substring(CAAdvocacy,2,1) = '1'
+OR substring(CATranslation,2,1) = '1'
+OR substring(CALaborSupport,2,1) = '1'
+OR substring(CAChildSupport,2,1) = '1'
+OR substring(CAVisitation,2,1) = '1'
+OR substring(CAOther,2,1) = '1'
+THEN 1 ELSE 0 END) * 100 / @x [CA2],
 
 count(*) [Total]
 

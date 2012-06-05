@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -70,10 +71,12 @@ CASE WHEN PSITotalScore >= 86 THEN 1 ELSE 0 END
 ) >= @n) x 
 ON x.HVCaseFK = a.HVCaseFK
 
-WHERE d.currentFSWFK = ISNULL(@workerfk, d.currentFSWFK)
+WHERE 
+d.DischargeDate IS NOT NULL
+AND d.currentFSWFK = ISNULL(@workerfk, d.currentFSWFK)
 AND wp.supervisorfk = ISNULL(@supervisorfk, wp.supervisorfk)
 AND d.programfk = @programfk
-ORDER BY  supervisor, worker, a.PSIInterval
+ORDER BY  supervisor, worker, PC1ID, a.PSIInterval
 
 
 

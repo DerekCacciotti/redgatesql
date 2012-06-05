@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -72,10 +73,12 @@ CASE WHEN UnderProblemSolving = 1 THEN 1 ELSE 0 END
 ) >= @n) x 
 ON x.TCIDFK = a.TCIDFK
 
-WHERE d.currentFSWFK = ISNULL(@workerfk, d.currentFSWFK)
+WHERE 
+d.DischargeDate IS NOT NULL 
+AND d.currentFSWFK = ISNULL(@workerfk, d.currentFSWFK)
 AND wp.supervisorfk = ISNULL(@supervisorfk, wp.supervisorfk)
 AND d.programfk = @programfk
-ORDER BY  supervisor, worker, TCName, TCAgeCode
+ORDER BY  supervisor, worker, PC1ID, TCAgeCode
 
 
 
