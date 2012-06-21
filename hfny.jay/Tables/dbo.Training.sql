@@ -3,6 +3,7 @@ CREATE TABLE [dbo].[Training]
 [TrainingPK] [int] NOT NULL IDENTITY(1, 1),
 [ProgramFK] [int] NULL,
 [TrainerFK] [int] NULL,
+[TrainingMethodFK] [int] NULL,
 [TrainingCreateDate] [datetime] NOT NULL CONSTRAINT [DF_Training_TrainingCreateDate] DEFAULT (getdate()),
 [TrainingCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [TrainingDate] [datetime] NOT NULL,
@@ -16,6 +17,8 @@ CREATE TABLE [dbo].[Training]
 [TrainingPK_old] [int] NOT NULL,
 [TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[Training] ADD
+CONSTRAINT [FK_Training_TrainingMethodFK] FOREIGN KEY ([TrainingMethodFK]) REFERENCES [dbo].[TrainingMethod] ([TrainingMethodPK])
 GO
 SET QUOTED_IDENTIFIER ON
 GO
