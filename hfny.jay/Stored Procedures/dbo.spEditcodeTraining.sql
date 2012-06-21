@@ -1,8 +1,9 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spEditcodeTraining](@codeTrainingPK int=NULL,
+CREATE PROCEDURE [dbo].[spEditcodeTraining](@codeTrainingPK char(2)=NULL,
 @codeTrainingPK_old int=NULL,
 @ProgramFK int=NULL,
 @TrainingCode char(2)=NULL,

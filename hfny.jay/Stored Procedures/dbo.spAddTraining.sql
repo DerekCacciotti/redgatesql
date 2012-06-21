@@ -1,9 +1,11 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddTraining](@ProgramFK int=NULL,
 @TrainerFK int=NULL,
+@TrainingMethodFK int=NULL,
 @TrainingCreator char(10)=NULL,
 @TrainingDate datetime=NULL,
 @TrainingDays int=NULL,
@@ -17,6 +19,7 @@ AS
 INSERT INTO Training(
 ProgramFK,
 TrainerFK,
+TrainingMethodFK,
 TrainingCreator,
 TrainingDate,
 TrainingDays,
@@ -30,6 +33,7 @@ TrainingTitle
 VALUES(
 @ProgramFK,
 @TrainerFK,
+@TrainingMethodFK,
 @TrainingCreator,
 @TrainingDate,
 @TrainingDays,
