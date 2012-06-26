@@ -76,6 +76,20 @@ CREATE TABLE [dbo].[CommonAttributes]
 [WasBreastFed] [bit] NULL,
 [WhyNotBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[CommonAttributes] ADD
+CONSTRAINT [FK_CommonAttributes_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+ALTER TABLE [dbo].[CommonAttributes] ADD
+CONSTRAINT [FK_CommonAttributes_PC1MedicalFacilityFK] FOREIGN KEY ([PC1MedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
+ALTER TABLE [dbo].[CommonAttributes] ADD
+CONSTRAINT [FK_CommonAttributes_PC1MedicalProviderFK] FOREIGN KEY ([PC1MedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
+ALTER TABLE [dbo].[CommonAttributes] ADD
+CONSTRAINT [FK_CommonAttributes_PCFK] FOREIGN KEY ([PCFK]) REFERENCES [dbo].[PC] ([PCPK])
+ALTER TABLE [dbo].[CommonAttributes] ADD
+CONSTRAINT [FK_CommonAttributes_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+ALTER TABLE [dbo].[CommonAttributes] ADD
+CONSTRAINT [FK_CommonAttributes_TCMedicalFacilityFK] FOREIGN KEY ([TCMedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
+ALTER TABLE [dbo].[CommonAttributes] ADD
+CONSTRAINT [FK_CommonAttributes_TCMedicalProviderFK] FOREIGN KEY ([TCMedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
 GO
 SET QUOTED_IDENTIFIER ON
 GO
