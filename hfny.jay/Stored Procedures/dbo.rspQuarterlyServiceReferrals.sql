@@ -1,49 +1,95 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 -- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
+-- Author:		<Devinder Singh Khalsa>
+-- Create date: <June 28, 2012>
+-- Description:	<gets you data for quarterly service referrals>
 -- =============================================
-CREATE PROCEDURE [dbo].[rspQuarterlyServiceReferrals]
-	-- Add the parameters for the stored procedure here
-	(@ProgramFK int = null, 
-	@StartDate datetime, 
-	@EndDate datetime,
-	@SiteFK int = null)
+CREATE procedure [dbo].[rspQuarterlyServiceReferrals](@programfk    varchar(max)    = null,
+                                                        @sdate        datetime,
+                                                        @edate        datetime,
+                                                        @sitefk int             = null                                                        
+                                                        )
 
-AS
+as
 BEGIN
-	-- SET NOCOUNT ON added to prevent extra result sets from
-	-- interfering with SELECT statements.
-	SET NOCOUNT ON
 
-    -- Insert statements for procedure here
+DECLARE @countMainTotal INT 
+DECLARE @countServicesStarted INT
+DECLARE @countServicesPending INT
+DECLARE @countServiceNotReceived INT
+;
 
---SELECT *
---		, SiteFK
---		, RTRIM(hv_lname)+', '+RTRIM(hv_fname) as WorkerName 
---		, RTRIM(pcfname)+' '+RTRIM(pclname) as PCFullName 
---		, case when TCDOB is null then edc else TCDOB end as edc_dob
---		, ServiceReferral.* 
---		, ServiceReferralCategory 
---		, 1 as TotalCount
---		, case when StartDate is NOT null then 1 else 0 end as ServiceStarted
---		, case when (StartDate is null or StartDate > @EndDate) and ReasonNoService is null then 1 else 0 end as Pending
---		, case when ReasonNoService is not null then 1 else 0 end as DidNotReceive
---from hvcase 
---inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
---inner join Worker w ON CurrentFSWFK = w.WorkerPK
---inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
---inner join PC ON PCPK=PC1FK
---inner join ServiceReferral sr ON sr.HVCaseFK=HVCasePK 
---inner join codeServiceReferral csr ON csr.ServiceReferralCode=sr.ServiceCode
---where ReferralDate between @StartDate and @EndDate AND 
---		NatureOfReferral='01' AND -- arranged
---		SiteFK=ISNULL(SiteFK, @SiteFK) 
---group by ServiceReferralCategory
+	with cteSubTotals
+			as (
+				SELECT RTRIM(w.LastName)+', '+RTRIM(w.FirstName) as WorkerName, wp.SiteFK 
+				,sr1.ServiceReferralCategory, sr1.ServiceReferralType
+				,h.HVCasePK,sr.*
+				FROM HVCase h 
+				INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
+				INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
+				INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
+				INNER JOIN ServiceReferral sr ON sr.HVCaseFK = h.HVCasePK 
+				INNER JOIN codeServiceReferral sr1 ON sr1.codeServiceReferralPK = sr.ServiceCode
+				WHERE 				
+				sr.ReferralDate BETWEEN @sdate AND @edate
+				AND
+				NatureOfReferral = 1 -- arranged referrals
+				AND 
+				cp.ProgramFK = 1
+				
+	)
+	,
+	cteTotals
+			as (
+	SELECT ServiceReferralCategory, count(ServiceReferralCategory) Total
+			,sum(case
+			   when (ServiceReceived = 1 AND (StartDate IS NOT NULL AND (StartDate <= @edate))) then
+				   1
+				   else
+					   0
+			   end) as ServicesStarted
+			,sum(case
+			   when ((StartDate IS NULL OR (StartDate > @edate)) AND (ReasonNoService IS NULL)) then
+				   1
+				   else
+					   0
+			   end) as ServicesPending
+			,sum(case
+			   when (ReasonNoService IS NOT NULL) then
+				   1
+				   else
+					   0
+			   end) as ServiceNotReceived
 
-END
+
+
+	 FROM cteSubTotals
+	GROUP BY ServiceReferralCategory 
+	--order by ServiceReferralType
+	)
+
+
+
+--SELECT ServiceReferralCategory
+--	 , Total
+--	 , ServicesStarted
+--	 , ServicesPending
+--	 , ServiceNotReceived
+	 
+--	  FROM cteTotals
+
+--SELECT @countMainTotal = (SELECT sum(Total) FROM cteTotals)
+--SELECT @countServicesStarted = (SELECT sum(ServicesStarted) FROM cteTotals)
+--SELECT @countServicesPending = (SELECT sum(ServicesPending) FROM cteTotals)
+--SELECT @countServiceNotReceived = (SELECT sum(ServiceNotReceived) FROM cteTotals)
+
+
+
+SELECT * FROM cteTotals
+
+end
 GO
