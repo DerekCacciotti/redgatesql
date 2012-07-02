@@ -31,7 +31,7 @@ CREATE TABLE [dbo].[CommonAttributes]
 [MonthlyIncomeUnknown] [bit] NULL,
 [NumberEmployed] [int] NULL,
 [NumberInHouse] [int] NULL,
-[OBPInHome] [bit] NULL,
+[OBPInHome] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OBPInvolvement] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OBPInvolvementSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Parity] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
