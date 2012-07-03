@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -5,39 +6,52 @@ GO
 
 -- pr_Disable_Triggers_v2 0
 
-CREATE PROCEDURE [dbo].[pr_Disable_Triggers] @disable BIT = 1
-AS 
-    DECLARE
-        @sql VARCHAR(500),
-        @tableName VARCHAR(128),
-        @tableSchema VARCHAR(128)
+CREATE procedure [dbo].[pr_Disable_Triggers] @disable bit = 1, @tableNames nvarchar(max)
+as
+	declare @sql         varchar(500),
+            @tableName   varchar(128),
+            @tableSchema varchar(128)
 
-	-- List of all tables
-    DECLARE triggerCursor CURSOR
-        FOR
-	SELECT
-        t.TABLE_NAME AS TableName,
-        t.TABLE_SCHEMA AS TableSchema
-      FROM
-        INFORMATION_SCHEMA.TABLES t
-      ORDER BY
-        t.TABLE_NAME,
-        t.TABLE_SCHEMA 
+	if @tableNames='' or @tableNames is null
+		-- List of all tables
+		begin
+			declare triggerCursor cursor
+			for
+			select t.TABLE_NAME as TableName
+				  ,t.TABLE_SCHEMA as TableSchema
+				from INFORMATION_SCHEMA.TABLES t
+				where TABLE_TYPE<>'VIEW'
+				order by t.TABLE_NAME
+						,t.TABLE_SCHEMA
+		end
+	else
+		-- only the passed table names
+		begin
+			declare triggerCursor cursor
+			for
+			select t.TABLE_NAME as TableName
+				  ,t.TABLE_SCHEMA as TableSchema
+				from INFORMATION_SCHEMA.TABLES t
+				inner join dbo.SplitString(@tableNames,',') on t.TABLE_NAME = listitem
+				where TABLE_TYPE<>'VIEW'
+				order by t.TABLE_NAME
+						,t.TABLE_SCHEMA
+		end
+		
+	open triggerCursor
 
-    OPEN triggerCursor
+	fetch next from triggerCursor into @tableName,@tableSchema
+	while (@@FETCH_STATUS = 0)
+	begin
+		if @disable = 1
+			set @sql = 'ALTER TABLE '+@tableSchema+'.['+@tableName+'] DISABLE TRIGGER ALL'
+		else
+			set @sql = 'ALTER TABLE '+@tableSchema+'.['+@tableName+'] ENABLE TRIGGER ALL'
+		print 'Executing Statement - '+@sql
+		execute (@sql)
+		fetch next from triggerCursor into @tableName,@tableSchema
+	end
 
-    FETCH NEXT FROM triggerCursor INTO @tableName, @tableSchema
-    WHILE ( @@FETCH_STATUS = 0 )
-        BEGIN
-            IF @disable = 1 
-                SET @sql = 'ALTER TABLE ' + @tableSchema + '.[' + @tableName + '] DISABLE TRIGGER ALL' 
-            ELSE 
-                SET @sql = 'ALTER TABLE ' + @tableSchema + '.[' + @tableName + '] ENABLE TRIGGER ALL' 
-            PRINT 'Executing Statement - ' + @sql
-            EXECUTE ( @sql )
-            FETCH NEXT FROM triggerCursor INTO @tableName, @tableSchema
-        END
-
-    CLOSE triggerCursor
-    DEALLOCATE triggerCursor
+	close triggerCursor
+	deallocate triggerCursor
 GO
