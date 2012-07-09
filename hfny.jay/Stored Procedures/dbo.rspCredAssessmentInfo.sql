@@ -205,7 +205,7 @@ begin
 							   and Kempe.KempeDate >= @StartDate
 							   and Kempe.KempeDate <= @EndDate
 							   and (@ProgramFKs like ('%,'+cast(kempe.programfk as varchar(100))+',%'))) a,
-					(select hvcasefk from udfCaseFilters(@posclause,@negclause,@ProgramFKs)) b
+					(select hvcasefk from udfCaseFilters2(@posclause,@negclause,@ProgramFKs)) b
 				where a.hvcasefk = b.hvcasefk
 		)
 		select kempettl

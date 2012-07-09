@@ -92,12 +92,19 @@ begin
 				(select HVCasePK
 					   ,CaseProgram.ProgramFK
 					   ,cast(isnull(CaseFilterNameFK,listCaseFilterNamePK) as varchar(10))
-						+isnull(UPPER(FilterValue),'') as answers
-					 from CaseProgram
-						 inner join HVCase on CaseProgram.HVCaseFK = HVCasePK
-						 inner join listCaseFilterName cfn on cfn.ProgramFK = CaseProgram.ProgramFK
-						 left join CaseFilter on HVCasePK = CaseFilter.HVCaseFK and CaseFilterNameFK = cfn.listCaseFilterNamePK
-					 where @programFKS like ('%,'+cast(CaseProgram.ProgramFK as varchar(100))+',%')) a
+						+case 
+							when cfn.FilterType = 1
+								then case when cf.CaseFilterNameChoice=1 then 'Yes' else 'No' end
+							when cfn.FilterType = 2
+								then (select cfno.FilterOption from listCaseFilterNameOption cfno where listCaseFilterNameOptionPK=cf.CaseFilterNameOptionFK)
+							when cfn.FilterType = 3
+								then CaseFilterValue
+						end as answers
+					from CaseProgram
+					inner join HVCase on CaseProgram.HVCaseFK = HVCasePK
+					inner join listCaseFilterName cfn on cfn.ProgramFK = CaseProgram.ProgramFK
+					left join CaseFilter cf on HVCasePK = cf.HVCaseFK and CaseFilterNameFK = cfn.listCaseFilterNamePK
+					where @programFKS like ('%,'+cast(CaseProgram.ProgramFK as varchar(100))+',%')) a
 			where (answers = @pospair1
 				 or answers = @pospair2
 				 or answers = @pospair3)
