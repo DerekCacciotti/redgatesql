@@ -9,7 +9,7 @@ GO
 -- Modified: 
 -- Description:	CaseFilter (Xtra-flds) by ProgramFK
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetAllCaseFilterByHVCaseFK]  (@HVCaseFK int)
+CREATE PROCEDURE [dbo].[spGetAllCaseFilterByHVCaseFK]  (@HVCaseFK int, @ProgramFK int)
 
 AS
 BEGIN
@@ -18,21 +18,31 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-
+	with cteCaseFilters
+	as
+	(select CaseFilterNameFK
+			,CaseFilterNameChoice
+			,CaseFilterNameOptionFK
+			,CaseFilterValue
+			,CaseFilterPK
+			,HVCaseFK
+			,ProgramFK 
+		from CaseFilter 
+	 Where HVCaseFK=@HVCaseFK) 
 	select listCaseFilterNamePK
           ,FieldTitle
           ,FilterType
           ,Hint
-          ,FilterValue
+		  ,CaseFilterNameChoice
+		  ,CaseFilterNameOptionFK
+		  ,CaseFilterValue
           ,CaseFilterPK
           ,HVCaseFK
           ,cfn.ProgramFK
 	from listCaseFilterName cfn
-	LEFT OUTER JOIN 
-	(Select CaseFilterNameFK,FilterValue,CaseFilterPK,HVCaseFK,ProgramFK from CaseFilter 
-	 Where HVCaseFK=@HVCaseFK) a
-	 ON cfn.ProgramFK=a.ProgramFK and 
-		listCaseFilterNamePK= a.CaseFilterNameFK
+	LEFT OUTER JOIN cteCaseFilters CF on cfn.ProgramFK=CF.ProgramFK and 
+										 listCaseFilterNamePK= CF.CaseFilterNameFK
+	where CF.ProgramFK = isnull(@ProgramFK,CF.ProgramFK)
 	ORDER BY FieldTitle
 
 END

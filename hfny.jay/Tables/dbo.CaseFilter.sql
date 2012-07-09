@@ -6,7 +6,9 @@ CREATE TABLE [dbo].[CaseFilter]
 [CaseFilterCreator] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [CaseFilterEditDate] [datetime] NULL,
 [CaseFilterEditor] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[FilterValue] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CaseFilterNameChoice] [bit] NULL,
+[CaseFilterNameOptionFK] [nchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CaseFilterValue] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HVCaseFK] [int] NOT NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]

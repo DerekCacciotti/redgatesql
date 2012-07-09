@@ -1,4 +1,9 @@
 SET IDENTITY_INSERT [dbo].[codeApp] ON
+INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (237, '01', 'CaseFilterType                ', 'Single option (Yes/No)                                                                              ', 'CF')
+INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (240, '02', 'CaseFilterType                ', 'Multiple option                                                                                     ', 'CF')
+INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (241, '03', 'CaseFilterType                ', 'Free form                                                                                           ', 'CF')
+SET IDENTITY_INSERT [dbo].[codeApp] OFF
+SET IDENTITY_INSERT [dbo].[codeApp] ON
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (1, '01', 'ASQVersion                    ', 'First Edition 1995                                                                                  ', 'ASQ,SS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (2, '02', 'ASQVersion                    ', 'Second Edition 1995                                                                                 ', 'ASQ,SS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (3, '03', 'ASQVersion                    ', 'Third Edition 2009                                                                                  ', 'ASQ,SS')
@@ -223,6 +228,7 @@ INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeTex
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (226, '02', 'TANFReason                    ', 'Immigration Status                                                                                  ', 'IN,FU')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (227, '03', 'TANFReason                    ', 'Refused to complete application                                                                     ', 'IN,FU')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (228, '04', 'TANFReason                    ', 'Other reason                                                                                        ', 'IN,FU')
+INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (229, '00', 'PSIInterval                   ', 'At Birth/Intake                                                                                     ', 'PS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (230, '01', 'PSIInterval                   ', '6 months old                                                                                        ', 'PS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (231, '02', 'PSIInterval                   ', '1 year old                                                                                          ', 'PS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (232, '03', 'PSIInterval                   ', '2 years old                                                                                         ', 'PS')
@@ -230,7 +236,4 @@ INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeTex
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (234, '05', 'PSIInterval                   ', '4 years old                                                                                         ', 'PS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (235, '06', 'PSIInterval                   ', '5 years old                                                                                         ', 'PS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (236, '07', 'PSIInterval                   ', 'At discharge                                                                                        ', 'PS')
-SET IDENTITY_INSERT [dbo].[codeApp] OFF
-SET IDENTITY_INSERT [dbo].[codeApp] ON
-INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (229, '00', 'PSIInterval                   ', 'At Birth/Intake                                                                                     ', 'PS')
 SET IDENTITY_INSERT [dbo].[codeApp] OFF
