@@ -7,12 +7,14 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <June 28, 2012>
 -- Description:	<gets you data for quarterly service referrals>
--- exec [rspQuarterlyServiceReferrals] 1,'01/01/2011','12/31/2011'
+-- exec [rspQuarterlyServiceReferrals3] 1,'01/01/2011','12/31/2012','01'
 -- =============================================
 CREATE procedure [dbo].[rspQuarterlyServiceReferrals](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
                                                         @edate        datetime,
-                                                        @sitefk int             = null                                                        
+                                                        @NatureOfReferral  char(2), 
+                                                        @sitefk int             = NULL
+                                                                                                                  
                                                         )
 
 as
@@ -22,46 +24,64 @@ DECLARE @countMainTotal INT
 DECLARE @countServicesStarted INT
 DECLARE @countServicesPending INT
 DECLARE @countServiceNotReceived INT
-;
 
-	with cteMain
+declare @tblResults table (
+ ServiceReferralCategory varchar(500) NULL 
+, Total varchar(10) NULL 
+, ServicesStarted  varchar(10) NULL 
+, ServicesPending  varchar(10) NULL 
+, ServiceNotReceived  varchar(10) NULL
+) 
+
+;
+	-- Initially, get the subset of data that we are interested in ... Good Practice ... Khalsa 
+	with cteGetInitRequiredData
 			as (
+				
 				SELECT 
-				sr1.ServiceReferralCategory, sr1.ServiceReferralType
-				,sr.ServiceReceived,sr.StartDate,sr.ReasonNoService
+				h.HVCasePK,wp.SiteFK 
 				FROM HVCase h 
 				INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
 				INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
 				INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
-				INNER JOIN ServiceReferral sr ON sr.HVCaseFK = h.HVCasePK 
+				WHERE 
+				cp.ProgramFK = @programfk
+				AND 
+				wp.SiteFK = isnull(@sitefk,wp.SiteFK)				
+				
+			)
+			,
+	cteMain
+			as (
+				SELECT 
+				sr1.ServiceReferralCategory, sr1.ServiceReferralType
+				,sr.ServiceReceived,sr.StartDate,sr.ReasonNoService
+				FROM cteGetInitRequiredData gir
+				INNER JOIN ServiceReferral sr ON sr.HVCaseFK = gir.HVCasePK 
 				INNER JOIN codeServiceReferral sr1 ON sr1.codeServiceReferralPK = sr.ServiceCode
 				WHERE 				
 				sr.ReferralDate BETWEEN @sdate AND @edate
 				AND
-				NatureOfReferral = 1 -- arranged referrals
-				AND 
-				cp.ProgramFK = @programfk
-				--AND 
-				--wp.SiteFK = @sitefk
+				NatureOfReferral = @NatureOfReferral -- @NatureOfReferral = 1arranged referrals
 	)
 	,
 	cteTotals
 			as (
 	SELECT ServiceReferralCategory, count(ServiceReferralCategory) Total
 			,sum(case
-			   when (ServiceReceived = 1 AND (StartDate IS NOT NULL AND (StartDate <= @edate))) then
+			   when (ServiceReceived = '1' AND (StartDate IS NOT NULL AND (StartDate <= @edate))) then
 				   1
 				   else
 					   0
 			   end) as ServicesStarted
 			,sum(case
-			   when ((StartDate IS NULL OR (StartDate > @edate)) AND (ReasonNoService IS NULL)) then
+			   when ((StartDate IS NULL OR (StartDate > @edate)) AND (ReasonNoService IS NULL OR ReasonNoService = '')) then
 				   1
 				   else
 					   0
 			   end) as ServicesPending
 			,sum(case
-			   when (ReasonNoService IS NOT NULL) then
+			   WHEN (ServiceReceived = '0' AND (ReasonNoService IS NOT NULL AND ReasonNoService <> '')) then
 				   1
 				   else
 					   0
@@ -74,14 +94,14 @@ DECLARE @countServiceNotReceived INT
 	--order by ServiceReferralType
 	)
 
-
-SELECT * INTO #MyTempTable FROM cteTotals
-
+--SELECT ServiceReferralCategory, Total, ServicesStarted, ServicesPending, ServiceNotReceived  INTO #MyTempTable FROM cteTotals
+--SELECT ServiceReferralCategory, Total, ServicesStarted, ServicesPending, ServiceNotReceived  INTO #MyTempTable FROM cteTotals
+INSERT INTO @tblResults SELECT ServiceReferralCategory, Total, ServicesStarted, ServicesPending, ServiceNotReceived FROM cteTotals
 --calculate the totals that will we use to caclualte percentages
-Set @countMainTotal = (SELECT sum(Total) FROM #MyTempTable)
-Set @countServicesStarted = (SELECT sum(ServicesStarted) FROM #MyTempTable)
-Set @countServicesPending = (SELECT sum(ServicesPending) FROM #MyTempTable)
-Set @countServiceNotReceived = (SELECT sum(ServiceNotReceived) FROM #MyTempTable)
+Set @countMainTotal = (SELECT sum(convert(INT,Total)) FROM @tblResults)
+Set @countServicesStarted = (SELECT sum(convert(INT,ServicesStarted)) FROM @tblResults)
+Set @countServicesPending = (SELECT sum(convert(INT,ServicesPending)) FROM @tblResults)
+Set @countServiceNotReceived = (SELECT sum(convert(INT,ServiceNotReceived)) FROM @tblResults)
 
 --SELECT @countMainTotal,@countServicesStarted, @countServicesPending , @countServiceNotReceived
 
@@ -108,7 +128,7 @@ Set @countServiceNotReceived = (SELECT sum(ServiceNotReceived) FROM #MyTempTable
 		 , CONVERT(VARCHAR,ServicesPending) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(ServicesPending AS FLOAT) * 100/ NULLIF(@countMainTotal,0), 0), 0))  + '%)' AS TotalServicesPending
 		 , CONVERT(VARCHAR,ServiceNotReceived) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(ServiceNotReceived AS FLOAT) * 100/ NULLIF(@countMainTotal,0), 0), 0))  + '%)' AS TotalServiceNotReceived
 
-	  FROM #MyTempTable
+	  FROM @tblResults
 
 UNION 
 
@@ -118,6 +138,9 @@ SELECT
 		 , CONVERT(VARCHAR,@countServicesStarted) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@countServicesStarted AS FLOAT) * 100/ NULLIF(@countMainTotal,0), 0), 0))  + '%)' AS TotalServicesStarted
 		 , CONVERT(VARCHAR,@countServicesPending) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@countServicesPending AS FLOAT) * 100/ NULLIF(@countMainTotal,0), 0), 0))  + '%)' AS TotalServicesPending
 		 , CONVERT(VARCHAR,@countServiceNotReceived) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@countServiceNotReceived AS FLOAT) * 100/ NULLIF(@countMainTotal,0), 0), 0))  + '%)' AS TotalServiceNotReceived
+
+
+
 
 end
 GO

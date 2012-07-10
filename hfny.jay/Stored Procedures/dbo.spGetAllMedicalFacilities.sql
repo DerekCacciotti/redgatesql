@@ -7,14 +7,15 @@ GO
 
 
 CREATE procedure [dbo].[spGetAllMedicalFacilities]
-@ProgramFK as int = NULL, @ActiveFilter as bit= NULL
+@ProgramFK as int = NULL, @ActiveFilter as bit= null
 
 as
 select *
-from dbo.listMedicalFacility
+from dbo.listMedicalFacility 
 where ProgramFK=isnull(@ProgramFK, ProgramFK) and 
-MFIsActive=isnull(@ActiveFilter,MFIsActive)
-AND  MFName != ''
+MFIsActive=case when @ActiveFilter is null then '1'
+		else @ActiveFilter
+		end
 order by mfname
 
 GO
