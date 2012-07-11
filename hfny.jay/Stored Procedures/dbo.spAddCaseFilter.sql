@@ -5,21 +5,27 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddCaseFilter](@CaseFilterNameFK int=NULL,
 @CaseFilterCreator varchar(10)=NULL,
-@FilterValue varchar(50)=NULL,
+@CaseFilterNameChoice bit=NULL,
+@CaseFilterNameOptionFK nchar(10)=NULL,
+@CaseFilterValue varchar(50)=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL)
 AS
 INSERT INTO CaseFilter(
 CaseFilterNameFK,
 CaseFilterCreator,
-FilterValue,
+CaseFilterNameChoice,
+CaseFilterNameOptionFK,
+CaseFilterValue,
 HVCaseFK,
 ProgramFK
 )
 VALUES(
 @CaseFilterNameFK,
 @CaseFilterCreator,
-@FilterValue,
+@CaseFilterNameChoice,
+@CaseFilterNameOptionFK,
+@CaseFilterValue,
 @HVCaseFK,
 @ProgramFK
 )
