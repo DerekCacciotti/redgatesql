@@ -18,6 +18,20 @@ CREATE procedure [dbo].[rspQSRReasonsServiceNotReceived](@programfk    varchar(m
 
 as
 BEGIN
+
+	-- Insert statements for procedure here
+	if @ProgramFK is null
+	begin
+		select @ProgramFK =
+			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+							  from HVProgram
+							  for xml path ('')),2,8000)
+	end
+
+	set @ProgramFK = REPLACE(@ProgramFK,'"','')
+
+
+
 DECLARE @countServiceNotReceived INT
 
 declare @tblResults table (
@@ -36,12 +50,11 @@ declare @tblResults table (
 				INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
 				INNER JOIN ServiceReferral sr ON sr.HVCaseFK = h.HVCasePK 
 				INNER JOIN codeServiceReferral sr1 ON sr1.codeServiceReferralPK = sr.ServiceCode
+				inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 				WHERE 				
 				sr.ReferralDate BETWEEN @sdate AND @edate
 				AND
 				NatureOfReferral = @NatureOfReferral -- @NatureOfReferral = 1arranged referrals
-				AND 
-				cp.ProgramFK = @programfk
 				AND 				
 				wp.SiteFK = isnull(@sitefk,wp.SiteFK)
 				AND

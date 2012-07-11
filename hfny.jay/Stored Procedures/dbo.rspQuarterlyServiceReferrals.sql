@@ -20,6 +20,19 @@ CREATE procedure [dbo].[rspQuarterlyServiceReferrals](@programfk    varchar(max)
 as
 BEGIN
 
+	-- Insert statements for procedure here
+	if @ProgramFK is null
+	begin
+		select @ProgramFK =
+			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+							  from HVProgram
+							  for xml path ('')),2,8000)
+	end
+
+	set @ProgramFK = REPLACE(@ProgramFK,'"','')
+
+
+
 DECLARE @countMainTotal INT 
 DECLARE @countServicesStarted INT
 DECLARE @countServicesPending INT
@@ -44,9 +57,8 @@ declare @tblResults table (
 				INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
 				INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
 				INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
+				inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 				WHERE 
-				cp.ProgramFK = @programfk
-				AND 
 				wp.SiteFK = isnull(@sitefk,wp.SiteFK)				
 				
 			)
