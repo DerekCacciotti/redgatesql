@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -47,7 +48,7 @@ SELECT  count(*) [PreInTakeCases]
 , sum(CASE WHEN PIFSWFK IS NOT NULL THEN 1 ELSE 0 END) [AssignedFSW]
 , sum(CASE WHEN CaseStatus = '02' THEN 1 ELSE 0 END) [Enrolled]
 , sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [Terminated]
-, sum(CASE WHEN CaseStatus = '01' THEN 1 ELSE 0 END) [Continue]
+, sum(CASE WHEN CaseStatus = '01' THEN 1 ELSE 0 END) [Continued]
 ,(SELECT count(*) FROM At_End_Of_Month) [At_End_of_Month]
 , sum(ISNULL(PIParentLetter, 0))  [Letters]
 , sum(ISNULL(PICall2Parent, 0)) [Call2Parent]
