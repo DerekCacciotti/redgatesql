@@ -18,16 +18,16 @@ begin
 
 	-- Insert statements for procedure here
 	select listCaseFilterNamePK
-		  ,FieldTitle
+		  ,rtrim(FieldTitle) as FieldTitle
 		  ,FilterType
 		  ,case
 			   when FilterType = 1 then 'Yes/No option'
 			   when FilterType = 2 then 'Defined options'
 			   when FilterType = 3 then 'Free form'
 		   end as FilterTypeText
-		  ,Hint
+		  ,rtrim(Hint) as Hint
 		  ,ProgramFK
-		  ,OptionsList = SUBSTRING ((SELECT ',' + FilterOption from listCaseFilterNameOption cfno WHERE cfno.CaseFilterNameFK = cfn.listCaseFilterNamePK FOR XML PATH ( '' )), 2, 1000)
+		  ,OptionsList = SUBSTRING ((SELECT ',' + rtrim(FilterOption) from listCaseFilterNameOption cfno WHERE cfno.CaseFilterNameFK = cfn.listCaseFilterNamePK FOR XML PATH ( '' )), 2, 1000)
 		from listCaseFilterName cfn
 		--inner join (select substring((select ','+LTRIM(RTRIM(STR(FilterOption))) as OptionList, CaseFilterNameFK
 		--					  from listCaseFilterNameOption cfno
