@@ -7,7 +7,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <June 28, 2012>
 -- Description:	<gets you data for quarterly service referrals>
--- exec [rspQuarterlyServiceReferrals3] 1,'01/01/2011','12/31/2012','01'
+-- exec [rspQuarterlyServiceReferrals] 6,'01/01/2011','12/31/2012','01'
 -- =============================================
 CREATE procedure [dbo].[rspQuarterlyServiceReferrals](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
@@ -52,14 +52,12 @@ declare @tblResults table (
 			as (
 				
 				SELECT 
-				h.HVCasePK,wp.SiteFK 
+				h.HVCasePK,CASE WHEN wp.SiteFK IS NULL THEN 0 ELSE wp.SiteFK END AS SiteFK
 				FROM HVCase h 
 				INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
 				INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
 				INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
-				inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
-				WHERE 
-				wp.SiteFK = isnull(@sitefk,wp.SiteFK)				
+				inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem	
 				
 			)
 			,
@@ -75,6 +73,7 @@ declare @tblResults table (
 				sr.ReferralDate BETWEEN @sdate AND @edate
 				AND
 				NatureOfReferral = @NatureOfReferral -- @NatureOfReferral = 1arranged referrals
+				AND SiteFK = isnull(@sitefk,SiteFK)	
 	)
 	,
 	cteTotals
