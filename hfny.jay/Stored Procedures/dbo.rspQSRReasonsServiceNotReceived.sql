@@ -43,7 +43,7 @@ declare @tblResults table (
 ;
 	with cteMain 
 			as (	
-				SELECT sr.ReasonNoService,sr.ServiceReferralPK
+				SELECT sr.ReasonNoService,sr.ServiceReferralPK,CASE WHEN wp.SiteFK IS NULL THEN 0 ELSE wp.SiteFK END AS SiteFK
 				FROM HVCase h 
 				INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
 				INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
@@ -55,8 +55,6 @@ declare @tblResults table (
 				sr.ReferralDate BETWEEN @sdate AND @edate
 				AND
 				NatureOfReferral = @NatureOfReferral -- @NatureOfReferral = 1arranged referrals
-				AND 				
-				wp.SiteFK = isnull(@sitefk,wp.SiteFK)
 				AND
 				ServiceReceived = 0 
 				AND 
@@ -71,8 +69,10 @@ declare @tblResults table (
 	
 				SELECT 	AppCodeText,ServiceReferralPK FROM codeApp a 
 				LEFT JOIN cteMain st ON a.AppCode = st.ReasonNoService
-						WHERE AppCodeGroup = 'ReasonCode' and
-						AppCodeUsedWhere like '%SR%' 	
+						WHERE 
+						SiteFK = isnull(@sitefk,SiteFK)
+						AND AppCodeGroup = 'ReasonCode'
+						AND AppCodeUsedWhere like '%SR%' 	
 
 	)
 		
