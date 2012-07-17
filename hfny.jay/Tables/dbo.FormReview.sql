@@ -29,7 +29,3 @@ From [FormReview] INNER JOIN Inserted ON [FormReview].[FormReviewPK]= Inserted.[
 GO
 ALTER TABLE [dbo].[FormReview] ADD CONSTRAINT [PK__FormRevi__31992EDB76969D2E] PRIMARY KEY CLUSTERED  ([FormReviewPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[FormReview] WITH NOCHECK ADD CONSTRAINT [FK_FormReview_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
-GO
-ALTER TABLE [dbo].[FormReview] WITH NOCHECK ADD CONSTRAINT [FK_FormReview_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
