@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,7 +7,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Jyly 16th, 2012>
 -- Description:	<gets you data for Enrolled Program Caseload Quarterly and Contract Period>
--- exec [rspEnrolledProgramCaseload] 6,'07/01/2011','12/31/2011'
+-- exec [rspEnrolledProgramCaseload] 1,'06/01/2010','08/31/2010'
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
@@ -18,6 +19,14 @@ CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)  
 as
 BEGIN
 
+	-- if user picks up custom dates ( not specific quarter dates) then Don't show ContractPeriod Column
+	DECLARE @bDontShowContractPeriod BIT
+	-- we will be receiving the value of @bDontShowContractPeriod from UI. 
+	-- so time being, let us do the following
+	SET @bDontShowContractPeriod = 0
+	
+
+
     declare @ContractStartDate DATE
     declare @ContractEndDate DATE
     
@@ -27,7 +36,7 @@ BEGIN
 		set @ContractEndDate = (select ContractEndDate FROM HVProgram P where HVProgramPK=@ProgramFK)
 	END 
 
---SELECT @ContractStartDate
+
 
 -- Let us declare few table variables so that we can manipulate the rows at our will
 -- Note: Table variables are a superior alternative to using temporary tables 
@@ -39,6 +48,7 @@ DECLARE @tblInitRequiredData TABLE(
 	[HVCasePK] [int],
 	[IntakeDate] [datetime],
 	[TCDOB] [datetime],
+	[TCDOD] [datetime],
 	[TCNumber] [int],
 	[DischargeDate] [datetime],
 	[DischargeReason] [char](2),
@@ -51,6 +61,7 @@ DECLARE @tblInitRequiredDataTemp TABLE(
 	[HVCasePK] [int],
 	[IntakeDate] [datetime],
 	[TCDOB] [datetime],
+	[TCDOD] [datetime],	
 	[TCNumber] [int],
 	[DischargeDate] [datetime],
 	[DischargeReason] [char](2),
@@ -63,6 +74,7 @@ INSERT INTO @tblInitRequiredDataTemp(
 	[HVCasePK],
 	[IntakeDate],
 	[TCDOB],
+	[TCDOD],
 	[TCNumber],
 	[DischargeDate],
 	[DischargeReason],
@@ -77,7 +89,7 @@ case
    else
 	   h.edc
 end as tcdob
-
+,h.TCDOD 
 ,h.TCNumber,cp.DischargeDate, cp.DischargeReason,CASE WHEN wp.SiteFK IS NULL THEN 0 ELSE wp.SiteFK END AS SiteFK
 FROM HVCase h 
 INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
@@ -92,6 +104,7 @@ INSERT INTO @tblInitRequiredData(
 	[HVCasePK],
 	[IntakeDate],
 	[TCDOB],
+	[TCDOD],
 	[TCNumber],
 	[DischargeDate],
 	[DischargeReason],
@@ -99,67 +112,75 @@ INSERT INTO @tblInitRequiredData(
 SELECT * FROM @tblInitRequiredDataTemp
 WHERE SiteFK = isnull(@sitefk,SiteFK)
 
-
---SELECT * FROM @tblInitRequiredData
 ---------------------------------------------
 
 ---------------------------------------------
 --- **************************************** ---
 -- Part 1: Families Enrolled at the beginning of the period	(QUARTERLY STATS)
--- declare a table variable for First row i.e. FamiliesEnrolled
-declare @tblFamiliesEnrolledQuarterly table (
- NumberOfFamiliesEnrolledQuarterly [int],
- TCNumberQuarterly [int]
-) 
-
--- Fill this table i.e. @tblFamiliesEnrolled as below
-INSERT INTO @tblFamiliesEnrolledQuarterly(
-	[NumberOfFamiliesEnrolledQuarterly],
-	[TCNumberQuarterly]
-
-)
-SELECT count(HVCasePK) AS NumOfFamiliesEnrolled,sum(TCNumber)AS TotalTCNumber FROM @tblInitRequiredData
-WHERE IntakeDate IS NOT NULL 
-AND IntakeDate < @sdate
-AND (DischargeDate IS NULL OR DischargeDate >= @sdate)			
-
---SELECT * FROM @tblFamiliesEnrolled
-
 
 DECLARE @TotalNumberOfFamiliesEnrolledQuarterly INT 
 DECLARE @TotalTCNumberQuarterly INT
-		
-SET @TotalNumberOfFamiliesEnrolledQuarterly = (SELECT NumberOfFamiliesEnrolledQuarterly FROM @tblFamiliesEnrolledQuarterly) -- value for 1
-SET @TotalTCNumberQuarterly = (SELECT TCNumberQuarterly FROM @tblFamiliesEnrolledQuarterly) -- value for 1.a	
+
+-- exclude any twin that dies before period, and babies that should have been born 
+SET @TotalTCNumberQuarterly = (
+SELECT sum(
+CASE WHEN (irq.TCDOB IS NOT NULL AND (irq.TCDOD >=  @edate OR irq.TCDOD IS NULL)) THEN 1
+ ELSE 
+	CASE WHEN (irq.TCDOB <=  @sdate) THEN 1 ELSE 0 END
+ END
+) AS TotalTCNumber
+FROM @tblInitRequiredData irq
+LEFT JOIN TCID T ON irq.HVCasePK = T.HVCaseFK 
+WHERE IntakeDate IS NOT NULL 
+AND IntakeDate < @sdate
+AND (DischargeDate IS NULL OR DischargeDate >= @sdate)			
+)
+
+
+
+SET @TotalNumberOfFamiliesEnrolledQuarterly = (
+SELECT count(DISTINCT HVCasePK)
+ FROM @tblInitRequiredData irq
+LEFT JOIN TCID T ON irq.HVCasePK = T.HVCaseFK 
+WHERE IntakeDate IS NOT NULL 
+AND IntakeDate < @sdate
+AND (DischargeDate IS NULL OR DischargeDate >= @sdate)
+)
 
 
 --- **************************************** ---
--- Part 1: Families Enrolled at the beginning of the period (CONTRACT PERIOD STATS)	
+-- Part 1a: Families Enrolled at the beginning of the period (CONTRACT PERIOD STATS)	
 -- NOTE: For contract period, our sdate is @ContractStartDate
-
--- declare a table variable for First row i.e. FamiliesEnrolled
-declare @tblFamiliesEnrolledContractPeriod table (
- NumberOfFamiliesEnrolledContractPeriod [int],
- TCNumberContractPeriod [int]
-) 
-
--- Fill this table i.e. @tblFamiliesEnrolled as below
-INSERT INTO @tblFamiliesEnrolledContractPeriod(
-	[NumberOfFamiliesEnrolledContractPeriod],
-	[TCNumberContractPeriod]
-
-)
-SELECT count(HVCasePK) AS NumOfFamiliesEnrolled,sum(TCNumber)AS TotalTCNumber FROM @tblInitRequiredData
-WHERE IntakeDate IS NOT NULL 
-AND IntakeDate < @ContractStartDate
-AND (DischargeDate IS NULL OR DischargeDate >= @ContractStartDate)	
 
 DECLARE @NumberOfFamiliesEnrolled4ContractPeriod INT 
 DECLARE @TCNumber4ContractPeriod INT 
 
-SET @NumberOfFamiliesEnrolled4ContractPeriod = (SELECT NumberOfFamiliesEnrolledContractPeriod FROM @tblFamiliesEnrolledContractPeriod) -- value for 1
-SET @TCNumber4ContractPeriod = (SELECT TCNumberContractPeriod FROM @tblFamiliesEnrolledContractPeriod) -- value for 1.a	
-	
+
+-- exclude any twin that dies before period, and babies that should have been born 
+SET @TCNumber4ContractPeriod = (
+SELECT sum(
+CASE WHEN (irq.TCDOB IS NOT NULL AND (irq.TCDOD >=  @edate OR irq.TCDOD IS NULL)) THEN 1
+ ELSE 
+	CASE WHEN (irq.TCDOB <=  @sdate) THEN 1 ELSE 0 END
+ END
+) AS TotalTCNumber
+FROM @tblInitRequiredData irq
+LEFT JOIN TCID T ON irq.HVCasePK = T.HVCaseFK 
+WHERE IntakeDate IS NOT NULL 
+AND IntakeDate < @ContractStartDate
+AND (DischargeDate IS NULL OR DischargeDate >= @ContractStartDate)			
+)
+
+
+
+SET @NumberOfFamiliesEnrolled4ContractPeriod = (
+SELECT count(DISTINCT HVCasePK)
+ FROM @tblInitRequiredData irq
+LEFT JOIN TCID T ON irq.HVCasePK = T.HVCaseFK 
+WHERE IntakeDate IS NOT NULL 
+AND IntakeDate < @ContractStartDate
+AND (DischargeDate IS NULL OR DischargeDate >= @ContractStartDate)	
+)
 	
 
 ---------------------------------------------
@@ -222,7 +243,7 @@ Set @TotalPrenatalFamiliesQuarterlyPCT = CONVERT(VARCHAR,@TotalPrenatalFamiliesQ
 Set @TotalPostnatalFamiliesQuarterlyPCT = CONVERT(VARCHAR,@TotalPostnatalFamiliesQuarterly) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@TotalPostnatalFamiliesQuarterly AS FLOAT) * 100/ NULLIF(@TotalNumOfFamiliesEnrolledThisPeriodQuarterly,0), 0), 0))  + '%)'
 
 
--- Part 2: New families Prenatal v/s Postnatal at intake
+-- Part 2a: New families Prenatal v/s Postnatal at intake
 -- ContractPeriod figures
 DECLARE @TotalNumOfFamiliesEnrolledThisPeriodContractPeriod INT 
 DECLARE @TotalPrenatalFamiliesContractPeriod INT 
@@ -593,7 +614,28 @@ INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[
 
 
 
-SELECT * FROM @tblEnrolledProgramCaseload
+IF @bDontShowContractPeriod = 1
+	BEGIN
+		-- for custom dates, don't show column i.e. CaseLoadContractPeriodData
 
-end
+		DECLARE @tblEnrolledProgramCaseloadTemp TABLE(
+			[CaseLoadText] VARCHAR(500),
+			[CaseLoadQuarterlyData] VARCHAR(50)
+		)
+
+		INSERT INTO @tblEnrolledProgramCaseloadTemp
+		SELECT [CaseLoadText],[CaseLoadQuarterlyData] FROM @tblEnrolledProgramCaseload
+
+		SELECT * FROM @tblEnrolledProgramCaseloadTemp
+
+	END
+	ELSE
+	BEGIN
+
+		SELECT * FROM @tblEnrolledProgramCaseload
+
+	END
+	
+	
+END
 GO
