@@ -7,23 +7,23 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Jyly 16th, 2012>
 -- Description:	<gets you data for Enrolled Program Caseload Quarterly and Contract Period>
--- exec [rspEnrolledProgramCaseload] 1,'06/01/2010','08/31/2010'
+-- exec [rspEnrolledProgramCaseload] 1,'06/01/2010','08/31/2010',null,1
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
                                                         @edate        datetime,                                                        
-                                                        @sitefk int             = NULL
-                                                                                                                  
+                                                        @sitefk int             = NULL,
+                                                         @CustomQuarterlyDates bit                                                         
                                                         )
 
 as
 BEGIN
 
 	-- if user picks up custom dates ( not specific quarter dates) then Don't show ContractPeriod Column
-	DECLARE @bDontShowContractPeriod BIT
+	--DECLARE @bDontShowContractPeriod BIT
 	-- we will be receiving the value of @bDontShowContractPeriod from UI. 
 	-- so time being, let us do the following
-	SET @bDontShowContractPeriod = 0
+	--SET @bDontShowContractPeriod = 0
 	
 
 
@@ -614,28 +614,32 @@ INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[
 
 
 
-IF @bDontShowContractPeriod = 1
+IF @CustomQuarterlyDates = 1
 	BEGIN
 		-- for custom dates, don't show column i.e. CaseLoadContractPeriodData
 
-		DECLARE @tblEnrolledProgramCaseloadTemp TABLE(
-			[CaseLoadText] VARCHAR(500),
-			[CaseLoadQuarterlyData] VARCHAR(50)
-		)
+		--NOTE: Don't drop the column, as XtraReport is expecting two columns to come to UI
+		
+		--DECLARE @tblEnrolledProgramCaseloadTemp TABLE(
+		--	[CaseLoadText] VARCHAR(500),
+		--	[CaseLoadQuarterlyData] VARCHAR(50)
+		--)
 
-		INSERT INTO @tblEnrolledProgramCaseloadTemp
-		SELECT [CaseLoadText],[CaseLoadQuarterlyData] FROM @tblEnrolledProgramCaseload
+		--INSERT INTO @tblEnrolledProgramCaseloadTemp
+		--SELECT [CaseLoadText],[CaseLoadQuarterlyData] FROM @tblEnrolledProgramCaseload
 
-		SELECT * FROM @tblEnrolledProgramCaseloadTemp
+		--SELECT * FROM @tblEnrolledProgramCaseloadTemp
+		
+		-- so simply blank out the data
+		UPDATE @tblEnrolledProgramCaseload
+		SET CaseLoadContractPeriodData = ''
+		
 
 	END
-	ELSE
-	BEGIN
 
-		SELECT * FROM @tblEnrolledProgramCaseload
-
-	END
 	
+	
+	SELECT * FROM @tblEnrolledProgramCaseload
 	
 END
 GO
