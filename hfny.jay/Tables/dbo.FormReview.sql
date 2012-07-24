@@ -8,7 +8,7 @@ CREATE TABLE [dbo].[FormReview]
 [FormReviewEditDate] [datetime] NULL,
 [FormReviewEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [FormType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[HVCaseFK] [int] NOT NULL,
+[HVCaseFK] [int] NULL,
 [ProgramFK] [int] NOT NULL,
 [ReviewDateTime] [datetime] NULL,
 [ReviewedBy] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL

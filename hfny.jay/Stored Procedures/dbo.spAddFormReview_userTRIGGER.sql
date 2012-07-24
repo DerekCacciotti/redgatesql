@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -64,8 +65,8 @@ Declare @TableName varchar(20), @FormDateName varchar(20),
 SET NOCOUNT ON; 
 
 --run the query
-EXEC  sp_Executesql @SelectStatement, N'@HVCaseFK int OUTPUT, @ProgramFK int OUTPUT, @lFormDate datetime OUTPUT, @Creator varchar(40)OUTPUT, @PK int OUTPUT' ,
-				@HVCaseFK=@HVCaseFKValue OUTPUT, @ProgramFK=@PrgFKValue OUTPUT,@lFormDate = @DateValue output,@Creator = @CreatorValue OUTPUT, @PK=@FormFK OUTPUT ;
+EXEC  sp_Executesql @SelectStatement, N'@ProgramFK int OUTPUT, @lFormDate datetime OUTPUT, @Creator varchar(40)OUTPUT, @PK int OUTPUT' ,
+				@ProgramFK=@PrgFKValue OUTPUT,@lFormDate = @DateValue output,@Creator = @CreatorValue OUTPUT, @PK=@FormFK OUTPUT ;
  
 --run the stored procedure to insert the values obtained in the last query into the FormReview Table
 -- don't use stored procedure because it returns identity value on PK and interferes with the main table's PK
