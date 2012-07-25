@@ -9,9 +9,10 @@ CREATE TABLE [dbo].[Trainer]
 [TrainerFirstName] [char] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TrainerLastName] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TrainerOrganization] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TrainerPK_old] [int] NOT NULL,
-[TrainingMethodName] [char] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[TrainingMethodType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+[TrainerPK_old] [int] NULL,
+[TrainerDescription] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TrainingMethodName] [char] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TrainingMethodType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

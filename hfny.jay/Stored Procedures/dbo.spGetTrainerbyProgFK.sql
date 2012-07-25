@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -28,9 +29,8 @@ BEGIN
       ,[TrainerLastName]
       ,[TrainerOrganization]
       ,[TrainerPK_old]
-      ,[TrainingMethodName]
-      ,[TrainingMethodType]
     FROM	Trainer t WHERE ProgramFK=@ProgFK
+    ORDER BY TrainerFirstName
     
 END
 GO
