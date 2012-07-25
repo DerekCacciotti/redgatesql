@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[TrainingDetail]
 [TrainingDetailCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [TrainingDetailEditDate] [datetime] NULL,
 [TrainingDetailEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TrainingDetailPK_old] [int] NOT NULL,
+[TrainingDetailPK_old] [int] NULL,
 [TrainingFK] [int] NOT NULL
 ) ON [PRIMARY]
 GO
