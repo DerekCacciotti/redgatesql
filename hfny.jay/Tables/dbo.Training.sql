@@ -4,19 +4,94 @@ CREATE TABLE [dbo].[Training]
 [ProgramFK] [int] NULL,
 [TrainerFK] [int] NULL,
 [TrainingMethodFK] [int] NULL,
-[TrainingCreateDate] [datetime] NOT NULL CONSTRAINT [DF_Training_TrainingCreateDate] DEFAULT (getdate()),
-[TrainingCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[TrainingDate] [datetime] NOT NULL,
-[TrainingDays] [int] NOT NULL,
+[TrainingCreateDate] [datetime] NULL CONSTRAINT [DF_Training_TrainingCreateDate] DEFAULT (getdate()),
+[TrainingCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TrainingDate] [datetime] NULL,
+[TrainingDays] [int] NULL,
 [TrainingDescription] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TrainingDuration] [int] NOT NULL,
+[TrainingDuration] [int] NULL,
 [TrainingEditDate] [datetime] NULL,
 [TrainingEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TrainingHours] [int] NOT NULL,
-[TrainingMinutes] [int] NOT NULL,
-[TrainingPK_old] [int] NOT NULL,
-[TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+[TrainingHours] [int] NULL,
+[TrainingMinutes] [int] NULL,
+[TrainingPK_old] [int] NULL,
+[TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE TRIGGER [dbo].[fr_delete_training]
+on dbo.Training
+After DELETE
+
+AS
+
+Declare @PK int
+
+set @PK = (SELECT TrainingPK from deleted)
+
+BEGIN
+	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='TR'
+END
+GO
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE TRIGGER [dbo].[fr_Training]
+on [dbo].[Training]
+After insert
+
+AS
+
+Declare @PK int
+
+set @PK = (SELECT TrainingPK from inserted)
+
+BEGIN
+	EXEC spAddFormReview_userTriggernoHVCaseFK @FormFK=@PK, @FormTypeValue='TR'
+END
+GO
+
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE TRIGGER [dbo].[fr_Training_Edit]
+on [dbo].[Training]
+AFTER UPDATE
+
+AS
+
+Declare @PK int
+Declare @UpdatedFormDate datetime 
+Declare @FormTypeValue varchar(2)
+
+select @PK = TrainingPK FROM inserted
+select @UpdatedFormDate = TrainingDate FROM inserted
+set @FormTypeValue = 'TR'
+
+BEGIN
+	UPDATE FormReview
+	SET 
+	FormDate=@UpdatedFormDate
+	WHERE FormFK=@PK 
+	AND FormType=@FormTypeValue
+
+END
+
+GO
+
 ALTER TABLE [dbo].[Training] ADD
 CONSTRAINT [FK_Training_TrainingMethodFK] FOREIGN KEY ([TrainingMethodFK]) REFERENCES [dbo].[TrainingMethod] ([TrainingMethodPK])
 GO
