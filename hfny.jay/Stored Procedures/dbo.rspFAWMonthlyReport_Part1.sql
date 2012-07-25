@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -18,34 +19,48 @@ AS
 --DECLARE @EndDt DATE = '01/31/2011'
 --DECLARE @programfk INT = 17
 
+;WITH section2 AS (
+SELECT count(*) [PreAssessmentCaseLoad]
+FROM HVScreen AS a 
+JOIN CaseProgram AS b ON a.HVCaseFK = b.HVCaseFK
+JOIN HVCase AS c ON c.HVCasePK = a.HVCaseFK
+WHERE b.ProgramFK = @programfk 
+AND a.ScreenDate < @StartDt AND a.ScreenResult = '1' AND a.ReferralMade = '1' 
+AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
+AND (c.KempeDate IS NULL OR c.KempeDate >= @StartDt)
+)
+
+, section1 AS (
 SELECT count(*) [TotalScreen]
 , sum(CASE WHEN a.ScreenResult = '1' THEN 1 ELSE 0 END) [ScreenPositive]
 , sum(CASE WHEN a.ScreenResult <> '1' THEN 1 ELSE 0 END) [ScreenNegative]
 , sum(CASE WHEN a.ScreenResult = '1' AND a.ReferralMade = '1' THEN 1 ELSE 0 END) [PositiveReferred]
 , sum(CASE WHEN a.ScreenResult = '1' AND a.ReferralMade <> '1' THEN 1 ELSE 0 END) [PositiveNotReferred]
-
-, (SELECT count(*) FROM HVScreen WHERE ProgramFK = @programfk 
-AND ScreenDate < @StartDt AND ScreenResult = '1' AND ReferralMade = '1' AND
-HVCaseFK NOT IN (SELECT DISTINCT HVCaseFK FROM Preassessment 
-WHERE ProgramFK = @programfk 
-AND PADate <= @EndDt 
-AND CaseStatus IN ('02', '03')
-)) [PreAssessmentCaseLoad]
-
-, (SELECT count(*) FROM Preassessment WHERE ProgramFK = @programfk AND CaseStatus = '02' AND PADate BETWEEN @StartDt AND @EndDt) [PAAssessed]
-, (SELECT count(*) FROM Preassessment WHERE ProgramFK = @programfk AND CaseStatus = '03' AND PADate BETWEEN @StartDt AND @EndDt) [PATerminated]
-, (SELECT count(*) FROM Preassessment WHERE ProgramFK = @programfk AND CaseStatus = '01' AND PADate BETWEEN @StartDt AND @EndDt) [PAPending]
-, (SELECT count(*) FROM HVScreen WHERE ProgramFK = @programfk 
-AND (ScreenDate BETWEEN @StartDt AND @EndDt) AND ScreenResult = '1' AND ReferralMade = '1' AND
-HVCaseFK NOT IN (SELECT DISTINCT HVCaseFK FROM Preassessment 
-WHERE ProgramFK = @programfk 
-AND (PADate BETWEEN @StartDt AND @EndDt)
-)) [PositiveReferredNoAssessmentYet]
-
 FROM HVScreen  AS a
 WHERE ProgramFK = @programfk AND a.ScreenDate BETWEEN @StartDt AND @EndDt
+)
 
+, section3 AS (
+SELECT 
+  sum(Case when CaseStatus = '02' THEN 1 ELSE 0 END) [PAAssessed]
+, sum(Case when CaseStatus = '04' THEN 1 ELSE 0 END) [PAAssessedNotAssigned]
+, sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [PATerminated]
+, sum(CASE WHEN CaseStatus = '01' THEN 1 ELSE 0 END) [PAContinue]
+, sum(CASE WHEN p.CaseStatus IS NULL OR p.CaseStatus NOT IN ('01', '02', '03', '04') THEN 1 ELSE 0 END) [PANone]
+FROM HVScreen AS a 
+JOIN CaseProgram AS b ON a.HVCaseFK = b.HVCaseFK
+JOIN HVCase AS c ON c.HVCasePK = a.HVCaseFK
+LEFT OUTER JOIN Preassessment AS p ON p.HVCaseFK = a.HVCaseFK AND p.PADate BETWEEN @StartDt AND @EndDt
+WHERE b.ProgramFK = @programfk 
+AND a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1' 
+AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
+AND (c.KempeDate IS NULL OR c.KempeDate >= @StartDt)
+)
 
+SELECT * 
+FROM section1 
+JOIN section2 ON 1 = 1
+JOIN section3 ON 1 = 1
 
 
 

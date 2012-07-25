@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -39,6 +40,7 @@ GROUP BY a.HVCasePK
 
 SELECT d.PC1ID
 , convert(VARCHAR(12), a.KempeDate, 101) KempDate
+, convert(VARCHAR(12), a.IntakeDate, 101) IntakeDate
 , e.LevelName
 , CASE WHEN (b.SubstanceAbuse = 1 OR b.AlcoholAbuse = 1)THEN 'Yes' ELSE '' END +
   CASE WHEN c.SubstanceAbuseServices > 0 AND (b.SubstanceAbuse = 1 OR b.AlcoholAbuse = 1) THEN ' *' ELSE '' END SubstanceAbuseServices
@@ -56,7 +58,7 @@ FROM HVCase AS a
 JOIN PC1Issues AS b ON a.HVCasePK = b.HVCaseFK
 JOIN CaseProgram AS d ON d.HVCaseFK = a.HVCasePK
 JOIN codeLevel AS e ON d.CurrentLevelFK = e.codeLevelPK
-LEFT OUTER JOIN inserviceReferral AS c ON c.HVCasePK = a.HVCasePK
+JOIN inserviceReferral AS c ON c.HVCasePK = a.HVCasePK
 
 inner join worker fsw on fsw.workerpk = d.currentfswfk
 inner join workerprogram on workerfk = fsw.workerpk
@@ -64,6 +66,7 @@ inner join worker supervisor on supervisorfk = supervisor.workerpk
 
 WHERE a.IntakeDate BETWEEN @StartDt AND @EndDt AND d.ProgramFK = @programfk
 AND (d.DischargeDate IS NULL OR d.DischargeDate <= @EndDt)
+AND (b.SubstanceAbuse = 1 OR b.AlcoholAbuse = 1 OR b.MentalIllness = 1 OR b.Depression = 1 OR b.DomesticViolence = 1)
 ORDER BY supervisor, d.PC1ID
 
 

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -14,9 +15,9 @@ CREATE PROCEDURE [dbo].[rspFAWMonthlyReport_Part2]
 	@EndDt datetime
 AS
 
---DECLARE @StartDt DATE = '01/01/2011'
---DECLARE @EndDt DATE = '01/31/2011'
---DECLARE @programfk INT = 17
+--DECLARE @StartDt DATE = '01/01/2012'
+--DECLARE @EndDt DATE = '01/31/2012'
+--DECLARE @programfk INT = 6
 
 SELECT rtrim(w.LastName) + ', ' + rtrim(w.FirstName) [workerName]
 , [FAWFK]
@@ -51,20 +52,24 @@ WHERE ProgramFK = @programfk AND (ScreenDate BETWEEN @StartDt AND @EndDt)
 AND ScreenResult = '1' AND ReferralMade = '1'
 GROUP BY FAWFK) AS a
 FULL OUTER JOIN
-(SELECT FAWFK, count(*) [CaseAtBeginning] 
-FROM HVScreen WHERE ProgramFK = @programfk 
-AND ScreenDate < @StartDt AND ScreenResult = '1' AND ReferralMade = '1' AND
-HVCaseFK NOT IN (SELECT DISTINCT HVCaseFK FROM Preassessment 
-WHERE ProgramFK = @programfk 
-AND PADate <= @EndDt 
-AND CaseStatus IN ('02', '03'))
-GROUP BY FAWFK) AS b
+
+(
+SELECT FAWFK, count(*) [CaseAtBeginning]
+FROM HVScreen AS a 
+JOIN CaseProgram AS b ON a.HVCaseFK = b.HVCaseFK
+JOIN HVCase AS c ON c.HVCasePK = a.HVCaseFK
+WHERE b.ProgramFK = @programfk 
+AND a.ScreenDate < @StartDt AND a.ScreenResult = '1' AND a.ReferralMade = '1' 
+AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
+AND (c.KempeDate IS NULL OR c.KempeDate >= @StartDt)
+GROUP BY a.FAWFK
+) AS b
 ON a.FAWFK = b.FAWFK) AS a1
 
 FULL OUTER JOIN
 (SELECT PAFAWFK [FAWFK]
 , sum(CASE WHEN CaseStatus = '02' THEN 1 ELSE 0 END) [PAAssessed]
-, sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [PATerminated]
+, sum(CASE WHEN CaseStatus in ('03', '04') THEN 1 ELSE 0 END) [PATerminated]
 , sum(CASE WHEN CaseStatus = '01' THEN 1 ELSE 0 END) [PAPending]
 FROM Preassessment WHERE ProgramFK = @programfk AND (PADate BETWEEN @StartDt AND @EndDt) 
 GROUP BY PAFAWFK) AS c

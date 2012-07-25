@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -16,6 +17,22 @@ CREATE PROCEDURE [dbo].[rspServiceReferralByCode]
 	@EndDt datetime
 AS
 
+
+--DECLARE @programfk INT = 6 
+--DECLARE @supervisorfk INT = NULL 
+--DECLARE @workerfk INT = NULL
+--DECLARE @StartDt DATETIME = '01/01/2012'
+--DECLARE @EndDt DATETIME = '03/31/2012'
+
+; WITH HVCaseInRange AS (
+SELECT b.HVCaseFK
+, CASE WHEN a.IntakeDate < @StartDt THEN @StartDt ELSE a.IntakeDate END [Start_Period]
+, CASE WHEN b.DischargeDate IS NULL OR b.DischargeDate > @EndDt THEN @EndDt ELSE b.DischargeDate END [End_Period]
+FROM HVCase AS a JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
+WHERE a.IntakeDate <= @EndDt AND a.IntakeDate IS NOT NULL AND
+(b.DischargeDate IS NULL OR b.DischargeDate > @EndDt)
+)
+
 SELECT 
 LTRIM(RTRIM(supervisor.firstname)) + ' ' + LTRIM(RTRIM(supervisor.lastname)) supervisor,
 LTRIM(RTRIM(fsw.firstname)) + ' ' + LTRIM(RTRIM(fsw.lastname)) worker,
@@ -31,12 +48,12 @@ ServiceReferralCategory =
 			WHEN 'OTH' THEN 'Other Services'
 			ELSE 'No Match'
 		END + ' (' + ltrim(rtrim(b.servicereferralcategory)) + ')',
-		
 b.ServiceReferralCode + '-' + ltrim(rtrim(b.ServiceReferralType)) [ServiceReferralCode],
 x.n
 FROM
 (SELECT a.FSWFK, a.ServiceCode, count(*) [n]
 FROM ServiceReferral a
+JOIN HVCaseInRange AS b ON b.HVCaseFK = a.HVCaseFK
 WHERE a.ProgramFK = @programfk 
 AND a.ReferralDate Between @StartDt AND @EndDt 
 AND a.ServiceReceived = 1
