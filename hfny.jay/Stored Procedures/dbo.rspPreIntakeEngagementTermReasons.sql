@@ -1,7 +1,10 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- Stored Procedure
+
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Jyly 16th, 2012>
@@ -25,12 +28,12 @@ BEGIN
 	-- we will be receiving the value of @bDontShowContractPeriod from UI. 
 	-- so time being, let us do the following
 	--SET @bDontShowContractPeriod = 0
-	
+
 
 
     declare @ContractStartDate DATE
     declare @ContractEndDate DATE
-    
+
     if ((@ProgramFK IS not NULL) AND (@CustomQuarterlyDates = 0))
     BEGIN 
 		set @ProgramFK = REPLACE(@ProgramFK,',','') -- remove comma's
@@ -117,7 +120,7 @@ INSERT INTO @tblTerminationReasonQuarterly
 			 PIDate BETWEEN @sDate AND @edate			
 			AND p.CaseStatus = '03'
 			GROUP BY p.DischargeReason
-			
+
 )
 
 -- exec [rspPreIntakeEngagementTermReasons] ',1,','09/01/2010','11/30/2010',null,0
@@ -165,7 +168,7 @@ INSERT INTO @tblTerminationReasonContractPeriod
 			 PIDate BETWEEN @ContractStartDate AND @edate			
 			AND p.CaseStatus = '03'
 			GROUP BY p.DischargeReason
-			
+
 )
 
 
@@ -205,6 +208,6 @@ INNER JOIN @tblTRContractPeriod cp ON cp.DischargeReason = Qtrly.DischargeReason
 
 
 
-	
+
 END
 GO

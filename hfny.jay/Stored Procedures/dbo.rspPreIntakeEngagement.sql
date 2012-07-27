@@ -1,7 +1,10 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- Stored Procedure
+
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <July 16th, 2012>
@@ -25,12 +28,12 @@ BEGIN
 	-- we will be receiving the value of @bDontShowContractPeriod from UI. 
 	-- so time being, let us do the following
 	--SET @bDontShowContractPeriod = 0
-	
+
 
 
     declare @ContractStartDate DATE
     declare @ContractEndDate DATE
-    
+
     if ((@ProgramFK IS not NULL) AND (@CustomQuarterlyDates = 0))
     BEGIN 
 		set @ProgramFK = REPLACE(@ProgramFK,',','') -- remove comma's
@@ -283,7 +286,7 @@ SET @nQ2g =
 				   else
 					   0
 			   end) as MomScoreOver40
-	
+
 	FROM @tblInitRequiredData irq
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
@@ -298,7 +301,7 @@ SET @nQ2h =
 				   else
 					   0
 			   end) as DadScoreOver40
-	
+
 	FROM @tblInitRequiredData irq
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
@@ -314,7 +317,7 @@ SET @nQ2i =
 				   else
 					   0
 			   end) as Prenatal
-	
+
 	FROM @tblInitRequiredData irq
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
@@ -330,7 +333,7 @@ SET @nQ2j =
 				   else
 					   0
 			   end) as Postnatal
-	
+
 	FROM @tblInitRequiredData irq
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
@@ -446,7 +449,7 @@ IF (@CustomQuarterlyDates = 0)
 						   else
 							   0
 					   end) as MomScoreOver40
-			
+
 			FROM @tblInitRequiredData irq
 			WHERE 
 			irq.KempeDate BETWEEN @ContractStartDate AND @edate
@@ -461,7 +464,7 @@ IF (@CustomQuarterlyDates = 0)
 						   else
 							   0
 					   end) as DadScoreOver40
-			
+
 			FROM @tblInitRequiredData irq
 			WHERE 
 			irq.KempeDate BETWEEN @ContractStartDate AND @edate
@@ -477,7 +480,7 @@ IF (@CustomQuarterlyDates = 0)
 						   else
 							   0
 					   end) as Prenatal
-			
+
 			FROM @tblInitRequiredData irq
 			WHERE 
 			irq.KempeDate BETWEEN @ContractStartDate AND @edate
@@ -493,7 +496,7 @@ IF (@CustomQuarterlyDates = 0)
 						   else
 							   0
 					   end) as Postnatal
-			
+
 			FROM @tblInitRequiredData irq
 			WHERE 
 			irq.KempeDate BETWEEN @ContractStartDate AND @edate
@@ -503,7 +506,7 @@ IF (@CustomQuarterlyDates = 0)
 
 			--SELECT @TotalNumberOfKempesContractPeriod,@nQ2CPa,@nQ2CPb,@nQ2CPc,@nQ2CPd,@nQ2CPe,@nQ2CPf,@nQ2CPg,@nQ2CPh,@nQ2CPi,@nQ2CPj		
 	END
-		
+
 
 -- #3 Previous Kempes ====Quarterly or By Dates
 	DECLARE @nQ3 INT 
@@ -561,7 +564,7 @@ INSERT INTO @tblEngage
 			AND p.CaseStatus = '01'
 			GROUP BY HVCaseFK
 )
-	
+
 SET @nQ5a =
 (	
 		SELECT count(HVCasePK) AS count1
@@ -612,7 +615,7 @@ SET @nQ5d =
 --			WHERE 
 --			 PIDate BETWEEN @sDate AND @edate
 --			 AND			 
-			 
+
 --			 (p.CaseStatus IS NULL 
 --			OR (month(PIDate) <> month('11/30/2010')
 --			AND p.CaseStatus = '01'))			 
@@ -649,7 +652,7 @@ IF (@CustomQuarterlyDates = 0)
 						AND p.CaseStatus = '01'
 						GROUP BY HVCaseFK
 			)
-				
+
 			SET @nQ5CPa =
 			(	
 					SELECT count(HVCasePK) AS count1
@@ -737,7 +740,7 @@ FROM @tblInitRequiredData irq
 	WHERE 
 	 PIDate BETWEEN @sDate AND @edate
 )
-	 
+
 -- #6 Activities for Period - Contract Period
 IF (@CustomQuarterlyDates = 0)
 	BEGIN 
@@ -817,20 +820,20 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		h. Score over 40 - Father', @nQ2h, @nQ2CPh)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		i. Prenatal', @nQ2i, @nQ2CPi)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		j. Postnatal', @nQ2j, @nQ2CPj)
-			
+
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q3
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Kempe Assessments from previous periods assigned this period', @nQ3, @nQCP3)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
-			
+
 			-- Q4
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('4. Pre-Intake Cases this period(1+2a+3)', 
 			@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ3 ,
 			@TotalNumberOfPreIntakeCasesContractPeriod + @nQ2CPa + @nQCP3
 			)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
-			
+
 			-- Q5
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('5. Outcomes for Pre-Intake Cases this period(1+2a+3)', '', '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		a. Engagement Efforts contiue', @nQ5a, @nQ5CPa)
@@ -852,9 +855,9 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		i. Gift provided to parent',(SELECT nQ6i FROM @tblnQ6Q), (SELECT nQ6CPi FROM @tblnQ6CP))
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		j. Case Conference/review',(SELECT nQ6j FROM @tblnQ6Q), (SELECT nQ6CPj FROM @tblnQ6CP))
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		k. Other',(SELECT nQ6k FROM @tblnQ6Q), (SELECT nQ6CPk FROM @tblnQ6CP))
-			
+
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
-	
+
 
 	END 
 	ELSE 
@@ -876,18 +879,18 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		h. Score over 40 - Father', @nQ2h, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		i. Prenatal', @nQ2i, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		j. Postnatal', @nQ2j, '')
-			
+
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q3
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Kempe Assessments from previous periods assigned this period', @nQ3, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
-			
+
 			-- Q4
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('4. Pre-Intake Cases this period(1+2a+3)', 
 			@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ3 , '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
-			
+
 			-- Q5
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('5. Outcomes for Pre-Intake Cases this period(1+2a+3)', '', '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		a. Engagement Efforts contiue', @nQ5a, '')
@@ -909,11 +912,11 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		i. Gift provided to parent',(SELECT nQ6i FROM @tblnQ6Q), '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		j. Case Conference/review',(SELECT nQ6j FROM @tblnQ6Q), '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('		k. Other',(SELECT nQ6k FROM @tblnQ6Q), '')
-			
+
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
-	
-	
+
+
 	END 
 
 	SELECT * FROM @tblMainResult
@@ -938,6 +941,6 @@ IF (@CustomQuarterlyDates = 0)
 
 
 	--SELECT * FROM @tblPreIntakeEngagement
-	
+
 END
 GO

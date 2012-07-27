@@ -1,7 +1,10 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- Stored Procedure
+
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Jyly 16th, 2012>
@@ -25,12 +28,12 @@ BEGIN
 	-- we will be receiving the value of @bDontShowContractPeriod from UI. 
 	-- so time being, let us do the following
 	--SET @bDontShowContractPeriod = 0
-	
+
 
 
     declare @ContractStartDate DATE
     declare @ContractEndDate DATE
-    
+
     if ((@ProgramFK IS not NULL) AND (@CustomQuarterlyDates = 0))
     BEGIN 
 		set @ProgramFK = REPLACE(@ProgramFK,',','') -- remove comma's
@@ -57,7 +60,7 @@ DECLARE @tblInitRequiredData TABLE(
 	[PC1ID] [char](13),
 	[OldID] [char](23),
 	[FSWWorkerName] [char](100)
-	  
+
 
 )
 
@@ -144,7 +147,7 @@ DECLARE @tblEngageAll TABLE(
 	[FSWWorkerName] [char](100),	
 	[CaseStatus] [char](2)
 
-	
+
 )
 
 INSERT INTO @tblEngageAll
@@ -176,7 +179,7 @@ INSERT INTO @tblEngageAll
 			irq.[OldID],
 			irq.[FSWWorkerName],
 			p.[CaseStatus]				
-		
+
 		FROM @tblInitRequiredData irq
 		INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK 
 		WHERE 
@@ -202,7 +205,7 @@ UNION ALL
 			irq.[OldID],
 			irq.[FSWWorkerName],	
 			p.[CaseStatus]						
-		
+
 		FROM @tblInitRequiredData irq	
 		INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 		LEFT JOIN Kempe k ON k.HVCaseFK = irq.HVCasePK		
@@ -227,13 +230,13 @@ UNION ALL
 			irq.[OldID],
 			irq.[FSWWorkerName],	
 			p.[CaseStatus]									
-		
+
 		FROM @tblInitRequiredData irq
 		INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 		WHERE 
 		(irq.KempeDate < @sDate AND irq.KempeDate IS NOT NULL)
 		AND	(p.FSWAssignDate IS NOT NULL AND p.FSWAssignDate >= @sDate)	
-		
+
 )
 
 DECLARE @tblLastPa TABLE(
@@ -258,7 +261,7 @@ SELECT * FROM @tblLastPa
 SELECT 
 	ea.[PC1ID],
 	ea.[FSWAssignDate],	
-	
+
 	CASE WHEN pre.[CaseStatus] IN ('02','03') THEN 
 	datediff(day,ea.[FSWAssignDate], lp.PIDate)
 	ELSE 
@@ -274,11 +277,11 @@ SELECT
 			WHEN '03' THEN 'Terminated'
 			ELSE ''
 		END	
-		
+
 	,pre.[CaseStatus],	
-	
-	
-	
+
+
+
 	ea.[HVCasePK],
 	ea.[OldID]	
 
@@ -291,6 +294,6 @@ SELECT
 -- exec [rspPreIntakeEngagementDetails] ',1,','09/01/2010','11/30/2010',null,0
 
 
-	
+
 END
 GO
