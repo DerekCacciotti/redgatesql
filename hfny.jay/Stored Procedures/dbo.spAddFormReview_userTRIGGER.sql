@@ -34,40 +34,40 @@ Declare @TableName varchar(20), @FormDateName varchar(20),
 			RETURN
 		END
 
-		--set up the query with the fieldnames from the previous query to get the values
-		IF @FormTypeValue = 'ID'
-			BEGIN
-			SET @SelectStatement= N'select @lFormDate=IntakeDate,
-										   @ProgramFK=ProgramFK,
-										   @HVCaseFK=HVCasePK,
-										   @Creator=HVCaseEditor
-									From
-									(select IntakeDate,
-											HVCasePK,
-											HVCaseEditor								
-										From HVCase
-										WHERE HVCasePK=@PK)a,
-										(select ProgramFK,CaseStartDate,DischargeDate,HVCaseFK from caseprogram) b 
-										where a.IntakeDate >=b.casestartdate and 
-										a.IntakeDate<=isnull(b.dischargedate,getdate())
-										 and a.hvcasepk=b.hvcasefk'
-			END
-		ELSE
-			BEGIN
-				SET @SelectStatement = N'Select @lFormDate = '+ @FormDateName+'
-										  ,@ProgramFK = ProgramFK,
-											@HVCaseFK = HVCaseFK,
-											@Creator  = '+ @CreatorName + ' 
-									 FROM ' + @Tablename +
-									' Where '+ @PKName +' = @PK'
-			END
+	--set up the query with the fieldnames from the previous query to get the values
+	IF @FormTypeValue = 'ID'
+		BEGIN
+		SET @SelectStatement= N'select @lFormDate=IntakeDate,
+									   @ProgramFK=ProgramFK,
+									   @HVCaseFK=HVCasePK,
+									   @Creator=HVCaseEditor
+								From
+								(select IntakeDate,
+										HVCasePK,
+										HVCaseEditor								
+									From HVCase
+									WHERE HVCasePK=@PK)a,
+									(select ProgramFK,CaseStartDate,DischargeDate,HVCaseFK from caseprogram) b 
+									where a.IntakeDate >=b.casestartdate and 
+									a.IntakeDate<=isnull(b.dischargedate,getdate())
+									 and a.hvcasepk=b.hvcasefk'
+		END
+	ELSE
+		BEGIN
+			SET @SelectStatement = N'Select @lFormDate = '+ @FormDateName+'
+									  ,@ProgramFK = ProgramFK,
+										@HVCaseFK = HVCaseFK,
+										@Creator  = '+ @CreatorName + ' 
+								 FROM ' + @Tablename +
+								' Where '+ @PKName +' = @PK'
+		END
 
 SET NOCOUNT ON; 
 
 --run the query
-EXEC  sp_Executesql @SelectStatement, N'@ProgramFK int OUTPUT, @lFormDate datetime OUTPUT, @Creator varchar(40)OUTPUT, @PK int OUTPUT' ,
-				@ProgramFK=@PrgFKValue OUTPUT,@lFormDate = @DateValue output,@Creator = @CreatorValue OUTPUT, @PK=@FormFK OUTPUT ;
- 
+EXEC  sp_Executesql @SelectStatement, N'@HVCaseFK int OUTPUT, @ProgramFK int OUTPUT, @lFormDate datetime OUTPUT, @Creator varchar(40)OUTPUT, @PK int OUTPUT' ,
+				@HVCaseFK=@HVCaseFKValue OUTPUT, @ProgramFK=@PrgFKValue OUTPUT,@lFormDate = @DateValue output,@Creator = @CreatorValue OUTPUT, @PK=@FormFK OUTPUT ;
+
 --run the stored procedure to insert the values obtained in the last query into the FormReview Table
 -- don't use stored procedure because it returns identity value on PK and interferes with the main table's PK
 --EXEC spAddFormReview @FormType = @FormTypeValue, @FormFK = @FormFK, @FormDate = @DateValue,
