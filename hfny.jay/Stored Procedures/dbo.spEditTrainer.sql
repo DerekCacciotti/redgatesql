@@ -10,7 +10,9 @@ CREATE PROCEDURE [dbo].[spEditTrainer](@TrainerPK int=NULL,
 @TrainerLastName char(30)=NULL,
 @TrainerOrganization char(30)=NULL,
 @TrainerPK_old int=NULL,
-@TrainerDescription varchar(50)=NULL)
+@TrainerDescription varchar(50)=NULL,
+@TrainingMethodName char(40)=NULL,
+@TrainingMethodType char(2)=NULL)
 AS
 UPDATE Trainer
 SET 
@@ -20,6 +22,8 @@ TrainerFirstName = @TrainerFirstName,
 TrainerLastName = @TrainerLastName, 
 TrainerOrganization = @TrainerOrganization, 
 TrainerPK_old = @TrainerPK_old, 
-TrainerDescription = @TrainerDescription
+TrainerDescription = @TrainerDescription, 
+TrainingMethodName = @TrainingMethodName, 
+TrainingMethodType = @TrainingMethodType
 WHERE TrainerPK = @TrainerPK
 GO

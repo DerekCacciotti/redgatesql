@@ -9,7 +9,9 @@ CREATE PROCEDURE [dbo].[spAddTrainer](@ProgramFK int=NULL,
 @TrainerLastName char(30)=NULL,
 @TrainerOrganization char(30)=NULL,
 @TrainerPK_old int=NULL,
-@TrainerDescription varchar(50)=NULL)
+@TrainerDescription varchar(50)=NULL,
+@TrainingMethodName char(40)=NULL,
+@TrainingMethodType char(2)=NULL)
 AS
 INSERT INTO Trainer(
 ProgramFK,
@@ -18,7 +20,9 @@ TrainerFirstName,
 TrainerLastName,
 TrainerOrganization,
 TrainerPK_old,
-TrainerDescription
+TrainerDescription,
+TrainingMethodName,
+TrainingMethodType
 )
 VALUES(
 @ProgramFK,
@@ -27,7 +31,9 @@ VALUES(
 @TrainerLastName,
 @TrainerOrganization,
 @TrainerPK_old,
-@TrainerDescription
+@TrainerDescription,
+@TrainingMethodName,
+@TrainingMethodType
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
