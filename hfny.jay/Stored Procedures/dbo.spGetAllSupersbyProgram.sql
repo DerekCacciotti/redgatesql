@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,20 +7,26 @@ GO
 -- Author:    <Chris Papas
 -- Create date: <02/09/2010>
 -- Description: <Get list of all Supervisors by Program>
+-- Modified: jrobohn 2012-07-24 - just calls the common spGetAllWorkersByProgram stored proc
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetAllSupersbyProgram] 
-  @ProgramFK int = NULL,
-  @Supervisor bit = false
-AS
-BEGIN
-  -- SET NOCOUNT ON added to prevent extra result sets from
-  -- interfering with SELECT statements.
-  SET NOCOUNT ON;
+CREATE procedure [dbo].[spGetAllSupersbyProgram]
+    @ProgramFK  int = null,
+    @Supervisor bit = false
+as
+begin
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	set nocount on;
 
-    -- Insert statements for procedure here
-  SELECT FirstName, LastName, WorkerPK 
-  From Worker 
-  LEFT JOIN WorkerProgram ON WorkerProgram.WorkerFK=Worker.WorkerPK
-  WHERE WorkerProgram.Supervisor='TRUE' AND WorkerProgram.ProgramFK=@ProgramFK
-END
+	exec spGetAllWorkersbyProgram @ProgramFK, null, 'Sup'
+
+	-- Insert statements for procedure here
+	--select FirstName
+	--	  ,LastName
+	--	  ,WorkerPK
+	--	from Worker
+	--		left join WorkerProgram on WorkerProgram.WorkerFK = Worker.WorkerPK
+	--	where WorkerProgram.Supervisor = 'TRUE'
+	--		 and WorkerProgram.ProgramFK = @ProgramFK
+end
 GO

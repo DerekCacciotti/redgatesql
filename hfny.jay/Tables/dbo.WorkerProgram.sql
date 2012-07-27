@@ -4,6 +4,8 @@ CREATE TABLE [dbo].[WorkerProgram]
 [CommunityOutreach] [bit] NULL,
 [DirectParticipantServices] [bit] NULL,
 [FatherAdvocate] [bit] NULL,
+[FatherAdvocateEndDate] [datetime] NULL,
+[FatherAdvocateStartDate] [datetime] NULL,
 [FAW] [bit] NULL,
 [FAWEndDate] [datetime] NULL,
 [FAWStartDate] [datetime] NULL,

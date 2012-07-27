@@ -6,26 +6,25 @@ GO
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Jan 11, 2012>
--- Description:	<Copied originally from FamSys - see header below>
+-- Description:	<Copied originally from FamSys - see header below> <Get list of all Supervisors by Program>
 -- =============================================
--- =============================================
--- Author:    <Chris Papas
--- Create date: <02/15/2010>
--- Description: <Get list of all Supervisors by Program>
--- =============================================
-CREATE PROCEDURE [dbo].[spGetWorkersbyProgram]
-  @ProgramFK int = NULL
-AS
-BEGIN
-  -- SET NOCOUNT ON added to prevent extra result sets from
-  -- interfering with SELECT statements.
-  SET NOCOUNT ON;
+CREATE procedure [dbo].[spGetWorkersbyProgram]
+    @ProgramFK int = null
+as
+begin
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	set nocount on;
 
-    -- Insert statements for procedure here
-  SELECT FirstName, LastName, WorkerPK 
-  From Worker 
-  LEFT JOIN WorkerProgram ON WorkerProgram.WorkerFK=Worker.WorkerPK
-  WHERE WorkerProgram.ProgramFK=@ProgramFK
-  Order By LastName, FirstName
-END
+	exec spGetAllWorkersbyProgram @ProgramFK
+	-- Insert statements for procedure here
+	--select FirstName
+	--	  ,LastName
+	--	  ,WorkerPK
+	--	from Worker
+	--		left join WorkerProgram on WorkerProgram.WorkerFK = Worker.WorkerPK
+	--	where WorkerProgram.ProgramFK = @ProgramFK
+	--	order by LastName
+	--			,FirstName
+end
 GO

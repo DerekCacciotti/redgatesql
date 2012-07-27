@@ -17,6 +17,8 @@ CREATE TABLE [dbo].[Training]
 [TrainingPK_old] [int] NULL,
 [TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[Training] WITH NOCHECK ADD
+CONSTRAINT [FK_Training_TrainingMethodFK] FOREIGN KEY ([TrainingMethodFK]) REFERENCES [dbo].[TrainingMethod] ([TrainingMethodPK])
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -92,9 +94,6 @@ END
 
 GO
 
-ALTER TABLE [dbo].[Training] ADD
-CONSTRAINT [FK_Training_TrainingMethodFK] FOREIGN KEY ([TrainingMethodFK]) REFERENCES [dbo].[TrainingMethod] ([TrainingMethodPK])
-GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON

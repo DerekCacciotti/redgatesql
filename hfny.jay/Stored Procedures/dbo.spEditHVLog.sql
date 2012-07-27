@@ -116,7 +116,8 @@ CREATE PROCEDURE [dbo].[spEditHVLog](@HVLogPK int=NULL,
 @VisitLengthMinute int=NULL,
 @VisitLocation char(5)=NULL,
 @VisitStartTime datetime=NULL,
-@VisitType char(4)=NULL)
+@VisitType char(4)=NULL,
+@FatherAdvocateFK int=NULL)
 AS
 UPDATE HVLog
 SET 
@@ -232,6 +233,7 @@ VisitLengthHour = @VisitLengthHour,
 VisitLengthMinute = @VisitLengthMinute, 
 VisitLocation = @VisitLocation, 
 VisitStartTime = @VisitStartTime, 
-VisitType = @VisitType
+VisitType = @VisitType, 
+FatherAdvocateFK = @FatherAdvocateFK
 WHERE HVLogPK = @HVLogPK
 GO

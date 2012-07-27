@@ -33,7 +33,6 @@ ALTER TABLE [dbo].[TrainingDetail] WITH NOCHECK ADD CONSTRAINT [FK_TrainingDetai
 GO
 ALTER TABLE [dbo].[TrainingDetail] WITH NOCHECK ADD CONSTRAINT [FK_TrainingDetail_SubTopicFK] FOREIGN KEY ([SubTopicFK]) REFERENCES [dbo].[SubTopic] ([SubTopicPK])
 GO
-ALTER TABLE [dbo].[TrainingDetail] WITH NOCHECK ADD CONSTRAINT [FK_TrainingDetail_TopicFK] FOREIGN KEY ([TopicFK]) REFERENCES [dbo].[Topic] ([TopicPK])
-GO
+
 ALTER TABLE [dbo].[TrainingDetail] WITH NOCHECK ADD CONSTRAINT [FK_TrainingDetail_TrainingFK] FOREIGN KEY ([TrainingFK]) REFERENCES [dbo].[Training] ([TrainingPK])
 GO
