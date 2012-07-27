@@ -116,8 +116,13 @@ CREATE TABLE [dbo].[HVLog]
 [VisitLengthMinute] [int] NOT NULL,
 [VisitLocation] [char] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [VisitStartTime] [datetime] NOT NULL,
-[VisitType] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+[VisitType] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[FatherAdvocateFK] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD
+CONSTRAINT [FK_HVLog_FatherAdvocateFK] FOREIGN KEY ([FatherAdvocateFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD
+CONSTRAINT [FK_HVLog_NonPrimaryFSWFK] FOREIGN KEY ([NonPrimaryFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO
 SET QUOTED_IDENTIFIER ON
 GO
