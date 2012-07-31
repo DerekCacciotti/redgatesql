@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,6 +7,7 @@ CREATE PROCEDURE [dbo].[spAddAuditC](@AuditCCreator char(10)=NULL,
 @DailyDrinks char(2)=NULL,
 @FormFK int=NULL,
 @FormInterval char(2)=NULL,
+@FormType char(2)=NULL,
 @HowOften char(2)=NULL,
 @HVCaseFK int=NULL,
 @Invalid bit=NULL,
@@ -19,6 +21,7 @@ AuditCCreator,
 DailyDrinks,
 FormFK,
 FormInterval,
+FormType,
 HowOften,
 HVCaseFK,
 Invalid,
@@ -32,6 +35,7 @@ VALUES(
 @DailyDrinks,
 @FormFK,
 @FormInterval,
+@FormType,
 @HowOften,
 @HVCaseFK,
 @Invalid,

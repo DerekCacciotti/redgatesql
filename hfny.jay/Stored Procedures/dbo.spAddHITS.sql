@@ -1,9 +1,11 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddHITS](@FormFK int=NULL,
 @FormInterval char(2)=NULL,
+@FormType char(2)=NULL,
 @HITSCreator char(10)=NULL,
 @HVCaseFK int=NULL,
 @Invalid bit=NULL,
@@ -19,6 +21,7 @@ AS
 INSERT INTO HITS(
 FormFK,
 FormInterval,
+FormType,
 HITSCreator,
 HVCaseFK,
 Invalid,
@@ -34,6 +37,7 @@ Threaten
 VALUES(
 @FormFK,
 @FormInterval,
+@FormType,
 @HITSCreator,
 @HVCaseFK,
 @Invalid,

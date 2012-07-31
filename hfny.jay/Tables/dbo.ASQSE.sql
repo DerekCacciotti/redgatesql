@@ -13,6 +13,7 @@ CREATE TABLE [dbo].[ASQSE]
 [ASQSETCAge] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ASQSETotalScore] [numeric] (4, 1) NOT NULL,
 [ASQSEVersion] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[DiscussedWithPC1] [bit] NULL,
 [FSWFK] [int] NOT NULL,
 [ReviewCDS] [bit] NOT NULL CONSTRAINT [DF_ASQSE_ReviewCDS] DEFAULT ((0)),
 [HVCaseFK] [int] NOT NULL,

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -38,7 +39,9 @@ where HVCasefk=@lHVCaseFK
 exec spGetHVCasebyPK @lHVCaseFK
 exec spGetKempebyHVCaseFK @lHVCaseFK
 exec spGetPCbyPK @lPC1PK
-exec spGetCommonAttributesbyForm @myKempePK, "KE"
+exec spGetCommonAttributesbyForm @myKempePK, 'KE'
+exec spGetAuditCbyForm @myKempePK, 'KE'
+exec spGetHITSbyForm @myKempePK, 'KE'
 exec spGetPC1IssuesbyPK @lPC1IssuesFK
 
 END

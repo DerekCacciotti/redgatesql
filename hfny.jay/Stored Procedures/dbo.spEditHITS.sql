@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -5,6 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditHITS](@HITSPK int=NULL,
 @FormFK int=NULL,
 @FormInterval char(2)=NULL,
+@FormType char(2)=NULL,
 @HITSEditor char(10)=NULL,
 @HVCaseFK int=NULL,
 @Invalid bit=NULL,
@@ -21,6 +23,7 @@ UPDATE HITS
 SET 
 FormFK = @FormFK, 
 FormInterval = @FormInterval, 
+FormType = @FormType, 
 HITSEditor = @HITSEditor, 
 HVCaseFK = @HVCaseFK, 
 Invalid = @Invalid, 

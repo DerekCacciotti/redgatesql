@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,6 +13,7 @@ CREATE PROCEDURE [dbo].[spAddASQ](@ASQCreator char(10)=NULL,
 @ASQProblemSolvingScore numeric(4, 1)=NULL,
 @ASQTCReceiving char(1)=NULL,
 @DateCompleted datetime=NULL,
+@DiscussedWithPC1 bit=NULL,
 @FSWFK int=NULL,
 @HVCaseFK int=NULL,
 @ReviewCDS bit=NULL,
@@ -36,6 +38,7 @@ ASQPersonalSocialScore,
 ASQProblemSolvingScore,
 ASQTCReceiving,
 DateCompleted,
+DiscussedWithPC1,
 FSWFK,
 HVCaseFK,
 ReviewCDS,
@@ -60,6 +63,7 @@ VALUES(
 @ASQProblemSolvingScore,
 @ASQTCReceiving,
 @DateCompleted,
+@DiscussedWithPC1,
 @FSWFK,
 @HVCaseFK,
 @ReviewCDS,
