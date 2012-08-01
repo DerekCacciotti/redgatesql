@@ -239,12 +239,14 @@ UNION ALL
 
 )
 
-DECLARE @tblLastPa TABLE(
+
+--#01: Get the cases where PIDate BETWEEN @sDate AND @edate
+DECLARE @tblLastPa1 TABLE(
 	[HVCasePK] [int],
 	[PIDate] [datetime]	
 )
 
-INSERT INTO @tblLastPa
+INSERT INTO @tblLastPa1
 (
 	[HVCasePK],
 	[PIDate]
@@ -252,11 +254,34 @@ INSERT INTO @tblLastPa
 (
 SELECT  p.HVCaseFK, max(p.PIDate)  FROM @tblEngageAll e
 LEFT JOIN Preintake p ON e.HVCasePK = p.HVCaseFK 
---WHERE PIDate BETWEEN @sDate AND @edate
+WHERE PIDate BETWEEN @sDate AND @edate
 GROUP BY p.HVCaseFK 
 )
 
-SELECT * FROM @tblLastPa
+
+--#02: Get the ODD cases WHERE la.PIDate IS NULL AND e1.HVCasePK = pre.HVCaseFK AND pre.PIDate > @edate
+DECLARE @tblLastPa2 TABLE(
+	[HVCasePK] [int],
+	[PIDate] [datetime]	
+)
+
+INSERT INTO @tblLastPa2
+(
+	[HVCasePK],
+	[PIDate]
+)
+(
+SELECT pre.HVCaseFK, max(pre.PIDate)
+FROM @tblLastPa1 la
+RIGHT JOIN @tblEngageAll e1 ON e1.HVCasePK = la.HVCasePK
+LEFT JOIN Preintake pre ON e1.HVCasePK = pre.HVCaseFK 
+WHERE la.PIDate IS NULL AND e1.HVCasePK = pre.HVCaseFK
+AND pre.PIDate > @edate
+GROUP BY pre.HVCaseFK 
+)
+
+
+-- Combine both cases
 
 SELECT 
 	ea.[PC1ID],
@@ -276,23 +301,29 @@ SELECT
 			WHEN '02' THEN 'Enrolled'
 			WHEN '03' THEN 'Terminated'
 			ELSE ''
-		END	
-
-	,pre.[CaseStatus],	
-
-
-
-	ea.[HVCasePK],
-	ea.[OldID]	
+		END		
 
  FROM @tblEngageAll ea
- INNER JOIN @tblLastPa lp ON lp.HVCasePK = ea.HVCasePK
+ INNER JOIN @tblLastPa1 lp ON lp.HVCasePK = ea.HVCasePK
  LEFT JOIN Preintake pre ON ea.HVCasePK = pre.HVCaseFK 
  WHERE lp.PIDate = pre.PIDate 
- ORDER BY [FSWWorkerName],[HVCasePK]
 
--- exec [rspPreIntakeEngagementDetails] ',1,','09/01/2010','11/30/2010',null,0
+UNION ALL  
 
+SELECT 
+	ea.[PC1ID],
+	ea.[FSWAssignDate],	
+	datediff(day,ea.[FSWAssignDate],@edate) PreIntakeDays,	
+	ea.[FSWWorkerName],
+	NULL AS  PIDate, 
+
+	'No Status' Status
+
+ FROM @tblEngageAll ea
+ INNER JOIN @tblLastPa2 lp ON lp.HVCasePK = ea.HVCasePK
+ LEFT JOIN Preintake pre ON ea.HVCasePK = pre.HVCaseFK 
+ WHERE lp.PIDate = pre.PIDate 
+ ORDER BY [FSWWorkerName]
 
 
 END
