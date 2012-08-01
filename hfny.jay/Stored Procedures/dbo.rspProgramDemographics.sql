@@ -40,7 +40,7 @@ JOIN dbo.CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 JOIN PC AS c ON c.PCPK = a.PC1FK
 JOIN Intake AS d ON d.HVCaseFK = a.HVCasePK
 JOIN TCID AS tc ON tc.HVCaseFK = a.HVCasePK AND tc.TCDOB <= @EndDt
-JOIN CommonAttributes AS	caTC ON caTC.FormFK = tc.TCIDPK AND caTC.FormType = 'TC'
+JOIN CommonAttributes AS caTC ON caTC.FormFK = tc.TCIDPK AND caTC.FormType = 'TC'
 WHERE (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt) AND a.IntakeDate <= @EndDt
 AND b.ProgramFK = @programfk
 )
@@ -71,7 +71,7 @@ select DISTINCT a.HVCasePK
 , ca2.CommonAttributesPK [PC2InHoushold]
 , CASE WHEN b.DischargeDate IS NOT NULL AND b.DischargeDate <= @EndDt THEN b.DischargeDate ELSE @EndDt END [lastdate]
 
-, CASE WHEN isnull(t.TCDOB, a.EDC) <= a.IntakeDate THEN 1 ELSE 0 END [PrenatalStatus]
+, CASE WHEN isnull(t.TCDOB, a.EDC) > a.IntakeDate THEN 1 ELSE 0 END [PrenatalStatus]
 , CASE WHEN ca1.PrimaryLanguage IN ('02', '03') THEN 1 ELSE 0 END [NeedInterpreter]
 
 FROM dbo.HVCase AS a
