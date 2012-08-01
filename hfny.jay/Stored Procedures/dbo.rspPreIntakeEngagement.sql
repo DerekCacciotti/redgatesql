@@ -592,36 +592,7 @@ SET @nQ5c =
 			AND p.CaseStatus = '03'
 )
 
-SET @nQ5d =
-(	
-		SELECT count(HVCaseFK)
-		FROM @tblInitRequiredData irq
-			LEFT  OUTER JOIN Preintake p ON HVCasePK = p.HVCaseFK
-			WHERE 
-			 PIDate BETWEEN @sDate AND @edate			
-			AND p.CaseStatus IS null
-			--AND (pidate IS NULL OR (p.CaseStatus = '01' AND ))
-)
-
-
-
---SELECT @nQ5a,@nQ5b,@nQ5c,@nQ5d
-
-
-
---SELECT HVCasePK, CaseStatus, PIDate 
---		FROM @tblInitRequiredData irq
---			LEFT OUTER JOIN Preintake p ON HVCasePK = p.HVCaseFK
---			WHERE 
---			 PIDate BETWEEN @sDate AND @edate
---			 AND			 
-
---			 (p.CaseStatus IS NULL 
---			OR (month(PIDate) <> month('11/30/2010')
---			AND p.CaseStatus = '01'))			 
-
-
-
+SET @nQ5d =(@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ3) - (@nQ5a + @nQ5b + @nQ5c) 
 
 
 -- #5 Outcomes -- Contract Period
@@ -681,15 +652,10 @@ IF (@CustomQuarterlyDates = 0)
 						AND p.CaseStatus = '03'
 			)
 
-			SET @nQ5CPd =
-			(	
-					SELECT count(HVCaseFK)
-					FROM @tblInitRequiredData irq
-						LEFT  OUTER JOIN Preintake p ON HVCasePK = p.HVCaseFK
-						WHERE 
-						 PIDate BETWEEN @ContractStartDate AND @edate			
-						AND p.CaseStatus IS null
-			)
+			SET @nQ5CPd =(@TotalNumberOfPreIntakeCasesContractPeriod + @nQ2CPa + @nQCP3) - (@nQ5CPa + @nQ5CPb + @nQ5CPc) 
+
+
+
 END
 
 
