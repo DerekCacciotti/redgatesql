@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -14,7 +15,7 @@ CREATE PROCEDURE [dbo].[rspProgramDemographics]
 AS
 
 --DECLARE @programfk INT = 6 
---DECLARE @StartDt DATETIME = '07/01/2011'
+--DECLARE @StartDt DATETIME = '06/01/2012'
 --DECLARE @EndDt DATETIME = '06/30/2012'
 
 ; WITH MotherWithOtherChildren as (
@@ -54,7 +55,9 @@ FROM TCMedicaid_5
 , x AS (
 select DISTINCT a.HVCasePK
 , c.Race [Race]
-, datediff(yy, c.PCDOB,  a.IntakeDate) [Age]
+, cast(str(datediff(dd, c.PCDOB,  a.IntakeDate) / 365.25, 6) AS INT) [Age]
+, cast(datediff(dd, a.IntakeDate, 
+  CASE WHEN b.DischargeDate IS NOT NULL AND b.DischargeDate <= @EndDt THEN b.DischargeDate ELSE @EndDt END) /365.25 AS INT) [yrEnrolled]
 , ca1.HighestGrade [Edu]
 , ca1.IsCurrentlyEmployed [pc1Employed]
 , ca2.IsCurrentlyEmployed [pc2Employed]
@@ -67,9 +70,8 @@ select DISTINCT a.HVCasePK
 , caOBP.CommonAttributesPK [OBPInHoushold]
 , ca2.CommonAttributesPK [PC2InHoushold]
 , CASE WHEN b.DischargeDate IS NOT NULL AND b.DischargeDate <= @EndDt THEN b.DischargeDate ELSE @EndDt END [lastdate]
-, datediff(dd, a.IntakeDate, 
-CASE WHEN b.DischargeDate IS NOT NULL AND b.DischargeDate <= @EndDt THEN b.DischargeDate ELSE @EndDt END) /365 [yrEnrolled]
-, CASE WHEN isnull(a.TCDOB, a.EDC) <= a.IntakeDate THEN 1 ELSE 0 END [PrenatalStatus]
+
+, CASE WHEN isnull(t.TCDOB, a.EDC) <= a.IntakeDate THEN 1 ELSE 0 END [PrenatalStatus]
 , CASE WHEN ca1.PrimaryLanguage IN ('02', '03') THEN 1 ELSE 0 END [NeedInterpreter]
 
 FROM dbo.HVCase AS a
@@ -80,6 +82,10 @@ LEFT OUTER JOIN CommonAttributes AS	ca ON ca.FormFK = d.IntakePK AND ca.FormType
 LEFT OUTER JOIN CommonAttributes AS	ca1 ON ca1.FormFK = d.IntakePK AND ca1.FormType = 'IN-PC1'
 LEFT OUTER JOIN CommonAttributes AS	ca2 ON ca2.FormFK = d.IntakePK AND ca2.FormType = 'IN-PC2'
 LEFT OUTER JOIN CommonAttributes AS	caOBP ON caOBP.FormFK = d.IntakePK AND ca2.FormType = 'IN-OBP'
+
+LEFT OUTER JOIN 
+(SELECT HVCaseFK, min(TCDOB) [TCDOB]
+FROM TCID GROUP BY HVCaseFK) AS t ON t.HVCaseFK = a.HVCasePK
 
 WHERE (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt) AND a.IntakeDate <= @EndDt
 AND b.ProgramFK = @programfk
@@ -93,9 +99,9 @@ SELECT
 , sum(CASE WHEN x.Race = '03' THEN 1 ELSE 0 END) [1Hispanic]
 , sum(CASE WHEN x.Race = '04' THEN 1 ELSE 0 END) [1Other]
 , sum(CASE WHEN x.Age < 18 THEN 1 ELSE 0 END) [2Age_17]
-, sum(CASE WHEN x.Age BETWEEN 18 AND 20 THEN 1 ELSE 0 END) [2Age_18_20]
-, sum(CASE WHEN x.Age BETWEEN 21 AND 30 THEN 1 ELSE 0 END) [2Age_21_30]
-, sum(CASE WHEN x.Age > 30 THEN 1 ELSE 0 END) [2Age_30+]
+, sum(CASE WHEN x.Age BETWEEN 18 AND 19 THEN 1 ELSE 0 END) [2Age_18_20]
+, sum(CASE WHEN x.Age BETWEEN 20 AND 29 THEN 1 ELSE 0 END) [2Age_21_30]
+, sum(CASE WHEN x.Age >= 30 THEN 1 ELSE 0 END) [2Age_30+]
 , sum(CASE WHEN x.Edu IN ('01', '02') THEN 1 ELSE 0 END) [3Less12Yr]
 , sum(CASE WHEN x.Edu IN ('03', '04') THEN 1 ELSE 0 END) [3HighSchool]
 , sum(CASE WHEN x.Edu IN ('05', '06', '07', '08') THEN 1 ELSE 0 END) [3PostSecondary]
@@ -111,9 +117,9 @@ SELECT
 , sum(CASE WHEN x.OBPInHoushold IS NOT null THEN 1 ELSE 0 END) [7OBPInHousehold]
 , sum(CASE WHEN x.PC2InHoushold IS NOT null THEN 1 ELSE 0 END) [7PC2InHousehold]
 , sum(CASE WHEN x.yrEnrolled < 1 THEN 1 ELSE 0 END) [9LessThan1Yr]
-, sum(CASE WHEN x.yrEnrolled = 2 THEN 1 ELSE 0 END) [9UpTo2Yr]
-, sum(CASE WHEN x.yrEnrolled = 3 THEN 1 ELSE 0 END) [9UpTo3Yr]
-, sum(CASE WHEN x.yrEnrolled > 3 THEN 1 ELSE 0 END) [9Over3Yr]
+, sum(CASE WHEN x.yrEnrolled = 1 THEN 1 ELSE 0 END) [9UpTo2Yr]
+, sum(CASE WHEN x.yrEnrolled = 2 THEN 1 ELSE 0 END) [9UpTo3Yr]
+, sum(CASE WHEN x.yrEnrolled >= 3 THEN 1 ELSE 0 END) [9Over3Yr]
 , sum(CASE WHEN x.PrenatalStatus = 1 THEN 1 ELSE 0 END) [10PrenatalAtEnrolled]
 , sum(CASE WHEN x.NeedInterpreter = 1 THEN 1 ELSE 0 END) [11NeedInterpreter]
 FROM x AS x
