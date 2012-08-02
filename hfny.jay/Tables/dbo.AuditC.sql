@@ -5,17 +5,17 @@ CREATE TABLE [dbo].[AuditC]
 [AuditCCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [AuditCEditDate] [datetime] NULL,
 [AuditCEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[DailyDrinks] [int] NOT NULL,
+[DailyDrinks] [int] NULL,
 [FormFK] [int] NOT NULL,
 [FormInterval] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [FormType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[HowOften] [int] NOT NULL,
+[HowOften] [int] NULL,
 [HVCaseFK] [int] NOT NULL,
 [Invalid] [bit] NULL,
-[MoreThanSix] [int] NOT NULL,
-[Positive] [bit] NOT NULL,
+[MoreThanSix] [int] NULL,
+[Positive] [bit] NULL,
 [ProgramFK] [int] NOT NULL,
-[TotalScore] [int] NOT NULL
+[TotalScore] [int] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

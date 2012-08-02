@@ -8,17 +8,21 @@ CREATE TABLE [dbo].[HITS]
 [HITSCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [HITSEditDate] [datetime] NULL,
 [HITSEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[Hurt] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[Hurt] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HVCaseFK] [int] NOT NULL,
-[Insult] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[Invalid] [bit] NOT NULL,
+[Insult] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Invalid] [bit] NULL,
 [NotDoneReason] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[Positive] [bit] NOT NULL,
+[Positive] [bit] NULL,
 [ProgramFK] [int] NOT NULL,
-[Scream] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[Threaten] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[TotalScore] [int] NOT NULL
+[Scream] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[Threaten] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TotalScore] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[HITS] ADD
+CONSTRAINT [FK_HITS_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+ALTER TABLE [dbo].[HITS] ADD
+CONSTRAINT [FK_HITS_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_CaseProgramEditDate ON CaseProgram
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
