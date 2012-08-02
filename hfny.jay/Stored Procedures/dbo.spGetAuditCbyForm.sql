@@ -1,10 +1,11 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spGetAuditCbyForm]
 	@FormFK [int],
-	@FormType [char](8)
+	@FormType [char](2)
 AS
 
 SET NOCOUNT ON;
