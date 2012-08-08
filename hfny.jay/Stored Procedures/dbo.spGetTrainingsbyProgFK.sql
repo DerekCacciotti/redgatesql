@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -33,7 +34,7 @@ BEGIN
 		  ,[TrainingMinutes]
 		  ,[TrainingPK_old]
 		  ,[TrainingTitle]
-	  FROM [HFNY].[dbo].[Training]
+	  FROM [dbo].[Training]
 	  WHERE ProgramFK = @ProgFK
 	  ORDER BY TrainingDate DESC
 END
