@@ -17,6 +17,8 @@ CREATE TABLE [dbo].[Training]
 [TrainingPK_old] [int] NULL,
 [TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [TrainingPK_ProgramFK] ON [dbo].[Training] ([TrainingPK], [ProgramFK]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[Training] WITH NOCHECK ADD
 CONSTRAINT [FK_Training_TrainingMethodFK] FOREIGN KEY ([TrainingMethodFK]) REFERENCES [dbo].[TrainingMethod] ([TrainingMethodPK])
 GO
