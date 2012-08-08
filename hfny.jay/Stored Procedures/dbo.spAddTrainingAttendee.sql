@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,7 +11,6 @@ CREATE PROCEDURE [dbo].[spAddTrainingAttendee](@ExemptDescription varchar(500)=N
 @TopicFK int=NULL,
 @TrainingAttendeeCreator char(10)=NULL,
 @TrainingAttendeePK_old int=NULL,
-@TrainingDetailFK int=NULL,
 @TrainingFK int=NULL,
 @WorkerFK int=NULL)
 AS
@@ -23,7 +23,6 @@ SubtopicFK,
 TopicFK,
 TrainingAttendeeCreator,
 TrainingAttendeePK_old,
-TrainingDetailFK,
 TrainingFK,
 WorkerFK
 )
@@ -36,7 +35,6 @@ VALUES(
 @TopicFK,
 @TrainingAttendeeCreator,
 @TrainingAttendeePK_old,
-@TrainingDetailFK,
 @TrainingFK,
 @WorkerFK
 )

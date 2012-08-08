@@ -12,7 +12,6 @@ CREATE TABLE [dbo].[TrainingAttendee]
 [TrainingAttendeeEditDate] [datetime] NULL,
 [TrainingAttendeeEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TrainingAttendeePK_old] [int] NULL,
-[TrainingDetailFK] [int] NULL,
 [TrainingFK] [int] NULL,
 [WorkerFK] [int] NOT NULL
 ) ON [PRIMARY]
@@ -37,8 +36,6 @@ GO
 ALTER TABLE [dbo].[TrainingAttendee] WITH NOCHECK ADD CONSTRAINT [FK_TrainingAttendee_SubtopicFK] FOREIGN KEY ([SubtopicFK]) REFERENCES [dbo].[SubTopic] ([SubTopicPK])
 GO
 
-ALTER TABLE [dbo].[TrainingAttendee] WITH NOCHECK ADD CONSTRAINT [FK_TrainingAttendee_TrainingDetailFK] FOREIGN KEY ([TrainingDetailFK]) REFERENCES [dbo].[TrainingDetail] ([TrainingDetailPK])
-GO
 ALTER TABLE [dbo].[TrainingAttendee] WITH NOCHECK ADD CONSTRAINT [FK_TrainingAttendee_TrainingFK] FOREIGN KEY ([TrainingFK]) REFERENCES [dbo].[Training] ([TrainingPK])
 GO
 ALTER TABLE [dbo].[TrainingAttendee] WITH NOCHECK ADD CONSTRAINT [FK_TrainingAttendee_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])

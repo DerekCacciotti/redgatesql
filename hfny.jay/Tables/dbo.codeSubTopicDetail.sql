@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[codeSubTopicDetail]
 [DaysRequired] [int] NULL,
 [Interval] [varchar] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RequiredBy] [varchar] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[SATFK] [int] NULL,
+[SATFK] [money] NULL,
 [SubTopicFK] [int] NULL,
 [SubTopicName] [varchar] (64) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TopicFK] [int] NULL,

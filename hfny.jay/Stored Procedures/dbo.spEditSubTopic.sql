@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -5,7 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditSubTopic](@SubTopicPK int=NULL,
 @ProgramFK int=NULL,
 @RequiredBy char(4)=NULL,
-@SATFK int=NULL,
+@SATFK money=NULL,
 @SubTopicCode char(1)=NULL,
 @SubTopicEditor char(10)=NULL,
 @SubTopicName char(100)=NULL,

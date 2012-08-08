@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,16 +7,19 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetTopics] 
-	-- Add the parameters for the stored procedure here
-
+CREATE PROCEDURE [dbo].[spGetSubTopicsAllbyProgram]-- Add the parameters for the stored procedure here
+    @ProgramFK AS INT
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-    -- Insert statements for procedure here
-	SELECT DISTINCT codetopicPK, cast([TopicCode] AS VARCHAR(MAX)) + ' ' + [TopicName] AS TopicCodeName FROM codeTopic t
+	-- Insert statements for procedure here
+	SELECT DISTINCT TopicFK, SubTopicPK , cast([SubTopicCode] AS VARCHAR(MAX)) + ' ' + [SubTopicName] AS SubTopicCodeName
+	FROM SubTopic t
+	WHERE
+		(programfk IS NULL
+		OR ProgramFK = @ProgramFK)
 END
 GO

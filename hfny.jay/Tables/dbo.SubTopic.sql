@@ -2,15 +2,15 @@ CREATE TABLE [dbo].[SubTopic]
 (
 [SubTopicPK] [int] NOT NULL IDENTITY(1, 1),
 [ProgramFK] [int] NULL,
-[RequiredBy] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[SATFK] [int] NOT NULL,
+[RequiredBy] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SATFK] [money] NOT NULL,
 [SubTopicCode] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [SubTopicCreateDate] [datetime] NULL,
 [SubTopicCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SubTopicEditDate] [datetime] NULL,
 [SubTopicEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SubTopicName] [char] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[SubTopicPK_old] [int] NOT NULL,
+[SubTopicPK_old] [int] NULL,
 [TopicFK] [int] NOT NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[SubTopic] WITH NOCHECK ADD

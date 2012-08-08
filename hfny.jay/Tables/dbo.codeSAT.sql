@@ -1,6 +1,6 @@
 CREATE TABLE [dbo].[codeSAT]
 (
-[codeSATPK] [int] NOT NULL IDENTITY(1, 1),
+[codeSATPK] [money] NOT NULL,
 [codeSATPK_old] [int] NOT NULL,
 [ProgramFK] [int] NULL,
 [SATCompareDateField] [char] (8) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
