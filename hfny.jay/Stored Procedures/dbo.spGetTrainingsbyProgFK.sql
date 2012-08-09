@@ -18,24 +18,28 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT [TrainingPK]
-		  ,[ProgramFK]
-		  ,[TrainerFK]
-		  ,[TrainingMethodFK]
-		  ,[TrainingCreateDate]
-		  ,[TrainingCreator]
-		  ,[TrainingDate]
-		  ,[TrainingDays]
-		  ,[TrainingDescription]
-		  ,[TrainingDuration]
-		  ,[TrainingEditDate]
-		  ,[TrainingEditor]
-		  ,[TrainingHours]
-		  ,[TrainingMinutes]
-		  ,[TrainingPK_old]
-		  ,[TrainingTitle]
-	  FROM [dbo].[Training]
-	  WHERE ProgramFK = @ProgFK
+	SELECT DISTINCT 
+		  FormReviewedTableList.IsApproved
+		  ,tr.[TrainingPK]
+		  ,tr.[ProgramFK]
+		  ,tr.[TrainerFK]
+		  ,tr.[TrainingMethodFK]
+		  ,tr.[TrainingCreateDate]
+		  ,tr.[TrainingCreator]
+		  ,tr.[TrainingDate]
+		  ,tr.[TrainingDays]
+		  ,tr.[TrainingDescription]
+		  ,tr.[TrainingDuration]
+		  ,tr.[TrainingEditDate]
+		  ,tr.[TrainingEditor]
+		  ,tr.[TrainingHours]
+		  ,tr.[TrainingMinutes]
+		  ,tr.[TrainingPK_old]
+		  ,tr.[TrainingTitle]
+	  FROM [dbo].[Training] tr
+		INNER JOIN FormReviewedTableList('TR', @ProgFK)
+		ON FormReviewedTableList.formfk = tr.TrainingPK
+	  WHERE tr.ProgramFK = @ProgFK
 	  ORDER BY TrainingDate DESC
 END
 GO
