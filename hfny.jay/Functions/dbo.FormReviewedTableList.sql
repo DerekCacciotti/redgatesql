@@ -1,11 +1,14 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 -- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
+-- Author:		Chris Papas
+-- Create date: 08/09/12
+-- Description:	Get all Form Reviews by programfk and formtype.
+--				This was created because the utility to check formreview goes item by item, and in a large
+--				table (like the 1000+ in TrainingHome) it was taking 5 minutes or more to go through the whole list
 -- =============================================
 CREATE FUNCTION [dbo].[FormReviewedTableList]
 (
