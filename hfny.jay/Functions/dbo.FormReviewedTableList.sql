@@ -37,5 +37,5 @@ RETURN
 		FROM FormReview fr
 	    INNER JOIN [dbo].[FormReviewOptions] fro ON fro.ProgramFK = fr.ProgramFK  
 		WHERE fr.ProgramFK = @ProgFK
-		AND fr.FormType=@FormType AND fro.FormType=@FormType	
+		AND fr.FormType=@FormType OR fro.FormType=@FormType	
 GO
