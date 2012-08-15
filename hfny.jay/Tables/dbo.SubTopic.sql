@@ -31,6 +31,3 @@ From [SubTopic] INNER JOIN Inserted ON [SubTopic].[SubTopicPK]= Inserted.[SubTop
 GO
 ALTER TABLE [dbo].[SubTopic] ADD CONSTRAINT [PK__SubTopic__3EC19D447849DB76] PRIMARY KEY CLUSTERED  ([SubTopicPK]) ON [PRIMARY]
 GO
-
-ALTER TABLE [dbo].[SubTopic] WITH NOCHECK ADD CONSTRAINT [FK_SubTopic_SATFK] FOREIGN KEY ([SATFK]) REFERENCES [dbo].[codeSAT] ([codeSATPK])
-GO
