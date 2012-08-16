@@ -31,12 +31,3 @@ From [TrainingAttendee] INNER JOIN Inserted ON [TrainingAttendee].[TrainingAtten
 GO
 ALTER TABLE [dbo].[TrainingAttendee] ADD CONSTRAINT [PK__Training__C0BC3C361B9317B3] PRIMARY KEY CLUSTERED  ([TrainingAttendeePK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[TrainingAttendee] WITH NOCHECK ADD CONSTRAINT [FK_TrainingAttendee_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
-ALTER TABLE [dbo].[TrainingAttendee] WITH NOCHECK ADD CONSTRAINT [FK_TrainingAttendee_SubtopicFK] FOREIGN KEY ([SubtopicFK]) REFERENCES [dbo].[SubTopic] ([SubTopicPK])
-GO
-
-ALTER TABLE [dbo].[TrainingAttendee] WITH NOCHECK ADD CONSTRAINT [FK_TrainingAttendee_TrainingFK] FOREIGN KEY ([TrainingFK]) REFERENCES [dbo].[Training] ([TrainingPK])
-GO
-ALTER TABLE [dbo].[TrainingAttendee] WITH NOCHECK ADD CONSTRAINT [FK_TrainingAttendee_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO

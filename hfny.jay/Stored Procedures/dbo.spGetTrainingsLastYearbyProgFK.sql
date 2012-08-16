@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +7,7 @@ GO
 -- Create date: 7/11/2012
 -- Description:	Gets Training List by program for the TrainingHome.aspx page
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetTrainingsbyProgFK]
+CREATE PROCEDURE [dbo].[spGetTrainingsLastYearbyProgFK]
 	-- Add the parameters for the stored procedure here
 	@ProgFK AS int
 AS
@@ -34,11 +33,13 @@ BEGIN
 		  ,tr.[TrainingEditor]
 		  ,tr.[TrainingHours]
 		  ,tr.[TrainingMinutes]
+		  ,tr.[TrainingPK_old]
 		  ,tr.[TrainingTitle]
 	  FROM [dbo].[Training] tr
-		INNER JOIN FormReviewedTableList('TR', @ProgFK)
+		INNER JOIN FormReviewedTableList2('TR', @ProgFK)
 		ON formfk = tr.TrainingPK
 	  WHERE tr.ProgramFK = @ProgFK
+	  AND tr.TrainingDate > dateadd(year,-1,getdate())
 	  ORDER BY TrainingDate DESC
 END
 GO

@@ -14,7 +14,6 @@ CREATE TABLE [dbo].[Training]
 [TrainingEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TrainingHours] [int] NULL,
 [TrainingMinutes] [int] NULL,
-[TrainingPK_old] [int] NULL,
 [TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [TrainingPK_ProgramFK] ON [dbo].[Training] ([TrainingPK], [ProgramFK]) ON [PRIMARY]
