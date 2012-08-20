@@ -8,7 +8,8 @@ CREATE PROCEDURE [dbo].[rspASQHistory]
 ( @programfk INT = NULL, 
   @supervisorfk INT = NULL, 
   @workerfk INT = NULL,
-  @UnderCutoffOnly CHAR(1) = 'N')
+  @UnderCutoffOnly CHAR(1) = 'N',
+  @pc1ID VARCHAR(13) = '')
 AS
 
 DECLARE @n INT = 0
@@ -78,6 +79,7 @@ d.DischargeDate IS NULL
 AND d.currentFSWFK = ISNULL(@workerfk, d.currentFSWFK)
 AND wp.supervisorfk = ISNULL(@supervisorfk, wp.supervisorfk)
 AND d.programfk = @programfk
+AND d.PC1ID = CASE WHEN @pc1ID = '' THEN d.PC1ID ELSE @pc1ID END
 ORDER BY  supervisor, worker, PC1ID, TCAgeCode
 
 
