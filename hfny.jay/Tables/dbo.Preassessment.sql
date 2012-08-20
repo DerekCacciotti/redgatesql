@@ -124,7 +124,6 @@ ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD CONSTRAINT [FK_Preassessment_
 GO
 ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD CONSTRAINT [FK_Preassessment_PAFAWFK] FOREIGN KEY ([PAFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO
-ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD CONSTRAINT [FK_Preassessment_PAFSWFK] FOREIGN KEY ([PAFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
+
 ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD CONSTRAINT [FK_Preassessment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO

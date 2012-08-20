@@ -9,7 +9,7 @@ CREATE TABLE [dbo].[PC]
 [PC1] [bit] NULL,
 [PC2] [bit] NULL,
 [PCApt] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[PCCellPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PCCellPhone] [varchar] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCCity] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCCreateDate] [datetime] NOT NULL CONSTRAINT [DF_PC_PCCreateDate] DEFAULT (getdate()),
 [PCCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
@@ -17,8 +17,8 @@ CREATE TABLE [dbo].[PC]
 [PCDOD] [datetime] NULL,
 [PCEditDate] [datetime] NULL,
 [PCEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[PCEmail] [char] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[PCEmergencyPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PCEmail] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PCEmergencyPhone] [varchar] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCFirstName] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PCLastName] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PCMiddleInitial] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -38,13 +38,8 @@ CREATE TABLE [dbo].[PC]
 [CP] [bit] NULL
 ) ON [PRIMARY]
 GO
-CREATE STATISTICS [_dta_stat_53575229_20_1_21_14] ON [dbo].[PC] ([PCFirstName], [PCPK], [PCLastName], [PCDOB])
 
-GO
-CREATE STATISTICS [_dta_stat_53575229_21_1] ON [dbo].[PC] ([PCLastName], [PCPK])
 
-GO
-CREATE STATISTICS [_dta_stat_53575229_1_14_21] ON [dbo].[PC] ([PCPK], [PCDOB], [PCLastName])
 
 CREATE NONCLUSTERED INDEX [_dta_index_PC_18_53575229__K14_K1_K21_K20] ON [dbo].[PC] ([PCDOB], [PCPK], [PCLastName], [PCFirstName]) ON [PRIMARY]
 

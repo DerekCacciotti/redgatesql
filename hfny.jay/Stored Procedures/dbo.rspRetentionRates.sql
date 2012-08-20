@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -50,7 +51,7 @@ BEGIN
 		, TwoYearsDischarge int);
 	
 	declare @tblPC1withStats table (
-		PC1ID char(12)
+		PC1ID char(13)
 		, IntakeDate datetime
 		, DischargeDate datetime
 		, LastHomeVisit datetime

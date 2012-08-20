@@ -64,6 +64,7 @@ CREATE TABLE [dbo].[CommonAttributes]
 [TANFServicesNoSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TCHasMedicalProvider] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TCHIFamilyChildHealthPlus] [bit] NULL,
+[TCHIMedicaidCaseNumber] [varchar] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TCHIPrivateInsurance] [bit] NULL,
 [TCHIOther] [bit] NULL,
 [TCHIOtherSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,

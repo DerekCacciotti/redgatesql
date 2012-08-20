@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,6 +20,10 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 --region declarations
+print @programfk
+print @startdate
+print @enddate
+
 	declare @tblResults table (
 		LineDescription varchar(50)
 		, LineGroupingLevel int
@@ -47,7 +52,7 @@ BEGIN
 		, TwoYearsDischarge int);
 	
 	declare @tblPC1withStats table (
-		PC1ID char(12)
+		PC1ID char(13)
 		, IntakeDate datetime
 		, DischargeDate datetime
 		, ReportDischargeText char(80)
@@ -239,8 +244,43 @@ from @tblPC1withStats
 where ActiveAt24Months=1 and DischargeDate is not null
 --endregion
 
-select *
+--select *
+--from @tblPC1withStats
+
+select @LineGroupingLevel as LineGroupingLevel
+		,@TotalEnrolledParticipants as TotalEnrolledParticipants
+		,@RetentionRateSixMonths as RetentionRateSixMonths
+		,@RetentionRateOneYear as RetentionRateOneYear
+		,@RetentionRateEighteenMonths as RetentionRateEighteenMonths
+		,@RetentionRateTwoYears as RetentionRateTwoYears
+		,@EnrolledParticipantsSixMonths as EnrolledParticipantsSixMonths
+		,@EnrolledParticipantsOneYear as EnrolledParticipantsOneYear
+		,@EnrolledParticipantsEighteenMonths as EnrolledParticipantsEighteenMonths
+		,@EnrolledParticipantsTwoYears as EnrolledParticipantsTwoYears
+		,@RunningTotalDischargedSixMonths as RunningTotalDischargedSixMonths
+		,@RunningTotalDischargedOneYear as RunningTotalDischargedOneYear
+		,@RunningTotalDischargedEighteenMonths as RunningTotalDischargedEighteenMonths
+		,@RunningTotalDischargedTwoYears as RunningTotalDischargedTwoYears
+		,@TotalNSixMonths as TotalNSixMonths
+		,@TotalNOneYear as TotalNOneYear
+		,@TotalNEighteenMonths as TotalNEighteenMonths
+		,@TotalNTwoYears as TotalNTwoYears
+		,@SixMonthsTotal as SixMonthsTotal
+		,@TwelveMonthsTotal as TwelveMonthsTotal
+		,@EighteenMonthsTotal as EighteenMonthsTotal
+		,@TwentyFourMonthsTotal as TwentyFourMonthsTotal
+		,@SixMonthsAtDischarge as SixMonthsAtDischarge
+		,@TwelveMonthsAtDischarge as TwelveMonthsAtDischarge
+		,@EighteenMonthsAtDischarge as EighteenMonthsAtDischarge
+		,@TwentyFourMonthsAtDischarge as TwentyFourMonthsAtDischarge
+		
+select ReportDischargeText
+	  ,sum(ActiveAt6Months) as SumActiveAt6Months
+	  ,sum(ActiveAt12Months) as SumActiveAt12Months
+	  ,sum(ActiveAt18Months) as SumActiveAt18Months
+	  ,sum(ActiveAt24Months) as SumActiveAt24Months
 from @tblPC1withStats
+group by ReportDischargeText
 
 --select *
 --from @tblResults
