@@ -116,7 +116,7 @@ SELECT c.PC1ID [Participant]
   WHEN a.CaseStatus = '03' THEN rtrim(x.ReportDischargeText) + ' ' + convert(VARCHAR(12), a.PADate, 101) 
   WHEN a.CaseStatus = '01' THEN 'Continue ' + convert(VARCHAR(12), @EndDt, 101) 
   WHEN a.CaseStatus = '02' THEN 'Enrolled ' + convert(VARCHAR(12), b.KempeDate, 101)
-  WHEN a.CaseStatus = '99' THEN 'No Preassessment'
+  WHEN a.CaseStatus = '99' THEN 'No Preassessments'
   ELSE '' END [CurrentStatus]
 , CASE WHEN a.PADate < @StartDt THEN 0 ELSE ISNULL(a.PAParentLetter, 0) END [Letters]
 , CASE WHEN a.PADate < @StartDt THEN 0 ELSE ISNULL(a.PACall2Parent, 0) END [Call2Parent]
