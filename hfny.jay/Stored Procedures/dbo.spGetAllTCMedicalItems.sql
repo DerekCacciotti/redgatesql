@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -21,7 +22,7 @@ BEGIN
     -- Insert statements for procedure here
 	SELECT MedicalItemCode, MedicalItemText
 	FROM dbo.codeMedicalItem
-	WHERE MedicalItemUsedWhere = 'TM' AND MedicalItemCode != '17'
+	WHERE MedicalItemUsedWhere = 'TM' -- AND MedicalItemCode != '17'
 	ORDER BY CAST(MedicalItemCode AS int)
 END
 
