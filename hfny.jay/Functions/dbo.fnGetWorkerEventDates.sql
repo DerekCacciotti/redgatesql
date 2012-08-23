@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -41,9 +42,10 @@ RETURN
 		,ctSuper AS
 		(SELECT DISTINCT SupervisorFK, min(SupervisionDate) AS SuperDate 
 		FROM Supervision s
-		GROUP BY SupervisorFK)
+		GROUP BY SupervisorFK
+		)
 
-		, ctFinal AS(
+
 		SELECT DISTINCT w.WorkerPK
 			 , w.FAWInitialStart --as per Jay, we will use Initial start for FAW date
 			 , w.SupervisorInitialStart
@@ -78,7 +80,7 @@ RETURN
 		HAVING wp.ProgramFK=@prgfk
 		AND w.WorkerPK = isnull(@workerfk,w.workerpk)
 		and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
-		)
-		SELECT * FROM ctFinal
+		AND wp.TerminationDate IS NULL
+
 )
 GO

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -33,10 +34,9 @@ BEGIN
 		  ,tr.[TrainingEditor]
 		  ,tr.[TrainingHours]
 		  ,tr.[TrainingMinutes]
-		  ,tr.[TrainingPK_old]
 		  ,tr.[TrainingTitle]
 	  FROM [dbo].[Training] tr
-		INNER JOIN FormReviewedTableList2('TR', @ProgFK)
+		INNER JOIN FormReviewedTableList('TR', @ProgFK)
 		ON formfk = tr.TrainingPK
 	  WHERE tr.ProgramFK = @ProgFK
 	  AND tr.TrainingDate > dateadd(year,-1,getdate())

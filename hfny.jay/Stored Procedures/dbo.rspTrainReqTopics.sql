@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,6 +7,7 @@ GO
 -- Author:		Chris Papas
 -- Create date: 8/16/2012
 -- Description:	Report: Training Required Topics
+-- EXEC rspTrainReqTopics 1, NULL, NULL
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainReqTopics]
 	-- Add the parameters for the stored procedure here
@@ -19,10 +21,23 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	
-WITH ctMain AS
+;WITH ctAttendee AS
 (
-SELECT firstname, lastname
+SELECT t.TrainingPK
+	 , t.TrainingDate
+	 , WorkerFK
+	 , td.SubTopicFK
+	 , td.topicfk
+FROM Training t
+INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
+INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK
+WHERE t.ProgramFK = @prgfk
+)
+
+
+, ctMain AS
+(
+SELECT firstname + lastname AS Name
 , fn.WorkerPK
 , fn.FAWInitialStart
 , fn.SupervisorInitialStart
@@ -34,181 +49,97 @@ SELECT firstname, lastname
 , fn.FirstKempeDate
 , fn.FirstEvent
 , fn.SupervisorFirstEvent
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=1) AS 'f1'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=65) AS 'f2a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=66) AS 'f2b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=67) AS 'f2c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=3) AS 'f3'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=4) AS 'f4'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=5) AS 'f5'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=6) AS 'f6'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=32) AS 'f7'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=7) AS 'f8'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=8) as 'f9'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=39) as 'f9.1'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=82) AS 'f10a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=10) as 'f11'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=11) as 'f12'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.TopicFK=12) as 'f13'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=1) AS 'f14a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=2) AS 'f14b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=3) AS 'f14c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=4) AS 'f14d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=5) AS 'f15a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=6) AS 'f15b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=7) AS 'f15c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=8) AS 'f15d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=9) AS 'f15e'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=10) AS 'f15f'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=11) AS 'f15g'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=12) AS 'f15h'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=13) AS 'f15i'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=14) AS 'f16a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=15) AS 'f16b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=16) AS 'f16c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=17) AS 'f16d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=18) AS 'f16e'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=19) AS 'f16f'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=20) AS 'f17a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=21) AS 'f17b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=22) AS 'f17c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=23) AS 'f17e' --as per FoxPro, there is no 'd'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=24) AS 'f18a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=25) AS 'f18b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=26) AS 'f18c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=27) AS 'f19a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=28) AS 'f19b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=29) AS 'f19c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=30) AS 'f19d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=31) AS 'f19e'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=32) AS 'f19f'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=33) AS 'f20a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=34) AS 'f20b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=35) AS 'f21a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=36) AS 'f21b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=37) AS 'f21c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=38) AS 'f21d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=76) AS 'f21e'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=83) AS 'f21f'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=84) AS 'f21g'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=39) AS 'f22a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=40) AS 'f22b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=71) AS 'f22c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=41) AS 'f22d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=42) AS 'f22e'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=43) AS 'f22f'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=44) AS 'f22g'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=45) AS 'f22h'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=46) AS 'f23a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=47) AS 'f23b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=48) AS 'f23c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=49) AS 'f23d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=50) AS 'f23e'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=51) AS 'f23f'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=52) AS 'f24a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=53) AS 'f24b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=54) AS 'f24c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=55) AS 'f24d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=56) AS 'f24e'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=57) AS 'f24f'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=58) AS 'f25a'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=59) AS 'f25b'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=60) AS 'f25c'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=61) AS 'f25d'
-, (SELECT min(trainingdate) FROM Training t INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
-	INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK WHERE ta.WorkerFK=w.WorkerPK AND td.SubTopicFK=62) AS 'f25e'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=1) AS 'f1'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=65) AS 'f2a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=66) AS 'f2b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=67) AS 'f2c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=3) AS 'f3'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=4) AS 'f4'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=5) AS 'f5'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=6) AS 'f6'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=32) AS 'f7'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=7) AS 'f8'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=8) as 'f9'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=39) as 'f9.1'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=82) AS 'f10a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=10) as 'f11'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=11) as 'f12'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=12) as 'f13'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=1) AS 'f14a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=2) AS 'f14b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=3) AS 'f14c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=4) AS 'f14d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=5) AS 'f15a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=6) AS 'f15b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=7) AS 'f15c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=8) AS 'f15d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=9) AS 'f15e'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=10) AS 'f15f'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=11) AS 'f15g'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=12) AS 'f15h'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=13) AS 'f15i'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=14) AS 'f16a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=15) AS 'f16b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=16) AS 'f16c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=17) AS 'f16d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=18) AS 'f16e'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=19) AS 'f16f'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=20) AS 'f17a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=21) AS 'f17b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=22) AS 'f17c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=23) AS 'f17e' --as per FoxPro, there is no 'd'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=24) AS 'f18a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=25) AS 'f18b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=26) AS 'f18c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=27) AS 'f19a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=28) AS 'f19b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=29) AS 'f19c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=30) AS 'f19d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=31) AS 'f19e'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=32) AS 'f19f'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=33) AS 'f20a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=34) AS 'f20b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=35) AS 'f21a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=36) AS 'f21b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=37) AS 'f21c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=38) AS 'f21d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=76) AS 'f21e'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=83) AS 'f21f'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=84) AS 'f21g'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=39) AS 'f22a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=40) AS 'f22b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=71) AS 'f22c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=41) AS 'f22d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=42) AS 'f22e'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=43) AS 'f22f'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=44) AS 'f22g'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=45) AS 'f22h'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=46) AS 'f23a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=47) AS 'f23b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=48) AS 'f23c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=49) AS 'f23d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=50) AS 'f23e'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=51) AS 'f23f'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=52) AS 'f24a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=53) AS 'f24b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=54) AS 'f24c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=55) AS 'f24d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=56) AS 'f24e'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=57) AS 'f24f'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=58) AS 'f25a'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=59) AS 'f25b'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=60) AS 'f25c'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=61) AS 'f25d'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=62) AS 'f25e'
 FROM Worker w
 INNER JOIN dbo.fnGetWorkerEventDates(@prgfk, @super, @worker) fn ON fn.workerpk = w.workerpk
-INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK
-WHERE wp.TerminationDate IS null
 )
 
-SELECT [FirstName]
-	 , [LastName]
+SELECT [Name]
 	 , [WorkerPK]
 	 , [FAWInitialStart]
 	 , [SupervisorInitialStart]
+	 , [SupervisorFirstEvent]
 	 , [FSWInitialStart]
 	 , [TerminationDate]
 	 , [HireDate]
@@ -708,6 +639,6 @@ SELECT [FirstName]
 			CASE WHEN datediff(dd, [f25e], [HireDate]) < -183 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f25e_ast'
-FROM ctMain ORDER BY FirstName, LastName
+FROM ctMain ORDER BY Name
 END
 GO
