@@ -13,7 +13,6 @@ CREATE PROCEDURE [dbo].[spAddTraining](@ProgramFK int=NULL,
 @TrainingDuration int=NULL,
 @TrainingHours int=NULL,
 @TrainingMinutes int=NULL,
-@TrainingPK_old int=NULL,
 @TrainingTitle char(70)=NULL)
 AS
 INSERT INTO Training(
@@ -27,7 +26,6 @@ TrainingDescription,
 TrainingDuration,
 TrainingHours,
 TrainingMinutes,
-TrainingPK_old,
 TrainingTitle
 )
 VALUES(
@@ -41,7 +39,6 @@ VALUES(
 @TrainingDuration,
 @TrainingHours,
 @TrainingMinutes,
-@TrainingPK_old,
 @TrainingTitle
 )
 

@@ -13,7 +13,7 @@ GO
 -- Test: exec spGetAllWorkersbyProgram 30,null,'FSW,FAW,FAdv,SUP,PM'
 -- =============================================
 CREATE procedure [dbo].[spGetAllWorkersbyProgram]
-    @ProgramFK  int           = null,
+	@ProgramFK  int           = null,
     @EventDate  datetime      = null,
     @WorkerType varchar(20)   = null
 
@@ -31,7 +31,7 @@ with cteAllWorkers as
 	inner join workerprogram
 	on workerpk=workerfk
 	where programfk=@ProgramFK
-			and faw = 1
+			-- and faw = 1
 			and @EventDate between FAWStartDate AND isnull(FAWEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 	union all
 	select LastName, FirstName, WorkerPK, 'FSW' as workertype
@@ -39,7 +39,7 @@ with cteAllWorkers as
 	inner join workerprogram
 	on workerpk=workerfk
 	where programfk=@ProgramFK 
-			and fsw = 1
+			-- and fsw = 1
 			and @EventDate between FSWStartDate AND isnull(FSWEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 	union all
 	select LastName, FirstName, WorkerPK, 'FAdv' as workertype
@@ -47,15 +47,15 @@ with cteAllWorkers as
 	inner join workerprogram
 	on workerpk=workerfk
 	where programfk=@ProgramFK 
-			and FatherAdvocate = 1
-			-- and @EventDate between FatherAdvocateStartDate AND isnull(FatherAdvocateEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+			-- and FatherAdvocate = 1
+			and @EventDate between FatherAdvocateStartDate AND isnull(FatherAdvocateEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 	union all
 	select LastName, FirstName, WorkerPK, 'SUP' as workertype
 	from worker
 	inner join workerprogram
 	on workerpk=workerfk
 	where programfk=@ProgramFK 
-			and supervisor = 1
+			-- and supervisor = 1
 			and @EventDate between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 	union all
 	select LastName, FirstName, WorkerPK, 'PM' as workertype
@@ -63,7 +63,7 @@ with cteAllWorkers as
 	inner join workerprogram
 	on workerpk=workerfk
 	where programfk=@ProgramFK 
-			and programmanager = 1
+			-- and programmanager = 1
 			and @EventDate between ProgramManagerStartDate AND isnull(ProgramManagerEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 	)
 
