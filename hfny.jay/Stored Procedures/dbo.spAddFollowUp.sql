@@ -51,7 +51,9 @@ CREATE PROCEDURE [dbo].[spAddFollowUp](@BCAbstinence bit=NULL,
 @PC2InHome char(1)=NULL,
 @Pregnant char(1)=NULL,
 @ProgramFK int=NULL,
-@TimesPregnant int=NULL)
+@TimesPregnant int=NULL,
+@SafetyPlan bit=NULL,
+@SixMonthHome bit=NULL)
 AS
 INSERT INTO FollowUp(
 BCAbstinence,
@@ -102,7 +104,9 @@ PC1IssuesFK,
 PC2InHome,
 Pregnant,
 ProgramFK,
-TimesPregnant
+TimesPregnant,
+SafetyPlan,
+SixMonthHome
 )
 VALUES(
 @BCAbstinence,
@@ -153,7 +157,9 @@ VALUES(
 @PC2InHome,
 @Pregnant,
 @ProgramFK,
-@TimesPregnant
+@TimesPregnant,
+@SafetyPlan,
+@SixMonthHome
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
