@@ -35,6 +35,7 @@ CREATE PROCEDURE [dbo].[spAddHVLog](@CAChildSupport char(2)=NULL,
 @CurriculumPAT bit=NULL,
 @CurriculumPATFocusFathers bit=NULL,
 @CurriculumSanAngelo bit=NULL,
+@FatherAdvocateFK int=NULL,
 @FatherAdvocateParticipated bit=NULL,
 @FatherFigureParticipated bit=NULL,
 @FFCommunication char(2)=NULL,
@@ -115,8 +116,7 @@ CREATE PROCEDURE [dbo].[spAddHVLog](@CAChildSupport char(2)=NULL,
 @VisitLengthMinute int=NULL,
 @VisitLocation char(5)=NULL,
 @VisitStartTime datetime=NULL,
-@VisitType char(4)=NULL,
-@FatherAdvocateFK int=NULL)
+@VisitType char(4)=NULL)
 AS
 INSERT INTO HVLog(
 CAChildSupport,
@@ -151,6 +151,7 @@ CurriculumPartnersHealthyBaby,
 CurriculumPAT,
 CurriculumPATFocusFathers,
 CurriculumSanAngelo,
+FatherAdvocateFK,
 FatherAdvocateParticipated,
 FatherFigureParticipated,
 FFCommunication,
@@ -231,8 +232,7 @@ VisitLengthHour,
 VisitLengthMinute,
 VisitLocation,
 VisitStartTime,
-VisitType,
-FatherAdvocateFK
+VisitType
 )
 VALUES(
 @CAChildSupport,
@@ -267,6 +267,7 @@ VALUES(
 @CurriculumPAT,
 @CurriculumPATFocusFathers,
 @CurriculumSanAngelo,
+@FatherAdvocateFK,
 @FatherAdvocateParticipated,
 @FatherFigureParticipated,
 @FFCommunication,
@@ -347,8 +348,7 @@ VALUES(
 @VisitLengthMinute,
 @VisitLocation,
 @VisitStartTime,
-@VisitType,
-@FatherAdvocateFK
+@VisitType
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

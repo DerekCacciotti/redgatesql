@@ -33,6 +33,7 @@ CREATE TABLE [dbo].[HVLog]
 [CurriculumPAT] [bit] NULL,
 [CurriculumPATFocusFathers] [bit] NULL,
 [CurriculumSanAngelo] [bit] NULL,
+[FatherAdvocateFK] [int] NULL,
 [FatherAdvocateParticipated] [bit] NULL,
 [FatherFigureParticipated] [bit] NULL,
 [FFCommunication] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -116,8 +117,7 @@ CREATE TABLE [dbo].[HVLog]
 [VisitLengthMinute] [int] NOT NULL,
 [VisitLocation] [char] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [VisitStartTime] [datetime] NOT NULL,
-[VisitType] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[FatherAdvocateFK] [int] NULL
+[VisitType] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
 
 

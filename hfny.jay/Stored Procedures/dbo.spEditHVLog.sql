@@ -36,6 +36,7 @@ CREATE PROCEDURE [dbo].[spEditHVLog](@HVLogPK int=NULL,
 @CurriculumPAT bit=NULL,
 @CurriculumPATFocusFathers bit=NULL,
 @CurriculumSanAngelo bit=NULL,
+@FatherAdvocateFK int=NULL,
 @FatherAdvocateParticipated bit=NULL,
 @FatherFigureParticipated bit=NULL,
 @FFCommunication char(2)=NULL,
@@ -116,8 +117,7 @@ CREATE PROCEDURE [dbo].[spEditHVLog](@HVLogPK int=NULL,
 @VisitLengthMinute int=NULL,
 @VisitLocation char(5)=NULL,
 @VisitStartTime datetime=NULL,
-@VisitType char(4)=NULL,
-@FatherAdvocateFK int=NULL)
+@VisitType char(4)=NULL)
 AS
 UPDATE HVLog
 SET 
@@ -153,6 +153,7 @@ CurriculumPartnersHealthyBaby = @CurriculumPartnersHealthyBaby,
 CurriculumPAT = @CurriculumPAT, 
 CurriculumPATFocusFathers = @CurriculumPATFocusFathers, 
 CurriculumSanAngelo = @CurriculumSanAngelo, 
+FatherAdvocateFK = @FatherAdvocateFK, 
 FatherAdvocateParticipated = @FatherAdvocateParticipated, 
 FatherFigureParticipated = @FatherFigureParticipated, 
 FFCommunication = @FFCommunication, 
@@ -233,7 +234,6 @@ VisitLengthHour = @VisitLengthHour,
 VisitLengthMinute = @VisitLengthMinute, 
 VisitLocation = @VisitLocation, 
 VisitStartTime = @VisitStartTime, 
-VisitType = @VisitType, 
-FatherAdvocateFK = @FatherAdvocateFK
+VisitType = @VisitType
 WHERE HVLogPK = @HVLogPK
 GO
