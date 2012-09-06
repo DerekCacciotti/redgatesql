@@ -72,11 +72,12 @@ if @AllWorkers = 0
 						, FirstName
 						, TerminationDate
 						, WorkerPK 
+						, case when TerminationDate is null then 0 else 1 end
 		from cteAllWorkers aw
 		inner join dbo.SplitString(@WorkerType,',') on workertype = listitem
 		-- where workertype in (select listitem from dbo.SplitString(@WorkerType,','))
 		-- inner join Worker w on w.WorkerPK = aw.WorkerPK
-		order by LastName, FirstName
+		order by case when TerminationDate is null then 0 else 1 end, LastName, FirstName
 	end
 else
 	begin
@@ -85,9 +86,10 @@ else
 						, FirstName
 						, convert(varchar(12),TerminationDate,101) as TerminationDate
 						, WorkerPK 
+						, case when TerminationDate is null then 0 else 1 end
 		from WorkerProgram wp
 		inner join Worker w on w.WorkerPK = wp.WorkerFK
 		where ProgramFK = @ProgramFK
-		order by LastName, FirstName
+		order by case when TerminationDate is null then 0 else 1 end, LastName, FirstName
 	end
 GO
