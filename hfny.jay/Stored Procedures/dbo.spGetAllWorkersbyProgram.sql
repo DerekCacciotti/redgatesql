@@ -24,7 +24,7 @@ as
 
 set nocount on
 
-if @AllWorkers = 0 
+if @AllWorkers = 0 or @AllWorkers is null 
 	begin
 		set @EventDate = isnull(@EventDate, current_timestamp);
 		set @WorkerType = case when dbo.IsNullOrEmpty(@WorkerType)=1 or upper(@WorkerType)='ALL' then 'FSW,FAW,PM,FAdv,SUP,' else @WorkerType end;
