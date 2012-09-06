@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[TrainingDetail]
 (
 [TrainingDetailPK] [int] NOT NULL IDENTITY(1, 1),
-[isCulturalCompetent] [bit] NULL,
+[CulturalCompetency] [bit] NULL,
 [ProgramFK] [int] NULL,
 [SubTopicFK] [int] NULL,
 [SubTopicTime] [int] NULL,
