@@ -1,9 +1,10 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditTrainingDetail](@TrainingDetailPK int=NULL,
-@isCulturalCompetent bit=NULL,
+@CulturalCompetency bit=NULL,
 @ProgramFK int=NULL,
 @SubTopicFK int=NULL,
 @SubTopicTime int=NULL,
@@ -14,7 +15,7 @@ CREATE PROCEDURE [dbo].[spEditTrainingDetail](@TrainingDetailPK int=NULL,
 AS
 UPDATE TrainingDetail
 SET 
-isCulturalCompetent = @isCulturalCompetent, 
+CulturalCompetency = @CulturalCompetency, 
 ProgramFK = @ProgramFK, 
 SubTopicFK = @SubTopicFK, 
 SubTopicTime = @SubTopicTime, 
