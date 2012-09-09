@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -16,7 +17,7 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 	
-	SELECT topicfk, subtopicfk, isCulturalCompetent FROM TrainingDetail td
+	SELECT topicfk, subtopicfk, CulturalCompetency FROM TrainingDetail td
 	WHERE TrainingFK=@TrainingFK
 
 END
