@@ -65,14 +65,16 @@ Declare @TableName varchar(20), @FormDateName varchar(20),
 SET NOCOUNT ON; 
 
 --run the query
-EXEC  sp_Executesql @SelectStatement, N'@HVCaseFK int OUTPUT, @ProgramFK int OUTPUT, @lFormDate datetime OUTPUT, @Creator varchar(40)OUTPUT, @PK int OUTPUT' ,
+EXEC  sp_Executesql @SelectStatement, N'@HVCaseFK int OUTPUT, @ProgramFK int OUTPUT, @lFormDate datetime OUTPUT, @Creator varchar(40) OUTPUT, @PK int OUTPUT' ,
 				@HVCaseFK=@HVCaseFKValue OUTPUT, @ProgramFK=@PrgFKValue OUTPUT,@lFormDate = @DateValue output,@Creator = @CreatorValue OUTPUT, @PK=@FormFK OUTPUT ;
 
 --run the stored procedure to insert the values obtained in the last query into the FormReview Table
 -- don't use stored procedure because it returns identity value on PK and interferes with the main table's PK
 --EXEC spAddFormReview @FormType = @FormTypeValue, @FormFK = @FormFK, @FormDate = @DateValue,
 --                     @HVCaseFK = @HVCaseFKValue, @ProgramFK = @PrgFKValue, @FormReviewCreator = @CreatorValue
-	
-INSERT INTO FormReview(FormType,FormFK,FormDate,HVCaseFK,ProgramFK,FormReviewCreator)
-Values(@FormTypeValue,@FormFK,@DateValue,@HVCaseFKValue,@PrgFKValue,@CreatorValue)
+if @CreatorValue is null
+	print 'FormReview insert failed from spAddFormReview_userTRIGGER'
+else	
+	INSERT INTO FormReview(FormType,FormFK,FormDate,HVCaseFK,ProgramFK,FormReviewCreator)
+	Values(@FormTypeValue,@FormFK,@DateValue,@HVCaseFKValue,@PrgFKValue,@CreatorValue)
 GO
