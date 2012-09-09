@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[Supervision]
 [Caseload] [bit] NULL,
 [Coaching] [bit] NULL,
 [CommunityResources] [bit] NULL,
-[CulturalSenitivity] [bit] NULL,
+[CulturalSensitivity] [bit] NULL,
 [Curriculum] [bit] NULL,
 [FamilyProgress] [bit] NULL,
 [HomeVisitLogActivities] [bit] NULL,
