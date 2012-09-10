@@ -11,7 +11,9 @@ CREATE TABLE [dbo].[TrainingDetail]
 [TrainingDetailEditDate] [datetime] NULL,
 [TrainingDetailEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TrainingDetailPK_old] [int] NULL,
-[TrainingFK] [int] NOT NULL
+[TrainingFK] [int] NOT NULL,
+[ExemptDescription] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ExemptType] [varchar] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
