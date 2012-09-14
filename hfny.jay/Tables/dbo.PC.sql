@@ -3,6 +3,7 @@ CREATE TABLE [dbo].[PC]
 [PCPK] [int] NOT NULL IDENTITY(1, 1),
 [BirthCountry] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [BornUSA] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CP] [bit] NULL,
 [Ethnicity] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Gender] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OBP] [bit] NULL,
@@ -34,8 +35,7 @@ CREATE TABLE [dbo].[PC]
 [RaceSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SSNo] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TimesMoved] [int] NULL,
-[YearArriveUSA] [numeric] (4, 0) NULL,
-[CP] [bit] NULL
+[YearsInUSA] [numeric] (4, 0) NULL
 ) ON [PRIMARY]
 GO
 
