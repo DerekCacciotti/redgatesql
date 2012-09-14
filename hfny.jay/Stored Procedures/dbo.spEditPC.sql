@@ -6,6 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditPC](@PCPK int=NULL,
 @BirthCountry char(30)=NULL,
 @BornUSA char(1)=NULL,
+@CP bit=NULL,
 @Ethnicity varchar(500)=NULL,
 @Gender char(2)=NULL,
 @OBP bit=NULL,
@@ -34,13 +35,13 @@ CREATE PROCEDURE [dbo].[spEditPC](@PCPK int=NULL,
 @RaceSpecify varchar(500)=NULL,
 @SSNo varchar(200)=NULL,
 @TimesMoved int=NULL,
-@YearArriveUSA numeric(4, 0)=NULL,
-@CP bit=NULL)
+@YearsInUSA numeric(4, 0)=NULL)
 AS
 UPDATE PC
 SET 
 BirthCountry = @BirthCountry, 
 BornUSA = @BornUSA, 
+CP = @CP, 
 Ethnicity = @Ethnicity, 
 Gender = @Gender, 
 OBP = @OBP, 
@@ -69,7 +70,6 @@ Race = @Race,
 RaceSpecify = @RaceSpecify, 
 SSNo = @SSNo, 
 TimesMoved = @TimesMoved, 
-YearArriveUSA = @YearArriveUSA, 
-CP = @CP
+YearsInUSA = @YearsInUSA
 WHERE PCPK = @PCPK
 GO

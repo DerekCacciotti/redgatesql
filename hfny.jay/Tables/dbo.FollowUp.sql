@@ -52,9 +52,9 @@ CREATE TABLE [dbo].[FollowUp]
 [PC2InHome] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [Pregnant] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NOT NULL,
-[TimesPregnant] [int] NULL,
 [SafetyPlan] [bit] NULL,
-[SixMonthHome] [bit] NULL
+[SixMonthHome] [bit] NULL,
+[TimesPregnant] [int] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

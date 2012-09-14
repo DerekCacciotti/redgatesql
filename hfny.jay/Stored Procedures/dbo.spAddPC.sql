@@ -5,6 +5,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddPC](@BirthCountry char(30)=NULL,
 @BornUSA char(1)=NULL,
+@CP bit=NULL,
 @Ethnicity varchar(500)=NULL,
 @Gender char(2)=NULL,
 @OBP bit=NULL,
@@ -33,12 +34,12 @@ CREATE PROCEDURE [dbo].[spAddPC](@BirthCountry char(30)=NULL,
 @RaceSpecify varchar(500)=NULL,
 @SSNo varchar(200)=NULL,
 @TimesMoved int=NULL,
-@YearArriveUSA numeric(4, 0)=NULL,
-@CP bit=NULL)
+@YearsInUSA numeric(4, 0)=NULL)
 AS
 INSERT INTO PC(
 BirthCountry,
 BornUSA,
+CP,
 Ethnicity,
 Gender,
 OBP,
@@ -67,12 +68,12 @@ Race,
 RaceSpecify,
 SSNo,
 TimesMoved,
-YearArriveUSA,
-CP
+YearsInUSA
 )
 VALUES(
 @BirthCountry,
 @BornUSA,
+@CP,
 @Ethnicity,
 @Gender,
 @OBP,
@@ -101,8 +102,7 @@ VALUES(
 @RaceSpecify,
 @SSNo,
 @TimesMoved,
-@YearArriveUSA,
-@CP
+@YearsInUSA
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
