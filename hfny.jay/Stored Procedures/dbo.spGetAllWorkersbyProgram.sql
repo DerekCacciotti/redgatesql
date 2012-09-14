@@ -72,7 +72,7 @@ if @AllWorkers = 0 or @AllWorkers is null
 						, FirstName
 						, TerminationDate
 						, WorkerPK 
-						, case when TerminationDate is null then 0 else 1 end
+						, case when TerminationDate is null then 0 else 1 end as IsTermed
 		from cteAllWorkers aw
 		inner join dbo.SplitString(@WorkerType,',') on workertype = listitem
 		-- where workertype in (select listitem from dbo.SplitString(@WorkerType,','))
@@ -86,7 +86,7 @@ else
 						, FirstName
 						, convert(varchar(12),TerminationDate,101) as TerminationDate
 						, WorkerPK 
-						, case when TerminationDate is null then 0 else 1 end
+						, case when TerminationDate is null then 0 else 1 end as IsTermed
 		from WorkerProgram wp
 		inner join Worker w on w.WorkerPK = wp.WorkerFK
 		where ProgramFK = @ProgramFK
