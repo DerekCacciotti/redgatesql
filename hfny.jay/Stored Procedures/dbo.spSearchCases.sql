@@ -3,91 +3,151 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spSearchCases] ( @PC1ID VARCHAR(13) = NULL, @PCPK INT = NULL, 
-@PCFirstName VARCHAR(20) = NULL, @PCLastName VARCHAR(30) = NULL,@PCDOB DATETIME = NULL, 
-@TCFirstName VARCHAR(20) = NULL, @TCLastName VARCHAR(30) = NULL,@TCDOB DATETIME = NULL,
-@WorkerPK INT = NULL, @ProgramFK INT = NULL)
-
-AS
-
-SET NOCOUNT ON;
--- Rewrote this store proc to make it compatible with SQL 2008.
-WITH results(hvcasepk,pcpk, 
-	PC1ID,
-	pcfirstname, pclastname, pcdob,
-	tcfirstname, tclastname, tcdob,
-	workerlastname, workerfirstname,
-	dischargedate,caseprogress,levelname,WorkerPK)
-AS
+CREATE procedure [dbo].[spSearchCases]
 (
-
-	SELECT hvcasepk,pc.pcpk, 
-		PC1ID,
-		pc.pcfirstname, pc.pclastname, pc.pcdob,
-		RTRIM(tcid.tcfirstname), RTRIM(tcid.tclastname), hv.tcdob,
-		RTRIM(worker.lastname) AS workerlastname, RTRIM(worker.firstname) AS workerfirstname,
-		dischargedate, rtrim(cast(CaseProgress as char(4)))+'-'+ccp.CaseProgressBrief as CaseProgress, cdlvl.levelname,WorkerPK
-	FROM fnTableCaseProgram(@ProgramFK) cp  -- Note: fnTableCaseProgram is like a parameterised view ... Khalsa
-	
-	INNER JOIN codeLevel cdlvl ON cdlvl.codeLevelPK = cp.CurrentLevelFK 
-		
-	INNER JOIN hvcase hv
-	ON cp.hvcasefk = hv.hvcasepk	
-	
-	
-	INNER JOIN pc
-	ON hv.pc1fk = pc.pcpk
-	
-	inner join codeCaseProgress ccp on hv.CaseProgress=ccp.CaseProgressCode	
-	
-	
-	LEFT JOIN tcid
-	ON tcid.hvcasefk = hv.hvcasepk
-	
-	LEFT JOIN Workerprogram wp
-	ON wp.workerfk = ISNULL(currentfswfk, currentfawfk) --IN(currentfswfk, currentfawfk)
-	AND wp.programfk = cp.programfk
-	LEFT JOIN worker
-	ON workerpk = workerfk
-	WHERE (pc1id LIKE '%' + @PC1ID + '%'
-	OR pcpk = @PCPK
-	OR pc.pcfirstname LIKE @PCFirstName + '%'
-	OR pc.pclastname LIKE @PCLastName + '%'
-	OR pc.pcdob = @PCDOB
-	OR tcid.tcfirstname LIKE @TCFirstName + '%'
-	OR tcid.tclastname LIKE @TCLastName + '%'
-	OR hv.tcdob = @TCDOB
-	OR workerpk = @WorkerPK)
-
+    @PC1ID       varchar(13)    = null,
+    @PCPK        int            = null,
+    @PCFirstName varchar(20)    = null,
+    @PCLastName  varchar(30)    = null,
+    @PCDOB       datetime       = null,
+    @TCFirstName varchar(20)    = null,
+    @TCLastName  varchar(30)    = null,
+    @TCDOB       datetime       = null,
+    @WorkerPK    int            = null,
+    @ProgramFK   int            = null
 )
 
+as
 
-SELECT DISTINCT TOP 100 hvcasepk,pcpk, 
-	PC1ID,
-	pcfirstname + ' ' + pclastname AS PC1,
-	pcdob,
-	tc = SUBSTRING ((SELECT ', ' + tcfirstname + ' ' + tclastname FROM results r2 WHERE r1.pc1id = r2.pc1id FOR XML PATH ( '' ) ), 3, 1000),
-	tcdob,
-	workerfirstname + ' ' + workerlastname AS worker,
-	dischargedate, caseprogress,levelname, CASE WHEN dischargedate IS NULL THEN 0 ELSE 1 END
-	
-	,
+	set nocount on;
+	-- Rewrote this store proc to make it compatible with SQL 2008.
+	with results (hvcasepk	
+					,pcpk
+					,PC1ID
+					,pcfirstname
+					,pclastname
+					,pcdob
+					,tcfirstname
+					,tclastname
+					,tcdob
+					,workerlastname
+					,workerfirstname
+					,intakedate
+					,dischargedate
+					,caseprogress
+					,casehasobp
+					,casehaspc2
+					,levelname
+					,WorkerPK)
+	as
 	(
-	CASE WHEN pc1id = @PC1ID THEN 1 ELSE 0 END +
-	CASE WHEN pcpk = @PCPK THEN 1 ELSE 0 END +
-	CASE WHEN r1.pcfirstname LIKE @PCFirstName + '%' THEN 1 ELSE 0 END +
-	CASE WHEN r1.pclastname LIKE @PCLastName + '%' THEN 1 ELSE 0 END +
-	CASE WHEN r1.pcdob = @PCDOB THEN 1 ELSE 0 END +
-	CASE WHEN r1.tcfirstname LIKE @TCFirstName + '%' THEN 1 ELSE 0 END +
-	CASE WHEN r1.tclastname LIKE @TCLastName + '%' THEN 1 ELSE 0 END +
-	CASE WHEN r1.tcdob = @TCDOB THEN 1 ELSE 0 END +
-	CASE WHEN workerpk = @WorkerPK THEN 1 ELSE 0 END) AS SCORE4ORDERINGROWS
-	
-	
-FROM results r1
-ORDER BY
-CASE WHEN dischargedate IS NULL THEN 0 ELSE 1 END,
-SCORE4ORDERINGROWS DESC,PC1ID
-	
 
+	select hvcasepk
+		  ,pc.pcpk
+		  ,PC1ID
+		  ,pc.pcfirstname
+		  ,pc.pclastname
+		  ,pc.pcdob
+		  ,rtrim(tcid.tcfirstname)
+		  ,rtrim(tcid.tclastname)
+		  ,hv.tcdob
+		  ,rtrim(worker.lastname) as workerlastname
+		  ,rtrim(worker.firstname) as workerfirstname
+		  ,IntakeDate
+		  ,DischargeDate
+		  ,rtrim(cast(CaseProgress as char(4)))+'-'+ccp.CaseProgressBrief as CaseProgress
+		  ,case when obpfk is not null then 'Yes' else 'No' end as CaseHasOBP
+		  ,case when PC2FK is not null then 'Yes' else 'No' end as CaseHasPC2
+		  ,cdlvl.levelname
+		  ,WorkerPK
+		from fnTableCaseProgram(@ProgramFK) cp -- Note: fnTableCaseProgram is like a parameterised view ... Khalsa
+			inner join codeLevel cdlvl on cdlvl.codeLevelPK = cp.CurrentLevelFK
+			inner join hvcase hv on cp.hvcasefk = hv.hvcasepk
+			inner join pc on hv.pc1fk = pc.pcpk
+			inner join codeCaseProgress ccp on hv.CaseProgress = ccp.CaseProgressCode
+			left join tcid on tcid.hvcasefk = hv.hvcasepk
+			left join Workerprogram wp on wp.workerfk = isnull(currentfswfk,currentfawfk) --IN(currentfswfk, currentfawfk)
+					 and wp.programfk = cp.programfk
+			left join worker on workerpk = workerfk
+		where (pc1id like '%'+@PC1ID+'%'
+			 or pcpk = @PCPK
+			 or pc.pcfirstname like @PCFirstName+'%'
+			 or pc.pclastname like @PCLastName+'%'
+			 or pc.pcdob = @PCDOB
+			 or tcid.tcfirstname like @TCFirstName+'%'
+			 or tcid.tclastname like @TCLastName+'%'
+			 or hv.tcdob = @TCDOB
+			 or workerpk = @WorkerPK)
+
+	)
+
+	select distinct top 100 hvcasepk
+						   ,pcpk
+						   ,PC1ID
+						   ,pcfirstname+' '+pclastname as PC1
+						   ,pcdob
+						   ,tc = substring((select ', '+tcfirstname+' '+tclastname
+												from results r2
+												where r1.pc1id = r2.pc1id
+												for xml path ('')),3,1000)
+						   ,tcdob
+						   ,workerfirstname+' '+workerlastname as worker
+						   ,dischargedate
+						   ,intakedate
+						   ,caseprogress
+						   ,casehasobp
+						   ,casehaspc2
+						   ,levelname
+						   ,case
+								when dischargedate is null then 0
+								else 1
+							end
+
+						   ,(
+							case
+								when pc1id = @PC1ID then 1
+								else 0
+							end+
+							case
+								when pcpk = @PCPK then 1
+								else 0
+							end+
+							case
+								when r1.pcfirstname like @PCFirstName+'%' then 1
+								else 0
+							end+
+							case
+								when r1.pclastname like @PCLastName+'%' then 1
+								else 0
+							end+
+							case
+								when r1.pcdob = @PCDOB then 1
+								else 0
+							end+
+							case
+								when r1.tcfirstname like @TCFirstName+'%' then 1
+								else 0
+							end+
+							case
+								when r1.tclastname like @TCLastName+'%' then 1
+								else 0
+							end+
+							case
+								when r1.tcdob = @TCDOB then 1
+								else 0
+							end+
+							case
+								when workerpk = @WorkerPK then 1
+								else 0
+							end) as SCORE4ORDERINGROWS
+
+
+		from results r1
+		order by
+				case
+					when dischargedate is null then 0
+					else 1
+				end
+			   ,SCORE4ORDERINGROWS desc
+			   ,PC1ID
 GO

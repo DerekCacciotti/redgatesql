@@ -10,6 +10,12 @@ CREATE TABLE [dbo].[WorkerAssignment]
 [WorkerAssignmentEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WorkerFK] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_HVCaseFK] ON [dbo].[WorkerAssignment] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_ProgramFK] ON [dbo].[WorkerAssignment] ([ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssignment] ([WorkerFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO
