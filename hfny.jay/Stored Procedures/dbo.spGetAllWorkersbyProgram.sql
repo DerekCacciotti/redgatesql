@@ -34,35 +34,35 @@ if @AllWorkers = 0 or @AllWorkers is null
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FAW' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
-			where programfk=@ProgramFK
+			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and faw = 1
 					and @EventDate between FAWStartDate AND isnull(FAWEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FSW' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
-			where programfk=@ProgramFK 
+			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and fsw = 1
 					and @EventDate between FSWStartDate AND isnull(FSWEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FAdv' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
-			where programfk=@ProgramFK 
+			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and FatherAdvocate = 1
 					and @EventDate between FatherAdvocateStartDate AND isnull(FatherAdvocateEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'SUP' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
-			where programfk=@ProgramFK 
+			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and supervisor = 1
 					and @EventDate between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'PM' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
-			where programfk=@ProgramFK 
+			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and programmanager = 1
 					and @EventDate between ProgramManagerStartDate AND isnull(ProgramManagerEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			)
@@ -72,9 +72,10 @@ if @AllWorkers = 0 or @AllWorkers is null
 						, FirstName
 						, TerminationDate
 						, WorkerPK 
-						, case when TerminationDate is null then 0 else 1 end as IsTermed
+						, case when TerminationDate is null then 0 else 1 end
 		from cteAllWorkers aw
 		inner join dbo.SplitString(@WorkerType,',') on workertype = listitem
+		where (not FirstName like 'Historical%') and LastName <> 'Transfer Worker'
 		-- where workertype in (select listitem from dbo.SplitString(@WorkerType,','))
 		-- inner join Worker w on w.WorkerPK = aw.WorkerPK
 		order by case when TerminationDate is null then 0 else 1 end, LastName, FirstName
@@ -86,10 +87,12 @@ else
 						, FirstName
 						, convert(varchar(12),TerminationDate,101) as TerminationDate
 						, WorkerPK 
-						, case when TerminationDate is null then 0 else 1 end as IsTermed
+						, case when TerminationDate is null then 0 else 1 end
 		from WorkerProgram wp
 		inner join Worker w on w.WorkerPK = wp.WorkerFK
-		where ProgramFK = @ProgramFK
+		where ProgramFK = isnull(@ProgramFK, ProgramFK)
+				and (not FirstName like 'Historical%') 
+				and LastName <> 'Transfer Worker'
 		order by case when TerminationDate is null then 0 else 1 end, LastName, FirstName
 	end
 GO
