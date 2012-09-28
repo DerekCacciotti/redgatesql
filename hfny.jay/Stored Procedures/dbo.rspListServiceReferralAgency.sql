@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -20,7 +21,7 @@ BEGIN
 
    
   SELECT [AgencyName]     
-  FROM [HFNYConversion].[dbo].[listServiceReferralAgency]
+  FROM [listServiceReferralAgency]
   WHERE ProgramFK = @programfk AND AgencyIsActive = @bAgencyIsActive AND AgencyName <> ''
   ORDER BY AgencyName
   

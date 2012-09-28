@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -32,7 +33,7 @@ CASE WHEN len(isnull(rtrim(MPFirstName),'')) > 0 -- Add comma (,) if there is a 
 ,isnull(rtrim(MPAddress),'') as MPADDRESS
 ,isnull(rtrim(MPCity) + ',','')+'  '+isnull(rtrim(MPState) + ',','')+'  '+isnull(rtrim(MPZip),'') as MPCSZ
 ,isnull(rtrim(MPPhone),'') as MPPHONE    
-  FROM [HFNYConversion].[dbo].[listMedicalProvider]
+  FROM [listMedicalProvider]
   WHERE ProgramFK = @programfk AND MPIsActive = @bMPIsActive
   ORDER BY MPFNLN
  

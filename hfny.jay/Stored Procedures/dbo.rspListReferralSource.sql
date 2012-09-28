@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -20,7 +21,7 @@ BEGIN
 
    
 SELECT [ReferralSourceName]     
-  FROM [HFNYConversion].[dbo].[listReferralSource]
+  FROM [listReferralSource]
   WHERE ProgramFK = @programfk AND RSIsActive = @bRSIsActive AND ReferralSourceName <> ''
   ORDER BY ReferralSourceName
   

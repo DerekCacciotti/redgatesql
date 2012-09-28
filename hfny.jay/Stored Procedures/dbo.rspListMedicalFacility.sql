@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -23,7 +24,7 @@ isnull(rtrim(MFName),'') as MFNAME
 ,isnull(rtrim(MFAddress),'') as MFADDRESS
 ,isnull(rtrim(MFCity) + ',','')+'  '+isnull(rtrim(MFState) + ',','')+'  '+isnull(rtrim(MFZip),'') as MFCSZ
 ,isnull(rtrim(MFPhone),'') as MFPHONE    
-  FROM [HFNYConversion].[dbo].[listMedicalFacility]
+  FROM [listMedicalFacility]
   WHERE ProgramFK = @programfk AND MFIsActive = @bMFIsActive
   ORDER BY MFNAME
 
