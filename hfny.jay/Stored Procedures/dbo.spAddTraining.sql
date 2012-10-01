@@ -13,7 +13,8 @@ CREATE PROCEDURE [dbo].[spAddTraining](@ProgramFK int=NULL,
 @TrainingDuration int=NULL,
 @TrainingHours int=NULL,
 @TrainingMinutes int=NULL,
-@TrainingTitle char(70)=NULL)
+@TrainingTitle char(70)=NULL,
+@IsExempt bit=NULL)
 AS
 INSERT INTO Training(
 ProgramFK,
@@ -26,7 +27,8 @@ TrainingDescription,
 TrainingDuration,
 TrainingHours,
 TrainingMinutes,
-TrainingTitle
+TrainingTitle,
+IsExempt
 )
 VALUES(
 @ProgramFK,
@@ -39,7 +41,8 @@ VALUES(
 @TrainingDuration,
 @TrainingHours,
 @TrainingMinutes,
-@TrainingTitle
+@TrainingTitle,
+@IsExempt
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

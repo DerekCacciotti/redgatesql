@@ -10,7 +10,9 @@ CREATE PROCEDURE [dbo].[spAddTrainingDetail](@CulturalCompetency bit=NULL,
 @TopicFK int=NULL,
 @TrainingDetailCreator char(10)=NULL,
 @TrainingDetailPK_old int=NULL,
-@TrainingFK int=NULL)
+@TrainingFK int=NULL,
+@ExemptDescription varchar(500)=NULL,
+@ExemptType varchar(2)=NULL)
 AS
 INSERT INTO TrainingDetail(
 CulturalCompetency,
@@ -20,7 +22,9 @@ SubTopicTime,
 TopicFK,
 TrainingDetailCreator,
 TrainingDetailPK_old,
-TrainingFK
+TrainingFK,
+ExemptDescription,
+ExemptType
 )
 VALUES(
 @CulturalCompetency,
@@ -30,7 +34,9 @@ VALUES(
 @TopicFK,
 @TrainingDetailCreator,
 @TrainingDetailPK_old,
-@TrainingFK
+@TrainingFK,
+@ExemptDescription,
+@ExemptType
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

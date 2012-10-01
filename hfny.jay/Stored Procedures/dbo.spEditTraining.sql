@@ -14,7 +14,8 @@ CREATE PROCEDURE [dbo].[spEditTraining](@TrainingPK int=NULL,
 @TrainingEditor char(10)=NULL,
 @TrainingHours int=NULL,
 @TrainingMinutes int=NULL,
-@TrainingTitle char(70)=NULL)
+@TrainingTitle char(70)=NULL,
+@IsExempt bit=NULL)
 AS
 UPDATE Training
 SET 
@@ -28,6 +29,7 @@ TrainingDuration = @TrainingDuration,
 TrainingEditor = @TrainingEditor, 
 TrainingHours = @TrainingHours, 
 TrainingMinutes = @TrainingMinutes, 
-TrainingTitle = @TrainingTitle
+TrainingTitle = @TrainingTitle, 
+IsExempt = @IsExempt
 WHERE TrainingPK = @TrainingPK
 GO

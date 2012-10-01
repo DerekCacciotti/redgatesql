@@ -11,7 +11,9 @@ CREATE PROCEDURE [dbo].[spEditTrainingDetail](@TrainingDetailPK int=NULL,
 @TopicFK int=NULL,
 @TrainingDetailEditor char(10)=NULL,
 @TrainingDetailPK_old int=NULL,
-@TrainingFK int=NULL)
+@TrainingFK int=NULL,
+@ExemptDescription varchar(500)=NULL,
+@ExemptType varchar(2)=NULL)
 AS
 UPDATE TrainingDetail
 SET 
@@ -22,6 +24,8 @@ SubTopicTime = @SubTopicTime,
 TopicFK = @TopicFK, 
 TrainingDetailEditor = @TrainingDetailEditor, 
 TrainingDetailPK_old = @TrainingDetailPK_old, 
-TrainingFK = @TrainingFK
+TrainingFK = @TrainingFK, 
+ExemptDescription = @ExemptDescription, 
+ExemptType = @ExemptType
 WHERE TrainingDetailPK = @TrainingDetailPK
 GO
