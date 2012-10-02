@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,11 +6,11 @@ GO
 
 
 -- =============================================
--- Author:    <Jay Robohn>
--- Create date: <Feb 20, 2012>
--- Description: <copied from FamSys - see header below>
+-- Author:    <Dar Chen>
+-- Create date: <Oct 1, 2012>
+-- Description: <>
 -- =============================================
-CREATE procedure [dbo].[rspFollowUpTicklerSummary]
+CREATE procedure [dbo].[rspPSITicklerSummary]
 (
     @programfk    varchar(max)    = null,
     @rdate        datetime,
@@ -28,7 +27,7 @@ as
 
 	set @programfk = REPLACE(@programfk,'"','')
 
-	---- FOLLOW UP
+	---- PSI
 	select distinct pc1id
 				   ,hvcase.tcdob
 				   ,eventDescription
@@ -43,13 +42,16 @@ as
 		from caseprogram
 			inner join hvcase on hvcasepk = caseprogram.hvcasefk
 			inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-			inner join codeduebydates on scheduledevent = 'Follow Up'
+			inner join codeduebydates on scheduledevent = 'PSI'
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			inner join worker fsw on fsw.workerpk = currentfswfk
 			inner join workerprogram on workerfk = fsw.workerpk
 			inner join worker supervisor on supervisorfk = supervisor.workerpk
-			left join followup on followup.hvcasefk = hvcasepk and followup.programfk = caseprogram.programfk and codeduebydates.interval = followupinterval
-		where followup.hvcasefk is NULL
+			
+			left join PSI on PSI.hvcasefk = hvcasepk and PSI.programfk = caseprogram.programfk 
+			and codeduebydates.interval = PSIInterval
+	
+		where PSI.hvcasefk is NULL
 		     AND HVCase.TCDOD IS NULL
 			 and CaseProgress >= 11
 			 and CurrentFSWFK = isnull(@workerfk,CurrentFSWFK)

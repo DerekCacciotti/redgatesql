@@ -1,18 +1,15 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
-
-
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Feb 5, 2012>
 -- Description:	<report: ASQSE Tickler Summary>
 --				Moved from FamSys - 02/05/12 jrobohn
 -- =============================================
-create procedure [dbo].[rspASQSETicklerSummary]
+CREATE procedure [dbo].[rspASQSETicklerSummary]
 (@programfk    varchar(max)    = null,
  @rdate        datetime,
  @supervisorfk int             = null,
@@ -70,6 +67,8 @@ as
 			 and (dischargedate is null)
 			 and year(dateadd(dd,dueby,hvcase.tcdob)) = year(@rdate)
 			 and month(dateadd(dd,dueby,hvcase.tcdob)) = month(@rdate)
+			 AND HVCase.TCDOD IS NULL
+			 
 		order by fswname
 				,DueDate
 
