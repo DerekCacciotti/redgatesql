@@ -11,6 +11,7 @@ CREATE TABLE [dbo].[FatherFigure]
 [HVCaseFK] [int] NOT NULL,
 [IsOBP] [bit] NOT NULL,
 [IsPC2] [bit] NOT NULL,
+[IsOther] [bit] NULL,
 [LiveInPC1Home] [bit] NOT NULL,
 [MarriedToPC1] [bit] NOT NULL,
 [PC2InPC1Home] [bit] NOT NULL,
