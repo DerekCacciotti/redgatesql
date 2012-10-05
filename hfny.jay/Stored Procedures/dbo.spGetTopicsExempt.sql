@@ -1,14 +1,13 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 -- =============================================
--- Author:		Crhsi Papas
+-- Author:		Chris Papas
 -- Modified date: 10-2-2012
--- Description:	Gets topics and the associated topic code
+-- Description:	Gets topics and the associated topic code for Exempt Topics only
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetTopics] 
+CREATE PROCEDURE [dbo].[spGetTopicsExempt] 
 	-- Add the parameters for the stored procedure here
 
 AS
@@ -19,6 +18,6 @@ BEGIN
 
     -- Insert statements for procedure here
 	SELECT DISTINCT codetopicPK, cast([TopicCode] AS VARCHAR(MAX)) + ' ' + [TopicName] AS TopicCodeName FROM codeTopic t
-
+	WHERE SATInterval LIKE '%Wrap-Around%'
 END
 GO

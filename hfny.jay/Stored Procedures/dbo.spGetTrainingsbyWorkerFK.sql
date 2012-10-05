@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -33,7 +34,7 @@ BEGIN
       ,td.[ExemptDescription]
       ,td.[ExemptType]
       ,ta.[TrainingattendeePK]
-      , cT.TopicName AS 'Topic'
+      , cast([TopicCode] AS VARCHAR(MAX)) + ' ' + cT.TopicName AS 'Topic'
       , st.SubTopicName
       , t1.TrainingCodeDescription AS 'ExemptTypeName'
 	  FROM [dbo].[Trainingattendee] ta

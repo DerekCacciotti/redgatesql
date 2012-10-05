@@ -25,19 +25,22 @@ RETURN
 		(SELECT DISTINCT fawfk, min(kempedate) AS KempeDate
 		FROM Kempe k 
 		GROUP BY fawfk, programfk
-		Having ProgramFK=@prgfk)
+		--Having ProgramFK=@prgfk
+		)
 
 		, ctASQ AS
 		(SELECT DISTINCT FSWFK, min(DateCompleted) AS DateCompleted
 		FROM asq a
 		GROUP BY FSWFK, programfk
-		Having ProgramFK=@prgfk)
+		--Having ProgramFK=@prgfk
+		)
 
 		, ctHVLog AS
 		(SELECT DISTINCT FSWFK, min(VisitStartTime) AS VisitStartTime
 		FROM hvlog
 		GROUP BY FSWFK, programfk
-		Having ProgramFK=@prgfk)
+		--Having ProgramFK=@prgfk
+		)
 		
 		,ctSuper AS
 		(SELECT DISTINCT SupervisorFK, min(SupervisionDate) AS SuperDate 
@@ -47,6 +50,7 @@ RETURN
 
 
 		SELECT DISTINCT w.WorkerPK
+			 , w.LastName AS 'WrkrLName'
 			 , w.FAWInitialStart --as per Jay, we will use Initial start for FAW date
 			 , w.SupervisorInitialStart
 			 , w.FSWInitialStart
@@ -73,14 +77,13 @@ RETURN
 		LEFT OUTER JOIN ctHVLog ON ctHVLog.FSWFK = w.WorkerPK
 		LEFT OUTER JOIN ctKempe ctk ON ctk.FAWFK = w.workerpk
 		LEFT OUTER JOIN ctSuper ON ctsuper.SupervisorFK=w.WorkerPK
-		GROUP BY wp.programfk, w.WorkerPK, 
-		wp.supervisorfk
+		GROUP BY wp.programfk, w.WorkerPK, w.LastName
+		,wp.supervisorfk
 		,w.SupervisorInitialStart, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate
 		, ctHVLog.VisitStartTime, ctk.KempeDate, wp.FAWStartDate, w.FAWInitialStart, w.FSWInitialStart
-		HAVING wp.ProgramFK=@prgfk
-		AND w.WorkerPK = isnull(@workerfk,w.workerpk)
+		HAVING (wp.ProgramFK=@prgfk)
 		and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
 		AND wp.TerminationDate IS NULL
-
+		AND w.LastName NOT LIKE '%Transfer%'
 )
 GO

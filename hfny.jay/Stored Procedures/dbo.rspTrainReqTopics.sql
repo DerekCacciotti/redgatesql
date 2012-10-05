@@ -61,6 +61,7 @@ SELECT firstname + lastname AS Name
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=7) AS 'f8'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=8) as 'f9'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=39) as 'f9.1'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=9) AS 'f10'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=82) AS 'f10a'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=10) as 'f11'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=11) as 'f12'
@@ -218,6 +219,12 @@ SELECT [Name]
 		ELSE 
 			CASE WHEN datediff(dd, [f9.1], [SupervisorFirstEvent]) < 0 THEN '*' END
 		END AS 'f9_1_ast' 
+	 , convert(VARCHAR(12), [f10], 101) AS [f10]
+	 , CASE isnull(FAWInitialStart,0)
+		WHEN 0 THEN '' --do nothing as 9.0 is only for FAW's
+		ELSE 
+			CASE WHEN datediff(dd, [f10], [FAWInitialStart]) < -183 THEN '*' END
+		END AS 'f10_ast'
 	 , convert(VARCHAR(12), [f10a], 101) AS [f10a]
 	 , CASE isnull(FAWInitialStart,0)
 		WHEN 0 THEN '' --do nothing as 9.0 is only for FAW's
@@ -638,6 +645,8 @@ SELECT [Name]
 			CASE WHEN datediff(dd, [f25e], [HireDate]) < -183 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f25e_ast'
-FROM ctMain ORDER BY Name
+FROM ctMain
+WHERE ctMain.WorkerPK = isnull(@worker,ctMain.WorkerPK)
+ ORDER BY Name
 END
 GO
