@@ -11,31 +11,36 @@ GO
 CREATE PROCEDURE [dbo].[rspServiceReferralByCode] 
 	-- Add the parameters for the stored procedure here
 	@programfk INT = NULL, 
-    @supervisorfk INT = NULL, 
     @workerfk INT = NULL,
 	@StartDt datetime,
-	@EndDt datetime
+	@EndDt DATETIME,
+	@pc1id AS VARCHAR(13) = NULL,
+    @doWorker AS INT = 0,
+    @doPC1ID AS INT = 0
 AS
 
-
 --DECLARE @programfk INT = 6 
---DECLARE @supervisorfk INT = NULL 
 --DECLARE @workerfk INT = NULL
 --DECLARE @StartDt DATETIME = '01/01/2012'
 --DECLARE @EndDt DATETIME = '03/31/2012'
+--DECLARE @pc1id AS VARCHAR(13)
+--DECLARE @doWorker AS INT = 0
+--DECLARE @doPC1ID AS INT = 0
 
 ; WITH HVCaseInRange AS (
-SELECT b.HVCaseFK
+SELECT b.PC1ID, b.HVCaseFK
 , CASE WHEN a.IntakeDate < @StartDt THEN @StartDt ELSE a.IntakeDate END [Start_Period]
 , CASE WHEN b.DischargeDate IS NULL OR b.DischargeDate > @EndDt THEN @EndDt ELSE b.DischargeDate END [End_Period]
 FROM HVCase AS a JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 WHERE a.IntakeDate <= @EndDt AND a.IntakeDate IS NOT NULL AND
-(b.DischargeDate IS NULL OR b.DischargeDate > @EndDt)
+(b.DischargeDate IS NULL OR b.DischargeDate > @EndDt) 
+AND b.PC1ID = ISNULL(@pc1id, b.PC1ID)
 )
 
 SELECT 
-LTRIM(RTRIM(supervisor.firstname)) + ' ' + LTRIM(RTRIM(supervisor.lastname)) supervisor,
-LTRIM(RTRIM(fsw.firstname)) + ' ' + LTRIM(RTRIM(fsw.lastname)) worker,
+CASE WHEN @doWorker = 1 THEN 
+LTRIM(RTRIM(fsw.firstname)) + ' ' + LTRIM(RTRIM(fsw.lastname)) ELSE 'All Workers' END [worker], 
+CASE WHEN @doPC1ID = 1 THEN PC1ID ELSE '' END [PC1ID],
 ServiceReferralCategory =
 		CASE b.servicereferralcategory
 			WHEN 'HC' THEN 'Health Care'
@@ -49,27 +54,30 @@ ServiceReferralCategory =
 			ELSE 'No Match'
 		END + ' (' + ltrim(rtrim(b.servicereferralcategory)) + ')',
 b.ServiceReferralCode + '-' + ltrim(rtrim(b.ServiceReferralType)) [ServiceReferralCode],
+ltrim(rtrim(b.servicereferralcategory)) [CategoryCode],
 x.n
 FROM
-(SELECT a.FSWFK, a.ServiceCode, count(*) [n]
+(SELECT 
+CASE WHEN @doWorker = 1 THEN a.FSWFK ELSE '' END [FSWFK], 
+CASE WHEN @doPC1ID = 1 THEN b.PC1ID ELSE '' END [PC1ID], 
+a.ServiceCode, count(*) [n]
 FROM ServiceReferral a
 JOIN HVCaseInRange AS b ON b.HVCaseFK = a.HVCaseFK
 WHERE a.ProgramFK = @programfk 
 AND a.ReferralDate Between @StartDt AND @EndDt 
 AND a.ServiceReceived = 1
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
-GROUP BY a.FSWFK, a.ServiceCode) x
-INNER JOIN worker fsw
+GROUP BY 
+CASE WHEN @doWorker = 1 THEN a.FSWFK ELSE '' END, 
+CASE WHEN @doPC1ID = 1 THEN b.PC1ID ELSE '' END, 
+a.ServiceCode) x
+LEFT OUTER JOIN worker fsw
 ON x.FSWFK = fsw.workerpk
-INNER JOIN workerprogram wp
-ON wp.workerfk = fsw.workerpk
-INNER JOIN worker supervisor
-ON wp.supervisorfk = supervisor.workerpk
+--INNER JOIN workerprogram wp
+--ON wp.workerfk = fsw.workerpk
 INNER JOIN codeServiceReferral b
 ON x.ServiceCode = b.ServiceReferralCode
-
-WHERE wp.supervisorfk = ISNULL(@supervisorfk, wp.supervisorfk)
-ORDER BY supervisor, worker, ServiceReferralCategory, ServiceReferralCode
+ORDER BY worker, PC1ID, ServiceReferralCategory, ServiceReferralCode
 
 
 
