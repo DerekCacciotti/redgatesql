@@ -23,11 +23,12 @@ BEGIN
     -- Insert statements for procedure here
 ;WITH ctAttendee AS
 (
-SELECT t.TrainingPK
+SELECT DISTINCT t.TrainingPK
 	 , t.TrainingDate
 	 , WorkerFK
 	 , td.SubTopicFK
 	 , td.topicfk
+	 , t.IsExempt
 FROM Training t
 INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
 INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK
@@ -50,6 +51,7 @@ SELECT firstname + lastname AS Name
 , fn.FirstEvent
 , fn.SupervisorFirstEvent
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=1) AS 'f1'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.TopicFK=2) AS 'f2'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=65) AS 'f2a'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=66) AS 'f2b'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=67) AS 'f2c'
@@ -152,7 +154,13 @@ SELECT [Name]
 		WHEN [f1] THEN
 			CASE WHEN datediff(dd, [f1], [FirstEvent]) < 0 THEN '*' 
 			ELSE '' END
-		ELSE '' END AS 'f1_ast'
+		ELSE '' END AS 'f1_ast'	 
+	 , convert(VARCHAR(12), [f2], 101) AS [f2]
+	 , CASE isnull([f2], 0)
+		WHEN [f2] THEN
+			CASE WHEN datediff(dd, [f2], [FirstEvent]) < 0 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f2_ast'
 	 , convert(VARCHAR(12), [f2a], 101) AS [f2a]
 	 , CASE isnull([f2a], 0)
 		WHEN [f2a] THEN
