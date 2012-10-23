@@ -32,8 +32,8 @@ AS
 
 	SET @isApproved = ISNULL(@isApproved, 0)
 	
+	COMMIT TRANSACTION
 	
 	RETURN
 
-	COMMIT TRANSACTION
 GO
