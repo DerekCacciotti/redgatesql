@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,9 +10,9 @@ GO
 -- Description:	<report: Family time line -- header>
 --				moved from FamSys Feb 20, 2012 by jrobohn
 -- =============================================
-create procedure [dbo].[rspFamilyTimeLineHeader]
+CREATE procedure [dbo].[rspFamilyTimeLineHeader]
 (
-    @pc1id     varchar(12),
+    @pc1id     varchar(13),
     @programfk varchar(max)
 )
 as
