@@ -451,205 +451,205 @@ SELECT [Name]
 	 , CASE [f20a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f20a], 101) END AS [f20a]
 	 , CASE isnull([f20a], 0)
 		WHEN [f20a] THEN
-			CASE WHEN datediff(dd, [f20a], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f20a], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f20a_ast'
 	 , CASE [f20b] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f20b], 101) END AS [f20b]
 	 , CASE isnull([f20b], 0)
 		WHEN [f20b] THEN
-			CASE WHEN datediff(dd, [f20b], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f20b], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f20b_ast'
 	 , CASE [f21a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f21a], 101) END AS [f21a]
 	 , CASE isnull([f21a], 0)
 		WHEN [f21a] THEN
-			CASE WHEN datediff(dd, [f21a], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f21a], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f21a_ast'
 	 , CASE [f21b] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f21b], 101) END AS [f21b]
 	 , CASE isnull([f21b], 0)
 		WHEN [f21b] THEN
-			CASE WHEN datediff(dd, [f21b], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f21b], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f21b_ast'
 	 , CASE [f21c] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f21c], 101) END AS [f21c]
 	 , CASE isnull([f21c], 0)
 		WHEN [f21c] THEN
-			CASE WHEN datediff(dd, [f21c], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f21c], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f21c_ast'
 	 , CASE [f21d] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f21d], 101) END AS [f21d]
 	 , CASE isnull([f21d], 0)
 		WHEN [f21d] THEN
-			CASE WHEN datediff(dd, [f21d], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f21d], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f21d_ast'
 	 , CASE [f21e] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f21e], 101) END AS [f21e]
 	 , CASE isnull([f21e], 0)
 		WHEN [f21e] THEN
-			CASE WHEN datediff(dd, [f21e], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f21e], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f21e_ast'
 	 , CASE [f21f] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f21f], 101) END AS [f21f]
 	 , CASE isnull([f21f], 0)
 		WHEN [f21f] THEN
-			CASE WHEN datediff(dd, [f21f], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f21f], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f21f_ast'
 	 , CASE [f21g] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f21g], 101) END AS [f21g]
 	 , CASE isnull([f21g], 0)
 		WHEN [f21g] THEN
-			CASE WHEN datediff(dd, [f21g], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f21g], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f21g_ast'
 	 , CASE [f22a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f22a], 101) END AS [f22a]
 	 , CASE isnull([f22a], 0)
 		WHEN [f22a] THEN
-			CASE WHEN datediff(dd, [f22a], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f22a], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f22a_ast'
 	 , CASE [f22b] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f22b], 101) END AS [f22b]
 	 , CASE isnull([f22b], 0)
 		WHEN [f22b] THEN
-			CASE WHEN datediff(dd, [f22b], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f22b], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f22b_ast'
 	 , CASE [f22c] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f22c], 101) END AS [f22c]
 	 , CASE isnull([f22c], 0)
 		WHEN [f22c] THEN
-			CASE WHEN datediff(dd, [f22c], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f22c], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f22c_ast'
 	 , CASE [f22d] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f22d], 101) END AS [f22d]
 	 , CASE isnull([f22d], 0)
 		WHEN [f22d] THEN
-			CASE WHEN datediff(dd, [f22d], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f22d], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f22d_ast'
 	 , CASE [f22e] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f22e], 101) END AS [f22e]
 	 , CASE isnull([f22e], 0)
 		WHEN [f22e] THEN
-			CASE WHEN datediff(dd, [f22e], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f22e], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f22e_ast'
 	 , CASE [f22f] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f22f], 101) END AS [f22f]
 	 , CASE isnull([f22f], 0)
 		WHEN [f22f] THEN
-			CASE WHEN datediff(dd, [f22f], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f22f], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f22f_ast'
 	 , CASE [f22g] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f22g], 101) END AS [f22g]
 	 , CASE isnull([f22g], 0)
 		WHEN [f22g] THEN
-			CASE WHEN datediff(dd, [f22g], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f22g], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f22g_ast'
 	 , CASE [f22h] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f22h], 101) END AS [f22h]
 	 , CASE isnull([f22h], 0)
 		WHEN [f22h] THEN
-			CASE WHEN datediff(dd, [f22h], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f22h], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f22h_ast'
 	 , CASE [f23a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f23a], 101) END AS [f23a]
 	 , CASE isnull([f23a], 0)
 		WHEN [f23a] THEN
-			CASE WHEN datediff(dd, [f23a], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f23a], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f23a_ast'
 	 , CASE [f23b] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f23b], 101) END AS [f23b]
 	 , CASE isnull([f23b], 0)
 		WHEN [f23b] THEN
-			CASE WHEN datediff(dd, [f23b], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f23b], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f23b_ast'
 	 , CASE [f23c] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f23c], 101) END AS [f23c]
 	 , CASE isnull([f23c], 0)
 		WHEN [f23c] THEN
-			CASE WHEN datediff(dd, [f23c], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f23c], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f23c_ast'
 	 , CASE [f23d] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f23d], 101) END AS [f23d]
 	 , CASE isnull([f23d], 0)
 		WHEN [f23d] THEN
-			CASE WHEN datediff(dd, [f23d], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f23d], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f23d_ast'
 	 , CASE [f23e] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f23e], 101) END AS [f23e]
 	 , CASE isnull([f23e], 0)
 		WHEN [f23e] THEN
-			CASE WHEN datediff(dd, [f23e], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f23e], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f23e_ast'
 	 , CASE [f23f] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f23f], 101) END AS [f23f]
 	 , CASE isnull([f23f], 0)
 		WHEN [f23f] THEN
-			CASE WHEN datediff(dd, [f23f], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f23f], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f23f_ast'
 	 , CASE [f24a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f24a], 101) END AS [f24a]
 	 , CASE isnull([f24a], 0)
 		WHEN [f24a] THEN
-			CASE WHEN datediff(dd, [f24a], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f24a], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f24a_ast'
 	 , CASE [f24b] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f24b], 101) END AS [f24b]
 	 , CASE isnull([f24b], 0)
 		WHEN [f24b] THEN
-			CASE WHEN datediff(dd, [f24b], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f24b], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f24b_ast'
 	 , CASE [f24c] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f24c], 101) END AS [f24c]
 	 , CASE isnull([f24c], 0)
 		WHEN [f24c] THEN
-			CASE WHEN datediff(dd, [f24c], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f24c], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f24c_ast'
 	 , CASE [f24d] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f24d], 101) END AS [f24d]
 	 , CASE isnull([f24d], 0)
 		WHEN [f24d] THEN
-			CASE WHEN datediff(dd, [f24d], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f24d], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f24d_ast'
 	 , CASE [f24e] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f24e], 101) END AS [f24e]
 	 , CASE isnull([f24e], 0)
 		WHEN [f24e] THEN
-			CASE WHEN datediff(dd, [f24e], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f24e], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f24e_ast'
 	 , CASE [f24f] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f24f], 101) END AS [f24f]
 	 , CASE isnull([f24f], 0)
 		WHEN [f24f] THEN
-			CASE WHEN datediff(dd, [f24f], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f24f], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f24f_ast'
 	 , CASE [f25a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f25a], 101) END AS [f25a]
 	 , CASE isnull([f25a], 0)
 		WHEN [f25a] THEN
-			CASE WHEN datediff(dd, [f25a], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f25a], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f25a_ast'
 	 , CASE [f25b] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f25b], 101) END AS [f25b]
 	 , CASE isnull([f25b], 0)
 		WHEN [f25b] THEN
-			CASE WHEN datediff(dd, [f25b], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f25b], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f25b_ast'
 	 , CASE [f25c] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f25c], 101) END AS [f25c]
 	 , CASE isnull([f25c], 0)
 		WHEN [f25c] THEN
-			CASE WHEN datediff(dd, [f25c], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f25c], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f25c_ast'
 	 , CASE [f25d] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f25d], 101) END AS [f25d]
 	 , CASE isnull([f25d], 0)
 		WHEN [f25d] THEN
-			CASE WHEN datediff(dd, [f25d], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f25d], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f25d_ast'
 	 , CASE [f25e] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f25e] , 101) END AS [f25e]
 	 , CASE isnull([f25e], 0)
 		WHEN [f25e] THEN
-			CASE WHEN datediff(dd, [f25e], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f25e], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f25e_ast'
 FROM ctMain
