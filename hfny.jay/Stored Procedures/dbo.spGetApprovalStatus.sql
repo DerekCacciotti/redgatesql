@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -15,6 +16,9 @@ CREATE PROCEDURE [dbo].[spGetApprovalStatus]
 
 AS
 	SET NOCOUNT ON
+	BEGIN TRANSACTION
+	
+	SET TRANSACTION ISOLATION LEVEL Read uncommitted;
 	
 	SELECT @isApproved = CASE WHEN ReviewedBy IS NOT NULL THEN 1 ELSE 0 END
 	FROM FormReview
@@ -27,8 +31,9 @@ AS
 	AND FormReview.ProgramFK = @ProgramFK
 
 	SET @isApproved = ISNULL(@isApproved, 0)
-		
+	
+	
 	RETURN
 
-
+	COMMIT TRANSACTION
 GO

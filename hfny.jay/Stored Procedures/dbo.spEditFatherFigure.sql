@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,6 +11,7 @@ CREATE PROCEDURE [dbo].[spEditFatherFigure](@FatherFigurePK int=NULL,
 @HVCaseFK int=NULL,
 @IsOBP bit=NULL,
 @IsPC2 bit=NULL,
+@IsOther bit=NULL,
 @LiveInPC1Home bit=NULL,
 @MarriedToPC1 bit=NULL,
 @PC2InPC1Home bit=NULL,
@@ -27,6 +29,7 @@ FatherFigureEditor = @FatherFigureEditor,
 HVCaseFK = @HVCaseFK, 
 IsOBP = @IsOBP, 
 IsPC2 = @IsPC2, 
+IsOther = @IsOther, 
 LiveInPC1Home = @LiveInPC1Home, 
 MarriedToPC1 = @MarriedToPC1, 
 PC2InPC1Home = @PC2InPC1Home, 
