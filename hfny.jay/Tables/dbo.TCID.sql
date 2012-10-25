@@ -32,6 +32,41 @@ CREATE TABLE [dbo].[TCID]
 [VaricellaZoster] [bit] NULL,
 [NoImmunizationsReason] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author:		Chris Papas
+-- Create date: 10/24/2012
+-- Description:	Stop a Duplicate TCID from being entered (Zoho Bug HW352)
+-- =============================================
+CREATE TRIGGER [dbo].[fr_tcidStopDupe]
+   on [dbo].[TCID]
+   AFTER INSERT
+AS 
+BEGIN
+
+	SET NOCOUNT ON;
+	
+	Declare @insertedtime AS DATETIME
+	set @insertedtime = (SELECT TCIDCreateDate from inserted)
+	
+	DECLARE @insertedcase AS INT
+	SET @insertedcase = (SELECT HVCaseFK FROM INSERTED)
+
+if exists (select hvcasefk from TCID where datediff(ss, TCIDCreateDate, @insertedtime) < 1 AND HVCaseFK = @insertedcase
+				group by hvcasefk having count(*) > 1) 
+				
+				
+BEGIN
+		ROLLBACK TRANSACTION
+END
+
+END
+GO
+
 ALTER TABLE [dbo].[TCID] WITH NOCHECK ADD
 CONSTRAINT [FK_TCID_HVCase] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
