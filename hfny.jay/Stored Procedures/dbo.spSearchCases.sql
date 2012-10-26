@@ -3,6 +3,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- 'AD85030196603'
+-- exec spSearchCases null,null,'Allison','Dough'
 CREATE procedure [dbo].[spSearchCases]
 (
     @PC1ID       varchar(13)    = null,
