@@ -37,59 +37,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- =============================================
--- Author:		Chris Papas
--- Create date: 10/24/2012
--- Description:	Stop a Duplicate TCID from being entered (Zoho Bug HW352)
--- =============================================
-CREATE TRIGGER [dbo].[fr_tcidStopDupe]
-   on [dbo].[TCID]
-   AFTER INSERT
-AS 
-BEGIN
-
-	SET NOCOUNT ON;
-	
-	Declare @insertedtime AS DATETIME
-	set @insertedtime = (SELECT TCIDCreateDate from inserted)
-	
-	DECLARE @insertedcase AS INT
-	SET @insertedcase = (SELECT HVCaseFK FROM INSERTED)
-
-if exists (select hvcasefk from TCID where datediff(ss, TCIDCreateDate, @insertedtime) < 1 AND HVCaseFK = @insertedcase
-				group by hvcasefk having count(*) > 1) 
-				
-				
-BEGIN
-		ROLLBACK TRANSACTION
-END
-
-END
-GO
-
-ALTER TABLE [dbo].[TCID] WITH NOCHECK ADD
-CONSTRAINT [FK_TCID_HVCase] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
-GO
-CREATE STATISTICS [_dta_stat_197575742_10_21] ON [dbo].[TCID] ([HVCaseFK], [TCFirstName])
-
-GO
-CREATE STATISTICS [_dta_stat_197575742_21_29_10] ON [dbo].[TCID] ([TCFirstName], [TCLastName], [HVCaseFK])
-
-GO
-CREATE STATISTICS [_dta_stat_197575742_29_10] ON [dbo].[TCID] ([TCLastName], [HVCaseFK])
-
-CREATE NONCLUSTERED INDEX [IX_TCID_HVCaseFK] ON [dbo].[TCID] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_TCID_HVCaseFK_TCDOB_TCFname_TCLName] ON [dbo].[TCID] ([HVCaseFK], [TCDOB], [TCFirstName], [TCLastName]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_TCID_TCDOB_TCFname_TCLName] ON [dbo].[TCID] ([TCDOB], [TCFirstName], [TCLastName]) ON [PRIMARY]
-
-
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
 Create TRIGGER [dbo].[fr_delete_tcid]
 on [dbo].[TCID]
 After DELETE
@@ -168,4 +115,20 @@ Update TCID Set TCID.TCIDEditDate= getdate()
 From [TCID] INNER JOIN Inserted ON [TCID].[TCIDPK]= Inserted.[TCIDPK]
 GO
 ALTER TABLE [dbo].[TCID] ADD CONSTRAINT [PK__TCID__05FAD12F00DF2177] PRIMARY KEY CLUSTERED  ([TCIDPK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_TCID_HVCaseFK] ON [dbo].[TCID] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_TCID_HVCaseFK_TCDOB_TCFname_TCLName] ON [dbo].[TCID] ([HVCaseFK], [TCDOB], [TCFirstName], [TCLastName]) ON [PRIMARY]
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [uix_HVCaseName] ON [dbo].[TCID] ([HVCaseFK], [TCFirstName], [TCLastName]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_TCID_TCDOB_TCFname_TCLName] ON [dbo].[TCID] ([TCDOB], [TCFirstName], [TCLastName]) ON [PRIMARY]
+GO
+CREATE STATISTICS [_dta_stat_197575742_10_21] ON [dbo].[TCID] ([HVCaseFK], [TCFirstName])
+GO
+CREATE STATISTICS [_dta_stat_197575742_21_29_10] ON [dbo].[TCID] ([TCFirstName], [TCLastName], [HVCaseFK])
+GO
+CREATE STATISTICS [_dta_stat_197575742_29_10] ON [dbo].[TCID] ([TCLastName], [HVCaseFK])
+GO
+ALTER TABLE [dbo].[TCID] WITH NOCHECK ADD CONSTRAINT [FK_TCID_HVCase] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
