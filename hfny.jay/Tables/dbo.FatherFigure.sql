@@ -25,6 +25,55 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+create TRIGGER [dbo].[fr_FatherFigure]
+on [dbo].[FatherFigure]
+After insert
+
+AS
+
+Declare @PK int
+
+set @PK = (SELECT FatherFigurePK from inserted)
+
+BEGIN
+	EXEC spAddFormReview_userTrigger @FormFK=@PK, @FormTypeValue='FF'
+END
+GO
+
+-- =============================================
+-- Author:		Jay Robohn
+-- Create date: 10/19/2012
+-- Description:	Updates FormReview Table with form date on Supervisor Review of Form
+-- =============================================
+create trigger [dbo].[fr_FatherFigure_Edit]
+on [dbo].[FatherFigure]
+after update
+
+as
+
+	declare @PK int
+	declare @UpdatedFormDate datetime
+	declare @FormTypeValue varchar(2)
+
+	select @PK = FatherFigurePK
+		from inserted
+	select @UpdatedFormDate = DateAcceptService
+		from inserted
+	set @FormTypeValue = 'FF'
+
+	begin
+		update FormReview
+			set FormDate = @UpdatedFormDate
+			where FormFK = @PK
+				 and FormType = @FormTypeValue
+
+	end
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_FatherFigureEditDate ON FatherFigure
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
