@@ -43,11 +43,11 @@ as
 			inner join tcid
 					  on tcid.hvcasefk = hvcasepk
 					  and tcid.programfk = caseprogram.programfk
-			inner join appoptions
-					  on caseprogram.programfk = appoptions.programfk
-					  and optionitem = 'asqse version'
+			--inner join appoptions
+			--		  on caseprogram.programfk = appoptions.programfk
+			--		  and optionitem = 'asqse version'
 			inner join codeduebydates
-					  on scheduledevent = optionValue
+					  on scheduledevent = 'ASQSE-1'  --optionValue
 			inner join dbo.SplitString(@programfk,',')
 					  on caseprogram.programfk = listitem
 			inner join worker fsw

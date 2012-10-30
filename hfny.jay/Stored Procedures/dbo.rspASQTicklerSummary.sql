@@ -48,8 +48,8 @@ as
 		from caseprogram
 			inner join hvcase on hvcasepk = caseprogram.hvcasefk
 			inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-			inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asq version'
-			inner join codeduebydates on scheduledevent = optionValue
+			--inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asq version'
+			inner join codeduebydates on scheduledevent = 'ASQ' --optionValue
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			inner join worker fsw on fsw.workerpk = currentfswfk
 			inner join workerprogram on workerfk = fsw.workerpk
