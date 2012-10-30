@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -262,8 +263,14 @@ ELSE
 BEGIN
 
 SELECT 
-	   PC1ID
-	 , convert(varchar(10),TCDOB,101) as TCDOB
+	   PC1ID,
+		case
+		   when TCDOB is not null then
+			   convert(varchar(10),TCDOB,101)
+		   else
+			   ''
+		end as TCDOB
+		
 	 , TCName
 	 , Worker
 	 , TCAgeInMonths

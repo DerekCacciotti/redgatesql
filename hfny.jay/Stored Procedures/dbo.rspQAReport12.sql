@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -42,7 +43,7 @@ DECLARE @tbl4QAReport12 TABLE(
 	Worker [varchar](200),
 	TCAgeInMonths INT,
 	currentLevel [varchar](50),
-	LengthInProgress INT  
+	LengthInProgram INT  
 	
 	)
 
@@ -64,7 +65,7 @@ DECLARE @tbl4QAReport12Detail TABLE(
 	XDateAge INT,
 	TCName [varchar](200),
 	DaysSinceLastMedicalFormEdit INT,
-	LengthInProgress INT  
+	LengthInProgram INT  
 	)
 
 INSERT INTO @tbl4QAReport12Detail(
@@ -83,7 +84,7 @@ INSERT INTO @tbl4QAReport12Detail(
 	XDateAge,
 	TCName,
 	DaysSinceLastMedicalFormEdit,
-	LengthInProgress	
+	LengthInProgram	
 )
 select 
 	 h.HVCasePK, 
@@ -123,7 +124,7 @@ select
 	end as XDateAge,
 	'' AS TCName,
 	''  AS DaysSinceLastMedicalFormEdit,
-	datediff(dd, h.IntakeDate,  @LastDayofPreviousMonth)  AS LengthInProgress
+	datediff(dd, h.IntakeDate,  @LastDayofPreviousMonth)  AS LengthInProgram
 		
 	from dbo.CaseProgram cp
 	inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
@@ -145,13 +146,13 @@ INSERT INTO @tbl4QAReport12
 (
 	HVCasePK,
 	[PC1ID],
-	LengthInProgress,
+	LengthInProgram,
 	Worker,
 	currentLevel
 )
 SELECT HVCasePK
 	 , PC1ID
-	 , LengthInProgress
+	 , LengthInProgram
 	 , Worker
 	 , currentLevel	 
 
@@ -193,7 +194,7 @@ BEGIN
 
 SELECT 
 	   PC1ID
-	 , LengthInProgress
+	 , LengthInProgram
 	 , Worker
 	 , currentLevel	 
 

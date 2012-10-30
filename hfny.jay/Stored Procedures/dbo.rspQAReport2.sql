@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -141,14 +142,46 @@ SELECT * FROM @tbl4QAReport2Summary
 END
 ELSE
 BEGIN
-SELECT PC1ID
-	 , convert(varchar(10),ScreenDate,101) as ScreenDate
-	 , convert(varchar(10),TCDOB,101) as TCDOB
-	 , convert(varchar(10),tcdobplus14days,101) as tcdobplus14days
-	 , convert(varchar(10),tcdobplus3months,101) as tcdobplus3months
+SELECT PC1ID,
+		case
+		   when ScreenDate is not null then
+			   convert(varchar(10),ScreenDate,101)
+		   else
+			   ''
+		end as ScreenDate,
+
+		case
+		   when TCDOB is not null then
+			   convert(varchar(10),TCDOB,101)
+		   else
+			   ''
+		end as TCDOB,
+
+		case
+		   when tcdobplus14days is not null then
+			   convert(varchar(10),tcdobplus14days,101)
+		   else
+			   ''
+		end as tcdobplus14days,
+
+		case
+		   when tcdobplus3months is not null then
+			   convert(varchar(10),tcdobplus3months,101)
+		   else
+			   ''
+		end as tcdobplus3months
+		
 	 , CurrentFAW
-	 , ReferralSourceName
-	 , ActivityDate FROM @tbl4QAReport2Detail	
+	 , ReferralSourceName,
+	 	case
+		   when ActivityDate is not null then
+			   ActivityDate
+		   else
+			   ''
+		end as ActivityDate	 
+	 
+	 
+	  FROM @tbl4QAReport2Detail	
 WHERE datediff(dd, tcdob , @LastDayofPreviousMonth) > datediff(dd, dateadd(m, 3, @LastDayofPreviousMonth), @LastDayofPreviousMonth) * -1		
 ORDER BY PC1ID 	
 

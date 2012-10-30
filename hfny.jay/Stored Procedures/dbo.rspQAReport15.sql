@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -165,8 +166,14 @@ ELSE
 BEGIN
 
 SELECT 	
-    PC1ID
-  , convert(varchar(10),CurrentLevelDate,101) as StartDateOfLevelX
+    PC1ID,
+		case
+		   when CurrentLevelDate is not null then
+			   convert(varchar(10),CurrentLevelDate,101)
+		   else
+			   ''
+		end as StartDateOfLevelX  
+    
   , datediff(dd, CurrentLevelDate, @LastDayofPreviousMonth) AS NumberOfDaysOnLevelX
   , Worker
   , currentLevel  

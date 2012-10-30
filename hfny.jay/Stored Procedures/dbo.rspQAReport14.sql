@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -250,9 +251,23 @@ ELSE
 BEGIN
 
 SELECT 	
-    PC1ID
-  , LastVisitActual
-  , LastVisitAttempted
+    PC1ID,
+    
+		case
+		   when LastVisitActual is not null then
+			   convert(varchar(10),LastVisitActual,101)
+		   else
+			   ''
+		end as LastVisitActual,    
+
+		case
+		   when LastVisitAttempted is not null then
+			   convert(varchar(10),LastVisitAttempted,101)
+		   else
+			   ''
+		end as LastVisitAttempted        
+    
+
   , Worker
   , currentLevel
  FROM @tbl4QAReport14Final

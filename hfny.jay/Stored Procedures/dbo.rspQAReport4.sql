@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -129,8 +130,18 @@ ELSE
 	SELECT 
 		HVCasePK,
 		[PC1ID],
-		convert(varchar(10),IntakeDate,101) as IntakeDate,
-		convert(varchar(10),FormDueDate,101) as FormDueDate,
+		case
+		   when IntakeDate is not null then
+			   convert(varchar(10),IntakeDate,101)
+		   else
+			   ''
+		end as IntakeDate,
+		case
+		   when FormDueDate is not null then
+			   convert(varchar(10),FormDueDate,101)
+		   else
+			   ''
+		end as FormDueDate,	
 		Worker,
 		currentLevel 
 	 FROM @tbl4QAReport4Detail	
