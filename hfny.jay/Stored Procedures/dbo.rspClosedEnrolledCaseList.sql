@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -11,7 +12,8 @@ CREATE PROCEDURE [dbo].[rspClosedEnrolledCaseList]
 	-- Add the parameters for the stored procedure here
 	@programfk INT = NULL, 
 	@StartDt datetime,
-	@EndDt datetime
+	@EndDt DATETIME,
+	@SiteFK INT = -1
 AS
 
 
@@ -63,6 +65,7 @@ JOIN HVScreen ON HVScreen.HVCaseFK = b.HVCasePK
 --
 -- FSW & site = a.CurrentFSWFK <-> Worker.WorkerPK -> Worker.LastName + Worker.FirstName ?? site ??
 LEFT OUTER JOIN Worker ON Worker.WorkerPK = a.CurrentFSWFK
+JOIN Workerprogram AS wp on wp.WorkerFK = Worker.WorkerPK
 --
 -- intake date & age at intake = a.HVCaseFK <-> Intake.HVCaseFK -> Intake.IntakeDate -> (PCDOB - IntakeDate)
 JOIN Intake ON Intake.HVCaseFK = b.HVCasePK
@@ -92,6 +95,7 @@ LEFT OUTER JOIN TCID T ON T.HVCaseFK = b.HVCasePK
 
 WHERE a.DischargeDate BETWEEN @StartDt AND @EndDt
 AND a.ProgramFK = @programfk
+AND (@SiteFK = -1 OR (ISNULL(wp.SiteFK, -1) = @SiteFK))
 ORDER BY [key01]
 
 
