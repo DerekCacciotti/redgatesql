@@ -104,7 +104,7 @@ SELECT * FROM NoStatus
 )
 
 SELECT c.PC1ID [Participant]
-, rtrim(w.LastName) + ', ' + rtrim(w.LastName) [Worker]
+, rtrim(w.LastName) + ', ' + rtrim(w.FirstName) [Worker]
 , CASE WHEN a.PADate < @StartDt THEN rtrim(str(datediff(dd, b.ScreenDate , @EndDt),10))
   WHEN a.CaseStatus = '03' THEN rtrim(str(datediff(dd, b.ScreenDate , a.PADate),10))
   WHEN a.CaseStatus = '01' THEN rtrim(str(datediff(dd, b.ScreenDate, @EndDt),10))
