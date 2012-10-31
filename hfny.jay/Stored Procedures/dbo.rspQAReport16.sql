@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -235,7 +236,6 @@ ELSE
 BEGIN
 
 SELECT 
-	  --HVCasePK,
 	   PC1ID
 	 , NumOfFormsToBeReviewed
 	 , Supervisor

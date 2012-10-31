@@ -144,7 +144,8 @@ SELECT * FROM @tbl4QAReport1Summary
 END
 ELSE
 BEGIN
-SELECT PC1ID,
+SELECT
+		PC1ID,
 		case
 		   when ScreenDate is not null then
 			   convert(varchar(10),ScreenDate,101)
@@ -164,14 +165,14 @@ SELECT PC1ID,
 			   convert(varchar(10),tcdobplus14days,101)
 		   else
 			   ''
-		end as tcdobplus14days,
+		end as AssessmentAgeOutDate,
 
 		case
 		   when tcdobplus3months is not null then
 			   convert(varchar(10),tcdobplus3months,101)
 		   else
 			   ''
-		end as tcdobplus3months
+		end as EnrollmentAgeOutDate
 		
 	 , CurrentFAW
 	 , ReferralSourceName,
@@ -181,7 +182,7 @@ SELECT PC1ID,
 			   ActivityDate
 		   else
 			   ''
-		end as ActivityDate
+		end as PreassessmentFormDate
 	 
 
  FROM @tbl4QAReport1Detail	

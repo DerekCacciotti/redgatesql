@@ -127,8 +127,7 @@ VALUES(4 ,'Intakes for Active Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + '
 	END
 ELSE
 	BEGIN
-	SELECT 
-		HVCasePK,
+	SELECT 		
 		[PC1ID],
 		case
 		   when IntakeDate is not null then
