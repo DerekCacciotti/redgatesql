@@ -8,6 +8,6 @@ CREATE TABLE [dbo].[codeTopic]
 [SATInterval] [nvarchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SATName] [nvarchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[codeTopic] ADD CONSTRAINT [PK__Topic__022EC8500A688BB1] PRIMARY KEY CLUSTERED  ([codeTopicPK]) ON [PRIMARY]
+ALTER TABLE [dbo].[codeTopic] ADD 
+CONSTRAINT [PK_codeTopic] PRIMARY KEY CLUSTERED  ([codeTopicPK]) ON [PRIMARY]
 GO
