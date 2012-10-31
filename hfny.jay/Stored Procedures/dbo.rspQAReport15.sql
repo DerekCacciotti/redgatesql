@@ -148,6 +148,13 @@ SET @numOfALLScreens = (SELECT count(HVCasePK) FROM @tbl4QAReport15Detail)
 DECLARE @numOfCasesOnLevelX INT = 0
 SET @numOfCasesOnLevelX = (SELECT count(HVCasePK) FROM @tbl4QAReport15Detail WHERE datediff(dd, CurrentLevelDate, @LastDayofPreviousMonth) > 93)  
 
+-- leave the following here
+if @numOfALLScreens is null
+SET @numOfALLScreens = 0
+
+if @numOfCasesOnLevelX is null
+SET @numOfCasesOnLevelX = 0
+
 DECLARE @tbl4QAReport15Summary TABLE(
 	[SummaryId] INT,
 	[SummaryText] [varchar](200),

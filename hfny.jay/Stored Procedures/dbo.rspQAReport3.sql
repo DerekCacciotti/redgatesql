@@ -128,6 +128,14 @@ SELECT count(PC1ID) FROM @tbl4QAReport3Detail
 WHERE month(@LastDayofPreviousMonth) <> month(PADate)  or PADate IS null
 )
 
+-- leave the following here
+if @numOfALLScreens is null
+SET @numOfALLScreens = 0
+
+if @numOfScreensNoPAThisMonth is null
+SET @numOfScreensNoPAThisMonth = 0
+
+
 DECLARE @tbl4QAReport3Summary TABLE(
 	[SummaryId] INT,
 	[SummaryText] [varchar](200),

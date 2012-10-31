@@ -217,6 +217,13 @@ SET @numOfCasesOnLevelX = (SELECT count(HVCasePK) FROM #tbl4QAReport16)
 
 DROP TABLE #tbl4QAReport16
 
+-- leave the following here
+if @numOfALLScreens is null
+SET @numOfALLScreens = 0
+
+if @numOfCasesOnLevelX is null
+SET @numOfCasesOnLevelX = 0
+
 
 DECLARE @tbl4QAReport16Summary TABLE(
 	[SummaryId] INT,

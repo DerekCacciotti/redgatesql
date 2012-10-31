@@ -125,7 +125,11 @@ SELECT count(PC1ID) FROM @tbl4QAReport1Detail
 				WHERE datediff(dd, tcdob , @LastDayofPreviousMonth) Between 14 AND datediff(dd, dateadd(m, 3, @LastDayofPreviousMonth), @LastDayofPreviousMonth) * -1
 )
 
+if @numOfALLScreens is null
+SET @numOfALLScreens = 0
 
+if @numOfScreensOver14days is null
+SET @numOfScreensOver14days = 0
 
 DECLARE @tbl4QAReport1Summary TABLE(
 	[SummaryId] INT,

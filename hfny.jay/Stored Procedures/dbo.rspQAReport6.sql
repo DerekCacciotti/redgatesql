@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -152,6 +153,13 @@ SET @numOfActiveIntakeCases = (
 		inner join dbo.SplitString(@programfk,',') on T.programfk = listitem
 		)
 )
+
+-- leave the following here
+if @numOfALLScreens is null
+SET @numOfALLScreens = 0
+
+if @numOfActiveIntakeCases is null
+SET @numOfActiveIntakeCases = 0
 
 DECLARE @tbl4QAReport6Summary TABLE(
 	[SummaryId] INT,

@@ -111,6 +111,14 @@ IF @ReportType = 'summary'
 
 	)
 
+-- leave the following here
+if @numOfALLScreens is null
+SET @numOfALLScreens = 0
+
+if @numOfActiveIntakeCases is null
+SET @numOfActiveIntakeCases = 0
+
+
 DECLARE @tbl4QAReport4Summary TABLE(
 	[SummaryId] INT,
 	[SummaryText] [varchar](200),

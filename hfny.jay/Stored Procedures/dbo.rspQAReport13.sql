@@ -182,6 +182,13 @@ SET @numOfALLScreens = (SELECT count(HVCasePK) FROM @tbl4QAReport13Detail)
 DECLARE @numOfActiveIntakeCases INT = 0
 SET @numOfActiveIntakeCases = (SELECT count(HVCasePK) FROM @tbl4QAReport13)
 
+-- leave the following here
+if @numOfALLScreens is null
+SET @numOfALLScreens = 0
+
+if @numOfActiveIntakeCases is null
+SET @numOfActiveIntakeCases = 0
+
 DECLARE @tbl4QAReport13Summary TABLE(
 	[SummaryId] INT,
 	[SummaryText] [varchar](200),
