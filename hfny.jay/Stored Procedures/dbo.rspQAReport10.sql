@@ -477,7 +477,7 @@ DECLARE @tbl4QAReport10Summary TABLE(
 -- ToDo: Work on the following lines
 
 INSERT INTO @tbl4QAReport10Summary([SummaryId],[SummaryText],[MissingCases],[NotOnTimeCases],[SummaryTotal])
-VALUES(10 ,'Follow-Ups for Active Cases with Target Child 6 months or older (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(16 ,'Follow-Ups for Active Cases with Target Child 6 months or older (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 	,CONVERT(VARCHAR,@numOfMissingCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfMissingCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 	,CONVERT(VARCHAR,@numOfOutOfWindowsORNotReviewedCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfOutOfWindowsORNotReviewedCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 	,CONVERT(VARCHAR,@numOfMissingAndOutOfWindowsCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfMissingAndOutOfWindowsCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'

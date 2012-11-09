@@ -232,7 +232,7 @@ DECLARE @tbl4QAReport16Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport16Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(16 ,'Cases with Forms to be reviewed (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(12 ,'Cases with Forms to be reviewed (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfCasesOnLevelX) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfCasesOnLevelX AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 

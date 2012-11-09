@@ -162,7 +162,7 @@ DECLARE @tbl4QAReport15Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport15Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(15 ,'Cases on Level X for more than 93 days (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(11 ,'Cases on Level X for more than 93 days (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfCasesOnLevelX) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfCasesOnLevelX AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 

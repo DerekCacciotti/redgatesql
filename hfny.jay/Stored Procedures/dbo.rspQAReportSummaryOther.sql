@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -34,8 +35,8 @@ DECLARE @tbl4QAReportSummaryOther TABLE(
 
 
 
-INSERT INTO @tbl4QAReportSummaryOther VALUES(7, 'Coming soon ... ', '', '', '')	--- for summary page
-INSERT INTO @tbl4QAReportSummaryOther VALUES(8, 'Coming soon ... ', '', '', '')	--- for summary page
+INSERT INTO @tbl4QAReportSummaryOther VALUES(13, 'Coming soon ... ', '', '', '')	--- for summary page
+INSERT INTO @tbl4QAReportSummaryOther VALUES(14, 'Coming soon ... ', '', '', '')	--- for summary page
 
 INSERT INTO @tbl4QAReportSummaryOther EXEC rspQAReport9 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummaryOther EXEC rspQAReport10 @programfk, 'summary'	--- for summary page

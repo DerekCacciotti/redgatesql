@@ -260,7 +260,7 @@ DECLARE @tbl4QAReport11Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport11Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(11 ,'Cases with infrequent entries in Target Child Medical (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(7 ,'Cases with infrequent entries in Target Child Medical (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfActiveIntakeCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfActiveIntakeCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 
