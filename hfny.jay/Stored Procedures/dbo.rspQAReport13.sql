@@ -171,6 +171,10 @@ WHERE HVCasePK IN (SELECT HVCaseFK FROM cteMissingFollowUp sr)
 
 
 
+-- rspQAReport13 1 ,'summary'
+
+
+
 if @ReportType='summary'
 BEGIN 
 
@@ -206,16 +210,32 @@ END
 ELSE
 BEGIN
 
+-- to calculate "Number of Referarals needing Follow Up"
+;
+WITH cteCaseCount AS
+(
+SELECT HVCaseFK, count(HVCaseFK) AS casecount 
+FROM ServiceReferral sr 
+	inner join dbo.SplitString(@programfk,',') on sr.programfk = listitem
+	WHERE 
+	datediff(dd, @LastDayofPreviousMonth, ReferralDate) < 0	
+	AND (ReasonNoService = '' OR ReasonNoService IS NULL)
+	AND StartDate IS NULL
+ GROUP BY HVCaseFK 
+)
+
+
 SELECT 
 	   PC1ID
-	 , LengthInProgram
+	 , casecount AS NumberOfReferaralsNeedingFollowUp
 	 , Worker
 	 , currentLevel	 
 
- FROM @tbl4QAReport13
+ FROM @tbl4QAReport13 qa13
+ INNER JOIN cteCaseCount ccc ON ccc.HVCaseFK = qa13.HVCasePK 
 ORDER BY Worker, PC1ID 
 
---- rspQAReport13 31 ,'summary'
+--- rspQAReport13 1 ,'summary'
 
 END
 GO

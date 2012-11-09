@@ -8,7 +8,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 1st, 2012>
 -- Description:	<This QA report gets you 'Target Child IDs for Active Cases '>
--- rspQAReport5 31, 'summary'	--- for summary page
+-- rspQAReport5 1, 'summary'	--- for summary page
 -- rspQAReport5 31			--- for main report - location = 2
 -- rspQAReport5 null			--- for main report for all locations
 -- =============================================
@@ -74,16 +74,25 @@ select
 	   else
 		   h.edc
 	end as tcdob,
-	
+	CASE 
+	WHEN (h.IntakeLevel = '1') 	
+	THEN 
+		
+		CASE 
+		WHEN (h.tcdob is NULL) THEN dateadd(mm,1,h.edc) ELSE dateadd(mm,1,h.tcdob) END 
+		
+	ELSE
+		 dateadd(mm,1,h.IntakeDate) 
+	END as FormDueDate,
 	--	Form due date is 30.44 days after intake if postnatal at intake or 30.44 days after TC DOB if prenatal at intake
-	case
-	   when (h.tcdob is not NULL AND h.tcdob <= h.IntakeDate) THEN -- postnatal
-		   dateadd(mm,1,h.IntakeDate) 
-	   when (h.tcdob is not NULL AND h.tcdob > h.IntakeDate) THEN -- pretnatal
-					dateadd(mm,1,h.tcdob) 
-	   when (h.tcdob is NULL AND h.edc > h.IntakeDate) THEN -- pretnatal
-					dateadd(mm,1,h.edc) 					
-	end as FormDueDate,
+	----case
+	----   when (h.tcdob is not NULL AND h.tcdob <= h.IntakeDate) THEN -- postnatal
+	----	   dateadd(mm,1,h.IntakeDate) 
+	----   when (h.tcdob is not NULL AND h.tcdob > h.IntakeDate) THEN -- pretnatal
+	----				dateadd(mm,1,h.tcdob) 
+	----   when (h.tcdob is NULL AND h.edc > h.IntakeDate) THEN -- pretnatal
+	----				dateadd(mm,1,h.edc) 					
+	----end as FormDueDate,
 	
 	LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) as worker,
 

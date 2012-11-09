@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -493,10 +494,10 @@ ELSE
 	SELECT 
 		   PC1ID
 		 , EventDescription AS IntervalDue		   
-		 --, qam.Interval		 
-		 , FormDue
-		 , FormDoneDateCompleted AS FormDate	
-		 , TCDOB
+		 --, qam.Interval	
+		 , convert(varchar(10),FormDue,101) AS FormDue
+		 , convert(varchar(10),FormDoneDateCompleted,101) AS FormDate		 	
+		 , convert(varchar(10),TCDOB,101) AS TCDOB	
 		 , Worker
 		 , FormReviewed
 		 , Missing

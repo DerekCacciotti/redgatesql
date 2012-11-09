@@ -8,7 +8,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 18, 2012>
 -- Description:	<This QA report gets you '11. Cases with infrequent entries in Target Child Medical '>
--- rspQAReport11 31, 'summary'	--- for summary page
+-- rspQAReport11 1, 'summary'	--- for summary page
 -- rspQAReport11 31			--- for main report - location = 2
 -- rspQAReport11 null			--- for main report for all locations
 -- =============================================
@@ -41,7 +41,7 @@ DECLARE @tbl4QAReport11 TABLE(
 	TCDOB [datetime],
 	TCName [varchar](200),
 	Worker [varchar](200),
-	TCAgeInMonths INT,
+	TCAgeInMonths FLOAT,
 	DaysSinceLastMedicalFormEdit INT, 
 	currentLevel [varchar](50)
 	
@@ -145,7 +145,7 @@ select
 			--SELECT * FROM @tbl4QAReport11Detail
 
 	
---- rspQAReport11 31 ,'summary'
+--- rspQAReport11 1 ,'summary'
 
 -- Get TCMedical records with max date
 DECLARE @tbl4TCMedicalRecordsWithMaxDate TABLE(
@@ -281,14 +281,14 @@ SELECT
 		
 	 , TCName
 	 , Worker
-	 , TCAgeInMonths
+	 , cast(TCAgeInMonths AS DECIMAL(10,1)) AS TCAgeInMonths
 	 , DaysSinceLastMedicalFormEdit
 	 , currentLevel
 
  FROM @tbl4QAReport11
 ORDER BY Worker, TCName
 
---- rspQAReport11 31 ,'summary'
+--- rspQAReport11 1 ,'summary'
 
 END
 GO

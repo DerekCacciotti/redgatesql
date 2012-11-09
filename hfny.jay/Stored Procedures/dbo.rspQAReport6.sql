@@ -8,7 +8,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 1st, 2012>
 -- Description:	<This QA report gets you 'Target Child Medical forms for Active Cases '>
--- rspQAReport6 31, 'summary'	--- for summary page
+-- rspQAReport6 5, 'summary'	--- for summary page
 -- rspQAReport6 31			--- for main report - location = 2
 -- rspQAReport6 null			--- for main report for all locations
 -- =============================================
@@ -78,16 +78,25 @@ select
 	   else
 		   h.edc
 	end as tcdob,
+	CASE WHEN (h.IntakeLevel = '1') 	
+	THEN 
+		
+		CASE 
+		WHEN (h.tcdob is NULL) THEN dateadd(mm,1,h.edc) ELSE dateadd(mm,1,h.tcdob) END 
+		
+	ELSE
+		 dateadd(mm,1,h.IntakeDate) 
+	END as FormDueDate,
 	
 	--	Form due date is 30.44 days after intake if postnatal at intake or 30.44 days after TC DOB if prenatal at intake
-	case
-	   when (h.tcdob is not NULL AND h.tcdob <= h.IntakeDate) THEN -- postnatal
-		   dateadd(mm,1,h.IntakeDate) 
-	   when (h.tcdob is not NULL AND h.tcdob > h.IntakeDate) THEN -- pretnatal
-					dateadd(mm,1,h.tcdob) 
-	   when (h.tcdob is NULL AND h.edc > h.IntakeDate) THEN -- pretnatal
-					dateadd(mm,1,h.edc) 					
-	end as FormDueDate,
+	--case
+	--   when (h.tcdob is not NULL AND h.tcdob <= h.IntakeDate) THEN -- postnatal
+	--	   dateadd(mm,1,h.IntakeDate) 
+	--   when (h.tcdob is not NULL AND h.tcdob > h.IntakeDate) THEN -- pretnatal
+	--				dateadd(mm,1,h.tcdob) 
+	--   when (h.tcdob is NULL AND h.edc > h.IntakeDate) THEN -- pretnatal
+	--				dateadd(mm,1,h.edc) 					
+	--end as FormDueDate,
 	
 	LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) as worker,
 
@@ -109,14 +118,14 @@ select
 	inner join dbo.HVCase h ON cp.HVCaseFK = h.HVCasePK	
 	inner join worker fsw on cp.CurrentFSWFK = fsw.workerpk
 	-- JOIN TO TCID to get each child for the case
-	INNER JOIN TCID T ON T.HVCaseFK = h.HVCasePK 
+	LEFT JOIN TCID T ON T.HVCaseFK = h.HVCasePK 
 	
 	where   ((h.IntakeDate <= dateadd(M, -1, @LastDayofPreviousMonth)) AND (h.IntakeDate IS NOT NULL))	 		  
 			AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @LastDayofPreviousMonth)
 			-- as per John, make it one month period (not 45 days)
 			AND (( (@LastDayofPreviousMonth >= dateadd(M, 1, h.edc)) AND (h.tcdob IS NULL) ) OR ( (@LastDayofPreviousMonth >= dateadd(M, 1, h.tcdob)) AND (h.edc IS NULL) ) )  
 			-- adding 45 days (not just one month)
-			-- AND (( (@LastDayofPreviousMonth >= dateadd(day,15,dateadd(M, 1, h.edc)) ) AND (h.tcdob IS NULL) ) OR ( (@LastDayofPreviousMonth >= dateadd(day,15,dateadd(M, 1, h.tcdob)) ) AND (h.edc IS NULL) ) )  
+			 --AND (( (@LastDayofPreviousMonth >= dateadd(day,15,dateadd(M, 1, h.edc)) ) AND (h.tcdob IS NULL) ) OR ( (@LastDayofPreviousMonth >= dateadd(day,15,dateadd(M, 1, h.tcdob)) ) AND (h.edc IS NULL) ) )  
 			AND (T.TCDOD > @LastDayofPreviousMonth OR T.TCDOD IS NULL)
 
 			-- to get accurate count of case

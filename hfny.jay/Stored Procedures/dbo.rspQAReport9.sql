@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,7 +8,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 1st, 2012>
 -- Description:	<This QA report gets you 'PSIs for Active Cases '>
--- rspQAReport9 8, 'summary'	--- for summary page
+-- rspQAReport9 1, 'summary'	--- for summary page
 -- rspQAReport9 8			--- for main report - location = 2
 -- rspQAReport9 null			--- for main report for all locations
 -- =============================================
@@ -32,7 +33,7 @@ AS
 Declare @LastDayofPreviousMonth DateTime 
 --Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
 
-Set @LastDayofPreviousMonth = '05/31/2012'
+Set @LastDayofPreviousMonth = '10/31/2012'
 
 -- table variable for holding Init Required Data
 DECLARE @tbl4QAReport9Coheart TABLE(
@@ -478,15 +479,15 @@ ELSE
 		   PC1ID
 		 , EventDescription AS IntervalDue
 		 --, qam.Interval		 
-		 , FormDue
-		 , FormDoneDateCompleted	
-		 , TCDOB
+		 , convert(varchar(10),FormDue,101) AS FormDue
+		 , convert(varchar(10),FormDoneDateCompleted,101) AS FormDoneDateCompleted		 	
+		 , convert(varchar(10),TCDOB,101) AS TCDOB		 
 		 , Worker
 		 , FormReviewed
 		 , Missing
 		 , OutOfWindow		 		 
 		 , currentLevel
-		 
+	 
 		 --, IntakeDate
 		 --, DischargeDate
 		 --, CaseProgress
@@ -508,5 +509,5 @@ ELSE
 
 	END	
 	
-	--- rspQAReport9 8 ,'summary'
+	--- rspQAReport9 1 ,'summary'
 GO
