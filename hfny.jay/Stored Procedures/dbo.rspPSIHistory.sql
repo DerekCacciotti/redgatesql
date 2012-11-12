@@ -73,7 +73,7 @@ CASE WHEN PSITotalScore >= 86 THEN 1 ELSE 0 END
 ON x.HVCaseFK = a.HVCaseFK
 
 WHERE 
-d.DischargeDate IS NOT NULL
+d.DischargeDate IS NULL
 AND d.currentFSWFK = ISNULL(@workerfk, d.currentFSWFK)
 AND wp.supervisorfk = ISNULL(@supervisorfk, wp.supervisorfk)
 AND d.programfk = @programfk
