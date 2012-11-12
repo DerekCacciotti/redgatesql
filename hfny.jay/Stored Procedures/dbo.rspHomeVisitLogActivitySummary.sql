@@ -10,14 +10,14 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummary] 
 	-- Add the parameters for the stored procedure here
-	@programfk INT = NULL, 
+	(@programfk INT = NULL, 
 	@StartDt datetime,
 	@EndDt DATETIME,
 	@workerfk INT = NULL,
-	@pc1id VARCHAR(13) = NULL,
-	@showWorkerDetail VARCHAR(1) = 'N',
-	@showPC1IDDetail VARCHAR(1) = 'N'
-	
+	@pc1id VARCHAR(13) = '',
+	@showWorkerDetail CHAR(1) = 'N',
+	@showPC1IDDetail CHAR(1) = 'N')
+
 --DECLARE	@programfk INT = 6
 --DECLARE @StartDt DATETIME = '01/01/2011'
 --DECLARE @EndDt DATETIME = '01/01/2012'
@@ -42,7 +42,7 @@ WHERE
 a.ProgramFK = @programfk 
 AND VisitStartTime between @StartDt AND @EndDt 
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
-AND cp.PC1ID = isnull(@pc1id, cp.PC1ID)
+AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
 GROUP BY 
 CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END, 
 CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END
@@ -379,7 +379,7 @@ WHERE
 a.ProgramFK = @programfk 
 AND VisitStartTime between @StartDt AND @EndDt 
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
-AND cp.PC1ID = isnull(@pc1id, cp.PC1ID)
+AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
 GROUP BY 
 CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END, 
 CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END
