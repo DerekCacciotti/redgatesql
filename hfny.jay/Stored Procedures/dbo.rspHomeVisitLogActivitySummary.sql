@@ -391,7 +391,7 @@ SELECT a.*,
 ([AvgMinuteForCompletedVisit] / x) [AvgMinuteForCompletedVisit],
 
 [PC1Participated] / x [PC1Participated],
-[PC1Participated] / x [PC2Participated],
+[PC2Participated] / x [PC2Participated],
 [OBPParticipated] / x [OBPParticipated],
 [FatherFigureParticipated] / x [FatherFigureParticipated], 
 [TCParticipated] / x [TCParticipated],
