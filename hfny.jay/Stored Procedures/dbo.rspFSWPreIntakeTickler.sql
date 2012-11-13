@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -24,9 +25,10 @@ as
 -- CaseStatus = '02' : Assessment Completed
 -- CaseStatus = '03' : Engagement Efforts Terminated, Kempe not Completed
 
---DECLARE @programfk INT = 17
+--DECLARE @programfk INT = 6
 --DECLARE @workerfk INT = NULL
 --DECLARE @supervisorfk INT = NULL
+--DECLARE @rdate DATETIME = '01/01/2012'
 
 ; WITH lastpreintake AS 
 (
@@ -41,7 +43,8 @@ SELECT c.PC1ID [pc1ID]
 + ' ' + rtrim(b.PCZip) [City]
 , b.PCPhone [Phone]
 , datediff(day, d.FSWAssignDate, GETDATE()) [DaysSinceFSW]
-, convert(VARCHAR(12), CASE WHEN a.TCDOB IS NOT NULL THEN a.TCDOB ELSE a.EDC END, 101) [EnrollmentAgeOutDate]
+, convert(VARCHAR(12), DATEADD(day,30.44*3,CASE WHEN a.TCDOB IS NOT NULL THEN a.TCDOB ELSE a.EDC END)
+, 101) [EnrollmentAgeOutDate]
 , substring(convert(VARCHAR(30),  e.LastPreIntakeDate, 106),4, 20) [LastIntakeForm]
 , ltrim(rtrim(fsw.firstname))+' '+ltrim(rtrim(fsw.lastname)) fswname
 , ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) as supervisor
