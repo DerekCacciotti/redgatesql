@@ -61,6 +61,11 @@ select DISTINCT a.HVCasePK
 , ca1.HighestGrade [Edu]
 , ca1.IsCurrentlyEmployed [pc1Employed]
 , ca2.IsCurrentlyEmployed [pc2Employed]
+
+, caOBP.IsCurrentlyEmployed [obpEmployed]
+, caOBP.EducationalEnrollment [obpTrainingProgram]
+, pc.PCPK [OBPMaleInHoushold]
+
 , ca1.EducationalEnrollment [pc1TrainingProgram]
 , ca2.EducationalEnrollment [pc2TrainingProgram]
 , ca.PC1ReceivingMedicaid [pc1Medicaid]
@@ -81,7 +86,8 @@ JOIN Intake AS d ON d.HVCaseFK = a.HVCasePK
 LEFT OUTER JOIN CommonAttributes AS	ca ON ca.FormFK = d.IntakePK AND ca.FormType = 'IN'
 LEFT OUTER JOIN CommonAttributes AS	ca1 ON ca1.FormFK = d.IntakePK AND ca1.FormType = 'IN-PC1'
 LEFT OUTER JOIN CommonAttributes AS	ca2 ON ca2.FormFK = d.IntakePK AND ca2.FormType = 'IN-PC2'
-LEFT OUTER JOIN CommonAttributes AS	caOBP ON caOBP.FormFK = d.IntakePK AND ca2.FormType = 'IN-OBP'
+LEFT OUTER JOIN CommonAttributes AS	caOBP ON caOBP.FormFK = d.IntakePK AND caOBP.FormType = 'IN-OBP'
+LEFT OUTER JOIN PC AS pc ON pc.PCPK = caOBP.PCFK AND pc.Gender = '02'
 
 LEFT OUTER JOIN 
 (SELECT HVCaseFK, min(TCDOB) [TCDOB]
@@ -109,15 +115,15 @@ SELECT
 , sum(CASE WHEN x.Edu IN ('03', '04') THEN 1 ELSE 0 END) [3HighSchool]
 , sum(CASE WHEN x.Edu IN ('05', '06', '07', '08') THEN 1 ELSE 0 END) [3PostSecondary]
 , sum(CASE WHEN x.pc1Employed = 1 THEN 1 ELSE 0 END) [4PC1Employed]
-, sum(CASE WHEN x.pc2Employed = 1 THEN 1 ELSE 0 END) [4PC2Employed]
-, sum(CASE WHEN x.pc1Employed = 1 OR x.pc2Employed = 1 THEN 1 ELSE 0 END) [4PC1orPC2Employed]
+, sum(CASE WHEN x.pc2Employed = 1 OR x.obpEmployed = 1 THEN 1 ELSE 0 END) [4PC2Employed]
+, sum(CASE WHEN x.pc1Employed = 1 OR x.pc2Employed = 1 OR x.obpEmployed = 1 THEN 1 ELSE 0 END) [4PC1orPC2Employed]
 , sum(CASE WHEN x.pc1TrainingProgram = 1 THEN 1 ELSE 0 END) [4PC1TrainingProgram]
-, sum(CASE WHEN x.pc2TrainingProgram = 1 THEN 1 ELSE 0 END) [4PC2TrainingProgram]
+, sum(CASE WHEN x.pc2TrainingProgram = 1 OR x.obpTrainingProgram = 1 THEN 1 ELSE 0 END) [4PC2TrainingProgram]
 , sum(CASE WHEN x.pc1Medicaid = 1 THEN 1 ELSE 0 END) [5PC1Medicaid]
 , sum(CASE WHEN x.TANF = 1 THEN 1 ELSE 0 END) [5TANF]
 , sum(CASE WHEN x.FoodStamps = 1 THEN 1 ELSE 0 END) [5FoodStamps]
 , sum(CASE WHEN x.pc1MaritalStatus = '01' THEN 1 ELSE 0 END) [6Married]
-, sum(CASE WHEN x.OBPInHoushold IS NOT null THEN 1 ELSE 0 END) [7OBPInHousehold]
+, sum(CASE WHEN x.OBPMaleInHoushold IS NOT null THEN 1 ELSE 0 END) [7OBPInHousehold]
 , sum(CASE WHEN x.PC2InHoushold IS NOT null THEN 1 ELSE 0 END) [7PC2InHousehold]
 , sum(CASE WHEN x.yrEnrolled < 1 THEN 1 ELSE 0 END) [9LessThan1Yr]
 , sum(CASE WHEN x.yrEnrolled = 1 THEN 1 ELSE 0 END) [9UpTo2Yr]
