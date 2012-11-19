@@ -522,7 +522,8 @@ INSERT INTO @tbl4QAReport7NotExpected(
 	  , qa2.OutOfWindow	
 	  , CASE WHEN (ASQTCReceiving = 1) THEN 1 ELSE 0 END AS RecOK 
 	  , easq.FormDate AS FormDate
-	  , CASE WHEN dbo.IsFormReviewed(qa4.DateCompleted, 'AQ', qa4.ASQPK)=1 THEN 1 ELSE 0 END AS FormReviewed  -- AQ = ASQ FORM
+	  --, CASE WHEN dbo.IsFormReviewed(qa4.DateCompleted, 'AQ', qa4.ASQPK)=1 THEN 1 ELSE 0 END AS FormReviewed  -- AQ = ASQ FORM
+	  ,0 AS FormReviewed
 	  , qa2.TCName
 	  , qa2.GestationalAge
 	  , CASE WHEN (qa2.XDateAge/30.44) < 24  
@@ -943,16 +944,42 @@ VALUES(13 ,'ASQs for Active Cases with Target Child 4 months or older, calc. DOB
 ELSE
 	BEGIN
 	
+	
+	SELECT 
+		[PC1ID],
+		qam2.Interval AS IntervalDue,		
+		convert(varchar(10),FormDueDate,101) AS FormDueDate,
+		convert(varchar(10),FormDate,101) AS FormDate,
+		convert(varchar(10),TCDOB,101) AS TCDOB,
+		convert(varchar(10),CalcDOB,101) AS CalcDOB,
+		TCName,
+		Worker,		
+		GestationalAge,
+		FormReviewed,
+		Missing,
+		OutOfWindow,
+		currentLevel	
+
+	FROM @tbl4QAReport7Expected qam2
+	inner join codeduebydates cdd2 on scheduledevent = 'ASQ' AND cdd2.Interval = qam2.Interval 
+	WHERE OutOfWindow = 1 OR FormReviewed=0
+
+UNION 	
 
 	SELECT
 		[PC1ID],
-		TCName,
-		--IntervalExpected AS IntervalDue,
-		EventDescription AS IntervalDue,
-		Worker,
+		EventDescription AS IntervalDue,		
 		convert(varchar(10),FormDueDate,101) AS FormDueDate,
+		convert(varchar(10),FormDate,101) AS FormDate,
+		convert(varchar(10),TCDOB,101) AS TCDOB,
 		convert(varchar(10),CalcDOB,101) AS CalcDOB,
-		GestationalAge
+		TCName,
+		Worker,		
+		GestationalAge,
+		FormReviewed,
+		Missing,
+		OutOfWindow,
+		currentLevel
 		 		
 	 FROM @tbl4QAReport7NotExpectedMain qam	 
 	 inner join codeduebydates cdd on scheduledevent = 'ASQ' AND cdd.Interval = qam.IntervalExpected 
