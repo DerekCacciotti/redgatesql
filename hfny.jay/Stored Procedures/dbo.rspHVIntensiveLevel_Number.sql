@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +9,7 @@ GO
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
 -- =============================================
-create procedure [dbo].[rspHVIntensiveLevel_Number]
+CREATE procedure [dbo].[rspHVIntensiveLevel_Number]
 (
     @programfk varchar(max)    = null,
     @sdate     datetime,
@@ -42,7 +43,7 @@ as
 				  where a.caseprogress >= 9
 					   and a.intakedate <= @edate
 					   and (b.dischargedate is null
-					   or b.dischargedate > @edate)
+					   or b.dischargedate >= @sdate)
 					   and d.Levelfk in (16,18,20)
 
 			  -- union 2 groups then count the distinct
@@ -79,7 +80,7 @@ as
 												where a.caseprogress >= 9
 													 and a.intakedate <= @edate
 													 and (b.dischargedate is null
-													 or b.dischargedate > @edate)) as p) as q
+													 or b.dischargedate >= @sdate)) as p) as q
 							where q.Levelfk in (14,27,24)
 							group by q.hvcasefk) as x
 				  where x.[days_length_total] >= 183) as xx
@@ -117,7 +118,7 @@ as
 									  where a.caseprogress >= 9
 										   and a.intakedate <= @edate
 										   and (b.dischargedate is null
-										   or b.dischargedate > @edate)) as p) as q
+										   or b.dischargedate >= @sdate)) as p) as q
 				  where q.Levelfk in (14,27,24)
 				  group by q.hvcasefk) as x
 		where x.[days_length_total] >= 183
