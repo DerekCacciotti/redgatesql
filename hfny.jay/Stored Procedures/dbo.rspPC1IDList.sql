@@ -11,7 +11,9 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPC1IDList]
 (
-    @programfk int = 1
+    @programfk int = NULL,
+    @supervisorfk INT = NULL, 
+    @workerfk INT = NULL
 )
 as
 
@@ -31,6 +33,24 @@ as
 						 ,hvcase.screendate
 						 ,HVCase.kempedate
 						 ,hvcase.intakedate
+						 -- get pc1name
+						 ,pc1fk
+						 ,case
+							  when pc1fk is null or pc1fk = 0 then
+								  0
+							  else
+								  1
+						  end as pc1exists
+						 ,case
+							  when pc1fk is not null and pc1fk > 0
+								  then
+								  (select LTRIM(RTRIM(pcfirstname))+' '+LTRIM(RTRIM(pclastname)) as pc1name
+									   from pc
+									   where pcpk = pc1fk)
+							  else
+								  ''
+						  end as pc1name
+						 
 						 ,pc2fk
 						 ,case
 							  when pc2fk is null or pc2fk = 0 then
@@ -94,10 +114,27 @@ as
 					  on CurrentFSWFK = fsw.workerpk
 			inner join workerprogram
 					  on workerfk = fsw.workerpk
+					  
+					  
+					  
+--INNER JOIN worker fsw
+--ON d.CurrentFSWFK = fsw.workerpk
+--INNER JOIN workerprogram wp
+--ON wp.workerfk = fsw.workerpk
+INNER JOIN worker supervisor
+ON workerprogram.supervisorfk = supervisor.workerpk
+					  
+					  
 		where caseprogram.programfk = @programfk
 			 and dischargedate is null
 			 and kempedate is not null
 			 and casestartdate <= dateadd(dd,1,datediff(dd,0,GETDATE()))
+			 
+			 
+			 AND caseprogram.currentFSWFK = ISNULL(@workerfk, caseprogram.currentFSWFK)
+AND workerprogram.supervisorfk = ISNULL(@supervisorfk, workerprogram.supervisorfk)
+			 
+			 
 		order by oldid
 				,workername
 				,screendate
