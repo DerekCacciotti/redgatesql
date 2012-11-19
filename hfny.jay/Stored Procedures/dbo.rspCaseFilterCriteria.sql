@@ -11,7 +11,7 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspCaseFilterCriteria]
 (
-    @programfks varchar(100)
+@ProgramFKs varchar(100)
 )
 as
 begin
@@ -21,27 +21,37 @@ begin
 
 	-- First table, distinct list of FieldTitles
 	select distinct cf1.ProgramFK
-				   ,FieldTitle
-				   ,CaseFilterNameFK
+				 ,FieldTitle
+				 ,CaseFilterNameFK
 		from CaseFilter cf1
-		inner join listCaseFilterName lcfn on lcfn.listCaseFilterNamePK = cf1.CaseFilterNameFK
-		where @programfks like ('%,'+cast(cf1.programfk as varchar(100))+',%')
-	--Second table, distinct list of FilterValues
-	select distinct case when FilterType = 1
-							then case when CaseFilterNameChoice=1 then 'Yes' else 'No' end 
-						 when FilterType = 2
-							then (select FilterOption 
-									from listCaseFilterNameOption cfno 
-									where cfno.CaseFilterNameFK=cf.CaseFilterNameFK and cfno.listCaseFilterNameOptionPK=cf.CaseFilterNameOptionFK)
-						 else			
-							CaseFilterValue 
-						 end as FilterValue
-				   ,cf.ProgramFK
-				   ,FieldTitle
-				   ,CaseFilterNameFK
-		from CaseFilter cf 
-		inner join listCaseFilterName cfn on cfn.listCaseFilterNamePK = cf.CaseFilterNameFK
-		where @programfks like ('%,'+cast(cf.programfk as varchar(100))+',%')
-end
+			inner join listCaseFilterName lcfn
+					on lcfn.listCaseFilterNamePK = cf1.CaseFilterNameFK
+		where @ProgramFKs like ('%,'+cast(cf1.programfk as varchar(100))+',%')
 
+	--Second table, distinct list of FilterValues
+	select distinct case
+						when FilterType = 1
+							then case
+								when CaseFilterNameChoice = 1 then 'Yes'
+								else 'No'
+							end
+						when FilterType = 2
+							then (select FilterOption
+									from listCaseFilterNameOption cfno
+									where cfno.CaseFilterNameFK = cf.
+										CaseFilterNameFK
+										 and cfno.listCaseFilterNameOptionPK = 
+											 cf.CaseFilterNameOptionFK)
+						else
+							CaseFilterValue
+					end as FilterValue
+				 ,cf.ProgramFK
+				 ,FieldTitle
+				 ,CaseFilterNameFK
+		from CaseFilter cf
+			inner join listCaseFilterName cfn
+					on cfn.listCaseFilterNamePK = cf.CaseFilterNameFK
+			inner join dbo.SplitString(@ProgramFKs,',') on cf.programfk = listitem
+		-- where @programfks like ('%,'+cast(cf.programfk as varchar(100))+',%')
+end
 GO

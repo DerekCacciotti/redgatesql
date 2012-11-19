@@ -11,11 +11,11 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspCredAssessmentInfo]
 (
-    @StartDate  datetime,
-    @EndDate    datetime,
-    @ProgramFKs varchar(max),
-    @posclause  varchar(200),
-    @negclause  varchar(200)
+@StartDate datetime,
+@EndDate datetime,
+@ProgramFKs varchar(max),
+@posclause varchar(200),
+@negclause varchar(200)
 )
 -- Add the parameters for the stored procedure here
 as
@@ -24,19 +24,8 @@ begin
 	-- interfering with SELECT statements.
 	set nocount on;
 
-	set @posclause = case
-						 when @posclause = '' then
-							 null
-						 else
-							 @posclause
-					 end;
-
-	set @negclause = case
-						 when @negclause = '' then
-							 null
-						 else
-							 @negclause
-					 end;
+	set @posclause = case when @posclause = '' then null else @posclause end;
+	set @negclause = case when @negclause = '' then null else @negclause end;
 
 	if charindex(',',@ProgramFKs) = 0
 		set @ProgramFKs = ',' + @ProgramFKs + ','
@@ -45,225 +34,225 @@ begin
 	if @posclause is null and @negclause is null -- don't include filters
 		with cteTotals
 		as (select count(kempepk) as kempettl
-				  ,sum(case
-						   when bday > kempedate then
-							   1
-						   else
-							   0
-					   end) as prenatal
-				  ,sum(case
-						   when bday <= kempedate then
-							   1
-						   else
-							   0
-					   end) as postnatal
-				  ,sum(case
-						   when cast(kempedate-bday as int) <= 14 and cast(kempedate-bday as int) >= 0 then
-							   1
-						   else
-							   0
-					   end) as within2wks
-				  ,sum(case
-						   when cast(kempedate-bday as int) <= 14 then
-							   1
-						   else
-							   0
-					   end) as b4twoWks
-				  ,sum(case
-						   when cast(kempedate-bday as int) > 14 then
-							   1
-						   else
-							   0
-					   end) as morethan2wks
-				  ,sum(case
-						   when KempeResult = 0 then
-							   1
-						   else
-							   0
-					   end) as NegativeKempes
-				  ,sum(case
-						   when KempeResult = 1 then
-							   1
-						   else
-							   0
-					   end) as PositiveKempes
+				,sum(case
+						 when bday > kempedate then
+							 1
+						 else
+							 0
+					 end) as prenatal
+				,sum(case
+						 when bday <= kempedate then
+							 1
+						 else
+							 0
+					 end) as postnatal
+				,sum(case
+						 when cast(kempedate-bday as int) <= 14 and cast(kempedate-bday as int) >= 0 then
+							 1
+						 else
+							 0
+					 end) as within2wks
+				,sum(case
+						 when cast(kempedate-bday as int) <= 14 then
+							 1
+						 else
+							 0
+					 end) as b4twoWks
+				,sum(case
+						 when cast(kempedate-bday as int) > 14 then
+							 1
+						 else
+							 0
+					 end) as morethan2wks
+				,sum(case
+						 when KempeResult = 0 then
+							 1
+						 else
+							 0
+					 end) as NegativeKempes
+				,sum(case
+						 when KempeResult = 1 then
+							 1
+						 else
+							 0
+					 end) as PositiveKempes
 				from (select kempe.*
 							,isnull(hvcase.tcdob,hvcase.edc) as bday
-						  from kempe,hvcase
-						  where kempe.hvcasefk = hvcasepk
-							   and Kempe.KempeDate >= @StartDate
-							   and Kempe.KempeDate <= @EndDate
-							   and (@ProgramFKs like ('%,'+cast(kempe.programfk as varchar(100))+',%'))) a
+						from kempe,hvcase
+						where kempe.hvcasefk = hvcasepk
+							 and Kempe.KempeDate >= @StartDate
+							 and Kempe.KempeDate <= @EndDate
+							 and (@ProgramFKs like ('%,'+cast(kempe.programfk as varchar(100))+',%'))) a
 		)
 		select kempettl
-			  ,prenatal
-			  ,postnatal
-			  ,within2wks
-			  ,b4twoWks
-			  ,morethan2wks
-			  ,NegativeKempes
-			  ,PositiveKempes
-			  ,case
-				   when prenatal is not null and prenatal > 0 then
-					   prenatal/(kempettl*1.0)
-				   else
-					   0
-			   end as PrenatalPercent
-			  ,case
-				   when postnatal is not null and postnatal > 0 then
-					   postnatal/(kempettl*1.0)
-				   else
-					   0
-			   end as PostnatalPercent
-			  ,case
-				   when within2wks is not null and within2wks > 0 then
-					   within2wks/(kempettl*1.0)
-				   else
-					   0
-			   end as twoWkPercent
-			  ,case
-				   when morethan2wks is not null and morethan2wks > 0 then
-					   morethan2wks/(kempettl*1.0)
-				   else
-					   0
-			   end as After2Percent
-			  ,case
-				   when prenatal is not null and prenatal > 0 then
-					   prenatal+within2wks
-				   else
-					   within2wks
-			   end as Prenatal_2wks
-			  ,case
-				   when prenatal is not null and prenatal > 0 then
-					   (prenatal+within2wks)/(kempettl*1.0)
-				   else
-					   within2wks/(kempettl*1.0)
-			   end as Percent_2wks
-			  ,case
-				   when NegativeKempes is not null and NegativeKempes > 0 then
-					   NegativeKempes/(kempettl*1.0)
-				   else
-					   0
-			   end as NegKempePercent
-			  ,case
-				   when PositiveKempes is not null and PositiveKempes > 0 then
-					   PositiveKempes/(kempettl*1.0)
-				   else
-					   0
-			   end as PosKempePercent
+			,prenatal
+			,postnatal
+			,within2wks
+			,b4twoWks
+			,morethan2wks
+			,NegativeKempes
+			,PositiveKempes
+			,case
+				 when prenatal is not null and prenatal > 0 then
+					 prenatal/(kempettl*1.0)
+				 else
+					 0
+			 end as PrenatalPercent
+			,case
+				 when postnatal is not null and postnatal > 0 then
+					 postnatal/(kempettl*1.0)
+				 else
+					 0
+			 end as PostnatalPercent
+			,case
+				 when within2wks is not null and within2wks > 0 then
+					 within2wks/(kempettl*1.0)
+				 else
+					 0
+			 end as twoWkPercent
+			,case
+				 when morethan2wks is not null and morethan2wks > 0 then
+					 morethan2wks/(kempettl*1.0)
+				 else
+					 0
+			 end as After2Percent
+			,case
+				 when prenatal is not null and prenatal > 0 then
+					 prenatal+within2wks
+				 else
+					 within2wks
+			 end as Prenatal_2wks
+			,case
+				 when prenatal is not null and prenatal > 0 then
+					 (prenatal+within2wks)/(kempettl*1.0)
+				 else
+					 within2wks/(kempettl*1.0)
+			 end as Percent_2wks
+			,case
+				 when NegativeKempes is not null and NegativeKempes > 0 then
+					 NegativeKempes/(kempettl*1.0)
+				 else
+					 0
+			 end as NegKempePercent
+			,case
+				 when PositiveKempes is not null and PositiveKempes > 0 then
+					 PositiveKempes/(kempettl*1.0)
+				 else
+					 0
+			 end as PosKempePercent
 			from cteTotals
 
 	else
 		with cteTotals
 		as (select count(kempepk) as kempettl
-				  ,sum(case
-						   when bday > kempedate then
-							   1
-						   else
-							   0
-					   end) as prenatal
-				  ,sum(case
-						   when bday <= kempedate then
-							   1
-						   else
-							   0
-					   end) as postnatal
-				  ,sum(case
-						   when cast(kempedate-bday as int) <= 14 and cast(kempedate-bday as int) >= 0 then
-							   1
-						   else
-							   0
-					   end) as within2wks
-				  ,sum(case
-						   when cast(kempedate-bday as int) <= 14 then
-							   1
-						   else
-							   0
-					   end) as b4twoWks
-				  ,sum(case
-						   when cast(kempedate-bday as int) > 14 then
-							   1
-						   else
-							   0
-					   end) as morethan2wks
-				  ,sum(case
-						   when KempeResult = 0 then
-							   1
-						   else
-							   0
-					   end) as NegativeKempes
-				  ,sum(case
-						   when KempeResult = 1 then
-							   1
-						   else
-							   0
-					   end) as PositiveKempes
+				,sum(case
+						 when bday > kempedate then
+							 1
+						 else
+							 0
+					 end) as prenatal
+				,sum(case
+						 when bday <= kempedate then
+							 1
+						 else
+							 0
+					 end) as postnatal
+				,sum(case
+						 when cast(kempedate-bday as int) <= 14 and cast(kempedate-bday as int) >= 0 then
+							 1
+						 else
+							 0
+					 end) as within2wks
+				,sum(case
+						 when cast(kempedate-bday as int) <= 14 then
+							 1
+						 else
+							 0
+					 end) as b4twoWks
+				,sum(case
+						 when cast(kempedate-bday as int) > 14 then
+							 1
+						 else
+							 0
+					 end) as morethan2wks
+				,sum(case
+						 when KempeResult = 0 then
+							 1
+						 else
+							 0
+					 end) as NegativeKempes
+				,sum(case
+						 when KempeResult = 1 then
+							 1
+						 else
+							 0
+					 end) as PositiveKempes
 				from (select kempe.*
 							,isnull(hvcase.tcdob,hvcase.edc) as bday
-						  from kempe,hvcase
-						  where kempe.hvcasefk = hvcasepk
-							   and Kempe.KempeDate >= @StartDate
-							   and Kempe.KempeDate <= @EndDate
-							   and (@ProgramFKs like ('%,'+cast(kempe.programfk as varchar(100))+',%'))) a,
-					(select hvcasefk from udfCaseFilters2(@posclause,@negclause,@ProgramFKs)) b
+						from kempe,hvcase
+						where kempe.hvcasefk = hvcasepk
+							 and Kempe.KempeDate >= @StartDate
+							 and Kempe.KempeDate <= @EndDate
+							 and (@ProgramFKs like ('%,'+cast(kempe.programfk as varchar(100))+',%'))) a,
+					(select hvcasefk from udfCaseFilters(@posclause,@negclause,@ProgramFKs)) b
 				where a.hvcasefk = b.hvcasefk
 		)
 		select kempettl
-			  ,prenatal
-			  ,postnatal
-			  ,within2wks
-			  ,b4twoWks
-			  ,morethan2wks
-			  ,NegativeKempes
-			  ,PositiveKempes
-			  ,case
-				   when prenatal is not null and prenatal > 0 then
-					   prenatal/(kempettl*1.0)
-				   else
-					   0
-			   end as PrenatalPercent
-			  ,case
-				   when postnatal is not null and postnatal > 0 then
-					   postnatal/(kempettl*1.0)
-				   else
-					   0
-			   end as PostnatalPercent
-			  ,case
-				   when within2wks is not null and within2wks > 0 then
-					   within2wks/(kempettl*1.0)
-				   else
-					   0
-			   end as twoWkPercent
-			  ,case
-				   when morethan2wks is not null and morethan2wks > 0 then
-					   morethan2wks/(kempettl*1.0)
-				   else
-					   0
-			   end as After2Percent
-			  ,case
-				   when prenatal is not null and prenatal > 0 then
-					   prenatal+within2wks
-				   else
-					   within2wks
-			   end as Prenatal_2wks
-			  ,case
-				   when prenatal is not null and prenatal > 0 then
-					   (prenatal+within2wks)/(kempettl*1.0)
-				   else
-					   within2wks/(kempettl*1.0)
-			   end as Percent_2wks
-			  ,case
-				   when NegativeKempes is not null and NegativeKempes > 0 then
-					   NegativeKempes/(kempettl*1.0)
-				   else
-					   0
-			   end as NegKempePercent
-			  ,case
-				   when PositiveKempes is not null and PositiveKempes > 0 then
-					   PositiveKempes/(kempettl*1.0)
-				   else
-					   0
-			   end as PosKempePercent
+			,prenatal
+			,postnatal
+			,within2wks
+			,b4twoWks
+			,morethan2wks
+			,NegativeKempes
+			,PositiveKempes
+			,case
+				 when prenatal is not null and prenatal > 0 then
+					 prenatal/(kempettl*1.0)
+				 else
+					 0
+			 end as PrenatalPercent
+			,case
+				 when postnatal is not null and postnatal > 0 then
+					 postnatal/(kempettl*1.0)
+				 else
+					 0
+			 end as PostnatalPercent
+			,case
+				 when within2wks is not null and within2wks > 0 then
+					 within2wks/(kempettl*1.0)
+				 else
+					 0
+			 end as twoWkPercent
+			,case
+				 when morethan2wks is not null and morethan2wks > 0 then
+					 morethan2wks/(kempettl*1.0)
+				 else
+					 0
+			 end as After2Percent
+			,case
+				 when prenatal is not null and prenatal > 0 then
+					 prenatal+within2wks
+				 else
+					 within2wks
+			 end as Prenatal_2wks
+			,case
+				 when prenatal is not null and prenatal > 0 then
+					 (prenatal+within2wks)/(kempettl*1.0)
+				 else
+					 within2wks/(kempettl*1.0)
+			 end as Percent_2wks
+			,case
+				 when NegativeKempes is not null and NegativeKempes > 0 then
+					 NegativeKempes/(kempettl*1.0)
+				 else
+					 0
+			 end as NegKempePercent
+			,case
+				 when PositiveKempes is not null and PositiveKempes > 0 then
+					 PositiveKempes/(kempettl*1.0)
+				 else
+					 0
+			 end as PosKempePercent
 			from cteTotals
 end
 GO
