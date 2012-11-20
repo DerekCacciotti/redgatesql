@@ -14,7 +14,9 @@ CREATE procedure [dbo].[rspFirstHomeVisit]
     @programfk varchar(max)    = null,
     @Case      varchar(50)     = null,--figure the Case Filters out later
     @STDate    datetime,
-    @EndDate   datetime
+    @EndDate   datetime, 
+    @posclause varchar(200),
+    @negclause varchar(200)
 )
 as
 	if @programfk is null
@@ -80,6 +82,7 @@ as
 					  group by hvcasepk
 							  ,tcdob
 							  ,edc) as a
+				inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = a.HVCasePK
 			group by hvcasepk
 					,VisitStartTime
 					,tcdob

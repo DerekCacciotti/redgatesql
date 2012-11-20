@@ -27,8 +27,8 @@ begin
             @pospair2 as varchar(100) = '',
             @pospair3 as varchar(100) = '',
             @negpair1 as varchar(100) = '',
-            @negpair2 as varchar(100) = '',
-            @negpair3 as varchar(100) = '',
+            @negpair2 as varchar(100) ,
+            @negpair3 as varchar(100) ,
             @rownum   as int,
             @listitem as varchar(100)
 	--positive clause
@@ -88,38 +88,39 @@ begin
 			deallocate neg_cursor
 		end
 	---
-	insert into @tblCases
-		select distinct HVCasePK
-			from
-				(select HVCasePK
-					   ,cp.ProgramFK
-					   ,cast(isnull(CaseFilterNameFK,listCaseFilterNamePK) as varchar(10))
-						+case 
-							when cfn.FilterType = 1
-								then case when cf.CaseFilterNameChoice=1 then 'Yes' else 'No' end
-							when cfn.FilterType = 2
-								then (select cfno.FilterOption from listCaseFilterNameOption cfno where listCaseFilterNameOptionPK=cf.CaseFilterNameOptionFK)
-							when cfn.FilterType = 3
-								then CaseFilterValue
-						end as answers
-					from CaseProgram cp
-					inner join HVCase on cp.HVCaseFK = HVCasePK
-					inner join listCaseFilterName cfn on cfn.ProgramFK = cp.ProgramFK
-					left join CaseFilter cf on HVCasePK = cf.HVCaseFK and CaseFilterNameFK = cfn.listCaseFilterNamePK
-					inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem) a
-					-- where @programFKS like ('%,'+cast(CaseProgram.ProgramFK as varchar(100))+',%')) a
-			where answers in (@pospair1, @pospair2, @pospair3)
-				 and answers not in (@negpair1, @negpair2, @negpair3)
-
-			--(answers = @pospair1
-			--	 or answers = @pospair2
-			--	 or answers = @pospair3)
-			--	 and
-			--	 (answers <> @negpair1
-			--	 or answers <> @negpair2
-			--	 or answers <> @negpair3)
-
-			-- return information to caller- second part of last
+	if (@positiveClause is null or @positiveClause = '') and (@negativeClause is null or @negativeClause = '') 
+		begin
+			insert into @tblCases
+				select HVCasePK 
+				from CaseProgram cp
+				inner join HVCase h on h.HVCasePK = cp.HVCaseFK
+				inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
+		end
+	else
+		begin
+			insert into @tblCases
+				select distinct HVCasePK
+					from
+						(select HVCasePK
+							   ,cp.ProgramFK
+							   ,cast(isnull(CaseFilterNameFK,listCaseFilterNamePK) as varchar(10))
+								+case 
+									when cfn.FilterType = 1
+										then case when cf.CaseFilterNameChoice=1 then 'Yes' else 'No' end
+									when cfn.FilterType = 2
+										then (select cfno.FilterOption from listCaseFilterNameOption cfno where listCaseFilterNameOptionPK=cf.CaseFilterNameOptionFK)
+									when cfn.FilterType = 3
+										then CaseFilterValue
+								end as answers
+							from CaseProgram cp
+							inner join HVCase on cp.HVCaseFK = HVCasePK
+							inner join listCaseFilterName cfn on cfn.ProgramFK = cp.ProgramFK
+							left join CaseFilter cf on HVCasePK = cf.HVCaseFK and CaseFilterNameFK = cfn.listCaseFilterNamePK
+							inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem) a
+							-- where @programFKS like ('%,'+cast(CaseProgram.ProgramFK as varchar(100))+',%')) a
+					where answers in (@pospair1, @pospair2, @pospair3)
+						 and answers not in (@negpair1, @negpair2, @negpair3)
+		end
 
 	return
 	
