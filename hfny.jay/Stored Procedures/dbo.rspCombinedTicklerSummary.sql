@@ -55,8 +55,9 @@ as
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
 					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-					  inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asq version'
-					  inner join codeduebydates on scheduledevent = optionValue
+					  --inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asq version'
+					  inner join codeduebydates on scheduledevent = 'ASQ' 
+					  --inner join codeduebydates on scheduledevent = optionValue
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
 					  inner join workerprogram on workerfk = fsw.workerpk
@@ -102,14 +103,16 @@ as
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
 					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-					  inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asqse version'
-					  inner join codeduebydates on scheduledevent = optionValue
+					  --inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asqse version'
+					  inner join codeduebydates on scheduledevent = 'ASQSE-1'  --optionValue
+					  --inner join codeduebydates on scheduledevent = optionValue
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
 					  inner join workerprogram on workerfk = fsw.workerpk
 					  inner join worker supervisor on supervisorfk = supervisor.workerpk
 					  inner join codelevel on codelevelpk = currentlevelfk
-					  left join asqse on asqse.hvcasefk = hvcasepk and asqse.programfk = caseprogram.programfk and codeduebydates.interval = asqseTCAge
+					  left join asqse on asqse.hvcasefk = hvcasepk and asqse.programfk = caseprogram.programfk 
+					  and codeduebydates.interval = asqseTCAge
 				  where asqse.hvcasefk is NULL
 				       AND HVCase.TCDOD IS NULL
 					   and caseprogress >= 11
@@ -145,7 +148,8 @@ as
 					  inner join workerprogram on workerfk = fsw.workerpk
 					  inner join worker supervisor on supervisorfk = supervisor.workerpk
 					  inner join codelevel on codelevelpk = currentlevelfk
-					  left join followup on followup.hvcasefk = hvcasepk and followup.programfk = caseprogram.programfk and codeduebydates.interval = followupinterval
+					  left join followup on followup.hvcasefk = hvcasepk and followup.programfk = caseprogram.programfk 
+					  and codeduebydates.interval = followupinterval
 				  where followup.hvcasefk is NULL
 				       AND HVCase.TCDOD IS NULL
 					   and caseprogress >= 11
@@ -177,7 +181,7 @@ as
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
 					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-					  inner join codeduebydates on scheduledevent = 'Follow Up'
+					  inner join codeduebydates on scheduledevent = 'PSI'
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
 					  inner join workerprogram on workerfk = fsw.workerpk
