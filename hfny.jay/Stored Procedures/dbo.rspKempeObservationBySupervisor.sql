@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +9,7 @@ GO
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
 -- =============================================
-create procedure [dbo].[rspKempeObservationBySupervisor]
+CREATE procedure [dbo].[rspKempeObservationBySupervisor]
 (
     @programfk varchar(max)    = null
 )
@@ -36,8 +37,8 @@ as
 				left join HVCase on HVCase.HVCasePK = Kempe.hvcasefk
 				inner join WorkerCohort on Kempe.FAWFK = WorkerCohort.FAWFK
 				inner join dbo.SplitString(@programfk,',') on Kempe.programfk = listitem
-			where datediff(m,Kempe.KempeDate,getdate()) <= 12
-				 and Kempe.SupervisorObservation = 1
+			where  --datediff(m,Kempe.KempeDate,getdate()) <= 12 and
+				  Kempe.SupervisorObservation = 1
 	),
 	q
 	as (select KempeDate
@@ -67,9 +68,9 @@ as
 			inner join WorkerProgram on WorkerProgram.WorkerFK = Worker.WorkerPK
 			inner join Worker supervisor on WorkerProgram.SupervisorFK = supervisor.WorkerPK
 			inner join dbo.SplitString(@programfk,',') on WorkerProgram.programfk = listitem
-		where Worker.WorkerPK in (select FAWFK
-									  from WorkerCohort)
-			 and WorkerProgram.TerminationDate is null
+		where Worker.WorkerPK in (select FAWFK from WorkerCohort)
+			 and WorkerProgram.TerminationDate is NULL
+			 AND Worker.LastName <> 'Transfer Worker'
 		order by supervisor.LastName
 				,Worker.LastName
 				,KempeDate desc
