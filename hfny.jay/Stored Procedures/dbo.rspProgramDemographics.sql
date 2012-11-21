@@ -11,7 +11,8 @@ GO
 CREATE PROCEDURE [dbo].[rspProgramDemographics] 
 	@programfk INT = NULL, 
 	@StartDt datetime,
-	@EndDt datetime
+	@EndDt DATETIME,
+	@SiteFK INT = 0
 AS
 
 --DECLARE @programfk INT = 6 
@@ -25,8 +26,13 @@ JOIN dbo.CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 JOIN PC AS c ON c.PCPK = a.PC1FK
 JOIN Intake AS d ON d.HVCaseFK = a.HVCasePK
 JOIN OtherChild AS oc ON oc.FormFK = d.IntakePK AND oc.FormType = 'IN' AND oc.Relation2PC1 = '01'
+
+inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
+inner join workerprogram on workerprogram.workerfk = fsw.workerpk
+					  
 WHERE (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt) AND a.IntakeDate <= @EndDt
 AND b.ProgramFK = @programfk
+AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
 )
 , TCMedicaid_5 AS (
 SELECT
@@ -41,8 +47,13 @@ JOIN PC AS c ON c.PCPK = a.PC1FK
 JOIN Intake AS d ON d.HVCaseFK = a.HVCasePK
 JOIN TCID AS tc ON tc.HVCaseFK = a.HVCasePK AND tc.TCDOB <= @EndDt
 JOIN CommonAttributes AS caTC ON caTC.FormFK = tc.TCIDPK AND caTC.FormType = 'TC'
+
+inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
+inner join workerprogram on workerprogram.workerfk = fsw.workerpk
+		
 WHERE (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt) AND a.IntakeDate <= @EndDt
 AND b.ProgramFK = @programfk
+AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
 )
 
 , TCMedicaid AS (
@@ -83,6 +94,10 @@ FROM dbo.HVCase AS a
 JOIN dbo.CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 JOIN PC AS c ON c.PCPK = a.PC1FK
 JOIN Intake AS d ON d.HVCaseFK = a.HVCasePK
+
+join worker fsw on b.CurrentFSWFK = fsw.workerpk
+join workerprogram on workerprogram.workerfk = fsw.workerpk
+		
 LEFT OUTER JOIN CommonAttributes AS	ca ON ca.FormFK = d.IntakePK AND ca.FormType = 'IN'
 LEFT OUTER JOIN CommonAttributes AS	ca1 ON ca1.FormFK = d.IntakePK AND ca1.FormType = 'IN-PC1'
 LEFT OUTER JOIN CommonAttributes AS	ca2 ON ca2.FormFK = d.IntakePK AND ca2.FormType = 'IN-PC2'
@@ -95,6 +110,7 @@ FROM TCID GROUP BY HVCaseFK) AS t ON t.HVCaseFK = a.HVCasePK
 
 WHERE (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt) AND a.IntakeDate <= @EndDt
 AND b.ProgramFK = @programfk
+AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
 )
 
 , y AS (
