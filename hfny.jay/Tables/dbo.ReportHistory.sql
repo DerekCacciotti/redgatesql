@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[ReportHistory]
 [ReportCategory] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ReportFK] [int] NOT NULL,
 [ReportName] [char] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[ReportType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ReportType] [char] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TimeRun] [datetime] NOT NULL,
 [UserFK] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ReportFK_old] [int] NULL
