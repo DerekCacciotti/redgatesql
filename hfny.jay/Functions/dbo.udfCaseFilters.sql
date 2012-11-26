@@ -119,7 +119,8 @@ begin
 							inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem) a
 							-- where @programFKS like ('%,'+cast(CaseProgram.ProgramFK as varchar(100))+',%')) a
 					where answers in (@pospair1, @pospair2, @pospair3)
-						 and answers not in (@negpair1, @negpair2, @negpair3)
+						-- (case when @pospair1 is not null then 
+						 and answers not in (isnull(@negpair1,answers), isnull(@negpair2,answers), isnull(@negpair3,answers))
 		end
 
 	return
