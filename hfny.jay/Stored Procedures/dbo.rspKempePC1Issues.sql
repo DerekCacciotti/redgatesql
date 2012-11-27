@@ -4,8 +4,6 @@ GO
 SET ANSI_NULLS ON
 GO
 
-
-
 -- =============================================
 -- Author:      <Dar Chen>
 -- Create date: <Jul 11, 2012>
@@ -36,9 +34,23 @@ JOIN ServiceReferral AS c ON c.HVCaseFK = a.HVCasePK
 WHERE a.IntakeDate BETWEEN @StartDt AND @EndDt
 AND c.ReferralDate - a.IntakeDate < 183 
 GROUP BY a.HVCasePK
+),
+
+inPC1Issues
+AS (
+SELECT HVCaseFK
+,CASE WHEN sum(CASE WHEN SubstanceAbuse = 1 THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END SubstanceAbuse
+,CASE WHEN sum(CASE WHEN MentalIllness = 1 THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END MentalIllness 
+,CASE WHEN sum(CASE WHEN DomesticViolence = 1 THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END DomesticViolence 
+,CASE WHEN sum(CASE WHEN AlcoholAbuse = 1 THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END AlcoholAbuse 
+,CASE WHEN sum(CASE WHEN Depression = 1 THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END Depression 
+,CASE WHEN sum(CASE WHEN OtherIssue = 1 THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END OtherIssue 
+FROM PC1Issues
+WHERE PC1IssuesDate <= @EndDt
+GROUP BY HVCaseFK
 )
 
-SELECT d.PC1ID
+SELECT DISTINCT d.PC1ID
 , convert(VARCHAR(12), a.KempeDate, 101) KempDate
 , convert(VARCHAR(12), a.IntakeDate, 101) IntakeDate
 , e.LevelName
@@ -51,11 +63,8 @@ SELECT d.PC1ID
 , ltrim(rtrim(fsw.firstname))+' '+ltrim(rtrim(fsw.lastname)) fswname
 , ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) supervisor
 
-, b.SubstanceAbuse, b.MentalIllness, b.DomesticViolence
-, b.AlcoholAbuse, b.Depression, b.OtherIssue
-
 FROM HVCase AS a 
-JOIN PC1Issues AS b ON a.HVCasePK = b.HVCaseFK
+JOIN inPC1Issues AS b ON a.HVCasePK = b.HVCaseFK
 JOIN CaseProgram AS d ON d.HVCaseFK = a.HVCasePK
 JOIN codeLevel AS e ON d.CurrentLevelFK = e.codeLevelPK
 JOIN inserviceReferral AS c ON c.HVCasePK = a.HVCasePK
