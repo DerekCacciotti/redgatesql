@@ -94,72 +94,7 @@ CONSTRAINT [FK_CommonAttributes_TCMedicalFacilityFK] FOREIGN KEY ([TCMedicalFaci
 ALTER TABLE [dbo].[CommonAttributes] ADD
 CONSTRAINT [FK_CommonAttributes_TCMedicalProviderFK] FOREIGN KEY ([TCMedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
 GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
-CREATE trigger [dbo].[fr_Delete_TIPS] ON [dbo].[CommonAttributes] AFTER DELETE
-AS
-	DECLARE @oldFormType char(2), @PK int ;
 
-		Select @oldFormType = FormType,
-			   @PK = CommonAttributesPK			  
-		From deleted 
-
-	IF @oldFormType='TP'
-			BEGIN
-				EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='TP'
-			END
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
-CREATE trigger [dbo].[fr_TIPS] ON [dbo].[CommonAttributes] AFTER INSERT
-AS
-	DECLARE @newFormType char(2), @PK int ;
-
-		Select @newFormType = FormType,
-			   @PK = CommonAttributesPK			  
-		From inserted 
-
-	IF @newFormType='TP'
-			BEGIN
-				EXEC spAddFormReview_userTrigger @FormFK=@PK, @FormTypeValue='TP'
-			END
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
--- =============================================
--- Author:		Chris Papas
--- Create date: 08/18/2010
--- Description:	Updates FormReview Table with form date on Supervisor Review of Form
--- =============================================
-CREATE TRIGGER [dbo].[fr_TIPS_Edit]
-on [dbo].[CommonAttributes]
-AFTER UPDATE
-
-AS
-
-Declare @PK int
-Declare @UpdatedFormDate datetime 
-Declare @FormTypeValue varchar(2)
-
-select @PK = CommonAttributesPK FROM inserted
-select @UpdatedFormDate = FormDate FROM inserted
-set @FormTypeValue = 'TP'
-
-BEGIN
-	UPDATE FormReview
-	SET 
-	FormDate=@UpdatedFormDate
-	WHERE FormFK=@PK 
-	AND FormType=@FormTypeValue
-
-END
-GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
