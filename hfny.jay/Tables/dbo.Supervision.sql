@@ -36,6 +36,7 @@ CREATE TABLE [dbo].[Supervision]
 [StaffIll] [bit] NULL,
 [StaffTraining] [bit] NULL,
 [StaffVacation] [bit] NULL,
+[StaffOutAllWeek] [bit] NULL,
 [StrengthBasedApproach] [bit] NULL,
 [Strengths] [bit] NULL,
 [SupervisionCreateDate] [datetime] NOT NULL CONSTRAINT [DF_Supervision_SupervisionCreateDate] DEFAULT (getdate()),
