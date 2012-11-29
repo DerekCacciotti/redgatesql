@@ -4,6 +4,8 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditCommonAttributes](@CommonAttributesPK int=NULL,
+@AvailableMonthlyBenefits numeric(4, 0)=NULL,
+@AvailableMonthlyBenefitsUnknown bit=NULL,
 @AvailableMonthlyIncome numeric(4, 0)=NULL,
 @CommonAttributesEditor char(10)=NULL,
 @EducationalEnrollment char(1)=NULL,
@@ -79,6 +81,8 @@ CREATE PROCEDURE [dbo].[spEditCommonAttributes](@CommonAttributesPK int=NULL,
 AS
 UPDATE CommonAttributes
 SET 
+AvailableMonthlyBenefits = @AvailableMonthlyBenefits, 
+AvailableMonthlyBenefitsUnknown = @AvailableMonthlyBenefitsUnknown, 
 AvailableMonthlyIncome = @AvailableMonthlyIncome, 
 CommonAttributesEditor = @CommonAttributesEditor, 
 EducationalEnrollment = @EducationalEnrollment, 

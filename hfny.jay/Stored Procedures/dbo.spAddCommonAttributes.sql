@@ -3,7 +3,9 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyIncome numeric(4, 0)=NULL,
+CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyBenefits numeric(4, 0)=NULL,
+@AvailableMonthlyBenefitsUnknown bit=NULL,
+@AvailableMonthlyIncome numeric(4, 0)=NULL,
 @CommonAttributesCreator char(10)=NULL,
 @EducationalEnrollment char(1)=NULL,
 @FormDate datetime=NULL,
@@ -77,6 +79,8 @@ CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyIncome numeric(4
 @WhyNotBreastFed char(2)=NULL)
 AS
 INSERT INTO CommonAttributes(
+AvailableMonthlyBenefits,
+AvailableMonthlyBenefitsUnknown,
 AvailableMonthlyIncome,
 CommonAttributesCreator,
 EducationalEnrollment,
@@ -151,6 +155,8 @@ WasBreastFed,
 WhyNotBreastFed
 )
 VALUES(
+@AvailableMonthlyBenefits,
+@AvailableMonthlyBenefitsUnknown,
 @AvailableMonthlyIncome,
 @CommonAttributesCreator,
 @EducationalEnrollment,
