@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,15 +5,15 @@ GO
 
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
--- Create date: <November 6th, 2012>
--- Description:	<This QA report gets you 'Follow-Ups for Active Cases with Target Child 6 months or older '>
--- rspQAReport10 4, 'summary'	--- for summary page
--- rspQAReport10 8			--- for main report - location = 2
--- rspQAReport10 null			--- for main report for all locations
+-- Create date: <October 1st, 2012>
+-- Description:	<This QA report gets you 'PSIs for Active Cases '>
+-- rspQAReport9_bak 8, 'summary'	--- for summary page
+-- rspQAReport9_bak 8			--- for main report - location = 2
+-- rspQAReport9_bak null			--- for main report for all locations
 -- =============================================
 
 
-CREATE procedure [dbo].[rspQAReport10](
+CREATE procedure [dbo].[rspQAReport9_bak](
 @programfk    varchar(max)    = NULL,
 @ReportType char(7) = NULL 
 
@@ -31,23 +30,17 @@ AS
 
 -- Last Day of Previous Month 
 Declare @LastDayofPreviousMonth DateTime 
-Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
---Set @LastDayofPreviousMonth = '05/31/2012'
+--Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
 
--------- Hard code date for FollowUpInterval = 18 -----
--- NOTE: Ignore Missing field for the old FoxPro data
-Declare @StartFollowUpInterval18AfterThisDate DateTime 
-Set @StartFollowUpInterval18AfterThisDate = '07/01/2011'
---Set @StartFollowUpInterval18AfterThisDate = '07/01/1999'
--------------------------------------------------------
-
-
+Set @LastDayofPreviousMonth = '05/31/2012'
 
 -- table variable for holding Init Required Data
-DECLARE @tbl4QAReport10Coheart TABLE(
+DECLARE @tbl4QAReport9_bakCoheart TABLE(
+OldID [char](23),	
 	HVCasePK INT, 
 	[PC1ID] [char](13),	
 	TCDOB [datetime],
+	FormDueDate [datetime],	
 	Worker [varchar](200),
 	currentLevel [varchar](50),
 	IntakeDate [datetime],
@@ -59,13 +52,17 @@ DECLARE @tbl4QAReport10Coheart TABLE(
 	Missing BIT,
 	OutOfWindow BIT,
 	RecOK BIT,
-	FollowUpInterval [char](2)
+	PSIInterval [char](2),
+	HVCaseCreator [char](10),
+	HVCaseEditor [char](10)
 )
 
-INSERT INTO @tbl4QAReport10Coheart(
+INSERT INTO @tbl4QAReport9_bakCoheart(
+	OldID,
 	HVCasePK,
 	[PC1ID],
 	TCDOB,
+	FormDueDate,
 	Worker,
 	currentLevel,
 	IntakeDate,
@@ -77,9 +74,11 @@ INSERT INTO @tbl4QAReport10Coheart(
 	Missing,
 	OutOfWindow,
 	RecOK,
-	FollowUpInterval 	 
+	PSIInterval,
+	HVCaseCreator,
+	HVCaseEditor
 )
-select 
+select cp.OldID,
 	 h.HVCasePK, 
 	cp.PC1ID,
 	case
@@ -87,7 +86,10 @@ select
 		   h.tcdob
 	   else
 		   h.edc
-	end as tcdob,	
+	end as tcdob,
+
+	-- Form due date is intake date plus 30.44 days
+	dateadd(mm,1,h.IntakeDate) as FormDueDate,
 	
 	LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) as worker,
 
@@ -107,7 +109,9 @@ select
 	0 AS  	Missing ,
 	0 AS 	OutOfWindow,
 	0 AS 	RecOK,
-	'' AS FollowUpInterval
+	'' AS PSIInterval,
+	h.HVCaseCreator,
+	h.HVCaseEditor
 	
 	
 	from dbo.CaseProgram cp
@@ -117,29 +121,38 @@ select
 	inner join worker fsw on cp.CurrentFSWFK = fsw.workerpk
 	
 
-	where   ((h.IntakeDate <= dateadd(M, -1, @LastDayofPreviousMonth)) AND (h.IntakeDate IS NOT NULL))	-- enrolled atleast 30 days as of analysis point		 		  
+	where   ((h.IntakeDate <= dateadd(M, -1, @LastDayofPreviousMonth)) AND (h.IntakeDate IS NOT NULL))	-- enrolled atleast 30 days as of analysis point		  
 			AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @LastDayofPreviousMonth)  --- case not closed as of analysis point
-			AND (( (@LastDayofPreviousMonth >= dateadd(dd, 183, h.edc)) AND (h.tcdob IS NULL) ) OR ( (@LastDayofPreviousMonth >= dateadd(dd, 183, h.tcdob)) AND (h.edc IS NULL) ) )    -- baby is atleast 30 days old as of analysis point
+			AND (( (@LastDayofPreviousMonth > dateadd(d, 30, h.edc)) AND (h.tcdob IS NULL) ) OR ( (@LastDayofPreviousMonth > dateadd(d, 30, h.tcdob)) AND (h.edc IS NULL) ) )  -- baby is atleast 30 days old as of analysis point
+
+
+
 
  
 -- to get accurate count of case
-UPDATE @tbl4QAReport10Coheart
+UPDATE @tbl4QAReport9_bakCoheart
 SET TCNumber = 1
 WHERE TCNumber = 0 
 
 
---SELECT * FROM @tbl4QAReport10Coheart
--- Equivelent to csrForm6 in foxpro	
+--SELECT * FROM @tbl4QAReport9_bakCoheart
+--ORDER BY OldID
 
+
+-- Equivelent to csrForm6 in foxpro	
+--SELECT DISTINCT HVCasePK  FROM @tbl4QAReport9_bakCoheart
+----------SELECT * FROM @tbl4QAReport9_bakCoheart  -- Equivelent to csrForm6 in foxpro
+----------ORDER BY HVCasePK
  
  ---***********************************************************************************************
  --*************************************************************************************************
---- rspQAReport10 8 ,'summary'
+--- rspQAReport9_bak 8 ,'summary'
 
-DECLARE @tbl4QAReport10 TABLE(
+DECLARE @tbl4QAReport9_bak TABLE(
 	HVCasePK INT,
 	[PC1ID] [char](13),
 	TCDOB [datetime],
+	FormDueDate [datetime],
 	Worker [varchar](200),
 	currentLevel [varchar](50),
 	IntakeDate [datetime],
@@ -159,10 +172,11 @@ DECLARE @tbl4QAReport10 TABLE(
 	FormReviewed BIT 
 )
 
-DECLARE @tbl4QAReport10Expected TABLE(
+DECLARE @tbl4QAReport9_bakExpected TABLE(
 	HVCasePK INT,
 	[PC1ID] [char](13),
 	TCDOB [datetime],
+	FormDueDate [datetime],
 	Worker [varchar](200),
 	currentLevel [varchar](50),
 	IntakeDate [datetime],
@@ -182,10 +196,11 @@ DECLARE @tbl4QAReport10Expected TABLE(
 	FormReviewed BIT 
 )
 
-DECLARE @tbl4QAReport10NotExpected TABLE(
+DECLARE @tbl4QAReport9_bakNotExpected TABLE(
 	HVCasePK INT,
 	[PC1ID] [char](13),
 	TCDOB [datetime],
+	FormDueDate [datetime],
 	Worker [varchar](200),
 	currentLevel [varchar](50),
 	IntakeDate [datetime],
@@ -206,13 +221,13 @@ DECLARE @tbl4QAReport10NotExpected TABLE(
 )
 
 
-DECLARE @tbl4QAReport10Interval TABLE(
+DECLARE @tbl4QAReport9_bakInterval TABLE(
 	HVCasePK INT,
 	Interval CHAR (2)
 )
 
 
-INSERT INTO @tbl4QAReport10Interval
+INSERT INTO @tbl4QAReport9_bakInterval
 (
 HVCasePK,
 Interval
@@ -221,21 +236,20 @@ SELECT
 		qa1.HVCasePK	 
 	  , max(Interval) AS Interval
  
- FROM @tbl4QAReport10Coheart qa1
- inner join codeduebydates on scheduledevent = 'Follow Up' AND XDateAge >= DueBy  
+ FROM @tbl4QAReport9_bakCoheart qa1
+ inner join codeduebydates on scheduledevent = 'PSI' AND XDateAge >= DueBy  
  GROUP BY HVCasePK 
 
 
---SELECT * FROM @tbl4QAReport10Interval
---ORDER BY Interval 
---- rspQAReport10 8 ,'summary'
+--SELECT * FROM @tbl4QAReport9_bakInterval
 
 
 -- get expected records that are due for the Interval
-INSERT INTO @tbl4QAReport10Expected(
+INSERT INTO @tbl4QAReport9_bakExpected(
 	HVCasePK,
 	[PC1ID],
 	TCDOB,
+	FormDueDate,
 	Worker,
 	currentLevel,
 	IntakeDate,
@@ -257,6 +271,7 @@ INSERT INTO @tbl4QAReport10Expected(
  SELECT qa1.HVCasePK
 	  , PC1ID
 	  , TCDOB
+	  , FormDueDate
 	  , Worker
 	  , currentLevel
 	  , IntakeDate
@@ -266,33 +281,33 @@ INSERT INTO @tbl4QAReport10Expected(
 	  , qa1.TCNumber
 	  , qa1.MultipleBirth
 	  , 0 AS Missing
-	  , CASE WHEN (FUPInWindow = 1) THEN 0 ELSE 1 END AS OutOfWindow
-	  , CASE WHEN (FUPInWindow = 1) THEN 1 ELSE 0 END AS RecOK 
+	  , CASE WHEN (PSIInWindow = 1) THEN 0 ELSE 1 END AS OutOfWindow
+	  , CASE WHEN (PSIInWindow = 1) THEN 1 ELSE 0 END AS RecOK 
 	  , cd.[DueBy]
 	  , cd.[Interval]
 	  , cd.[MaximumDue]
 	  , cd.[MinimumDue]		  
-	  , FollowUpDate  AS FormDoneDateCompleted
-	  , CASE WHEN dbo.IsFormReviewed(FollowUpDate, 'FU', FollowUpPK)=1 THEN 1 ELSE 0 END AS FormReviewed 
+	  , PSIDateComplete  AS FormDoneDateCompleted
+	  , CASE WHEN dbo.IsFormReviewed(PSIDateComplete, 'PS', PSIPK)=1 THEN 1 ELSE 0 END AS FormReviewed 
  
- FROM @tbl4QAReport10Coheart qa1 
- INNER JOIN @tbl4QAReport10Interval cteIn ON qa1.HVCasePK = cteIn.HVCasePK -- we will use column 'Interval' next, which we just added
- inner join codeduebydates cd on scheduledevent = 'Follow Up' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
- -- The following line gets those tcid's with fu's that are due for the Interval
- INNER JOIN FollowUp fu ON fu.HVCaseFK = qa1.HVCasePK AND fu.FollowUpInterval = cteIn.Interval -- note 'Interval' is the minimum interval 
- ORDER BY HVCasePK 	  
-
+ FROM @tbl4QAReport9_bakCoheart qa1 
+ INNER JOIN @tbl4QAReport9_bakInterval cteIn ON qa1.HVCasePK = cteIn.HVCasePK -- we will use column 'Interval' next, which we just added
+ inner join codeduebydates cd on scheduledevent = 'PSI' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
+ -- The following line gets those tcid's with PSI's that are due for the Interval
+ INNER JOIN PSI P ON P.HVCaseFK = qa1.HVCasePK AND P.PSIInterval = cteIn.Interval -- note 'Interval' is the minimum interval 
+ ORDER BY HVCasePK 
  
- --- rspQAReport10 8 ,'summary'
- --SELECT * FROM @tbl4QAReport10Expected
+ --- rspQAReport9_bak 8 ,'summary'
+ --SELECT * FROM @tbl4QAReport9_bakExpected
  
 -------- -- The following records, We did find ASQs for the proper interval
--- missing fu cases
+-- missing psi cases
 -- get expected records that are due for the Interval
-INSERT INTO @tbl4QAReport10NotExpected(
+INSERT INTO @tbl4QAReport9_bakNotExpected(
 	HVCasePK,
 	[PC1ID],
 	TCDOB,
+	FormDueDate,
 	Worker,
 	currentLevel,
 	IntakeDate,
@@ -314,6 +329,7 @@ INSERT INTO @tbl4QAReport10NotExpected(
 SELECT qa2.HVCasePK
 	 , qa2.PC1ID
 	 , qa2.TCDOB
+	 , qa2.FormDueDate
 	 , qa2.Worker
 	 , qa2.currentLevel
 	 , qa2.IntakeDate
@@ -321,55 +337,38 @@ SELECT qa2.HVCasePK
 	 , qa2.CaseProgress
 	 , qa2.XDateAge	
 	 , qa2.TCNumber
-	 , qa2.MultipleBirth	 
-	 ,CASE 
-		WHEN (qa2.TCDOB >= @StartFollowUpInterval18AfterThisDate AND cteIn.[Interval] = '18')   THEN 1 -- missing
-		WHEN (qa2.TCDOB < @StartFollowUpInterval18AfterThisDate AND cteIn.[Interval] = '18')   THEN 0  --- not missing
-		WHEN cteIn.[Interval] <> '18' THEN 1  --- missing
-		ELSE 0 END  --- not missing
-	   AS Missing
+	 , qa2.MultipleBirth 
+	 , 1 AS Missing
 	 , qa2.OutOfWindow
 	 , qa2.RecOK
 	  , cd.[DueBy]
-	  
- 	  , CASE WHEN cteIn.[Interval] = '18' THEN 
-		
-		CASE WHEN qa2.TCDOB >= @StartFollowUpInterval18AfterThisDate THEN 
-				'18'
-	    ELSE
-				'12'
-	    END			
-	  
-	  ELSE
-			cteIn.[Interval]
-	  END  AS Interval	 
-	  
-	  --, cteIn.[Interval]
+	  , cteIn.[Interval]
 	  , cd.[MaximumDue]
 	  , cd.[MinimumDue]		  	
 	 , FormDoneDateCompleted
 	 , NULL AS FormReviewed
 	 
-	  FROM @tbl4QAReport10Coheart qa2
+	  FROM @tbl4QAReport9_bakCoheart qa2
 	 
-	 Left JOIN @tbl4QAReport10Interval cteIn ON qa2.HVCasePK = cteIn.HVCasePK -- we will use column 'Interval' next		
-     LEFT JOIN @tbl4QAReport10Expected efu on efu.hvcasepk = qa2.HVCasePK 
-     inner join codeduebydates cd on scheduledevent = 'Follow Up' AND cteIn.[Interval] = cd.Interval  -- to get dueby, max, min
-WHERE efu.hvcasepk IS NULL 
+	 Left JOIN @tbl4QAReport9_bakInterval cteIn ON qa2.HVCasePK = cteIn.HVCasePK -- we will use column 'Interval' next		
+     LEFT JOIN @tbl4QAReport9_bakExpected epsi on epsi.hvcasepk = qa2.HVCasePK 
+     inner join codeduebydates cd on scheduledevent = 'PSI' AND cteIn.[Interval] = cd.Interval  -- to get dueby, max, min
+WHERE epsi.hvcasepk IS NULL 
 
---------------- rspQAReport10 8 ,'summary'
+--------------- rspQAReport9_bak 8 ,'summary'
 
-INSERT INTO @tbl4QAReport10
-SELECT * FROM @tbl4QAReport10Expected
+INSERT INTO @tbl4QAReport9_bak
+SELECT * FROM @tbl4QAReport9_bakExpected
 Union
-SELECT * FROM @tbl4QAReport10NotExpected  
+SELECT * FROM @tbl4QAReport9_bakNotExpected  
 
 
 
-DECLARE @tbl4QAReport10Main TABLE(
+DECLARE @tbl4QAReport9_bakMain TABLE(
 	HVCasePK INT,
 	[PC1ID] [char](13),
 	TCDOB [datetime],
+	FormDueDate [datetime],
 	Worker [varchar](200),
 	currentLevel [varchar](50),
 	IntakeDate [datetime],
@@ -391,11 +390,12 @@ DECLARE @tbl4QAReport10Main TABLE(
 )
 
 
-INSERT INTO @tbl4QAReport10Main
+INSERT INTO @tbl4QAReport9_bakMain
 (
         HVCasePK
 	  , PC1ID
 	  , TCDOB
+	  , FormDueDate
 	  , Worker
 	  , currentLevel
 	  , IntakeDate
@@ -418,6 +418,7 @@ INSERT INTO @tbl4QAReport10Main
  SELECT HVCasePK
 	  , PC1ID
 	  , TCDOB
+	  , FormDueDate
 	  , Worker
 	  , currentLevel
 	  , IntakeDate
@@ -436,14 +437,14 @@ INSERT INTO @tbl4QAReport10Main
 	  , FormDoneDateCompleted
 	  , FormReviewed
 	  , CASE WHEN ( Interval='00' AND ((IntakeDate >TCDOB) AND (TCDOB IS NOT null)) ) 
-		THEN  dateadd(dd,DueBy,IntakeDate) ELSE dateadd(dd,DueBy,TCDOB) END AS FormDue
-	  FROM @tbl4QAReport10
+		THEN  dateadd(dd,MinimumDue,IntakeDate) ELSE dateadd(dd,MinimumDue,TCDOB) END AS FormDue
+	  FROM @tbl4QAReport9_bak
 
---SELECT * FROM @tbl4QAReport10Main
+--SELECT * FROM @tbl4QAReport9_bakMain
 --ORDER BY HVCasePK 
 
 	
---- rspQAReport10 8 ,'summary'
+--- rspQAReport9_bak 8 ,'summary'
 
 
 
@@ -452,22 +453,20 @@ IF @ReportType = 'summary'
 	BEGIN 
 
 	DECLARE @numOfALLScreens INT = 0
-	SET @numOfALLScreens = (SELECT count(HVCasePK) FROM @tbl4QAReport10Main)
+	SET @numOfALLScreens = (SELECT count(HVCasePK) FROM @tbl4QAReport9_bakMain)
 
 
 	DECLARE @numOfMissingCases INT = 0
-	SET @numOfMissingCases = (SELECT count(HVCasePK) FROM @tbl4QAReport10Main WHERE Missing = 1)
+	SET @numOfMissingCases = (SELECT count(HVCasePK) FROM @tbl4QAReport9_bakMain WHERE Missing = 1)
 	
 	DECLARE @numOfOutOfWindowsORNotReviewedCases INT = 0
-	--SET @numOfOutOfWindowsORNotReviewedCases = (SELECT count(HVCasePK) FROM @tbl4QAReport10Main WHERE OutOfWindow = 1)	
-	--Use the following when FormReviewed is working .... Khalsa
-	SET @numOfOutOfWindowsORNotReviewedCases = (SELECT count(HVCasePK) FROM @tbl4QAReport10Main WHERE OutOfWindow = 1 OR FormReviewed=0)	
+	SET @numOfOutOfWindowsORNotReviewedCases = (SELECT count(HVCasePK) FROM @tbl4QAReport9_bakMain WHERE OutOfWindow = 1 OR FormReviewed=0)	
 	
 	DECLARE @numOfMissingAndOutOfWindowsCases INT = 0	
 	SET @numOfMissingAndOutOfWindowsCases = (@numOfMissingCases + @numOfOutOfWindowsORNotReviewedCases)
 	
 
-DECLARE @tbl4QAReport10Summary TABLE(
+DECLARE @tbl4QAReport9_bakSummary TABLE(
 	[SummaryId] INT,
 	[SummaryText] [varchar](200),
 	[MissingCases] [varchar](200),
@@ -475,17 +474,15 @@ DECLARE @tbl4QAReport10Summary TABLE(
 	[SummaryTotal] [varchar](100)
 )
 
--- ToDo: Work on the following lines
-
-INSERT INTO @tbl4QAReport10Summary([SummaryId],[SummaryText],[MissingCases],[NotOnTimeCases],[SummaryTotal])
-VALUES(16 ,'Follow-Ups for Active Cases with Target Child 6 months or older (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+INSERT INTO @tbl4QAReport9_bakSummary([SummaryId],[SummaryText],[MissingCases],[NotOnTimeCases],[SummaryTotal])
+VALUES(9 ,'PSIs for Active Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 	,CONVERT(VARCHAR,@numOfMissingCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfMissingCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 	,CONVERT(VARCHAR,@numOfOutOfWindowsORNotReviewedCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfOutOfWindowsORNotReviewedCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 	,CONVERT(VARCHAR,@numOfMissingAndOutOfWindowsCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfMissingAndOutOfWindowsCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 
 	)
 
-	SELECT * FROM @tbl4QAReport10Summary	
+	SELECT * FROM @tbl4QAReport9_bakSummary	
 
 	END
 ELSE
@@ -494,11 +491,11 @@ ELSE
 
 	SELECT 
 		   PC1ID
-		 , EventDescription AS IntervalDue		   
-		 --, qam.Interval	
-		 , convert(varchar(10),FormDue,101) AS FormDue
-		 , convert(varchar(10),FormDoneDateCompleted,101) AS FormDate		 	
-		 , convert(varchar(10),TCDOB,101) AS TCDOB	
+		 , EventDescription AS IntervalDue
+		 --, qam.Interval		 
+		 , FormDue
+		 , FormDoneDateCompleted	
+		 , TCDOB
 		 , Worker
 		 , FormReviewed
 		 , Missing
@@ -518,13 +515,13 @@ ELSE
 		 
 		 
 		 		
-	 FROM @tbl4QAReport10Main qam
-	 inner join codeduebydates cdd on scheduledevent = 'Follow Up' AND cdd.Interval = qam.Interval 
+	 FROM @tbl4QAReport9_bakMain qam
+	 inner join codeduebydates cdd on scheduledevent = 'PSI' AND cdd.Interval = qam.Interval 
 		WHERE (Missing = 1 or OutOfWindow = 1 OR FormReviewed=0)
 	ORDER BY Worker, PC1ID 	
 
 
 	END	
 	
-	--- rspQAReport10 8 ,'summary'
+	--- rspQAReport9_bak 8 ,'summary'
 GO
