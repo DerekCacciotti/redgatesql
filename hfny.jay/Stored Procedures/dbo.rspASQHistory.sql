@@ -4,85 +4,82 @@ GO
 SET ANSI_NULLS ON
 GO
 
-CREATE PROCEDURE [dbo].[rspASQHistory]
-( @programfk INT = NULL, 
-  @supervisorfk INT = NULL, 
-  @workerfk INT = NULL,
-  @UnderCutoffOnly CHAR(1) = 'N',
-  @pc1ID VARCHAR(13) = '')
-AS
+CREATE procedure [dbo].[rspASQHistory]
+(
+    @programfk       int            = null,
+    @supervisorfk    int            = null,
+    @workerfk        int            = null,
+    @UnderCutoffOnly char(1)        = 'N',
+    @pc1ID           varchar(13)    = '',
+    @sitefk          int            = null
+)
+as
 
-DECLARE @n INT = 0
-SELECT @n = CASE WHEN @UnderCutoffOnly = 'Y' THEN 1 ELSE 0 END
+	declare @n int = 0
+	select @n = case when @UnderCutoffOnly = 'Y' then 1 else 0 end
 
-SELECT 
-LTRIM(RTRIM(supervisor.firstname)) + ' ' + LTRIM(RTRIM(supervisor.lastname)) supervisor,
-LTRIM(RTRIM(fsw.firstname)) + ' ' + LTRIM(RTRIM(fsw.lastname)) worker,
-d.PC1ID, LTRIM(RTRIM(c.TCFirstName)) + ' ' + LTRIM(RTRIM(c.TCLastName)) TCName,
-convert(VARCHAR(12), c.TCDOB, 101) TCDOB, 
-c.GestationalAge, 
-ltrim(rtrim(replace(b.[AppCodeText], '(optional)', ''))) TCAge, 
-convert(VARCHAR(12), a.DateCompleted, 101) DateCompleted, 
-a.ASQCommunicationScore, 
-CASE WHEN UnderCommunication = 1 THEN '*' ELSE '' END UnderCommunication, 
-ASQGrossMotorScore, 
-CASE WHEN UnderGrossMotor = 1 THEN '*' ELSE '' END UnderGrossMotor, 
-ASQFineMotorScore, 
-CASE WHEN UnderFineMotor = 1 THEN '*' ELSE '' END UnderFineMotor, 
-ASQProblemSolvingScore, 
-CASE WHEN UnderProblemSolving = 1 THEN '*' ELSE '' END UnderProblemSolving, 
-ASQPersonalSocialScore, 
-CASE WHEN UnderPersonalSocial = 1 THEN '*' ELSE '' END UnderPersonalSocial, 
-CASE WHEN TCReferred IS NULL THEN 'Unknown' 
-WHEN TCReferred = 1 THEN 'Yes' ELSE 'No' END TCReferred, 
-CASE WHEN ReviewCDS = 1 THEN 'Yes' ELSE 'No' END ReviewCDS, 
-CASE WHEN ASQInWindow IS NULL THEN 'Unknown' 
-WHEN ASQInWindow = 1 THEN 'In Window' ELSE 'Out of Window' END InWindow,
-a.TCAge [TCAgeCode]
+	select
+		  LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
+		 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
+		 ,d.PC1ID
+		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) TCName
+		 ,convert(varchar(12),c.TCDOB,101) TCDOB
+		 ,c.GestationalAge
+		 ,ltrim(rtrim(replace(b.[AppCodeText],'(optional)',''))) TCAge
+		 ,convert(varchar(12),a.DateCompleted,101) DateCompleted
+		 ,a.ASQCommunicationScore
+		 ,case when UnderCommunication = 1 then '*' else '' end UnderCommunication
+		 ,ASQGrossMotorScore
+		 ,case when UnderGrossMotor = 1 then '*' else '' end UnderGrossMotor
+		 ,ASQFineMotorScore
+		 ,case when UnderFineMotor = 1 then '*' else '' end UnderFineMotor
+		 ,ASQProblemSolvingScore
+		 ,case when UnderProblemSolving = 1 then '*' else '' end UnderProblemSolving
+		 ,ASQPersonalSocialScore
+		 ,case when UnderPersonalSocial = 1 then '*' else '' end UnderPersonalSocial
+		 ,case when TCReferred is null then 'Unknown'
+			  when TCReferred = 1 then 'Yes' else 'No' end TCReferred
+		 ,case when ReviewCDS = 1 then 'Yes' else 'No' end ReviewCDS
+		 ,case when ASQInWindow is null then 'Unknown'
+			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end InWindow
+		 ,a.TCAge [TCAgeCode]
 
-FROM ASQ a 
-INNER JOIN codeApp b 
-ON a.TCAge = b.AppCode AND b.AppCodeGroup = 'TCAge' AND b.AppCodeUsedWhere LIKE '%AQ%'
-INNER JOIN TCID c 
-ON c.TCIDPK = a.TCIDFK
-INNER JOIN CaseProgram d 
-ON d.HVCaseFK = a.HVCaseFK
-INNER JOIN worker fsw
-ON d.CurrentFSWFK = fsw.workerpk
-INNER JOIN workerprogram wp
-ON wp.workerfk = fsw.workerpk
-INNER JOIN worker supervisor
-ON wp.supervisorfk = supervisor.workerpk
+		from ASQ a
+			inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
+			inner join TCID c on c.TCIDPK = a.TCIDFK
+			inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
+			inner join worker fsw on d.CurrentFSWFK = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk
+			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
+			inner join
+					  (select TCIDFK
+							 ,SUM(
+							  case when UnderCommunication = 1 then 1 else 0 end+
+							  case when UnderFineMotor = 1 then 1 else 0 end+
+							  case when UnderGrossMotor = 1 then 1 else 0 end+
+							  case when UnderPersonalSocial = 1 then 1 else 0 end+
+							  case when UnderProblemSolving = 1 then 1 else 0 end
+							  ) flag
+						   from ASQ
+						   group by TCIDFK
+						   having SUM(
+								 case when UnderCommunication = 1 then 1 else 0 end+
+								 case when UnderFineMotor = 1 then 1 else 0 end+
+								 case when UnderGrossMotor = 1 then 1 else 0 end+
+								 case when UnderPersonalSocial = 1 then 1 else 0 end+
+								 case when UnderProblemSolving = 1 then 1 else 0 end
+								 ) >= @n) x
+					  on x.TCIDFK = a.TCIDFK
 
-INNER JOIN 
-(SELECT TCIDFK, 
-SUM(
-CASE WHEN UnderCommunication = 1 THEN 1 ELSE 0 END  + 
-CASE WHEN UnderFineMotor = 1 THEN 1 ELSE 0 END +
-CASE WHEN UnderGrossMotor = 1 THEN 1 ELSE 0 END +
-CASE WHEN UnderPersonalSocial = 1 THEN 1 ELSE 0 END + 
-CASE WHEN UnderProblemSolving = 1 THEN 1 ELSE 0 END
-) flag
-FROM ASQ 
-GROUP BY TCIDFK
-HAVING SUM(
-CASE WHEN UnderCommunication = 1 THEN 1 ELSE 0 END  + 
-CASE WHEN UnderFineMotor = 1 THEN 1 ELSE 0 END +
-CASE WHEN UnderGrossMotor = 1 THEN 1 ELSE 0 END +
-CASE WHEN UnderPersonalSocial = 1 THEN 1 ELSE 0 END + 
-CASE WHEN UnderProblemSolving = 1 THEN 1 ELSE 0 END
-) >= @n) x 
-ON x.TCIDFK = a.TCIDFK
-
-WHERE 
-d.DischargeDate IS NULL 
-AND d.currentFSWFK = ISNULL(@workerfk, d.currentFSWFK)
-AND wp.supervisorfk = ISNULL(@supervisorfk, wp.supervisorfk)
-AND d.programfk = @programfk
-AND d.PC1ID = CASE WHEN @pc1ID = '' THEN d.PC1ID ELSE @pc1ID END
-ORDER BY  supervisor, worker, PC1ID, TCAgeCode
-
-
-
-
+		where
+			 d.DischargeDate is null
+			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
+			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)
+			 and d.programfk = @programfk
+			 and d.PC1ID = case when @pc1ID = '' then d.PC1ID else @pc1ID end
+			 and SiteFK = isnull(@sitefk,SiteFK)
+		order by supervisor
+				,worker
+				,PC1ID
+				,TCAgeCode
 GO
