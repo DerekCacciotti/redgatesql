@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -15,5 +16,5 @@ AS
 	SELECT *
 	FROM dbo.listMedicalProvider
 	WHERE ProgramFK = ISNULL(@ProgramFK,ProgramFK)
-	ORDER BY mplastname
+	ORDER BY mplastname, MPAddress
 GO
