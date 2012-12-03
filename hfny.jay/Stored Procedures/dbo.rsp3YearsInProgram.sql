@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,7 +11,8 @@ GO
 --				Moved from FamSys - 02/05/12 jrobohn
 -- =============================================
 CREATE procedure [dbo].[rsp3YearsInProgram]
-(@programfk varchar(max)    = null)
+(@programfk varchar(max)    = NULL,
+ @SiteFK INT = 0)
 as
 begin
 
@@ -31,39 +33,26 @@ begin
 
 	select
 		  PC1ID
-		 ,HVCase.IntakeDate
-		 ,case
-			  when DischargeDate is null then
-				  convert(varchar(10),getdate(),101)
-			  else
-				  DischargeDate
-		  end as DISDate
-		 ,datediff(month,IntakeDate,case
-										when DischargeDate is null then
-											getdate()
-										else
-											DischargeDate
-									end) as MonthsInProgram
+		 ,convert(VARCHAR(10), HVCase.IntakeDate, 101) [IntakeDate]
+		 ,CASE when DischargeDate is null THEN  ''
+		  ELSE  convert(VARCHAR(10), DischargeDate, 101) end [DISDate]
+		 ,datediff(month,IntakeDate,CASE when DischargeDate is null THEN getdate()
+		  ELSE DischargeDate end) [MonthsInProgram]
 		 ,HVPROGRAM.ProgramName as Program_Name
-		 ,'Outcome' = case
-						  when DischargeDate is null then
-							  convert(varchar(75),LevelName)
-						  else
-							  convert(varchar(75),codeDischarge.DischargeReason)
-					  end
+		 ,case when DischargeDate is null THEN 'Case Open, ' + rtrim(LevelName)
+		  else rtrim(codeDischarge.DischargeReason) END [Outcome]
 		from
 			CaseProgram
+			INNER JOIN worker fsw ON CurrentFSWFK = fsw.workerpk
+		    INNER JOIN workerprogram ON workerprogram.workerfk = fsw.workerpk
 			left join HVCase on HVCase.HVCasePK = CaseProgram.HVCaseFK
 			left join codeDischarge on CaseProgram.DischargeReason = codeDischarge.DischargeCode
 			left join codeLevel on CaseProgram.CurrentLevelFK = codeLevel.codeLevelPK
 			left join HVProgram on CaseProgram.ProgramFK = HVProgram.HVProgramPK
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 		where HVCase.IntakeDate is not null
-			 and datediff(day,IntakeDate,case
-											 when DischargeDate is null then
-												 getdate()
-											 else
-												 DischargeDate
-										 end) > 1095
+			 and datediff(day,IntakeDate,CASE when DischargeDate is null THEN getdate()
+			 else DischargeDate end) > 1095 
+			 AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
 end
 GO
