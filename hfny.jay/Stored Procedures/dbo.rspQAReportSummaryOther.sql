@@ -36,7 +36,7 @@ DECLARE @tbl4QAReportSummaryOther TABLE(
 
 
 INSERT INTO @tbl4QAReportSummaryOther EXEC rspQAReport7 @programfk, 'summary'	--- for summary page
-INSERT INTO @tbl4QAReportSummaryOther VALUES(14, 'Coming soon ... ', '', '', '')	--- for summary page
+INSERT INTO @tbl4QAReportSummaryOther EXEC rspQAReport8 @programfk, 'summary'	--- for summary page
 
 INSERT INTO @tbl4QAReportSummaryOther EXEC rspQAReport9 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummaryOther EXEC rspQAReport10 @programfk, 'summary'	--- for summary page
