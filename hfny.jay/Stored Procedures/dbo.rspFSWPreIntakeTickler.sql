@@ -42,7 +42,7 @@ SELECT c.PC1ID [pc1ID]
 , rtrim(b.PCCity) + CASE WHEN b.PCCity IS NOT NULL OR len(b.PCCity) > 0 THEN ', NY' ELSE 'NY' END 
 + ' ' + rtrim(b.PCZip) [City]
 , b.PCPhone [Phone]
-, datediff(day, d.FSWAssignDate, GETDATE()) [DaysSinceFSW]
+, datediff(day, d.FSWAssignDate, @rdate) [DaysSinceFSW]
 , convert(VARCHAR(12), DATEADD(day,30.44*3,CASE WHEN a.TCDOB IS NOT NULL THEN a.TCDOB ELSE a.EDC END)
 , 101) [EnrollmentAgeOutDate]
 , substring(convert(VARCHAR(30),  e.LastPreIntakeDate, 106),4, 20) [LastIntakeForm]
