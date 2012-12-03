@@ -188,13 +188,22 @@ CASE WHEN ca.PBFoodStamps = 1 THEN 'FS ' ELSE '' END +
 CASE WHEN ca.PBSSI = 1 THEN 'SSI ' ELSE '' END +
 Case WHEN ca.PBTANF = 1 THEN 'TANF ' ELSE '' END +
 Case WHEN ca.PBWIC = 1 THEN 'WIC' ELSE '' END [PC1Benefits]
-, CASE WHEN  ca.TANFServices = 1 THEN 'Yes' ELSE '' END [TANFServiceEligible]
+, CASE WHEN  ca.TANFServices = 1 THEN 'Yes' 
+WHEN ca.TANFServicesNo = 1 THEN (
+CASE WHEN ca.TANFServicesNoSpecify = '01' THEN 'No-Income above 200% of Poverty'                                                                       
+WHEN ca.TANFServicesNoSpecify = '02' THEN 'No-Immigration Status'
+WHEN ca.TANFServicesNoSpecify = '03' THEN 'No-Refused to complete application'
+WHEN ca.TANFServicesNoSpecify = '04' THEN 'No-' + ca.TANFServicesNoSpecify
+ELSE 'No' END
+)
+ELSE '' END [TANFServiceEligible]
+
 FROM(
 SELECT HVCaseFK, cast(substring(maxkey, 9, 10) AS INT) CommonAttributesPK
 FROM (SELECT HVCaseFK,
 max(convert(VARCHAR(max), FormDate, 112) + cast(CommonAttributesPK AS VARCHAR(max))) [maxkey]
 FROM CommonAttributes
-WHERE FormType IN ('IN', 'FU-PC1')
+WHERE FormType IN ('IN', 'FU-PC1', 'FU')
 GROUP BY HVCaseFK) AS xyz) AS hh
 LEFT OUTER JOIN CommonAttributes ca ON hh.CommonAttributesPK = ca.CommonAttributesPK 
 ),
