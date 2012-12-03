@@ -7,7 +7,9 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <June 28, 2012>
 -- Description:	<gets you data for quarterly service referrals>
--- exec [rspQuarterlyServiceReferrals] 6,'01/01/2011','12/31/2012','01'
+ --exec [rspQuarterlyServiceReferrals] 5,'07/01/2012','09/30/2012','01'
+ --exec [rspQuarterlyServiceReferrals] 5,'07/01/2012','09/30/2012','02'
+
 -- =============================================
 CREATE procedure [dbo].[rspQuarterlyServiceReferrals](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
@@ -48,15 +50,27 @@ declare @tblResults table (
 
 ;
 	-- Initially, get the subset of data that we are interested in ... Good Practice ... Khalsa 
-	with cteGetInitRequiredData
+
+		
+	WITH cteGetInitRequiredData
 			as (
 				
 				SELECT 
-				h.HVCasePK,CASE WHEN wp.SiteFK IS NULL THEN 0 ELSE wp.SiteFK END AS SiteFK
+				h.HVCasePK,cp.PC1ID, P.PCFirstName + '' +  P.PCLastName AS pcname
+				
+				,CASE WHEN wp.SiteFK IS NULL THEN 0 ELSE wp.SiteFK END AS SiteFK
+				,rtrim(w.FirstName)+' '+rtrim(w.LastName) as WorkerName
+				,	case
+					   when h.tcdob is not null then
+						   h.tcdob
+					   else
+						   h.edc
+					end as tcdob
 				FROM HVCase h 
 				INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
-				INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
+			    INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
 				INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
+				INNER JOIN PC P ON P.PCPK = h.CPFK
 				inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem	
 				
 			)
@@ -107,7 +121,43 @@ declare @tblResults table (
 
 --SELECT ServiceReferralCategory, Total, ServicesStarted, ServicesPending, ServiceNotReceived  INTO #MyTempTable FROM cteTotals
 --SELECT ServiceReferralCategory, Total, ServicesStarted, ServicesPending, ServiceNotReceived  INTO #MyTempTable FROM cteTotals
-INSERT INTO @tblResults SELECT ServiceReferralCategory, Total, ServicesStarted, ServicesPending, ServiceNotReceived FROM cteTotals
+INSERT INTO @tblResults 
+SELECT ServiceReferralCategory, Total, ServicesStarted, ServicesPending, ServiceNotReceived FROM cteTotals
+
+
+
+declare @tblFinalResults table (
+ ServiceReferralCategory varchar(500) NULL 
+, Total varchar(10) NULL 
+, ServicesStarted  varchar(10) NULL 
+, ServicesPending  varchar(10) NULL 
+, ServiceNotReceived  varchar(10) NULL
+) 
+
+
+;
+	WITH cteServiceCodes AS
+		(
+		SELECT DISTINCT 
+			  [ServiceReferralCategory]
+		  FROM [HFNYConversion].[dbo].[codeServiceReferral]
+		)
+
+
+INSERT INTO @tblFinalResults
+SELECT sc.ServiceReferralCategory
+	 , isnull(Total,0) AS Total
+	 , isnull(ServicesStarted,0) AS ServicesStarted
+	 , isnull(ServicesPending,0) AS ServicesPending
+	 , isnull(ServiceNotReceived,0) AS ServiceNotReceived
+	 FROM @tblResults rs
+RIGHT JOIN cteServiceCodes sc ON rs.ServiceReferralCategory = sc.ServiceReferralCategory 
+
+
+--SELECT * FROM @tblFinalResults
+
+--exec [rspQuarterlyServiceReferrals] 5,'07/01/2012','09/30/2012','01'
+
 --calculate the totals that will we use to caclualte percentages
 Set @countMainTotal = (SELECT sum(convert(INT,Total)) FROM @tblResults)
 Set @countServicesStarted = (SELECT sum(convert(INT,ServicesStarted)) FROM @tblResults)
@@ -139,7 +189,7 @@ Set @countServiceNotReceived = (SELECT sum(convert(INT,ServiceNotReceived)) FROM
 		 , CONVERT(VARCHAR,ServicesPending) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(ServicesPending AS FLOAT) * 100/ NULLIF(@countMainTotal,0), 0), 0))  + '%)' AS TotalServicesPending
 		 , CONVERT(VARCHAR,ServiceNotReceived) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(ServiceNotReceived AS FLOAT) * 100/ NULLIF(@countMainTotal,0), 0), 0))  + '%)' AS TotalServiceNotReceived
 
-	  FROM @tblResults
+	  FROM @tblFinalResults
 
 UNION 
 
