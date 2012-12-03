@@ -13,8 +13,9 @@ CREATE procedure [dbo].[rspASQHistory]
     @pc1ID           varchar(13)    = '',
     @sitefk          int            = null
 )
-as
+AS
 
+--White space for testing Dar's SQL SVN repository
 	declare @n int = 0
 	select @n = case when @UnderCutoffOnly = 'Y' then 1 else 0 end
 
