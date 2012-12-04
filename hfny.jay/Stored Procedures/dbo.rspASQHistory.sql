@@ -40,7 +40,7 @@ AS
 		 ,case when UnderPersonalSocial = 1 then '*' else '' end UnderPersonalSocial
 		 ,case when TCReferred is null then 'Unknown'
 			  when TCReferred = 1 then 'Yes' else 'No' end TCReferred
-		 ,case when ReviewCDS = 1 then 'Yes' else 'No' end ReviewCDS
+		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end ReviewCDS
 		 ,case when ASQInWindow is null then 'Unknown'
 			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end InWindow
 		 ,a.TCAge [TCAgeCode]
