@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -101,7 +102,7 @@ AS (SELECT sum(CASE
 x
 AS (SELECT DISTINCT a.HVCasePK
 				  , c.Race [Race]
-				  , cast(str(datediff(dd, c.PCDOB, a.IntakeDate) / 365.25, 6) AS INT) [Age]
+				  , cast(datediff(dd, c.PCDOB, a.IntakeDate) / 365.25 AS INT) [Age]
 				  , cast(datediff(dd, a.IntakeDate, CASE
 						WHEN b.DischargeDate IS NOT NULL AND b.DischargeDate <= @EndDt THEN
 							b.DischargeDate
