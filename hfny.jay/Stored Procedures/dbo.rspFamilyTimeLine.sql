@@ -10,6 +10,8 @@ GO
 -- Create date: 
 -- Description:	<report: Family Time Line>
 --				moved from FamSys Feb 20, 2012 by jrobohn
+--mod by dar
+--exec rspFamilyTimeline null,1
 -- =============================================
 CREATE procedure [dbo].[rspFamilyTimeLine]
 (
