@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,6 +7,9 @@ GO
 -- Author:    <Jay Robohn>
 -- Create date: <Feb. 15, 2012>
 -- Description: <copied from FamSys - see header below>
+--              This differs from spGetAllPC1IDs in that it only retrieves 
+--				the cases were the TC has been born and entered into the system
+-- exec spGetAllPC1IDs_ChildEnrolled 16, 0
 -- =============================================
 -- =============================================
 -- Author:    <Dorothy Baum>
@@ -24,6 +28,9 @@ begin
 	-- interfering with SELECT statements.
 	set nocount on;
 
+	if charindex(',',@ProgramFKs) = 0
+		set @ProgramFKs = ',' + @ProgramFKs + ','
+	
 	-- Insert statements for procedure here
 	if @includeClosed = 1
 		select distinct pc1id
