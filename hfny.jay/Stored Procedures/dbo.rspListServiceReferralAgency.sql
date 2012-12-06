@@ -7,11 +7,14 @@ GO
 -- Author:		Devinder S. Khalsa
 -- Create date: 06/20/2012
 -- Description:	Report containing  Service Referral Agency
--- Usage: [rspListServiceReferralAgency] 2,1
+
+-- Usage: rspListServiceReferralAgency 1,1  -- INCLUDE ALL ACTIVE AND INACTIVE
+-- Usage: rspListServiceReferralAgency 1,0  -- INCLUDE ONLY ACTIVE
+
 -- =============================================
 CREATE PROCEDURE [dbo].[rspListServiceReferralAgency]
 ( @programfk INT,
-@bAgencyIsActive      bit             = null
+@bIncludeInactive      bit             = FALSE 
 )
 AS
 BEGIN
@@ -19,12 +22,28 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-   
-  SELECT [AgencyName]     
-  FROM [listServiceReferralAgency]
-  WHERE ProgramFK = @programfk AND AgencyIsActive = @bAgencyIsActive AND AgencyName <> ''
+ WITH cteMain AS
+(  
+  
+	  SELECT [AgencyName],AgencyIsActive     
+	  FROM [listServiceReferralAgency]
+	  WHERE ProgramFK = @programfk AND 
+	  AgencyIsActive = CASE WHEN NOT @bIncludeInactive = 1 THEN 1 ELSE AgencyIsActive END   
+	  AND AgencyName <> ''
+ )
+ 
+ 
+  SELECT 
+		CASE WHEN AgencyIsActive = 1 THEN isnull(AgencyName,'') ELSE 
+		
+		 CASE WHEN AgencyName IS NULL THEN '' ELSE AgencyName + ' ( **Inactive )' END		 
+		
+		 END AS AgencyName  
+		 
+	   FROM cteMain  
   ORDER BY AgencyName
   
   
   END
+
 GO
