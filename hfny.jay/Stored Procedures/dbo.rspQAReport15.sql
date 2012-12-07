@@ -186,6 +186,7 @@ SELECT
   , currentLevel  
  FROM @tbl4QAReport15Detail
  WHERE datediff(dd, CurrentLevelDate, @LastDayofPreviousMonth) > 93
+ ORDER BY Worker, PC1ID 
  
  
 
