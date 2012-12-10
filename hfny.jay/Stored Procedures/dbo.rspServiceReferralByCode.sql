@@ -30,10 +30,11 @@ AS
 ; WITH HVCaseInRange AS (
 SELECT b.PC1ID, b.HVCaseFK
 , CASE WHEN a.IntakeDate < @StartDt THEN @StartDt ELSE a.IntakeDate END [Start_Period]
-, CASE WHEN b.DischargeDate IS NULL OR b.DischargeDate > @EndDt THEN @EndDt ELSE b.DischargeDate END [End_Period]
+, CASE WHEN b.DischargeDate IS NULL THEN @EndDt
+  WHEN b.DischargeDate > @EndDt THEN @EndDt ELSE b.DischargeDate END [End_Period]
 FROM HVCase AS a JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 WHERE a.IntakeDate <= @EndDt AND a.IntakeDate IS NOT NULL AND
-(b.DischargeDate IS NULL OR b.DischargeDate > @EndDt) 
+(b.DischargeDate IS NULL OR b.DischargeDate > @StartDt) 
 AND b.PC1ID = ISNULL(@pc1id, b.PC1ID)
 )
 
@@ -64,7 +65,7 @@ a.ServiceCode, count(*) [n]
 FROM ServiceReferral a
 JOIN HVCaseInRange AS b ON b.HVCaseFK = a.HVCaseFK
 WHERE a.ProgramFK = @programfk 
-AND a.ReferralDate Between @StartDt AND @EndDt 
+AND a.ReferralDate Between b.Start_Period AND b.End_Period
 AND a.ServiceReceived = 1
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
 GROUP BY 
