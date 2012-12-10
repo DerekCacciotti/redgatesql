@@ -29,6 +29,10 @@ CREATE TABLE [dbo].[PC1Issues]
 [Stress] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SubstanceAbuse] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_PC1Issues_HVCaseFK] ON [dbo].[PC1Issues] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_PC1Issues_ProgramFK] ON [dbo].[PC1Issues] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

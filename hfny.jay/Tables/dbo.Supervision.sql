@@ -65,6 +65,10 @@ CREATE TABLE [dbo].[Supervision]
 [Weather] [bit] NULL,
 [WorkerFK] [int] NOT NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Supervision_SupervisorFK] ON [dbo].[Supervision] ([SupervisorFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Supervision_WorkerFK] ON [dbo].[Supervision] ([WorkerFK]) ON [PRIMARY]
+
 GO
 ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
 GO

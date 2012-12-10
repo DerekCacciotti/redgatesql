@@ -10,6 +10,12 @@ CREATE TABLE [dbo].[Intake]
 [IntakeEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Intake_FSWFK] ON [dbo].[Intake] ([FSWFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Intake_HVCaseFK] ON [dbo].[Intake] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Intake_ProgramFK] ON [dbo].[Intake] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

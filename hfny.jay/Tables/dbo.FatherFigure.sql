@@ -20,6 +20,14 @@ CREATE TABLE [dbo].[FatherFigure]
 [RelationToTargetChild] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RelationToTargetChildOther] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_FatherFigure_FatherAdvocateFK] ON [dbo].[FatherFigure] ([FatherAdvocateFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_FatherFigure_HVCaseFK] ON [dbo].[FatherFigure] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_FatherFigure_PCFK] ON [dbo].[FatherFigure] ([PCFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_FatherFigure_ProgramFK] ON [dbo].[FatherFigure] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

@@ -17,6 +17,8 @@ CREATE TABLE [dbo].[HVGroup]
 [NumberParticipating] [int] NULL,
 [ProgramFK] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_HVGroup_ProgramFK] ON [dbo].[HVGroup] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

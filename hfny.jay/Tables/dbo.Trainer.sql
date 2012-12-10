@@ -12,6 +12,8 @@ CREATE TABLE [dbo].[Trainer]
 [TrainerPK_old] [int] NULL,
 [TrainerDescription] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Trainer_ProgramFK] ON [dbo].[Trainer] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

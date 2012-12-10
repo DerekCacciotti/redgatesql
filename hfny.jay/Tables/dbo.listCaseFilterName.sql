@@ -6,6 +6,8 @@ CREATE TABLE [dbo].[listCaseFilterName]
 [Hint] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_listCaseFilterName_ProgramFK] ON [dbo].[listCaseFilterName] ([ProgramFK]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[listCaseFilterName] WITH NOCHECK ADD
 CONSTRAINT [FK_listCaseFilterName_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO

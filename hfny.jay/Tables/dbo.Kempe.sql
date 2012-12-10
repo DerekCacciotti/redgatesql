@@ -72,6 +72,14 @@ CREATE TABLE [dbo].[Kempe]
 [ProgramFK] [int] NOT NULL,
 [SupervisorObservation] [bit] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Kempe_FAWFK] ON [dbo].[Kempe] ([FAWFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Kempe_HVCaseFK] ON [dbo].[Kempe] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Kempe_PC1IssuesFK] ON [dbo].[Kempe] ([PC1IssuesFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Kempe_ProgramFK] ON [dbo].[Kempe] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

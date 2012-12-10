@@ -6,6 +6,8 @@ CREATE TABLE [dbo].[listReferralSource]
 [RSIsActive] [bit] NOT NULL,
 [listReferralSourcePK_old] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_listReferralSource_ProgramFK] ON [dbo].[listReferralSource] ([ProgramFK]) ON [PRIMARY]
+
 GO
 ALTER TABLE [dbo].[listReferralSource] ADD CONSTRAINT [PK__listRefe__0A3058D637703C52] PRIMARY KEY CLUSTERED  ([listReferralSourcePK]) ON [PRIMARY]
 GO

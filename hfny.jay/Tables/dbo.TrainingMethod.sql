@@ -6,6 +6,8 @@ CREATE TABLE [dbo].[TrainingMethod]
 [ProgramFK] [int] NOT NULL,
 [OldTMethodPK] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_TrainingMethod_ProgramFK] ON [dbo].[TrainingMethod] ([ProgramFK]) ON [PRIMARY]
+
 GO
 ALTER TABLE [dbo].[TrainingMethod] ADD CONSTRAINT [PK_TrainingMethod] PRIMARY KEY CLUSTERED  ([TrainingMethodPK]) ON [PRIMARY]
 GO

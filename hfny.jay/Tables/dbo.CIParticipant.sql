@@ -10,6 +10,10 @@ CREATE TABLE [dbo].[CIParticipant]
 [CIParticipantType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [CriticalIncidentFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_CIParticipant_CIFollowUpFK] ON [dbo].[CIParticipant] ([CIFollowUpFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CIParticipant_CriticalIncidentFK] ON [dbo].[CIParticipant] ([CriticalIncidentFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

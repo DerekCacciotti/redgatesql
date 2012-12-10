@@ -5,6 +5,8 @@ CREATE TABLE [dbo].[listServiceReferralAgency]
 [AgencyName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_listServiceReferralAgency_ProgramFK] ON [dbo].[listServiceReferralAgency] ([ProgramFK]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[listServiceReferralAgency] WITH NOCHECK ADD
 CONSTRAINT [FK_listServiceReferralAgency_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 

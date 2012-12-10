@@ -35,6 +35,14 @@ CREATE TABLE [dbo].[WorkerProgram]
 [YearEarlyChildExperience] [int] NULL,
 [YearHVExperience] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_ProgramFK] ON [dbo].[WorkerProgram] ([ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_SiteFK] ON [dbo].[WorkerProgram] ([SiteFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_SupervisorFK] ON [dbo].[WorkerProgram] ([SupervisorFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_WorkerFK] ON [dbo].[WorkerProgram] ([WorkerFK]) ON [PRIMARY]
+
 CREATE NONCLUSTERED INDEX [IX_WorkerProgram_ProgramFK] ON [dbo].[WorkerProgram] ([ProgramFK]) ON [PRIMARY]
 
 ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD

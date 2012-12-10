@@ -56,6 +56,14 @@ CREATE TABLE [dbo].[FollowUp]
 [SixMonthHome] [bit] NULL,
 [TimesPregnant] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_FSWFK] ON [dbo].[FollowUp] ([FSWFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_HVCaseFK] ON [dbo].[FollowUp] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_PC1IssuesFK] ON [dbo].[FollowUp] ([PC1IssuesFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_ProgramFK] ON [dbo].[FollowUp] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

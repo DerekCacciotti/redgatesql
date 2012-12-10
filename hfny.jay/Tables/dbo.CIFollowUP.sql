@@ -19,6 +19,12 @@ CREATE TABLE [dbo].[CIFollowUP]
 [ReportByStaff] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ReportSubstantiated] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_CIFollowUP_CriticalIncidentFK] ON [dbo].[CIFollowUP] ([CriticalIncidentFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CIFollowUP_HVCaseFK] ON [dbo].[CIFollowUP] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CIFollowUP_ProgramFK] ON [dbo].[CIFollowUP] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

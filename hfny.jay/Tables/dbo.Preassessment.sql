@@ -36,6 +36,12 @@ CREATE TABLE [dbo].[Preassessment]
 [ProgramFK] [int] NOT NULL,
 [TransferredtoProgram] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_HVCaseFK] ON [dbo].[Preassessment] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_PAFAWFK] ON [dbo].[Preassessment] ([PAFAWFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_ProgramFK] ON [dbo].[Preassessment] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

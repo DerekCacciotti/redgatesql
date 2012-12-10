@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[FormReviewOptions]
 [FormType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_FormReviewOptions_ProgramFK] ON [dbo].[FormReviewOptions] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

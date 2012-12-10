@@ -17,6 +17,12 @@ CREATE TABLE [dbo].[Training]
 [TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [IsExempt] [bit] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Training_ProgramFK] ON [dbo].[Training] ([ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Training_TrainerFK] ON [dbo].[Training] ([TrainerFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Training_TrainingMethodFK] ON [dbo].[Training] ([TrainingMethodFK]) ON [PRIMARY]
+
 CREATE NONCLUSTERED INDEX [TrainingPK_ProgramFK] ON [dbo].[Training] ([TrainingPK], [ProgramFK]) ON [PRIMARY]
 
 ALTER TABLE [dbo].[Training] WITH NOCHECK ADD

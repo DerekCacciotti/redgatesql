@@ -17,6 +17,10 @@ CREATE TABLE [dbo].[Education]
 [ProgramType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramTypeSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Education_HVCaseFK] ON [dbo].[Education] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Education_ProgramFK] ON [dbo].[Education] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

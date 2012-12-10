@@ -12,6 +12,12 @@ CREATE TABLE [dbo].[CaseFilter]
 [HVCaseFK] [int] NOT NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_CaseFilter_CaseFilterNameFK] ON [dbo].[CaseFilter] ([CaseFilterNameFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CaseFilter_HVCaseFK] ON [dbo].[CaseFilter] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CaseFilter_ProgramFK] ON [dbo].[CaseFilter] ([ProgramFK]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[CaseFilter] WITH NOCHECK ADD
 CONSTRAINT [FK_CaseFilter_CaseFilterNameFK] FOREIGN KEY ([CaseFilterNameFK]) REFERENCES [dbo].[listCaseFilterName] ([listCaseFilterNamePK])
 GO

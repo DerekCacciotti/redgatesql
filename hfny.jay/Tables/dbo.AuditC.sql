@@ -17,6 +17,10 @@ CREATE TABLE [dbo].[AuditC]
 [ProgramFK] [int] NOT NULL,
 [TotalScore] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_AuditC_HVCaseFK] ON [dbo].[AuditC] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_AuditC_ProgramFK] ON [dbo].[AuditC] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

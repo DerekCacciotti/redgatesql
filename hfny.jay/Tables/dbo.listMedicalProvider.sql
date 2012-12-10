@@ -15,6 +15,8 @@ CREATE TABLE [dbo].[listMedicalProvider]
 [MPZip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_listMedicalProvider_ProgramFK] ON [dbo].[listMedicalProvider] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

@@ -20,6 +20,14 @@ CREATE TABLE [dbo].[ServiceReferral]
 [ServiceReferralEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [StartDate] [datetime] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_FSWFK] ON [dbo].[ServiceReferral] ([FSWFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_HVCaseFK] ON [dbo].[ServiceReferral] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_ProgramFK] ON [dbo].[ServiceReferral] ([ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_ProvidingAgencyFK] ON [dbo].[ServiceReferral] ([ProvidingAgencyFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

@@ -31,6 +31,20 @@ CREATE TABLE [dbo].[CaseProgram]
 [TransferredtoProgram] [varchar] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TransferredtoProgramFK] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAFK] ON [dbo].[CaseProgram] ([CurrentFAFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAWFK] ON [dbo].[CaseProgram] ([CurrentFAWFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFSWFK] ON [dbo].[CaseProgram] ([CurrentFSWFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentLevelFK] ON [dbo].[CaseProgram] ([CurrentLevelFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_HVCaseFK] ON [dbo].[CaseProgram] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_ProgramFK] ON [dbo].[CaseProgram] ([ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_TransferredtoProgramFK] ON [dbo].[CaseProgram] ([TransferredtoProgramFK]) ON [PRIMARY]
+
 CREATE NONCLUSTERED INDEX [IX_CaseProgram_CurrentLevelFK] ON [dbo].[CaseProgram] ([CurrentLevelFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_CaseProgram_HVCaseFK] ON [dbo].[CaseProgram] ([HVCaseFK]) ON [PRIMARY]

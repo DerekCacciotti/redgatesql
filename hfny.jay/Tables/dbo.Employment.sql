@@ -18,6 +18,10 @@ CREATE TABLE [dbo].[Employment]
 [ProgramFK] [int] NOT NULL,
 [StillWorking] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Employment_HVCaseFK] ON [dbo].[Employment] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Employment_ProgramFK] ON [dbo].[Employment] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

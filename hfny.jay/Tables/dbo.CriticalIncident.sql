@@ -28,6 +28,16 @@ CREATE TABLE [dbo].[CriticalIncident]
 [StaffReport] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisorFK] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_CriticalIncident_AssignedWorkerFK] ON [dbo].[CriticalIncident] ([AssignedWorkerFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CriticalIncident_HVCaseFK] ON [dbo].[CriticalIncident] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CriticalIncident_ProgramFK] ON [dbo].[CriticalIncident] ([ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CriticalIncident_ServiceLevelFK] ON [dbo].[CriticalIncident] ([ServiceLevelFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CriticalIncident_SupervisorFK] ON [dbo].[CriticalIncident] ([SupervisorFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

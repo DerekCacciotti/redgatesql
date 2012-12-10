@@ -33,6 +33,14 @@ CREATE TABLE [dbo].[Preintake]
 [ProgramFK] [int] NOT NULL,
 [TransferredtoProgram] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Preintake_HVCaseFK] ON [dbo].[Preintake] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Preintake_KempeFK] ON [dbo].[Preintake] ([KempeFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Preintake_PIFSWFK] ON [dbo].[Preintake] ([PIFSWFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Preintake_ProgramFK] ON [dbo].[Preintake] ([ProgramFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

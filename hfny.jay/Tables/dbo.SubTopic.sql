@@ -13,6 +13,8 @@ CREATE TABLE [dbo].[SubTopic]
 [SubTopicPK_old] [int] NULL,
 [TopicFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_SubTopic_TopicFK] ON [dbo].[SubTopic] ([TopicFK]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[SubTopic] WITH NOCHECK ADD
 CONSTRAINT [FK_SubTopic_TopicFK] FOREIGN KEY ([TopicFK]) REFERENCES [dbo].[codeTopic] ([codeTopicPK])
 GO

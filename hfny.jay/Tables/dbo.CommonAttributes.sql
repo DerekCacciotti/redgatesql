@@ -79,6 +79,20 @@ CREATE TABLE [dbo].[CommonAttributes]
 [WasBreastFed] [bit] NULL,
 [WhyNotBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_HVCaseFK] ON [dbo].[CommonAttributes] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PC1MedicalFacilityFK] ON [dbo].[CommonAttributes] ([PC1MedicalFacilityFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PC1MedicalProviderFK] ON [dbo].[CommonAttributes] ([PC1MedicalProviderFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PCFK] ON [dbo].[CommonAttributes] ([PCFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_ProgramFK] ON [dbo].[CommonAttributes] ([ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_TCMedicalFacilityFK] ON [dbo].[CommonAttributes] ([TCMedicalFacilityFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_TCMedicalProviderFK] ON [dbo].[CommonAttributes] ([TCMedicalProviderFK]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[CommonAttributes] ADD
 CONSTRAINT [FK_CommonAttributes_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 ALTER TABLE [dbo].[CommonAttributes] ADD
