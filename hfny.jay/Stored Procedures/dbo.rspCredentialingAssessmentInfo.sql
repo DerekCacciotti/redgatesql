@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -27,6 +28,7 @@ begin
 	if charindex(',',@ProgramFKs) = 0
 		set @ProgramFKs = ',' + @ProgramFKs + ','
 
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 	set @posclause = case when @posclause = '' then null else @posclause end;
 	set @negclause = case when @negclause = '' then null else @negclause end;
 

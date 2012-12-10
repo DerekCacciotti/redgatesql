@@ -12,7 +12,10 @@ CREATE procedure [dbo].[rspHVIntensiveLevel_Detail]
 (
     @programfk varchar(max)    = null,
     @sdate     datetime,
-    @edate     datetime
+    @edate     datetime, 
+    @sitefk		 int			 = null,
+    @posclause	 varchar(200), 
+    @negclause	 varchar(200)
 )
 as
 	if @programfk is null
@@ -23,6 +26,8 @@ as
 	end
 
 	set @programfk = REPLACE(@programfk,'"','')
+	set @sitefk = case when dbo.IsNullOrEmpty(@sitefk) = 1 then 0 else @sitefk end
+	set @posclause = case when @posclause = '' then null else @posclause end
 
 	select 2 [level1_less_183]
 		  ,b.PC1ID
@@ -64,10 +69,15 @@ as
 														inner join caseprogram as b on b.hvcasefk = a.hvcasepk
 														inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
 														join HVLevelDetail as d on a.hvcasepk = d.hvcasefk and b.programfk = d.programfk and d.StartLevelDate <= @edate
+														inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = a.HVCasePK
+														inner join WorkerProgram wp on wp.WorkerFK = CurrentFSWFK
 													where a.caseprogress >= 9
 														 and a.intakedate <= @edate
 														 and (b.dischargedate is null
-														 or b.dischargedate >= @sdate)) as p) as q
+														 or b.dischargedate >= @sdate)
+														 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+												) as p
+									) as q
 								where q.Levelfk in (14,27,24)
 								group by q.hvcasefk) as x
 					  where x.[days_length_total] >= 183) as yy on yy.hvcasefk = a.HVCasePK
@@ -85,6 +95,7 @@ as
 			inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
 			inner join pc as c on c.PCPK = a.PC1FK
 			inner join Worker w on b.CurrentFSWFK = w.WorkerPK
+			inner join WorkerProgram wp on CurrentFSWFK = WorkerFK
 			join (select distinct x.hvcasefk [hvcasefk]
 								 ,[days_length_total]
 					  from (select q.hvcasefk
@@ -113,10 +124,15 @@ as
 														inner join caseprogram as b on b.hvcasefk = a.hvcasepk
 														inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
 														join HVLevelDetail as d on a.hvcasepk = d.hvcasefk and b.programfk = d.programfk and d.StartLevelDate <= @edate
+														inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = a.HVCasePK
+														inner join WorkerProgram wp on wp.WorkerFK = CurrentFSWFK
 													where a.caseprogress >= 9
 														 and a.intakedate <= @edate
 														 and (b.dischargedate is null
-														 or b.dischargedate >= @sdate)) as p) as q
+														 or b.dischargedate >= @sdate)
+														 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+												) as p
+									) as q
 								where q.Levelfk in (14,27,24)
 								group by q.hvcasefk) as x
 					  where x.[days_length_total] < 183) as yy on yy.hvcasefk = a.HVCasePK

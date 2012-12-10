@@ -11,7 +11,10 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspKempeObservationBySupervisor]
 (
-    @programfk varchar(max)    = null
+    @programfk varchar(max)	= null,
+    @sitefk		 int		= null,
+    @posclause	 varchar(200), 
+    @negclause	 varchar(200)
 )
 as
 	if @programfk is null
@@ -22,6 +25,8 @@ as
 	end
 
 	set @programfk = REPLACE(@programfk,'"','');
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @posclause = case when @posclause = '' then null else @posclause end;
 
 	with WorkerCohort
 	as (select distinct FAWFK
@@ -52,8 +57,8 @@ as
 		  ,hvcasepk
 		  ,(select min(KempeDate) KempeDate
 				from Kempe
-				where FAWFK = Worker.WorkerPK) KempeDate_min
-		  ,RTRIM(Worker.FirstName)+' '+RTRIM(Worker.LastName) FAW
+				where FAWFK = w.WorkerPK) KempeDate_min
+		  ,RTRIM(w.FirstName)+' '+RTRIM(w.LastName) FAW
 		  ,RTRIM(supervisor.FirstName)+' '+RTRIM(supervisor.LastName) supervisor
 		from (select KempeDate
 					,hvcasepk
@@ -64,18 +69,17 @@ as
 						  ,KempeDate
 						  ,FAWFK) q
 			inner join CaseProgram cp on cp.HVCaseFK = hvcasepk
-			right join Worker on Worker.WorkerPK = q.FAWFK
-			inner join WorkerProgram on WorkerProgram.WorkerFK = Worker.WorkerPK
-			inner join Worker supervisor on WorkerProgram.SupervisorFK = supervisor.WorkerPK
-			inner join dbo.SplitString(@programfk,',') on WorkerProgram.programfk = listitem
-		where Worker.WorkerPK in (select FAWFK from WorkerCohort)
-			 and WorkerProgram.TerminationDate is NULL
-			 AND Worker.LastName <> 'Transfer Worker'
+			right join Worker w on w.WorkerPK = q.FAWFK
+			inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+			inner join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
+			inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
+			inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = hvcasepk
+		where w.WorkerPK in (select FAWFK from WorkerCohort)
+			 and wp.TerminationDate is NULL
+			 and w.LastName <> 'Transfer Worker'
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		order by supervisor.LastName
-				,Worker.LastName
+				,w.LastName
 				,KempeDate desc
 				,hvcasepk
-
-
-
 GO

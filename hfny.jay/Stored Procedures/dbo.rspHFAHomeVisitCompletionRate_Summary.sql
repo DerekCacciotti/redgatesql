@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -11,7 +12,10 @@ CREATE procedure [dbo].[rspHFAHomeVisitCompletionRate_Summary](@programfk    var
                                                        @sdate        datetime,
                                                        @edate        datetime,
                                                        @supervisorfk int             = null,
-                                                       @workerfk     int             = null
+                                                       @workerfk     int             = null,
+                                                       @sitefk		 int			 = null,
+                                                       @posclause	 varchar(200), 
+                                                       @negclause	 varchar(200)
                                                        )
 
 as
@@ -24,6 +28,10 @@ begin
 							  from HVProgram
 							  for xml path ('')),2,8000)
 	end;
+
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @posclause = case when @posclause = '' then null else @posclause end;
+	set @negclause = case when @negclause = '' then null else @negclause end;
 
 	with cteHVRecords
 	as
@@ -68,9 +76,11 @@ begin
 			 inner join worker on workerpk = hvr.workerfk
 			 inner join workerprogram wp on wp.workerfk = workerpk
 			 inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
+			 inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = hvr.casefk
 		 where workerpk = isnull(@workerfk,workerpk)
 			  and supervisorfk = isnull(@supervisorfk,supervisorfk)
 			  and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
+			  and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		 group by firstname
 				 ,lastname
 				 ,hvr.workerfk

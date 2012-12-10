@@ -15,6 +15,7 @@ CREATE procedure [dbo].[rspFirstHomeVisit]
     @Case      varchar(50)     = null,--figure the Case Filters out later
     @STDate    datetime,
     @EndDate   datetime, 
+    @SiteFK	   int,
     @posclause varchar(200),
     @negclause varchar(200)
 )
@@ -27,7 +28,8 @@ as
 	end
 
 	set @programfk = replace(@programfk,'"','')
-
+	set @SiteFK = isnull(@SiteFK, 0)
+	
 	begin
 		-- SET NOCOUNT ON added to prevent extra result sets from
 		-- interfering with SELECT statements.
@@ -76,9 +78,12 @@ as
 						,edc
 					  from hvlog
 						  left join HVCase on HVCase.HVCasePK = hvlog.hvcasefk
+						  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
+						  inner join WorkerProgram wp on WorkerFK = CurrentFSWFK
 						  inner join dbo.SplitString(@programfk,',') on hvlog.programfk = listitem
 					  where CaseProgress >= 9
 						   and IntakeDate between @STDate and @EndDate
+						   and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 					  group by hvcasepk
 							  ,tcdob
 							  ,edc) as a

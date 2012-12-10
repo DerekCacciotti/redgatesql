@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,7 +11,11 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspHomeVisitObservationBySupervisor]
 (
-    @programfk varchar(max)    = null
+    @programfk varchar(max)    = null,
+    @sitefk		 int		   = null,
+    @posclause	 varchar(200), 
+    @negclause	 varchar(200)
+
 )
 as
 	if @programfk is null
@@ -21,6 +26,8 @@ as
 	end
 
 	set @programfk = REPLACE(@programfk,'"','');
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @posclause = case when @posclause = '' then null else @posclause end;
 
 	with WorkerCohort
 	as (select distinct FSWFK
@@ -53,9 +60,9 @@ as
 		  ,hvcasepk
 		  ,(select min(VisitStartTime) VisitStartTime
 				from hvlog
-				where FSWFK = worker.WorkerPK
+				where FSWFK = w.WorkerPK
 				group by fswfk) hvdate_min
-		  ,RTRIM(Worker.FirstName)+' '+RTRIM(Worker.LastName) fsw
+		  ,RTRIM(w.FirstName)+' '+RTRIM(w.LastName) fsw
 		  ,RTRIM(supervisor.FirstName)+' '+RTRIM(supervisor.LastName) supervisor
 		  ,case
 				when substring(visitType,1,1) = '1' or substring(visitType,2,1) = '1' then
@@ -76,15 +83,17 @@ as
 						  ,VisitStartTime
 						  ,visitType) q
 			inner join CaseProgram cp on cp.HVCaseFK = hvcasepk
-			right join Worker on Worker.WorkerPK = q.FSWFK
-			inner join WorkerProgram on WorkerProgram.WorkerFK = Worker.WorkerPK
-			inner join Worker supervisor on WorkerProgram.SupervisorFK = supervisor.WorkerPK
-			inner join dbo.SplitString(@programfk,',') on WorkerProgram.programfk = listitem
-		where Worker.WorkerPK in (select FSWFK
+			right join Worker w on w.WorkerPK = q.FSWFK
+			inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+			inner join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
+			inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
+			inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = hvcasepk
+		where w.WorkerPK in (select FSWFK
 									  from WorkerCohort)
-			 and WorkerProgram.TerminationDate is null
+			 and wp.TerminationDate is null
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		order by supervisor.LastName
-				,Worker.LastName
+				,w.LastName
 				,VisitStartTime desc
 				,hvcasepk
 

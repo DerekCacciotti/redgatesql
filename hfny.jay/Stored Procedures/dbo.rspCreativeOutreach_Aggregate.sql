@@ -14,7 +14,9 @@ CREATE procedure [dbo].[rspCreativeOutreach_Aggregate]
 (
     @programfk varchar(max)    = null,
     @sdate     datetime        = null,
-    @edate     datetime        = null
+    @edate     datetime        = null,
+    @casefilterspositive varchar(100) = '',
+    @sitefk	   int			   = 0
 )
 as
 	if @programfk is null
@@ -25,6 +27,8 @@ as
 	end
 
 	set @programfk = replace(@programfk,'"','')
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
 	select families_served
 		  ,x
@@ -85,11 +89,12 @@ as
 										 ,codelevel.levelname
 							) e4 on e4.hvcasefk = caseprogram.hvcasefk and e4.programfk = caseprogram.programfk
 				  left join codeDischarge on DischargeCode = caseprogram.DischargeReason
-
+				  inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = HVCasePK
+				  inner join WorkerProgram wp on CurrentFSWFK = WorkerFK
 			  where caseprogress >= 9
 				   and intakedate <= @edate
 				   and (dischargedate is null
 				   or (dischargedate between @sdate and @edate))
-				   
+				   and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 			) t
 GO

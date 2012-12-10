@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,158 +9,162 @@ GO
 -- Description:	<gets you data for Enrolled Program Caseload detail info>
 -- exec [rspEnrolledProgramCaseloadDetail] 1,'06/01/2010','08/31/2010'
 -- =============================================
-CREATE procedure [dbo].[rspEnrolledProgramCaseloadDetail](@programfk    varchar(max)    = null,
-                                                        @sdate        datetime,
-                                                        @edate        datetime,                                                        
-                                                        @sitefk int             = NULL
-                                                                                                                  
-                                                        )
+CREATE procedure [dbo].[rspEnrolledProgramCaseloadDetail]
+(
+    @programfk           varchar(max)    = null,
+    @sdate               datetime,
+    @edate               datetime,
+    @sitefk              int             = null,
+    @casefilterspositive varchar(200)
+)
 
 as
-BEGIN
+begin
 
--- Let us declare few table variables so that we can manipulate the rows at our will
--- Note: Table variables are a superior alternative to using temporary tables 
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
----------------------------------------------
--- Initially, get the subset of data that we are interested in ... Good Practice ... Khalsa 
--- table variable for holding Init Required Data
-DECLARE @tblInitRequiredData TABLE(
-	[HVCasePK] [int],
-	[IntakeDate] [datetime],
-	[TCDOB] [datetime],
-	[TCDOD] [datetime],
-	[TCNumber] [int],
-	[DischargeDate] [datetime],
-	[DischargeReason] [char](2),
-	[SiteFK] [int],
-	[PC1ID] [char](13),
-	[LevelChangeStar] [char](1)
-)
-
-
-DECLARE @tblInitRequiredDataTemp TABLE(
-	[HVCasePK] [int],
-	[IntakeDate] [datetime],
-	[TCDOB] [datetime],
-	[TCDOD] [datetime],	
-	[TCNumber] [int],
-	[DischargeDate] [datetime],
-	[DischargeReason] [char](2),
-	[SiteFK] [int],
-	[PC1ID] [char](13),
-	[LevelChangeStar] [char](1)
-
-)
-
-;
-WITH cteLevelChange
-AS
-(
-SELECT 
-count(*) count, hd.hvcasefk  FROM HVLevelDetail hd
-INNER JOIN CaseProgram cp ON cp.HVCaseFK = hd.HVCaseFK
-inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem	
-WHERE hd.EndLevelDate BETWEEN @sdate AND @edate 
-AND DischargeDate <> hd.EndLevelDate
-GROUP BY hd.hvcasefk
-HAVING count(*) > 0
-)
-
-
-
--- Fill this table i.e. @tblInitRequiredData as below
-INSERT INTO @tblInitRequiredDataTemp(
-	[HVCasePK],
-	[IntakeDate],
-	[TCDOB],
-	[TCDOD],
-	[TCNumber],
-	[DischargeDate],
-	[DischargeReason],
-	[SiteFK],
-	[PC1ID],
-	[LevelChangeStar]
-)
-SELECT 
-h.HVCasePK,h.IntakeDate,
-
-case
-   when h.tcdob is not null then
-	   h.tcdob
-   else
-	   h.edc
-end as tcdob
-,h.TCDOD 
-,h.TCNumber,cp.DischargeDate, cp.DischargeReason,CASE WHEN wp.SiteFK IS NULL THEN 0 ELSE wp.SiteFK END AS SiteFK
-,cp.PC1ID
-,CASE WHEN lc.hvcasefk IS NULL THEN '' ELSE '*' END AS levelchange
-FROM HVCase h 
-INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
-INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
-INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
-LEFT JOIN cteLevelChange lc ON lc.hvcasefk =  cp.HVCaseFK
-inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem	 
-
-
--- SiteFK = isnull(@sitefk,SiteFK) does not work because column SiteFK may be null itself 
--- so to solve this problem we make use of @tblInitRequiredDataTemp
-INSERT INTO @tblInitRequiredData( 
-	[HVCasePK],
-	[IntakeDate],
-	[TCDOB],
-	[TCDOD],
-	[TCNumber],
-	[DischargeDate],
-	[DischargeReason],
-	[SiteFK],
-	[PC1ID],
-	[LevelChangeStar]
+	-- Let us declare few table variables so that we can manipulate the rows at our will
+	-- Note: Table variables are a superior alternative to using temporary tables 
+	---------------------------------------------
+	-- Initially, get the subset of data that we are interested in ... Good Practice ... Khalsa 
+	-- table variable for holding Init Required Data
+	declare @tblInitRequiredData table(
+		[HVCasePK] [int],
+		[IntakeDate] [datetime],
+		[TCDOB] [datetime],
+		[TCDOD] [datetime],
+		[TCNumber] [int],
+		[DischargeDate] [datetime],
+		[DischargeReason] [char](2),
+		[SiteFK] [int],
+		[PC1ID] [char](13),
+		[LevelChangeStar] [char](1)
 	)
-SELECT * FROM @tblInitRequiredDataTemp
-WHERE SiteFK = isnull(@sitefk,SiteFK)
-
----------------------------------------------
-
----------------------------------------------
---- **************************************** ---
--- Part 1: Families Enrolled at the beginning of the period	(QUARTERLY STATS)
--- exec [rspEnrolledProgramCaseloadDetail] 1,'06/01/2010','08/31/2010'
 
 
-;
-WITH cteLevelChangeStatus
-AS 
-(
+	declare @tblInitRequiredDataTemp table(
+		[HVCasePK] [int],
+		[IntakeDate] [datetime],
+		[TCDOB] [datetime],
+		[TCDOD] [datetime],
+		[TCNumber] [int],
+		[DischargeDate] [datetime],
+		[DischargeReason] [char](2),
+		[SiteFK] [int],
+		[PC1ID] [char](13),
+		[LevelChangeStar] [char](1)
 
-SELECT 
-irq.HVCasePK,
-(select max(convert(varchar(12), StartLevelDate,112) + LEFT(levelname,20) )
-						  from hvleveldetail hld
-						  where irq.HVCasePK = hld.hvcasefk
-							   and StartLevelDate <= @edate) AS selectname
-,LevelChangeStar							   
-							   
-							   
-FROM @tblInitRequiredData irq
-WHERE IntakeDate IS NOT NULL 
-AND IntakeDate < @sdate
-AND (DischargeDate IS NULL OR DischargeDate >= @sdate)
-)
+	);
+	
+	with cteLevelChange
+	as
+	(
+	select
+		  count(*) count
+		 ,hd.hvcasefk
+		from HVLevelDetail hd
+			inner join CaseProgram cp on cp.HVCaseFK = hd.HVCaseFK
+			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
+		where hd.EndLevelDate between @sdate and @edate
+			 and DischargeDate <> hd.EndLevelDate
+		group by hd.hvcasefk
+		having count(*) > 0
+	)
 
+	-- Fill this table i.e. @tblInitRequiredData as below
+	insert into @tblInitRequiredDataTemp (
+			   [HVCasePK]
+			  ,[IntakeDate]
+			  ,[TCDOB]
+			  ,[TCDOD]
+			  ,[TCNumber]
+			  ,[DischargeDate]
+			  ,[DischargeReason]
+			  ,[SiteFK]
+			  ,[PC1ID]
+			  ,[LevelChangeStar]
+			   )
+		select h.HVCasePK
+			 ,h.IntakeDate
+			 ,case
+				  when h.tcdob is not null then
+					  h.tcdob
+				  else
+					  h.edc
+			  end as tcdob
+			 ,h.TCDOD
+			 ,h.TCNumber
+			 ,cp.DischargeDate
+			 ,cp.DischargeReason
+			 ,case when wp.SiteFK is null then 0 else wp.SiteFK end as SiteFK
+			 ,cp.PC1ID
+			 ,case when lc.hvcasefk is null then '' else '*' end as levelchange
+			from HVCase h
+				inner join CaseProgram cp on h.HVCasePK = cp.HVCaseFK
+				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
+				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK -- get SiteFK
+				left join cteLevelChange lc on lc.hvcasefk = cp.HVCaseFK
+				inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
+				inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = HVCasePK
+			where (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
+	-- SiteFK = isnull(@sitefk,SiteFK) does not work because column SiteFK may be null itself 
+	-- so to solve this problem we make use of @tblInitRequiredDataTemp
+	insert into @tblInitRequiredData (
+			   [HVCasePK]
+			  ,[IntakeDate]
+			  ,[TCDOB]
+			  ,[TCDOD]
+			  ,[TCNumber]
+			  ,[DischargeDate]
+			  ,[DischargeReason]
+			  ,[SiteFK]
+			  ,[PC1ID]
+			  ,[LevelChangeStar]
+			   )
+		select *
+			from @tblInitRequiredDataTemp
+			where SiteFK = isnull(@sitefk,SiteFK);
 
-SELECT 
-[PC1ID],
-[IntakeDate],
-[DischargeDate],
-irq.[TCDOB],
-substring(lcs.selectname,9, len(lcs.selectname)) + lcs.LevelChangeStar AS CurrentLevel
- FROM @tblInitRequiredData irq
- LEFT JOIN cteLevelChangeStatus lcs ON lcs.HVCasePK = irq.HVCasePK
-WHERE IntakeDate IS NOT NULL 
-AND IntakeDate < @sdate
-AND (DischargeDate IS NULL OR DischargeDate >= @sdate)
-ORDER BY PC1ID 	
-END
+	---------------------------------------------
+
+	---------------------------------------------
+	--- **************************************** ---
+	-- Part 1: Families Enrolled at the beginning of the period	(QUARTERLY STATS)
+	-- exec [rspEnrolledProgramCaseloadDetail] 1,'06/01/2010','08/31/2010'
+	with cteLevelChangeStatus
+	as
+	(select irq.HVCasePK
+			 ,(select max(convert(varchar(12),StartLevelDate,112)+LEFT(levelname,20))
+				   from hvleveldetail hld
+				   where irq.HVCasePK = hld.hvcasefk
+						and StartLevelDate <= @edate) as selectname
+			 ,LevelChangeStar
+		from @tblInitRequiredData irq
+		where IntakeDate is not null
+			 and IntakeDate < @sdate
+			 and (DischargeDate is null
+			 or DischargeDate >= @sdate)
+	)
+
+	select
+		  irq.PC1ID
+		 ,IntakeDate
+		 ,irq.DischargeDate
+		 ,irq.TCDOB
+		 ,substring(lcs.selectname,9,len(lcs.selectname))+lcs.LevelChangeStar as CurrentLevel
+		from @tblInitRequiredData irq
+			left join cteLevelChangeStatus lcs on lcs.HVCasePK = irq.HVCasePK
+			inner join CaseProgram cp on HVCaseFK = irq.HVCasePK
+			inner join WorkerProgram wp on wp.WorkerFK = CurrentFSWFK -- get SiteFK,
+			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = irq.HVCasePK
+		where IntakeDate is not null
+			 and IntakeDate < @sdate
+			 and (irq.DischargeDate is null
+			 or irq.DischargeDate >= @sdate)
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+		order by irq.PC1ID
+
+end
 GO

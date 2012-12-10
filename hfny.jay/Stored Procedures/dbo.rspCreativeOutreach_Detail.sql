@@ -14,7 +14,9 @@ CREATE procedure [dbo].[rspCreativeOutreach_Detail]
 (
     @programfk varchar(max)    = null,
     @sdate     datetime        = null,
-    @edate     datetime        = null
+    @edate     datetime        = null,
+    @casefilterspositive varchar(100) = '',
+    @sitefk    int			   = 0
 )
 as
 	if @programfk is null
@@ -25,6 +27,8 @@ as
 	end
 
 	set @programfk = replace(@programfk,'"','')
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
 	declare @ClosedOnXLess3NoMove int
 
@@ -36,27 +40,22 @@ as
 		from hvcase
 			inner join caseprogram on caseprogram.hvcasefk = hvcasepk
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			--left join (select hvlevel.hvlevelpk, hvlevel.hvcasefk, hvlevel.programfk, 
-			--hvlevel.levelassigndate, levelname, caseweight, LevelFK
-			--	from hvlevel
-			--	inner join codelevel
-			--	on codelevelpk = levelfk
-			--) e3
-			--on e3.hvcasefk = caseprogram.hvcasefk
-			--and e3.programfk = caseprogram.programfk
 			left join (select hvlevel.hvlevelpk
 							 ,hvlevel.hvcasefk
 							 ,hvlevel.programfk
 							 ,hvlevel.levelassigndate
 							 ,levelname
 							 ,caseweight
-		   from hvlevel
-			    inner join codelevel on codelevelpk = levelfk
-		   where LevelFK = 22) e4 on e4.hvcasefk = caseprogram.hvcasefk and e4.programfk = caseprogram.programfk
+					   from hvlevel
+					    inner join codelevel on codelevelpk = levelfk
+						where LevelFK = 22) e4 on e4.hvcasefk = caseprogram.hvcasefk and e4.programfk = caseprogram.programfk
 		   left join codeDischarge on DischargeCode = caseprogram.DischargeReason
+		   inner join WorkerProgram wp on CurrentFSWFK = WorkerFK
+		   inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = HVCasePK
 		where caseprogress >= 9
 			 and intakedate <= @edate
 			 and CaseProgram.DischargeDate > @sdate
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
 	-- Length of Service on Level X at DC
 	select PC1ID
@@ -79,6 +78,8 @@ as
 			where LevelFK = 22) e3 on e3.hvcasefk = caseprogram.hvcasefk and e3.programfk = caseprogram.programfk
 			inner join codeDischarge on DischargeCode = caseprogram.DischargeReason
 			inner join Worker on Worker.WorkerPK = CaseProgram.CurrentFSWFK
+		    inner join WorkerProgram wp on CurrentFSWFK = WorkerFK
+			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = HVCasePK
 		where caseprogress >= 9
 			 and intakedate <= @edate
 			 and datediff(day,e3.LevelAssignDate,dischargedate) < 92
@@ -87,5 +88,6 @@ as
 			 or dischargedate < @edate)
 			 and DischargeCode not in (7,36)
 			 and CaseProgram.DischargeDate > @sdate
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		order by PC1ID
 GO

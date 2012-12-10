@@ -13,8 +13,10 @@ GO
 CREATE procedure [dbo].[rspServiceReferralsNeedFollowUp](@programfk    varchar(max)    = null,
                                                         @supervisorfk int             = null,
                                                         @workerfk     int             = null,
-                                                        @pc1id        varchar(13)     = null
-                                                        )
+                                                        @pc1id        varchar(13)     = null,
+                                                        @sitefk		  int			 = null,
+                                                        @casefilterspositive varchar(200), 
+                                                        @negclause	 varchar(200))
 as
 
 	if @programfk is null
@@ -26,6 +28,8 @@ as
 	end
 
 	set @programfk = REPLACE(@programfk,'"','')
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
 	select PC1ID
 		  ,pcfirstname+' '+pclastname as PC1
@@ -36,19 +40,20 @@ as
 		  ,rtrim(fsw.FirstName)+' '+rtrim(fsw.LastName) as fsw
 		  ,supervisorfk
 		  ,rtrim(supervisor.FirstName)+' '+rtrim(supervisor.LastName) as supervisor
-		  ,CaseProgram.ProgramFK
+		  ,cp.ProgramFK
 		from dbo.ServiceReferral
 			inner join dbo.codeServiceReferral on ServiceReferralCode = ServiceCode
 			inner join dbo.codeApp on FamilyCode = codeApp.AppCode
 					  and codeApp.AppCodeGroup = 'FamilyMemberReferred'
-			inner join CaseProgram on ServiceReferral.HVCaseFK = CaseProgram.HVCaseFK
-					  and ServiceReferral.ProgramFK = CaseProgram.ProgramFK
-			inner join HVCase on CaseProgram.HVCaseFK = HVCasePK
-			inner join PC on HVCase.PC1FK = PCPK
+			inner join CaseProgram cp on ServiceReferral.HVCaseFK = cp.HVCaseFK
+					  and ServiceReferral.ProgramFK = cp.ProgramFK
+			inner join HVCase c on cp.HVCaseFK = HVCasePK
+			inner join PC on c.PC1FK = PCPK
 			inner join worker fsw on CurrentFSWFK = fsw.workerpk
-			inner join workerprogram on workerprogram.workerfk = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk
 			inner join worker supervisor on supervisorfk = supervisor.workerpk
-			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
+			inner join dbo.udfCaseFilters(@casefilterspositive, @negclause, @programfk) cf on cf.HVCaseFK = c.HVCasePK
 		where (ServiceReceived is null
 				 or ServiceReceived = 0
 				 or ServiceReceived = RTRIM(''))
@@ -57,6 +62,7 @@ as
 			 and currentFSWFK = isnull(@workerfk,currentFSWFK)
 			 and supervisorfk = isnull(@supervisorfk,supervisorfk)
 			 and PC1ID = isnull(@pc1id,PC1ID)
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		order by PC1ID
 				,ReferralDate
 GO

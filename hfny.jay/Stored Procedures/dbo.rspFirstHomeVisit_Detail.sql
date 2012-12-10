@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,12 +10,15 @@ GO
 -- Description:	Report - 1.1.F Timing of First Home Visit
 -- moved from FamSys Feb 20, 2012 by jrobohn
 -- =============================================
-create procedure [dbo].[rspFirstHomeVisit_Detail]
+CREATE procedure [dbo].[rspFirstHomeVisit_Detail]
 (
     @programfk varchar(max)    = null,
     @Case      varchar(50)     = null,--figure the Case Filters out later
     @STDate    datetime,
-    @EndDate   datetime
+    @EndDate   datetime, 
+    @SiteFK	   int,
+    @posclause varchar(200),
+    @negclause varchar(200)
 )
 as
 	if @programfk is null
@@ -25,6 +29,7 @@ as
 	end
 
 	set @programfk = REPLACE(@programfk,'"','')
+	set @SiteFK = isnull(@SiteFK, 0)
 
 	begin
 		-- SET NOCOUNT ON added to prevent extra result sets from
@@ -57,9 +62,13 @@ as
 											,edc
 										  from hvlog
 											  left join HVCase on HVCase.HVCasePK = hvlog.hvcasefk
+											  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
+											  inner join WorkerProgram wp on WorkerFK = CurrentFSWFK
 											  inner join dbo.SplitString(@programfk,',') on hvlog.programfk = listitem
+											  inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = HVCasePK
 										  where CaseProgress >= 9
 											   and IntakeDate between @STDate and @EndDate
+											   and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 										  group by hvcasepk
 												  ,tcdob
 												  ,edc) as t on CaseProgram.HVCaseFK = t.HVCasePK
