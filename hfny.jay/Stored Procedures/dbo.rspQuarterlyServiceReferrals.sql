@@ -147,7 +147,7 @@ begin
 	(
 	select distinct
 				   [ServiceReferralCategory]
-		from [HFNYConversion].[dbo].[codeServiceReferral]
+		from [codeServiceReferral]
 	)
 
 
