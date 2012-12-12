@@ -191,7 +191,7 @@ SELECT PC1ID,
 
  FROM @tbl4QAReport3Detail	
 WHERE month(@LastDayofPreviousMonth) <> month(PADate)  or PADate IS null
-ORDER BY PC1ID 	
+ORDER BY CurrentFAW,PC1ID 		
 
 
 END

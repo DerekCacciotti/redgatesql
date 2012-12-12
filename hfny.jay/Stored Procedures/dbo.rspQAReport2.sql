@@ -187,7 +187,7 @@ SELECT PC1ID,
 	 
 	  FROM @tbl4QAReport2Detail	
 WHERE datediff(dd, tcdob , @LastDayofPreviousMonth) > datediff(dd, dateadd(m, 3, @LastDayofPreviousMonth), @LastDayofPreviousMonth) * -1		
-ORDER BY PC1ID 	
+ORDER BY CurrentFAW,PC1ID 	
 
 END
 GO

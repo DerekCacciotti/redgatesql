@@ -192,7 +192,7 @@ SELECT
  FROM @tbl4QAReport1Detail	
 --WHERE datediff(dd, tcdob , @LastDayofPreviousMonth) Between 14 AND 30.44 * 3			
 WHERE datediff(dd, tcdob , @LastDayofPreviousMonth) Between 14 AND datediff(dd, dateadd(m, 3, @LastDayofPreviousMonth), @LastDayofPreviousMonth) * -1
-ORDER BY PC1ID 	
+ORDER BY CurrentFAW,PC1ID 	
 
 END
 
