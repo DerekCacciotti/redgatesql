@@ -35,7 +35,9 @@ BEGIN
       ,td.[ExemptType]
       ,ta.[TrainingattendeePK]
       , cast([TopicCode] AS VARCHAR(MAX)) + ' ' + cT.TopicName AS 'Topic'
-      , st.SubTopicName
+      , cast(st.[SubTopicCode] AS VARCHAR(2)) + ' ' +  st.SubTopicName AS 'SubTopicName'
+      , TopicCode
+      , st.SubTopicCode
       , t1.TrainingCodeDescription AS 'ExemptTypeName'
 	  FROM [dbo].[Trainingattendee] ta
 		INNER JOIN Training tr ON tr.TrainingPK=ta.TrainingFK
@@ -45,6 +47,6 @@ BEGIN
 		LEFT JOIN SubTopic st ON st.SubTopicPK = td.SubTopicFK
 	  WHERE ta.WorkerFK=@WorkerFK
 	  AND tr.IsExempt=1
-	  ORDER BY TrainingDate DESC
+	  ORDER BY TopicCode, st.SubTopicCode ASC
 END
 GO
