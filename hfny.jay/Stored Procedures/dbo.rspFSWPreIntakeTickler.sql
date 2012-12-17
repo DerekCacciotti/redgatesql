@@ -43,8 +43,9 @@ SELECT c.PC1ID [pc1ID]
 + ' ' + rtrim(b.PCZip) [City]
 , b.PCPhone [Phone]
 , datediff(day, d.FSWAssignDate, @rdate) [DaysSinceFSW]
-, convert(VARCHAR(12), DATEADD(day,30.44*3,CASE WHEN a.TCDOB IS NOT NULL THEN a.TCDOB ELSE a.EDC END)
-, 101) [EnrollmentAgeOutDate]
+, convert(VARCHAR(12), DATEADD(day,30.44*3,CASE WHEN a.TCDOB IS NOT NULL THEN a.TCDOB ELSE a.EDC END), 101) [EnrollmentAgeOutDate]
+, case when DATEADD(day,30.44*3,CASE WHEN a.TCDOB IS NOT NULL THEN a.TCDOB ELSE a.EDC END) <= current_timestamp 
+	   then '*' else '' end as AgedOut
 , substring(convert(VARCHAR(30),  e.LastPreIntakeDate, 106),4, 20) [LastIntakeForm]
 , ltrim(rtrim(fsw.firstname))+' '+ltrim(rtrim(fsw.lastname)) fswname
 , ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) as supervisor

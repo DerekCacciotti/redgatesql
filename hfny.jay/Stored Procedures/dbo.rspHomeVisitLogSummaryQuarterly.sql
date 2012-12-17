@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,279 +8,310 @@ GO
 -- Create date: Jul/23/2012
 -- Description:	Home Visit Log Summary Quarterly
 -- =============================================
-CREATE PROCEDURE [dbo].[rspHomeVisitLogSummaryQuarterly] 
-	@programfk INT = NULL, 
-	@StartDt datetime,
-	@EndDt datetime
-AS
+CREATE procedure [dbo].[rspHomeVisitLogSummaryQuarterly]
+    @programfk int = null,
+    @StartDt   datetime,
+    @EndDt     datetime,
+    @SiteFK	   int = null,
+    @casefilterspositive varchar(200)
+as
 
---DECLARE @programfk INT = 6 
---DECLARE @StartDt DATETIME = '01/01/2012'
---DECLARE @EndDt DATETIME = '03/31/2012'
+	--DECLARE @programfk INT = 6 
+	--DECLARE @StartDt DATETIME = '01/01/2012'
+	--DECLARE @EndDt DATETIME = '03/31/2012'
 
-DECLARE @xDate DATETIME = '07/01/' + str(year(@StartDt))
-DECLARE @StartDtX DATETIME = CASE WHEN @xDate > @StartDt THEN '07/01/' + str(year(@StartDt)-1) ELSE @xDate END
-DECLARE @EndDtX DATETIME = @EndDt
+	declare @xDate datetime = '07/01/'+str(year(@StartDt))
+	declare @StartDtX datetime = case when @xDate > @StartDt then '07/01/'+str(year(@StartDt)-1) else @xDate end
+	declare @EndDtX datetime = @EndDt
 
-DECLARE @x INT = 0
-DECLARE @y INT = 0
-DECLARE @OutOfHome INT = 0
-SELECT 
-  @y = count(*)
-, @x = sum(CASE WHEN substring(a.VisitType,4,1) = '1' THEN 0 ELSE 1 END)
-, @OutOfHome = sum(CASE WHEN substring(a.VisitType,4,1) != '1' AND substring(a.VisitType,3,1) = '1' THEN 1 ELSE 0 END)
-FROM HVLog AS a 
-JOIN CaseProgram AS b ON b.HVCaseFK = a.HVCaseFK
-WHERE b.ProgramFK = @programfk AND a.VisitStartTime BETWEEN @StartDt AND @EndDt
-AND (b.DischargeDate IS NULL OR b.DischargeDate > @EndDt)
-IF @x = 0 
-BEGIN
-  SET @x = 1
-END
-IF @y = 0 
-BEGIN
-  SET @y = 1
-END
-IF @OutOfHome = 0 
-BEGIN
-  SET @OutOfHome = 1
-END
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
---SELECT @StartDt, @StartDtX
+	declare @x int = 0
+	declare @y int = 0
+	declare @OutOfHome int = 0
+	select
+		  @y = count(*)
+		 ,@x = sum(case when substring(a.VisitType,4,1) = '1' then 0 else 1 end)
+		 ,@OutOfHome = sum(case when substring(a.VisitType,4,1) != '1' and substring(a.VisitType,3,1) = '1' then 1 else 0 end)
+		from HVLog as a
+			join CaseProgram as b on b.HVCaseFK = a.HVCaseFK
+			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
+		where b.ProgramFK = @programfk
+			 and a.VisitStartTime between @StartDt and @EndDt
+			 and (b.DischargeDate is null
+			 or b.DischargeDate > @EndDt)
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	if @x = 0
+	begin
+		set @x = 1
+	end
+	if @y = 0
+	begin
+		set @y = 1
+	end
+	if @OutOfHome = 0
+	begin
+		set @OutOfHome = 1
+	end
 
-DECLARE @xX INT = 0
-DECLARE @yX INT = 0
-DECLARE @OutOfHomeX INT = 0
-SELECT 
-  @yX = count(*)
-, @xX = sum(CASE WHEN substring(a.VisitType,4,1) = '1' THEN 0 ELSE 1 END)
-, @OutOfHomeX = sum(CASE WHEN substring(a.VisitType,4,1) != '1' AND substring(a.VisitType,3,1) = '1' THEN 1 ELSE 0 END)
-FROM HVLog AS a 
-JOIN CaseProgram AS b ON b.HVCaseFK = a.HVCaseFK
-WHERE b.ProgramFK = @programfk AND a.VisitStartTime BETWEEN @StartDtX AND @EndDtX
-AND (b.DischargeDate IS NULL OR b.DischargeDate > @EndDtX)
-IF @xX = 0 
-BEGIN
-  SET @xX = 1
-END
-IF @yX = 0 
-BEGIN
-  SET @yX = 1
-END
-IF @OutOfHomeX = 0 
-BEGIN
-  SET @OutOfHomeX = 1
-END
+	--SELECT @StartDt, @StartDtX
 
-; WITH q1 AS
-(
-SELECT 
-count(*) AS [n]
-, sum(CASE WHEN substring(c.VisitType,4,1) = '1' THEN 1 ELSE 0 END) [Attemped]
-, avg(CASE WHEN substring(c.VisitType,4,1) != '1' THEN c.VisitLengthMinute ELSE NULL END) [AverageLength]
-, str(sum(CASE WHEN isnull(a.TCDOB, a.EDC) >= c.VisitStartTime THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + '%' [Prenatal]
-, str(sum(CASE WHEN isnull(a.TCDOB, a.EDC) < c.VisitStartTime THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + '%'  [Postnatal]
+	declare @xX int = 0
+	declare @yX int = 0
+	declare @OutOfHomeX int = 0
+	select
+		  @yX = count(*)
+		 ,@xX = sum(case when substring(a.VisitType,4,1) = '1' then 0 else 1 end)
+		 ,@OutOfHomeX = sum(case when substring(a.VisitType,4,1) != '1' and substring(a.VisitType,3,1) = '1' then 1 else 0 end)
+		from HVLog as a
+			join CaseProgram as b on b.HVCaseFK = a.HVCaseFK
+			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
+		where b.ProgramFK = @programfk
+			 and a.VisitStartTime between @StartDtX and @EndDtX
+			 and (b.DischargeDate is null
+			 or b.DischargeDate > @EndDtX)
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	if @xX = 0
+	begin
+		set @xX = 1
+	end
+	if @yX = 0
+	begin
+		set @yX = 1
+	end
+	if @OutOfHomeX = 0
+	begin
+		set @OutOfHomeX = 1
+	end
 
-, str(sum(CASE WHEN substring(c.VisitType,1,1) = '1' OR substring(c.VisitType,2,1) = '1' THEN 1 ELSE 0 END)
- * 100.0 / @x, 10, 0) + '%'  [InParticipantHome]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitType,1,1) != '1' 
-  AND substring(c.VisitType,2,1) != '1' THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [OutParticipantHome]
-, str(sum(CASE WHEN (substring(c.VisitType,1,1) = '1' OR substring(c.VisitType,2,1) = '1')
-  AND substring(c.VisitType,3,1) = '1' 
-  THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%'  [InOutParticipantHome]
-  
-, sum(CASE WHEN substring(c.VisitType,4,1) != '1' AND substring(c.VisitType,3,1) = '1' THEN 1 ELSE 0 END) [OutOfHome]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,1,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHome, 10, 0) + '%' [MedicalProviderOffice]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,2,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHome, 10, 0) + '%'  [OtherProviderOffice]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,3,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHome, 10, 0) + '%'  [HomeVisitOffice]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,4,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHome, 10, 0) + '%'  [Hospital]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,5,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHome, 10, 0) + '%'  [OtherLocation]
+	;
+	with q1
+	as
+	(
+	select
+		  count(*) as [n]
+		 ,sum(case when substring(c.VisitType,4,1) = '1' then 1 else 0 end) [Attemped]
+		 ,avg(case when substring(c.VisitType,4,1) != '1' then c.VisitLengthMinute else null end) [AverageLength]
+		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Prenatal]
+		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Postnatal]
 
-, str(sum(CASE WHEN c.PC1Participated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [PC1Participated]
-, str(sum(CASE WHEN c.PC2Participated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [PC2Participated]
-, str(sum(CASE WHEN c.OBPParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [OBPParticipated]
-, str(sum(CASE WHEN c.FatherFigureParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [FatherFigureParticipated]
-, str(sum(CASE WHEN c.TCParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [TCParticipated]
-, str(sum(CASE WHEN c.GrandParentParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [GrandParentParticipated]
-, str(sum(CASE WHEN c.SiblingParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [SiblingParticipated]
-, str(sum(CASE WHEN c.NonPrimaryFSWParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [NonPrimaryFSWParticipated]
-, str(sum(CASE WHEN c.HVSupervisorParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [HVSupervisorParticipated]
-, str(sum(CASE WHEN c.SupervisorObservation = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [SupervisorObservation]
-, str(sum(CASE WHEN c.OtherParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + '%' [OtherParticipated]
+		 ,str(sum(case when substring(c.VisitType,1,1) = '1' or substring(c.VisitType,2,1) = '1' then 1 else 0 end)
+		  *100.0/@x,10,0)+'%' [InParticipantHome]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitType,1,1) != '1'
+				  and substring(c.VisitType,2,1) != '1' then 1 else 0 end)*100.0/@x,10,0)+'%' [OutParticipantHome]
+		 ,str(sum(case when (substring(c.VisitType,1,1) = '1' or substring(c.VisitType,2,1) = '1')
+				  and substring(c.VisitType,3,1) = '1'
+				  then 1 else 0 end)*100.0/@x,10,0)+'%' [InOutParticipantHome]
 
-, str(sum(CASE WHEN (isnull(c.CDChildDevelopment, '00') = '00' AND isnull(c.CDToys, '00') = '00' 
-AND isnull(c.CDOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @x, 10, 0) + '%' [ChildDevelopment]
+		 ,sum(case when substring(c.VisitType,4,1) != '1' and substring(c.VisitType,3,1) = '1' then 1 else 0 end) [OutOfHome]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,1,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHome,10,0)+'%' [MedicalProviderOffice]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,2,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHome,10,0)+'%' [OtherProviderOffice]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,3,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHome,10,0)+'%' [HomeVisitOffice]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,4,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHome,10,0)+'%' [Hospital]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,5,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHome,10,0)+'%' [OtherLocation]
 
-, str(sum(CASE WHEN (isnull(c.PCChildInteraction, '00') = '00' AND isnull(c.PCChildManagement, '00') = '00' 
-AND isnull(c.PCFeelings, '00') = '00' AND isnull(c.PCStress, '00') = '00' 
-AND isnull(c.PCBasicNeeds, '00') = '00' AND isnull(c.PCShakenBaby, '00') = '00' AND isnull(c.PCShakenBabyVideo, '00') = '00' 
-AND isnull(c.PCOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' THEN 0 ELSE 1 END) * 100.0 / @x, 10, 0) + '%' [PCInteraction]
+		 ,str(sum(case when c.PC1Participated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [PC1Participated]
+		 ,str(sum(case when c.PC2Participated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [PC2Participated]
+		 ,str(sum(case when c.OBPParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [OBPParticipated]
+		 ,str(sum(case when c.FatherFigureParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [FatherFigureParticipated]
+		 ,str(sum(case when c.TCParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [TCParticipated]
+		 ,str(sum(case when c.GrandParentParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [GrandParentParticipated]
+		 ,str(sum(case when c.SiblingParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [SiblingParticipated]
+		 ,str(sum(case when c.NonPrimaryFSWParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [NonPrimaryFSWParticipated]
+		 ,str(sum(case when c.HVSupervisorParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [HVSupervisorParticipated]
+		 ,str(sum(case when c.SupervisorObservation = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [SupervisorObservation]
+		 ,str(sum(case when c.OtherParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [OtherParticipated]
 
-, str(sum(CASE WHEN (isnull(c.HCGeneral, '00') = '00' AND isnull(c.HCChild, '00') = '00' AND isnull(c.HCDental, '00') = '00' 
-AND isnull(c.HCFeeding, '00') = '00' AND isnull(c.HCBreastFeeding, '00') = '00' 
-AND isnull(c.HCNutrition, '00') = '00' AND isnull(c.HCFamilyPlanning, '00') = '00' AND isnull(c.HCProviders, '00') = '00' 
-AND isnull(c.HCFASD, '00') = '00' AND isnull(c.HCSexEducation, '00') = '00' 
-AND isnull(c.HCPrenatalCare, '00') = '00' AND isnull(c.HCMedicalAdvocacy, '00') = '00' AND isnull(c.HCSafety, '00') = '00' 
-AND isnull(c.HCSmoking, '00') = '00' AND isnull(c.HCSIDS, '00') = '00' 
-AND isnull(c.HCOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' THEN 0 ELSE 1 END) * 100.0 / @x, 10, 0) + '%' [HealthCare]
+		 ,str(sum(case when (isnull(c.CDChildDevelopment,'00') = '00' and isnull(c.CDToys,'00') = '00'
+				  and isnull(c.CDOther,'00') = '00') or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@x,10,0)+'%' [ChildDevelopment]
 
-, str(sum(CASE WHEN (isnull(c.FFDomesticViolence, '00') = '00' AND isnull(c.FFFamilyRelations, '00') = '00' 
-AND isnull(c.FFSubstanceAbuse, '00') = '00' 
-AND isnull(c.FFMentalHealth, '00') = '00' AND isnull(c.FFCommunication, '00') = '00' 
-AND isnull(c.FFOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @x, 10, 0) + '%' [FamilyFunction]
+		 ,str(sum(case when (isnull(c.PCChildInteraction,'00') = '00' and isnull(c.PCChildManagement,'00') = '00'
+				  and isnull(c.PCFeelings,'00') = '00' and isnull(c.PCStress,'00') = '00'
+				  and isnull(c.PCBasicNeeds,'00') = '00' and isnull(c.PCShakenBaby,'00') = '00' and isnull(c.PCShakenBabyVideo,
+					  '00') = '00'
+				  and isnull(c.PCOther,'00') = '00') or substring(c.VisitType,4,1) = '1' then 0 else 1 end)*100.0/@x,10,0)+'%' 
+					  [PCInteraction]
 
-, str(sum(CASE WHEN (isnull(c.SSCalendar, '00') = '00' AND isnull(c.SSHousekeeping, '00') = '00' 
-AND isnull(c.SSTransportation, '00') = '00' AND isnull(c.SSEmployment, '00') = '00' 
-AND isnull(c.SSMoneyManagement, '00') = '00' AND isnull(c.SSChildCare, '00') = '00' 
-AND isnull(c.SSProblemSolving, '00') = '00' AND isnull(c.SSEducation, '00') = '00' AND isnull(c.SSJob, '00') = '00' 
-AND isnull(c.SSOther, '00') = '00' ) OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @x, 10, 0) + '%' [SelfSufficincy]
+		 ,str(sum(case when (isnull(c.HCGeneral,'00') = '00' and isnull(c.HCChild,'00') = '00' and isnull(c.HCDental,'00') = '00'
+				  and isnull(c.HCFeeding,'00') = '00' and isnull(c.HCBreastFeeding,'00') = '00'
+				  and isnull(c.HCNutrition,'00') = '00' and isnull(c.HCFamilyPlanning,'00') = '00' and isnull(c.HCProviders,'00') 
+					  = '00'
+				  and isnull(c.HCFASD,'00') = '00' and isnull(c.HCSexEducation,'00') = '00'
+				  and isnull(c.HCPrenatalCare,'00') = '00' and isnull(c.HCMedicalAdvocacy,'00') = '00' and isnull(c.HCSafety,'00') 
+					  = '00'
+				  and isnull(c.HCSmoking,'00') = '00' and isnull(c.HCSIDS,'00') = '00'
+				  and isnull(c.HCOther,'00') = '00') or substring(c.VisitType,4,1) = '1' then 0 else 1 end)*100.0/@x,10,0)+'%' 
+					  [HealthCare]
 
-, str(sum(CASE WHEN (isnull(c.CIProblems, '00') = '00' AND isnull(c.CIOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @x, 10, 0) + '%' [CrisisIntervention]
+		 ,str(sum(case when (isnull(c.FFDomesticViolence,'00') = '00' and isnull(c.FFFamilyRelations,'00') = '00'
+				  and isnull(c.FFSubstanceAbuse,'00') = '00'
+				  and isnull(c.FFMentalHealth,'00') = '00' and isnull(c.FFCommunication,'00') = '00'
+				  and isnull(c.FFOther,'00') = '00') or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@x,10,0)+'%' [FamilyFunction]
 
-, str(sum(CASE WHEN (isnull(c.PAForms, '00') = '00' AND isnull(c.PAVideo, '00') = '00'
-AND isnull(c.PAGroups, '00') = '00' AND isnull(c.PAIFSP, '00') = '00'
-AND isnull(c.PARecreation, '00') = '00' AND isnull(c.PAOther, '00') = '00'
-) OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @x, 10, 0) + '%' [ProgramActivity]
+		 ,str(sum(case when (isnull(c.SSCalendar,'00') = '00' and isnull(c.SSHousekeeping,'00') = '00'
+				  and isnull(c.SSTransportation,'00') = '00' and isnull(c.SSEmployment,'00') = '00'
+				  and isnull(c.SSMoneyManagement,'00') = '00' and isnull(c.SSChildCare,'00') = '00'
+				  and isnull(c.SSProblemSolving,'00') = '00' and isnull(c.SSEducation,'00') = '00' and isnull(c.SSJob,'00') = '00'
+				  and isnull(c.SSOther,'00') = '00') or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@x,10,0)+'%' [SelfSufficincy]
 
-, str(sum(CASE WHEN (isnull(c.CATransportation, '00') = '00' AND isnull(c.CAGoods, '00') = '00' AND isnull(c.CALegal, '00') = '00' 
-AND isnull(c.CAHousing, '00') = '00' 
-AND isnull(c.CAAdvocacy, '00') = '00' AND isnull(c.CATranslation, '00') = '00' AND isnull(c.CALaborSupport, '00') = '00' 
-AND isnull(c.CAChildSupport, '00') = '00' 
-AND isnull(c.CAParentRights, '00') = '00' AND isnull(c.CAVisitation, '00') = '00' AND isnull(c.CAOther, '00') = '00') 
-OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @x, 10, 0) + '%' [ConcreteAcivities]
+		 ,str(sum(case when (isnull(c.CIProblems,'00') = '00' and isnull(c.CIOther,'00') = '00') or substring(c.VisitType,4,1) = 
+			 '1'
+				  then 0 else 1 end)*100.0/@x,10,0)+'%' [CrisisIntervention]
 
-FROM HVCase AS a 
-JOIN CaseProgram AS b ON b.HVCaseFK = a.HVCasePK
-JOIN HVLog  AS c ON a.HVCasePK = c.HVCaseFK
-WHERE b.ProgramFK = @programfk AND c.VisitStartTime BETWEEN @StartDt AND @EndDt
-AND (b.DischargeDate IS NULL OR b.DischargeDate > @EndDt)
-),
+		 ,str(sum(case when (isnull(c.PAForms,'00') = '00' and isnull(c.PAVideo,'00') = '00'
+				  and isnull(c.PAGroups,'00') = '00' and isnull(c.PAIFSP,'00') = '00'
+				  and isnull(c.PARecreation,'00') = '00' and isnull(c.PAOther,'00') = '00'
+				  ) or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@x,10,0)+'%' [ProgramActivity]
 
----------------------------------------------------------------------
+		 ,str(sum(case when (isnull(c.CATransportation,'00') = '00' and isnull(c.CAGoods,'00') = '00' and isnull(c.CALegal,'00') = 
+			 '00'
+				  and isnull(c.CAHousing,'00') = '00'
+				  and isnull(c.CAAdvocacy,'00') = '00' and isnull(c.CATranslation,'00') = '00' and isnull(c.CALaborSupport,'00') = 
+					  '00'
+				  and isnull(c.CAChildSupport,'00') = '00'
+				  and isnull(c.CAParentRights,'00') = '00' and isnull(c.CAVisitation,'00') = '00' and isnull(c.CAOther,'00') = 
+					  '00')
+				  or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@x,10,0)+'%' [ConcreteAcivities]
 
-q2 AS (
+		from HVCase as a
+			join CaseProgram as b on b.HVCaseFK = a.HVCasePK
+			join HVLog as c on a.HVCasePK = c.HVCaseFK
+			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
+		where b.ProgramFK = @programfk
+			 and c.VisitStartTime between @StartDt and @EndDt
+			 and (b.DischargeDate is null
+			 or b.DischargeDate > @EndDt)
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	),
 
-SELECT 
-count(*) AS [nX]
-, sum(CASE WHEN substring(c.VisitType,4,1) = '1' THEN 1 ELSE 0 END) [AttempedX]
-, avg(CASE WHEN substring(c.VisitType,4,1) != '1' THEN c.VisitLengthMinute ELSE NULL END) [AverageLengthX]
-, str(sum(CASE WHEN isnull(a.TCDOB, a.EDC) >= c.VisitStartTime THEN 1 ELSE 0 END) * 100.0 / @yX, 10, 0) + '%' [PrenatalX]
-, str(sum(CASE WHEN isnull(a.TCDOB, a.EDC) < c.VisitStartTime THEN 1 ELSE 0 END) * 100.0 / @yX, 10, 0) + '%'  [PostnatalX]
+	---------------------------------------------------------------------
 
-, str(sum(CASE WHEN substring(c.VisitType,1,1) = '1' OR substring(c.VisitType,2,1) = '1' THEN 1 ELSE 0 END)
- * 100.0 / @xX, 10, 0) + '%'  [InParticipantHomeX]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitType,1,1) != '1' 
-  AND substring(c.VisitType,2,1) != '1' THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [OutParticipantHomeX]
-, str(sum(CASE WHEN (substring(c.VisitType,1,1) = '1' OR substring(c.VisitType,2,1) = '1')
-  AND substring(c.VisitType,3,1) = '1' 
-  THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%'  [InOutParticipantHomeX]
-  
-, sum(CASE WHEN substring(c.VisitType,4,1) != '1' AND substring(c.VisitType,3,1) = '1' THEN 1 ELSE 0 END) [OutOfHomeX]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,1,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHomeX, 10, 0) + '%' [MedicalProviderOfficeX]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,2,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHomeX, 10, 0) + '%'  [OtherProviderOfficeX]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,3,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHomeX, 10, 0) + '%'  [HomeVisitOfficeX]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,4,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHomeX, 10, 0) + '%'  [HospitalX]
-, str(sum(CASE WHEN substring(c.VisitType,3,1) = '1' AND substring(c.VisitLocation,5,1) = '1' THEN 1 ELSE 0 END) * 100.0 / @OutOfHomeX, 10, 0) + '%'  [OtherLocationX]
+	q2
+	as (
 
-, str(sum(CASE WHEN c.PC1Participated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [PC1ParticipatedX]
-, str(sum(CASE WHEN c.PC2Participated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [PC2ParticipatedX]
-, str(sum(CASE WHEN c.OBPParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [OBPParticipatedX]
-, str(sum(CASE WHEN c.FatherFigureParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [FatherFigureParticipatedX]
-, str(sum(CASE WHEN c.TCParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [TCParticipatedX]
-, str(sum(CASE WHEN c.GrandParentParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [GrandParentParticipatedX]
-, str(sum(CASE WHEN c.SiblingParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [SiblingParticipatedX]
-, str(sum(CASE WHEN c.NonPrimaryFSWParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [NonPrimaryFSWParticipatedX]
-, str(sum(CASE WHEN c.HVSupervisorParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [HVSupervisorParticipatedX]
-, str(sum(CASE WHEN c.SupervisorObservation = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [SupervisorObservationX]
-, str(sum(CASE WHEN c.OtherParticipated = 1 THEN 1 ELSE 0 END) * 100.0 / @xX, 10, 0) + '%' [OtherParticipatedX]
+	select
+		  count(*) as [nX]
+		 ,sum(case when substring(c.VisitType,4,1) = '1' then 1 else 0 end) [AttempedX]
+		 ,avg(case when substring(c.VisitType,4,1) != '1' then c.VisitLengthMinute else null end) [AverageLengthX]
+		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@yX,10,0)+'%' [PrenatalX]
+		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@yX,10,0)+'%' [PostnatalX]
 
-, str(sum(CASE WHEN (isnull(c.CDChildDevelopment, '00') = '00' AND isnull(c.CDToys, '00') = '00' 
-AND isnull(c.CDOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @xX, 10, 0) + '%' [ChildDevelopmentX]
+		 ,str(sum(case when substring(c.VisitType,1,1) = '1' or substring(c.VisitType,2,1) = '1' then 1 else 0 end)
+		  *100.0/@xX,10,0)+'%' [InParticipantHomeX]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitType,1,1) != '1'
+				  and substring(c.VisitType,2,1) != '1' then 1 else 0 end)*100.0/@xX,10,0)+'%' [OutParticipantHomeX]
+		 ,str(sum(case when (substring(c.VisitType,1,1) = '1' or substring(c.VisitType,2,1) = '1')
+				  and substring(c.VisitType,3,1) = '1'
+				  then 1 else 0 end)*100.0/@xX,10,0)+'%' [InOutParticipantHomeX]
 
-, str(sum(CASE WHEN (isnull(c.PCChildInteraction, '00') = '00' AND isnull(c.PCChildManagement, '00') = '00' 
-AND isnull(c.PCFeelings, '00') = '00' AND isnull(c.PCStress, '00') = '00' 
-AND isnull(c.PCBasicNeeds, '00') = '00' AND isnull(c.PCShakenBaby, '00') = '00' AND isnull(c.PCShakenBabyVideo, '00') = '00' 
-AND isnull(c.PCOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' THEN 0 ELSE 1 END) * 100.0 / @xX, 10, 0) + '%' [PCInteractionX]
+		 ,sum(case when substring(c.VisitType,4,1) != '1' and substring(c.VisitType,3,1) = '1' then 1 else 0 end) [OutOfHomeX]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,1,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHomeX,10,0)+'%' [MedicalProviderOfficeX]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,2,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHomeX,10,0)+'%' [OtherProviderOfficeX]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,3,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHomeX,10,0)+'%' [HomeVisitOfficeX]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,4,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHomeX,10,0)+'%' [HospitalX]
+		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitLocation,5,1) = '1' then 1 else 0 end)*100.0/
+			 @OutOfHomeX,10,0)+'%' [OtherLocationX]
 
-, str(sum(CASE WHEN (isnull(c.HCGeneral, '00') = '00' AND isnull(c.HCChild, '00') = '00' AND isnull(c.HCDental, '00') = '00' 
-AND isnull(c.HCFeeding, '00') = '00' AND isnull(c.HCBreastFeeding, '00') = '00' 
-AND isnull(c.HCNutrition, '00') = '00' AND isnull(c.HCFamilyPlanning, '00') = '00' AND isnull(c.HCProviders, '00') = '00' 
-AND isnull(c.HCFASD, '00') = '00' AND isnull(c.HCSexEducation, '00') = '00' 
-AND isnull(c.HCPrenatalCare, '00') = '00' AND isnull(c.HCMedicalAdvocacy, '00') = '00' AND isnull(c.HCSafety, '00') = '00' 
-AND isnull(c.HCSmoking, '00') = '00' AND isnull(c.HCSIDS, '00') = '00' 
-AND isnull(c.HCOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' THEN 0 ELSE 1 END) * 100.0 / @xX, 10, 0) + '%' [HealthCareX]
+		 ,str(sum(case when c.PC1Participated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [PC1ParticipatedX]
+		 ,str(sum(case when c.PC2Participated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [PC2ParticipatedX]
+		 ,str(sum(case when c.OBPParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [OBPParticipatedX]
+		 ,str(sum(case when c.FatherFigureParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [FatherFigureParticipatedX]
+		 ,str(sum(case when c.TCParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [TCParticipatedX]
+		 ,str(sum(case when c.GrandParentParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [GrandParentParticipatedX]
+		 ,str(sum(case when c.SiblingParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [SiblingParticipatedX]
+		 ,str(sum(case when c.NonPrimaryFSWParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [NonPrimaryFSWParticipatedX]
+		 ,str(sum(case when c.HVSupervisorParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [HVSupervisorParticipatedX]
+		 ,str(sum(case when c.SupervisorObservation = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [SupervisorObservationX]
+		 ,str(sum(case when c.OtherParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [OtherParticipatedX]
 
-, str(sum(CASE WHEN (isnull(c.FFDomesticViolence, '00') = '00' AND isnull(c.FFFamilyRelations, '00') = '00' 
-AND isnull(c.FFSubstanceAbuse, '00') = '00' 
-AND isnull(c.FFMentalHealth, '00') = '00' AND isnull(c.FFCommunication, '00') = '00' 
-AND isnull(c.FFOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @xX, 10, 0) + '%' [FamilyFunctionX]
+		 ,str(sum(case when (isnull(c.CDChildDevelopment,'00') = '00' and isnull(c.CDToys,'00') = '00'
+				  and isnull(c.CDOther,'00') = '00') or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@xX,10,0)+'%' [ChildDevelopmentX]
 
-, str(sum(CASE WHEN (isnull(c.SSCalendar, '00') = '00' AND isnull(c.SSHousekeeping, '00') = '00' 
-AND isnull(c.SSTransportation, '00') = '00' AND isnull(c.SSEmployment, '00') = '00' 
-AND isnull(c.SSMoneyManagement, '00') = '00' AND isnull(c.SSChildCare, '00') = '00' 
-AND isnull(c.SSProblemSolving, '00') = '00' AND isnull(c.SSEducation, '00') = '00' AND isnull(c.SSJob, '00') = '00' 
-AND isnull(c.SSOther, '00') = '00' ) OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @xX, 10, 0) + '%' [SelfSufficincyX]
+		 ,str(sum(case when (isnull(c.PCChildInteraction,'00') = '00' and isnull(c.PCChildManagement,'00') = '00'
+				  and isnull(c.PCFeelings,'00') = '00' and isnull(c.PCStress,'00') = '00'
+				  and isnull(c.PCBasicNeeds,'00') = '00' and isnull(c.PCShakenBaby,'00') = '00' and isnull(c.PCShakenBabyVideo,
+					  '00') = '00'
+				  and isnull(c.PCOther,'00') = '00') or substring(c.VisitType,4,1) = '1' then 0 else 1 end)*100.0/@xX,10,0)+'%' 
+					  [PCInteractionX]
 
-, str(sum(CASE WHEN (isnull(c.CIProblems, '00') = '00' AND isnull(c.CIOther, '00') = '00') OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @xX, 10, 0) + '%' [CrisisInterventionX]
+		 ,str(sum(case when (isnull(c.HCGeneral,'00') = '00' and isnull(c.HCChild,'00') = '00' and isnull(c.HCDental,'00') = '00'
+				  and isnull(c.HCFeeding,'00') = '00' and isnull(c.HCBreastFeeding,'00') = '00'
+				  and isnull(c.HCNutrition,'00') = '00' and isnull(c.HCFamilyPlanning,'00') = '00' and isnull(c.HCProviders,'00') 
+					  = '00'
+				  and isnull(c.HCFASD,'00') = '00' and isnull(c.HCSexEducation,'00') = '00'
+				  and isnull(c.HCPrenatalCare,'00') = '00' and isnull(c.HCMedicalAdvocacy,'00') = '00' and isnull(c.HCSafety,'00') 
+					  = '00'
+				  and isnull(c.HCSmoking,'00') = '00' and isnull(c.HCSIDS,'00') = '00'
+				  and isnull(c.HCOther,'00') = '00') or substring(c.VisitType,4,1) = '1' then 0 else 1 end)*100.0/@xX,10,0)+'%' 
+					  [HealthCareX]
 
+		 ,str(sum(case when (isnull(c.FFDomesticViolence,'00') = '00' and isnull(c.FFFamilyRelations,'00') = '00'
+				  and isnull(c.FFSubstanceAbuse,'00') = '00'
+				  and isnull(c.FFMentalHealth,'00') = '00' and isnull(c.FFCommunication,'00') = '00'
+				  and isnull(c.FFOther,'00') = '00') or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@xX,10,0)+'%' [FamilyFunctionX]
 
-, str(sum(CASE WHEN (isnull(c.PAForms, '00') = '00' AND isnull(c.PAVideo, '00') = '00'
-AND isnull(c.PAGroups, '00') = '00' AND isnull(c.PAIFSP, '00') = '00'
-AND isnull(c.PARecreation, '00') = '00' AND isnull(c.PAOther, '00') = '00'
-) OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @xX, 10, 0) + '%' [ProgramActivityX]
+		 ,str(sum(case when (isnull(c.SSCalendar,'00') = '00' and isnull(c.SSHousekeeping,'00') = '00'
+				  and isnull(c.SSTransportation,'00') = '00' and isnull(c.SSEmployment,'00') = '00'
+				  and isnull(c.SSMoneyManagement,'00') = '00' and isnull(c.SSChildCare,'00') = '00'
+				  and isnull(c.SSProblemSolving,'00') = '00' and isnull(c.SSEducation,'00') = '00' and isnull(c.SSJob,'00') = '00'
+				  and isnull(c.SSOther,'00') = '00') or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@xX,10,0)+'%' [SelfSufficincyX]
 
-, str(sum(CASE WHEN (isnull(c.CATransportation, '00') = '00' AND isnull(c.CAGoods, '00') = '00' AND isnull(c.CALegal, '00') = '00' 
-AND isnull(c.CAHousing, '00') = '00' 
-AND isnull(c.CAAdvocacy, '00') = '00' AND isnull(c.CATranslation, '00') = '00' AND isnull(c.CALaborSupport, '00') = '00' 
-AND isnull(c.CAChildSupport, '00') = '00' 
-AND isnull(c.CAParentRights, '00') = '00' AND isnull(c.CAVisitation, '00') = '00' AND isnull(c.CAOther, '00') = '00') 
-OR substring(c.VisitType,4,1) = '1' 
-THEN 0 ELSE 1 END) * 100.0 / @xX, 10, 0) + '%' [ConcreteAcivitiesX]
-
-FROM HVCase AS a 
-JOIN CaseProgram AS b ON b.HVCaseFK = a.HVCasePK
-JOIN HVLog  AS c ON a.HVCasePK = c.HVCaseFK
-WHERE b.ProgramFK = @programfk AND c.VisitStartTime BETWEEN @StartDtX AND @EndDtX
-AND (b.DischargeDate IS NULL OR b.DischargeDate > @EndDtX)
-)
-
-SELECT * FROM q1
-JOIN q2 ON 1 = 1
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		 ,str(sum(case when (isnull(c.CIProblems,'00') = '00' and isnull(c.CIOther,'00') = '00') or substring(c.VisitType,4,1) = 
+			 '1'
+				  then 0 else 1 end)*100.0/@xX,10,0)+'%' [CrisisInterventionX]
 
 
+		 ,str(sum(case when (isnull(c.PAForms,'00') = '00' and isnull(c.PAVideo,'00') = '00'
+				  and isnull(c.PAGroups,'00') = '00' and isnull(c.PAIFSP,'00') = '00'
+				  and isnull(c.PARecreation,'00') = '00' and isnull(c.PAOther,'00') = '00'
+				  ) or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@xX,10,0)+'%' [ProgramActivityX]
 
+		 ,str(sum(case when (isnull(c.CATransportation,'00') = '00' and isnull(c.CAGoods,'00') = '00' and isnull(c.CALegal,'00') = 
+			 '00'
+				  and isnull(c.CAHousing,'00') = '00'
+				  and isnull(c.CAAdvocacy,'00') = '00' and isnull(c.CATranslation,'00') = '00' and isnull(c.CALaborSupport,'00') = 
+					  '00'
+				  and isnull(c.CAChildSupport,'00') = '00'
+				  and isnull(c.CAParentRights,'00') = '00' and isnull(c.CAVisitation,'00') = '00' and isnull(c.CAOther,'00') = 
+					  '00')
+				  or substring(c.VisitType,4,1) = '1'
+				  then 0 else 1 end)*100.0/@xX,10,0)+'%' [ConcreteAcivitiesX]
+
+		from HVCase as a
+			join CaseProgram as b on b.HVCaseFK = a.HVCasePK
+			join HVLog as c on a.HVCasePK = c.HVCaseFK
+			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
+		where b.ProgramFK = @programfk
+			 and c.VisitStartTime between @StartDtX and @EndDtX
+			 and (b.DischargeDate is null
+			 or b.DischargeDate > @EndDtX)
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	)
+
+	select *
+		from q1
+			join q2 on 1 = 1
 GO

@@ -11,8 +11,12 @@ GO
 --				Moved from FamSys - 02/05/12 jrobohn
 -- =============================================
 CREATE procedure [dbo].[rsp3YearsInProgram]
-(@programfk varchar(max)    = NULL,
- @SiteFK INT = 0)
+(
+    @programfk varchar(max)    = null,
+    @SiteFK    int             = 0,
+    @casefilterspositive varchar(200)
+)
+
 as
 begin
 
@@ -29,30 +33,30 @@ begin
 	end
 
 	set @programfk = replace(@programfk,'"','')
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
-
-	select
-		  PC1ID
-		 ,convert(VARCHAR(10), HVCase.IntakeDate, 101) [IntakeDate]
-		 ,CASE when DischargeDate is null THEN  ''
-		  ELSE  convert(VARCHAR(10), DischargeDate, 101) end [DISDate]
-		 ,datediff(month,IntakeDate,CASE when DischargeDate is null THEN getdate()
-		  ELSE DischargeDate end) [MonthsInProgram]
-		 ,HVPROGRAM.ProgramName as Program_Name
-		 ,case when DischargeDate is null THEN 'Case Open, ' + rtrim(LevelName)
-		  else rtrim(codeDischarge.DischargeReason) END [Outcome]
-		from
-			CaseProgram
-			INNER JOIN worker fsw ON CurrentFSWFK = fsw.workerpk
-		    INNER JOIN workerprogram ON workerprogram.workerfk = fsw.workerpk
-			left join HVCase on HVCase.HVCasePK = CaseProgram.HVCaseFK
-			left join codeDischarge on CaseProgram.DischargeReason = codeDischarge.DischargeCode
-			left join codeLevel on CaseProgram.CurrentLevelFK = codeLevel.codeLevelPK
-			left join HVProgram on CaseProgram.ProgramFK = HVProgram.HVProgramPK
-			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-		where HVCase.IntakeDate is not null
-			 and datediff(day,IntakeDate,CASE when DischargeDate is null THEN getdate()
-			 else DischargeDate end) > 1095 
-			 AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
+	select PC1ID
+		 ,convert(varchar(10),c.IntakeDate,101) [IntakeDate]
+		 ,case when DischargeDate is null then ''
+			  else convert(varchar(10),DischargeDate,101) end [DISDate]
+		 ,datediff(month,IntakeDate,case when DischargeDate is null then getdate()
+			  else DischargeDate end) [MonthsInProgram]
+		 ,p.ProgramName as Program_Name
+		 ,case when DischargeDate is null then 'Case Open, '+rtrim(LevelName)
+			  else rtrim(codeDischarge.DischargeReason) end [Outcome]
+		from CaseProgram cp
+			inner join worker fsw on CurrentFSWFK = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk
+			left join HVCase c on c.HVCasePK = cp.HVCaseFK
+			left join codeDischarge on cp.DischargeReason = codeDischarge.DischargeCode
+			left join codeLevel on cp.CurrentLevelFK = codeLevel.codeLevelPK
+			left join HVProgram p on cp.ProgramFK = p.HVProgramPK
+			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
+			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = HVCasePK
+		where c.IntakeDate is not null
+			 and datediff(day,IntakeDate,case when DischargeDate is null then getdate()
+				 else DischargeDate end) > 1095
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 end
 GO

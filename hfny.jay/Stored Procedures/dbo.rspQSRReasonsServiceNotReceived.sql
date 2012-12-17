@@ -39,8 +39,7 @@ begin
 
 	declare @tblResults table(
 		AppCodeText varchar(500) null
-		,
-		ServiceReferralPK varchar(10) null
+		,ServiceReferralPK varchar(10) null
 	);
 
 	with cteMain
@@ -69,7 +68,6 @@ begin
 	as
 	(select AppCodeText
 		  ,ServiceReferralPK
-		  ,case when SiteFK is null then 0 else SiteFK end as SiteFK
 		from codeApp a
 			left join cteMain st on a.AppCode = st.ReasonNoService
 		where AppCodeGroup = 'ReasonCode'
@@ -80,12 +78,10 @@ begin
 		select AppCodeText
 			  ,ServiceReferralPK
 			from cteServicesNotReceived
-			where SiteFK = isnull(@sitefk,SiteFK)
 
-	--calculate the totals that will we use to caclualte percentages
+	--calculate the totals that will we use to calculate percentages
 	set @countServiceNotReceived = (select count(ServiceReferralPK)
 										from @tblResults)
-
 
 	select AppCodeText
 		  ,CONVERT(varchar,count(ServiceReferralPK))+' ('+CONVERT(varchar,round(COALESCE(cast(count(ServiceReferralPK) as float)*

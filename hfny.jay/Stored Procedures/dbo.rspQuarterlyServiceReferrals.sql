@@ -147,7 +147,7 @@ begin
 	(
 	select distinct
 				   [ServiceReferralCategory]
-		from [codeServiceReferral]
+		from codeServiceReferral
 	)
 
 

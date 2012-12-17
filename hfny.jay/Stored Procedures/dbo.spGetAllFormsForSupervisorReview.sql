@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -39,6 +40,8 @@ BEGIN
 		--								, @WorkerType = 'SUP'
 		--								, @AllWorkers = 0
 	)
+	--,
+	--cteHomeVisitLogRow
 	
 	select FormReviewPK
 		  ,PC1ID
@@ -57,7 +60,7 @@ BEGIN
 		  ,FormReviewStartDate
 		  ,FormReviewEndDate
 		  ,'CaseHome.aspx?pc1id='+PC1ID as CaseHomeLink
-		  ,ltrim(rtrim(replace(codeFormName,' ','')))+'.aspx?pc1id='+PC1ID as FormLink
+		  ,ltrim(rtrim(replace(replace(codeFormName,'-',''),' ','')))+'.aspx?pc1id='+PC1ID as FormLink
 		  ,isnull(FormReviewEndDate, current_timestamp) as EffectiveEndDate
 		  ,dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) as EffectiveStartDate
 		  ,ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as WorkerName

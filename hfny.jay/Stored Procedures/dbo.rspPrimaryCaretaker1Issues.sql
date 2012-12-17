@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,141 +7,276 @@ GO
 -- Author:		Dar Chen
 -- Create date: 06/18/2010
 -- Description:	FAW Monthly Report
+-- exec rspPrimaryCaretaker1Issues 18, N'04/01/12', N'06/30/12', NULL, NULL
 -- =============================================
-CREATE PROCEDURE [dbo].[rspPrimaryCaretaker1Issues] 
-	-- Add the parameters for the stored procedure here
-	@programfk INT = NULL, 
-	@StartDt datetime,
-	@EndDt datetime
-AS
+CREATE procedure [dbo].[rspPrimaryCaretaker1Issues]-- Add the parameters for the stored procedure here
+    @programfk int = null,
+    @StartDt   datetime,
+    @EndDt     datetime,
+    @SiteFK int	= null,
+    @casefilterspositive varchar(200)	
+as
 
---DECLARE @programfk INT = 6 
---DECLARE @StartDt DATETIME = '07/01/2011'
---DECLARE @EndDt DATETIME = '03/31/2012'
+	--DECLARE @programfk INT = 6 
+	--DECLARE @StartDt DATETIME = '07/01/2011'
+	--DECLARE @EndDt DATETIME = '03/31/2012'
 
-DECLARE @x INT = 0
-DECLARE @y INT = 0
+	declare @x int = 0
+	declare @y int = 0
+	
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end;
 
-SELECT @x = count(DISTINCT a.HVCaseFK)
-FROM dbo.PC1Issues AS a
-JOIN CaseProgram AS b ON b.HVCaseFK = a.HVCaseFK
-WHERE a.PC1IssuesDate BETWEEN @StartDt AND @EndDt
-AND a.ProgramFK = @programfk AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
+	--select @x = count(distinct pc1i.HVCaseFK)
+	--	from cteCohort
+	--	dbo.PC1Issues as pc1i
+	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
+	--		 and pc1i.ProgramFK = @programfk
+	--		 and (cp.DischargeDate is null
+	--		 or cp.DischargeDate >= @StartDt)
+	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
-SELECT @y = count(DISTINCT a.HVCaseFK)
-FROM dbo.PC1Issues AS a
-JOIN CaseProgram AS b ON b.HVCaseFK = a.HVCaseFK
-WHERE a.PC1IssuesDate BETWEEN @StartDt AND @EndDt
-AND rtrim(a.Interval) = '1'
-AND a.ProgramFK = @programfk AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
+	--select @y = count(distinct pc1i.HVCaseFK)
+	--	from dbo.PC1Issues pc1i
+	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
+	--		 and rtrim(pc1i.Interval) = '1'
+	--		 and pc1i.ProgramFK = @programfk
+	--		 and (cp.DischargeDate is null
+	--		 or cp.DischargeDate >= @StartDt)
+	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
-IF @x = 0 
-BEGIN
-  SET @x = 1
-END
-IF @y = 0 
-BEGIN
-  SET @y = 1
-END
+	--if @x = 0
+	--begin
+	--	set @x = 1
+	--end
+	--if @y = 0
+	--begin
+	--	set @y = 1
+	--end
 
-; WITH xxx AS (
-SELECT a.HVCaseFK, max(PC1IssuesPK) [PC1IssuesPK]
-FROM dbo.PC1Issues AS a
-JOIN CaseProgram AS b ON b.HVCaseFK = a.HVCaseFK
-WHERE a.PC1IssuesDate BETWEEN @StartDt AND @EndDt
-AND a.ProgramFK = @programfk AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
-GROUP BY a.HVCaseFK
-)
-,
-yyy AS (
-SELECT a.HVCaseFK, max(a.PC1IssuesPK) [PC1IssuesPK]
-FROM dbo.PC1Issues AS a
-JOIN CaseProgram AS b ON b.HVCaseFK = a.HVCaseFK
-WHERE a.PC1IssuesDate BETWEEN @StartDt AND @EndDt
-AND rtrim(a.Interval) = '1'
-AND a.ProgramFK = @programfk AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
-GROUP BY a.HVCaseFK
-)
-,
+	--xxx as (select pc1i.HVCaseFK
+	--		  ,max(PC1IssuesPK) [PC1IssuesPK]
+	--		from dbo.PC1Issues pc1i
+	--			join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+	--			inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+	--			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+	--		where pc1i.PC1IssuesDate between @StartDt and @EndDt
+	--			 and pc1i.ProgramFK = @programfk
+	--			 and (cp.DischargeDate is null
+	--			 or cp.DischargeDate >= @StartDt)
+	--			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	--		group by pc1i.HVCaseFK
+	--)
+	--,
+	--yyy
+	--as (
+	--select pc1i.HVCaseFK
+	--	  ,max(pc1i.PC1IssuesPK) [PC1IssuesPK]
+	--	from dbo.PC1Issues pc1i
+	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
+	--		 and rtrim(pc1i.Interval) = '1'
+	--		 and pc1i.ProgramFK = @programfk
+	--		 and (cp.DischargeDate is null
+	--		 or cp.DischargeDate >= @StartDt)
+	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	--	group by pc1i.HVCaseFK
+	--)
+	--,
 
-sub1 AS (
-SELECT 
-str(sum(CASE WHEN AlcoholAbuse = '1' OR SubstanceAbuse = '1' THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN AlcoholAbuse IN ('1', '0', '9') OR SubstanceAbuse IN ('1', '0', '9') 
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [01SubstanceAbuse]
-, '0 %' [02PhysicalDisability]
-, str(sum(CASE WHEN MentalIllness = '1' OR Depression = '1' THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN MentalIllness IN ('1', '0', '9') OR Depression IN ('1', '0', '9') 
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [03MentalHealth]
-, str(sum(CASE WHEN Stress = '1'  THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN Stress IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [04Stress]
-, '0 %' [05DevelopmentalDisability]
-, str(sum(CASE WHEN DomesticViolence = '1' THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN DomesticViolence IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [06Violence]
-, str(sum(CASE WHEN MaritalProblems = '1'  THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN MaritalProblems IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [07MaritalProblem]
-, str(sum(CASE WHEN CriminalActivity = '1'  THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN CriminalActivity IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [08LegalIssues]
-, str(sum(CASE WHEN FinancialDifficulty = '1' OR InadequateBasics = '1' THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN FinancialDifficulty IN ('1', '0', '9') OR InadequateBasics IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [09ResourceIssues]
-, str(sum(CASE WHEN Homeless = '1'  THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN Homeless IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [10Homeless]
-, str(sum(CASE WHEN SocialIsolation = '1'  THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN SocialIsolation IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [11SocialIsolation]
-, str(sum(CASE WHEN Smoking = '1' THEN 1 ELSE 0 END) * 100.0 / @x, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN Stress IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @x < 75.0 THEN '**' ELSE '' END [12Smoking]
+	with cteCohort as (select pc1i.HVCaseFK
+								, PC1IssuesPK
+								, PC1IssuesDate
+								, pc1i.ProgramFK
+								, Interval
+						from dbo.PC1Issues pc1i
+							join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+							inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+							inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+						where pc1i.PC1IssuesDate between @StartDt and @EndDt
+							 and pc1i.ProgramFK = @programfk
+							 and (cp.DischargeDate is null
+							 or cp.DischargeDate >= @StartDt)
+							 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+						-- group by pc1i.HVCaseFK
+						), 
+	cteTotalCount as (select count(distinct HVCaseFK) as TotalCount
+			from cteCohort
+		 ),
+	cteKempeCount as (select count(distinct HVCaseFK) as KempeCount
+			from cteCohort
+			where rtrim(Interval) = '1'
+		 ),
 
-FROM dbo.PC1Issues AS a
-JOIN xxx AS a1 ON a.PC1IssuesPK = a1.PC1IssuesPK
-)
-,
-sub2 AS (
-SELECT 
-str(sum(CASE WHEN AlcoholAbuse = '1' OR SubstanceAbuse = '1' THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN AlcoholAbuse IN ('1', '0', '9') OR SubstanceAbuse IN ('1', '0', '9') 
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [01SubstanceAbuseAE]
-, '0 %' [02PhysicalDisabilityAE]
-, str(sum(CASE WHEN MentalIllness = '1' OR Depression = '1' THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN MentalIllness IN ('1', '0', '9') OR Depression IN ('1', '0', '9') 
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [03MentalHealthAE]
-, str(sum(CASE WHEN Stress = '1'  THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN Stress IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [04StressAE]
-, '0 %' [05DevelopmentalDisabilityAE]
-, str(sum(CASE WHEN DomesticViolence = '1' THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN DomesticViolence IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [06ViolenceAE]
-, str(sum(CASE WHEN MaritalProblems = '1'  THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN MaritalProblems IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [07MaritalProblemAE]
-, str(sum(CASE WHEN CriminalActivity = '1'  THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN CriminalActivity IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [08LegalIssuesAE]
-, str(sum(CASE WHEN FinancialDifficulty = '1' OR InadequateBasics = '1' THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN FinancialDifficulty IN ('1', '0', '9') OR InadequateBasics IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [09ResourceIssuesAE]
-, str(sum(CASE WHEN Homeless = '1'  THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN Homeless IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [10HomelessAE]
-, str(sum(CASE WHEN SocialIsolation = '1'  THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN SocialIsolation IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [11SocialIsolationAE]
-, str(sum(CASE WHEN Smoking = '1' THEN 1 ELSE 0 END) * 100.0 / @y, 10, 0) + ' %' 
-+ CASE WHEN sum(CASE WHEN Stress IN ('1', '0', '9')
-THEN 1 ELSE 0 END) * 100.0 / @y < 75.0 THEN '**' ELSE '' END [12SmokingAE]
+	cteLastIssues as (select HVCaseFK
+						,max(PC1IssuesPK) [PC1IssuesPK]
+						from cteCohort coh
+						group by HVCaseFK
+						),
+	cteLastKempeIssues as (select HVCaseFK
+			  ,max(PC1IssuesPK) [PC1IssuesPK]
+			from cteCohort coh
+			where rtrim(Interval) = '1'
+			group by HVCaseFK
+		   ),
+	sub1
+	as (select TotalCount
+		  ,str(sum(case when AlcoholAbuse = '1' or SubstanceAbuse = '1' then 1 else 0 end)
+		      * 100.0 / cteTotalCount.TotalCount, 10, 0) + ' %'
+		  +case when sum(case when AlcoholAbuse in ('1','0','9') or SubstanceAbuse in ('1','0','9')
+						  then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i01SubstanceAbuse]
+		 ,str(sum(case when PhysicalDisability = '1' then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount, 10, 0) + ' %'
+		  +case when sum(case when PhysicalDisability in ('1','0','9') then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount < 75.0 
+				then '**' else '' end [pc1i02PhysicalDisability]
+		 ,str(sum(case when MentalIllness = '1' or Depression = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when MentalIllness in ('1','0','9') or Depression in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i03MentalHealth]
+		 ,str(sum(case when Stress = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when Stress in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i04Stress]
+		 ,str(sum(case when DevelopmentalDisability = '1' then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount, 10, 0) + ' %'
+		  +case when sum(case when DevelopmentalDisability in ('1','0','9') then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount < 75.0 
+				then '**' else '' end [pc1i05DevelopmentalDisability]
+		 ,str(sum(case when DomesticViolence = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when DomesticViolence in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i06Violence]
+		 ,str(sum(case when MaritalProblems = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when MaritalProblems in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i07MaritalProblem]
+		 ,str(sum(case when CriminalActivity = '1' or OtherLegalProblems = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when CriminalActivity in ('1','0','9') or OtherLegalProblems in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i08LegalIssues]
+		 ,str(sum(case when FinancialDifficulty = '1' or InadequateBasics = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when FinancialDifficulty in ('1','0','9') or InadequateBasics in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i09ResourceIssues]
+		 ,str(sum(case when Homeless = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when Homeless in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i10Homeless]
+		 ,str(sum(case when SocialIsolation = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when SocialIsolation in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i11SocialIsolation]
+		 ,str(sum(case when Smoking = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+		  +case when sum(case when Stress in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i12Smoking]
 
-FROM dbo.PC1Issues AS a
-JOIN yyy AS b ON a.PC1IssuesPK = b.PC1IssuesPK
-)
+		from dbo.PC1Issues a
+			join cteLastIssues li on a.PC1IssuesPK = li.PC1IssuesPK
+			join cteTotalCount on 1 = 1
+		group by TotalCount
+	)
+	,
+	sub2
+	as (select KempeCount
+		  ,str(sum(case when AlcoholAbuse = '1' or SubstanceAbuse = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when AlcoholAbuse in ('1','0','9') or SubstanceAbuse in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i01SubstanceAbuseAE]
+		 ,str(sum(case when PhysicalDisability = '1' then 1 else 0 end) * 100.0 / cteKempeCount.KempeCount, 10, 0) + ' %'
+		  +case when sum(case when PhysicalDisability in ('1','0','9') then 1 else 0 end) * 100.0 / cteKempeCount.KempeCount < 75.0 
+				then '**' else '' end [pc1i02PhysicalDisabilityAE]
+		 ,str(sum(case when MentalIllness = '1' or Depression = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when MentalIllness in ('1','0','9') or Depression in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i03MentalHealthAE]
+		 ,str(sum(case when Stress = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when Stress in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i04StressAE]
+		 ,str(sum(case when DevelopmentalDisability = '1' then 1 else 0 end) * 100.0 / cteKempeCount.KempeCount, 10, 0) + ' %'
+		  +case when sum(case when DevelopmentalDisability in ('1','0','9') then 1 else 0 end) * 100.0 / cteKempeCount.KempeCount < 75.0 
+				then '**' else '' end [pc1i05DevelopmentalDisabilityAE]
+		 ,str(sum(case when DomesticViolence = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when DomesticViolence in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i06ViolenceAE]
+		 ,str(sum(case when MaritalProblems = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when MaritalProblems in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i07MaritalProblemAE]
+		 ,str(sum(case when CriminalActivity = '1' or OtherLegalProblems = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when CriminalActivity in ('1','0','9') or OtherLegalProblems in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i08LegalIssuesAE]
+		 ,str(sum(case when FinancialDifficulty = '1' or InadequateBasics = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when FinancialDifficulty in ('1','0','9') or InadequateBasics in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i09ResourceIssuesAE]
+		 ,str(sum(case when Homeless = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when Homeless in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i10HomelessAE]
+		 ,str(sum(case when SocialIsolation = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when SocialIsolation in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i11SocialIsolationAE]
+		 ,str(sum(case when Smoking = '1' then 1 else 0 end)*100.0/cteKempeCount.KempeCount,10,0)+' %'
+		  +case when sum(case when Stress in ('1','0','9')
+						  then 1 else 0 end)*100.0/cteKempeCount.KempeCount < 75.0 then '**' else '' end [pc1i12SmokingAE]
 
-SELECT @y [00AssessmentN], @x [00CurrentIssueN], * FROM sub2
-JOIN sub1 ON 1 = 1
+		from dbo.PC1Issues a
+			join cteLastKempeIssues lki on a.PC1IssuesPK = lki.PC1IssuesPK
+			join cteKempeCount on 1 = 1
+		group by KempeCount
+	)
+	--,
+	--testsub1
+	--as (select str(sum(case when AlcoholAbuse = '1' or SubstanceAbuse = '1' then 1 else 0 end)) as pc1i01SubstanceAbuseCount
+	--	  ,str(sum(case when AlcoholAbuse = '1' or SubstanceAbuse = '1' then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount, 10, 0) + ' %'
+	--	  +case when sum(case when AlcoholAbuse in ('1','0','9') or SubstanceAbuse in ('1','0','9')
+	--					  then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i01SubstanceAbusePerc]
+	--	 ,str(sum(case when PhysicalDisability = '1' then 1 else 0 end)) as pc1i02PhysicalDisabilityCount
+	--	 ,str(sum(case when PhysicalDisability = '1' then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount, 10, 0) + ' %'
+	--	  +case when sum(case when PhysicalDisability in ('1','0','9') then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount < 75.0 
+	--			then '**' else '' end [pc1i02PhysicalDisabilityPerc]
+	--	 ,str(sum(case when MentalIllness = '1' or Depression = '1' then 1 else 0 end)) as pc1i03MentalHealthCount
+	--	 ,str(sum(case when MentalIllness = '1' or Depression = '1' then 1 else 0 end) * 100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when MentalIllness in ('1','0','9') or Depression in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i03MentalHealthPerc]
+	--	 ,str(sum(case when Stress = '1' then 1 else 0 end)) as pc1i04StressCount
+	--	 ,str(sum(case when Stress = '1' then 1 else 0 end) * 100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when Stress in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i04StressPerc]
+	--	 ,str(sum(case when DevelopmentalDisability = '1' then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount, 10, 0) + ' %'
+	--	  +case when sum(case when DevelopmentalDisability in ('1','0','9') then 1 else 0 end) * 100.0 / cteTotalCount.TotalCount < 75.0 
+	--			then '**' else '' end [pc1i05DevelopmentalDisabilityPerc]
+	--	 ,str(sum(case when DomesticViolence = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when DomesticViolence in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i06ViolencePerc]
+	--	 ,str(sum(case when MaritalProblems = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when MaritalProblems in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i07MaritalProblemPerc]
+	--	 ,str(sum(case when CriminalActivity = '1' or OtherLegalProblems = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when CriminalActivity in ('1','0','9') or OtherLegalProblems in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i08LegalIssuesPerc]
+	--	 ,str(sum(case when FinancialDifficulty = '1' or InadequateBasics = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when FinancialDifficulty in ('1','0','9') or InadequateBasics in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i09ResourceIssuesPerc]
+	--	 ,str(sum(case when Homeless = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when Homeless in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i10HomelessPerc]
+	--	 ,str(sum(case when SocialIsolation = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when SocialIsolation in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i11SocialIsolationPerc]
+	--	 ,str(sum(case when Smoking = '1' then 1 else 0 end)*100.0/cteTotalCount.TotalCount,10,0)+' %'
+	--	  +case when sum(case when Stress in ('1','0','9')
+	--					  then 1 else 0 end)*100.0/cteTotalCount.TotalCount < 75.0 then '**' else '' end [pc1i12SmokingPerc]
+
+	--	from dbo.PC1Issues a
+	--		join cteLastIssues li on a.PC1IssuesPK = li.PC1IssuesPK
+	--		join cteTotalCount on 1 = 1
+	--	group by TotalCount
+	--)
+
+	--select * from dbo.PC1Issues a
+	--		join cteLastIssues li on a.PC1IssuesPK = li.PC1IssuesPK
+	--		join cteTotalCount on 1 = 1
+	-- group by TotalCount
+		
+	--select * from testsub1
+
+	select KempeCount [pc1i00AssessmentN]
+		  ,TotalCount [pc1i00CurrentIssueN]
+		  ,*
+		from sub2
+			join sub1 on 1 = 1
+		
 GO
