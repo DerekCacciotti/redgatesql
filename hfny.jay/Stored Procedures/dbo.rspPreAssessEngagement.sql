@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -31,8 +32,8 @@ section1QX AS
   sum(1) [Q1Screened]
 , sum(CASE WHEN c.ScreenResult = 1 THEN 1 ELSE 0 END) [Q1aScreenResultPositive]
 , sum(CASE WHEN c.ScreenResult != 1 THEN 1 ELSE 0 END) [Q1bScreenResultNegative]
-, sum(CASE WHEN isnull(a.TCDOB, a.EDC) >= a.ScreenDate THEN 1 ELSE 0 END) [Q1cPrenatal]
-, sum(CASE WHEN isnull(a.TCDOB, a.EDC) < a.ScreenDate THEN 1 ELSE 0 END) [Q1dPostnatal]
+, sum(CASE WHEN isnull(a.TCDOB, a.EDC) > a.ScreenDate THEN 1 ELSE 0 END) [Q1cPrenatal]
+, sum(CASE WHEN isnull(a.TCDOB, a.EDC) <= a.ScreenDate THEN 1 ELSE 0 END) [Q1dPostnatal]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 1  THEN 1 ELSE 0 END) [Q1ePositiveReferred]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0  THEN 1 ELSE 0 END) [Q1fPositiveNotReferred]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
@@ -158,8 +159,8 @@ section1TX AS
   sum(1) [T1Screened]
 , sum(CASE WHEN c.ScreenResult = 1 THEN 1 ELSE 0 END) [T1aScreenResultPositive]
 , sum(CASE WHEN c.ScreenResult != 1 THEN 1 ELSE 0 END) [T1bScreenResultNegative]
-, sum(CASE WHEN isnull(a.TCDOB, a.EDC) >= a.ScreenDate THEN 1 ELSE 0 END) [T1cPrenatal]
-, sum(CASE WHEN isnull(a.TCDOB, a.EDC) < a.ScreenDate THEN 1 ELSE 0 END) [T1dPostnatal]
+, sum(CASE WHEN isnull(a.TCDOB, a.EDC) > a.ScreenDate THEN 1 ELSE 0 END) [T1cPrenatal]
+, sum(CASE WHEN isnull(a.TCDOB, a.EDC) <= a.ScreenDate THEN 1 ELSE 0 END) [T1dPostnatal]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 1  THEN 1 ELSE 0 END) [T1ePositiveReferred]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0  THEN 1 ELSE 0 END) [T1fPositiveNotReferred]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
