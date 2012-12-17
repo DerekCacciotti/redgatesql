@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,10 +5,10 @@ GO
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 08/14/2012
--- Description:	Get worker first event dates for workers NOT TERMINATED
+-- Description:	Get worker first event dates for workers INCLUDING TERMINATED
 		--Hire Date / First Kempe / First Home Visit / Termination / First Supervisor / First ASQ
 -- =============================================
-CREATE FUNCTION [dbo].[fnGetWorkerEventDates]
+CREATE FUNCTION [dbo].[fnGetWorkerEventDatesALL]
 (	
 	-- Add the parameters for the function here
 	@prgfk AS INT = Null,
@@ -83,7 +82,6 @@ RETURN
 		, ctHVLog.VisitStartTime, ctk.KempeDate, wp.FAWStartDate, w.FAWInitialStart, w.FSWInitialStart
 		HAVING (wp.ProgramFK=@prgfk)
 		and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
-		AND wp.TerminationDate IS NULL
 		AND w.LastName NOT LIKE '%Transfer%'
 )
 GO
