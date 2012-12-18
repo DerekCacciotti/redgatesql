@@ -66,7 +66,7 @@ FROM ServiceReferral a
 JOIN HVCaseInRange AS b ON b.HVCaseFK = a.HVCaseFK
 WHERE a.ProgramFK = @programfk 
 AND a.ReferralDate Between b.Start_Period AND b.End_Period
-AND a.ServiceReceived = 1
+--AND a.ServiceReceived = 1
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
 GROUP BY 
 CASE WHEN @doWorker = 1 THEN a.FSWFK ELSE '' END, 
