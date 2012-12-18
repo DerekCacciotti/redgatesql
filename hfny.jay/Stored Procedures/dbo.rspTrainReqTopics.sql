@@ -28,7 +28,7 @@ SELECT t.TrainingPK
 	 , ta.WorkerFK
 	 , td.SubTopicFK
 	 , td.topicfk
-	 , topic.topiccode
+	 , codetopic.topiccode
 	 , st.SubTopicName
 	 , t.IsExempt
 FROM Training t
@@ -36,7 +36,7 @@ INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
 INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK
 INNER JOIN Worker w ON w.WorkerPK = ta.workerfk
 INNER JOIN WorkerProgram wp ON wp.WorkerFK=w.WorkerPK
-RIGHT JOIN topic ON topic.topicpk = td.topicfk
+RIGHT JOIN codetopic ON codetopic.codeTopicPK = td.topicfk
 left JOIN SubTopic st ON st.SubTopicPK=td.SubTopicFK
 --WHERE wp.TerminationDate IS NOT NULL
 --WHERE t.ProgramFK = @prgfk  (Can't link on programfk because some workers will be transferred from a different program)
