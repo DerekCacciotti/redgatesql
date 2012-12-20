@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,23 +20,28 @@ BEGIN
 
 	DECLARE @IsReviewed as bit
 
-	SET @IsReviewed = 0
+	SET @IsReviewed = 1
 
 	-- Declare the return variable here
-		SELECT @IsReviewed = CASE WHEN FormReviewOptionsPK IS NULL THEN 1
-		WHEN FormReviewOptions.FormType IS NULL THEN 1
-		WHEN @DateCheck < FormReviewStartDate THEN 1 
-		WHEN @DateCheck > FormReviewENDDate THEN 1
-		WHEN ReviewedBy IS NOT NULL THEN 1
-		ELSE 0
-		END
-		FROM formreview 
-		LEFT JOIN formreviewoptions
-		ON FormReview.ProgramFK=FormReviewOptions.Programfk AND FormReviewOptions.FormType=@Ftype
-		where formreview.FormFK=@FormFK 
-		 and formreview.FormType=@FType 
-		 and formreview.formdate=@DateCheck
-
+	
+		IF dbo.IsFormReviewTurnedOn(@DateCheck,@FType,@FormFK) > 0 
+			BEGIN 
+			
+				SELECT @IsReviewed = CASE WHEN FormReviewOptionsPK IS NULL THEN 1
+				WHEN FormReviewOptions.FormType IS NULL THEN 1
+				WHEN @DateCheck < FormReviewStartDate THEN 1 
+				WHEN @DateCheck > FormReviewENDDate THEN 1
+				WHEN ReviewedBy IS NOT NULL THEN 1
+				ELSE 0
+				END
+				FROM formreview 
+				LEFT JOIN formreviewoptions
+				ON FormReview.ProgramFK=FormReviewOptions.Programfk AND FormReviewOptions.FormType=@Ftype
+				where formreview.FormFK=@FormFK 
+				 and formreview.FormType=@FType 
+				 and formreview.formdate=@DateCheck
+			END 
+	
 	RETURN @IsReviewed
 END
 GO
