@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -40,6 +41,13 @@ SELECT firstname + lastname AS Name
 , fn.SupervisorFirstEvent
 FROM Worker w
 INNER JOIN dbo.fnGetWorkerEventDatesALL(@prgfk, NULL, NULL) fn ON fn.workerpk = w.workerpk
+--This where clause eliminates workers terminated after start date if the user selected 'All Workers'
+WHERE (fn.TerminationDate IS NULL OR fn.TerminationDate >=
+	CASE @workerfk
+		WHEN NULL THEN @sdate
+		ELSE @edate
+	END
+	)
 )
 
 , cteTrainings AS (
@@ -79,6 +87,8 @@ SELECT    cteMain.HireDate
   AND ((TrainingDate BETWEEN @sdate AND @edate) OR TrainingDate IS NULL)
 )
 
-SELECT DISTINCT * FROM cteTrainings ORDER BY [TrainingDate], [TopicName]
+SELECT DISTINCT @sdate AS StartDate
+, @edate AS EndDate
+,* FROM cteTrainings ORDER BY [TrainingDate], [TopicName]
 END
 GO
