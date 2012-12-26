@@ -7,14 +7,15 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Jyly 16th, 2012>
 -- Description:	<gets you data for Enrolled Program Caseload Quarterly and Contract Period>
--- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2010',null,0
+-- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2010',null,0, null
 -- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2010',null,1
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
                                                         @edate        datetime,                                                        
                                                         @sitefk int             = NULL,
-                                                        @CustomQuarterlyDates bit                                                         
+                                                        @CustomQuarterlyDates BIT,
+                                                        @casefilterspositive varchar(200)                                                         
                                                         )
 
 as
@@ -35,10 +36,11 @@ BEGIN
     BEGIN 
 		set @ProgramFK = REPLACE(@ProgramFK,',','') -- remove comma's
 		set @ContractStartDate = (select ContractStartDate FROM HVProgram P where HVProgramPK=@ProgramFK)
-		set @ContractEndDate = (select ContractEndDate FROM HVProgram P where HVProgramPK=@ProgramFK)
+		set @ContractEndDate = (select ContractEndDate FROM HVProgram P where HVProgramPK=@ProgramFK)		
 	END 
 
-
+	set @ProgramFK = REPLACE(@ProgramFK,'"','')	
+	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
 -- Let us declare few table variables so that we can manipulate the rows at our will
 -- Note: Table variables are a superior alternative to using temporary tables 
@@ -98,6 +100,7 @@ INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK
 INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
 INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
 inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem	
+inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
 
 -- SiteFK = isnull(@sitefk,SiteFK) does not work because column SiteFK may be null itself 
 -- so to solve this problem we make use of @tblInitRequiredDataTemp

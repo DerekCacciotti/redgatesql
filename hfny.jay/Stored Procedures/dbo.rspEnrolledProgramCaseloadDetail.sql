@@ -7,7 +7,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <July 20, 2012>
 -- Description:	<gets you data for Enrolled Program Caseload detail info>
--- exec [rspEnrolledProgramCaseloadDetail] 1,'06/01/2010','08/31/2010'
+-- exec [rspEnrolledProgramCaseloadDetail] 1,'06/01/2010','08/31/2010', null, null
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseloadDetail]
 (
@@ -109,8 +109,6 @@ begin
 				inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = HVCasePK
 			where (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
-	-- SiteFK = isnull(@sitefk,SiteFK) does not work because column SiteFK may be null itself 
-	-- so to solve this problem we make use of @tblInitRequiredDataTemp
 	insert into @tblInitRequiredData (
 			   [HVCasePK]
 			  ,[IntakeDate]
@@ -125,14 +123,13 @@ begin
 			   )
 		select *
 			from @tblInitRequiredDataTemp
-			where SiteFK = isnull(@sitefk,SiteFK);
 
 	---------------------------------------------
-
 	---------------------------------------------
 	--- **************************************** ---
 	-- Part 1: Families Enrolled at the beginning of the period	(QUARTERLY STATS)
-	-- exec [rspEnrolledProgramCaseloadDetail] 1,'06/01/2010','08/31/2010'
+	-- exec [rspEnrolledProgramCaseloadDetail] 1,'06/01/2010','08/31/2010', null, null
+	;
 	with cteLevelChangeStatus
 	as
 	(select irq.HVCasePK
