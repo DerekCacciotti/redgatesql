@@ -8,7 +8,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <November 16th, 2012>
 -- Description:	<This QA report gets you 'ASQs for Active Cases with Target Child 4 months or older, calc. DOB '>
--- rspQAReport7 1, 'summary'	--- for summary page
+-- rspQAReport7 3, 'summary'	--- for summary page
 -- rspQAReport7 1			--- for main report - location = 1
 -- rspQAReport7 null			--- for main report for all locations
 -- =============================================
@@ -946,7 +946,7 @@ ELSE
 	
 	SELECT 
 		[PC1ID],
-		qam2.Interval AS IntervalDue,		
+		EventDescription AS IntervalDue,	
 		convert(varchar(10),FormDueDate,101) AS FormDueDate,
 		convert(varchar(10),FormDate,101) AS FormDate,
 		convert(varchar(10),TCDOB,101) AS TCDOB,

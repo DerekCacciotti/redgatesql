@@ -904,7 +904,7 @@ ELSE
 	
 	SELECT 
 		[PC1ID],
-		qam2.Interval AS IntervalDue,		
+		EventDescription AS IntervalDue,	
 		convert(varchar(10),FormDueDate,101) AS FormDueDate,
 		convert(varchar(10),FormDate,101) AS FormDate,
 		convert(varchar(10),TCDOB,101) AS TCDOB,
