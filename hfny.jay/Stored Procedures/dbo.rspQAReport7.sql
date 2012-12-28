@@ -286,7 +286,7 @@ DECLARE @tbl4QAReport7Expected TABLE(
 	[MaximumDue] [int] NOT NULL,
 	[MinimumDue] [int] NOT NULL,	
 	FormDate [datetime],
-	FormReviewed BIT,
+	FormNotReviewed BIT,
 	TCName [varchar](200),
 	FormDueDate [datetime],
 	GestationalAge INT,
@@ -318,7 +318,7 @@ INSERT INTO @tbl4QAReport7Expected(
 	[MaximumDue],
 	[MinimumDue],	
 	FormDate,
-	FormReviewed,
+	FormNotReviewed,
 	TCName,
 	FormDueDate,
 	GestationalAge,
@@ -347,7 +347,7 @@ INSERT INTO @tbl4QAReport7Expected(
 	  , cd.[MaximumDue]
 	  , cd.[MinimumDue]		  
 	  , DateCompleted  AS FormDate
-	  , CASE WHEN dbo.IsFormReviewed(DateCompleted, 'AQ', ASQPK)=1 THEN 1 ELSE 0 END AS FormReviewed  -- AQ = ASQ FORM
+	  , CASE WHEN dbo.IsFormReviewed(DateCompleted, 'AQ', ASQPK)=1 THEN 0 ELSE 1 END AS FormNotReviewed  -- AQ = ASQ FORM
 	  , qa1.TCName
 	  , CASE WHEN (XDateAge/30.44) < 24  
 	  THEN   dateadd(d, ((40 - qa1.GestationalAge) * 7) + cd.[DueBy], TCDOB) 	  
@@ -467,7 +467,7 @@ INSERT INTO @tbl4QAReport7Intervals4AllASQsInOurCohort
 	OutOfWindow BIT,
 	RecOK BIT,
 	FormDate [datetime],
-	FormReviewed BIT,
+	FormNotReviewed BIT,
 	TCName [varchar](200),
 	GestationalAge INT,
 	CalcDOB [datetime],
@@ -497,7 +497,7 @@ INSERT INTO @tbl4QAReport7NotExpected(
 	OutOfWindow,
 	RecOK,
 	FormDate,
-	FormReviewed,
+	FormNotReviewed,
 	TCName,
 	GestationalAge,
 	CalcDOB,
@@ -522,8 +522,7 @@ INSERT INTO @tbl4QAReport7NotExpected(
 	  , qa2.OutOfWindow	
 	  , CASE WHEN (ASQTCReceiving = 1) THEN 1 ELSE 0 END AS RecOK 
 	  , easq.FormDate AS FormDate
-	  --, CASE WHEN dbo.IsFormReviewed(qa4.DateCompleted, 'AQ', qa4.ASQPK)=1 THEN 1 ELSE 0 END AS FormReviewed  -- AQ = ASQ FORM
-	  ,0 AS FormReviewed
+	  , NULL  AS FormNotReviewed
 	  , qa2.TCName
 	  , qa2.GestationalAge
 	  , CASE WHEN (qa2.XDateAge/30.44) < 24  
@@ -576,7 +575,7 @@ easq.hvcasepk IS NULL
 	OutOfWindow BIT,
 	RecOK BIT,
 	FormDate [datetime],
-	FormReviewed BIT,
+	FormNotReviewed BIT,
 	TCName [varchar](200),
 	FormDueDate [datetime],
 	GestationalAge INT,
@@ -701,7 +700,7 @@ SELECT HVCasePK
 	 , OutOfWindow
 	 , 0 as RecOK
 	 , FormDate
-	 , FormReviewed
+	 , FormNotReviewed
 	 , TCName
 	 , GestationalAge
 	 , CalcDOB
@@ -734,7 +733,7 @@ INSERT INTO @tbl4QAReport7NotExpectedModified(
 	OutOfWindow,
 	RecOK,
 	FormDate,
-	FormReviewed,
+	FormNotReviewed,
 	TCName,
 	GestationalAge,
 	CalcDOB,
@@ -760,7 +759,7 @@ SELECT DISTINCT
 	 , OutOfWindow
 	 , RecOK
 	 , FormDate
-	 , FormReviewed
+	 , FormNotReviewed
 	 , TCName
 	 , GestationalAge
 	 , CalcDOB
@@ -827,7 +826,7 @@ ORDER BY Worker
 	OutOfWindow BIT,
 	RecOK BIT,
 	FormDate [datetime],
-	FormReviewed BIT,
+	FormNotReviewed BIT,
 	TCName [varchar](200),	
 	FormDueDate [datetime],	
 	GestationalAge INT,
@@ -856,7 +855,7 @@ INSERT INTO @tbl4QAReport7NotExpectedMain(
 	OutOfWindow,
 	RecOK,
 	FormDate,
-	FormReviewed,
+	FormNotReviewed,
 	TCName,
 	FormDueDate,
 	GestationalAge,
@@ -883,7 +882,7 @@ SELECT
 	 , OutOfWindow
 	 , RecOK
 	 , FormDate
-	 , FormReviewed
+	 , FormNotReviewed
 	 , TCName
 	 , CASE WHEN (qa5.XDateAge/30.44) < 24  
 	  THEN   dateadd(d, ((40 - qa5.GestationalAge) * 7) + cd.[DueBy], qa5.TCDOB) 	  
@@ -916,7 +915,7 @@ IF @ReportType = 'summary'
 	SET @numOfMissingCases = (SELECT count(HVCasePK) FROM @tbl4QAReport7NotExpectedMain WHERE Missing = 1)
 	
 	DECLARE @numOfOutOfWindowsORNotReviewedCases INT = 0
-	SET @numOfOutOfWindowsORNotReviewedCases = (SELECT count(HVCasePK) FROM @tbl4QAReport7Expected WHERE OutOfWindow = 1 OR FormReviewed=0)	
+	SET @numOfOutOfWindowsORNotReviewedCases = (SELECT count(HVCasePK) FROM @tbl4QAReport7Expected WHERE OutOfWindow = 1 OR FormNotReviewed=1)	
 	
 	DECLARE @numOfMissingAndOutOfWindowsCases INT = 0	
 	SET @numOfMissingAndOutOfWindowsCases = (@numOfMissingCases + @numOfOutOfWindowsORNotReviewedCases)
@@ -955,14 +954,14 @@ ELSE
 		TCName,
 		Worker,		
 		GestationalAge,
-		FormReviewed,
+		FormNotReviewed,
 		Missing,
 		OutOfWindow,
 		currentLevel	
 
 	FROM @tbl4QAReport7Expected qam2
 	inner join codeduebydates cdd2 on scheduledevent = 'ASQ' AND cdd2.Interval = qam2.Interval 
-	WHERE OutOfWindow = 1 OR FormReviewed=0
+	WHERE OutOfWindow = 1 OR FormNotReviewed=1
 
 UNION 	
 
@@ -976,14 +975,14 @@ UNION
 		TCName,
 		Worker,		
 		GestationalAge,
-		FormReviewed,
+		FormNotReviewed,
 		Missing,
 		OutOfWindow,
 		currentLevel
 		 		
 	 FROM @tbl4QAReport7NotExpectedMain qam	 
 	 inner join codeduebydates cdd on scheduledevent = 'ASQ' AND cdd.Interval = qam.IntervalExpected 
-		WHERE (Missing = 1 or OutOfWindow = 1 OR FormReviewed=0)
+		WHERE (Missing = 1 or OutOfWindow = 1 OR FormNotReviewed=1)
 			ORDER BY Worker, PC1ID 	
 
 

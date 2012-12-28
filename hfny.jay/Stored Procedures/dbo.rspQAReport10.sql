@@ -156,7 +156,7 @@ DECLARE @tbl4QAReport10 TABLE(
 	[MaximumDue] [int] NOT NULL,
 	[MinimumDue] [int] NOT NULL,	
 	FormDoneDateCompleted [datetime],
-	FormReviewed BIT 
+	FormNotReviewed BIT 
 )
 
 DECLARE @tbl4QAReport10Expected TABLE(
@@ -179,7 +179,7 @@ DECLARE @tbl4QAReport10Expected TABLE(
 	[MaximumDue] [int] NOT NULL,
 	[MinimumDue] [int] NOT NULL,	
 	FormDoneDateCompleted [datetime],
-	FormReviewed BIT 
+	FormNotReviewed BIT 
 )
 
 DECLARE @tbl4QAReport10NotExpected TABLE(
@@ -202,7 +202,7 @@ DECLARE @tbl4QAReport10NotExpected TABLE(
 	[MaximumDue] [int] NOT NULL,
 	[MinimumDue] [int] NOT NULL,	
 	FormDoneDateCompleted [datetime],
-	FormReviewed BIT 
+	FormNotReviewed BIT 
 )
 
 
@@ -252,7 +252,7 @@ INSERT INTO @tbl4QAReport10Expected(
 	[MaximumDue],
 	[MinimumDue],	
 	FormDoneDateCompleted,
-	FormReviewed
+	FormNotReviewed
 ) 
  SELECT qa1.HVCasePK
 	  , PC1ID
@@ -273,7 +273,7 @@ INSERT INTO @tbl4QAReport10Expected(
 	  , cd.[MaximumDue]
 	  , cd.[MinimumDue]		  
 	  , FollowUpDate  AS FormDoneDateCompleted
-	  , CASE WHEN dbo.IsFormReviewed(FollowUpDate, 'FU', FollowUpPK)=1 THEN 1 ELSE 0 END AS FormReviewed 
+	  , CASE WHEN dbo.IsFormReviewed(FollowUpDate, 'FU', FollowUpPK)=1 THEN 0 ELSE 1 END AS FormNotReviewed 
  
  FROM @tbl4QAReport10Coheart qa1 
  INNER JOIN @tbl4QAReport10Interval cteIn ON qa1.HVCasePK = cteIn.HVCasePK -- we will use column 'Interval' next, which we just added
@@ -309,7 +309,7 @@ INSERT INTO @tbl4QAReport10NotExpected(
 	[MaximumDue],
 	[MinimumDue],	
 	FormDoneDateCompleted,
-	FormReviewed
+	FormNotReviewed
 ) 
 SELECT qa2.HVCasePK
 	 , qa2.PC1ID
@@ -348,7 +348,7 @@ SELECT qa2.HVCasePK
 	  , cd.[MaximumDue]
 	  , cd.[MinimumDue]		  	
 	 , FormDoneDateCompleted
-	 , NULL AS FormReviewed
+	 , NULL AS FormNotReviewed
 	 
 	  FROM @tbl4QAReport10Coheart qa2
 	 
@@ -386,7 +386,7 @@ DECLARE @tbl4QAReport10Main TABLE(
 	[MaximumDue] [int] NOT NULL,
 	[MinimumDue] [int] NOT NULL,	
 	FormDoneDateCompleted [datetime],	
-	FormReviewed BIT,
+	FormNotReviewed BIT,
 	FormDue [datetime]	 
 )
 
@@ -412,7 +412,7 @@ INSERT INTO @tbl4QAReport10Main
 	  , [MaximumDue]
 	  , [MinimumDue]	
 	  , FormDoneDateCompleted
-	  , FormReviewed
+	  , FormNotReviewed
 	  , FormDue
 )
  SELECT HVCasePK
@@ -434,7 +434,7 @@ INSERT INTO @tbl4QAReport10Main
 	  , [MaximumDue]
 	  , [MinimumDue]	
 	  , FormDoneDateCompleted
-	  , FormReviewed
+	  , FormNotReviewed
 	  , CASE WHEN ( Interval='00' AND ((IntakeDate >TCDOB) AND (TCDOB IS NOT null)) ) 
 		THEN  dateadd(dd,DueBy,IntakeDate) ELSE dateadd(dd,DueBy,TCDOB) END AS FormDue
 	  FROM @tbl4QAReport10
@@ -460,8 +460,8 @@ IF @ReportType = 'summary'
 	
 	DECLARE @numOfOutOfWindowsORNotReviewedCases INT = 0
 	--SET @numOfOutOfWindowsORNotReviewedCases = (SELECT count(HVCasePK) FROM @tbl4QAReport10Main WHERE OutOfWindow = 1)	
-	--Use the following when FormReviewed is working .... Khalsa
-	SET @numOfOutOfWindowsORNotReviewedCases = (SELECT count(HVCasePK) FROM @tbl4QAReport10Main WHERE OutOfWindow = 1 OR FormReviewed=0)	
+	--Use the following when FormNotReviewed is working .... Khalsa
+	SET @numOfOutOfWindowsORNotReviewedCases = (SELECT count(HVCasePK) FROM @tbl4QAReport10Main WHERE OutOfWindow = 1 OR FormNotReviewed=1)	
 	
 	DECLARE @numOfMissingAndOutOfWindowsCases INT = 0	
 	SET @numOfMissingAndOutOfWindowsCases = (@numOfMissingCases + @numOfOutOfWindowsORNotReviewedCases)
@@ -500,7 +500,7 @@ ELSE
 		 , convert(varchar(10),FormDoneDateCompleted,101) AS FormDate		 	
 		 , convert(varchar(10),TCDOB,101) AS TCDOB	
 		 , Worker
-		 , FormReviewed
+		 , FormNotReviewed
 		 , Missing
 		 , OutOfWindow		 		 
 		 , currentLevel
@@ -520,7 +520,7 @@ ELSE
 		 		
 	 FROM @tbl4QAReport10Main qam
 	 inner join codeduebydates cdd on scheduledevent = 'Follow Up' AND cdd.Interval = qam.Interval 
-		WHERE (Missing = 1 or OutOfWindow = 1 OR FormReviewed=0)
+		WHERE (Missing = 1 or OutOfWindow = 1 OR FormNotReviewed=1)
 	ORDER BY Worker, PC1ID 	
 
 
