@@ -37,8 +37,15 @@ set @programfk = REPLACE(@programfk,'"','')
 set @sitefk = case when dbo.IsNullOrEmpty(@sitefk) = 1 then 0 else @sitefk end
 set @posclause = case when @posclause = '' then null else @posclause end
 
-;WITH xxx AS (
+;WITH level2 AS (
+SELECT hvcasefk, min(StartLevelDate) [StartLevelDate_Level2]
+FROM dbo.HVLevelDetail
+WHERE Levelfk IN (16, 18, 20) AND ProgramFK = @programfk 
+GROUP BY hvcasefk
+)
+,
 
+xxx AS (
 SELECT 
 	b.PC1ID
 	, rtrim(p.PCFirstName) + ' ' + rtrim(p.PCLastName) [Name]
@@ -51,19 +58,21 @@ SELECT
 	, count(*) [n]
 	,b.HVCaseFK
 
-FROM HVCase  AS a
+FROM HVCase AS a
 JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 JOIN HVLevelDetail AS c ON c.hvcasefk = a.HVCasePK AND c.StartLevelDate <= @edate
 JOIN udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = a.HVCasePK
 JOIN Worker AS w on w.WorkerPK = b.CurrentFSWFK
 JOIN WorkerProgram AS wp ON wp.WorkerFK = w.WorkerPK
-JOIN PC AS p ON p.PCPK = a.PC1FK			
+JOIN PC AS p ON p.PCPK = a.PC1FK
+LEFT OUTER JOIN level2 AS q	ON a.HVCasePK = q.hvcasefk
 WHERE b.ProgramFK = @programfk 
 AND a.caseprogress >= 9
 AND a.IntakeDate <= @edate
 AND (b.dischargedate is NULL or b.dischargedate >= @sdate)
 AND (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-AND c.Levelfk IN (14)
+AND c.Levelfk IN (12, 14)
+AND (q.StartLevelDate_Level2 IS NULL OR c.StartLevelDate < q.StartLevelDate_Level2)
 GROUP BY
 b.HVCaseFK, b.PC1ID
 , rtrim(p.PCFirstName) + ' ' + rtrim(p.PCLastName)
