@@ -33,7 +33,7 @@ as
 	as (select distinct FSWFK
 			from HVLog
 				inner join dbo.SplitString(@programfk,',') on HVLog.programfk = listitem
-			where datediff(year,VisitStartTime,getdate()) <= 1
+			where datediff(m,VisitStartTime,getdate()) <= 12
 	),
 	hvlogs (VisitStartTime,hvcasepk,visitType,FSWFK)
 	as (select VisitStartTime
@@ -44,8 +44,8 @@ as
 				left join HVCase on HVCase.HVCasePK = hvlog.hvcasefk
 				inner join WorkerCohort on hvlog.FSWFK = WorkerCohort.FSWFK
 				inner join dbo.SplitString(@programfk,',') on hvlog.programfk = listitem
-			where datediff(year,VisitStartTime,getdate()) <= 1
-				 and SupervisorObservation = 1
+			where -- datediff(year,VisitStartTime,getdate()) <= 1 and
+				 SupervisorObservation = 1
 	),
 	q
 	as (select VisitStartTime

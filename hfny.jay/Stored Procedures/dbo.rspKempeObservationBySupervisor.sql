@@ -32,7 +32,7 @@ as
 	as (select distinct FAWFK
 			from Kempe
 				inner join dbo.SplitString(@programfk,',') on Kempe.programfk = listitem
-			where datediff(year,KempeDate,getdate()) <= 1
+			where datediff(m,KempeDate,getdate()) <= 12
 	),
 	kempes (KempeDate,hvcasepk,FAWFK)
 	as (select Kempe.KempeDate
