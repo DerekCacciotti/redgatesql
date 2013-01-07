@@ -58,5 +58,6 @@ begin
 			 and datediff(day,IntakeDate,case when DischargeDate is null then getdate()
 				 else DischargeDate end) > 1095
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+		ORDER BY PC1ID
 end
 GO
