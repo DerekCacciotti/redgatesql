@@ -87,7 +87,7 @@ begin
 					   'On file'
 			   end as SocialSecurityNumberOnFile
 			  ,PC1.PCDOB
-			  ,datediff(year,PC1.PCDOB,getdate()) as CurrentAge
+			  ,floor(datediff(day,PC1.PCDOB,getdate())/365.25) as CurrentAge
 			  ,floor(datediff(day,PC1.PCDOB,IntakeDate)/365.25) as AgeAtIntake
 			  ,rtrim(w.FirstName)+' '+rtrim(w.LastName) as WorkerName
 			  ,rtrim(w.LastName)+', '+rtrim(w.FirstName) as WorkerNameLast
@@ -125,9 +125,9 @@ begin
 				   when TCGender = '02' then
 					   'Male'
 			   end as TCGender
-			  ,(datediff(day,t.TCDOB,getdate()))/30.44 as TCChronologicalAge
+			  ,floor((datediff(day,t.TCDOB,getdate()))/30.44) as TCChronologicalAge
 			  ,GestationalAge
-			  ,((datediff(day,t.TCDOB,getdate()))-((40-GestationalAge)*7))/30.44 as TCDevelopmentalAge
+			  ,floor(((datediff(day,t.TCDOB,getdate()))-((40-GestationalAge)*7))/30.44) as TCDevelopmentalAge
 			  ,NumberOfChildren
 			  --,IIF(!EMPTY(tc_ssn) and !ISNULL(tc_ssn),"On file    ","Not on file") as tcss_of, ;
 			   ,case
