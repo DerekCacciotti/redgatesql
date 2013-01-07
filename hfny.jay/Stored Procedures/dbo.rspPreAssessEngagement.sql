@@ -20,9 +20,9 @@ as
 
 -- Pre-Assessment Engagement Quartly Report --
 --DECLARE @StartDtT DATE = '01/01/2011'
---DECLARE @StartDt DATE = '08/01/2011'
---DECLARE @EndDt DATE = '12/31/2011'
---DECLARE @programfk INT = 17
+--DECLARE @StartDt DATE = '07/01/2011'
+--DECLARE @EndDt DATE = '09/30/2011'
+--DECLARE @programfk INT = 5
 
 
 
@@ -118,10 +118,10 @@ AND (b1.DischargeDate >= @StartDt OR b1.DischargeDate IS NULL)
 , section4Q AS 
 (
 SELECT sum(CASE WHEN x.CaseStatus = '01' THEN 1 ELSE 0 END) [Q4aEffortContnue]
-, sum(CASE WHEN x.CaseStatus = '02' THEN 1 ELSE 0 END) [Q4bCompleted]
+, sum(CASE WHEN x.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [Q4bCompleted]
 , sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate <= @EndDt THEN 1 ELSE 0 END) [Q4b1PositiveAssignd]
 , sum(CASE WHEN  x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate > @EndDt THEN 1 ELSE 0 END) [Q4b2PositivePendingAssignd]
-, sum(CASE WHEN  x.CaseStatus = '02'  AND x.KempeResult = 1 AND x.FSWAssignDate IS NULL THEN 1 ELSE 0 END) [Q4b3PositiveNotAssignd]
+, sum(CASE WHEN  x.CaseStatus = '04'  AND x.KempeResult = 1 AND x.FSWAssignDate IS NULL THEN 1 ELSE 0 END) [Q4b3PositiveNotAssignd]
 , sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 0 THEN 1 ELSE 0 END) [Q4b4Negative]
 , sum(CASE WHEN x.CaseStatus = '03' THEN 1 ELSE 0 END) [Q4cTerminated]
 , 0 [Q4dNoStatus]
@@ -245,10 +245,10 @@ AND (b1.DischargeDate >= @StartDtT OR b1.DischargeDate IS NULL)
 , section4T AS 
 (
 SELECT sum(CASE WHEN x.CaseStatus = '01' THEN 1 ELSE 0 END) [T4aEffortContnue]
-, sum(CASE WHEN x.CaseStatus = '02' THEN 1 ELSE 0 END) [T4bCompleted]
+, sum(CASE WHEN x.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [T4bCompleted]
 , sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate <= @EndDt THEN 1 ELSE 0 END) [T4b1PositiveAssignd]
 , sum(CASE WHEN  x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate > @EndDt THEN 1 ELSE 0 END) [T4b2PositivePendingAssignd]
-, sum(CASE WHEN  x.CaseStatus = '02'  AND x.KempeResult = 1 AND x.FSWAssignDate IS NULL THEN 1 ELSE 0 END) [T4b3PositiveNotAssignd]
+, sum(CASE WHEN  x.CaseStatus = '04'  AND x.KempeResult = 1 AND x.FSWAssignDate IS NULL THEN 1 ELSE 0 END) [T4b3PositiveNotAssignd]
 , sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 0 THEN 1 ELSE 0 END) [T4b4Negative]
 , sum(CASE WHEN x.CaseStatus = '03' THEN 1 ELSE 0 END) [T4cTerminated]
 , 0 [T4dNoStatus]
