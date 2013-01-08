@@ -18,7 +18,7 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT DISTINCT codetopicPK, cast([TopicCode] AS VARCHAR(MAX)) + ' ' + [TopicName] AS TopicCodeName FROM codeTopic t
+	SELECT codetopicPK, cast([TopicCode] AS VARCHAR(MAX)) + ' ' + [TopicName] AS TopicCodeName FROM codeTopic t ORDER BY TopicCode
 
 END
 GO
