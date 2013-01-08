@@ -8,7 +8,8 @@ GO
 -- Author:    Dorothy Baum
 -- Create date: Sept 23, 2010
 -- Description: Return all workers, who are performing role,
---for use in reports.
+--				for use in reports.
+-- exec spGetAllWorkersbyProgramforReports 1, 'FSW'
 -- =============================================
 
 CREATE procedure [dbo].[spGetAllWorkersbyProgramforReports]
@@ -18,7 +19,7 @@ as
 
 	set nocount on;
 
-	exec spGetAllWorkersbyProgram @ProgramFK, null, @WorkerType
+	exec spGetAllWorkersbyProgram @ProgramFK, '19800101', @WorkerType, 1
 
 --select rtrim(LastName) + ', ' + rtrim(FirstName) as WorkerName, FirstName, LastName, WorkerPK from 
 --  (select *, 'FAW' as workertype

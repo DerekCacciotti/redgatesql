@@ -8,6 +8,7 @@ GO
 -- Author:      <Dar Chen>
 -- Create date: <Jul 11, 2012>
 -- Description: 
+-- exec rspKempePC1Issues 1, '20120701', '20120930', '', null
 -- =============================================
 CREATE procedure [dbo].[rspKempePC1Issues]
 (
@@ -48,7 +49,7 @@ begin
 		  ,sum(case when sr.servicecode = '52' and sr.FamilyCode = '01' then 1 else 0 end) SubstanceAbuseServices
 		from HVCase c
 			join ServiceReferral sr on sr.HVCaseFK = c.HVCasePK
-			inner join WorkerProgram wp on WorkerFK = FSW
+			inner join WorkerProgram wp on WorkerFK = FSWFK
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = c.HVCasePK
 		where c.IntakeDate between @StartDt and @EndDt
 			 and sr.ReferralDate-c.IntakeDate < 183
