@@ -39,6 +39,7 @@ BEGIN
 		INNER JOIN FormReviewedTableList('TR', @ProgFK)
 		ON formfk = tr.TrainingPK
 	  WHERE tr.ProgramFK = @ProgFK
+	  AND tr.IsExempt IS Null
 	  ORDER BY TrainingDate DESC
 END
 GO
