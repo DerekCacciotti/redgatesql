@@ -3,7 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spEditcodeSAT](@codeSATPK money=NULL,
+CREATE PROCEDURE [dbo].[spEditcodeSAT](@codeSATPK int=NULL,
 @codeSATPK_old int=NULL,
 @ProgramFK int=NULL,
 @SATCompareDateField char(8)=NULL,

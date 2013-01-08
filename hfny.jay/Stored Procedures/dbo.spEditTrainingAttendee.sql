@@ -4,14 +4,14 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditTrainingAttendee](@TrainingAttendeePK int=NULL,
+@TrainingAttendeeEditor char(10)=NULL,
 @TrainingFK int=NULL,
-@WorkerFK int=NULL,
-@TrainingAttendeeEditor nvarchar(50)=NULL)
+@WorkerFK int=NULL)
 AS
 UPDATE TrainingAttendee
 SET 
+TrainingAttendeeEditor = @TrainingAttendeeEditor, 
 TrainingFK = @TrainingFK, 
-WorkerFK = @WorkerFK, 
-TrainingAttendeeEditor = @TrainingAttendeeEditor
+WorkerFK = @WorkerFK
 WHERE TrainingAttendeePK = @TrainingAttendeePK
 GO
