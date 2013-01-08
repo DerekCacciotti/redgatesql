@@ -6,10 +6,10 @@ CREATE TABLE [dbo].[TrainingMethod]
 [ProgramFK] [int] NOT NULL,
 [OldTMethodPK] [int] NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[TrainingMethod] WITH NOCHECK ADD
-CONSTRAINT [FK_TrainingMethod_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
-
 GO
 ALTER TABLE [dbo].[TrainingMethod] ADD CONSTRAINT [PK_TrainingMethod] PRIMARY KEY CLUSTERED  ([TrainingMethodPK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_TrainingMethod_ProgramFK] ON [dbo].[TrainingMethod] ([ProgramFK]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[TrainingMethod] ADD CONSTRAINT [FK_TrainingMethod_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
