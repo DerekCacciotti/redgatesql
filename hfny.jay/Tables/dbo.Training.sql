@@ -95,25 +95,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE TRIGGER [dbo].[fr_delete_training]
-on dbo.Training
-After DELETE
 
-AS
-
-Declare @PK int
-
-set @PK = (SELECT TrainingPK from deleted)
-
-BEGIN
-	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='TR'
-END
-GO
 
 -- =============================================
 -- Author:		<Author,,Name>
