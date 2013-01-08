@@ -77,12 +77,3 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- -- -- -- -- -- -- -- -- -- -- -- -- -- --
--- create trigger TR_TrainingEditDate ON Training
--- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_TrainingEditDate] ON dbo.Training
-For Update 
-AS
-Update Training Set Training.TrainingEditDate= getdate()
-From [Training] INNER JOIN Inserted ON [Training].[TrainingPK]= Inserted.[TrainingPK]
-GO
