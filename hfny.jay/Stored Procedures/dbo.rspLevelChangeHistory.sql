@@ -15,6 +15,12 @@ CREATE procedure [dbo].[rspLevelChangeHistory](@programfk varchar(max)    = null
                                                )
 
 as
+
+--DECLARE @programfk varchar(max)    = '5'
+--DECLARE @pc1id     varchar(13)     = null
+--DECLARE @WorkerFK int = null
+--DECLARE @SupervisorFK int = null
+
 begin
 
 	if @programfk is null
@@ -41,10 +47,10 @@ begin
 			inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK
 			inner join dbo.SplitString(@programfk,',') on hld.programfk = listitem
 		where PC1ID = isnull(@PC1ID,pc1id)
-				and CurrentFSWFK = isnull(@WorkerFK, CurrentFSWFK)
-				and SupervisorFK = isnull(@SupervisorFK, SupervisorFK)
-		order by PC1ID
-				,StartLevelDate desc
+			  and CurrentFSWFK = isnull(@WorkerFK, CurrentFSWFK)
+			  and SupervisorFK = isnull(@SupervisorFK, SupervisorFK)
+		      AND (CASE WHEN (@pc1id IS NULL AND DischargeDate IS NOT NULL) THEN 0 ELSE 1 END = 1)
+		order by PC1ID, StartLevelDate desc
 
 end
 GO
