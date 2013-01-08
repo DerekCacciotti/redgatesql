@@ -73,68 +73,6 @@ CONSTRAINT [FK_Training_TrainerFK] FOREIGN KEY ([TrainerFK]) REFERENCES [dbo].[T
 
 
 
-
-
-
-
-
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
-
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE TRIGGER [dbo].[fr_Training]
-on [dbo].[Training]
-After insert
-
-AS
-
-Declare @PK int
-
-set @PK = (SELECT TrainingPK from inserted)
-
-BEGIN
-	EXEC spAddFormReview_userTriggernoHVCaseFK @FormFK=@PK, @FormTypeValue='TR'
-END
-GO
-
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-CREATE TRIGGER [dbo].[fr_Training_Edit]
-on [dbo].[Training]
-AFTER UPDATE
-
-AS
-
-Declare @PK int
-Declare @UpdatedFormDate datetime 
-Declare @FormTypeValue varchar(2)
-
-select @PK = TrainingPK FROM inserted
-select @UpdatedFormDate = TrainingDate FROM inserted
-set @FormTypeValue = 'TR'
-
-BEGIN
-	UPDATE FormReview
-	SET 
-	FormDate=@UpdatedFormDate
-	WHERE FormFK=@PK 
-	AND FormType=@FormTypeValue
-
-END
-
-GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
