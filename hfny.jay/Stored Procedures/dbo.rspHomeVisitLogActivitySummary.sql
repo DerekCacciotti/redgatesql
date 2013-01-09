@@ -27,6 +27,13 @@ CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummary]
 --DECLARE @showPC1IDDetail CHAR(1) = 'N'
 AS
 
+--DECLARE	@programfk INT = 1
+--DECLARE @StartDt DATETIME = '04/01/2012'
+--DECLARE @EndDt DATETIME = '09/30/2012'
+--DECLARE @workerfk INT = NULL
+--DECLARE @pc1id VARCHAR(13) = ''
+--DECLARE @showWorkerDetail CHAR(1) = 'N'
+--DECLARE @showPC1IDDetail CHAR(1) = 'N'
 
 ;WITH base1 AS (
 SELECT 
@@ -56,7 +63,9 @@ SELECT FSWFK, PC1ID, CASE WHEN x = 0 THEN 1 ELSE x END x FROM base1
 SELECT 
 CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
 ,CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END PC1ID
-,count(DISTINCT a.HVCaseFK) [UniqueFamilies],
+--,count(DISTINCT a.HVCaseFK) [UniqueFamilies],
+
+,count(DISTINCT (CASE WHEN substring(VisitType,4,1) != '1' THEN a.HVCaseFK ELSE NULL END)) [UniqueFamilies],
 sum(CASE substring(VisitType,4,1) WHEN '1' THEN 1 ELSE 0 END) [Attempted] , 
 sum(CASE substring(VisitType,4,1) WHEN '1' THEN 0 ELSE 1 END) [CompletedVisit],
 sum(CASE WHEN substring(VisitType,1,3) IN ('100', '110', '010')  THEN 1 ELSE 0 END) [InHome],
