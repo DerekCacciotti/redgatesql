@@ -40,7 +40,7 @@ BEGIN
 		ON formfk = tr.TrainingPK
 	  WHERE tr.ProgramFK = @ProgFK
 	  AND tr.TrainingDate > dateadd(year,-1,getdate())
-	  AND tr.IsExempt IS Null
+	 AND (tr.IsExempt IS Null OR tr.IsExempt = 0)
 	  ORDER BY TrainingDate DESC
 END
 GO
