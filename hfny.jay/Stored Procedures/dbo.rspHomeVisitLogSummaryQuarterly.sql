@@ -19,6 +19,12 @@ as
 	--DECLARE @programfk INT = 6 
 	--DECLARE @StartDt DATETIME = '01/01/2012'
 	--DECLARE @EndDt DATETIME = '03/31/2012'
+	
+--DECLARE	@programfk int = 18
+--DECLARE @StartDt   DATETIME = '07/01/2012'
+--DECLARE @EndDt     DATETIME = '09/30/2012'
+--DECLARE @SiteFK	   int = null
+--DECLARE @casefilterspositive varchar(200) = null
 
 	declare @xDate datetime = '07/01/'+str(year(@StartDt))
 	declare @StartDtX datetime = case when @xDate > @StartDt then '07/01/'+str(year(@StartDt)-1) else @xDate end
@@ -92,9 +98,10 @@ as
 	as
 	(
 	select
-		  count(*) as [n]
+		  sum(case when substring(c.VisitType,4,1) <> '1' then 1 else 0 end) as [n]
 		 ,sum(case when substring(c.VisitType,4,1) = '1' then 1 else 0 end) [Attemped]
-		 ,avg(case when substring(c.VisitType,4,1) != '1' then c.VisitLengthMinute else null end) [AverageLength]
+		 ,avg(case when substring(c.VisitType,4,1) != '1' 
+		 then (c.VisitLengthHour * 60 + c.VisitLengthMinute) else null end) [AverageLength]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Prenatal]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Postnatal]
 
@@ -193,8 +200,8 @@ as
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 		where b.ProgramFK = @programfk
 			 and c.VisitStartTime between @StartDt and @EndDt
-			 and (b.DischargeDate is null
-			 or b.DischargeDate > @EndDt)
+			 --and (b.DischargeDate is null
+			 --or b.DischargeDate > @EndDt)
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	),
 
@@ -204,9 +211,10 @@ as
 	as (
 
 	select
-		  count(*) as [nX]
+		  sum(case when substring(c.VisitType,4,1) <> '1' then 1 else 0 end) as [nX]
 		 ,sum(case when substring(c.VisitType,4,1) = '1' then 1 else 0 end) [AttempedX]
-		 ,avg(case when substring(c.VisitType,4,1) != '1' then c.VisitLengthMinute else null end) [AverageLengthX]
+		 ,avg(case when substring(c.VisitType,4,1) != '1' 
+		 then (c.VisitLengthHour * 60 + c.VisitLengthMinute) else null end) [AverageLengthX]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@yX,10,0)+'%' [PrenatalX]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@yX,10,0)+'%' [PostnatalX]
 
@@ -306,8 +314,8 @@ as
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 		where b.ProgramFK = @programfk
 			 and c.VisitStartTime between @StartDtX and @EndDtX
-			 and (b.DischargeDate is null
-			 or b.DischargeDate > @EndDtX)
+			 --and (b.DischargeDate is null
+			 --or b.DischargeDate > @EndDtX)
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	)
 
