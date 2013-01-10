@@ -197,13 +197,12 @@ WHEN ca.TANFServicesNoSpecify = '04' THEN 'No-' + ca.TANFServicesNoSpecify
 ELSE 'No' END
 )
 ELSE '' END [TANFServiceEligible]
-
 FROM(
 SELECT HVCaseFK, cast(substring(maxkey, 9, 10) AS INT) CommonAttributesPK
 FROM (SELECT HVCaseFK,
 max(convert(VARCHAR(max), FormDate, 112) + cast(CommonAttributesPK AS VARCHAR(max))) [maxkey]
 FROM CommonAttributes
-WHERE FormType IN ('IN', 'FU-PC1', 'FU')
+WHERE FormType IN ('IN', 'FU')
 GROUP BY HVCaseFK) AS xyz) AS hh
 LEFT OUTER JOIN CommonAttributes ca ON hh.CommonAttributesPK = ca.CommonAttributesPK 
 ),
