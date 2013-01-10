@@ -227,6 +227,7 @@ LEFT OUTER JOIN listMedicalFacility lmf ON ca.PC1MedicalFacilityFK = lmf.listMed
 LEFT OUTER JOIN listMedicalProvider lmp ON ca.PC1MedicalProviderFK = lmp.listMedicalProviderPK
 ),
 
+
 TCDoctorClinic
 AS (
 -- TC Doctor name/phone and Facility name/phone (xx3)
@@ -234,6 +235,22 @@ SELECT hh.HVCaseFK --ca.TCMedicalFacilityFK, ca.TCMedicalProviderFK
 ,rtrim(lmf.MFName) [TCClinic],
 rtrim(lmp.MPFirstName) + ' ' + rtrim(lmp.MPLastName) [TCDoctorName]
 ,lmp.MPPhone [TCDoctorPhone]
+FROM(
+SELECT HVCaseFK, cast(substring(maxkey, 9, 10) AS INT) CommonAttributesPK
+FROM (SELECT HVCaseFK,
+max(convert(VARCHAR(max), FormDate, 112) + cast(CommonAttributesPK AS VARCHAR(max))) [maxkey]
+FROM CommonAttributes
+WHERE FormType IN ('CH', 'TC')
+GROUP BY HVCaseFK) AS xyz) AS hh
+LEFT OUTER JOIN CommonAttributes ca ON hh.CommonAttributesPK = ca.CommonAttributesPK 
+LEFT OUTER JOIN listMedicalFacility lmf ON ca.TCMedicalFacilityFK = lmf.listMedicalFacilityPK
+LEFT OUTER JOIN listMedicalProvider lmp ON ca.TCMedicalProviderFK = lmp.listMedicalProviderPK
+),
+
+TCMedicalInsurance
+AS (
+-- TC Doctor name/phone and Facility name/phone (xx3)
+SELECT hh.HVCaseFK 
 , CASE WHEN ca.TCReceivingMedicaid = 1 THEN 'MA' 
 WHEN ca.TCHIFamilyChildHealthPlus = 1 THEN 'HealthPlus'
 WHEN ca.TCHIPrivateInsurance = 1 THEN 'Private'
@@ -250,8 +267,6 @@ FROM CommonAttributes
 WHERE FormType IN ('FU', 'TC')
 GROUP BY HVCaseFK) AS xyz) AS hh
 LEFT OUTER JOIN CommonAttributes ca ON hh.CommonAttributesPK = ca.CommonAttributesPK 
-LEFT OUTER JOIN listMedicalFacility lmf ON ca.TCMedicalFacilityFK = lmf.listMedicalFacilityPK
-LEFT OUTER JOIN listMedicalProvider lmp ON ca.TCMedicalProviderFK = lmp.listMedicalProviderPK
 ),
 
 TCASQ
@@ -280,8 +295,10 @@ pc1pc2InHome
 AS (
 -- PC1 and PC2 InHome from FollowUp table (xx5)
 SELECT hh.HVCaseFK
-, CASE WHEN fu.PC1InHome = 1 THEN 'Yes' ELSE '' END [PC1InHome]
-, CASE WHEN fu.PC2InHome = 1 THEN 'Yes' ELSE '' END [PC2InHome]
+, CASE WHEN fu.PC1InHome IS NULL THEN '' 
+  WHEN fu.PC1InHome = 1 THEN 'Yes' ELSE 'No' END [PC1InHome]
+, CASE WHEN fu.PC2InHome IS NULL THEN ''
+  WHEN fu.PC2InHome = 1 THEN 'Yes' ELSE 'No' END [PC2InHome]
 FROM (SELECT HVCaseFK, cast(substring(maxkey, 9, 10) AS INT) FollowUpPK
 FROM (SELECT HVCaseFK,
 max(convert(VARCHAR(max), FollowUpDate, 112) + cast(FollowUpPK AS VARCHAR(max))) [maxkey]
@@ -364,8 +381,8 @@ select Main.HVCasePK
 	  ,xx3.[TCClinic]
 	  ,xx3.[TCDoctorName]
 	  ,xx3.[TCDoctorPhone]
-	  ,xx3.[TCMedicalInsurance]
-	  ,xx3.[TCMAOnFile]
+	  ,xx31.[TCMedicalInsurance]
+	  ,xx31.[TCMAOnFile]
 	  
 	  ,xx4.[TCASQMonths]
 	  ,xx4.[TCASQDate]
@@ -376,11 +393,12 @@ select Main.HVCasePK
 	  
 	from cteMain Main
 		inner join cteFSWAssignDate on HVCaseFK = HVCasePK
-		LEFT OUTER JOIN codeApp a1 ON a1.AppCode = Main.PC2Relation2TC AND a1.AppCodeGroup = 'Relation2PC1'
+		LEFT OUTER JOIN codeApp a1 ON a1.AppCode = Main.PC2Relation2TC AND a1.AppCodeGroup = 'Relation'
 		
 		LEFT OUTER JOIN pc1MedicalInsurance xx1 ON xx1.HVCaseFK = Main.HVCasePK
 		LEFT OUTER JOIN pc1DoctorClinic xx2 ON xx2.HVCaseFK = Main.HVCasePK
 		LEFT OUTER JOIN TCDoctorClinic xx3 ON xx3.HVCaseFK = Main.HVCasePK
+		LEFT OUTER JOIN TCMedicalInsurance xx31 ON xx31.HVCaseFK = Main.HVCasePK
 		LEFT OUTER JOIN TCASQ xx4 ON xx4.HVCaseFK = Main.HVCasePK
 		LEFT OUTER JOIN pc1pc2InHome xx5 ON xx5.HVCaseFK = Main.HVCasePK
 		
