@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -16,10 +17,7 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT [codeTrainingPK]
-      ,[codeTrainingPK_old]
-      ,[ProgramFK]
-      ,rtrim([TrainingCode]) AS 'TrainingCode'
+	SELECT DISTINCT rtrim([TrainingCode]) AS 'TrainingCode'
       ,[TrainingCodeDescription]
       ,[TrainingCodeGroup]
       ,[TrainingCodeUsedWhere]
