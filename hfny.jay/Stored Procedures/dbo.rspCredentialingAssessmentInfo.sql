@@ -83,8 +83,8 @@ begin
 						  from kempe 
 						  JOIN hvcase ON kempe.hvcasefk = hvcasepk
 						  join caseprogram on hvcase.HVCasePK = caseprogram.HVcaseFK
-						  inner join worker fsw on CurrentFSWFK = fsw.workerpk
-				          inner join workerprogram on workerprogram.workerfk = fsw.workerpk
+						  inner join worker faw on FAWFK = faw.workerpk
+				          inner join workerprogram on workerprogram.workerfk = faw.workerpk
 					  
 						  where 
 							   Kempe.KempeDate >= @StartDate
