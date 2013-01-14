@@ -6,7 +6,7 @@ GO
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Feb 15, 2012>
--- Description:	<Reporting utility sproc to calculate and return the completed Quarters frmo 1 to 4>
+-- Description:	<Reporting utility sproc to calculate and return the completed Quarters from 1 to 4>
 -- =============================================
 CREATE PROCEDURE [dbo].[rspGetAllQuarters]
 	@ProgramFK int
@@ -44,7 +44,8 @@ BEGIN
 			,QuarterStartDate
 			,QuarterEndDate
 			,convert(varchar(8),QuarterStartDate,1)+','+convert(varchar(8),QuarterEndDate,1) as QuarterDates
-			,'{"start":"'+convert(varchar(8),QuarterStartDate,1)+'","end":"'+convert(varchar(8),QuarterEndDate,1)+'"}' as QuarterData
+			,'{"start":"'+convert(varchar(8),QuarterStartDate,1)+'","end":"'+convert(varchar(8),QuarterEndDate,1)+
+				'","contractstart":"'+convert(varchar(8),@ContractStartDate,1)+'","contractend":"'+convert(varchar(8),QuarterEndDate,1)+'"}' as QuarterData
 		from cteRawQuarters
 END
 GO
