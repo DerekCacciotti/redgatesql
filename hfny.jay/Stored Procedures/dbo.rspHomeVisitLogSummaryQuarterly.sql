@@ -12,6 +12,8 @@ CREATE procedure [dbo].[rspHomeVisitLogSummaryQuarterly]
     @programfk int = null,
     @StartDt   datetime,
     @EndDt     datetime,
+    @StartDtX    datetime,
+    @EndDtX     datetime,
     @SiteFK	   int = null,
     @casefilterspositive varchar(200)
 as
@@ -20,15 +22,15 @@ as
 	--DECLARE @StartDt DATETIME = '01/01/2012'
 	--DECLARE @EndDt DATETIME = '03/31/2012'
 	
---DECLARE	@programfk int = 18
---DECLARE @StartDt   DATETIME = '07/01/2012'
---DECLARE @EndDt     DATETIME = '09/30/2012'
+--DECLARE	@programfk int = 4
+--DECLARE @StartDt   DATETIME = '09/01/2012'
+--DECLARE @EndDt     DATETIME = '11/30/2012'
 --DECLARE @SiteFK	   int = null
 --DECLARE @casefilterspositive varchar(200) = null
 
-	declare @xDate datetime = '07/01/'+str(year(@StartDt))
-	declare @StartDtX datetime = case when @xDate > @StartDt then '07/01/'+str(year(@StartDt)-1) else @xDate end
-	declare @EndDtX datetime = @EndDt
+	--declare @xDate datetime = '07/01/'+str(year(@StartDt))
+	--declare @StartDtX datetime = case when @xDate > @StartDt then '07/01/'+str(year(@StartDt)-1) else @xDate end
+	--declare @EndDtX datetime = @EndDt
 
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
@@ -46,8 +48,8 @@ as
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
 		where b.ProgramFK = @programfk
 			 and a.VisitStartTime between @StartDt and @EndDt
-			 and (b.DischargeDate is null
-			 or b.DischargeDate > @EndDt)
+			 --and (b.DischargeDate is null
+			 --or b.DischargeDate > @EndDt)
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	if @x = 0
 	begin
@@ -77,8 +79,8 @@ as
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
 		where b.ProgramFK = @programfk
 			 and a.VisitStartTime between @StartDtX and @EndDtX
-			 and (b.DischargeDate is null
-			 or b.DischargeDate > @EndDtX)
+			 --and (b.DischargeDate is null
+			 --or b.DischargeDate > @EndDtX)
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	if @xX = 0
 	begin
@@ -104,7 +106,6 @@ as
 		 then (c.VisitLengthHour * 60 + c.VisitLengthMinute) else null end) [AverageLength]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Prenatal]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Postnatal]
-
 		 ,str(sum(case when substring(c.VisitType,1,1) = '1' or substring(c.VisitType,2,1) = '1' then 1 else 0 end)
 		  *100.0/@x,10,0)+'%' [InParticipantHome]
 		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitType,1,1) != '1'
