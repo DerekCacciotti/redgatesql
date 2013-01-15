@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -17,13 +18,11 @@ CREATE procedure [dbo].[rspPreAssessEngagement]
 )
 as
 
--- Pre-Assessment Engagement Quartly Report --
---DECLARE @StartDtT DATE = '01/01/2011'
---DECLARE @StartDt DATE = '07/01/2011'
---DECLARE @EndDt DATE = '09/30/2011'
---DECLARE @programfk INT = 5
-
-
+--Pre-Assessment Engagement Quartly Report --
+--DECLARE @StartDtT DATE = '09/01/2012'
+--DECLARE @StartDt DATE = '09/01/2012'
+--DECLARE @EndDt DATE = '11/30/2012'
+--DECLARE @programfk INT = 4
 
 ; WITH 
 section1QX AS
@@ -114,16 +113,43 @@ AND (a1.KempeDate >= @StartDt OR a1.KempeDate IS NULL)
 AND (b1.DischargeDate >= @StartDt OR b1.DischargeDate IS NULL)
 )
 
+, section4Qa AS 
+(
+SELECT 
+sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [Q4aEffortContnue]
+, sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) > 30 THEN 1 ELSE 0 END) [Q4dNoStatus1]
+FROM Preassessment x
+JOIN (
+SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
+FROM Preassessment AS p 
+WHERE p.PADate <= @EndDt AND p.ProgramFK = @programfk
+GROUP BY p.HVCaseFK) AS y 
+ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
+)
+
+, section4Qb AS 
+(
+SELECT count(DISTINCT a.HVCaseFK) [Q4dNoStatus2]
+FROM HVScreen AS a
+JOIN CaseProgram AS c ON c.HVCaseFK = a.HVCaseFK
+LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
+WHERE a.ProgramFK = @programfk AND a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
+AND (c.DischargeDate IS NULL OR c.DischargeDate > @StartDt)
+AND b.HVCaseFK IS NULL
+)
+
 , section4Q AS 
 (
-SELECT sum(CASE WHEN x.CaseStatus = '01' THEN 1 ELSE 0 END) [Q4aEffortContnue]
-, sum(CASE WHEN x.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [Q4bCompleted]
+SELECT 
+--sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [Q4aEffortContnue]
+--, sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) > 30 THEN 1 ELSE 0 END) [Q4dNoStatus1]
+sum(CASE WHEN x.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [Q4bCompleted]
 , sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate <= @EndDt THEN 1 ELSE 0 END) [Q4b1PositiveAssignd]
 , sum(CASE WHEN  x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate > @EndDt THEN 1 ELSE 0 END) [Q4b2PositivePendingAssignd]
 , sum(CASE WHEN  x.CaseStatus = '04'  AND x.KempeResult = 1 AND x.FSWAssignDate IS NULL THEN 1 ELSE 0 END) [Q4b3PositiveNotAssignd]
 , sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 0 THEN 1 ELSE 0 END) [Q4b4Negative]
 , sum(CASE WHEN x.CaseStatus = '03' THEN 1 ELSE 0 END) [Q4cTerminated]
-, 0 [Q4dNoStatus]
+--, 0 [Q4dNoStatus]
 FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
@@ -132,6 +158,28 @@ WHERE p.PADate BETWEEN @StartDt AND @EndDt AND p.ProgramFK = @programfk
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 )
+
+--, zzz AS (
+--SELECT DISTINCT x.HVCaseFK
+--FROM Preassessment AS x
+--JOIN (SELECT a.HVCaseFK, max(a.PADate) [maxDate]
+--FROM Preassessment AS a
+--WHERE a.ProgramFK = @programfk AND a.PADate < @StartDt
+--GROUP BY a.HVCaseFK) AS y
+--ON x.HVCaseFK = y.HVCaseFK AND x.PADate = maxDate
+--WHERE x.CaseStatus = '01')
+
+--, qqq AS (
+--SELECT DISTINCT a.HVCaseFK
+--FROM Preassessment AS a
+--WHERE a.ProgramFK = @programfk AND a.PADate BETWEEN @StartDt AND @EndDt
+--)
+
+--, NoStatus AS (
+--SELECT count(*) [Q4dNoStatus2]
+--FROM zzz AS a LEFT OUTER JOIN qqq AS b ON a.HVCaseFK = b.HVCaseFK
+--WHERE b.HVCaseFK IS NULL
+--)
 
 , section5Q AS 
 (
@@ -241,16 +289,43 @@ AND (a1.KempeDate >= @StartDtT OR a1.KempeDate IS NULL)
 AND (b1.DischargeDate >= @StartDtT OR b1.DischargeDate IS NULL)
 )
 
+
+, section4Ta AS 
+(
+SELECT 
+sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [T4aEffortContnue]
+, sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) > 30 THEN 1 ELSE 0 END) [T4dNoStatus1]
+FROM Preassessment x
+JOIN (
+SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
+FROM Preassessment AS p 
+WHERE p.PADate <= @EndDt AND p.ProgramFK = @programfk
+GROUP BY p.HVCaseFK) AS y 
+ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
+)
+
+, section4Tb AS 
+(
+SELECT count(DISTINCT a.HVCaseFK) [T4dNoStatus2]
+FROM HVScreen AS a
+JOIN CaseProgram AS c ON c.HVCaseFK = a.HVCaseFK
+LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
+WHERE a.ProgramFK = @programfk AND a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
+AND (c.DischargeDate IS NULL OR c.DischargeDate > @StartDtT)
+AND b.HVCaseFK IS NULL
+)
+
 , section4T AS 
 (
-SELECT sum(CASE WHEN x.CaseStatus = '01' THEN 1 ELSE 0 END) [T4aEffortContnue]
-, sum(CASE WHEN x.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [T4bCompleted]
+SELECT 
+--sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [T4aEffortContnue]
+--, sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) > 30 THEN 1 ELSE 0 END) [T4dNoStatus1]
+sum(CASE WHEN x.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [T4bCompleted]
 , sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate <= @EndDt THEN 1 ELSE 0 END) [T4b1PositiveAssignd]
 , sum(CASE WHEN  x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate > @EndDt THEN 1 ELSE 0 END) [T4b2PositivePendingAssignd]
 , sum(CASE WHEN  x.CaseStatus = '04'  AND x.KempeResult = 1 AND x.FSWAssignDate IS NULL THEN 1 ELSE 0 END) [T4b3PositiveNotAssignd]
 , sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 0 THEN 1 ELSE 0 END) [T4b4Negative]
 , sum(CASE WHEN x.CaseStatus = '03' THEN 1 ELSE 0 END) [T4cTerminated]
-, 0 [T4dNoStatus]
 FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
@@ -259,6 +334,28 @@ WHERE p.PADate BETWEEN @StartDtT AND @EndDt AND p.ProgramFK = @programfk
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 )
+
+--, zzzT AS (
+--SELECT DISTINCT x.HVCaseFK
+--FROM Preassessment AS x
+--JOIN (SELECT a.HVCaseFK, max(a.PADate) [maxDate]
+--FROM Preassessment AS a
+--WHERE a.ProgramFK = @programfk AND a.PADate < @StartDtT
+--GROUP BY a.HVCaseFK) AS y
+--ON x.HVCaseFK = y.HVCaseFK AND x.PADate = maxDate
+--WHERE x.CaseStatus = '01')
+
+--, qqqT AS (
+--SELECT DISTINCT a.HVCaseFK
+--FROM Preassessment AS a
+--WHERE a.ProgramFK = @programfk AND a.PADate BETWEEN @StartDtT AND @EndDt
+--)
+
+--, NoStatusT AS (
+--SELECT count(*) [T4dNoStatus2]
+--FROM zzzT AS a LEFT OUTER JOIN qqqT AS b ON a.HVCaseFK = b.HVCaseFK
+--WHERE b.HVCaseFK IS NULL
+--)
 
 , section5T AS 
 (
@@ -283,20 +380,30 @@ SELECT
 , section2Q.*
 , section1Q.[Q1ePositiveReferred] + section2Q.[Q2PreAssessmentBeforePeriod] [Q3TotalCasesThisPerion]
 , section4Q.*
+, section4Qa.*
+, section4Qb.*
+, [Q4dNoStatus1] + [Q4dNoStatus2] AS [Q4dNoStatus]
 , section5Q.*
 , section1T.* 
 , section2T.*
 , section1T.[T1ePositiveReferred] + section2T.[T2PreAssessmentBeforePeriod] [T3TotalCasesThisPerion]
 , section4T.*
+, section4Ta.*
+, section4Tb.*
+, [T4dNoStatus1] + [T4dNoStatus2] AS [T4dNoStatus]
 , section5T.*
 
 FROM section1Q
 join section2Q ON 1 = 1
 join section4Q ON 1 = 1
+join section4Qa ON 1 = 1
+join section4Qb ON 1 = 1
 join section5Q ON 1 = 1
 join section1T ON 1 = 1
 join section2T ON 1 = 1
 join section4T ON 1 = 1
+join section4Ta ON 1 = 1
+join section4Tb ON 1 = 1
 join section5T ON 1 = 1
 
 
