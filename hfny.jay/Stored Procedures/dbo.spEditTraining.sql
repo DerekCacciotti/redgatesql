@@ -6,6 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditTraining](@TrainingPK int=NULL,
 @ProgramFK int=NULL,
 @TrainerFK int=NULL,
+@TrainingMethodFK int=NULL,
 @TrainingDate datetime=NULL,
 @TrainingDays int=NULL,
 @TrainingDescription varchar(500)=NULL,
@@ -14,13 +15,13 @@ CREATE PROCEDURE [dbo].[spEditTraining](@TrainingPK int=NULL,
 @TrainingHours int=NULL,
 @TrainingMinutes int=NULL,
 @TrainingTitle char(70)=NULL,
-@TrainingMethodFK int=NULL,
 @IsExempt bit=NULL)
 AS
 UPDATE Training
 SET 
 ProgramFK = @ProgramFK, 
 TrainerFK = @TrainerFK, 
+TrainingMethodFK = @TrainingMethodFK, 
 TrainingDate = @TrainingDate, 
 TrainingDays = @TrainingDays, 
 TrainingDescription = @TrainingDescription, 
@@ -29,7 +30,6 @@ TrainingEditor = @TrainingEditor,
 TrainingHours = @TrainingHours, 
 TrainingMinutes = @TrainingMinutes, 
 TrainingTitle = @TrainingTitle, 
-TrainingMethodFK = @TrainingMethodFK, 
 IsExempt = @IsExempt
 WHERE TrainingPK = @TrainingPK
 GO

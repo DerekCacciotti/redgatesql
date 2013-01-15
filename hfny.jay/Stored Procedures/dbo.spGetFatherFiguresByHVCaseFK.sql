@@ -43,6 +43,7 @@ as
 		  ,PCFirstName as FirstName
 		  ,PCMiddleInitial as MiddleInitial
 		  ,PCLastName as LastName
+		  ,isnull(PCFirstName,'') + ' ' + isnull(PCMiddleInitial,'') + ' ' + isnull(PCLastName,'') AS FFigureName
 		  ,case when FF.IsOBP=1 then 'Yes' else 'No' end as OBPOfCase
 		  ,case when FF.IsPC2=1 then 'Yes' else 'No' end as PC2OfCase
 		  ,case when FF.LiveInPC1Home=1 then 'Yes' else 'No' end as InPC1Home

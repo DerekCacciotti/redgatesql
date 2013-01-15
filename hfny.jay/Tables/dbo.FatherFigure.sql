@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[FatherFigure]
 [IsPC2] [bit] NOT NULL,
 [IsOther] [bit] NULL,
 [LiveInPC1Home] [bit] NOT NULL,
-[MarriedToPC1] [bit] NOT NULL,
+[MarriedToPC1] [bit] NULL,
 [PC2InPC1Home] [bit] NOT NULL,
 [PCFK] [int] NOT NULL,
 [ProgramFK] [int] NULL,

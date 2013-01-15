@@ -18,10 +18,12 @@ CREATE TABLE [dbo].[Training]
 [IsExempt] [bit] NULL
 ) ON [PRIMARY]
 GO
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 CREATE TRIGGER [dbo].[fr_delete_training]
 on dbo.Training
 After DELETE
@@ -34,6 +36,9 @@ BEGIN
 	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='TR'
 END
 GO
+DISABLE TRIGGER [dbo].[fr_delete_training] ON [dbo].[Training]
+GO
+
 
 SET QUOTED_IDENTIFIER ON
 GO
