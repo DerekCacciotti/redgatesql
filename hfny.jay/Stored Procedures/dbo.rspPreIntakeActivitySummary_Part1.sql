@@ -75,11 +75,21 @@ select distinct HVCaseFK
 		 and wp.WorkerFK = isnull(@WorkerFK, wp.WorkerFK)
 		 and sup.WorkerFK = isnull(@SupervisorFK, sup.WorkerFK)
 )
+,
+
+PreAssessmentFSWAssignDate
+AS
+(
+SELECT DISTINCT a.HVCaseFK
+FROM Preassessment AS a
+WHERE a.FSWAssignDate BETWEEN @StartDt AND @EndDt
+AND a.ProgramFK = @programfk
+)
 
 select count(*) [PreInTakeCases]
 	  ,(select count(*)
 			from At_Start_Of_Month) [At_Start_of_Month]
-	  ,sum(case when PIFSWFK is not null then 1 else 0 end) [AssignedFSW]
+	  ,sum(case when PIFSWFK is not null AND x.HVCaseFK IS NOT NULL then 1 else 0 end) [AssignedFSW]
 	  ,sum(case when CaseStatus = '02' then 1 else 0 end) [Enrolled]
 	  ,sum(case when CaseStatus = '03' then 1 else 0 end) [Terminated]
 	  ,sum(case when CaseStatus = '01' then 1 else 0 end) [Continued]
@@ -100,6 +110,7 @@ select count(*) [PreInTakeCases]
 	from Preintake pi
 	inner join WorkerProgram wp on wp.WorkerFK = PIFSWFK
 	inner join WorkerProgram sup on sup.WorkerFK = wp.SupervisorFK
+	LEFT OUTER JOIN PreAssessmentFSWAssignDate AS x ON pi.HVCaseFK = x.HVCaseFK
 	where pi.ProgramFK = @programfk
 		 and PIDate between @StartDt and @EndDt
 		 and wp.WorkerFK = isnull(@WorkerFK, wp.WorkerFK)
