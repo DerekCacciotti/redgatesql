@@ -13,9 +13,3 @@ CREATE TABLE [dbo].[codeSubTopicDetail]
 [STDetailPK_old] [int] NOT NULL
 ) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[codeSubTopicDetail] ADD CONSTRAINT [PK_codeSubTopicDetail] PRIMARY KEY CLUSTERED  ([codeSubTopicDetailPK]) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[codeSubTopicDetail] WITH NOCHECK ADD CONSTRAINT [FK_codeSubTopicDetail_SubTopic] FOREIGN KEY ([SubTopicFK]) REFERENCES [dbo].[SubTopic] ([SubTopicPK])
-GO
-ALTER TABLE [dbo].[codeSubTopicDetail] WITH NOCHECK ADD CONSTRAINT [FK_codeSubTopicDetail_codeTopic] FOREIGN KEY ([TopicFK]) REFERENCES [dbo].[codeTopic] ([codeTopicPK])
-GO

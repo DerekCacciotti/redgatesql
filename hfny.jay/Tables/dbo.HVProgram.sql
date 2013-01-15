@@ -35,6 +35,8 @@ CREATE TABLE [dbo].[HVProgram]
 [ProgramZip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TargetZip] [char] (60) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_HVProgram_CountyFK] ON [dbo].[HVProgram] ([CountyFK]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO
