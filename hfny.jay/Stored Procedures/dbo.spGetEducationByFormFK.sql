@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,7 +20,8 @@ GO
 CREATE PROCEDURE [dbo].[spGetEducationByFormFK]
 	@PCType AS VARCHAR(3),
 	@FormType AS CHAR(2),
-	@FormFK INT
+	@FormFK INT, 
+	@Interval INT
 
 AS
 
@@ -30,6 +32,7 @@ On programtype=a.AppCode
 WHERE formfk = @FormFK
 AND FormType = @FormType
 AND PCType = @PCType
+AND Interval < @Interval
 
 
 
