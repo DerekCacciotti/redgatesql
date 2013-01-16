@@ -3,19 +3,19 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddTrainingAttendee](@TrainingFK int=NULL,
-@WorkerFK int=NULL,
-@TrainingAttendeeCreator nvarchar(50)=NULL)
+CREATE PROCEDURE [dbo].[spAddTrainingAttendee](@TrainingAttendeeCreator nvarchar(50)=NULL,
+@TrainingFK int=NULL,
+@WorkerFK int=NULL)
 AS
 INSERT INTO TrainingAttendee(
+TrainingAttendeeCreator,
 TrainingFK,
-WorkerFK,
-TrainingAttendeeCreator
+WorkerFK
 )
 VALUES(
+@TrainingAttendeeCreator,
 @TrainingFK,
-@WorkerFK,
-@TrainingAttendeeCreator
+@WorkerFK
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
