@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +9,8 @@ GO
 -- Description:	Get the PC1 Hightest Grade for FollowUp Validation
 -- =============================================
 CREATE PROCEDURE [dbo].[spGetHighestGradePC1] 
-	@HVCaseFK [int]
+	@HVCaseFK [int],
+	@FormInterval [int]
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -20,6 +22,8 @@ BEGIN
   SELECT max(highestgrade) FROM CommonAttributes ca
   WHERE (FormType = 'IN-PC1' OR FormType='KE' OR FormType = 'FU-PC1')
   AND HVCaseFK=@HVCaseFK
+  AND FormInterval < @FormInterval
+  
 
 END
 GO
