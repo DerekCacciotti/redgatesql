@@ -17,12 +17,17 @@ CREATE procedure [dbo].[rspPC1IDList]
 )
 as
 
+--DECLARE @programfk int = 4
+--DECLARE @supervisorfk INT = NULL
+--DECLARE @workerfk INT = NULL
+
 	select top 100 percent
 						  programname
 						 ,hvcasepk
 						 ,pc1id
 						 ,oldid
-						 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) as workername
+						 ,LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
+		                 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) as workername
 						 ,codelevelpk
 						 ,levelname
 						 ,currentleveldate
@@ -114,16 +119,10 @@ as
 					  on CurrentFSWFK = fsw.workerpk
 			inner join workerprogram
 					  on workerfk = fsw.workerpk
-					  
-					  
-					  
---INNER JOIN worker fsw
---ON d.CurrentFSWFK = fsw.workerpk
---INNER JOIN workerprogram wp
---ON wp.workerfk = fsw.workerpk
+			
 INNER JOIN worker supervisor
 ON workerprogram.supervisorfk = supervisor.workerpk
-					  
+
 					  
 		where caseprogram.programfk = @programfk
 			 and dischargedate is null
@@ -135,9 +134,8 @@ ON workerprogram.supervisorfk = supervisor.workerpk
 AND workerprogram.supervisorfk = ISNULL(@supervisorfk, workerprogram.supervisorfk)
 			 
 			 
-		order by oldid
-				,workername
-				,screendate
+		order by supervisor, workername, OldID, ScreenDate
+		
 
 	/* SET NOCOUNT ON */
 	return
