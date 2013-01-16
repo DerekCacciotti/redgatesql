@@ -33,7 +33,7 @@ as
 	as (select distinct FSWFK
 			from HVLog
 				inner join dbo.SplitString(@programfk,',') on HVLog.programfk = listitem
-			where datediff(m,VisitStartTime,getdate()) <= 12
+			where datediff(month,VisitStartTime,getdate()) <= 12
 	),
 	hvlogs (VisitStartTime,hvcasepk,visitType,FSWFK)
 	as (select VisitStartTime
@@ -44,8 +44,8 @@ as
 				left join HVCase on HVCase.HVCasePK = hvlog.hvcasefk
 				inner join WorkerCohort on hvlog.FSWFK = WorkerCohort.FSWFK
 				inner join dbo.SplitString(@programfk,',') on hvlog.programfk = listitem
-			where -- datediff(year,VisitStartTime,getdate()) <= 1 and
-				 SupervisorObservation = 1
+			where -- datediff(year,VisitStartTime,getdate()) <= 1 and 
+				SupervisorObservation = 1
 	),
 	q
 	as (select VisitStartTime
@@ -66,11 +66,11 @@ as
 		  ,RTRIM(supervisor.FirstName)+' '+RTRIM(supervisor.LastName) supervisor
 		  ,case
 				when substring(visitType,1,1) = '1' or substring(visitType,2,1) = '1' then
-					'Home Visit'
-				when substring(visitType,4,1) = '1' then
-					'Attempted - Family not home or unable to meet after visit to home'
+					'In Home'
+				when substring(visitType,3,1) = '1' then
+					'Out of Home'
 				else
-					''
+					'Attempted - Family not home or unable to meet after visit to home'
 				end as visitType
 		from (select VisitStartTime
 					,hvcasepk
@@ -91,6 +91,7 @@ as
 		where w.WorkerPK in (select FSWFK
 									  from WorkerCohort)
 			 and wp.TerminationDate is null
+			 and w.LastName <> 'Transfer Worker'
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		order by supervisor.LastName
 				,w.LastName
