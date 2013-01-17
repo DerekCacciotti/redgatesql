@@ -19,7 +19,8 @@ as
 
 	set nocount on;
 
-	exec spGetAllWorkersbyProgram @ProgramFK, '19800101', @WorkerType, 1
+	exec spGetAllWorkersbyProgram @ProgramFK, null, @WorkerType, 0
+	-- exec spGetAllWorkersbyProgram @ProgramFK, '19800101', @WorkerType, 1
 
 --select rtrim(LastName) + ', ' + rtrim(FirstName) as WorkerName, FirstName, LastName, WorkerPK from 
 --  (select *, 'FAW' as workertype
