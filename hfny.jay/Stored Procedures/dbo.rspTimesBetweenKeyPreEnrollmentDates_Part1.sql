@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -31,14 +32,14 @@ SELECT e.PC1ID
 , datediff(day, b.ScreenDate, a.IntakeDate) [ScreenToIntake]
 , datediff(day, d.KempeDate, a.IntakeDate) [KempeToIntake]
 
-FROM Intake AS a
-LEFT OUTER JOIN HVScreen AS b ON a.HVCaseFK = b.HVCaseFK
-LEFT OUTER JOIN Preassessment AS c ON c.HVCaseFK = a.HVCaseFK AND c.CaseStatus = '02' 
-LEFT OUTER JOIN Kempe  AS d ON d.HVCaseFK = a.HVCaseFK
-JOIN dbo.CaseProgram AS e ON e.HVCaseFK = a.HVCaseFK
+FROM HVCase AS a
+LEFT OUTER JOIN HVScreen AS b ON a.HVCasePK = b.HVCaseFK
+LEFT OUTER JOIN Preassessment AS c ON c.HVCaseFK = a.HVCasePK AND c.CaseStatus = '02' 
+LEFT OUTER JOIN Kempe  AS d ON d.HVCaseFK = a.HVCasePK
+JOIN dbo.CaseProgram AS e ON e.HVCaseFK = a.HVCasePK
 JOIN dbo.Worker AS faw ON faw.WorkerPK = b.FAWFK
 JOIN dbo.Worker AS fsw	ON fsw.WorkerPK = c.PAFSWFK
-WHERE a.ProgramFK = @programfk AND a.IntakeDate BETWEEN @StartDt AND @EndDt
+WHERE e.ProgramFK = @programfk AND a.IntakeDate BETWEEN @StartDt AND @EndDt
 ORDER BY e.PC1ID
 
 

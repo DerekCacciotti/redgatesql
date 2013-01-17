@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -14,8 +15,8 @@ CREATE PROCEDURE [dbo].[rspTimesBetweenKeyPreEnrollmentDates_Part2]
 	@EndDt datetime
 AS
 
---DECLARE @StartDt DATE = '01/01/2011'
---DECLARE @EndDt DATE = '01/31/2011'
+--DECLARE @StartDt DATE = '01/01/2012'
+--DECLARE @EndDt DATE = '06/30/2012'
 --DECLARE @programfk INT = 17
 
 SELECT avg([ScreenToKempe]) [ScreenToKempe]
@@ -38,14 +39,14 @@ SELECT e.PC1ID
 , datediff(day, b.ScreenDate, a.IntakeDate) [ScreenToIntake]
 , datediff(day, d.KempeDate, a.IntakeDate) [KempeToIntake]
 
-FROM Intake AS a
-LEFT OUTER JOIN HVScreen AS b ON a.HVCaseFK = b.HVCaseFK
-LEFT OUTER JOIN Preassessment AS c ON c.HVCaseFK = a.HVCaseFK AND c.CaseStatus = '02' 
-LEFT OUTER JOIN Kempe  AS d ON d.HVCaseFK = a.HVCaseFK
-JOIN dbo.CaseProgram AS e ON e.HVCaseFK = a.HVCaseFK
-JOIN dbo.Worker AS faw ON faw.WorkerPK = b.FAWFK
-JOIN dbo.Worker AS fsw	ON fsw.WorkerPK = c.PAFSWFK
-WHERE a.ProgramFK = @programfk AND a.IntakeDate BETWEEN @StartDt AND @EndDt
+FROM HVCase AS a
+LEFT OUTER JOIN HVScreen AS b ON a.HVCasePK = b.HVCaseFK
+LEFT OUTER JOIN Preassessment AS c ON c.HVCaseFK = a.HVCasePK AND c.CaseStatus = '02' 
+LEFT OUTER JOIN Kempe  AS d ON d.HVCaseFK = a.HVCasePK
+JOIN dbo.CaseProgram AS e ON e.HVCaseFK = a.HVCasePK
+JOIN dbo.Worker AS faw ON faw.WorkerPK = b.FAWFK -- e.CurrentFAWFK
+JOIN dbo.Worker AS fsw	ON fsw.WorkerPK = c.PAFSWFK -- e.CurrentFSWFK
+WHERE e.ProgramFK = @programfk AND a.IntakeDate BETWEEN @StartDt AND @EndDt
 ) AS gg
 
 
