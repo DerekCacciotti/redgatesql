@@ -33,7 +33,7 @@ as
 	declare @ClosedOnXLess3NoMove int
 
 	select @ClosedOnXLess3NoMove = count(distinct case
-			  when datediff(day,e4.LevelAssignDate,dischargedate) < 92 and CurrentLevelFK = 23 -- level X-term
+			  when datediff(day,e4.LevelAssignDate,dischargedate) < 91 and CurrentLevelFK = 23 -- level X-term
 				  and (dischargedate is not null or dischargedate < @edate) and DischargeCode not in (7,36) then
 				  PC1ID
 		  end)
@@ -82,7 +82,7 @@ as
 			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = HVCasePK
 		where caseprogress >= 9
 			 and intakedate <= @edate
-			 and datediff(day,e3.LevelAssignDate,dischargedate) < 92
+			 and datediff(day,e3.LevelAssignDate,dischargedate) < 91
 			 and CurrentLevelFK = 23 -- level X-term
 			 and (dischargedate is not null
 			 or dischargedate < @edate)

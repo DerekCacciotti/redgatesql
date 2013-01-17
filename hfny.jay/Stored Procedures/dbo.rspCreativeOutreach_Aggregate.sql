@@ -53,15 +53,15 @@ as
 				     when (dischargedate is null or DischargeDate > @edate) and CurrentLevelFK = 22 then
 					 PC1ID end)*1.0
 			,ClosedOnXLess3 = count(distinct case
-					 when datediff(day,e4.LevelAssignDate,dischargedate) < 92 and CurrentLevelFK = 23 -- level X-term
+					 when datediff(day,e4.LevelAssignDate,dischargedate) < 91 and CurrentLevelFK = 23 -- level X-term
 					 and (dischargedate is not null or dischargedate <= @edate) and DischargeCode in (7,36) then
 					 PC1ID end)*1.0
 			,ClosedOnXGreater3 = count(distinct case
-	                 when datediff(day,e4.LevelAssignDate,dischargedate) >= 92 and CurrentLevelFK = 23 -- level X-term
+	                 when datediff(day,e4.LevelAssignDate,dischargedate) >= 91 and CurrentLevelFK = 23 -- level X-term
 					 and (dischargedate is not null or dischargedate <= @edate) then
 					 PC1ID end)*1.0
 			,ClosedOnXLess3NoMove = count(distinct case
-				     when datediff(day,e4.LevelAssignDate,dischargedate) < 92 and CurrentLevelFK = 23 -- level X-term
+				     when datediff(day,e4.LevelAssignDate,dischargedate) < 91 and CurrentLevelFK = 23 -- level X-term
 					 and (dischargedate is not null and dischargedate <= @edate) and DischargeCode not in (7,36) then
 					 PC1ID end)*1.0
 			,ReXOpen = count(distinct case
