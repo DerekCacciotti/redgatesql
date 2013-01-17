@@ -153,6 +153,8 @@ begin
 				left outer join codeDischarge cd on cd.DischargeCode = cp.DischargeReason
 	
 			where PC1ID = isnull(@PC1ID,PC1ID)
+				AND (CASE WHEN @PC1ID IS NOT NULL THEN 1 ELSE 
+				CASE WHEN cp.DischargeDate IS NOT NULL THEN 0 ELSE 1 END END = 1)
 				 and CurrentFSWFK = isnull(@WorkerFK,CurrentFSWFK)
 				 and CurrentFAWFK = isnull(@FAWFK,CurrentFAWFK)
 				 and sup.WorkerPK = isnull(@SupervisorFK,sup.WorkerPK)
