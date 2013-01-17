@@ -66,7 +66,7 @@ BEGIN
 		  ,ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as WorkerName
 		  ,sup.WorkerName as SupervisorName
 	from FormReview fr
-	inner join FormReviewOptions fro on fro.FormType = fr.FormType
+	inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = isnull(@ProgramFK,fro.ProgramFK)
 	inner join codeForm f on codeFormAbbreviation = fr.FormType
 	inner join CaseProgram cp on cp.HVCaseFK = fr.HVCaseFK
 								and cp.ProgramFK = fr.ProgramFK
