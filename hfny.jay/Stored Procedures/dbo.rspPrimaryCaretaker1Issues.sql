@@ -7,7 +7,7 @@ GO
 -- Author:		Dar Chen
 -- Create date: 06/18/2010
 -- Description:	FAW Monthly Report
--- exec rspPrimaryCaretaker1Issues 18, N'04/01/12', N'06/30/12', NULL, NULL
+-- exec rspPrimaryCaretaker1Issues 19, N'07/01/12', N'09/30/12', NULL, NULL
 -- =============================================
 CREATE procedure [dbo].[rspPrimaryCaretaker1Issues]-- Add the parameters for the stored procedure here
     @programfk int = null,
@@ -27,71 +27,6 @@ as
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end;
 
-	--select @x = count(distinct pc1i.HVCaseFK)
-	--	from cteCohort
-	--	dbo.PC1Issues as pc1i
-	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
-	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
-	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
-	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
-	--		 and pc1i.ProgramFK = @programfk
-	--		 and (cp.DischargeDate is null
-	--		 or cp.DischargeDate >= @StartDt)
-	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-
-	--select @y = count(distinct pc1i.HVCaseFK)
-	--	from dbo.PC1Issues pc1i
-	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
-	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
-	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
-	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
-	--		 and rtrim(pc1i.Interval) = '1'
-	--		 and pc1i.ProgramFK = @programfk
-	--		 and (cp.DischargeDate is null
-	--		 or cp.DischargeDate >= @StartDt)
-	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-
-	--if @x = 0
-	--begin
-	--	set @x = 1
-	--end
-	--if @y = 0
-	--begin
-	--	set @y = 1
-	--end
-
-	--xxx as (select pc1i.HVCaseFK
-	--		  ,max(PC1IssuesPK) [PC1IssuesPK]
-	--		from dbo.PC1Issues pc1i
-	--			join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
-	--			inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
-	--			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
-	--		where pc1i.PC1IssuesDate between @StartDt and @EndDt
-	--			 and pc1i.ProgramFK = @programfk
-	--			 and (cp.DischargeDate is null
-	--			 or cp.DischargeDate >= @StartDt)
-	--			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-	--		group by pc1i.HVCaseFK
-	--)
-	--,
-	--yyy
-	--as (
-	--select pc1i.HVCaseFK
-	--	  ,max(pc1i.PC1IssuesPK) [PC1IssuesPK]
-	--	from dbo.PC1Issues pc1i
-	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
-	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
-	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
-	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
-	--		 and rtrim(pc1i.Interval) = '1'
-	--		 and pc1i.ProgramFK = @programfk
-	--		 and (cp.DischargeDate is null
-	--		 or cp.DischargeDate >= @StartDt)
-	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-	--	group by pc1i.HVCaseFK
-	--)
-	--,
-
 	with cteCohort as (select pc1i.HVCaseFK
 								, PC1IssuesPK
 								, PC1IssuesDate
@@ -99,12 +34,15 @@ as
 								, Interval
 						from dbo.PC1Issues pc1i
 							join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+							inner join HVCase h on h.HVCasePK = cp.HVCaseFK
 							inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
 							inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
-						where pc1i.PC1IssuesDate between @StartDt and @EndDt
-							 and pc1i.ProgramFK = @programfk
+						where -- pc1i.PC1IssuesDate between @StartDt and @EndDt
+							 pc1i.ProgramFK = @programfk
 							 and (cp.DischargeDate is null
-							 or cp.DischargeDate >= @StartDt)
+								 or cp.DischargeDate >= @StartDt)
+							 and IntakeDate is not null 
+							 and IntakeDate <= @EndDt
 							 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 						-- group by pc1i.HVCaseFK
 						), 
@@ -217,6 +155,77 @@ as
 			join cteKempeCount on 1 = 1
 		group by KempeCount
 	)
+
+	select KempeCount [pc1i00AssessmentN]
+		  ,TotalCount [pc1i00CurrentIssueN]
+		  ,*
+		from sub2
+			join sub1 on 1 = 1
+
+--------------------------------------------------------------------------------------------------------------		
+	--select @x = count(distinct pc1i.HVCaseFK)
+	--	from cteCohort
+	--	dbo.PC1Issues as pc1i
+	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
+	--		 and pc1i.ProgramFK = @programfk
+	--		 and (cp.DischargeDate is null
+	--		 or cp.DischargeDate >= @StartDt)
+	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+
+	--select @y = count(distinct pc1i.HVCaseFK)
+	--	from dbo.PC1Issues pc1i
+	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
+	--		 and rtrim(pc1i.Interval) = '1'
+	--		 and pc1i.ProgramFK = @programfk
+	--		 and (cp.DischargeDate is null
+	--		 or cp.DischargeDate >= @StartDt)
+	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+
+	--if @x = 0
+	--begin
+	--	set @x = 1
+	--end
+	--if @y = 0
+	--begin
+	--	set @y = 1
+	--end
+
+	--xxx as (select pc1i.HVCaseFK
+	--		  ,max(PC1IssuesPK) [PC1IssuesPK]
+	--		from dbo.PC1Issues pc1i
+	--			join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+	--			inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+	--			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+	--		where pc1i.PC1IssuesDate between @StartDt and @EndDt
+	--			 and pc1i.ProgramFK = @programfk
+	--			 and (cp.DischargeDate is null
+	--			 or cp.DischargeDate >= @StartDt)
+	--			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	--		group by pc1i.HVCaseFK
+	--)
+	--,
+	--yyy
+	--as (
+	--select pc1i.HVCaseFK
+	--	  ,max(pc1i.PC1IssuesPK) [PC1IssuesPK]
+	--	from dbo.PC1Issues pc1i
+	--		join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+	--		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+	--		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
+	--	where pc1i.PC1IssuesDate between @StartDt and @EndDt
+	--		 and rtrim(pc1i.Interval) = '1'
+	--		 and pc1i.ProgramFK = @programfk
+	--		 and (cp.DischargeDate is null
+	--		 or cp.DischargeDate >= @StartDt)
+	--		 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	--	group by pc1i.HVCaseFK
+	--)
 	--,
 	--testsub1
 	--as (select str(sum(case when AlcoholAbuse = '1' or SubstanceAbuse = '1' then 1 else 0 end)) as pc1i01SubstanceAbuseCount
@@ -272,11 +281,4 @@ as
 	-- group by TotalCount
 		
 	--select * from testsub1
-
-	select KempeCount [pc1i00AssessmentN]
-		  ,TotalCount [pc1i00CurrentIssueN]
-		  ,*
-		from sub2
-			join sub1 on 1 = 1
-		
 GO
