@@ -184,7 +184,7 @@ WHEN ca.HIUninsured = 1 THEN 'Uninsured'
 WHEN ca.HIUnknown = 1 THEN 'Other'
 WHEN ca.HIOther = 1 THEN 'Other'
 ELSE '' END [PC1MedicalInsurance]
-, CASE WHEN ca.PC1ReceivingMedicaid = 1 THEN 'On File' ELSE '' END [PC1MAOnFile]
+, case when HIMedicaidCaseNumber is not null and HIMedicaidCaseNumber <> '' THEN 'On File' ELSE '' END [PC1MAOnFile]
 , CASE WHEN ca.PBEmergencyAssistance = 1 THEN 'EA ' ELSE '' END +
 CASE WHEN ca.PBFoodStamps = 1 THEN 'FS ' ELSE '' END +
 CASE WHEN ca.PBSSI = 1 THEN 'SSI ' ELSE '' END +
@@ -259,7 +259,7 @@ WHEN ca.TCHIUninsured = 1 THEN 'Uninsured'
 WHEN ca.TCHIUnknown = 1 THEN 'Other'
 WHEN ca.TCHIOther = 1 THEN 'Other'
 ELSE '' END [TCMedicalInsurance]
-, CASE WHEN ca.TCReceivingMedicaid = 1 THEN 'On File'  ELSE '' END [TCMAOnFile]
+, case when ca.TCHIMedicaidCaseNumber is not null and ca.TCHIMedicaidCaseNumber <> '' then 'On File'  ELSE '' END [TCMAOnFile]
 FROM(
 SELECT HVCaseFK, cast(substring(maxkey, 9, 10) AS INT) CommonAttributesPK
 FROM (SELECT HVCaseFK,
