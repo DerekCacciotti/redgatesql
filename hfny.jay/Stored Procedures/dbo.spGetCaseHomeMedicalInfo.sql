@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -25,7 +26,7 @@ BEGIN
 	 FROM CommonAttributes ca 
 	 WHERE HVCaseFK=@hvcasefk
 	 AND FormType LIKE 'FU%'
-	 ORDER BY FormDate DESC
+	 ORDER BY FormDate DESC, CommonAttributesPK DESC
 	)
 
 	, ctePC AS (
@@ -34,7 +35,7 @@ BEGIN
 		 FROM CommonAttributes ca 
 		 WHERE HVCaseFK=@hvcasefk
 		 AND FormType IN ('CH', 'IN-PC1', 'FU-PC1')
-		 ORDER BY FormDate DESC
+		 ORDER BY FormDate DESC, CommonAttributesPK DESC
 	 )
 	 
 	, cteTC AS (
@@ -43,7 +44,7 @@ BEGIN
 		 FROM CommonAttributes ca 
 		 WHERE HVCaseFK=@hvcasefk
 		 AND FormType IN ('CH', 'IN', 'TC')
-		 ORDER BY FormDate DESC
+		 ORDER BY FormDate DESC, CommonAttributesPK DESC
 	 )
 		
 
