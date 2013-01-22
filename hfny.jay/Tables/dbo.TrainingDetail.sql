@@ -15,6 +15,10 @@ CREATE TABLE [dbo].[TrainingDetail]
 [ExemptDescription] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ExemptType] [varchar] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_TrainingDetail_ProgramFK] ON [dbo].[TrainingDetail] ([ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_TrainingDetail_TrainingFK] ON [dbo].[TrainingDetail] ([TrainingFK]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[TrainingDetail] WITH NOCHECK ADD
 CONSTRAINT [FK_TrainingDetail_TrainingFK] FOREIGN KEY ([TrainingFK]) REFERENCES [dbo].[Training] ([TrainingPK])
 GO
