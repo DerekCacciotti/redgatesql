@@ -8,6 +8,7 @@ GO
 -- Create date: Nov. 12, 2011
 -- Modified: 
 -- Description:	CaseFilter (Xtra-flds) by ProgramFK
+-- exec [spGetAllCaseFilterByHVCaseFK] 183802,34
 -- =============================================
 CREATE PROCEDURE [dbo].[spGetAllCaseFilterByHVCaseFK]  (@HVCaseFK int, @ProgramFK int)
 
@@ -31,17 +32,23 @@ BEGIN
 	 Where HVCaseFK=@HVCaseFK) 
 	select listCaseFilterNamePK
           ,FieldTitle
-          ,FilterType
+          ,case when FilterType='1' then 'Yes/No'
+				when FilterType='2' then 'Multiple choice'
+				when FilterType='3' then 'Free form'
+			end as FilterTitle
           ,Hint
-		  ,CaseFilterNameChoice
-		  ,CaseFilterNameOptionFK
+		  ,case when CaseFilterNameChoice=1 then 'Yes' 
+				when CaseFilterNameChoice=0 then 'No' 
+				else '' end as CaseFilterNameChoice
+		  ,cfno.FilterOption as CaseFilterNameOptionFK
 		  ,CaseFilterValue
           ,CaseFilterPK
           ,HVCaseFK
           ,cfn.ProgramFK
 	from listCaseFilterName cfn
-	LEFT OUTER JOIN cteCaseFilters CF on cfn.ProgramFK=CF.ProgramFK and 
+	left outer join cteCaseFilters CF on cfn.ProgramFK=CF.ProgramFK and 
 										 listCaseFilterNamePK= CF.CaseFilterNameFK
+	left outer join listCaseFilterNameOption cfno on CaseFilterNameOptionFK = cfno.listCaseFilterNameOptionPK
 	where CF.ProgramFK = isnull(@ProgramFK,CF.ProgramFK)
 	ORDER BY FieldTitle
 
