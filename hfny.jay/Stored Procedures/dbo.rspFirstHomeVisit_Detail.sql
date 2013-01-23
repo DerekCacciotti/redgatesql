@@ -74,7 +74,7 @@ as
 												  ,edc) as t on CaseProgram.HVCaseFK = t.HVCasePK
 						  left join HVCase on HVCase.HVCasePK = CaseProgram.HVCaseFK
 						  left join Worker on Worker.WorkerPK = CaseProgram.CurrentFSWFK) a
-			where numdays > 91
+			where numdays > 92
 			order by numdays desc
 
 	end
