@@ -27,8 +27,8 @@ begin
             @pospair2 as varchar(100) = '',
             @pospair3 as varchar(100) = '',
             @negpair1 as varchar(100) = '',
-            @negpair2 as varchar(100) ,
-            @negpair3 as varchar(100) ,
+            @negpair2 as varchar(100) = '',
+            @negpair3 as varchar(100) = '',
             @rownum   as int,
             @listitem as varchar(100)
 	--positive clause
