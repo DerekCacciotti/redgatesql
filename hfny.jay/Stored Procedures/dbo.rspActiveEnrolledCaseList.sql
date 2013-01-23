@@ -16,10 +16,10 @@ CREATE PROCEDURE [dbo].[rspActiveEnrolledCaseList]
 	@SiteFK INT = -1
 AS
 
-
---DECLARE @StartDate DATE = '01/01/2011'
---DECLARE @EndDate DATE = '05/31/2011'
---DECLARE @ProgramPK INT = 17
+--DECLARE @StartDt DATE = '01/01/2011'
+--DECLARE @EndDt DATE = '05/31/2011'
+--DECLARE @programfk INT = 17
+--DECLARE @SiteFK INT = -1
 
 SELECT rtrim(PC.PCLastName) + cast(PC.PCPK AS VARCHAR(10)) [key01]
 , rtrim(PC.PCLastName) + ', ' + rtrim(PC.PCFirstName) [Name]
@@ -50,6 +50,7 @@ ORDER BY ca.FormDate DESC
 ,ca.FormDate, ca.TANFServices, ca.FormType, ca.FormInterval
 ,rtrim(T.TCLastName) + ', ' + rtrim(T.TCFirstName) [tcName]
 ,convert(VARCHAR(12), T.TCDOB, 101) [tcDOB]
+, CASE WHEN ls.SiteCode IS NULL THEN '' ELSE ls.SiteCode END SiteCode
 
 FROM CaseProgram AS a
 JOIN HVCase AS b 
@@ -66,6 +67,7 @@ JOIN HVScreen ON HVScreen.HVCaseFK = b.HVCasePK
 -- FSW & site = a.CurrentFSWFK <-> Worker.WorkerPK -> Worker.LastName + Worker.FirstName ?? site ??
 LEFT OUTER JOIN Worker ON Worker.WorkerPK = a.CurrentFSWFK
 JOIN Workerprogram AS wp on wp.WorkerFK = Worker.WorkerPK
+LEFT OUTER JOIN listSite AS ls ON wp.SiteFK = ls.listSitePK
 --
 -- intake date & age at intake = a.HVCaseFK <-> Intake.HVCaseFK -> Intake.IntakeDate -> (PCDOB - IntakeDate)
 JOIN Intake ON Intake.HVCaseFK = b.HVCasePK
