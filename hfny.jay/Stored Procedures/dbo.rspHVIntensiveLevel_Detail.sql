@@ -41,6 +41,7 @@ set @posclause = case when @posclause = '' then null else @posclause end
 SELECT hvcasefk, min(StartLevelDate) [StartLevelDate_Level2]
 FROM dbo.HVLevelDetail
 WHERE Levelfk IN (16, 18, 20) AND ProgramFK = @programfk 
+AND StartLevelDate <= @edate
 GROUP BY hvcasefk
 )
 ,
