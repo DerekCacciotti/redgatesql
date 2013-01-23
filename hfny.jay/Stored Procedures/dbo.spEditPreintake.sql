@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -30,7 +31,7 @@ CREATE PROCEDURE [dbo].[spEditPreintake](@PreintakePK int=NULL,
 @PIVisitAttempt int=NULL,
 @PIVisitMade int=NULL,
 @ProgramFK int=NULL,
-@TransferredtoProgram int=NULL)
+@TransferredtoProgram varchar(50)=NULL)
 AS
 UPDATE Preintake
 SET 

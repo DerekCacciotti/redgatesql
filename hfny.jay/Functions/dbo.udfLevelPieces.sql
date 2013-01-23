@@ -6,7 +6,7 @@ GO
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Jan 4, 2012>
--- Description:	<udfLevelPieces - returns distinct level periods for each caswe in cohort, used in many other sprocs>
+-- Description:	<udfLevelPieces - returns distinct level periods for each case in cohort, used in many other sprocs>
 -- =============================================
 CREATE function [dbo].[udfLevelPieces]
 (-- Add the parameters for the function here

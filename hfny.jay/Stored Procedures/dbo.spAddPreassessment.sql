@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -32,7 +33,7 @@ CREATE PROCEDURE [dbo].[spAddPreassessment](@CaseStatus char(2)=NULL,
 @PAVisitAttempt int=NULL,
 @PAVisitMade int=NULL,
 @ProgramFK int=NULL,
-@TransferredtoProgram int=NULL)
+@TransferredtoProgram varchar(50)=NULL)
 AS
 INSERT INTO Preassessment(
 CaseStatus,

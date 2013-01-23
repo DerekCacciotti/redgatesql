@@ -40,7 +40,7 @@ CREATE PROCEDURE [dbo].[spEditHVScreen](@HVScreenPK int=NULL,
 @ScreenResult char(1)=NULL,
 @ScreenVersion char(2)=NULL,
 @TargetArea char(1)=NULL,
-@TransferredtoProgram int=NULL)
+@TransferredtoProgram varchar(50)=NULL)
 AS
 UPDATE HVScreen
 SET 

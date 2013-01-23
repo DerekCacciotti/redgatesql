@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -33,7 +34,7 @@ CREATE PROCEDURE [dbo].[spEditPreassessment](@PreassessmentPK int=NULL,
 @PAVisitAttempt int=NULL,
 @PAVisitMade int=NULL,
 @ProgramFK int=NULL,
-@TransferredtoProgram int=NULL)
+@TransferredtoProgram varchar(50)=NULL)
 AS
 UPDATE Preassessment
 SET 

@@ -39,7 +39,7 @@ CREATE PROCEDURE [dbo].[spAddHVScreen](@DischargeReason char(2)=NULL,
 @ScreenResult char(1)=NULL,
 @ScreenVersion char(2)=NULL,
 @TargetArea char(1)=NULL,
-@TransferredtoProgram int=NULL)
+@TransferredtoProgram varchar(50)=NULL)
 AS
 INSERT INTO HVScreen(
 DischargeReason,

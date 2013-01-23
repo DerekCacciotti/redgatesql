@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -45,6 +46,12 @@ begin
 
 	set @programfk = REPLACE(@programfk,'"','')
 
+	declare @startdate datetime
+	declare @enddate datetime
+	
+	set @startdate = convert(datetime,convert(varchar(12), @sdate) + '00:00:00.000')
+	set @enddate = convert(datetime,convert(varchar(12), @edate) + '23:59:59.999')
+
 	--match the hvlog records to this
 	insert
 		into @THVRecords
@@ -58,7 +65,7 @@ begin
 			  ,cp.DischargeDate
 			from [dbo].[udfLevelPieces](@programfk,@sdate,@edate) tlp
 				left outer join hvlog on tlp.casefk = hvlog.hvcasefk
-							   and VisitStartTime between tlp.StartDate and tlp.EndDate
+							   and convert(date,VisitStartTime) between @sdate and @edate
 				inner join CaseProgram cp on cp.HVCaseFK = tlp.Casefk
 						  and cp.ProgramFK = tlp.programfk
 

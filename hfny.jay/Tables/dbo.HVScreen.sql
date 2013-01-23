@@ -40,7 +40,7 @@ CREATE TABLE [dbo].[HVScreen]
 [ScreenResult] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ScreenVersion] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [TargetArea] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[TransferredtoProgram] [int] NULL
+[TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

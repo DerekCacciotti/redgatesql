@@ -34,7 +34,7 @@ CREATE TABLE [dbo].[Preassessment]
 [PAVisitAttempt] [int] NULL,
 [PAVisitMade] [int] NULL,
 [ProgramFK] [int] NOT NULL,
-[TransferredtoProgram] [int] NULL
+[TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_HVCaseFK] ON [dbo].[Preassessment] ([HVCaseFK]) ON [PRIMARY]
 
