@@ -28,7 +28,7 @@ CREATE TABLE [dbo].[CaseProgram]
 [OldID] [char] (23) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PC1ID] [char] (13) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL,
-[TransferredtoProgram] [varchar] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TransferredtoProgramFK] [int] NULL
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAFK] ON [dbo].[CaseProgram] ([CurrentFAFK]) ON [PRIMARY]
