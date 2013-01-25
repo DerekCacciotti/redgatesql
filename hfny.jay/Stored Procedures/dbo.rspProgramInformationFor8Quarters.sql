@@ -1288,14 +1288,14 @@ SELECT
 	 , c8.Q8Col8
 	 
 	 FROM @tblcol99 c99
-LEFT JOIN @tblcol1 c1 ON c1.Q8Columns = c99.Q8Columns
-LEFT JOIN @tblcol2 c2 ON c2.Q8Columns = c99.Q8Columns
-LEFT JOIN @tblcol3 c3 ON c3.Q8Columns = c99.Q8Columns
-LEFT JOIN @tblcol4 c4 ON c4.Q8Columns = c99.Q8Columns
-LEFT JOIN @tblcol5 c5 ON c5.Q8Columns = c99.Q8Columns
-LEFT JOIN @tblcol6 c6 ON c6.Q8Columns = c99.Q8Columns
-LEFT JOIN @tblcol7 c7 ON c7.Q8Columns = c99.Q8Columns
-LEFT JOIN @tblcol8 c8 ON c8.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol1 c1 ON c1.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol2 c2 ON c2.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol3 c3 ON c3.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol4 c4 ON c4.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol5 c5 ON c5.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol6 c6 ON c6.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol7 c7 ON c7.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol8 c8 ON c8.Q8Columns = c99.Q8Columns
 
 
 
