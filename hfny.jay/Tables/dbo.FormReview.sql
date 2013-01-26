@@ -13,6 +13,8 @@ CREATE TABLE [dbo].[FormReview]
 [ReviewDateTime] [datetime] NULL,
 [ReviewedBy] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FormReview_FormDate_FormFK_FormType] ON [dbo].[FormReview] ([FormDate], [FormFK], [FormType]) ON [PRIMARY]
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO

@@ -28,7 +28,7 @@ CREATE PROCEDURE [dbo].[spEditCaseProgram](@CaseProgramPK int=NULL,
 @OldID char(23)=NULL,
 @PC1ID char(13)=NULL,
 @ProgramFK int=NULL,
-@TransferredtoProgram varchar(30)=NULL,
+@TransferredtoProgram varchar(50)=NULL,
 @TransferredtoProgramFK int=NULL)
 AS
 UPDATE CaseProgram

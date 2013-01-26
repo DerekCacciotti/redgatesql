@@ -56,6 +56,8 @@ CREATE TABLE [dbo].[FollowUp]
 [SixMonthHome] [bit] NULL,
 [TimesPregnant] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FollowUpInterval] ON [dbo].[FollowUp] ([FollowUpInterval]) ON [PRIMARY]
+
 CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_FSWFK] ON [dbo].[FollowUp] ([FSWFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_HVCaseFK] ON [dbo].[FollowUp] ([HVCaseFK]) ON [PRIMARY]

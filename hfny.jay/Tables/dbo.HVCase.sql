@@ -36,6 +36,8 @@ CREATE TABLE [dbo].[HVCase]
 [TCDOD] [datetime] NULL,
 [TCNumber] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_HVCase_IntakeDate] ON [dbo].[HVCase] ([IntakeDate]) INCLUDE ([CaseProgress], [EDC], [HVCasePK], [TCDOB], [TCNumber]) ON [PRIMARY]
+
 CREATE NONCLUSTERED INDEX [IX_FK_HVCase_CPFK] ON [dbo].[HVCase] ([CPFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_HVCase_FFFK] ON [dbo].[HVCase] ([FFFK]) ON [PRIMARY]

@@ -31,6 +31,8 @@ CREATE TABLE [dbo].[CaseProgram]
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TransferredtoProgramFK] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[CaseProgram] ADD 
+CONSTRAINT [PK_CaseProgram] PRIMARY KEY CLUSTERED  ([CaseProgramPK]) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAFK] ON [dbo].[CaseProgram] ([CurrentFAFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAWFK] ON [dbo].[CaseProgram] ([CurrentFAWFK]) ON [PRIMARY]
@@ -93,8 +95,7 @@ AS
 Update CaseProgram Set CaseProgram.CaseProgramEditDate= getdate()
 From [CaseProgram] INNER JOIN Inserted ON [CaseProgram].[CaseProgramPK]= Inserted.[CaseProgramPK]
 GO
-ALTER TABLE [dbo].[CaseProgram] ADD CONSTRAINT [PK__CaseProg__E9A72D25117F9D94] PRIMARY KEY CLUSTERED  ([CaseProgramPK]) ON [PRIMARY]
-GO
+
 ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_CurrentFAFK] FOREIGN KEY ([CurrentFAFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO
 ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_CurrentFAWFK] FOREIGN KEY ([CurrentFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
