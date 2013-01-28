@@ -70,7 +70,9 @@ as
         union
         -- PSI block out HOME and HOME EC, and add PSI
 			select eventDescription
-			  ,dateadd(dd,dueby,
+			  ,dateadd(dd,
+			  --dueby,
+			  Case WHEN codeDueByDates.Interval = '00' THEN 0 ELSE DueBy END,
 			  --hvcase.tcdob
 			  Case WHEN codeDueByDates.Interval = '00' and hvcase.IntakeDate > hvcase.TCDOB THEN HVCase.IntakeDate ELSE HVCase.TCDOB END) DueDate
 			from caseprogram
