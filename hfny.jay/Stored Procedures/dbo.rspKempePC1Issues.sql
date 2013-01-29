@@ -12,26 +12,31 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspKempePC1Issues]
 (
-    @programfk           int      = null,
+    @programfk           VARCHAR(MAX) = null,
     @StartDt             datetime = null,
     @EndDt               datetime = null,
     @sitefk              int      = null,
-    @casefilterspositive varchar(200)
+    @casefilterspositive varchar(200) = null
 )
 
 as
-begin
 
+--DECLARE @programfk  VARCHAR(MAX)   = '1,35,9'
+--DECLARE @StartDt    datetime = '1/1/2012'
+--DECLARE @EndDt      datetime = '12/31/2012'
+--DECLARE @sitefk     int      = null
+--DECLARE @casefilterspositive varchar(200) = NULL
+
+begin
 	-- Insert statements for procedure here
-	if @ProgramFK is null
+	if @programfk is null
 	begin
-		select @ProgramFK =
+		select @programfk =
 			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
 							  from HVProgram
 							  for xml path ('')),2,8000)
 	end
-
-	set @ProgramFK = REPLACE(@ProgramFK,'"','')
+	set @programfk = REPLACE(@programfk,'"','')
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end;
 
@@ -50,6 +55,7 @@ begin
 		inner join caseprogram cp on cp.HVCaseFK = pc1i.HVCaseFK
 		inner join Kempe k on k.PC1IssuesFK = pc1i.PC1IssuesPK
 		inner join WorkerProgram wp on WorkerFK = FAWFK
+		inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = pc1i.HVCaseFK
 		where PC1IssuesDate <= @EndDt
 				and Interval='1'
@@ -68,6 +74,7 @@ begin
 			join ServiceReferral sr on sr.HVCaseFK = c.HVCasePK
 			inner join caseprogram cp on cp.HVCaseFK = c.HVCasePK
 			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = c.HVCasePK
 		where c.IntakeDate between @StartDt and @EndDt
 			 and sr.ReferralDate-c.IntakeDate < 183
@@ -98,9 +105,10 @@ begin
 			inner join worker fsw on fsw.workerpk = cp.currentfswfk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk
 			inner join worker sup on supervisorfk = sup.workerpk
+			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = c.HVCasePK
 		where c.IntakeDate between @StartDt and @EndDt
-			 and cp.ProgramFK = @programfk
+			 --and cp.ProgramFK = @programfk
 			 and (cp.DischargeDate is null
 			 or cp.DischargeDate <= @EndDt)
 			 and (pc1i.SubstanceAbuse = 1
