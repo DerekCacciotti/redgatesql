@@ -10,7 +10,8 @@ GO
 -- exec rspProgramDemographics @programfk = 18, @StartDt = N'12/01/11', @EndDt = N'11/30/12', @SiteFK = 21 
 -- =============================================
 CREATE procedure [dbo].[rspProgramDemographics]
-    @programfk int = null,
+    --@programfk int = null,
+    @programfk varchar(max)    = null,
     @StartDt   datetime,
     @EndDt     datetime,
     @SiteFK    int = 0
@@ -19,7 +20,13 @@ as
 	--DECLARE @programfk INT = 6 
 	--DECLARE @StartDt DATETIME = '06/01/2012'
 	--DECLARE @EndDt DATETIME = '06/30/2012'
-
+    if @programfk is null
+	begin
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
+	set @programfk = replace(@programfk,'"','')
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
 
 	with MotherWithOtherChildren
@@ -32,11 +39,12 @@ as
 				join OtherChild as oc on oc.FormFK = d.IntakePK and oc.FormType = 'IN' and oc.Relation2PC1 = '01'
 				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
 				inner join workerprogram wp on wp.workerfk = fsw.workerpk
+				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
 			where
 				 (b.DischargeDate is null
 				 or b.DischargeDate >= @StartDt)
 				 and a.IntakeDate <= @EndDt
-				 and b.ProgramFK = @programfk
+				 --and b.ProgramFK = @programfk
 				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	),
 	TCMedicaid_5
@@ -54,11 +62,12 @@ as
 				join CommonAttributes as caTC on caTC.FormFK = tc.TCIDPK and caTC.FormType = 'TC'
 				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
 				inner join workerprogram wp on wp.workerfk = fsw.workerpk
+				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
 			where
 				 (b.DischargeDate is null
 				 or b.DischargeDate >= @StartDt)
 				 and a.IntakeDate <= @EndDt
-				 and b.ProgramFK = @programfk
+				 --and b.ProgramFK = @programfk
 				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	),
 	TCMedicaid
@@ -122,6 +131,7 @@ as
 				join Intake as d on d.HVCaseFK = a.HVCasePK
 				join worker fsw on b.CurrentFSWFK = fsw.workerpk
 				join workerprogram wp on wp.workerfk = fsw.workerpk
+				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
 				left outer join CommonAttributes as ca on ca.FormFK = d.IntakePK and ca.FormType = 'IN'
 				left outer join CommonAttributes as ca1 on ca1.FormFK = d.IntakePK and ca1.FormType = 'IN-PC1'
 				left outer join CommonAttributes as ca2 on ca2.FormFK = d.IntakePK and ca2.FormType = 'IN-PC2'
@@ -134,11 +144,12 @@ as
 									 group by
 											 HVCaseFK) as t
 							   on t.HVCaseFK = a.HVCasePK
+			
 			where
 				 (b.DischargeDate is null
 				 or b.DischargeDate >= @StartDt)
 				 and a.IntakeDate <= @EndDt
-				 and b.ProgramFK = @programfk
+				 --and b.ProgramFK = @programfk
 				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	),
 	y
