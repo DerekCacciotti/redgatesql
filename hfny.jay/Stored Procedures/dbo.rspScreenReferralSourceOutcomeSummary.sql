@@ -18,6 +18,10 @@ CREATE procedure [dbo].[rspScreenReferralSourceOutcomeSummary]
 )
 as
 
+--DECLARE @programfk varchar(max)    = '18'
+--DECLARE   @sdate     DATETIME  = '01/01/2011'
+--DECLARE   @edate     DATETIME = '12/01/2012'
+
 	if @programfk is null
 	begin
 		select @programfk =
@@ -121,14 +125,15 @@ as
 							 else
 								 0
 						 end) as Enrolled
-					,ReferralSourceName
+					--,ReferralSourceName
+					,CASE WHEN ReferralSourceName IS NULL THEN 'No Referral Source' ELSE ReferralSourceName END ReferralSourceName
 				  from hvscreen
 					  inner join HVCase on HVScreen.HVCaseFK = HVCasePK
 					  inner join caseprogram on caseprogram.hvcasefk = hvcasepk
-					  inner join dbo.listReferralSource on ReferralSourceFK = listReferralSourcePK
+					  LEFT OUTER join dbo.listReferralSource on ReferralSourceFK = listReferralSourcePK
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 				  where hvscreen.ScreenDate between @sdate and @edate
 						-- and CaseProgress=3 and CurrentLevelFK=3
-				  group by ReferralSourceName) t
+				  group by CASE WHEN ReferralSourceName IS NULL THEN 'No Referral Source' ELSE ReferralSourceName END) t
 		order by screens desc
 GO
