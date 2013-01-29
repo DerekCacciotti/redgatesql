@@ -10,16 +10,25 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[rspActiveEnrolledCaseList] 
 	-- Add the parameters for the stored procedure here
-	@programfk INT = NULL, 
+	@programfk VARCHAR(MAX) = NULL, 
 	@StartDt datetime,
 	@EndDt DATETIME,
-	@SiteFK INT = -1
+	@SiteFK INT = 0
 AS
 
 --DECLARE @StartDt DATE = '01/01/2011'
 --DECLARE @EndDt DATE = '05/31/2011'
---DECLARE @programfk INT = 17
+--DECLARE @programfk VARCHAR(MAX) = '1'
 --DECLARE @SiteFK INT = -1
+
+  if @programfk is null
+	begin
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
+	set @programfk = replace(@programfk,'"','')
+    set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
 
 SELECT rtrim(PC.PCLastName) + cast(PC.PCPK AS VARCHAR(10)) [key01]
 , rtrim(PC.PCLastName) + ', ' + rtrim(PC.PCFirstName) [Name]
@@ -40,7 +49,8 @@ codeApp.AppCodeUsedWhere LIKE '%FU%' and codeApp.AppCodeGroup = 'TCAge'
 ) END [TANFServiceAt]
 ,convert(VARCHAR(12), ca.FormDate, 101) [Eligible]
 ,(SELECT count(*) FROM HVLog WHERE VisitType <> '0001'AND VisitStartTime <= @EndDt 
-AND VisitStartTime >= b.IntakeDate AND HVCaseFK = b.HVCasePK AND ProgramFK = @programfk) [HomeVisits]
+AND VisitStartTime >= b.IntakeDate AND HVCaseFK = b.HVCasePK 
+) [HomeVisits]
 -- folling fields are used for validating (to be removed)
 ,(
 SELECT TOP 1 ca.CommonAttributesPK FROM CommonAttributes ca 
@@ -53,9 +63,8 @@ ORDER BY ca.FormDate DESC
 , CASE WHEN ls.SiteCode IS NULL THEN '' ELSE ls.SiteCode END SiteCode
 
 FROM CaseProgram AS a
-JOIN HVCase AS b 
-ON a.HVCaseFK = b.HVCasePK
-
+JOIN HVCase AS b ON a.HVCaseFK = b.HVCasePK
+inner join dbo.SplitString(@programfk,',') on a.programfk = listitem
 -- pc1 name, dob, and SS# = b.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB, PC.SSNo
 JOIN PC ON PC.PCPK = b.PC1FK
 -- screen date = a.HVCaseFK <-> Kempe.HVCaseFK -> Kempe.KempeDate
@@ -96,8 +105,9 @@ ORDER BY FormDate DESC)
 LEFT OUTER JOIN TCID T ON T.HVCaseFK = b.HVCasePK
 
 WHERE b.IntakeDate < @EndDt AND (a.DischargeDate IS NULL OR a.DischargeDate > @StartDt)
-AND a.ProgramFK = @programfk
-AND (@SiteFK = -1 OR (ISNULL(wp.SiteFK, -1) = @SiteFK))
+--AND a.ProgramFK = @programfk
+and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+--AND (@SiteFK = -1 OR (ISNULL(wp.SiteFK, -1) = @SiteFK))
 ORDER BY [key01]
 
 
