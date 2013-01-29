@@ -8,12 +8,13 @@ GO
 -- Author:		<Jay Robohn orig by Dorothy Baum>
 -- Create date: <June 3, 2010>
 -- Description:	<report: Credentialing 1-1D. Assessment Info>
+-- exec rspCredentialingAssessmentInfo '20050101', '20051231', '34', null, '13Program,13Control', ''
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingAssessmentInfo]
 (
     @StartDate  datetime,
     @EndDate    datetime,
-    @ProgramFKs varchar(max),
+    @ProgramFKs varchar(200),
     @SiteFK		int = 0,
     @posclause  varchar(200),
     @negclause  varchar(200)
@@ -25,8 +26,8 @@ begin
 	-- interfering with SELECT statements.
 	set nocount on;
 
-	if charindex(',',@ProgramFKs) = 0
-		set @ProgramFKs = ',' + @ProgramFKs + ','
+	--if left(@ProgramFKs,1) <> ',' or right(@ProgramFKs,1) <> ',' -- charindex(',',@ProgramFKs) = 0
+	--	set @ProgramFKs = ',' + @ProgramFKs + ','
 
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 	set @posclause = case when @posclause = '' then null else @posclause end;
@@ -81,16 +82,16 @@ begin
 				from (select kempe.*
 							,isnull(hvcase.tcdob,hvcase.edc) as bday
 						  from kempe 
-						  JOIN hvcase ON kempe.hvcasefk = hvcasepk
-						  join caseprogram on hvcase.HVCasePK = caseprogram.HVcaseFK
+						  inner join hvcase ON kempe.hvcasefk = hvcasepk
+						  inner join CaseProgram cp on hvcase.HVCasePK = cp.HVcaseFK
 						  inner join worker faw on FAWFK = faw.workerpk
 				          inner join workerprogram on workerprogram.workerfk = faw.workerpk
-					  
+						  inner join dbo.SplitString(@ProgramFKs,',') ss on cp.ProgramFK = listitem
 						  where 
 							   Kempe.KempeDate >= @StartDate
 							   and Kempe.KempeDate <= @EndDate
-							   AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
-							   and (@ProgramFKs like ('%,'+cast(kempe.programfk as varchar(100))+',%'))) a
+							   AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)) a
+							   -- and (@ProgramFKs like ('%,'+cast(kempe.programfk as varchar(100))+',%'))
 				inner join dbo.udfCaseFilters(@posclause, @negclause, @ProgramFKs) cf on cf.HVCaseFK = a.HVCaseFK
 		)
 		select kempettl
