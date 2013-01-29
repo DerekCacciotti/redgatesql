@@ -6,7 +6,7 @@ GO
 
 CREATE procedure [dbo].[rspASQHistory]
 (
-    @programfk       int            = null,
+    @programfk       VARCHAR(MAX)   = null,
     @supervisorfk    int            = null,
     @workerfk        int            = null,
     @UnderCutoffOnly char(1)        = 'N',
@@ -15,6 +15,14 @@ CREATE procedure [dbo].[rspASQHistory]
 )
 AS
 
+  if @programfk is null
+	begin
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
+	set @programfk = replace(@programfk,'"','')
+	
 --White space for testing Dar's SQL SVN repository
 	declare @n int = 0
 	select @n = case when @UnderCutoffOnly = 'Y' then 1 else 0 end
@@ -49,6 +57,7 @@ AS
 			inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
 			inner join TCID c on c.TCIDPK = a.TCIDFK
 			inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
+			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
 			inner join worker fsw on d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
@@ -76,7 +85,7 @@ AS
 			 d.DischargeDate is null
 			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
 			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)
-			 and d.programfk = @programfk
+			 --and d.programfk = @programfk
 			 and d.PC1ID = case when @pc1ID = '' then d.PC1ID else @pc1ID end
 			 and SiteFK = isnull(@sitefk,SiteFK)
 		order by supervisor
