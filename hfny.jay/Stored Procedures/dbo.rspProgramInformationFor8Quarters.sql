@@ -10,7 +10,7 @@ GO
 -- Create date: <January 4th, 2013>
 -- Description:	<gets you data for Quarterly report i.e. J. Program Information for 8 Quarters>
 -- exec [rspProgramInformationFor8Quarters] '5','03/31/13'
--- exec [rspProgramInformationFor8Quarters] '5','12/31/12'
+-- exec [rspProgramInformationFor8Quarters] '2','06/30/12'
 -- exec [rspProgramInformationFor8Quarters] '5','06/30/12'
 --
 
@@ -277,29 +277,46 @@ INSERT INTO @tblInitial_cohort
 			cp.CaseStartDate <= @edate
 
 
-
 	
 	;
 	-- 1
-	WITH cteScreensFor1 AS
+	WITH cteScreensFor1Cohort AS
 	(	-- "1. Total Screens"
 		-- Screens Row 1
 	SELECT DISTINCT QuarterNumber,  count(*) over (partition by [QuarterNumber]) as 'numberOfScreens'
 		from @tblInitial_cohort h			
 			INNER JOIN @tblMake8Quarter q8 ON h.screendate between [QuarterStartDate] and [QuarterEndDate]
+	),
+	
+	cteScreensFor1 AS
+	(	-- "1. Total Screens"
+		-- Screens Row 1
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(numberOfScreens, 0) AS numberOfScreens
+		FROM cteScreensFor1Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber
+
 	),		
 
 	-- 2
-	cteKempAssessmentsFor2 AS
+	cteKempAssessmentsFor2Cohort AS
 	(	-- "2. Total Kempe Assessments"
 		-- Kempe Assessment Row 2
 	SELECT DISTINCT QuarterNumber,  count(*) over (partition by [QuarterNumber]) as 'numberOfKempAssessments'
 		from @tblInitial_cohort h
 			INNER JOIN @tblMake8Quarter q8 ON KempeDate between [QuarterStartDate] and [QuarterEndDate]
+	),	
+	cteKempAssessmentsFor2 AS
+	(	-- "2. Total Kempe Assessments"
+		-- Kempe Assessment Row 2		
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(numberOfKempAssessments, 0) AS numberOfKempAssessments
+		FROM cteKempAssessmentsFor2Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
 	),		
-
+		
 	-- 2a
-	cteKempAssessments_For2a AS
+	cteKempAssessments_For2aCohort AS
 	( 	
 	-- Kempe Assessment Percentage
 	-- It will be done in two steps i.e. 1. Get numbers like KempPositive and TotalKemp 2. Then calc Percentage from them in cteKempAssessments_For2a_Calc_Percentage ... khalsa
@@ -311,6 +328,18 @@ INSERT INTO @tblInitial_cohort
 			INNER JOIN @tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),	
 	
+	cteKempAssessments_For2a AS
+	( 	
+	-- Kempe Assessment Percentage
+	-- It will be done in two steps i.e. 1. Get numbers like KempPositive and TotalKemp 2. Then calc Percentage from them in cteKempAssessments_For2a_Calc_Percentage ... khalsa
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(TotalKemp, 0) AS TotalKemp
+				, isnull(KempPositive, 0) AS KempPositive
+				
+		FROM cteKempAssessments_For2aCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber
+	),	
+	
 	cteKempAssessments_For2a_Calc_Percentage AS
 			(	-- "    a. % Positive" 
 				-- Kempe Assessment Percentage Row 3				
@@ -320,7 +349,7 @@ INSERT INTO @tblInitial_cohort
 	),		
 
 	-- 2a1
-	cteKempAssessments_For2a_1 AS
+	cteKempAssessments_For2a_1Cohort AS
 	( 
 	-- Kempe Assessment Percentage - Positive Enrolled
 	-- It will be done in two steps i.e. 1. Get numbers like KempPositiveEnrolled and KempPositive 2. Then calc Percentage from them in cteKempAssessments_For2a_1_Calc_Percentage ... khalsa
@@ -332,6 +361,19 @@ INSERT INTO @tblInitial_cohort
 			INNER JOIN @tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),
 	
+	cteKempAssessments_For2a_1 AS
+	( 
+	-- Kempe Assessment Percentage - Positive Enrolled
+	-- It will be done in two steps i.e. 1. Get numbers like KempPositiveEnrolled and KempPositive 2. Then calc Percentage from them in cteKempAssessments_For2a_1_Calc_Percentage ... khalsa
+	
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(KempPositiveEnrolled, 0) AS KempPositiveEnrolled
+				, isnull(KempPositive, 0) AS KempPositive
+				
+		FROM cteKempAssessments_For2a_1Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+	),	
+	
 	cteKempAssessments_For2a_1_Calc_Percentage AS
 			(	-- "        1. % Positive Enrolled" 
 				-- Kempe Assessment Percentage Row 3				
@@ -341,7 +383,7 @@ INSERT INTO @tblInitial_cohort
 	),		
 
 	-- 2a2
-	cteKempAssessments_For2a_2 AS
+	cteKempAssessments_For2a_2Cohort AS
 	( 
 	-- Kempe Assessment Percentage - Positive Pending Enrollment
 	-- It will be done in two steps i.e. 1. Get numbers like KempPositivePending and KempPositive 2. Then calc Percentage from them in cteKempAssessments_For2a_2_Calc_Percentage ... khalsa
@@ -353,6 +395,20 @@ INSERT INTO @tblInitial_cohort
 			INNER JOIN @tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),
 	
+	cteKempAssessments_For2a_2 AS
+	( 
+	-- Kempe Assessment Percentage - Positive Pending Enrollment
+	-- It will be done in two steps i.e. 1. Get numbers like KempPositivePending and KempPositive 2. Then calc Percentage from them in cteKempAssessments_For2a_2_Calc_Percentage ... khalsa
+
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(KempPositivePending, 0) AS KempPositivePending
+				, isnull(KempPositive, 0) AS KempPositive
+				
+		FROM cteKempAssessments_For2a_2Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+	),	
+	
+	
 	cteKempAssessments_For2a_2_Calc_Percentage AS
 			(	--	"        2. % Positive Pending Enrollment" 
 				-- Kempe Assessment Percentage Row 3				
@@ -362,7 +418,7 @@ INSERT INTO @tblInitial_cohort
 	),		
 
 	-- 2a3
-	cteKempAssessments_For2a_3 AS
+	cteKempAssessments_For2a_3Cohort AS
 	( 
 	-- Kempe Assessment Percentage - Positive Terminated
 	-- It will be done in two steps i.e. 1. Get numbers like KempPositivePending and KempPositive 2. Then calc Percentage from them in cteKempAssessments_For2a_3_Calc_Percentage ... khalsa
@@ -373,7 +429,19 @@ INSERT INTO @tblInitial_cohort
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
 			INNER JOIN @tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),
-	
+	cteKempAssessments_For2a_3 AS
+	( 
+	-- Kempe Assessment Percentage - Positive Terminated
+	-- It will be done in two steps i.e. 1. Get numbers like KempPositivePending and KempPositive 2. Then calc Percentage from them in cteKempAssessments_For2a_3_Calc_Percentage ... khalsa
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(KempPositiveTerminated, 0) AS KempPositiveTerminated
+				, isnull(KempPositive, 0) AS KempPositive
+				
+		FROM cteKempAssessments_For2a_3Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+
+	),
+		
 	cteKempAssessments_For2a_3_Calc_Percentage AS
 			( --"        3. % Positive Terminated"
 			  -- Kempe Assessment Percentage Row 3				
@@ -383,7 +451,7 @@ INSERT INTO @tblInitial_cohort
 	),		
 
 	-- 2b
-	cteKempAssessments_For2b AS
+	cteKempAssessments_For2bCohort AS
 	( -- "    b. Average Positive Mother Score"
 	-- MomScore
 	SELECT DISTINCT q8.QuarterNumber	
@@ -393,8 +461,23 @@ INSERT INTO @tblInitial_cohort
 			INNER JOIN @tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),
 	
+	cteKempAssessments_For2b AS
+	( -- "    b. Average Positive Mother Score"
+	-- MomScore
+	
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(AvgPositiveMotherScore, 0) AS AvgPositiveMotherScore
+		FROM cteKempAssessments_For2bCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+	),	
+	
+	
+	
+	
+	
+	
 	-- 3
-	cteEnrolledAtBeginingOfQuarter3 AS
+	cteEnrolledAtBeginingOfQuarter3Cohort AS
 	( -- 3. Families Enrolled at Beginning of quarter
 		
 			SELECT DISTINCT QuarterNumber,  count(HVCasePK) over (partition by [QuarterNumber]) as 'EnrolledAtBeginningOfQrtr'
@@ -404,8 +487,18 @@ INSERT INTO @tblInitial_cohort
 	
 	),
 	
+	cteEnrolledAtBeginingOfQuarter3 AS
+	( -- 3. Families Enrolled at Beginning of quarter
+		
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(EnrolledAtBeginningOfQrtr, 0) AS EnrolledAtBeginningOfQrtr
+		FROM cteEnrolledAtBeginingOfQuarter3Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber			
+	
+	),	
+	
 	-- 4
-	cteNewEnrollmentsThisQuarter4 AS
+	cteNewEnrollmentsThisQuarter4Cohort AS
 	( -- "4. New Enrollments this quarter"
 		
 		SELECT DISTINCT QuarterNumber,  count(h.HVCasePK) over (partition by [QuarterNumber]) as 'NewEnrollmentsThisQuarter'
@@ -413,7 +506,16 @@ INSERT INTO @tblInitial_cohort
 			INNER JOIN @tblMake8Quarter q8 ON h.IntakeDate between [QuarterStartDate] and [QuarterEndDate]	
 
 	),	
-	
+	cteNewEnrollmentsThisQuarter4 AS
+	( -- "4. New Enrollments this quarter"
+		
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(NewEnrollmentsThisQuarter, 0) AS NewEnrollmentsThisQuarter
+		FROM cteNewEnrollmentsThisQuarter4Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber			
+
+	),	
+		
 	--- 4a
 	cteNewEnrollmentsThisQuarter4Again AS
 	( -- We will use this one in cteNewEnrollmentsThisQuarter4a. 
@@ -425,7 +527,7 @@ INSERT INTO @tblInitial_cohort
 
 	),				
 
-	cteNewEnrollmentsThisQuarter4a AS
+	cteNewEnrollmentsThisQuarter4aCohort AS
 	( 
 	-- "    a. % Prenatal"
 	-- It will be done in two steps i.e. 1. Get numbers like cteNewEnrollmentsThisQuarter4 and cteNewEnrollmentsThisQuarter4a 2. Then calc Percentage from them in cteNewEnrollmentsThisQuarter4a_Calc_Percentage ... khalsa
@@ -438,6 +540,20 @@ INSERT INTO @tblInitial_cohort
 			WHERE h.[CalcTCDOB] > IntakeDate 
 
 	),
+	
+	cteNewEnrollmentsThisQuarter4a AS
+	( 
+	-- "    a. % Prenatal"
+	-- It will be done in two steps i.e. 1. Get numbers like cteNewEnrollmentsThisQuarter4 and cteNewEnrollmentsThisQuarter4a 2. Then calc Percentage from them in cteNewEnrollmentsThisQuarter4a_Calc_Percentage ... khalsa
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(NewEnrollmentsPrenatal, 0) AS NewEnrollmentsPrenatal
+				, isnull(NewEnrollmentsThisQuarter, 0) AS NewEnrollmentsThisQuarter
+		FROM cteNewEnrollmentsThisQuarter4aCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+
+	),	
+	
+	
 	
 	cteNewEnrollmentsThisQuarter4a_Calc_Percentage AS		
 	(
@@ -457,7 +573,7 @@ INSERT INTO @tblInitial_cohort
 
 	),
 		
-	cteNewEnrollmentsThisQuarter4b AS
+	cteNewEnrollmentsThisQuarter4bCohort AS
 	( -- "    b. % TANF Services Eligible at Enrollment**"
 		
 		SELECT DISTINCT q8.QuarterNumber 
@@ -474,6 +590,18 @@ INSERT INTO @tblInitial_cohort
 		
 	),
 	
+	cteNewEnrollmentsThisQuarter4b AS
+	( -- "    b. % TANF Services Eligible at Enrollment**"
+	
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(TANFServicesEligible, 0) AS TANFServicesEligible
+				, isnull(NewEnrollmentsThisQuarter, 0) AS NewEnrollmentsThisQuarter
+		FROM cteNewEnrollmentsThisQuarter4bCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber			
+
+		
+	),	
+	
 	cteNewEnrollmentsThisQuarter4b_Calc_Percentage AS		
 	(
 			SELECT QuarterNumber		
@@ -481,8 +609,10 @@ INSERT INTO @tblInitial_cohort
 			 FROM cteNewEnrollmentsThisQuarter4b
 	),	
 	
+	
+	
 	-- 5
-	cteFamiliesDischargedThisQuarter5 AS
+	cteFamiliesDischargedThisQuarter5Cohort AS
 	( -- "5. Families Discharged this quarter"
 		
 		SELECT DISTINCT QuarterNumber,  count(h.HVCasePK) over (partition by [QuarterNumber]) as 'FamiliesDischargedThisQuarter'
@@ -492,8 +622,19 @@ INSERT INTO @tblInitial_cohort
 
 	),	
 	
+	cteFamiliesDischargedThisQuarter5 AS
+	( -- "5. Families Discharged this quarter"
+		
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(FamiliesDischargedThisQuarter, 0) AS FamiliesDischargedThisQuarter				
+		FROM cteFamiliesDischargedThisQuarter5Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+
+	),		
+	
+	
 	-- 5a
-	cteFamiliesCompletingProgramThisQuarter5a AS
+	cteFamiliesCompletingProgramThisQuarter5aCohort AS
 	( -- "    a. Families completing the program"
 		-- Discharged after completing the program through Discharge Form
 		SELECT DISTINCT QuarterNumber,  sum(
@@ -504,8 +645,19 @@ INSERT INTO @tblInitial_cohort
 			WHERE h.IntakeDate IS NOT NULL
 
 	),	
+	
+	cteFamiliesCompletingProgramThisQuarter5a AS
+	( -- "    a. Families completing the program"
+		-- Discharged after completing the program through Discharge Form
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(FamiliesCompletingProgramThisQuarter, 0) AS FamiliesCompletingProgramThisQuarter				
+		FROM cteFamiliesCompletingProgramThisQuarter5aCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+
+	),		
+	
 	-- 6
-	cteFamiliesActiveAtEndOfThisQuarter6 AS
+	cteFamiliesActiveAtEndOfThisQuarter6Cohort AS
 	( -- "6. Families Active at end of this Quarter"
 		
 		SELECT DISTINCT QuarterNumber,  count(h.HVCasePK) over (partition by [QuarterNumber]) as 'FamiliesActiveAtEndOfThisQuarter'
@@ -513,7 +665,18 @@ INSERT INTO @tblInitial_cohort
 				INNER JOIN @tblMake8Quarter q8 ON h.IntakeDate <= [QuarterEndDate]	
 				WHERE h.IntakeDate IS NOT NULL 				
 				AND (h.DischargeDate IS NULL OR h.DischargeDate >= QuarterEndDate)		
-	),	
+	),
+		
+	cteFamiliesActiveAtEndOfThisQuarter6 AS
+	( -- "6. Families Active at end of this Quarter"
+		
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(FamiliesActiveAtEndOfThisQuarter, 0) AS FamiliesActiveAtEndOfThisQuarter				
+		FROM cteFamiliesActiveAtEndOfThisQuarter6Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber			
+	),		
+	
+	
 	
 	-- 6a
 	cteFamiliesActiveAtEndOfThisQuarter6Again AS
@@ -527,7 +690,7 @@ INSERT INTO @tblInitial_cohort
 	),		
 	
 	
-	cteFamiliesActiveAtEndOfThisQuarter6a AS
+	cteFamiliesActiveAtEndOfThisQuarter6aCohort AS
 	( -- "    a. % on Level 1 at end of Quarter"
 		
 		SELECT DISTINCT q8.QuarterNumber
@@ -546,6 +709,17 @@ INSERT INTO @tblInitial_cohort
 				AND LevelName IN ('Level 1', 'Level 1-SS')	
 					
 	),
+	
+	cteFamiliesActiveAtEndOfThisQuarter6a AS
+	( -- "    a. % on Level 1 at end of Quarter"
+		
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(FamiliesActiveAtEndOfThisQuarterOnLevel1, 0) AS FamiliesActiveAtEndOfThisQuarterOnLevel1
+				, isnull(FamiliesActiveAtEndOfThisQuarter, 0) AS FamiliesActiveAtEndOfThisQuarter				
+		FROM cteFamiliesActiveAtEndOfThisQuarter6aCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+					
+	),	
 	
 	cteFamiliesActiveAtEndOfThisQuarter6a_Calc_Percentage AS		
 	(
@@ -637,7 +811,7 @@ INSERT INTO @tblInitial_cohort
 
 	),		
 	
-	cteFamiliesWithNoServiceReferrals6cMerge AS
+	cteFamiliesWithNoServiceReferrals6cMergeCohort AS
 	( -- "    c. % Families with no Service Referrals"
 	  -- Note: There are quarters which are missing in cteFamiliesWithNoServiceReferrals6c because all active families have service referrals in those quarters.
 	  -- therefore, we need  to merge to bring back missing quarters
@@ -651,6 +825,20 @@ INSERT INTO @tblInitial_cohort
 
 	),
 	
+	cteFamiliesWithNoServiceReferrals6cMerge AS
+	( -- "    c. % Families with no Service Referrals"
+	  -- Note: There are quarters which are missing in cteFamiliesWithNoServiceReferrals6c because all active families have service referrals in those quarters.
+	  -- therefore, we need  to merge to bring back missing quarters
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(FamiliesActiveAtEndOfThisQuarter, 0) AS FamiliesActiveAtEndOfThisQuarter
+				, isnull(FamiliesWithNoServiceReferrals, 0) AS FamiliesWithNoServiceReferrals				
+		FROM cteFamiliesWithNoServiceReferrals6cMergeCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber			
+
+	),	
+	
+	
+	
 	cteFamiliesWithNoServiceReferrals6c_Calc_Percentage AS		
 	(
 			SELECT QuarterNumber		
@@ -660,7 +848,7 @@ INSERT INTO @tblInitial_cohort
 	
 	-- 7	
 	
-	cteFamiliesActiveAtEndOfThisQuarter7LevelRate AS -- calculate level for each case
+	cteFamiliesActiveAtEndOfThisQuarter7LevelRateCohort AS -- calculate level for each case
 	( -- "7. Average Visits per Month per Case on Level 1"
 		
 		SELECT DISTINCT q8.QuarterNumber
@@ -695,7 +883,19 @@ INSERT INTO @tblInitial_cohort
 					
 	),
 	
-	cteFamiliesActiveAtEndOfThisQuarter7NumberOfVisits AS -- calculate visits per case
+	cteFamiliesActiveAtEndOfThisQuarter7LevelRate AS -- calculate level for each case
+	( -- "7. Average Visits per Month per Case on Level 1"
+		
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(FamiliesActiveAtEndOfThisQuarterOnLevel1, 0) AS FamiliesActiveAtEndOfThisQuarterOnLevel1
+				, isnull(TotalLevelRate, 0) AS TotalLevelRate				
+		FROM cteFamiliesActiveAtEndOfThisQuarter7LevelRateCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber		
+				
+					
+	),	
+	
+	cteFamiliesActiveAtEndOfThisQuarter7NumberOfVisitsCohort AS -- calculate visits per case
 	( -- "7. Average Visits per Month per Case on Level 1"
 
 		SELECT DISTINCT q8.QuarterNumber
@@ -725,6 +925,18 @@ INSERT INTO @tblInitial_cohort
 					
 	
 	),
+	
+	cteFamiliesActiveAtEndOfThisQuarter7NumberOfVisits AS -- calculate visits per case
+	( -- "7. Average Visits per Month per Case on Level 1"
+
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(FamiliesActiveAtEndOfThisQuarterOnLevel1, 0) AS FamiliesActiveAtEndOfThisQuarterOnLevel1
+				, isnull(TotalVisitRate, 0) AS TotalVisitRate				
+		FROM cteFamiliesActiveAtEndOfThisQuarter7NumberOfVisitsCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber								
+					
+	
+	),	
 		
 	cteFamiliesActiveAtEndOfThisQuarter7 AS -- calculate visits per case
 		( -- "7. Average Visits per Month per Case on Level 1"	
@@ -743,7 +955,7 @@ INSERT INTO @tblInitial_cohort
 	),	
 	
 	-- 8
-	cteTotalServedInQuarterIncludesClosedCases8 AS
+	cteTotalServedInQuarterIncludesClosedCases8Cohort AS
 	( -- "8. Total Served in Quarter(includes closed cases)"
 		
 		SELECT DISTINCT QuarterNumber,  count(h.HVCasePK) over (partition by [QuarterNumber]) as 'TotalServedInQuarterIncludesClosedCases'
@@ -752,9 +964,20 @@ INSERT INTO @tblInitial_cohort
 				WHERE h.IntakeDate IS NOT NULL 				
 				AND (h.DischargeDate IS NULL OR h.DischargeDate >= QuarterStartDate) -- not discharged or discharged after the quarter start date		
 	),
+	cteTotalServedInQuarterIncludesClosedCases8 AS
+	( -- "8. Total Served in Quarter(includes closed cases)"
+	
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(TotalServedInQuarterIncludesClosedCases, 0) AS TotalServedInQuarterIncludesClosedCases
+		FROM cteTotalServedInQuarterIncludesClosedCases8Cohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber				
+	
+	),	
+	
+	
 	
 	-- 8a
-	cteAllFamilies8AgainFor8a AS
+	cteAllFamilies8AgainFor8aCohort AS
 	( -- "8    a. Average Visits per Family"
 		
 		SELECT DISTINCT QuarterNumber,  count(h.HVCasePK) over (partition by [QuarterNumber]) as 'TotalFamiliesServed'
@@ -764,7 +987,17 @@ INSERT INTO @tblInitial_cohort
 				AND (h.DischargeDate IS NULL OR h.DischargeDate >= QuarterStartDate) -- not discharged or discharged after the quarter start date		
 	),
 	
-	cteAllFamilies8aVisits AS
+	cteAllFamilies8AgainFor8a AS
+	( -- "8    a. Average Visits per Family"
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(TotalFamiliesServed, 0) AS TotalFamiliesServed
+		FROM cteAllFamilies8AgainFor8aCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber			
+
+	),	
+	
+	
+	cteAllFamilies8aVisitsCohort AS
 	( -- "8    a. Average Visits per Family"
 	
 		SELECT  DISTINCT QuarterNumber,  count(HVLog.HVLogPK) over (partition by [QuarterNumber]) as 'TotalHVlogActivities'
@@ -780,6 +1013,16 @@ INSERT INTO @tblInitial_cohort
 				AND (h.DischargeDate IS NULL OR h.DischargeDate >= [QuarterStartDate]) -- not discharged or discharged after the quarter start date	
 				AND HVLog.VisitType <> '0001'		
 	),
+	
+	cteAllFamilies8aVisits AS
+	( -- "8    a. Average Visits per Family"
+	
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(TotalHVlogActivities, 0) AS TotalHVlogActivities
+		FROM cteAllFamilies8aVisitsCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber		
+	),	
+	
 
 	cteAverageVisitsPerFamily8a AS
 	(  -- "8    a. Average Visits per Family"
@@ -810,7 +1053,7 @@ INSERT INTO @tblInitial_cohort
 	
 	
 	-- 8b
-	cteAverageVisitsPerFamily8b AS
+	cteAverageVisitsPerFamily8bCohort AS
 	(  -- "8    b. % TANF Services Eligible at enrollment**"
 	
 		SELECT DISTINCT q8.QuarterNumber 
@@ -830,6 +1073,18 @@ INSERT INTO @tblInitial_cohort
 		ca.FormType = 'IN'  -- only from Intake form here	
 	
 	),
+	
+	cteAverageVisitsPerFamily8b AS
+	(  -- "8    b. % TANF Services Eligible at enrollment**"
+	
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(TANFServicesEligible, 0) AS TANFServicesEligible
+				, isnull(TotalFamiliesServed, 0) AS TotalFamiliesServed
+		FROM cteAverageVisitsPerFamily8bCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+	
+	),	
+	
 	-- 8b
 	cteAverageVisitsPerFamily8bFinal AS
 	(  -- "8    b. % TANF Services Eligible at enrollment**"
@@ -859,7 +1114,7 @@ INSERT INTO @tblInitial_cohort
 				
 	),
 		
-	cteLengthInProgram9Sum AS
+	cteLengthInProgram9SumCohort AS
 	( -- "9. Length in Program for Active at End of Quarter"
 		
 		SELECT DISTINCT QuarterNumber
@@ -872,6 +1127,21 @@ INSERT INTO @tblInitial_cohort
 			 FROM cteLengthInProgram9
 				
 	),
+	
+	cteLengthInProgram9Sum AS
+	( -- "9. Length in Program for Active at End of Quarter"
+		
+		SELECT isnull(s1.QuarterNumber,q8.QuarterNumber) AS QuarterNumber
+				, isnull(LengthInProgramUnder6Months, 0) AS LengthInProgramUnder6Months
+				, isnull(LengthInProgramUnder6MonthsTo1Year, 0) AS LengthInProgramUnder6MonthsTo1Year
+				, isnull(LengthInProgramUnder1YearTo2Year, 0) AS LengthInProgramUnder1YearTo2Year
+				, isnull(LengthInProgramUnder2YearsAndOver, 0) AS LengthInProgramUnder2YearsAndOver				
+				
+		FROM cteLengthInProgram9SumCohort s1
+		RIGHT JOIN @tblMake8Quarter q8 ON q8.QuarterNumber = s1.QuarterNumber	
+				
+	),	
+	
 			
 	cteLengthInProgramAtEndOfThisQuarter9 AS
 	( -- "6. Families Active at end of this Quarter"
@@ -900,7 +1170,7 @@ INSERT INTO @tblInitial_cohort
 		
 
 
--- exec [rspProgramInformationFor8Quarters] '5','06/30/2012'
+---- exec [rspProgramInformationFor8Quarters] '2','06/30/2012'
 --SELECT * FROM cteLengthInProgramFinal
 
 	
@@ -1060,7 +1330,10 @@ INSERT INTO @tblInitial_cohort
 			,'    d. 2 years and Over'			
 			
 
--- exec [rspProgramInformationFor8Quarters] '5','06/30/2012'
+---- exec [rspProgramInformationFor8Quarters] '2','06/30/2012'
+--SELECT * from @tblQ8ReportMain
+
+
 
 -- Objective: Transpose Rows into Columns - what a pain in the ...
 -- Idea: Create 9 variable tables and later join them to get our final result
@@ -1285,7 +1558,7 @@ SELECT
 	 , c5.Q8Col5
 	 , c6.Q8Col6
 	 , c7.Q8Col7
-	 --, c8.Q8Col8
+	 , c8.Q8Col8
 	 
 	 FROM @tblcol99 c99
 INNER JOIN @tblcol1 c1 ON c1.Q8Columns = c99.Q8Columns
@@ -1295,7 +1568,7 @@ INNER JOIN @tblcol4 c4 ON c4.Q8Columns = c99.Q8Columns
 INNER JOIN @tblcol5 c5 ON c5.Q8Columns = c99.Q8Columns
 INNER JOIN @tblcol6 c6 ON c6.Q8Columns = c99.Q8Columns
 INNER JOIN @tblcol7 c7 ON c7.Q8Columns = c99.Q8Columns
---INNER JOIN @tblcol8 c8 ON c8.Q8Columns = c99.Q8Columns
+INNER JOIN @tblcol8 c8 ON c8.Q8Columns = c99.Q8Columns
 
 
 
