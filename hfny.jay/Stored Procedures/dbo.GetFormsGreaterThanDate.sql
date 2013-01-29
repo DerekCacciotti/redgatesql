@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -16,7 +17,8 @@ AS
 	WHERE
 		codeFormAbbreviation = FormReview.formType
 		AND hvcasefk = @hvcasefk
-		AND formdate > @eventdate
+		AND DATEADD(D, 0, DATEDIFF(D, 0, formdate)) > @eventdate
+		--AND formdate > @eventdate
 	GROUP BY
 		codeFormName
 GO
