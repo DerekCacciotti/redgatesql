@@ -10,7 +10,7 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[rspServiceReferralByCode] 
 	-- Add the parameters for the stored procedure here
-	@programfk INT = NULL, 
+	@programfk VARCHAR(MAX) = null,
     @workerfk INT = NULL,
 	@StartDt datetime,
 	@EndDt DATETIME,
@@ -18,7 +18,14 @@ CREATE PROCEDURE [dbo].[rspServiceReferralByCode]
     @doWorker AS INT = 0,
     @doPC1ID AS INT = 0
 AS
-
+if @programfk is null
+	begin
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
+set @programfk = replace(@programfk,'"','')
+	
 --DECLARE @programfk INT = 5
 --DECLARE @workerfk INT = NULL
 --DECLARE @StartDt DATETIME = '04/01/2012'
@@ -68,9 +75,11 @@ CASE WHEN @doPC1ID = 1 THEN b.PC1ID ELSE '' END [PC1ID],
 a.ServiceCode, count(*) [n]
 FROM ServiceReferral a
 JOIN CaseProgram AS b ON a.HVCaseFK = b.HVCaseFK
+inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
 JOIN HVCaseInRange AS b1 ON b1.HVCaseFK = a.HVCaseFK
-WHERE a.ProgramFK = @programfk 
-AND a.ReferralDate Between @StartDt AND @EndDt
+WHERE 
+--a.ProgramFK = @programfk AND 
+a.ReferralDate Between @StartDt AND @EndDt
 --AND a.ServiceReceived = 1
 --AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
 AND isnull(b.CurrentFSWFK, b.CurrentFAWFK) = ISNULL(@workerfk, isnull(b.CurrentFSWFK, b.CurrentFAWFK))
