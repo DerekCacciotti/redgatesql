@@ -5,12 +5,20 @@ SET ANSI_NULLS ON
 GO
 
 CREATE PROCEDURE [dbo].[rspPSIHistory]
-( @programfk INT = NULL, 
+( @programfk VARCHAR(MAX) = NULL, 
   @supervisorfk INT = NULL, 
   @workerfk INT = NULL,
   @Over85Percent CHAR(1) = 'N',
   @pc1ID VARCHAR(13) = '')
 AS
+
+if @programfk is null
+  begin
+	select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+									   from HVProgram
+									   for xml path ('')),2,8000)
+  end
+set @programfk = replace(@programfk,'"','')
 
 DECLARE @n INT = 0
 SELECT @n = CASE WHEN @Over85Percent = 'Y' THEN 1 ELSE 0 END
@@ -43,14 +51,11 @@ FROM PSI a
 INNER JOIN codeApp b 
 ON a.PSIInterval = b.AppCode AND b.AppCodeGroup = 'PSIInterval' 
 AND b.AppCodeUsedWhere LIKE '%PS%'
-INNER JOIN CaseProgram d 
-ON d.HVCaseFK = a.HVCaseFK
-INNER JOIN worker fsw
-ON d.CurrentFSWFK = fsw.workerpk
-INNER JOIN workerprogram wp
-ON wp.workerfk = fsw.workerpk
-INNER JOIN worker supervisor
-ON wp.supervisorfk = supervisor.workerpk
+INNER JOIN CaseProgram d ON d.HVCaseFK = a.HVCaseFK
+INNER JOIN dbo.SplitString(@programfk,',') on d.programfk = listitem
+INNER JOIN worker fsw ON d.CurrentFSWFK = fsw.workerpk
+INNER JOIN workerprogram wp ON wp.workerfk = fsw.workerpk
+INNER JOIN worker supervisor ON wp.supervisorfk = supervisor.workerpk
 
 INNER JOIN 
 (SELECT HVCaseFK, 
@@ -76,7 +81,7 @@ WHERE
 d.DischargeDate IS NULL
 AND d.currentFSWFK = ISNULL(@workerfk, d.currentFSWFK)
 AND wp.supervisorfk = ISNULL(@supervisorfk, wp.supervisorfk)
-AND d.programfk = @programfk
+--AND d.programfk = @programfk
 AND d.PC1ID = CASE WHEN @pc1ID = '' THEN d.PC1ID ELSE @pc1ID END
 ORDER BY  supervisor, worker, PC1ID, a.PSIInterval
 
