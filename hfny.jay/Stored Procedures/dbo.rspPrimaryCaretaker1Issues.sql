@@ -10,12 +10,20 @@ GO
 -- exec rspPrimaryCaretaker1Issues 19, N'07/01/12', N'09/30/12', NULL, NULL
 -- =============================================
 CREATE procedure [dbo].[rspPrimaryCaretaker1Issues]-- Add the parameters for the stored procedure here
-    @programfk int = null,
+    @programfk VARCHAR(MAX) = null,
     @StartDt   datetime,
     @EndDt     datetime,
     @SiteFK int	= null,
     @casefilterspositive varchar(200)	
 as
+
+if @programfk is null
+  begin
+	select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+									   from HVProgram
+									   for xml path ('')),2,8000)
+  end
+set @programfk = replace(@programfk,'"','')
 
 	--DECLARE @programfk INT = 6 
 	--DECLARE @StartDt DATETIME = '07/01/2011'
@@ -34,13 +42,13 @@ as
 								, Interval
 						from dbo.PC1Issues pc1i
 							join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
+							INNER JOIN dbo.SplitString(@programfk,',') on pc1i.programfk = listitem
 							inner join HVCase h on h.HVCasePK = cp.HVCaseFK
 							inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
 							inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
 						where -- pc1i.PC1IssuesDate between @StartDt and @EndDt
-							 pc1i.ProgramFK = @programfk
-							 and (cp.DischargeDate is null
-								 or cp.DischargeDate >= @StartDt)
+							 --pc1i.ProgramFK = @programfk and 
+							 (cp.DischargeDate is null or cp.DischargeDate >= @StartDt)
 							 and IntakeDate is not null 
 							 and IntakeDate <= @EndDt
 							 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
