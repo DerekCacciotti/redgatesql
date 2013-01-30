@@ -25,13 +25,6 @@ as
 BEGIN
 
 
-
-
-    if (@ProgramFK IS not NULL) 
-    BEGIN 
-		set @ProgramFK = REPLACE(@ProgramFK,',','') -- remove comma's
-	END 
-
 	set @ProgramFK = REPLACE(@ProgramFK,'"','')	
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
