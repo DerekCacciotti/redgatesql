@@ -10,10 +10,18 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTimesBetweenKeyPreEnrollmentDates_Part1] 
 	-- Add the parameters for the stored procedure here
-	@programfk INT = NULL, 
+	@programfk VARCHAR(MAX) = NULL, 
 	@StartDt datetime,
 	@EndDt datetime
 AS
+
+if @programfk is null
+	begin
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
+set @programfk = replace(@programfk,'"','')
 
 --DECLARE @StartDt DATE = '01/01/2011'
 --DECLARE @EndDt DATE = '01/31/2011'
@@ -37,9 +45,13 @@ LEFT OUTER JOIN HVScreen AS b ON a.HVCasePK = b.HVCaseFK
 LEFT OUTER JOIN Preassessment AS c ON c.HVCaseFK = a.HVCasePK AND c.CaseStatus = '02' 
 LEFT OUTER JOIN Kempe  AS d ON d.HVCaseFK = a.HVCasePK
 JOIN dbo.CaseProgram AS e ON e.HVCaseFK = a.HVCasePK
+JOIN dbo.SplitString(@programfk,',') on e.programfk = listitem
 JOIN dbo.Worker AS faw ON faw.WorkerPK = b.FAWFK
 JOIN dbo.Worker AS fsw	ON fsw.WorkerPK = c.PAFSWFK
-WHERE e.ProgramFK = @programfk AND a.IntakeDate BETWEEN @StartDt AND @EndDt
+
+WHERE 
+--e.ProgramFK = @programfk AND 
+a.IntakeDate BETWEEN @StartDt AND @EndDt
 ORDER BY e.PC1ID
 
 
