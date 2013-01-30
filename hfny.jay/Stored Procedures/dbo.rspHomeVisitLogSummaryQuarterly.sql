@@ -9,7 +9,7 @@ GO
 -- Description:	Home Visit Log Summary Quarterly
 -- =============================================
 CREATE procedure [dbo].[rspHomeVisitLogSummaryQuarterly]
-    @programfk int = null,
+    @programfk VARCHAR(MAX) = null,
     @StartDt   datetime,
     @EndDt     datetime,
     @StartDtX    datetime,
@@ -17,6 +17,14 @@ CREATE procedure [dbo].[rspHomeVisitLogSummaryQuarterly]
     @SiteFK	   int = null,
     @casefilterspositive varchar(200)
 as
+
+if @programfk is null
+  begin
+	select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+									   from HVProgram
+									   for xml path ('')),2,8000)
+  end
+set @programfk = replace(@programfk,'"','')
 
 	--DECLARE @programfk INT = 6 
 	--DECLARE @StartDt DATETIME = '01/01/2012'
@@ -44,13 +52,15 @@ as
 		 ,@OutOfHome = sum(case when substring(a.VisitType,4,1) != '1' and substring(a.VisitType,3,1) = '1' then 1 else 0 end)
 		from HVLog as a
 			join CaseProgram as b on b.HVCaseFK = a.HVCaseFK
+			INNER JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 			inner join WorkerProgram wp on WorkerFK = FSWFK
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
-		where b.ProgramFK = @programfk
-			 and a.VisitStartTime between @StartDt and @EndDt
-			 --and (b.DischargeDate is null
-			 --or b.DischargeDate > @EndDt)
-			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+		where 
+		--b.ProgramFK = @programfk and 
+		a.VisitStartTime between @StartDt and @EndDt
+		--and (b.DischargeDate is null
+		--or b.DischargeDate > @EndDt)
+		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	if @x = 0
 	begin
 		set @x = 1
@@ -75,13 +85,15 @@ as
 		 ,@OutOfHomeX = sum(case when substring(a.VisitType,4,1) != '1' and substring(a.VisitType,3,1) = '1' then 1 else 0 end)
 		from HVLog as a
 			join CaseProgram as b on b.HVCaseFK = a.HVCaseFK
+			INNER JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 			inner join WorkerProgram wp on WorkerFK = FSWFK
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
-		where b.ProgramFK = @programfk
-			 and a.VisitStartTime between @StartDtX and @EndDtX
-			 --and (b.DischargeDate is null
-			 --or b.DischargeDate > @EndDtX)
-			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+		where 
+		--b.ProgramFK = @programfk and 
+		a.VisitStartTime between @StartDtX and @EndDtX
+		--and (b.DischargeDate is null
+		--or b.DischargeDate > @EndDtX)
+		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	if @xX = 0
 	begin
 		set @xX = 1
@@ -196,14 +208,16 @@ as
 
 		from HVCase as a
 			join CaseProgram as b on b.HVCaseFK = a.HVCasePK
+			INNER JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 			join HVLog as c on a.HVCasePK = c.HVCaseFK
 			inner join WorkerProgram wp on WorkerFK = FSWFK
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
-		where b.ProgramFK = @programfk
-			 and c.VisitStartTime between @StartDt and @EndDt
-			 --and (b.DischargeDate is null
-			 --or b.DischargeDate > @EndDt)
-			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+		where 
+		--b.ProgramFK = @programfk and 
+		c.VisitStartTime between @StartDt and @EndDt
+		--and (b.DischargeDate is null
+		--or b.DischargeDate > @EndDt)
+		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	),
 
 	---------------------------------------------------------------------
@@ -310,14 +324,16 @@ as
 
 		from HVCase as a
 			join CaseProgram as b on b.HVCaseFK = a.HVCasePK
+			INNER JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 			join HVLog as c on a.HVCasePK = c.HVCaseFK
 			inner join WorkerProgram wp on WorkerFK = FSWFK
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
-		where b.ProgramFK = @programfk
-			 and c.VisitStartTime between @StartDtX and @EndDtX
-			 --and (b.DischargeDate is null
-			 --or b.DischargeDate > @EndDtX)
-			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+		where 
+		--b.ProgramFK = @programfk and 
+		c.VisitStartTime between @StartDtX and @EndDtX
+		--and (b.DischargeDate is null
+		--or b.DischargeDate > @EndDtX)
+		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	)
 
 	select *
