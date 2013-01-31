@@ -93,7 +93,7 @@ begin
 						   and isnull(wad.EndAssignmentDate,@edate) >= @sdate
 						   and isnull(hld.endlevelDate,@EDATE) >= @sdate
 				 ) a
-			where beginning < ending
+			where beginning <= ending
 	return
 end
 GO

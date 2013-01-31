@@ -49,8 +49,8 @@ begin
 	declare @startdate datetime
 	declare @enddate datetime
 	
-	set @startdate = convert(datetime,convert(varchar(12), @sdate) + '00:00:00.000')
-	set @enddate = convert(datetime,convert(varchar(12), @edate) + '23:59:59.999')
+	--set @startdate = convert(datetime,convert(varchar(12), @sdate) + '00:00:00.000') --Chris Papas removed 01/29/2013 
+	--set @enddate = convert(datetime,convert(varchar(12), @edate) + '23:59:59.999')
 
 	--match the hvlog records to this
 	insert
@@ -65,7 +65,7 @@ begin
 			  ,cp.DischargeDate
 			from [dbo].[udfLevelPieces](@programfk,@sdate,@edate) tlp
 				left outer join hvlog on tlp.casefk = hvlog.hvcasefk
-							   and convert(date,VisitStartTime) between @sdate and @edate
+							   and VisitStartTime between tlp.StartDate and tlp.EndDate
 				inner join CaseProgram cp on cp.HVCaseFK = tlp.Casefk
 						  and cp.ProgramFK = tlp.programfk
 
