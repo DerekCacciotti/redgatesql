@@ -38,11 +38,12 @@ set @sitefk = case when dbo.IsNullOrEmpty(@sitefk) = 1 then 0 else @sitefk end
 set @posclause = case when @posclause = '' then null else @posclause end
 
 ;WITH level2 AS (
-SELECT hvcasefk, min(StartLevelDate) [StartLevelDate_Level2]
-FROM dbo.HVLevelDetail
-WHERE Levelfk IN (16, 18, 20) AND ProgramFK = @programfk 
-AND StartLevelDate <= @edate
-GROUP BY hvcasefk
+SELECT a.hvcasefk, min(a.StartLevelDate) [StartLevelDate_Level2]
+FROM dbo.HVLevelDetail AS a
+join dbo.SplitString(@programfk,',') on a.programfk = listitem
+WHERE a.Levelfk IN (16, 18, 20) --AND ProgramFK = @programfk 
+AND a.StartLevelDate <= @edate
+GROUP BY a.hvcasefk
 )
 ,
 
@@ -61,14 +62,15 @@ SELECT
 
 FROM HVCase AS a
 JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
+join dbo.SplitString(@programfk,',') on b.programfk = listitem
 JOIN HVLevelDetail AS c ON c.hvcasefk = a.HVCasePK AND c.StartLevelDate <= @edate
 JOIN udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = a.HVCasePK
 JOIN Worker AS w on w.WorkerPK = b.CurrentFSWFK
 JOIN WorkerProgram AS wp ON wp.WorkerFK = w.WorkerPK
 JOIN PC AS p ON p.PCPK = a.PC1FK
 LEFT OUTER JOIN level2 AS q	ON a.HVCasePK = q.hvcasefk
-WHERE b.ProgramFK = @programfk 
-AND a.caseprogress >= 9
+WHERE --b.ProgramFK = @programfk AND 
+a.caseprogress >= 9
 AND a.IntakeDate <= @edate
 AND (b.dischargedate is NULL or b.dischargedate >= @sdate)
 AND (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
@@ -87,12 +89,13 @@ yyy AS (
 SELECT DISTINCT a.HVCasePK
 FROM HVCase  AS a
 JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
+join dbo.SplitString(@programfk,',') on b.programfk = listitem
 JOIN HVLevelDetail AS c ON c.hvcasefk = a.HVCasePK AND c.StartLevelDate <= @edate
 JOIN udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = a.HVCasePK
 JOIN Worker AS w on w.WorkerPK = b.CurrentFSWFK
 JOIN WorkerProgram AS wp ON wp.WorkerFK = w.WorkerPK
-WHERE b.ProgramFK = @programfk 
-AND a.caseprogress >= 9
+WHERE --b.ProgramFK = @programfk AND 
+a.caseprogress >= 9
 AND a.IntakeDate <= @edate
 AND (b.dischargedate is NULL or b.dischargedate >= @sdate)
 AND (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
