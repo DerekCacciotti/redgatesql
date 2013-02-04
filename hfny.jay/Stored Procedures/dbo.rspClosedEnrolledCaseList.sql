@@ -11,11 +11,21 @@ GO
 -- exec rspClosedEnrolledCaseList_original 1,'20120701','20120731'
 -- =============================================
 CREATE procedure [dbo].[rspClosedEnrolledCaseList]-- Add the parameters for the stored procedure here
-    @programfk int = null,
+    @programfk VARCHAR(MAX) = null,
     @StartDt   datetime,
     @EndDt     datetime,
     @SiteFK    int = 0
-as
+AS
+
+if @programfk is null
+	begin
+		select @programfk =
+			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+							  from HVProgram
+							  for xml path ('')),2,8000)
+	END
+set @programfk = REPLACE(@programfk,'"','')
+
 	--DECLARE @StartDt DATE = '01/01/2011'
 	--DECLARE @EndDt DATE = '05/31/2011'
 	--DECLARE @programfk INT = 17
@@ -44,12 +54,13 @@ as
 		  ,(select count(*)
 				from HVLog
 				inner join CaseProgram cp1 on cp1.HVCaseFK = HVLog.HVCaseFK
+				join dbo.SplitString(@programfk,',') on cp1.programfk = listitem
 				inner join WorkerProgram wp1 on wp1.WorkerFK = cp1.CurrentFSWFK 
 				where VisitType <> '0001'
 					 and VisitStartTime <= @EndDt
 					 and VisitStartTime >= c.IntakeDate
 					 and HVLog.HVCaseFK = c.HVCasePK
-					 and HVLog.ProgramFK = @programfk
+					 --and HVLog.ProgramFK = @programfk
 					 and (case when @SiteFK = 0 then 1 when wp1.SiteFK = @SiteFK then 1 else 0 end = 1)) [HomeVisits]
 		  -- following fields are used for validating (to be removed)
 		  ,(select top 1 ca1.CommonAttributesPK
@@ -67,6 +78,7 @@ as
 		  ,convert(varchar(12),T.TCDOB,101) [tcDOB]
 
 		from CaseProgram cp
+		    join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			join HVCase c on cp.HVCaseFK = c.HVCasePK
 			-- pc1 name, dob, and SS# =  c.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB, PC.SSNo
 			join PC on PC.PCPK = c.PC1FK
@@ -105,7 +117,7 @@ as
 			left outer join TCID T on T.HVCaseFK = c.HVCasePK
 
 		where cp.DischargeDate between @StartDt and @EndDt
-			 and cp.ProgramFK = @programfk
+			 --and cp.ProgramFK = @programfk
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		order by [key01]
 GO
