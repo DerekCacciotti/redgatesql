@@ -11,13 +11,21 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPreAssessEngagement_Part3]
 (
-    @programfk    int      = null,
+    @programfk    VARCHAR(MAX) = null,
     @StartDtT     DATETIME = NULL,
     @StartDt      DATETIME = null,
     @EndDt        DATETIME = null
 )
 as
 
+if @programfk is null
+	begin
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
+set @programfk = replace(@programfk,'"','')
+	
 --DECLARE @StartDtT DATE = '09/01/2012'
 --DECLARE @StartDt DATE = '09/01/2012'
 --DECLARE @EndDt DATE = '11/30/2012'
@@ -29,7 +37,9 @@ SELECT x.HVCaseFK, x.PADate, 'xx' [CaseStatus]
 FROM Preassessment AS x
 JOIN (SELECT a.HVCaseFK, max(a.PADate) [maxDate]
 FROM Preassessment AS a
-WHERE a.ProgramFK = @programfk AND a.PADate < @StartDt
+JOIN dbo.SplitString(@programfk,',') on a.programfk = listitem
+WHERE --a.ProgramFK = @programfk AND 
+a.PADate < @StartDt
 GROUP BY a.HVCaseFK) AS y
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = maxDate
 WHERE x.CaseStatus = '01')
@@ -38,7 +48,9 @@ WHERE x.CaseStatus = '01')
 qqq AS (
 SELECT *
 FROM Preassessment AS a
-WHERE a.ProgramFK = @programfk AND a.PADate BETWEEN @StartDt AND @EndDt
+JOIN dbo.SplitString(@programfk,',') on a.programfk = listitem
+WHERE --a.ProgramFK = @programfk AND 
+a.PADate BETWEEN @StartDt AND @EndDt
 )
 ,
 NoStatus AS (
@@ -52,8 +64,10 @@ No_PreAssessment AS (
 SELECT a.HVCaseFK, NULL [PADate], 'xx' [CaseStatus], '1' [NoStatus]
 FROM HVScreen AS a
 JOIN CaseProgram AS c ON c.HVCaseFK = a.HVCaseFK
+JOIN dbo.SplitString(@programfk,',') on c.programfk = listitem
 LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
-WHERE a.ProgramFK = @programfk AND a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
+WHERE --a.ProgramFK = @programfk AND 
+a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
 AND (c.DischargeDate IS NULL OR c.DischargeDate > @StartDt)
 AND b.HVCaseFK IS NULL
 )
@@ -64,7 +78,8 @@ SELECT x.HVCaseFK, x.PADate, x.CaseStatus, '0' [NoStatus]
 FROM Preassessment AS x
 JOIN (SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM PreAssessment AS p 
-WHERE p.PADate BETWEEN @StartDt AND @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate BETWEEN @StartDt AND @EndDt --AND p.ProgramFK = @programfk
 GROUP BY p.HVCaseFK) AS y
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 UNION ALL

@@ -11,13 +11,21 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPreAssessEngagement]
 (
-    @programfk    int      = null,
+    @programfk    VARCHAR(MAX) = null,
     @StartDtT     DATETIME = NULL,
     @StartDt      DATETIME = null,
     @EndDt        DATETIME = null
 )
 as
 
+if @programfk is null
+	begin
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
+set @programfk = replace(@programfk,'"','')
+	
 --Pre-Assessment Engagement Quartly Report --
 --DECLARE @StartDtT DATE = '09/01/2012'
 --DECLARE @StartDt DATE = '09/01/2012'
@@ -60,8 +68,9 @@ AND c.DischargeReason = '13' THEN 1 ELSE 0 END) [Q1f10ControlCase]
 AND c.DischargeReason = '25' THEN 1 ELSE 0 END) [Q1f11Transferred]
 FROM HVCase AS a 
 JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
+JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 JOIN HVScreen AS c ON a.HVCasePK = c.HVCaseFK
-WHERE a.ScreenDate BETWEEN @StartDt AND @EndDt AND b.ProgramFK = @programfk
+WHERE a.ScreenDate BETWEEN @StartDt AND @EndDt --AND b.ProgramFK = @programfk
 )
 
 , section1Q AS
@@ -108,7 +117,9 @@ FROM section1QX AS a
 SELECT count(*) [Q2PreAssessmentBeforePeriod]
 FROM HVCase AS a1 
 JOIN CaseProgram AS b1 ON a1.HVCasePK = b1.HVCaseFK
-WHERE b1.ProgramFK = @programfk AND (a1.ScreenDate < @StartDt) 
+JOIN dbo.SplitString(@programfk,',') on b1.programfk = listitem
+WHERE --b1.ProgramFK = @programfk AND 
+(a1.ScreenDate < @StartDt) 
 AND (a1.KempeDate >= @StartDt OR a1.KempeDate IS NULL)
 AND (b1.DischargeDate >= @StartDt OR b1.DischargeDate IS NULL)
 )
@@ -122,7 +133,8 @@ FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM Preassessment AS p 
-WHERE p.PADate <= @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate <= @EndDt --AND p.ProgramFK = @programfk
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 )
@@ -132,8 +144,10 @@ ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 SELECT count(DISTINCT a.HVCaseFK) [Q4dNoStatus2]
 FROM HVScreen AS a
 JOIN CaseProgram AS c ON c.HVCaseFK = a.HVCaseFK
+JOIN dbo.SplitString(@programfk,',') on c.programfk = listitem
 LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
-WHERE a.ProgramFK = @programfk AND a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
+WHERE --a.ProgramFK = @programfk AND 
+a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
 AND (c.DischargeDate IS NULL OR c.DischargeDate > @StartDt)
 AND b.HVCaseFK IS NULL
 )
@@ -154,7 +168,8 @@ FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM Preassessment AS p 
-WHERE p.PADate BETWEEN @StartDt AND @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate BETWEEN @StartDt AND @EndDt --AND p.ProgramFK = @programfk
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 )
@@ -195,8 +210,9 @@ SELECT
 , sum(PAGift) [Q5iPAGift]
 , sum(PACaseReview) [Q5jPACaseReview]
 , sum(PAOtherActivity) [Q5kPAOtherActivity]
-FROM Preassessment 
-WHERE PADate BETWEEN @StartDt AND @EndDt AND ProgramFK = @programfk
+FROM Preassessment AS b
+JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
+WHERE PADate BETWEEN @StartDt AND @EndDt --AND ProgramFK = @programfk
 )
 
 -- total
@@ -236,8 +252,9 @@ AND c.DischargeReason = '13' THEN 1 ELSE 0 END) [T1f10ControlCase]
 AND c.DischargeReason = '25' THEN 1 ELSE 0 END) [T1f11Transferred]
 FROM HVCase AS a 
 JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
+JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 JOIN HVScreen AS c ON a.HVCasePK = c.HVCaseFK
-WHERE a.ScreenDate BETWEEN @StartDtT AND @EndDt AND b.ProgramFK = @programfk
+WHERE a.ScreenDate BETWEEN @StartDtT AND @EndDt --AND b.ProgramFK = @programfk
 )
 
 , section1T AS
@@ -284,7 +301,9 @@ FROM section1TX AS a
 SELECT count(*) [T2PreAssessmentBeforePeriod]
 FROM HVCase AS a1 
 JOIN CaseProgram AS b1 ON a1.HVCasePK = b1.HVCaseFK
-WHERE b1.ProgramFK = @programfk AND (a1.ScreenDate < @StartDtT) 
+JOIN dbo.SplitString(@programfk,',') on b1.programfk = listitem
+WHERE --b1.ProgramFK = @programfk AND 
+(a1.ScreenDate < @StartDtT) 
 AND (a1.KempeDate >= @StartDtT OR a1.KempeDate IS NULL)
 AND (b1.DischargeDate >= @StartDtT OR b1.DischargeDate IS NULL)
 )
@@ -299,7 +318,8 @@ FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM Preassessment AS p 
-WHERE p.PADate <= @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate <= @EndDt --AND p.ProgramFK = @programfk
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 )
@@ -309,8 +329,10 @@ ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 SELECT count(DISTINCT a.HVCaseFK) [T4dNoStatus2]
 FROM HVScreen AS a
 JOIN CaseProgram AS c ON c.HVCaseFK = a.HVCaseFK
+JOIN dbo.SplitString(@programfk,',') on c.programfk = listitem
 LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
-WHERE a.ProgramFK = @programfk AND a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
+WHERE --a.ProgramFK = @programfk AND 
+a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
 AND (c.DischargeDate IS NULL OR c.DischargeDate > @StartDtT)
 AND b.HVCaseFK IS NULL
 )
@@ -330,7 +352,8 @@ FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM Preassessment AS p 
-WHERE p.PADate BETWEEN @StartDtT AND @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate BETWEEN @StartDtT AND @EndDt --AND p.ProgramFK = @programfk
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
 )
@@ -371,8 +394,9 @@ SELECT
 , sum(PAGift) [T5iPAGift]
 , sum(PACaseReview) [T5jPACaseReview]
 , sum(PAOtherActivity) [T5kPAOtherActivity]
-FROM Preassessment 
-WHERE PADate BETWEEN @StartDtT AND @EndDt AND ProgramFK = @programfk
+FROM Preassessment AS p
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE PADate BETWEEN @StartDtT AND @EndDt --AND ProgramFK = @programfk
 )
 
 SELECT 

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,13 +11,22 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPreAssessEngagement_Part2]
 (
-    @programfk    int      = null,
+    @programfk    VARCHAR(MAX) = null,
     @StartDtT     DATETIME = NULL,
     @StartDt      DATETIME = null,
     @EndDt        DATETIME = null
 )
 as
 
+
+if @programfk is null
+	begin
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
+set @programfk = replace(@programfk,'"','')
+	
 -- Pre-Assessment Engagement Quartly Report --
 --DECLARE @StartDtT DATE = '01/01/2011'
 --DECLARE @StartDt DATE = '08/01/2011'
@@ -33,11 +43,11 @@ SELECT d.DischargeCode, d.DischargeReason
 FROM codeDischarge AS d
 LEFT OUTER JOIN
 (SELECT x.DischargeReason, count(*) [TerminatedNotAssigned]
-FROM Preassessment x
-JOIN (
+FROM Preassessment x JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM Preassessment AS p 
-WHERE p.PADate BETWEEN @StartDt AND @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate BETWEEN @StartDt AND @EndDt --AND p.ProgramFK = @programfk
 AND p.CaseStatus = '03'
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
@@ -50,7 +60,8 @@ FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM Preassessment AS p 
-WHERE p.PADate BETWEEN @StartDt AND @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate BETWEEN @StartDt AND @EndDt --AND p.ProgramFK = @programfk
 AND p.CaseStatus = '04'
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
@@ -63,7 +74,8 @@ FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM Preassessment AS p 
-WHERE p.PADate BETWEEN @StartDtT AND @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate BETWEEN @StartDtT AND @EndDt --AND p.ProgramFK = @programfk
 AND p.CaseStatus = '03'
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
@@ -76,7 +88,8 @@ FROM Preassessment x
 JOIN (
 SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
 FROM Preassessment AS p 
-WHERE p.PADate BETWEEN @StartDtT AND @EndDt AND p.ProgramFK = @programfk
+JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
+WHERE p.PADate BETWEEN @StartDtT AND @EndDt --AND p.ProgramFK = @programfk
 AND p.CaseStatus = '04'
 GROUP BY p.HVCaseFK) AS y 
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
