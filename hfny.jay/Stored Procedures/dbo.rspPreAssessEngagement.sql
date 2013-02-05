@@ -8,6 +8,9 @@ GO
 -- Author:      <Dar Chen>
 -- Create date: <Jul 16, 2012>
 -- Description: 
+-- exec rspPreAssessEngagement 19, '07/01/2012', '07/01/2012', '09/30/2012'
+-- exec rspPreAssessEngagement 5, '07/01/2012', '07/01/2012', '09/30/2012'
+
 -- =============================================
 CREATE procedure [dbo].[rspPreAssessEngagement]
 (
@@ -43,14 +46,20 @@ section1QX AS
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 1  THEN 1 ELSE 0 END) [Q1ePositiveReferred]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0  THEN 1 ELSE 0 END) [Q1fPositiveNotReferred]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason IN ('05','07','11','06','08','33','34','99','13','25')
+AND c.DischargeReason IN ('05','07','35','36','06','08','33','34','99','13','25')
 THEN 1 ELSE 0 END) [Q1DischargeAll]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
 AND c.DischargeReason = '05' THEN 1 ELSE 0 END) [Q1f1IncomeIneligible]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
 AND c.DischargeReason = '07' THEN 1 ELSE 0 END) [Q1f2OutOfGeoTarget]
+
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '11' THEN 1 ELSE 0 END) [Q1f3Refuse]
+AND c.DischargeReason = '35' THEN 1 ELSE 0 END) [Q1f3NonCompliant]
+
+, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
+AND c.DischargeReason = '36' THEN 1 ELSE 0 END) [Q1f3Refuse]
+
+
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
 AND c.DischargeReason = '06' THEN 1 ELSE 0 END) [Q1f4InappropriateScreen]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
@@ -73,6 +82,7 @@ JOIN HVScreen AS c ON a.HVCasePK = c.HVCaseFK
 WHERE a.ScreenDate BETWEEN @StartDt AND @EndDt --AND b.ProgramFK = @programfk
 )
 
+
 , section1Q AS
 (
 SELECT a.Q1Screened
@@ -90,6 +100,10 @@ ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1dPostnatal]
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f1IncomeIneligible
 ,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f2OutOfGeoTarget / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f2OutOfGeoTarget
+
+,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f3NonCompliant / Q1DischargeAll, 0) 
+ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f3NonCompliant
+
 ,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f3Refuse / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f3Refuse
 ,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f4InappropriateScreen / Q1DischargeAll, 0) 
@@ -227,14 +241,21 @@ section1TX AS
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 1  THEN 1 ELSE 0 END) [T1ePositiveReferred]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0  THEN 1 ELSE 0 END) [T1fPositiveNotReferred]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason IN ('05','07','11','06','08','33','34','99','13','25')
+AND c.DischargeReason IN ('05','07','35','36','06','08','33','34','99','13','25')
 THEN 1 ELSE 0 END) [T1DischargeAll]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
 AND c.DischargeReason = '05' THEN 1 ELSE 0 END) [T1f1IncomeIneligible]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
 AND c.DischargeReason = '07' THEN 1 ELSE 0 END) [T1f2OutOfGeoTarget]
+--, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
+--AND c.DischargeReason = '11' THEN 1 ELSE 0 END) [T1f3Refuse]
+
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '11' THEN 1 ELSE 0 END) [T1f3Refuse]
+AND c.DischargeReason = '35' THEN 1 ELSE 0 END) [T1f3NonCompliant]
+
+, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
+AND c.DischargeReason = '36' THEN 1 ELSE 0 END) [T1f3Refuse]
+
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
 AND c.DischargeReason = '06' THEN 1 ELSE 0 END) [T1f4InappropriateScreen]
 , sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
@@ -274,8 +295,14 @@ ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1dPostnatal]
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f1IncomeIneligible
 ,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f2OutOfGeoTarget / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f2OutOfGeoTarget
+,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f3NonCompliant / T1DischargeAll, 0) 
+ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f3NonCompliant
+
 ,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f3Refuse / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f3Refuse
+
+
+
 ,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f4InappropriateScreen / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f4InappropriateScreen
 ,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f5CaseLoadFull / T1DischargeAll, 0) 

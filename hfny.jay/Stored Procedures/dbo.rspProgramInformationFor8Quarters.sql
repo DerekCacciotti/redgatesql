@@ -25,7 +25,19 @@ as
 BEGIN
 
 
-	set @ProgramFK = REPLACE(@ProgramFK,'"','')	
+	
+	
+		if @programfk is null
+		  begin
+			select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+											   from HVProgram
+											   for xml path ('')),2,8000)
+		  end
+		set @programfk = replace(@programfk,'"','')	
+	
+	
+	
+	
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
