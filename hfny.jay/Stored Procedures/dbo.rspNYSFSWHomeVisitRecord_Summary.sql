@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -51,7 +52,7 @@ begin
 								 0
 						 end) as actvisitcount
 					,sum(case
-							 when visittype = '1000' then
+							 when substring(visittype,1,1) = '1' or substring(visittype,2,1) = '1' then
 								 1
 							 else
 								 0
