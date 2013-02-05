@@ -39,6 +39,7 @@ begin
 					,hvr.workerfk
 					,count(distinct casefk) as casecount
 					,pc1id
+					, hvlevelpk
 					,startdate
 					,enddate
 					,hvr.levelname
@@ -91,7 +92,8 @@ begin
 				 ,reqvisit
 				 ,dischargedate
 				 ,hvr.casefk
-				 ,hvr.programfk --,hld.StartLevelDate
+				 ,hvr.programfk
+				, hvlevelpk
 	)
 	,
 	cteLevelChanges
@@ -108,6 +110,7 @@ begin
 					,workerfk
 					,pc1id
 					,casecount
+					, max(hvlevelpk) over (partition by pc1id) as  'UseThisLevelPK'
 					,sum(visitlengthminute) over (partition by pc1wrkfk) as 'Minutes'
 					,sum(expvisitcount) over (partition by pc1wrkfk) as expvisitcount
 					,min(startdate) over (partition by pc1wrkfk) as 'startdate'
@@ -140,7 +143,8 @@ begin
 					,expvisitcount
 					,startdate
 					,enddate
-					,max(levelname) over (partition by pc1id) as levelname
+					, (select levelname  from HVLevel inner join codeLevel l on l.codeLevelPK = HVLevel.LevelFK
+							where HVLevel.HVLevelPK=UseThisLevelPK) as levelname
 					--CHRIS PAPAS - below line was bringing in duplicates (ex. AL8713016704 for July 2010 - June 2011)
 					 --, (SELECT TOP 1 levelname ORDER BY enddate) AS levelname
 					 ,levelstart
