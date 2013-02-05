@@ -15,6 +15,14 @@ CREATE procedure [dbo].[rspASQHistory]
 )
 AS
 
+--DECLARE @programfk       VARCHAR(MAX)   = '1'
+--DECLARE @supervisorfk    int            = null
+--DECLARE @workerfk        int            = null
+--DECLARE @UnderCutoffOnly char(1)        = 'N'
+--DECLARE @pc1ID           varchar(13)    = ''
+--DECLARE @sitefk          int            = null
+
+
   if @programfk is null
 	begin
 		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
@@ -22,6 +30,7 @@ AS
 										   for xml path ('')),2,8000)
 	end
 	set @programfk = replace(@programfk,'"','')
+	set @SiteFK = isnull(@SiteFK, 0)
 	
 --White space for testing Dar's SQL SVN repository
 	declare @n int = 0
@@ -87,7 +96,8 @@ AS
 			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)
 			 --and d.programfk = @programfk
 			 and d.PC1ID = case when @pc1ID = '' then d.PC1ID else @pc1ID end
-			 and SiteFK = isnull(@sitefk,SiteFK)
+			 --and SiteFK = isnull(@sitefk,SiteFK)
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		order by supervisor
 				,worker
 				,PC1ID
