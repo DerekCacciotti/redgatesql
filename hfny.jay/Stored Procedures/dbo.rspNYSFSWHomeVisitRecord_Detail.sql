@@ -161,16 +161,16 @@ begin
 						 when inhomevisitcount is null or inhomevisitcount = 0
 							 then
 							 0
-						 when actvisitcount is null or actvisitcount = 0
+						 when expvisitcount is null or expvisitcount = 0
 							 then
 							 1
 						 else
 							 case
-								 when (inhomevisitcount/(actvisitcount*1.000)) > 1
+								 when (inhomevisitcount/(expvisitcount*1.000)) > 1
 									 then
 									 1
 								 else
-									 inhomevisitcount/(actvisitcount*1.000)
+									 inhomevisitcount/(expvisitcount*1.000)
 							 end
 					 end as InHomeRate
 					,dischargedate
