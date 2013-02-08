@@ -33,7 +33,7 @@ CREATE TABLE [dbo].[HVProgram]
 [ProgramPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramStreet] [char] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramZip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TargetZip] [char] (60) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[TargetZip] [nvarchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_HVProgram_CountyFK] ON [dbo].[HVProgram] ([CountyFK]) ON [PRIMARY]
 
