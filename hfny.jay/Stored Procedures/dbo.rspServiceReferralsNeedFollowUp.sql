@@ -33,7 +33,7 @@ as
 
 	select PC1ID
 		  ,pcfirstname+' '+pclastname as PC1
-		  ,ServiceReferralType as Referral
+		  ,ServiceReferralCode + '-' + ServiceReferralType as Referral
 		  ,AppCodeText as FamilyMemberReferred
 		  ,ReferralDate
 		  ,currentfswfk
