@@ -62,22 +62,22 @@ begin
 						 end as beginning
 						,case
 							 when EndAssignmentDate < @edate and EndAssignmentDate < hld.EndLevelDate then
-								 EndAssignmentDate
+								cast(EndAssignmentDate as datetime) + cast('23:59:59' as datetime)
 							 when hld.EndLevelDate > @edate then
-								 @edate
+								 cast(@edate as datetime) + cast('23:59:59' as datetime)
 							 when hld.EndLevelDate > EndAssignmentDate then
-								 EndAssignmentDate
+								 cast(EndAssignmentDate as datetime) + cast('23:59:59' as datetime)
 							 when hld.EndLevelDate is null then
 								 case
 									 when EndAssignmentDate is null then
-										 @edate
+										 cast(@edate as datetime) + cast('23:59:59' as datetime)
 									 when EndAssignmentDate > @edate then
-										 @edate
+										 cast(@edate as datetime) + cast('23:59:59' as datetime)
 									 else
-										 EndAssignmentDate
+										 cast(EndAssignmentDate as datetime) + cast('23:59:59' as datetime)
 								 end
 							 else
-								 hld.EndLevelDate
+								 cast(hld.EndLevelDate as datetime) + cast('23:59:59' as datetime)
 						 end as ending
 						,levelname
 						,wad.programfk
