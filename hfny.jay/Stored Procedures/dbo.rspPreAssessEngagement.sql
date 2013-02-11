@@ -17,9 +17,18 @@ CREATE procedure [dbo].[rspPreAssessEngagement]
     @programfk    VARCHAR(MAX) = null,
     @StartDtT     DATETIME = NULL,
     @StartDt      DATETIME = null,
-    @EndDt        DATETIME = null
+    @EndDt        DATETIME = null,
+    @IncludeClosedCase BIT = 0
 )
 as
+
+	
+--Pre-Assessment Engagement Quartly Report --
+--DECLARE @StartDtT DATE = '09/01/2012'
+--DECLARE @StartDt DATE = '09/01/2012'
+--DECLARE @EndDt DATE = '11/30/2012'
+--DECLARE @programfk INT = 4
+--DECLARE @IncludeClosedCase BIT = 0
 
 if @programfk is null
 	begin
@@ -28,12 +37,6 @@ if @programfk is null
 										   for xml path ('')),2,8000)
 	end
 set @programfk = replace(@programfk,'"','')
-	
---Pre-Assessment Engagement Quartly Report --
---DECLARE @StartDtT DATE = '09/01/2012'
---DECLARE @StartDt DATE = '09/01/2012'
---DECLARE @EndDt DATE = '11/30/2012'
---DECLARE @programfk INT = 4
 
 ; WITH 
 section1QX AS
@@ -135,8 +138,13 @@ JOIN dbo.SplitString(@programfk,',') on b1.programfk = listitem
 WHERE --b1.ProgramFK = @programfk AND 
 (a1.ScreenDate < @StartDt) 
 AND (a1.KempeDate >= @StartDt OR a1.KempeDate IS NULL)
-AND (b1.DischargeDate >= @StartDt OR b1.DischargeDate IS NULL)
-)
+
+AND (b1.DischargeDate IS NULL OR 
+--b1.DischargeDate >= @StartDt
+CASE WHEN @IncludeClosedCase = 0 THEN 
+(CASE WHEN b1.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
+ELSE (CASE WHEN b1.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
+))
 
 , section4Qa AS 
 (
@@ -162,7 +170,14 @@ JOIN dbo.SplitString(@programfk,',') on c.programfk = listitem
 LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
 WHERE --a.ProgramFK = @programfk AND 
 a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
-AND (c.DischargeDate IS NULL OR c.DischargeDate > @StartDt)
+AND (
+--c.DischargeDate IS NULL OR c.DischargeDate > @StartDt
+c.DischargeDate IS NULL OR
+CASE WHEN @IncludeClosedCase = 0 THEN 
+(CASE WHEN c.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
+ELSE (CASE WHEN c.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
+)
+
 AND b.HVCaseFK IS NULL
 )
 
@@ -332,9 +347,14 @@ JOIN dbo.SplitString(@programfk,',') on b1.programfk = listitem
 WHERE --b1.ProgramFK = @programfk AND 
 (a1.ScreenDate < @StartDtT) 
 AND (a1.KempeDate >= @StartDtT OR a1.KempeDate IS NULL)
-AND (b1.DischargeDate >= @StartDtT OR b1.DischargeDate IS NULL)
+AND 
+--(b1.DischargeDate >= @StartDtT OR b1.DischargeDate IS NULL)
+(b1.DischargeDate IS NULL OR
+CASE WHEN @IncludeClosedCase = 0 THEN 
+(CASE WHEN b1.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
+ELSE (CASE WHEN b1.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
 )
-
+)
 
 , section4Ta AS 
 (
@@ -360,7 +380,14 @@ JOIN dbo.SplitString(@programfk,',') on c.programfk = listitem
 LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
 WHERE --a.ProgramFK = @programfk AND 
 a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
-AND (c.DischargeDate IS NULL OR c.DischargeDate > @StartDtT)
+AND 
+--(c.DischargeDate IS NULL OR c.DischargeDate > @StartDtT)
+(c.DischargeDate IS NULL OR
+CASE WHEN @IncludeClosedCase = 0 THEN 
+(CASE WHEN c.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
+ELSE (CASE WHEN c.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
+)
+
 AND b.HVCaseFK IS NULL
 )
 
