@@ -13,6 +13,10 @@ CREATE procedure [dbo].[rspFSWCaseList](@programfk    varchar(max)    = null,
 
 as
 
+--DECLARE @programfk    varchar(max)    = '1'
+--DECLARE @supervisorfk int             = null
+--DECLARE @workerfk     int             = null
+
 	if @programfk is null
 	begin
 		select @programfk =
@@ -59,12 +63,11 @@ as
 														  ', Apt: '+rtrim(pcapt)
 												  end as street
 							  ,rtrim(pc.pccity) + ', ' + pc.pcstate + ' ' + pc.pczip as pccsz
-							  ,pc.pcphone+case
-											  when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
-												  ', EMR: '+pc.PCEmergencyPhone
-											  else
-												  ''
-										  end as pcphone
+							  ,pc.pcphone + case when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
+										    ', Emr: '+pc.PCEmergencyPhone else '' END 
+										  + case when pc.PCCellPhone is not null and pc.PCCellPhone <> '' then
+												  ', Cell: '+pc.PCCellPhone else '' end
+										   as pcphone
 							  ,LTRIM(RTRIM(tcid.tcfirstname))
 							  ,LTRIM(RTRIM(tcid.tclastname))
 							  ,hvcase.tcdob
