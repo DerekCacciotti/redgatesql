@@ -10,6 +10,7 @@ GO
 -- Author:    <Dar Chen>
 -- Create date: <Jul 09, 2012>
 -- Description: 
+-- exec rspFSWPreIntakeTickler 28, '20130201', null, null
 -- =============================================
 CREATE procedure [dbo].[rspFSWPreIntakeTickler]
 (
@@ -30,46 +31,51 @@ as
 --DECLARE @supervisorfk INT = NULL
 --DECLARE @rdate DATETIME = '01/01/2012'
 
-; WITH lastpreintake AS 
+;
+with lastpreintake
+as
 (
-(SELECT HVCaseFK, max(PIDate) [LastPreIntakeDate] FROM Preintake WHERE ProgramFK = @programfk
-GROUP BY HVCaseFK) 
+(select HVCaseFK
+	   ,max(PIDate) [LastPreIntakeDate]
+	from Preintake
+	where ProgramFK = @programfk
+	group by HVCaseFK)
 )
 
-SELECT c.PC1ID [pc1ID]
-, rtrim(b.PCFirstName)+ ' ' + rtrim(b.PCLastName) [Name] 
-, rtrim(b.PCStreet) + CASE WHEN b.PCApt IS NULL THEN '' ELSE rtrim(b.PCApt) END [Street]
-, rtrim(b.PCCity) + CASE WHEN b.PCCity IS NOT NULL OR len(b.PCCity) > 0 THEN ', NY' ELSE 'NY' END 
-+ ' ' + rtrim(b.PCZip) [City]
-, b.PCPhone [Phone]
-, datediff(day, d.FSWAssignDate, @rdate) [DaysSinceFSW]
-, convert(VARCHAR(12), DATEADD(day,30.44*3,CASE WHEN a.TCDOB IS NOT NULL THEN a.TCDOB ELSE a.EDC END), 101) [EnrollmentAgeOutDate]
-, case when DATEADD(day,30.44*3,CASE WHEN a.TCDOB IS NOT NULL THEN a.TCDOB ELSE a.EDC END) <= current_timestamp 
-	   then '*' else '' end as AgedOut
-, substring(convert(VARCHAR(30),  e.LastPreIntakeDate, 106),4, 20) [LastIntakeForm]
-, ltrim(rtrim(fsw.firstname))+' '+ltrim(rtrim(fsw.lastname)) fswname
-, ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) as supervisor
-, d.PAFSWFK
+select c.PC1ID [pc1ID]
+	  ,rtrim(b.PCFirstName)+' '+rtrim(b.PCLastName) [Name]
+	  ,rtrim(b.PCStreet)+case when b.PCApt is null then '' else ' '+rtrim(b.PCApt) end [Street]
+	  ,rtrim(b.PCCity)+case when b.PCCity is not null or len(b.PCCity) > 0 then ', NY' else 'NY' end
+	   +' '+rtrim(b.PCZip) [City]
+	  ,b.PCPhone [Phone]
+	  ,datediff(day,d.FSWAssignDate,@rdate) [DaysSinceFSW]
+	  ,convert(varchar(12),DATEADD(day,30.44*3,case when a.TCDOB is not null then a.TCDOB else a.EDC end),101) 
+		  [EnrollmentAgeOutDate]
+	  ,case when DATEADD(day,30.44*3,case when a.TCDOB is not null then a.TCDOB else a.EDC end) <= current_timestamp
+			   then '*' else '' end as AgedOut
+	  ,substring(convert(varchar(30),e.LastPreIntakeDate,106),4,20) [LastIntakeForm]
+	  ,ltrim(rtrim(fsw.firstname))+' '+ltrim(rtrim(fsw.lastname)) fswname
+	  ,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) as supervisor
+	  ,d.PAFSWFK
 
-, e.LastPreIntakeDate
-, convert(VARCHAR(12), d.FSWAssignDate, 101) [FSWDateAssigned]
---, *
-FROM HVCase  AS a 
-JOIN PC AS b ON a.PC1FK = b.PCPK
-JOIN CaseProgram AS c ON c.HVCaseFK = a.HVCasePK
-JOIN Preassessment AS d ON a.HVCasePK = d.HVCaseFK AND d.CaseStatus = '02'
-JOIN lastpreintake AS e ON e.HVCaseFK = a.HVCasePK
+	  ,e.LastPreIntakeDate
+	  ,convert(varchar(12),d.FSWAssignDate,101) [FSWDateAssigned]
+	--, *
+	from HVCase as a
+		join PC as b on a.PC1FK = b.PCPK
+		join CaseProgram as c on c.HVCaseFK = a.HVCasePK
+		join Preassessment as d on a.HVCasePK = d.HVCaseFK and d.CaseStatus = '02'
+		left outer join lastpreintake as e on e.HVCaseFK = a.HVCasePK
+		inner join worker fsw on fsw.workerpk = c.currentfswfk
+		inner join workerprogram on workerfk = fsw.workerpk
+		inner join worker supervisor on supervisorfk = supervisor.workerpk
 
-inner join worker fsw on fsw.workerpk = c.currentfswfk
-inner join workerprogram on workerfk = fsw.workerpk
-inner join worker supervisor on supervisorfk = supervisor.workerpk
-
-WHERE c.DischargeDate IS NULL 
-AND c.ProgramFK = @programfk
-AND c.CurrentLevelFK IN (7, 8)
---and caseprogress >= 11
-and c.currentFSWFK = isnull(@workerfk, c.currentFSWFK)
-and supervisorfk = isnull(@supervisorfk, supervisorfk)
+	where c.DischargeDate is null
+		 and c.ProgramFK = @programfk
+		 and c.CurrentLevelFK in (7,8)
+		 --and caseprogress >= 11
+		 and c.currentFSWFK = isnull(@workerfk,c.currentFSWFK)
+		 and supervisorfk = isnull(@supervisorfk,supervisorfk)
 
 --where followup.hvcasefk is null
 --and CaseProgress >= 11
