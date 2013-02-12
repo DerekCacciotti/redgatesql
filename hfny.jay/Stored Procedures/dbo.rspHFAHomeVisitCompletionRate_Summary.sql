@@ -172,11 +172,11 @@ begin
 							 1
 						 else
 							 case
-								 when (inhomevisitcount/(expvisitcount*1.000)) > 1
+								 when (inhomevisitcount/(case when expvisitcount>=actvisitcount then actvisitcount else expvisitcount end*1.000)) > 1
 									 then
 									 1
 								 else
-									 inhomevisitcount/(expvisitcount*1.000)
+									 inhomevisitcount/(case when expvisitcount>=actvisitcount then actvisitcount else expvisitcount end*1.000)
 							 end
 					 end as InHomeRate
 					,dischargedate
