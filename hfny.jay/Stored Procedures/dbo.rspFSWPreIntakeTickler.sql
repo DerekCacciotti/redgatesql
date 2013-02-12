@@ -47,7 +47,10 @@ select c.PC1ID [pc1ID]
 	  ,rtrim(b.PCStreet)+case when b.PCApt is null then '' else ' '+rtrim(b.PCApt) end [Street]
 	  ,rtrim(b.PCCity)+case when b.PCCity is not null or len(b.PCCity) > 0 then ', NY' else 'NY' end
 	   +' '+rtrim(b.PCZip) [City]
-	  ,b.PCPhone [Phone]
+	  ,b.PCPhone + CASE when b.PCEmergencyPhone is not null and b.PCEmergencyPhone <> '' then
+	   + ' Emr:' + b.PCEmergencyPhone ELSE '' END
+	   + CASE when b.PCCellPhone is not null and b.PCCellPhone <> '' then
+	   + ' Cell:' + b.PCCellPhone ELSE '' END [Phone]
 	  ,datediff(day,d.FSWAssignDate,@rdate) [DaysSinceFSW]
 	  ,convert(varchar(12),DATEADD(day,30.44*3,case when a.TCDOB is not null then a.TCDOB else a.EDC end),101) 
 		  [EnrollmentAgeOutDate]

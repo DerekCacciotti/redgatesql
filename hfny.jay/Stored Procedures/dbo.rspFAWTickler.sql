@@ -16,6 +16,11 @@ CREATE procedure [dbo].[rspFAWTickler]
     @sortorder int             = 1
 )
 as
+
+--DECLARE @programfk varchar(max)    = '1'
+--DECLARE @workerpk  int             = null
+--DECLARE @sortorder int             = 1
+
 	if @programfk is null
 	begin
 		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
@@ -54,12 +59,11 @@ as
 								   else
 									   ' (Apt. '+rtrim(PCApt)+')'
 							   end+', '+rtrim(pccity)+', NY  '+rtrim(pczip) as PCAddress
-			  ,pc.pcphone+case
-							  when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
-								  ', EMR: '+pc.PCEmergencyPhone
-							  else
-								  ''
-						  end as pcphone
+			  ,pc.pcphone + CASE when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
+							+ CHAR(13) + 'Emr: ' + pc.PCEmergencyPhone ELSE '' END
+				    	   + CASE when pc.PCCellPhone is not null and pc.PCCellPhone <> '' then
+							+ CHAR(13) + 'Cell: ' + pc.PCCellPhone ELSE '' END
+							 as pcphone
 			  ,hvcase.ScreenDate
 			  ,case
 				   when hvcase.tcdob is not null then
