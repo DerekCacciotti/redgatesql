@@ -7,7 +7,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <June 28, 2012>
 -- Description:	<gets you data for quarterly service referrals>
--- exec [rspQSRReasonsServiceNotReceived] 6,'01/01/2011','12/31/2012','01'
+-- exec [rspQSRReasonsServiceNotReceived] 19,'07/01/2012','09/30/2012','01',null,null
 -- =============================================
 CREATE procedure [dbo].[rspQSRReasonsServiceNotReceived]
 (
@@ -39,52 +39,46 @@ begin
 
 	declare @tblResults table(
 		AppCodeText varchar(500) null
-		,ServiceReferralPK varchar(10) null
+		,ServiceReferralPK INT 
 	);
 
-	with cteMain
-	as (
-	select sr.ReasonNoService
-		  ,sr.ServiceReferralPK
-		  ,wp.SiteFK as SiteFK
-		from HVCase h
-			inner join CaseProgram cp on h.HVCasePK = cp.HVCaseFK
-			inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
-			inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK -- get SiteFK
-			inner join ServiceReferral sr on sr.HVCaseFK = h.HVCasePK
-			inner join codeServiceReferral sr1 on sr1.codeServiceReferralPK = sr.ServiceCode
-			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
-			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
-		where
-			 sr.ReferralDate between @sdate and @edate
-			 and NatureOfReferral = @NatureOfReferral -- @NatureOfReferral = 1arranged referrals
-			 and ServiceReceived = 0
-			 and ReasonNoService is not null
-			 and ReasonNoService <> ''
-			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-	)
-	,
-	cteServicesNotReceived
+	with cteServicesNotReceived
 	as
-	(select AppCodeText
-		  ,ServiceReferralPK
-		from codeApp a
-			left join cteMain st on a.AppCode = st.ReasonNoService
-		where AppCodeGroup = 'ReasonCode'
-			 and AppCodeUsedWhere like '%SR%'
+	(
+		select count(reasonnoservice) as counter
+			  ,AppCodeText
+			  ,sum(count(reasonnoservice)) over () as 'Total'
+			from servicereferral
+				left join codeApp on codeApp.appcode = servicereferral.reasonnoservice
+				left join codeServiceReferral on codeServiceReferral.ServiceReferralCode = ServiceReferral.ServiceCode
+				inner join dbo.SplitString(@programfk,',') on servicereferral.programfk = listitem
+			where ReferralDate between @sdate and @edate
+				 and natureofreferral = @NatureOfReferral
+				 and reasonnoservice is not null
+				 and reasonnoservice <> ''
+				 and appcodegroup = 'ReasonCode'
+				 and appcodeusedwhere = 'SR'
+			group by appcodetext	
+	
+	
+	
 	)
+
 
 	insert into @tblResults
-		select AppCodeText
-			  ,ServiceReferralPK
-			from cteServicesNotReceived
-
+		select a.AppCodeText
+		  , isnull(COUNTER, 0) AS ServiceReferralPK
+		from codeApp a
+			left join cteServicesNotReceived st on a.AppCodeText = st.AppCodeText
+		where AppCodeGroup = 'ReasonCode'
+			 and AppCodeUsedWhere like '%SR%'	
+	
+		
 	--calculate the totals that will we use to calculate percentages
-	set @countServiceNotReceived = (select count(ServiceReferralPK)
-										from @tblResults)
+	set @countServiceNotReceived = (select sum(ServiceReferralPK) from @tblResults)
 
 	select AppCodeText
-		  ,CONVERT(varchar,count(ServiceReferralPK))+' ('+CONVERT(varchar,round(COALESCE(cast(count(ServiceReferralPK) as float)*
+		  ,CONVERT(varchar,sum(ServiceReferralPK))+' ('+CONVERT(varchar,round(COALESCE(cast(sum(ServiceReferralPK) as float)*
 			  100/NULLIF(@countServiceNotReceived,0),0),0))+'%)' as TotalServiceNotReceived
 		from @tblResults nrc
 		group by nrc.AppCodeText
