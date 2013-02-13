@@ -269,7 +269,7 @@ as
 					   0
 			   end) [PD04PC2TrainingProgram]
 			  ,sum(case
-				   when x.pc1Medicaid = 1 then
+				   when x.pc1Medicaid = '1' then
 					   1
 				   else
 					   0
