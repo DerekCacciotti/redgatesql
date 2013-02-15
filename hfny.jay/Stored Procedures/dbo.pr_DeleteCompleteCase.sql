@@ -1,8 +1,15 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 
+-- =============================================
+-- Author:		Jay Robohn
+-- Create date: old
+-- Description:	Adapted from FamSys on Feb 13, 2013
+-- exec pr_DeleteCompleteCase 8088, 1
+-- =============================================
 CREATE procedure [dbo].[pr_DeleteCompleteCase]
 (
     @hvcasefk          int,
