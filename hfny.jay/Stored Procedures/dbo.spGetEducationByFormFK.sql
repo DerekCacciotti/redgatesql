@@ -32,7 +32,7 @@ On programtype=a.AppCode
 WHERE formfk = @FormFK
 AND FormType = @FormType
 AND PCType = @PCType
-AND Interval < @Interval
+AND Interval <= @Interval
 
 
 
