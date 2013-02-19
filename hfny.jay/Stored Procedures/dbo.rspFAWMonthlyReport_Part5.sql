@@ -54,7 +54,7 @@ DECLARE @NoAnyPreAssessment TABLE (
 	[PAVisitAttempt] [int] NULL,
 	[PAVisitMade] [int] NULL,
 	[ProgramFK] [int] NOT NULL,
-	[TransferredtoProgram] [int] NULL )
+	[TransferredtoProgram] [varchar](50) NULL )
 
 INSERT INTO @NoAnyPreAssessment ([HVCaseFK], [CaseStatus], [PAFAWFK], [ProgramFK])
 SELECT ppp.HVCaseFK, '99', ppp.FAWFK, @programfk
@@ -145,7 +145,4 @@ LEFT OUTER JOIN codeDischarge x ON x.DischargeCode = a.DischargeReason
 AND x.DischargeUsedWhere LIKE '%PA%'
 LEFT OUTER JOIN Worker AS w ON w.WorkerPK = a.PAFAWFK
 ORDER BY [Participant]
-
-
-
 GO
