@@ -6,8 +6,8 @@ GO
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 12/18/2012
--- Edit Date:
--- Edit Reason:
+-- Edit Date: 02/21/2013
+-- Edit Reason: John no longer wants Exempt Trainings
 -- Description:	Worker Training Resume
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingResume]
@@ -89,6 +89,8 @@ SELECT    cteMain.HireDate
 
 SELECT DISTINCT @sdate AS StartDate
 , @edate AS EndDate
-,* FROM cteTrainings ORDER BY [TrainingDate], [TopicName]
+,* FROM cteTrainings 
+WHERE IsExempt <> '1'
+ORDER BY [TrainingDate], [TopicName]
 END
 GO
