@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,6 +10,7 @@ GO
 -- Create date: <Feb 5, 2012>
 -- Description:	<report: Address list>
 --				Moved from FamSys - 02/05/12 jrobohn
+-- exec rspAddressList 1,1,0,0
 -- =============================================
 CREATE procedure [dbo].[rspAddressList]
 (@programfk     varchar(max)    = null,
@@ -33,14 +35,7 @@ as
 		  ltrim(rtrim(pcfirstname))+' '+ltrim(rtrim(pclastname)) PC1
 		 ,pcstreet
 		 ,pcapt
-		 ,pccity
-		 ,pcstate
-		 ,pczip = case
-					  when len(pczip) = 5 then
-						  pczip+'-'
-					  else
-						  pczip
-				  end
+		 ,rtrim(pccity) + ', ' + rtrim(pcstate) + ' ' + case when len(rtrim(pczip))=6 then left(PCZip,5) else PCZip end as csz
 		 ,pcdob
 		 ,pc1id
 		 ,isnull(tcdob,edc) tcdob
@@ -50,16 +45,11 @@ as
 		 ,levelname current_level
 		 ,ltrim(rtrim(worker.firstname))+' '+ltrim(rtrim(worker.lastname)) worker
 		from hvcase
-			inner join caseprogram
-					  on caseprogram.hvcasefk = hvcasepk
-			inner join pc
-					  on pc1fk = pcpk
-			inner join worker
-					  on workerpk = isnull(currentfswfk,currentfawfk)
-			inner join codelevel
-					  on currentlevelfk = codelevelpk
-			inner join dbo.SplitString(@programfk,',')
-					  on caseprogram.programfk = listitem
+			inner join caseprogram on caseprogram.hvcasefk = hvcasepk
+			inner join pc on pc1fk = pcpk
+			inner join worker on workerpk = isnull(currentfswfk,currentfawfk)
+			inner join codelevel on currentlevelfk = codelevelpk
+			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 		where dischargedate is null
 			 and casestartdate <= dateadd(dd,1,datediff(dd,0,getdate()))
 			 and 1 = case
