@@ -9,7 +9,7 @@ GO
 -- Create date: <Febu. 11, 2013>
 -- Description:	<This Performance Target report gets you 'Summary for all Performance Target reports '>
 
--- rspPerformanceTargetReportSummary 19 ,'10/01/2012' ,'12/31/2012'
+-- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
 
 -- =============================================
 
@@ -20,7 +20,7 @@ CREATE PROCEDURE [dbo].[rspPerformanceTargetReportSummary]
     @edate               DATETIME,
     @workerfk            INT             = NULL,
     @sitefk              INT             = NULL,
-    @IncludeClosedCase   BIT             = 1,
+    @IncludeClosedCase   BIT             = 0,
     @casefilterspositive VARCHAR(100)    = ''
 )
 AS
@@ -45,14 +45,19 @@ AS
 																	   , CurrentWorkerFK
 																	   , CurrentWorkerFullName
 																	   , CurrentLevel
-																	   , ProgramFK)
-			SELECT HVCasePK
+																	   , ProgramFK
+																	   , TCIDPK
+																	   )
+			SELECT 
+			HVCasePK
 				 , PC1ID
 				 , P.PCFirstName + ' ' + P.PCLastName AS PC1FullName
 				 , cp.CurrentFSWFK
 				 , w.FirstName + ' ' + w.LastName AS CurrentWorkerFullName
 				 , cp.CurrentLevelFK
 				 , @programfk
+				 , tcid.TCIDPK
+				 
 				FROM
 					HVCase h
 					INNER JOIN CaseProgram cp
@@ -61,15 +66,15 @@ AS
 							ON P.PCPK = h.PC1FK
 							INNER JOIN Worker w
 								ON w.WorkerPK = cp.CurrentFSWFK
-								left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+								INNER join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 								inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
-								left join tcid on tcid.hvcasefk = h.hvcasepk  -- for dead babies dod
+								LEFT join tcid on tcid.hvcasefk = h.hvcasepk  -- for dead babies dod
 
 				WHERE
 					cp.ProgramFK = @programfk
-					--AND h.CaseProgress >= 9
+					AND h.CaseProgress >= 9
 					-- dead babies
-					AND (h.IntakeDate IS NOT NULL AND h.IntakeDate <= @edate )
+					AND (h.IntakeDate IS NOT NULL AND h.IntakeDate <= @edate AND h.TCDOD IS NULL  )
 					AND (tcid.TCDOD IS NULL OR tcid.TCDOD > @edate)   -- 5/23/05 JH/DB if all children are dead don't include in performance target (FoxPro)
 					-- inclusion / exclusion of closed case
 					AND (cp.DischargeDate IS NULL
@@ -92,7 +97,7 @@ AS
 					--siteFK
 					and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
-
+				
 
 
 		

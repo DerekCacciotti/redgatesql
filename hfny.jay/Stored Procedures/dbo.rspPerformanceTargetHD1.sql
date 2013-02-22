@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -25,8 +26,43 @@ CREATE procedure [dbo].[rspPerformanceTargetHD1]
 as
 begin
 
+DECLARE @HD1Total INT
+DECLARE @HD1Valid INT
+DECLARE @HD1Meet INT
+
+DECLARE @tbl4PTReportHD1TotalCases TABLE(
+			NumberMeetingPT INT,
+			TotalValidCases INT,
+			TotalCase INT 
+)
+
+DECLARE @tbl4PTReportHD1NotMeetingPT TABLE(
+			ReportTitleText [varchar](max),
+			PC1ID [char](13),					
+			TCDOB [datetime],
+			Reason [varchar](200),
+			CurrentWorker [varchar](200),
+			LevelAtEndOfReport [varchar](50),
+			Explanation [varchar](60)
+
+)
+
+--DECLARE @tbl4PTReportHD1InvalidCases TABLE(
+--			ReportTitleText [varchar](max),
+--			PC1ID [char](13),
+--			MetTarget BIT,
+--			OutOfWindow VARCHAR(50),
+--			NotReviewedBySupervisor	BIT,
+--			Missing BIT,
+--			FormType  varchar(2),			
+--			TCDOB [datetime],
+--			LevelAtEndOfReport [varchar](50),
+--			ProgramName [varchar](60)
+
+--)
 
 
+;
 WITH cteSubCohort AS
 (
 SELECT 	
@@ -38,6 +74,7 @@ SELECT
 	, ptc.CurrentWorkerFullName
 	, ptc.CurrentLevel
 	, ptc.ProgramFK
+	, ptc.TCIDPK
 	, case
 	   when h.tcdob is not null then
 		   h.tcdob
@@ -49,7 +86,7 @@ SELECT
 	 
 	  FROM @tblPTCase ptc
 INNER JOIN HVCase h ON ptc.hvcaseFK = h.HVCasePK 
-inner join CaseProgram cp on ptc.hvcaseFK = cp.HVCaseFK
+INNER join CaseProgram cp on h.hvcasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
 )
 
 
@@ -67,6 +104,7 @@ SELECT
 	, CurrentWorkerFullName
 	, CurrentLevel
 	, ProgramFK
+	, TCIDPK
 	, TCDOB
 	, case
 		   when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @eDate then
@@ -88,130 +126,217 @@ SELECT
 )
 
 
+
+
+
 -- Report: HD1. Immunization at one year
 , cteHD1TotalCases AS
 (
-	SELECT *,
-	datediff(day, tcdob, @sdate) aa,
-	datediff(day,tcdob, lastdate) bb
-	
-	 FROM cteCohort
-	WHERE datediff(day, tcdob, @sdate)	<= 548 AND datediff(day,tcdob, lastdate) >= 365
-	
+	SELECT *	
+	 FROM cteCohort	
+	WHERE datediff(day, tcdob, @sdate)	<= 548 AND datediff(day,tcdob, lastdate) >= 365	
 
 )
-
-
-
-
-----------SELECT * FROM cteHD1TotalCases
-------------ORDER BY OldID
-----------ORDER BY pc1id
---ORDER BY HVCaseFK 
-
--- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
-
-
---------------SELECT * FROM CaseProgram cp 
---------------INNER JOIN HVCase h ON h.HVCasePK = cp.HVCaseFK
---------------left join tcid on tcid.hvcasefk = h.hvcasepk
---------------WHERE PC1ID = 'BH92070201567'
-
-
---------------SELECT * FROM CaseProgram cp 
---------------INNER JOIN HVCase h ON h.HVCasePK = cp.HVCaseFK
---------------left join tcid on tcid.hvcasefk = h.hvcasepk
---------------WHERE PC1ID = 'AW88070032137'
---WHERE PC1ID = 'AW88070032137'
-
-
-
-
-
-
-
-
-
-
-, cteHD1TotalCases1 AS
+,
+cteHD1Valid AS 
 (
-	SELECT * FROM cteCohort
-	WHERE datediff(day, tcdob, @sdate)	<= 548 AND datediff(day,tcdob, lastdate) >= 365
+	SELECT DISTINCT 
+	    coh.HVCaseFK
+	  , coh.TCIDPK 
+	  , CASE WHEN count(TCMedical.TCIDFK) > 0 THEN 1 ELSE 0 END AS valid
 
-)
-, cteHD1TotalCases2 AS
-(
-	SELECT * FROM cteCohort
-	WHERE datediff(day, tcdob, @sdate)	<= 548 AND datediff(day,tcdob, lastdate) >= 365
+	
+	  FROM cteHD1TotalCases coh	  
+	  LEFT join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK  AND TCMedical.TCIDFK = coh.TCIDPK	
 
+	 WHERE TCItemDate BETWEEN coh.TCDOB AND dateadd(dd,365,coh.TCDOB)	
+	GROUP BY coh.HVCaseFK, coh.TCIDPK
 )
+
 
 ,
-
-cteHD1ValidCases AS 
+--HD1: Meet 1 - count DTaP i.e. Diptheria Tetanus Pertussis shots for each child                              
+cteHD1DTaP_1YCount AS 
 (
 	SELECT DISTINCT 
 	  coh.HVCaseFK
-	, count(TCItemDate) over (partition BY coh.HVCaseFK) as 'DTaP_1Y'
-
+	  , coh.TCIDPK 
+	, count(coh.TCIDPK) as 'DTaP_1Y'
 	
-	  FROM cteHD1TotalCases1 coh	  
-	  LEFT join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK
-	  inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem AND cmi.MedicalItemTitle = 'DTaP'
+	
+	  FROM cteHD1TotalCases coh	
+	    
+	  LEFT join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK AND TCMedical.TCIDFK = coh.TCIDPK
+	  INNER join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem AND cmi.MedicalItemTitle = 'DTaP'
 
 	 WHERE TCItemDate BETWEEN TCDOB AND dateadd(dd,365,TCDOB)
-	GROUP BY coh.HVCaseFK, TCItemDate
-	
+	 GROUP BY coh.HVCaseFK, coh.TCIDPK
 )
-,
 
-cteHD1MeetPT AS 
+
+--HD1: Meet 2 - count Polio i.e. Polio Immunization  shots for each child      
+,
+cteHD1Polio_1YCount AS 
 (
 	SELECT DISTINCT 
 	  coh.HVCaseFK
-	, count(TCItemDate) over (partition BY coh.HVCaseFK) as 'Polio_1Y'
+	  , coh.TCIDPK 
+	, count(coh.TCIDPK) as 'Polio_1Y'
 	
-	  FROM cteHD1TotalCases2 coh	  
-	  LEFT join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK
+	
+	  FROM cteHD1TotalCases coh	
+	    
+	  LEFT join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK AND TCMedical.TCIDFK = coh.TCIDPK
 	  INNER join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem AND cmi.MedicalItemTitle = 'Polio'
 
 	 WHERE TCItemDate BETWEEN TCDOB AND dateadd(dd,365,TCDOB)
-	 GROUP BY coh.HVCaseFK, TCItemDate
+	 GROUP BY coh.HVCaseFK, coh.TCIDPK
 )
 
-
---SELECT * FROM cteHD1MeetPT
---ORDER BY HVCaseFK 
-
--- number who meet Performance Target
-SELECT * FROM cteHD1ValidCases a 
-LEFT JOIN cteHD1MeetPT b ON a.hvcasefk = b.hvcasefk 
+,
+cteHD1Meet AS (
+-- HD1: number who meet Performance Target
+-- Inner join HD1: Meet 1 and HD1: Meet 2
+SELECT dtap.HVCaseFK
+	 , dtap.TCIDPK
+	 , DTaP_1Y 	
+	 , Polio_1Y
+ FROM cteHD1DTaP_1YCount dtap
+INNER JOIN cteHD1Polio_1YCount polio ON dtap.hvcasefk = polio.hvcasefk  AND dtap.TCIDPK = polio.TCIDPK 
 WHERE DTaP_1Y >= 3 AND Polio_1Y >= 2
+)
 
---SELECT * FROM cteHD1MeetPT
+,
+cteHD1NotMeetingPT AS (
+ SELECT 
+		'HD1. Immunizations at one year  At least 90% of target children will be up to date on immunizations as of first birthday. Cohort: Target children 1 to 1.5 years of age' AS ReportTitleText
+	  , PC1ID
+	  , TCDOB
+	  , 'Missing Shots or Not on Time' AS Reason  
+	  , CurrentWorkerFullName
+	  , CurrentLevel
+	  , '' AS Explanation
+	  
+	 FROM cteHD1TotalCases cht
+	 WHERE cht.HVCaseFK NOT IN (SELECT HVCaseFK FROM cteHD1Meet) 
+)
 
--- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
+--SELECT * FROM cteHD1NotMeetingPT
+
+-- add all these into a row in a table
+INSERT INTO @tbl4PTReportHD1TotalCases
+(
+			NumberMeetingPT,
+			TotalValidCases,
+			TotalCase
+
+)
+select
+			(SELECT count(HVCaseFK) FROM cteHD1TotalCases) AS NumberMeetingPT
+			,(SELECT count(HVCaseFK) FROM cteHD1Valid) AS TotalValidCases
+			,(SELECT count(HVCaseFK) FROM cteHD1Meet) AS TotalCase
+			
+			
+
+--INSERT INTO @tbl4PTReportHD1NotMeetingPT
+--(
+--			ReportTitleText,
+--			PC1ID,					
+--			TCDOB,
+--			Reason,
+--			CurrentWorker,
+--			LevelAtEndOfReport,
+--			Explanation
+--) 
+-- SELECT * FROM cteHD1NotMeetingPT
 
 
-/*** START - For testing By Khalsa ***/
-DECLARE	@ReportTitleText [varchar](max)
-DECLARE	@PercentageMeetingPT [varchar](50)
-DECLARE	@NumberMeetingPT [varchar](50)
-DECLARE	@TotalValidCases [varchar](50)
-DECLARE	@TotalCase [varchar](50)	
+			
+			
+			
+			
+			
+			
 
-SET @ReportTitleText	= ''
-SET @PercentageMeetingPT = ''
-SET @NumberMeetingPT = ''
-SET @TotalValidCases = ''
-SET @TotalCase = ''
+----SELECT * FROM cteHD1Polio_1YCount
+----ORDER BY HVCaseFK 
+
+----SELECT * FROM cteHD1DTaP_1YCount
+----ORDER BY HVCaseFK 
+
+----SELECT * FROM cteHD1Meet
+----ORDER BY HVCaseFK 
+
+-- --  rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
 
 
---SELECT @ReportTitleText,@PercentageMeetingPT,@NumberMeetingPT,@TotalValidCases,@TotalCase
+IF @ReportType = 'summary'
 
---SELECT * FROM @tblPTCase
+		BEGIN 
+		
+	
+			DECLARE	@NumberMeetingPT INT = 0
+			DECLARE	@TotalValidCases INT = 0
+			DECLARE	@TotalCase INT = 0
 
-/*** END - For testing By Khalsa ***/
+			SET @TotalCase = (SELECT NumberMeetingPT FROM @tbl4PTReportHD1TotalCases)
+			SET @TotalValidCases = (SELECT TotalValidCases FROM @tbl4PTReportHD1TotalCases)
+			SET @NumberMeetingPT = (SELECT TotalCase FROM @tbl4PTReportHD1TotalCases)
+			
+			if @TotalCase is null
+			SET @TotalCase = 0
+			
+			if @TotalValidCases is null
+			SET @TotalValidCases = 0
+			
+			if @NumberMeetingPT is null
+			SET @NumberMeetingPT = 0
+
+
+			DECLARE @tbl4PTReportHD1Summary TABLE(
+						ReportTitleText [varchar](max),
+						PercentageMeetingPT [varchar](200),
+						NumberMeetingPT INT,
+						TotalValidCases INT,
+						TotalCase INT 
+			)
+
+			  
+
+
+
+			INSERT INTO @tbl4PTReportHD1Summary([ReportTitleText],[PercentageMeetingPT],[NumberMeetingPT],[TotalValidCases],[TotalCase])
+			VALUES('HD1. Immunizations at one year  At least 90% of target children will be up to date on immunizations as of first birthday. Cohort: Target children 1 to 1.5 years of age' 	
+				, ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@NumberMeetingPT AS FLOAT) * 100/ NULLIF(@TotalCase,0), 0), 0))  + '%)'
+				,CONVERT(VARCHAR,@NumberMeetingPT)
+				,CONVERT(VARCHAR,@TotalValidCases)
+				,CONVERT(VARCHAR,@TotalCase)
+				)
+
+				SELECT * FROM @tbl4PTReportHD1Summary	
+
+		END
+--	ELSE
+--		BEGIN
+		
+--			SELECT ReportTitleText
+--				 , PC1ID
+--				 , TCDOB
+--				 , Reason
+--				 , CurrentWorker
+--				 , LevelAtEndOfReport
+--				 , Explanation FROM @tbl4PTReportHD1NotMeetingPT
+--					ORDER BY CurrentWorker, PC1ID 	
+
+
+--		END	
+
+
+
+
+
+
+
 
 end
 GO
