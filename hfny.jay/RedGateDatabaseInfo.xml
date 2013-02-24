@@ -55,7 +55,7 @@
     <DataWriteAllFilesInOneDirectory>True</DataWriteAllFilesInOneDirectory>
   </WriteToFileOptions>
   <DataFileSet>
-    <Count>20</Count>
+    <Count>21</Count>
     <DataFile>dbo.codeApp_Data.sql</DataFile>
     <DataFile>dbo.codeCaseProgress_Data.sql</DataFile>
     <DataFile>dbo.codeCounty_Data.sql</DataFile>
@@ -76,5 +76,6 @@
     <DataFile>dbo.codeTopic_Data.sql</DataFile>
     <DataFile>dbo.codeSubTopicDetail_Data.sql</DataFile>
     <DataFile>dbo.codeAuditC_Data.sql</DataFile>
+    <DataFile>dbo.codePerformanceTargetTitles_Data.sql</DataFile>
   </DataFileSet>
 </DatabaseInformation>

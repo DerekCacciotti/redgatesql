@@ -8,151 +8,160 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 11, 2013>
 -- Description:	<This Performance Target report gets you 'Summary for all Performance Target reports '>
-
 -- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
-
+-- mods by jrobohn 20130222 - clean up names, code and layout
+-- mods by jrobohn 20130223 - added PCI1 report
 -- =============================================
 
-CREATE PROCEDURE [dbo].[rspPerformanceTargetReportSummary]
+CREATE procedure [dbo].[rspPerformanceTargetReportSummary]
 (
-    @programfk           VARCHAR(MAX)    = NULL,
-    @sdate               DATETIME,
-    @edate               DATETIME,
-    @workerfk            INT             = NULL,
-    @sitefk              INT             = NULL,
-    @IncludeClosedCase   BIT             = 0,
-    @casefilterspositive VARCHAR(100)    = ''
+    @ProgramFKs				varchar(max)    = null,
+    @StartDate				datetime,
+    @EndDate				datetime,
+    @FSWFK					int             = null,
+    @SiteFK					int             = null,
+    @IncludeClosedCases		bit             = 0,
+    @CaseFiltersPositive	varchar(100)    = ''
 )
-AS
-	BEGIN
-		-- SET NOCOUNT ON added to prevent extra result sets from
-		-- interfering with SELECT statements.
-		SET NOCOUNT ON;
+as
+begin
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	set nocount on;
+
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @CaseFiltersPositive = case when @CaseFiltersPositive = '' then null else @CaseFiltersPositive end
+
+	/** For performance reasons, get the active cases that belong to the cohort now **/
+	/* Declare a variable that references the type. */
+	declare @tblPTCohort as PTCases; -- PTCases is a user defined type
+
+	/* Add data to the table variable. */
+	insert into @tblPTCohort (HVCaseFK
+							 ,PC1ID
+							 ,PC1FullName
+							 ,CurrentWorkerFK
+							 ,CurrentWorkerFullName
+							 ,CurrentLevel
+							 ,ProgramFK
+							 ,TCIDPK
+			   )
+		select
+			  HVCasePK
+			 , PC1ID
+			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName
+			 , cp.CurrentFSWFK
+			 , rtrim(w.FirstName) + ' ' + rtrim(w.LastName) as CurrentWorkerFullName
+			 , cp.CurrentLevelFK
+			 , @ProgramFKs
+			 , tcid.TCIDPK
+
+			from
+				HVCase h
+				inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+				inner join PC P on P.PCPK = h.PC1FK
+				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
+				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+				inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+				left join tcid on tcid.hvcasefk = h.hvcasepk -- for dead babies dod
+
+			where
+				 cp.ProgramFK = @ProgramFKs
+				 and h.CaseProgress >= 9
+				 -- dead babies
+				 and (h.IntakeDate is not null
+				 and h.IntakeDate <= @EndDate
+				 and h.TCDOD is null)
+				 and (tcid.TCDOD is null
+				 or tcid.TCDOD > @EndDate) -- 5/23/05 JH/DB if all children are dead don't include in performance target (FoxPro)
+				 -- inclusion / exclusion of closed case
+				 and (cp.DischargeDate is null
+				 or case -- closed cases are not included
+					 when @IncludeClosedCases = 0 then
+						 (case
+							 when cp.DischargeDate > @EndDate then
+								 1
+							 else
+								 0
+						 end)
+					 else -- include closed cases
+						 (case
+							 when cp.DischargeDate >= @StartDate then
+								 1
+							 else
+								 0
+						 end)
+				 end = 1)
+				 --siteFK
+				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+
+	--SELECT * FROM @tblPTCohort
+
+	/***************************/
+
+	declare @tblPTSummary table(
+		[ReportTitleText] varchar(max),
+		[PercentageMeetingPT] [varchar](50),
+		[NumberMeetingPT] [varchar](50),
+		[TotalValidCases] [varchar](50),
+		[TotalCases] [varchar](50)
+	)
 
 
-		set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
-		set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
+	--Note: passing 'summary' will return just one line containg [ReportTitleText],[PercentageMeetingPT],[NumberMeetingPT],[TotalValidCases],[TotalCase]
+	--- for summary page
+	--For testing
+	--exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort,'summary'
+	insert into @tblPTSummary
+		exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort,'summary'
 
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetHD1 @StartDate, @EndDate, @tblPTCohort, 'summary' 
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetHD2 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetHD3 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetHD4 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetHD5 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetHD6 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetHD7 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetHD8 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 
-		/** For performance reasons, get the active cases that belong to the cohort now **/
-		/* Declare a variable that references the type. */
-		DECLARE @tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod AS PTCases; -- PTCases is a user defined type
+	insert into @tblPTSummary
+		exec rspPerformanceTargetPCI1 @StartDate,@EndDate,@tblPTCohort,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetPCI2 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetPCI3 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetPCI4 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetPCI5 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetPCI6 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 
-		/* Add data to the table variable. */
-		INSERT INTO @tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod (HVCaseFK
-																	   , PC1ID
-																	   , PC1FullName
-																	   , CurrentWorkerFK
-																	   , CurrentWorkerFullName
-																	   , CurrentLevel
-																	   , ProgramFK
-																	   , TCIDPK
-																	   )
-			SELECT 
-			HVCasePK
-				 , PC1ID
-				 , P.PCFirstName + ' ' + P.PCLastName AS PC1FullName
-				 , cp.CurrentFSWFK
-				 , w.FirstName + ' ' + w.LastName AS CurrentWorkerFullName
-				 , cp.CurrentLevelFK
-				 , @programfk
-				 , tcid.TCIDPK
-				 
-				FROM
-					HVCase h
-					INNER JOIN CaseProgram cp
-						ON cp.HVCaseFK = h.HVCasePK
-						INNER JOIN PC P
-							ON P.PCPK = h.PC1FK
-							INNER JOIN Worker w
-								ON w.WorkerPK = cp.CurrentFSWFK
-								INNER join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
-								inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
-								LEFT join tcid on tcid.hvcasefk = h.hvcasepk  -- for dead babies dod
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetMLC1 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetMLC2 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetMLC3 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetMLC4 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetMLC5 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetMLC6 @StartDate, @EndDate ,@tblPTCohort ,'summary'
+	--INSERT INTO @tblPTSummary 
+	--				EXEC rspPerformanceTargetMLC7 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 
-				WHERE
-					cp.ProgramFK = @programfk
-					AND h.CaseProgress >= 9
-					-- dead babies
-					AND (h.IntakeDate IS NOT NULL AND h.IntakeDate <= @edate AND h.TCDOD IS NULL  )
-					AND (tcid.TCDOD IS NULL OR tcid.TCDOD > @edate)   -- 5/23/05 JH/DB if all children are dead don't include in performance target (FoxPro)
-					-- inclusion / exclusion of closed case
-					AND (cp.DischargeDate IS NULL
-					OR CASE -- closed cases are not included
-						WHEN @IncludeClosedCase = 0 THEN
-							(CASE
-								WHEN cp.DischargeDate > @edate THEN
-									1
-								ELSE
-									0
-							END)
-						ELSE -- include closed cases
-							(CASE
-								WHEN cp.DischargeDate >= @sdate THEN
-									1
-								ELSE
-									0
-							END)
-					END = 1)
-					--siteFK
-					and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	select *
+		from @tblPTSummary
 
-				
-
-
-		
-
-		--SELECT * FROM @tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod
-
-		/***************************/
-
-
-
-		DECLARE @tbl4PerformanceTargetReportSummary TABLE(
-			[ReportTitleText] VARCHAR(MAX),
-			[PercentageMeetingPT] [varchar](50),
-			[NumberMeetingPT] [varchar](50),
-			[TotalValidCases] [varchar](50),
-			[TotalCase] [varchar](50)
-		)
-
-
---For testing
-EXEC rspPerformanceTargetHD1 @sdate, @edate, @tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod, 'summary'
---INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD1 @sdate, @edate, @tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod, 'summary' --- for summary page
-
-
-
-		--Note: passing 'summary' will return just one line containg [ReportTitleText],[PercentageMeetingPT],[NumberMeetingPT],[TotalValidCases],[TotalCase]
-
-		----INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD1 @sdate, @edate, @tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod, 'summary' --- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD2 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD3 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD4 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD5 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD6 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD7 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetHD8 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetPC11 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetPC12 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetPC13 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetPC14 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetPC15 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetPC16 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-
-
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetMLC1 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetMLC2 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetMLC3 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetMLC4 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetMLC5 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetMLC6 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-		--INSERT INTO @tbl4PerformanceTargetReportSummary EXEC rspPerformanceTargetMLC7 @sdate, @edate ,@tbl4PTMainCohortContainingActiveCasesAtEndOfPeriod ,'summary'	--- for summary page
-
-		--SELECT *
-		--	FROM
-		--		@tbl4PerformanceTargetReportSummary
-
-	END
+end
 GO
