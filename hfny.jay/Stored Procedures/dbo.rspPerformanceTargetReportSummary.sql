@@ -114,7 +114,8 @@ begin
 
 	declare @tblPTDetails table
 		(
-		HVCaseFK			int
+		PTCode				char(4)
+		, HVCaseFK			int
 		, PC1ID				char(13)
 		, TCDOB				datetime
 		, PC1Fullname		varchar(50)
@@ -131,7 +132,7 @@ begin
 	--- for summary page
 	--For testing
 	--exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort,'summary'
-	insert into @tblPTSummary
+	--insert into @tblPTDetails
 		exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort,'summary'
 
 	--INSERT INTO @tblPTSummary 
@@ -151,8 +152,8 @@ begin
 	--INSERT INTO @tblPTSummary 
 	--				EXEC rspPerformanceTargetHD8 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 
-	insert into @tblPTSummary
-		exec rspPerformanceTargetPCI1 @StartDate,@EndDate,@tblPTCohort,'summary'
+	--insert into @tblPTDetails
+	--	exec rspPerformanceTargetPCI1 @StartDate,@EndDate,@tblPTCohort,'summary'
 	--INSERT INTO @tblPTSummary 
 	--				EXEC rspPerformanceTargetPCI2 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 	--INSERT INTO @tblPTSummary 
@@ -179,8 +180,10 @@ begin
 	--INSERT INTO @tblPTSummary 
 	--				EXEC rspPerformanceTargetMLC7 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 
-	select *
-		from @tblPTSummary
+	--select PTTitle
+	--	, sum(FormReviewed)
+	--	, sum(Form
+	--	from @tblPTDetails
 
 end
 GO

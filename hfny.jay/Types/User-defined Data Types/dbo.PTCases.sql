@@ -5,7 +5,7 @@ CREATE TYPE [dbo].[PTCases] AS TABLE
 [PC1FullName] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [CurrentWorkerFK] [int] NOT NULL,
 [CurrentWorkerFullName] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[CurrentLevelName] [int] NOT NULL,
+[CurrentLevelName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL,
 [TCIDPK] [int] NULL,
 [TCDOB] [datetime] NULL
