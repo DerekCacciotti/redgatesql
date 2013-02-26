@@ -38,13 +38,14 @@ begin
 
 	/* Add data to the table variable. */
 	insert into @tblPTCohort (HVCaseFK
-							 ,PC1ID
-							 ,PC1FullName
-							 ,CurrentWorkerFK
-							 ,CurrentWorkerFullName
-							 ,CurrentLevel
-							 ,ProgramFK
-							 ,TCIDPK
+							 , PC1ID
+							 , PC1FullName
+							 , CurrentWorkerFK
+							 , CurrentWorkerFullName
+							 , CurrentLevelName
+							 , ProgramFK
+							 , TCIDPK
+							 , TCDOB
 			   )
 		select
 			  HVCasePK
@@ -52,46 +53,50 @@ begin
 			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName
 			 , cp.CurrentFSWFK
 			 , rtrim(w.FirstName) + ' ' + rtrim(w.LastName) as CurrentWorkerFullName
-			 , cp.CurrentLevelFK
+			 , LevelName as CurrentLevelName
 			 , @ProgramFKs
 			 , tcid.TCIDPK
-
-			from
-				HVCase h
+			 , case
+				  when h.tcdob is not null then
+					  h.tcdob
+				  else
+					  h.edc
+			  end as TCDOB
+			from HVCase h
 				inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
 				inner join PC P on P.PCPK = h.PC1FK
 				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
 				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+				inner join codeLevel l on l.codeLevelPK = cp.CurrentLevelFK
 				inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
 				left join tcid on tcid.hvcasefk = h.hvcasepk -- for dead babies dod
-
 			where
 				 cp.ProgramFK = @ProgramFKs
 				 and h.CaseProgress >= 9
 				 -- dead babies
 				 and (h.IntakeDate is not null
-				 and h.IntakeDate <= @EndDate
-				 and h.TCDOD is null)
+					 and h.IntakeDate <= @EndDate
+					and h.TCDOD is null)
 				 and (tcid.TCDOD is null
-				 or tcid.TCDOD > @EndDate) -- 5/23/05 JH/DB if all children are dead don't include in performance target (FoxPro)
+						or tcid.TCDOD > @EndDate) -- 5/23/05 JH/DB if all children are dead don't include in performance target (FoxPro)
 				 -- inclusion / exclusion of closed case
 				 and (cp.DischargeDate is null
-				 or case -- closed cases are not included
-					 when @IncludeClosedCases = 0 then
-						 (case
-							 when cp.DischargeDate > @EndDate then
-								 1
-							 else
-								 0
-						 end)
-					 else -- include closed cases
-						 (case
-							 when cp.DischargeDate >= @StartDate then
-								 1
-							 else
-								 0
-						 end)
-				 end = 1)
+					or case -- closed cases are not included
+						 when @IncludeClosedCases = 0 then
+							 (case
+								 when cp.DischargeDate > @EndDate then
+									 1
+								 else
+									 0
+							 end)
+						 else -- include closed cases
+							 (case
+								 when cp.DischargeDate >= @StartDate then
+									 1
+								 else
+									 0
+							 end)
+					 end = 1)
 				 --siteFK
 				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
@@ -107,7 +112,21 @@ begin
 		[TotalCases] [varchar](50)
 	)
 
-
+	declare @tblPTDetails table
+		(
+		HVCaseFK			int
+		, PC1ID				char(13)
+		, TCDOB				datetime
+		, PC1Fullname		varchar(50)
+		, WorkerFullName	varchar(50)
+		, CurrentLevelName	varchar(20)
+		, FormDate			datetime
+		, FormReviewed		bit
+		, FormOutOfWindow	bit
+		, FormMissing		bit
+		, FormMeetsStandard	bit
+		)
+		
 	--Note: passing 'summary' will return just one line containg [ReportTitleText],[PercentageMeetingPT],[NumberMeetingPT],[TotalValidCases],[TotalCase]
 	--- for summary page
 	--For testing

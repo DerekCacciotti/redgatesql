@@ -71,7 +71,7 @@ begin
 		 ,ptc.PC1FullName
 		 ,ptc.CurrentWorkerFK
 		 ,ptc.CurrentWorkerFullName
-		 ,ptc.CurrentLevel
+		 ,ptc.CurrentLevelName
 		 ,ptc.ProgramFK
 		 ,ptc.TCIDPK
 		 ,case
@@ -96,7 +96,7 @@ begin
 		 ,PC1FullName
 		 ,CurrentWorkerFK
 		 ,CurrentWorkerFullName
-		 ,CurrentLevel
+		 ,CurrentLevelName
 		 ,ProgramFK
 		 ,TCIDPK
 		 ,TCDOB
@@ -195,7 +195,7 @@ begin
 		 ,TCDOB
 		 ,'Missing Shots or Not on Time' as Reason
 		 ,CurrentWorkerFullName
-		 ,CurrentLevel
+		 ,CurrentLevelName
 		 ,'' as Explanation
 
 		from cteHD1TotalCases cht

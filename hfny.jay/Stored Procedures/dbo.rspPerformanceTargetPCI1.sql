@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -25,52 +26,29 @@ begin
 
 	declare @TotalCases int = 0
 	declare @TotalValidCases int = 0
-	declare @NumberMeetingPT int = 0
-
-	declare @tblPTReportTotalCases table(
-		NumberMeetingPT int,
-		TotalValidCases int,
-		TotalCases int
-	)
-
-	declare @tblPTReportNotMeetingPT table(
-		ReportTitleText [varchar](max),
-		PC1ID [char](13),
-		TCDOB [datetime],
-		Reason [varchar](200),
-		CurrentWorker [varchar](200),
-		LevelAtEndOfReport [varchar](50),
-		Explanation [varchar](60)
-	)
-
-	;
+	declare @NumberMeetingPT int = 0;
+	
 	with cteTotalCases
 	as
 	(
 	select
 		  ptc.HVCaseFK
-		 ,ptc.PC1ID
-		 ,cp.OldID
-		 ,ptc.PC1FullName
-		 ,ptc.CurrentWorkerFK
-		 ,ptc.CurrentWorkerFullName
-		 ,ptc.CurrentLevel
-		 ,ptc.ProgramFK
-		 ,ptc.TCIDPK
-		 ,case
-			  when h.tcdob is not null then
-				  h.tcdob
-			  else
-				  h.edc
-		  end as TCDOB
-		 ,DischargeDate
-		 ,case
+		 , ptc.PC1ID
+		 , ptc.PC1FullName
+		 , ptc.CurrentWorkerFK
+		 , ptc.CurrentWorkerFullName
+		 , ptc.CurrentLevelName
+		 , ptc.ProgramFK
+		 , ptc.TCIDPK
+		 , ptc.TCDOB
+		 , DischargeDate
+		 , case
 			  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-				  datediff(day,tcdob,DischargeDate)
+				  datediff(day,ptc.tcdob,DischargeDate)
 			  else
-				  datediff(day,tcdob,@EndDate)
+				  datediff(day,ptc.tcdob,@EndDate)
 		  end as tcAgeDays
-		 ,case
+		 , case
 			  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
 				  DischargeDate
 			  else
@@ -94,7 +72,7 @@ begin
 	as
 		(
 			select HVCaseFK
-					,max(Interval) as Interval
+					, max(Interval) as Interval
 			from cteCohort
 				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
 			group by HVCaseFK
@@ -108,17 +86,16 @@ begin
 			  , TCDOB
 			  , PC1FullName
 			  , CurrentWorkerFullName
-			  , currentLevel
-			  , 0 as Missing
-			  , case when (FUPInWindow = 1) then 0 else 1 end as OutOfWindow
-			  , case when (FUPInWindow = 1) then 1 else 0 end as RecOK
-			  , cd.[DueBy]
-			  , cd.[Interval]
-			  , cd.[MaximumDue]
-			  , cd.[MinimumDue]
+			  , CurrentLevelName
 			  , FollowUpDate as FormDate
-			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 0 else 1 end as FormNotReviewed
-			  , TimeBreastFed
+			  --, cd.[DueBy]
+			  --, cd.[Interval]
+			  --, cd.[MaximumDue]
+			  --, cd.[MinimumDue]
+			  --, TimeBreastFed
+			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
+			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
+			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
 			  , case when TimeBreastFed >= '04' then 1 else 0 end as MeetsStandard
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
@@ -127,8 +104,8 @@ begin
 			-- to get dueby, max, min (given interval)
 			-- The following line gets those fu's that are due for the Interval
 			-- note 'Interval' is the minimum interval 
-			inner join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
-			inner join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType='FU' 
+			left outer join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
+			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType='FU' 
 												and fu.FollowUpInterval = ca.FormInterval 
 		)
 	
