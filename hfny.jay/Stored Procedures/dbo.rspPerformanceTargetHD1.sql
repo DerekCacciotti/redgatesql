@@ -83,7 +83,8 @@ begin
 	select coh.HVCaseFK
 			, coh.TCIDPK
 			, MedicalItemTitle
-			, count(TCIDPK) over (partition by convert(varchar(10),coh.HVCaseFK)+convert(varchar(10),TCIDPK)+MedicalItemTitle) as ImmunizationCount
+			, count(coh.TCIDPK) as ImmunizationCount
+			--, count(TCIDPK) over (partition by convert(varchar(10),coh.HVCaseFK)+convert(varchar(10),TCIDPK)+MedicalItemTitle) as ImmunizationCount
 		from cteCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
@@ -93,23 +94,41 @@ begin
 				, coh.TCIDPK
 				, MedicalItemTitle
 	)
-	--,
-	--cteMain
-	--as
-	--(
-	--select *
-	--		, case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
-	--		, 1 as FormOutOfWindow
-	--		, case when imm.HVCaseFK is null then 1 else 0 end as FormMissing
-	--		, case when MedicalItemTitle = 'DTaP' and ImmunizationCount >= 3 and 
-	--					MedicalItemTitle = 'Polio' and ImmunizationCount >= 2 then 1 else 0 end as MeetsStandard
-	-- from cteCohort coh
-	-- inner join cteImmunizations imm on cteImmunizations.HVCaseFK = cteCohort.HVCaseFK
+	,
+	cteMain
+	as
+	(
+	select DISTINCT 
+		  
+		   PC1ID
+		 , PC1FullName
+		 , CurrentWorkerFK
+		 , CurrentWorkerFullName
+		 , CurrentLevelName
+		 , ProgramFK		 
+		 , TCDOB
+		 , DischargeDate
+		 , tcAgeDays
+		 , lastdate
+		 , imm.HVCaseFK
+		 , imm.TCIDPK
+		 , MedicalItemTitle
+		 , ImmunizationCount	
+			, 1 as FormReviewed
+			, 1 as FormOutOfWindow
+			, case when imm.HVCaseFK is null then 1 else 0 end as FormMissing
+			, case when MedicalItemTitle = 'DTaP' and ImmunizationCount >= 3 and 
+						MedicalItemTitle = 'Polio' and ImmunizationCount >= 2 then 1 else 0 end as MeetsStandard
+	 from cteCohort coh
+	 inner join cteImmunizations imm on imm.HVCaseFK = coh.HVCaseFK
 	
-	--)
+	)
 	
-	-- SELECT * FROM cteMain
-	select * from cteImmunizations
+-- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
+	
+	
+	 SELECT * FROM cteMain
+	--select * from cteImmunizations
 	--,
 	--cteValid
 	--as
