@@ -39,6 +39,7 @@ begin
 	/* Add data to the table variable. */
 	insert into @tblPTCohort (HVCaseFK
 							 , PC1ID
+							 , OldID
 							 , PC1FullName
 							 , CurrentWorkerFK
 							 , CurrentWorkerFullName
@@ -50,6 +51,7 @@ begin
 		select
 			  HVCasePK
 			 , PC1ID
+			 , OldID
 			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName
 			 , cp.CurrentFSWFK
 			 , rtrim(w.FirstName) + ' ' + rtrim(w.LastName) as CurrentWorkerFullName
@@ -116,6 +118,7 @@ begin
 		(
 		PTCode				char(4)
 		, HVCaseFK			int
+		, OldID				char(23)
 		, PC1ID				char(13)
 		, TCDOB				datetime
 		, PC1Fullname		varchar(50)
@@ -153,7 +156,7 @@ begin
 	--				EXEC rspPerformanceTargetHD8 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 
 	--insert into @tblPTDetails
-	--	exec rspPerformanceTargetPCI1 @StartDate,@EndDate,@tblPTCohort,'summary'
+		exec rspPerformanceTargetPCI1 @StartDate,@EndDate,@tblPTCohort,'summary'
 	--INSERT INTO @tblPTSummary 
 	--				EXEC rspPerformanceTargetPCI2 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 	--INSERT INTO @tblPTSummary 
@@ -181,6 +184,11 @@ begin
 	--				EXEC rspPerformanceTargetMLC7 @StartDate, @EndDate ,@tblPTCohort ,'summary'
 
 	--select PTTitle
+	--, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 
+	--		then 1
+	--		else 0
+	--		end) as ValidCases
+	--, 
 	--	, sum(FormReviewed)
 	--	, sum(Form
 	--	from @tblPTDetails

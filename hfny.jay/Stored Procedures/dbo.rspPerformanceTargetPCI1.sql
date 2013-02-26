@@ -9,11 +9,12 @@ GO
 -- Description:	gets data for Performance Target report - PCI1. Primary Care Taker 1 breast feeding
 -- exec [rspPerformanceTargetPCI1] '07/01/2012', '09/30/2012', <<table>>, null
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012'
+-- rspPerformanceTargetReportSummary 19 ,'10/01/2012' ,'12/31/2012'	
 -- testing siteFK below
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, 1
 -- based on initial work on PTHD1 by dkhalsa
 -- =============================================
-create procedure [dbo].[rspPerformanceTargetPCI1]
+CREATE procedure [dbo].[rspPerformanceTargetPCI1]
 (
     @StartDate      datetime,
     @EndDate		datetime,
@@ -34,6 +35,7 @@ begin
 	select
 		  ptc.HVCaseFK
 		 , ptc.PC1ID
+		 , ptc.OldID
 		 , ptc.PC1FullName
 		 , ptc.CurrentWorkerFK
 		 , ptc.CurrentWorkerFullName
@@ -81,9 +83,10 @@ begin
 	cteExpectedForm
 	as
 		(
-		select 'PCI1' as TargetCode
+		select 'PCI1' as PTCode
 			  , c.HVCaseFK
 			  , PC1ID
+			  , OldID
 			  , TCDOB
 			  , PC1FullName
 			  , CurrentWorkerFullName
@@ -112,8 +115,9 @@ begin
 	
 	
 	-- select * from cteCohort
-	select * from cteExpectedForm
-	
+	select * 
+	from cteExpectedForm
+	order by OldID
 
 	--	begin
 	--		select ReportTitleText

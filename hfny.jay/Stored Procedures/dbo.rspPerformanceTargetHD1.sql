@@ -31,6 +31,7 @@ begin
 	select
 		  ptc.HVCaseFK
 		 , ptc.PC1ID
+		 , ptc.OldID
 		 , ptc.PC1FullName
 		 , ptc.CurrentWorkerFK
 		 , ptc.CurrentWorkerFullName
@@ -61,17 +62,18 @@ begin
 	as
 	(
 	select HVCaseFK
-		  ,PC1ID
-		  ,PC1FullName
-		  ,CurrentWorkerFK
-		  ,CurrentWorkerFullName
-		  ,CurrentLevelName
-		  ,ProgramFK
-		  ,TCIDPK
-		  ,TCDOB
-		  ,DischargeDate
-		  ,tcAgeDays
-		  ,lastdate
+		  , PC1ID
+		  , OldID
+		  , PC1FullName
+		  , CurrentWorkerFK
+		  , CurrentWorkerFullName
+		  , CurrentLevelName
+		  , ProgramFK
+		  , TCIDPK
+		  , TCDOB
+		  , DischargeDate
+		  , tcAgeDays
+		  , lastdate
 		from cteTotalCases
 		where datediff(day,tcdob,@StartDate) <= 548
 			 and datediff(day,tcdob,lastdate) >= 365
@@ -84,7 +86,10 @@ begin
 			, coh.TCIDPK
 			, MedicalItemTitle
 			, count(coh.TCIDPK) as ImmunizationCount
-			--, count(TCIDPK) over (partition by convert(varchar(10),coh.HVCaseFK)+convert(varchar(10),TCIDPK)+MedicalItemTitle) as ImmunizationCount
+			, count(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
+					then 1 
+					else 0 
+					end) as FormReviewedCount
 		from cteCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
@@ -93,42 +98,67 @@ begin
 		group by coh.HVCaseFK
 				, coh.TCIDPK
 				, MedicalItemTitle
+				, TCItemDate
 	)
 	,
-	cteMain
+	cteImmunizationCounts
 	as
 	(
-	select DISTINCT 
-		  
-		   PC1ID
-		 , PC1FullName
-		 , CurrentWorkerFK
-		 , CurrentWorkerFullName
-		 , CurrentLevelName
-		 , ProgramFK		 
-		 , TCDOB
-		 , DischargeDate
-		 , tcAgeDays
-		 , lastdate
-		 , imm.HVCaseFK
-		 , imm.TCIDPK
-		 , MedicalItemTitle
-		 , ImmunizationCount	
-			, 1 as FormReviewed
+	select coh.HVCaseFK
+			, coh.TCIDPK
+			, case when ImmunizationCount = FormReviewedCount 
+					then 1 
+					else 0 
+					end as FormReviewed
+			,	PC1FullName
+			, CurrentWorkerFK
+			, CurrentWorkerFullName
+			, CurrentLevelName
+			, ProgramFK		 
+			, TCDOB
+			, DischargeDate
+			, tcAgeDays
+			, lastdate
+			, MedicalItemTitle
+			, ImmunizationCount 
 			, 1 as FormOutOfWindow
 			, case when imm.HVCaseFK is null then 1 else 0 end as FormMissing
-			, case when MedicalItemTitle = 'DTaP' and ImmunizationCount >= 3 and 
-						MedicalItemTitle = 'Polio' and ImmunizationCount >= 2 then 1 else 0 end as MeetsStandard
+			, case when (MedicalItemTitle = 'DTaP' and ImmunizationCount >= 3) or
+					(MedicalItemTitle = 'Polio' and ImmunizationCount >= 2) then 1 else 0 end as MeetsStandard
 	 from cteCohort coh
 	 inner join cteImmunizations imm on imm.HVCaseFK = coh.HVCaseFK
-	
 	)
+	--, 
+	--cteMain 
+	--as
+	--(
+	--select *
+	--	from
+	--)
 	
--- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
+	select PC1ID
+			, OldID
+			, PC1FullName
+			, CurrentWorkerFK
+			, CurrentWorkerFullName
+			, CurrentLevelName
+			, ProgramFK
+			, TCDOB
+			, DischargeDate
+			, tcAgeDays
+			, lastdate
+			, HVCaseFK
+			, TCIDPK
+			, MedicalItemTitle
+			, ImmunizationCount
+			, FormReviewed
+			, FormOutOfWindow
+			, FormMissing
+			-- , case when sum(MeetsStandard) = 2 then 1 else 0 end as MeetsStandard
+	from cteMain
+	order by OldID
 	
-	
-	 SELECT * FROM cteMain
-	--select * from cteImmunizations
+	-- select * from cteImmunizations
 	--,
 	--cteValid
 	--as
