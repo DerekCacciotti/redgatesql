@@ -90,7 +90,7 @@ SELECT    cteMain.HireDate
 SELECT DISTINCT @sdate AS StartDate
 , @edate AS EndDate
 ,* FROM cteTrainings 
-WHERE (IsExempt is null or IsExempt=1)
+WHERE (IsExempt is null or IsExempt=0)
 ORDER BY [TrainingDate], [TopicName]
 END
 GO
