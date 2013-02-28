@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,14 +5,14 @@ GO
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 13, 2013>
--- Description:	<gets you data for Performance Target report - HD1. Immunizations at one year>
--- exec [rspPerformanceTargetHD1] '07/01/2012','09/30/2012','01',null,null
+-- Description:	<gets you data for Performance Target report - HD2. Immunizations at two year>
+-- exec [rspPerformanceTargetHD2] '07/01/2012','09/30/2012','01',null,null
 -- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
 -- testing siteFK below
 -- rspPerformanceTargetReportSummary 1 ,'10/01/2012' ,'12/31/2012', null,1
 -- mods by jrobohn 20130222 - clean up names, code and layout
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetHD1]
+CREATE procedure [dbo].[rspPerformanceTargetHD2]
 (
     @StartDate      datetime,
     @EndDate      datetime,
@@ -30,7 +29,7 @@ begin
 	select
 		  ptc.HVCaseFK
 		 , ptc.PC1ID
-		 , ptc.OldID	
+		 , ptc.OldID			
 		 , ptc.PC1FullName
 		 , ptc.CurrentWorkerFK
 		 , ptc.CurrentWorkerFullName
@@ -62,7 +61,7 @@ begin
 	(
 	select HVCaseFK
 		  , PC1ID
-		  , OldID		 
+		  , OldID			 
 		  , PC1FullName
 		  , CurrentWorkerFK
 		  , CurrentWorkerFullName
@@ -74,8 +73,8 @@ begin
 		  , tcAgeDays
 		  , lastdate
 		from cteTotalCases
-		where datediff(day,tcdob,@StartDate) <= 548
-			 and datediff(day,tcdob,lastdate) >= 365
+		where datediff(day,tcdob,@StartDate) <= 913
+			 and datediff(day,tcdob,lastdate) >= 731
 	)
 	,
 	cteImmunizationsPolio
@@ -92,7 +91,7 @@ begin
 		from cteCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
-		where TCItemDate between TCDOB and dateadd(dd,365,TCDOB)
+		where TCItemDate between TCDOB and dateadd(dd,730,TCDOB)
 				and MedicalItemTitle = 'Polio'
 		group by coh.HVCaseFK
 				, coh.TCIDPK
@@ -115,7 +114,7 @@ begin
 		from cteCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
-		where TCItemDate between TCDOB and dateadd(dd,365,TCDOB)
+		where TCItemDate between TCDOB and dateadd(dd,730,TCDOB)
 				and MedicalItemTitle = 'DTaP'
 				 group by coh.HVCaseFK
 				, coh.TCIDPK
@@ -123,13 +122,35 @@ begin
 				
 	)	
 	
-	
-	
+	,
+	cteImmunizationsMMR
+	as
+	(
+	select coh.HVCaseFK
+			, coh.TCIDPK
+			, MedicalItemTitle
+			, count(coh.TCIDPK) as ImmunizationCountMMR
+			, count(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
+					then 1 
+					else 0 
+					end) as FormReviewedCountMMR
+		from cteCohort coh
+			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
+			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
+		where TCItemDate between TCDOB and dateadd(dd,730,TCDOB)
+				and MedicalItemTitle = 'MMR'
+				 group by coh.HVCaseFK
+				, coh.TCIDPK
+				, MedicalItemTitle
+				
+	)	
+		
+	-- SELECT * FROM cteImmunizationsMMR
 	,
 	cteImmunizationCounts
 	as
 	(
-		select 'HD1' as PTCode
+		select 'HD2' as PTCode
 			  , coh.HVCaseFK
 			  , PC1ID
 			  , OldID
@@ -138,20 +159,30 @@ begin
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
 			  , NULL as FormDate	
-			  , case when ((ImmunizationCountPolio = FormReviewedCountPolio) AND (ImmunizationCountDTaP = FormReviewedCountDTaP)) -- # of shots = # of forms reveiwed
+			, case when ((ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
+						AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP) 
+						AND (ImmunizationCountMMR IS NULL OR ImmunizationCountMMR = FormReviewedCountMMR)) -- # of shots = # of forms reveiwed
 					then 1 
 					else 0 
-					end as FormReviewed				
-			, 0 as FormOutOfWindow -- not out of window
+					end as FormReviewed		
+			, 0 as FormOutOfWindow
 			, 0 as FormMissing
-			, case when ((ImmunizationCountDTaP >= 3) AND (ImmunizationCountPolio >= 2)) then 1 else 0 end as MeetsStandard
+			, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) AND (ImmunizationCountMMR >= 1)) then 1 else 0 end as MeetsStandard
 	 from cteCohort coh
 	 LEFT join cteImmunizationsPolio immPolio on immPolio.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immPolio.TCIDPK 
 	 LEFT join cteImmunizationsDTaP immDTaP on immDTaP.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immDTaP.TCIDPK 
+	 LEFT join cteImmunizationsMMR immMMR on immMMR.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immMMR.TCIDPK 
+	 
 	)
-		
+	
+	
+	--SELECT * FROM cteCohort
 	
 	SELECT * FROM cteImmunizationCounts 
+	--SELECT * FROM cteImmunizationsMMR 
+	--SELECT * FROM cteImmunizations
+	-- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
+	
 
 end
 GO
