@@ -138,7 +138,8 @@ begin
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
 			  , NULL as FormDate	
-			  , case when ((ImmunizationCountPolio = FormReviewedCountPolio) AND (ImmunizationCountDTaP = FormReviewedCountDTaP)) -- # of shots = # of forms reveiwed
+			  , case when ( (ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
+						AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP)) -- # of shots = # of forms reveiwed
 					then 1 
 					else 0 
 					end as FormReviewed				
