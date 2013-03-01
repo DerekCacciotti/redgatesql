@@ -176,27 +176,27 @@ begin
 		insert into @tblPTDetails
 			exec rspPerformanceTargetPCI6 @StartDate,@EndDate,@tblPTCohort 
 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetMLC1]') and type in (N'P', N'PC'))
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetFLC1]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
-			exec rspPerformanceTargetMLC1 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetMLC2]') and type in (N'P', N'PC'))
+			exec rspPerformanceTargetFLC1 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetFLC2]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
-			exec rspPerformanceTargetMLC2 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetMLC3]') and type in (N'P', N'PC'))
+			exec rspPerformanceTargetFLC2 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetFLC3]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
-			exec rspPerformanceTargetMLC3 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetMLC4]') and type in (N'P', N'PC'))
+			exec rspPerformanceTargetFLC3 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetFLC4]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
-			exec rspPerformanceTargetMLC4 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetMLC5]') and type in (N'P', N'PC'))
+			exec rspPerformanceTargetFLC4 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetFLC5]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
-			exec rspPerformanceTargetMLC5 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetMLC6]') and type in (N'P', N'PC'))
+			exec rspPerformanceTargetFLC5 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetFLC6]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
-			exec rspPerformanceTargetMLC6 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetMLC7]') and type in (N'P', N'PC'))
+			exec rspPerformanceTargetFLC6 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetFLC7]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
-			exec rspPerformanceTargetMLC7 @StartDate,@EndDate,@tblPTCohort 
+			exec rspPerformanceTargetFLC7 @StartDate,@EndDate,@tblPTCohort 
 
 	;
 	with cteSummary
@@ -226,7 +226,7 @@ begin
 	from cteSummary s
 	inner join codePerformanceTargetTitles ptt on PTCode = PerformanceTargetCode
 
-	select * from @tblPTDetails
+	-- select * from @tblPTDetails
 
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012'
 end
