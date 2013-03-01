@@ -76,7 +76,7 @@ begin
 				cp.ProgramFK = @ProgramFKs
 				and h.CaseProgress >= 9
 				-- dead babies
-				and (h.IntakeDate is not null
+				 and (h.IntakeDate is not null
 					and h.IntakeDate <= @EndDate
 					and h.TCDOD is null)
 				and (tcid.TCDOD is null
@@ -228,6 +228,6 @@ begin
 
 	select * from @tblPTDetails
 
--- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, null, 0, ''
+-- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012'
 end
 GO

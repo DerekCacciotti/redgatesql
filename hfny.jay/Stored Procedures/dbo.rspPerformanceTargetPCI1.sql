@@ -25,10 +25,6 @@ CREATE procedure [dbo].[rspPerformanceTargetPCI1]
 as
 begin
 
-	declare @TotalCases int = 0
-	declare @TotalValidCases int = 0
-	declare @NumberMeetingPT int = 0;
-	
 	with cteTotalCases
 	as
 	(
@@ -92,15 +88,10 @@ begin
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
 			  , FollowUpDate as FormDate
-			  --, cd.[DueBy]
-			  --, cd.[Interval]
-			  --, cd.[MaximumDue]
-			  --, cd.[MinimumDue]
-			  --, TimeBreastFed
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
-			  , case when TimeBreastFed >= '04' then 1 else 0 end as MeetsStandard
+			  , TimeBreastFed
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
 			inner join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
@@ -115,9 +106,21 @@ begin
 	
 	
 	-- select * from cteCohort
-	select * 
+	select PTCode
+			, HVCaseFK
+			, PC1ID
+			, OldID
+			, TCDOB
+			, PC1FullName
+			, CurrentWorkerFullName
+			, CurrentLevelName
+			, FormDate
+			, FormReviewed
+			, FormOutOfWindow
+			, FormMissing
+			, case when (TimeBreastFed >= '04' and FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0) then 1 else 0 end as FormMeetsStandard
 	from cteExpectedForm
-	order by OldID
+	-- order by OldID
 
 	--	begin
 	--		select ReportTitleText

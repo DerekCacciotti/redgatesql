@@ -1,15 +1,15 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 -- =============================================
 -- Author:		jrobohn
--- Create date: 20130226
--- Description:	gets data for Performance Target report - PCI2. Valid PSI assessments
+-- Create date: 20130228
+-- Description:	gets data for Performance Target report - PCI6. Reducing Parental-Child Dysfunctional Interaction Stress (PCDI) in
+--				highly stressed families by the target child's first birthday.
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, null, 0, null
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetPCI2]
+CREATE procedure [dbo].[rspPerformanceTargetPCI6]
 (
     @StartDate      datetime,
     @EndDate		datetime,
@@ -58,9 +58,12 @@ begin
 		select tc.*	
 			from cteTotalCases tc
 			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
-			where dateadd(day, 30, case when IntakeDate > tc.tcdob then IntakeDate else tc.tcdob end) 
-					between @StartDate and @EndDate -- dateadd(day,-29,@StartDate) and dateadd(day,62,@StartDate)
-					and (DischargeDate > tc.TCDOB or DischargeDate is null or DischargeDate = '')
+			inner join PSI P on P.HVCaseFK = c.HVCasePK
+			where datediff(day,tc.tcdob,@StartDate) <= 548
+				 and datediff(day,tc.tcdob,lastdate) >= 365
+				 and PSIInterval = '00'
+				 and ParentChildDysfunctionalInteractionValid = 1
+				 and ParentChildDisfunctionalInteractionScore > 25
 		)
 	,
 	--cteExpectedForm
@@ -75,21 +78,23 @@ begin
 	--,
 	cteMain
 	as
-		(select 'PCI2' as PTCode
-			  , coh.HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName
-			  , PSIDateComplete as FormDate		
-			  , case when (PSIPK is not null and dbo.IsFormReviewed(PSIDateComplete,'PS',PSIPK) = 1) then 1 else 0 end as FormReviewed
-			  , case when (PSIPK is not null and PSIInWindow = 1) then 0 else 1 end as FormOutOfWindow
-			  , case when PSIPK is null then 1 else 0 end as FormMissing
-			  --, case when PSIPK is not null then 1 else 0 end as FormMeetsStandard
+		(select 'PCI5' as PTCode
+					, coh.HVCaseFK
+					, PC1ID
+					, OldID
+					, TCDOB
+					, PC1FullName
+					, CurrentWorkerFullName
+					, CurrentLevelName
+					, PSIDateComplete as FormDate		
+					, case when (PSIPK is not null and dbo.IsFormReviewed(PSIDateComplete,'PS',PSIPK) = 1) then 1 else 0 end as FormReviewed
+					, case when (PSIPK is not null and PSIInWindow = 1) then 0 else 1 end as FormOutOfWindow
+					, case when PSIPK is null then 1 else 0 end as FormMissing
+					--, case when PSIPK is not null then 1 else 0 end as FormMeetsStandard
+					, ParentChildDysfunctionalInteractionValid
+					, ParentChildDisfunctionalInteractionScore
 			  from cteCohort coh
-			  left outer join PSI P on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '00'
+			  left outer join PSI P on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '02'
 		)
 	select PTCode
 			  , HVCaseFK
@@ -103,7 +108,9 @@ begin
 			  , FormReviewed
 			  , FormOutOfWindow
 			  , FormMissing
-			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 then 1 else 0 end as FormMeetsStandard
+			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and
+							ParentChildDysfunctionalInteractionValid = 1 and 
+							ParentChildDisfunctionalInteractionScore <= 25 then 1 else 0 end as FormMeetsStandard
 	from cteMain
 	-- order by OldID
 
