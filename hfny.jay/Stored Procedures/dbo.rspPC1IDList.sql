@@ -114,7 +114,7 @@ as
 			inner join pc
 					  on pc.pcpk = pc1fk
 			left join tcid
-					 on tcid.hvcasefk = hvcasepk
+					 on tcid.hvcasefk = hvcasepk AND TCID.TCDOD IS NULL
 			inner join worker fsw
 					  on CurrentFSWFK = fsw.workerpk
 			inner join workerprogram
