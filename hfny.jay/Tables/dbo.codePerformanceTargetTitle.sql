@@ -1,4 +1,4 @@
-CREATE TABLE [dbo].[codePerformanceTargetTitles]
+CREATE TABLE [dbo].[codePerformanceTargetTitle]
 (
 [codePerformanceTargetTitlePK] [int] NOT NULL IDENTITY(1, 1),
 [PerformanceTargetCode] [varchar] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
@@ -8,5 +8,5 @@ CREATE TABLE [dbo].[codePerformanceTargetTitles]
 [PerformanceTargetTitle] [varchar] (150) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[codePerformanceTargetTitles] ADD CONSTRAINT [PK_codePerformanceTargetTitles] PRIMARY KEY CLUSTERED  ([codePerformanceTargetTitlePK]) ON [PRIMARY]
+ALTER TABLE [dbo].[codePerformanceTargetTitle] ADD CONSTRAINT [PK_codePerformanceTargetTitles] PRIMARY KEY CLUSTERED  ([codePerformanceTargetTitlePK]) ON [PRIMARY]
 GO
