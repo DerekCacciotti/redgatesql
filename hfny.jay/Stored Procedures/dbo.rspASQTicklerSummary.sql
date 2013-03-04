@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -68,7 +69,7 @@ DECLARE @tblASQTicklerSummaryCohort TABLE(
 		  ,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) as supervisor		  
 		from caseprogram
 			inner join hvcase on hvcasepk = caseprogram.hvcasefk
-			inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+			inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk AND TCID.TCDOD IS NULL
 			--inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asq version'
 			inner join codeduebydates on scheduledevent = 'ASQ' --optionValue
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
