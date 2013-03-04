@@ -36,7 +36,7 @@ as
 				   ,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 								   from tcid
 								   where hvcase.hvcasepk = tcid.hvcasefk
-										and tcid.programfk = caseprogram.programfk
+										and tcid.programfk = caseprogram.programfk AND TCID.TCDOD IS NULL
 								   for xml path ('')),3,1000) TargetChild
 				   ,rtrim(fsw.firstname)+' '+rtrim(fsw.lastname) fswname
 				   ,screendate
@@ -58,8 +58,9 @@ as
 			inner join worker supervisor on supervisor.workerpk = workerprogram.supervisorfk
 			left join kempe on kempe.hvcasefk = hvcasepk and kempe.programfk = caseprogram.programfk
 			left join pc pc2 on pc2fk = pc2.pcpk
-			left join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+			--left join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+			INNER join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 		where pc1id = @pc1id
-			 and caseprogress >= 11
+			 and caseprogress >= 11 
 GO
