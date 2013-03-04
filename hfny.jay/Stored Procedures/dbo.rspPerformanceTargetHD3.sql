@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -83,7 +84,7 @@ begin
 			select HVCaseFK					
 					, max(Interval) as Interval
 			from cteCohort
-				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= MaximumDue
+				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
 				WHERE Interval <> (SELECT dbd.Interval FROM codeDueByDates dbd WHERE dbd.EventDescription = '18 month Follow Up') -- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
 			group by HVCaseFK
 		)

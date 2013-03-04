@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,10 +5,12 @@ GO
 -- =============================================
 -- Author:		jrobohn
 -- Create date: 20130303
--- Description:	gets data for Performance Target report - FLC3. TANF Benefits on First Birthday
+-- Description:	gets data for Performance Target report - FLC6. Education of Participants under 21 at 
+--				Target Child's First birthday
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, null, 0, null
+-- rspPerformanceTargetReportSummary 19, '10/01/2012', '12/31/2012'
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetFLC3]
+CREATE procedure [dbo].[rspPerformanceTargetFLC6]
 (
     @StartDate      datetime,
     @EndDate		datetime,
@@ -56,14 +57,16 @@ begin
 	as
 		(
 		select tc.*
-				, PBTANF	
+				, HighestGrade
 			from cteTotalCases tc
 			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
 			inner join Intake i on i.HVCaseFK = c.HVCasePK
-			inner join CommonAttributes ca on ca.HVCaseFK = c.HVCasePK and FormFK = IntakePK and FormType = 'IN'
-			where datediff(day,tc.tcdob,@StartDate) <= 730
+			inner join CommonAttributes ca on ca.HVCaseFK = c.HVCasePK and FormFK = IntakePK and FormType = 'IN-PC1'
+			inner join PC P on P.PCPK = c.PC1FK
+			where datediff(day,tc.tcdob,@StartDate) <= 548
 				 and datediff(day,tc.tcdob,lastdate) >= 365
-				 and PBTANF = '1'
+				 and HighestGrade < '03'
+				 and (datediff(month,PCDOB,c.IntakeDate) / 12) < 21
 		)
 	,
 	cteInterval
@@ -72,7 +75,7 @@ begin
 			select HVCaseFK					
 					, max(Interval) as Interval
 			from cteCohort
-				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
+				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= MaximumDue
 				-- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
 				where Interval <> (select dbd.Interval from codeDueByDates dbd where dbd.EventDescription = '18 month Follow Up') 
 			group by HVCaseFK
@@ -81,7 +84,7 @@ begin
 	cteExpectedForm
 	as
 		(
-		select 'FLC3' as PTCode
+		select 'FLC6' as PTCode
 			  , c.HVCaseFK
 			  , PC1ID
 			  , OldID
@@ -91,19 +94,21 @@ begin
 			  , CurrentLevelName
 			  , FollowUpDate as FormDate
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
-			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
+			  , case when (FollowUpPK is null or FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
-			  , ca.PBTANF
+			  , EducationalEnrollment
+			  , e.ProgramType
 			from cteCohort c
-			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
-			inner join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
+			left outer join cteInterval i on c.HVCaseFK = i.HVCaseFK
+			left outer join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
 											and i.Interval = cd.Interval 
 			-- to get dueby, max, min (given interval)
 			-- The following line gets those fu's that are due for the Interval
 			-- note 'Interval' is the minimum interval 
 			left outer join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
-			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType = 'FU' 
+			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType = 'FU-PC1' 
 												and fu.FollowUpInterval = ca.FormInterval 
+			left outer join Education e on e.FormType = 'FU' and e.FormFK = ca.FormFK
 		)
 	select PTCode
 			  , HVCaseFK
@@ -117,7 +122,8 @@ begin
 			  , FormReviewed
 			  , FormOutOfWindow
 			  , FormMissing
-			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and PBTANF in ('2','3') 
+			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and 
+							EducationalEnrollment = '1' and ProgramType in ('01','02','03','06') 
 						then 1 
 						else 0 
 						end as FormMeetsStandard

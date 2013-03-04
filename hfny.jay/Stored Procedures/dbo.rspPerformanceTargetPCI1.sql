@@ -72,7 +72,7 @@ begin
 			select HVCaseFK					
 					, max(Interval) as Interval
 			from cteCohort
-				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= MaximumDue
+				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
 				-- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
 				where Interval <> (select dbd.Interval from codeDueByDates dbd where dbd.EventDescription = '18 month Follow Up') 
 			group by HVCaseFK
