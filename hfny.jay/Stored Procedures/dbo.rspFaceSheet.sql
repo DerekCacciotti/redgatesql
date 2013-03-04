@@ -148,7 +148,7 @@ begin
 				left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
 				left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 				left outer join Worker sup on sup.WorkerPK = wp.SupervisorFK
-				left outer join TCID t on t.HVCaseFK = c.HVCasePK
+				left outer join TCID t on t.HVCaseFK = c.HVCasePK AND t.TCDOD IS NULL
 				left outer join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
 				left outer join codeDischarge cd on cd.DischargeCode = cp.DischargeReason
 	
