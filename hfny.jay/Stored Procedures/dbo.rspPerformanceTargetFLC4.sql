@@ -1,20 +1,14 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 -- =============================================
 -- Author:		jrobohn
--- Create date: 20130222
--- Description:	gets data for Performance Target report - PCI1. Primary Care Taker 1 breast feeding
--- exec [rspPerformanceTargetPCI1] '07/01/2012', '09/30/2012', <<table>>, null
--- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012'
--- rspPerformanceTargetReportSummary 19 ,'10/01/2012' ,'12/31/2012'	
--- testing siteFK below
--- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, 1
--- based on initial work on PTHD1 by dkhalsa
+-- Create date: 20130303
+-- Description:	gets data for Performance Target report - FLC4. TANF Benefits on Second Birthday
+-- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, null, 0, null
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetPCI1]
+CREATE procedure [dbo].[rspPerformanceTargetFLC4]
 (
     @StartDate      datetime,
     @EndDate		datetime,
@@ -60,10 +54,15 @@ begin
 	cteCohort
 	as
 		(
-		select *
-			from cteTotalCases
-			where datediff(day,tcdob,@StartDate) <= 457
-				 and datediff(day,tcdob,lastdate) >= 183
+		select tc.*
+				, PBTANF	
+			from cteTotalCases tc
+			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
+			inner join Intake i on i.HVCaseFK = c.HVCasePK
+			inner join CommonAttributes ca on ca.HVCaseFK = c.HVCasePK and FormFK = IntakePK and FormType = 'IN'
+			where datediff(day,tc.tcdob,@StartDate) <= 1095
+				 and datediff(day,tc.tcdob,lastdate) >= 730
+				 and PBTANF = '1'
 		)
 	,
 	cteInterval
@@ -81,7 +80,7 @@ begin
 	cteExpectedForm
 	as
 		(
-		select 'PCI1' as PTCode
+		select 'FLC4' as PTCode
 			  , c.HVCaseFK
 			  , PC1ID
 			  , OldID
@@ -93,7 +92,7 @@ begin
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
-			  , TimeBreastFed
+			  , ca.PBTANF
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
 			inner join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
@@ -102,34 +101,30 @@ begin
 			-- The following line gets those fu's that are due for the Interval
 			-- note 'Interval' is the minimum interval 
 			left outer join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
-			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType='FU' 
+			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType = 'FU' 
 												and fu.FollowUpInterval = ca.FormInterval 
 		)
-	
-	
-	-- select * from cteCohort
 	select PTCode
-			, HVCaseFK
-			, PC1ID
-			, OldID
-			, TCDOB
-			, PC1FullName
-			, CurrentWorkerFullName
-			, CurrentLevelName
-			, FormDate
-			, FormReviewed
-			, FormOutOfWindow
-			, FormMissing
-			, case when (TimeBreastFed >= '04' and FormReviewed = 1 
-							and FormOutOfWindow = 0 and FormMissing = 0) 
-					then 1 
-					else 0 
-					end 
-				as FormMeetsStandard
+			  , HVCaseFK
+			  , PC1ID
+			  , OldID
+			  , TCDOB
+			  , PC1FullName
+			  , CurrentWorkerFullName
+			  , CurrentLevelName
+			  , FormDate
+			  , FormReviewed
+			  , FormOutOfWindow
+			  , FormMissing
+			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and PBTANF in ('2','3') 
+						then 1 
+						else 0 
+						end as FormMeetsStandard
 	from cteExpectedForm
 	-- order by OldID
 
-	--	begin
+--select * from cteTotalCases
+	--select * from cteCohort	--	begin
 	--		select ReportTitleText
 	--			  ,PC1ID
 	--			  ,TCDOB

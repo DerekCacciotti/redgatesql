@@ -216,6 +216,12 @@ begin
 	-- select * from cteSummary
 		
 	select PTCode
+			, case when left(PTCode,2) = 'HD'
+					then 1
+					when left(PTCode,3) = 'PCI'
+					then 2
+					else 3
+				end as PTSortOrder
 			, ptt.PerformanceTargetCohortDescription
 			, ptt.PerformanceTargetDescription
 			, ptt.PerformanceTargetSection
@@ -225,7 +231,25 @@ begin
 			, FormMeetsStandard
 	from cteSummary s
 	inner join codePerformanceTargetTitles ptt on PTCode = PerformanceTargetCode
-
+	union 
+	select PerformanceTargetCode as PTCode
+			, case when left(PerformanceTargetCode,2) = 'HD'
+					then 1
+					when left(PerformanceTargetCode,3) = 'PCI'
+					then 2
+					else 3
+				end as PTSortOrder
+			, PerformanceTargetCohortDescription
+			, PerformanceTargetDescription
+			, PerformanceTargetSection
+			, PerformanceTargetTitle
+			, 0 as ValidCases
+			, 0 as TotalCases
+			, 0 as FormMeetsStandard 
+		from codePerformanceTargetTitles ptt
+		where PerformanceTargetCode not in (select PTCode from cteSummary sum2) -- missing on missing.PerformanceTargetCode = s.PTCode 
+	order by PTSortOrder, PTCode
+	
 	-- select * from @tblPTDetails
 
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012'
