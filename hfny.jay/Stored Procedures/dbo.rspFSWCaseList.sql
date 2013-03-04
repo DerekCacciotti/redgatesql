@@ -82,7 +82,7 @@ as
 				left join kempe on kempe.hvcasefk = hvcasepk
 				inner join codelevel on codelevelpk = currentlevelfk
 				inner join pc on pc.pcpk = pc1fk
-				left join tcid on tcid.hvcasefk = hvcasepk
+				left join tcid on tcid.hvcasefk = hvcasepk AND TCID.TCDOD IS NULL
 				inner join worker fsw on CurrentFSWFK = fsw.workerpk
 				inner join workerprogram on workerprogram.workerfk = fsw.workerpk
 				inner join worker supervisor on supervisorfk = supervisor.workerpk
