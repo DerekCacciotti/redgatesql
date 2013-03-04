@@ -42,7 +42,7 @@ as
 					  on hvcasepk = caseprogram.hvcasefk
 			inner join tcid
 					  on tcid.hvcasefk = hvcasepk
-					  and tcid.programfk = caseprogram.programfk
+					  and tcid.programfk = caseprogram.programfk AND TCID.TCDOD IS NULL
 			--inner join appoptions
 			--		  on caseprogram.programfk = appoptions.programfk
 			--		  and optionitem = 'asqse version'
