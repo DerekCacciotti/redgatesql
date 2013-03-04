@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -32,7 +33,7 @@ CREATE PROCEDURE [dbo].[spEditHVProgram](@HVProgramPK int=NULL,
 @ProgramPhone char(12)=NULL,
 @ProgramStreet char(40)=NULL,
 @ProgramZip char(10)=NULL,
-@TargetZip char(60)=NULL)
+@TargetZip nvarchar(500)=NULL)
 AS
 UPDATE HVProgram
 SET 
