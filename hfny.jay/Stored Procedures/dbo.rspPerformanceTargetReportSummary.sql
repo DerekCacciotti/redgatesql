@@ -230,7 +230,7 @@ begin
 			, TotalCases
 			, FormMeetsStandard
 	from cteSummary s
-	inner join codePerformanceTargetTitles ptt on PTCode = PerformanceTargetCode
+	inner join codePerformanceTargetTitle ptt on PTCode = PerformanceTargetCode
 	union 
 	select PerformanceTargetCode as PTCode
 			, case when left(PerformanceTargetCode,2) = 'HD'
@@ -246,7 +246,7 @@ begin
 			, 0 as ValidCases
 			, 0 as TotalCases
 			, 0 as FormMeetsStandard 
-		from codePerformanceTargetTitles ptt
+		from codePerformanceTargetTitle ptt
 		where PerformanceTargetCode not in (select PTCode from cteSummary sum2) -- missing on missing.PerformanceTargetCode = s.PTCode 
 	order by PTSortOrder, PTCode
 	
