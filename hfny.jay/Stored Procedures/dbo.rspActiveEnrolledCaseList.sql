@@ -102,7 +102,7 @@ ORDER BY FormDate DESC)
 -- # of actual home visits since intake = a.HVCaseFK <-> HVLog.HVCaseFK, ProgramFK, 
 -- VisitType <> '0001', VisitStartTime < @EndDt and VisitStartTime >= b.IntakeDate
 
-LEFT OUTER JOIN TCID T ON T.HVCaseFK = b.HVCasePK
+LEFT OUTER JOIN TCID T ON T.HVCaseFK = b.HVCasePK AND T.TCDOD IS NULL
 
 WHERE b.IntakeDate < @EndDt AND (a.DischargeDate IS NULL OR a.DischargeDate > @StartDt)
 --AND a.ProgramFK = @programfk
