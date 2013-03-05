@@ -24,6 +24,7 @@ SELECT rtrim(w.LastName) + ', ' + rtrim(w.FirstName) [workerName]
 , isnull([AssignThisMonth],0) [AssignThisMonth]
 , isnull([CaseAtBeginning],0) [CaseAtBeginning]
 , isnull([PAAssessed],0) [PAAssessed]
+, isnull([PAAssessedNotAssigned],0) [PAAssessedNotAssigned]
 , isnull([PATerminated],0) [PATerminated]
 , isnull([PAPending],0) [PAPending]
 , isnull([MOBOnly],0) [MOBOnly]
@@ -36,12 +37,12 @@ SELECT rtrim(w.LastName) + ', ' + rtrim(w.FirstName) [workerName]
 FROM
 (SELECT isnull(aa1.FAWFK, d.FAWFK) [FAWFK]
 , [AssignThisMonth], [CaseAtBeginning] 
-, [PAAssessed], [PATerminated], [PAPending]
+, [PAAssessed], [PAAssessedNotAssigned], [PATerminated], [PAPending]
 , [MOBOnly],[BOTH], [FOBOnly], [MOBPartner], [FOBPartner], [MOBGrandmother], [Other]
 FROM 
 (SELECT isnull(a1.FAWFK, c.FAWFK) [FAWFK]
 , [AssignThisMonth], [CaseAtBeginning] 
-, [PAAssessed], [PATerminated], [PAPending]
+, [PAAssessed],[PAAssessedNotAssigned], [PATerminated], [PAPending]
 FROM
 (SELECT 
 isnull(a.FAWFK, b.FAWFK) [FAWFK], [AssignThisMonth], [CaseAtBeginning] 
@@ -69,7 +70,8 @@ ON a.FAWFK = b.FAWFK) AS a1
 FULL OUTER JOIN
 (SELECT PAFAWFK [FAWFK]
 , sum(CASE WHEN CaseStatus = '02' THEN 1 ELSE 0 END) [PAAssessed]
-, sum(CASE WHEN CaseStatus in ('03', '04') THEN 1 ELSE 0 END) [PATerminated]
+, sum(CASE WHEN CaseStatus = '04' THEN 1 ELSE 0 END) [PAAssessedNotAssigned]
+, sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [PATerminated]
 , sum(CASE WHEN CaseStatus = '01' THEN 1 ELSE 0 END) [PAPending]
 FROM Preassessment WHERE ProgramFK = @programfk AND (PADate BETWEEN @StartDt AND @EndDt) 
 GROUP BY PAFAWFK) AS c
