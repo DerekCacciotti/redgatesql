@@ -33,7 +33,7 @@ AS
 Declare @LastDayofPreviousMonth DateTime 
 Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
 
---Set @LastDayofPreviousMonth = '10/31/2012'
+--Set @LastDayofPreviousMonth = '02/28/2013'
 
 -- table variable for holding Init Required Data
 DECLARE @tbl4QAReport8Detail TABLE(
@@ -213,7 +213,7 @@ select HVCasePK
 
  FROM cteAgeInDays
  WHERE AgeInDays > 183 AND (tcdod > @LastDayofPreviousMonth OR tcdod IS NULL)  -- 183 need to be converted later on (Target Child 6 months or older)
- 
+
  
 UPDATE @tbl4QAReport8Detail SET TCName = '' WHERE TCName IS NULL
 
@@ -252,11 +252,10 @@ SELECT
  
  FROM @tbl4QAReport8Detail qa1
  inner join codeduebydates on scheduledevent = 'ASQSE-1' AND AgeInDays >= DueBy  
+ WHERE dateadd(dd,DueBy,qa1.TCDOB) >= '01/01/13'
  GROUP BY HVCasePK, QA1.TCIDPK -- Must 'group by HVCasePK, TCIDPK' to bring in twins etc (twins have same hvcasepks) (not just 'group by HVCasePK')
- 
- 
- 
- 
+  
+
  
  --SELECT * FROM @tbl4QAReport8Interval
  --ORDER BY HVCasePK, TCIDFK
