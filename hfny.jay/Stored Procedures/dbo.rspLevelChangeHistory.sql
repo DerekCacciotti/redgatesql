@@ -48,7 +48,9 @@ begin
 		from HVLevelDetail hld
 			inner join CaseProgram cp on cp.HVCaseFK = hld.hvcasefk
 			--inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK
-			inner join dbo.SplitString(@programfk,',') on hld.programfk = listitem
+			--inner join dbo.SplitString(@programfk,',') on hld.programfk = listitem (old code)
+			--use cp not hld to show ALL history for a transfer case 
+			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			
 			--inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
 			inner join worker fsw on cp.CurrentFSWFK = fsw.workerpk
