@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -105,7 +106,7 @@ begin
 		)
 		
 		,
-		cteOneIntervalBeforeASQDueInterval -- age appropriate ASQ Intervals that are expected to be there
+		cteOneIntervalBeforeASQDueInterval -- one interval before age appropriate ASQ Intervals that are expected to be there
 		AS 
 		(
 			SELECT 
@@ -203,6 +204,96 @@ begin
 			  , score.CommunicationScore AS cuttoff
 			  , A1.VersionNumber  	
 			
+			  , CASE WHEN (ASQInWindow = 1) THEN 0 ELSE 1 END AS FormOutOfWindow
+	
+				
+	--Note: Jay, I can we do something similar to what I did in QA report. For example, to figure 'Missing', the following code may do the trick		
+					
+			 , 
+			 CASE
+			 
+			  -- handling optional - 60, 54
+			  WHEN((casi.Interval = '60' OR casi.Interval = '54' OR casi.Interval = '48') AND (
+				 '60' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )
+				  OR
+				 '54' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )	  
+				 OR
+				 '48' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )	  
+
+			  )) THEN 0
+			 
+			  -- handling optional - 42
+			  WHEN((casi.Interval = '42' OR casi.Interval = '36') AND (
+				  '42' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '36' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
+			  )) THEN 0
+			 
+			  -- handling optional - 33
+			  WHEN((casi.Interval = '33' OR casi.Interval = '30') AND (
+				  '33' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '30' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
+			  )) THEN 0
+			 
+			  -- handling optional - 27
+			  WHEN((casi.Interval = '27' OR casi.Interval = '24') AND (
+				  '27' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '24' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
+			  )) THEN 0
+			 
+			  -- handling optional - 22
+			  WHEN((casi.Interval = '22' OR casi.Interval = '20') AND (
+				  '22' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '20' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
+			  )) THEN 0
+			 
+			  -- handling optional - 18
+			  WHEN((casi.Interval = '18' OR casi.Interval = '16') AND (
+				  '18' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '16' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
+			  )) THEN 0
+
+			 
+			  -- handling optional - 14
+			  WHEN((casi.Interval = '14' OR casi.Interval = '12') AND (
+				  '14' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '12' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				 	 
+			  )) THEN 0	 
+			 
+			  -- handling optional - 10,09
+			  WHEN((casi.Interval = '10' OR casi.Interval = '09' OR casi.Interval = '08') AND (
+				  '10' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '09' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '08' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				 	 
+			  )) THEN 0	 
+			 
+			  -- handling optional - 06
+			  WHEN((casi.Interval = '06' OR casi.Interval = '04') AND (
+				  '06' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				  OR
+				  '04' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				 	 
+			  )) THEN 0	 
+			 
+			  -- handling optional - 02
+			  WHEN((casi.Interval = '02') AND (
+				  '02' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
+				 	 
+			  )) THEN 0		  	  	 
+			  	  	 
+			 ELSE 1 END AS FormMissing 
+			
+			
+-- Note: Jay, we still need to figure out this one			
 			  
 			 , CASE 
 					WHEN 
