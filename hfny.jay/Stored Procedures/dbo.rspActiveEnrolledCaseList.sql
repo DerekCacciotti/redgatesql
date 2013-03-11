@@ -41,7 +41,13 @@ SELECT rtrim(PC.PCLastName) + cast(PC.PCPK AS VARCHAR(10)) [key01]
 , CAST(DATEDIFF(YEAR, PC.PCDOB, Intake.IntakeDate) AS VARCHAR(10)) + ' y' [AgeAtIntake]
 , CASE WHEN a.DischargeDate IS NULL THEN '' ELSE convert(VARCHAR(12), a.DischargeDate, 101) END [CloseDate]
 , CASE WHEN a.DischargeDate IS NULL THEN 'Case Open' ELSE rtrim(codeDischarge.DischargeReason) END [CloseReason]
-, CAST(DATEDIFF(month, Intake.IntakeDate, @EndDt) AS VARCHAR(10)) + ' m' [LengthInProgram]
+
+--, CAST(DATEDIFF(month, Intake.IntakeDate, @EndDt) AS VARCHAR(10)) + ' m' [LengthInProgram]
+
+, CASE WHEN a.DischargeDate IS NULL or a.DischargeDate > @EndDt 
+  THEN CAST(DATEDIFF(month, Intake.IntakeDate, @EndDt) AS VARCHAR(10)) + ' m' ELSE
+  CAST(DATEDIFF(month, Intake.IntakeDate, a.DischargeDate) AS VARCHAR(10)) + ' m' END [LengthInProgram]
+
 , CASE WHEN ca.TANFServices = 1 THEN 'Yes' ELSE 'No' END [TANF]
 , CASE WHEN ca.FormType = 'IN' THEN 'Intake' ELSE (
 SELECT TOP 1 codeApp.AppCodeText FROM codeApp WHERE ca.FormInterval = codeApp.AppCode AND 
