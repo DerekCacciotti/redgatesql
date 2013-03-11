@@ -104,81 +104,59 @@ begin
 		 GROUP BY HVCaseFK, c.TCIDPK -- Must 'group by HVCasePK, TCIDPK' to bring in twins etc (twins have same hvcasepks) (not just 'group by HVCasePK')
 
 		)
-		
+					
 		,
-		cteOneIntervalBeforeASQDueInterval -- one interval before age appropriate ASQ Intervals that are expected to be there
+		cteASQDueIntervalOneBefore -- age appropriate ASQ Intervals that are expected to be there
 		AS 
 		(
-			SELECT 
-				   A.HVCaseFK				 
-				 , max(TCAge) AS TCAge
-				 , A.TCIDFK			 
+
+		SELECT 
+				c.HVCaseFK
+			  , c.TCIDPK 	 
+			  , max(cd.Interval) AS Interval -- given child age, this is the interval that one expect to find ASQ record in the DB
+		 
+		 FROM cteCohort c
+		 INNER JOIN cteASQDueInterval i ON i.HVCaseFK = c.HVCaseFK AND i.TCIDPK = c.TCIDPK
+		 inner join codeduebydates cd on scheduledevent = 'ASQ' AND tcAgeDays >= DueBy 
+		 where cd.Interval < i.Interval 		 
+		 GROUP BY c.HVCaseFK, c.TCIDPK -- Must 'group by HVCasePK, TCIDPK' to bring in twins etc (twins have same hvcasepks) (not just 'group by HVCasePK')
+
+		)			
+
+		,
+		cteASQDueIntervalTwoBefore -- age appropriate ASQ Intervals that are expected to be there
+		AS 
+		(
+
+		SELECT 
+				c.HVCaseFK
+			  , c.TCIDPK 	 
+			  , max(cd.Interval) AS Interval -- given child age, this is the interval that one expect to find ASQ record in the DB
+		 
+		 FROM cteCohort c
+		 INNER JOIN cteASQDueIntervalOneBefore i ON i.HVCaseFK = c.HVCaseFK AND i.TCIDPK = c.TCIDPK
+		 inner join codeduebydates cd on scheduledevent = 'ASQ' AND tcAgeDays >= DueBy 
+		 where cd.Interval < i.Interval 		 
+		 GROUP BY c.HVCaseFK, c.TCIDPK -- Must 'group by HVCasePK, TCIDPK' to bring in twins etc (twins have same hvcasepks) (not just 'group by HVCasePK')
+
+		)			
+		
 			
-			 FROM ASQ A
-			INNER JOIN cteASQDueInterval cas ON cas.HVCaseFK = A.HVCaseFK AND cas.TCIDPK = A.TCIDFK
-			WHERE A.TCAge <= cas.Interval 
-			GROUP BY A.HVCaseFK, A.TCIDFK
+			
+				
+--SELECT * FROM cteASQDueInterval	
+--WHERE hvcasefk = 32508  -- interval due = 10
 
-		)		
-		
-		
-		
+--SELECT * FROM cteASQDueIntervalOneBefore	
+--WHERE hvcasefk = 32508  -- interval due one before = 09
 
--- Get the the last asq (max TCAge) that was done for each tcid
-		,
-		cteIntervalLastASQDone 
-		AS 
-		(
-			SELECT 
-					c.HVCaseFK
-				  , c.TCIDPK 	 
-				  , max(A.TCAge) AS Interval -- given child age, this is the interval that one expect to find ASQ record in the DB
-			 
-			 FROM cteCohort c
-			 inner join codeduebydates cd on scheduledevent = 'ASQ' AND tcAgeDays < DueBy 
-			 LEFT JOIN ASQ A ON c.HVCaseFK = A.HVCaseFK AND A.TCIDFK = c.TCIDPK  
-			 
-			 GROUP BY c.HVCaseFK,c.TCIDPK 
-		)
+--SELECT * FROM cteASQDueIntervalTwoBefore	
+--WHERE hvcasefk = 32508  -- interval due one before = 08
 
-		,
-		cteIntervalLastNonOptionalASQ
-		AS 
-		(
-			SELECT 
-					c.HVCaseFK
-				  , c.TCIDPK 	 
-				  , max(A.TCAge) AS Interval -- given child age, this is the interval that one expect to find ASQ record in the DB
-			 
-			 FROM cteCohort c
-			 inner join codeduebydates cd on scheduledevent = 'ASQ' AND tcAgeDays < DueBy 
-			 LEFT JOIN ASQ A ON c.HVCaseFK = A.HVCaseFK AND A.TCIDFK = c.TCIDPK  
-			 WHERE charindex('Optional',cd.ScheduledEvent) > 0
-			 GROUP BY c.HVCaseFK,c.TCIDPK 
-		)
-
-
-
-		--,
-		--cteMissingAgeAppropriateASQs -- age appropriate ASQ Intervals that are due
-		--AS 
-		--(
-
-		--SELECT 
-		--		c.HVCaseFK
-		--	  , c.TCIDPK 	 
-		--	  , max(cd.Interval) AS Interval -- given child age, this is the interval that one expect to find ASQ record in the DB
-		 
-		-- FROM cteCohort c
-		-- INNER JOIN cteASQDueInterval ci ON c.HVCaseFK = ci.HVCaseFK AND ci.TCIDFK = c.TCIDPK  
-		-- LEFT JOIN ASQ A ON c.HVCaseFK = A.HVCaseFK AND A.TCIDFK = ci.TCIDPK  
-		 
-		 
-		-- GROUP BY HVCaseFK, c.TCIDPK -- Must 'group by HVCasePK, TCIDPK' to bring in twins etc (twins have same hvcasepks) (not just 'group by HVCasePK')
-
-		--)
-
-
+	
+---------- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
+	
+	
 ,		
 	
 	cteExpectedForm
@@ -204,116 +182,41 @@ begin
 			  , score.CommunicationScore AS cuttoff
 			  , A1.VersionNumber  	
 			
-			  , CASE WHEN (ASQInWindow = 1) THEN 0 ELSE 1 END AS FormOutOfWindow
 	
-				
-	--Note: Jay, I can we do something similar to what I did in QA report. For example, to figure 'Missing', the following code may do the trick		
-					
-			 , 
-			 CASE
-			 
-			  -- handling optional - 60, 54
-			  WHEN((casi.Interval = '60' OR casi.Interval = '54' OR casi.Interval = '48') AND (
-				 '60' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )
-				  OR
-				 '54' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )	  
-				 OR
-				 '48' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )	  
+			--, CASE WHEN a1.ASQPK IS NOT NULL THEN 1
+			--		WHEN a1.ASQPK IS NULL AND a1.THEN 1
 
-			  )) THEN 0
-			 
-			  -- handling optional - 42
-			  WHEN((casi.Interval = '42' OR casi.Interval = '36') AND (
-				  '42' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '36' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
-			  )) THEN 0
-			 
-			  -- handling optional - 33
-			  WHEN((casi.Interval = '33' OR casi.Interval = '30') AND (
-				  '33' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '30' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
-			  )) THEN 0
-			 
-			  -- handling optional - 27
-			  WHEN((casi.Interval = '27' OR casi.Interval = '24') AND (
-				  '27' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '24' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
-			  )) THEN 0
-			 
-			  -- handling optional - 22
-			  WHEN((casi.Interval = '22' OR casi.Interval = '20') AND (
-				  '22' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '20' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
-			  )) THEN 0
-			 
-			  -- handling optional - 18
-			  WHEN((casi.Interval = '18' OR casi.Interval = '16') AND (
-				  '18' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '16' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  		 
-			  )) THEN 0
-
-			 
-			  -- handling optional - 14
-			  WHEN((casi.Interval = '14' OR casi.Interval = '12') AND (
-				  '14' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '12' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				 	 
-			  )) THEN 0	 
-			 
-			  -- handling optional - 10,09
-			  WHEN((casi.Interval = '10' OR casi.Interval = '09' OR casi.Interval = '08') AND (
-				  '10' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '09' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '08' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				 	 
-			  )) THEN 0	 
-			 
-			  -- handling optional - 06
-			  WHEN((casi.Interval = '06' OR casi.Interval = '04') AND (
-				  '06' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				  OR
-				  '04' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				 	 
-			  )) THEN 0	 
-			 
-			  -- handling optional - 02
-			  WHEN((casi.Interval = '02') AND (
-				  '02' IN (SELECT  TCAge FROM ASQ A WHERE casi.HVCaseFK = A.HVCaseFK AND casi.TCIDPK = A.TCIDFK )  	
-				 	 
-			  )) THEN 0		  	  	 
-			  	  	 
-			 ELSE 1 END AS FormMissing 
-			
-			
--- Note: Jay, we still need to figure out this one			
 			  
-			 , CASE 
-					WHEN 
-						--a
-						(A1.ASQCommunicationScore >= score.CommunicationScore AND A1.ASQFineMotorScore >= score.FineMotorScore AND  
-						A1.ASQGrossMotorScore >= score.GrossMotorScore AND A1.ASQPersonalSocialScore >= score.PersonalScore AND  
-						A1.ASQProblemSolvingScore >= score.ProblemSolvingScore)
+			  , CASE WHEN A1.ASQPK IS NOT NULL -- we found the golden asq record
+						  AND 
+						  (
+			  				--a
+							(A1.ASQCommunicationScore >= score.CommunicationScore AND A1.ASQFineMotorScore >= score.FineMotorScore AND  
+							A1.ASQGrossMotorScore >= score.GrossMotorScore AND A1.ASQPersonalSocialScore >= score.PersonalScore AND  
+							A1.ASQProblemSolvingScore >= score.ProblemSolvingScore)
 						 
-						----b 
-						--OR (A1.ASQCommunicationScore < score.CommunicationScore OR A1.ASQFineMotorScore < score.FineMotorScore OR  
-						--A1.ASQGrossMotorScore < score.GrossMotorScore OR A1.ASQPersonalSocialScore < score.PersonalScore OR  
-						--A1.ASQProblemSolvingScore < score.ProblemSolvingScore) AND A1.TCReferred = '1'
+							--b 
+							OR (A1.ASQCommunicationScore < score.CommunicationScore OR A1.ASQFineMotorScore < score.FineMotorScore OR  
+							A1.ASQGrossMotorScore < score.GrossMotorScore OR A1.ASQPersonalSocialScore < score.PersonalScore OR  
+							A1.ASQProblemSolvingScore < score.ProblemSolvingScore) AND A1.TCReferred = '1'
+						  )
+						THEN    1
 						
-						----c
+
+						
+						
+						
+						  
+						--c
 						--OR A3.ASQTCReceiving = '1'
 						----d
 						--OR A2.ASQInWindow = 1 AND A2.ReviewCDS = 1
-							
-							
-						THEN 1 
+
+				 	 
+			 
+			 
+			 
+
 						
 						ELSE   
 						
@@ -327,13 +230,27 @@ begin
 			   INNER JOIN cteASQDueInterval casi ON casi.hvcasefk = c.hvcasefk AND casi.tcidpk = c.tcidpk 
 			   LEFT JOIN ASQ A1 ON A1.hvcasefk = c.hvcasefk AND casi.tcidpk = A1.tcidfk AND A1.TCAge = casi.Interval
 			   LEFT JOIN scoreASQ score ON score.TCAge = casi.Interval AND score.ASQVersion = A1.VersionNumber  -- bring in age approp cutt off dates
-			   
-			   
-			    --LEFT JOIN cteIntervalLastNonOptionalASQ cin ON cin.hvcasefk = c.hvcasefk AND cin.tcidpk = c.tcidpk
-			    --LEFT JOIN ASQ A2 ON A2.hvcasefk = c.hvcasefk AND cin.tcidpk = A2.tcidfk AND A2.TCAge = cin.Interval
+			   --LEFT JOIN codeApp app ON app.Code
+				 --One interval before due Interval			   
+			   INNER JOIN cteASQDueIntervalOneBefore casi2 ON casi2.hvcasefk = c.hvcasefk AND casi2.tcidpk = c.tcidpk 
+			   LEFT JOIN ASQ A2 ON A2.hvcasefk = c.hvcasefk AND casi2.tcidpk = A2.tcidfk AND A2.TCAge = casi2.Interval
+			   LEFT JOIN scoreASQ score1 ON score1.TCAge = casi2.Interval AND score1.ASQVersion = A2.VersionNumber  -- bring in age approp cutt off dates
 
-			    --LEFT JOIN cteIntervalLastASQDone cil ON cil.hvcasefk = c.hvcasefk AND cil.tcidpk = c.tcidpk
-			    --LEFT JOIN ASQ A3 ON A3.hvcasefk = c.hvcasefk AND cil.tcidpk = A3.tcidfk AND A3.TCAge = cil.Interval
+				 --Two interval before due Interval			   
+			   INNER JOIN cteASQDueIntervalTwoBefore casi3 ON casi3.hvcasefk = c.hvcasefk AND casi3.tcidpk = c.tcidpk 
+			   LEFT JOIN ASQ A3 ON A3.hvcasefk = c.hvcasefk AND casi3.tcidpk = A3.tcidfk AND A3.TCAge = casi3.Interval
+			   LEFT JOIN scoreASQ score2 ON score2.TCAge = casi3.Interval AND score2.ASQVersion = A3.VersionNumber  -- bring in age approp cutt off dates
+
+
+
+
+			   
+			   
+			   -- LEFT JOIN cteIntervalLastNonOptionalASQ cin ON cin.hvcasefk = c.hvcasefk AND cin.tcidpk = c.tcidpk
+			   -- LEFT JOIN ASQ A2 ON A2.hvcasefk = c.hvcasefk AND cin.tcidpk = A2.tcidfk AND A2.TCAge = cin.Interval
+
+			   -- LEFT JOIN cteIntervalLastASQDone cil ON cil.hvcasefk = c.hvcasefk AND cil.tcidpk = c.tcidpk
+			   -- LEFT JOIN ASQ A3 ON A3.hvcasefk = c.hvcasefk AND cil.tcidpk = A3.tcidfk AND A3.TCAge = cil.Interval
 			    
 			    
 			    
@@ -351,7 +268,7 @@ begin
 
 
 
---SELECT * FROM cteCohort
+SELECT * FROM cteCohort
 SELECT * FROM cteExpectedForm
 --WHERE hvcasefk = 31718
 -- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
