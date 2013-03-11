@@ -42,7 +42,11 @@ set @programfk = REPLACE(@programfk,'"','')
 		  ,CAST(DATEDIFF(year,PC.PCDOB,Intake.IntakeDate) as varchar(10))+' y' [AgeAtIntake]
 		  ,case when cp.DischargeDate is null then '' else convert(varchar(12),cp.DischargeDate,101) end [CloseDate]
 		  ,case when cp.DischargeDate is null then 'Case Open' else rtrim(codeDischarge.DischargeReason) end [CloseReason]
-		  ,CAST(DATEDIFF(month,Intake.IntakeDate,@EndDt) as varchar(10))+' m' [LengthInProgram]
+		  
+		  --,CAST(DATEDIFF(month,Intake.IntakeDate,@EndDt) as varchar(10))+' m' [LengthInProgram]
+		  ,CASE WHEN cp.DischargeDate is NOT NULL THEN CAST(DATEDIFF(month,Intake.IntakeDate,cp.DischargeDate) as varchar(10))+' m' ELSE 
+		   CAST(DATEDIFF(month,Intake.IntakeDate,@EndDt) as varchar(10))+' m' END [LengthInProgram]
+		  
 		  ,case when ca.TANFServices = 1 then 'Yes' else 'No' end [TANF]
 		  ,case when ca.FormType = 'IN' then 'Intake' else (select top 1 codeApp.AppCodeText
 																from codeApp
