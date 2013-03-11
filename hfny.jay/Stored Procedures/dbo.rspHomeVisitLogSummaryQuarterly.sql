@@ -18,6 +18,14 @@ CREATE procedure [dbo].[rspHomeVisitLogSummaryQuarterly]
     @casefilterspositive varchar(200)
 as
 
+--DECLARE	@programfk int = 4
+--DECLARE @StartDt   DATETIME = '09/01/2012'
+--DECLARE @EndDt     DATETIME = '11/30/2012'
+--DECLARE @SiteFK	   int = null
+--DECLARE @casefilterspositive varchar(200) = null
+--DECLARE @StartDtX   DATETIME = '09/01/2012'
+--DECLARE @EndDtX     DATETIME = '11/30/2012'
+
 if @programfk is null
   begin
 	select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
@@ -25,16 +33,6 @@ if @programfk is null
 									   for xml path ('')),2,8000)
   end
 set @programfk = replace(@programfk,'"','')
-
-	--DECLARE @programfk INT = 6 
-	--DECLARE @StartDt DATETIME = '01/01/2012'
-	--DECLARE @EndDt DATETIME = '03/31/2012'
-	
---DECLARE	@programfk int = 4
---DECLARE @StartDt   DATETIME = '09/01/2012'
---DECLARE @EndDt     DATETIME = '11/30/2012'
---DECLARE @SiteFK	   int = null
---DECLARE @casefilterspositive varchar(200) = null
 
 	--declare @xDate datetime = '07/01/'+str(year(@StartDt))
 	--declare @StartDtX datetime = case when @xDate > @StartDt then '07/01/'+str(year(@StartDt)-1) else @xDate end
@@ -118,6 +116,18 @@ set @programfk = replace(@programfk,'"','')
 		 then (c.VisitLengthHour * 60 + c.VisitLengthMinute) else null end) [AverageLength]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Prenatal]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Postnatal]
+		 
+		 -- type of visit
+		 ,str(sum(case when c.VisitType = '1000' then 1 else 0 end)*100.0/@x,10,0)+'%' [InPC1HomeOnly]
+		 ,str(sum(case when c.VisitType = '0100' then 1 else 0 end)*100.0/@x,10,0)+'%' [InFatherFigureOBPHomeOnly]
+		 ,str(sum(case when c.VisitType = '1010' then 1 else 0 end)*100.0/@x,10,0)+'%' [InOutOfPC1Home]
+		 ,str(sum(case when c.VisitType = '0110' then 1 else 0 end)*100.0/@x,10,0)+'%' [InOutOfFatherFigureOBPHome]
+		 ,str(sum(case when c.VisitType = '1100' then 1 else 0 end)*100.0/@x,10,0)+'%' [InBothPC1FatherFigureOBPHome]
+		 ,str(sum(case when c.VisitType = '0010' then 1 else 0 end)*100.0/@x,10,0)+'%' [OutOfBothPC1FatherFigureOBPHome]
+		 ,str(sum(case when c.VisitType = '1110' then 1 else 0 end)*100.0/@x,10,0)+'%' [InBothPC1FatherFigureOBPHomeAndOutBoth]
+		 -- new type of visit
+		 
+		 
 		 ,str(sum(case when substring(c.VisitType,1,1) = '1' or substring(c.VisitType,2,1) = '1' then 1 else 0 end)
 		  *100.0/@x,10,0)+'%' [InParticipantHome]
 		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitType,1,1) != '1'
@@ -146,9 +156,29 @@ set @programfk = replace(@programfk,'"','')
 		 ,str(sum(case when c.GrandParentParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [GrandParentParticipated]
 		 ,str(sum(case when c.SiblingParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [SiblingParticipated]
 		 ,str(sum(case when c.NonPrimaryFSWParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [NonPrimaryFSWParticipated]
+		 -- new 
+		 ,str(sum(case when c.FatherAdvocateParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [FatherAdvocateParticipated]
 		 ,str(sum(case when c.HVSupervisorParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [HVSupervisorParticipated]
 		 ,str(sum(case when c.SupervisorObservation = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [SupervisorObservation]
 		 ,str(sum(case when c.OtherParticipated = 1 then 1 else 0 end)*100.0/@x,10,0)+'%' [OtherParticipated]
+
+/*
+	.PC1Participated = chkPC1Participated.Checked
+	.PC2Participated = chkPC2Participated.Checked
+	.OBPParticipated = chkOBPParticipated.Checked
+	.FatherFigureParticipated = chkFatherFigureParticipated.Checked	 ' new
+	.TCParticipated = chkTCParticipated.Checked
+	.GrandParentParticipated = chkGrandParentParticipated.Checked
+	.SiblingParticipated = chkSiblingParticipated.Checked
+	.NonPrimaryFSWParticipated = chkNonPrimaryFSWParticipated.Checked	 ' new
+	
+	.FatherAdvocateParticipated = chkFatherAdvocateParticipated.Checked	 ' new
+	.HVSupervisorParticipated = chkHVSupervisorParticipated.Checked
+	.SupervisorObservation = chkSupervisorObservation.Checked
+	.OtherParticipated = chkOtherParticipated.Checked
+*/
+
+
 
 		 ,str(sum(case when (isnull(c.CDChildDevelopment,'00') = '00' and isnull(c.CDToys,'00') = '00'
 				  and isnull(c.CDOther,'00') = '00') or substring(c.VisitType,4,1) = '1'
@@ -233,6 +263,17 @@ set @programfk = replace(@programfk,'"','')
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@yX,10,0)+'%' [PrenatalX]
 		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@yX,10,0)+'%' [PostnatalX]
 
+         -- type of visit
+		 ,str(sum(case when c.VisitType = '1000' then 1 else 0 end)*100.0/@xX,10,0)+'%' [InPC1HomeOnlyX]
+		 ,str(sum(case when c.VisitType = '0100' then 1 else 0 end)*100.0/@xX,10,0)+'%' [InFatherFigureOBPHomeOnlyX]
+		 ,str(sum(case when c.VisitType = '1010' then 1 else 0 end)*100.0/@xX,10,0)+'%' [InOutOfPC1HomeX]
+		 ,str(sum(case when c.VisitType = '0110' then 1 else 0 end)*100.0/@xX,10,0)+'%' [InOutOfFatherFigureOBPHomeX]
+		 ,str(sum(case when c.VisitType = '1100' then 1 else 0 end)*100.0/@xX,10,0)+'%' [InBothPC1FatherFigureOBPHomeX]
+		 ,str(sum(case when c.VisitType = '0010' then 1 else 0 end)*100.0/@xX,10,0)+'%' [OutOfBothPC1FatherFigureOBPHomeX]
+		 ,str(sum(case when c.VisitType = '1110' then 1 else 0 end)*100.0/@xX,10,0)+'%' [InBothPC1FatherFigureOBPHomeAndOutBothX]
+		 -- new type of visit
+
+
 		 ,str(sum(case when substring(c.VisitType,1,1) = '1' or substring(c.VisitType,2,1) = '1' then 1 else 0 end)
 		  *100.0/@xX,10,0)+'%' [InParticipantHomeX]
 		 ,str(sum(case when substring(c.VisitType,3,1) = '1' and substring(c.VisitType,1,1) != '1'
@@ -261,6 +302,8 @@ set @programfk = replace(@programfk,'"','')
 		 ,str(sum(case when c.GrandParentParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [GrandParentParticipatedX]
 		 ,str(sum(case when c.SiblingParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [SiblingParticipatedX]
 		 ,str(sum(case when c.NonPrimaryFSWParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [NonPrimaryFSWParticipatedX]
+		  -- new 
+		 ,str(sum(case when c.FatherAdvocateParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [FatherAdvocateParticipatedX]
 		 ,str(sum(case when c.HVSupervisorParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [HVSupervisorParticipatedX]
 		 ,str(sum(case when c.SupervisorObservation = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [SupervisorObservationX]
 		 ,str(sum(case when c.OtherParticipated = 1 then 1 else 0 end)*100.0/@xX,10,0)+'%' [OtherParticipatedX]
