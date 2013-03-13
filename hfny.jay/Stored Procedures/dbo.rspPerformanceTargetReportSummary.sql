@@ -250,7 +250,7 @@ begin
 		where PerformanceTargetCode not in (select PTCode from cteSummary sum2) -- missing on missing.PerformanceTargetCode = s.PTCode 
 	order by PTSortOrder, PTCode
 	
-	-- select * from @tblPTDetails
+	select * from @tblPTDetails
 
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012'
 end

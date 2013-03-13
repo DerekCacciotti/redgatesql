@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -14,7 +15,7 @@ CREATE procedure [dbo].[rspPerformanceTargetHD5]
 (
     @StartDate      datetime,
     @EndDate      datetime,
-    @tblPTCases  PTCases                           readonly
+    @tblPTCases  PTCases readonly
 )
 
 as
@@ -106,7 +107,7 @@ begin
 	cteWellBabyVisitCounts
 	as
 	(
-		select 'HD1' as PTCode
+		select 'HD5' as PTCode
 			  , coh.HVCaseFK
 			  , PC1ID
 			  , OldID
