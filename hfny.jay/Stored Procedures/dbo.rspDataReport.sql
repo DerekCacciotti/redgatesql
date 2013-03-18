@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -16,20 +17,25 @@ CREATE procedure [dbo].[rspDataReport]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartDate				datetime,
-    @EndDate				datetime,
-    @FSWFK					int             = null,
-    @SiteFK					int             = null,
-    @IncludeClosedCases		bit             = 0,
-    @CaseFiltersPositive	varchar(100)    = ''
+    @EndDate				datetime
+
 )
 as
 begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	set nocount on;
+	
+	if @ProgramFKs is null
+	begin
+		select @ProgramFKs = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+										   from HVProgram
+										   for xml path ('')),2,8000)
+	end
 
-	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
-	set @CaseFiltersPositive = case when @CaseFiltersPositive = '' then null else @CaseFiltersPositive end
+	set @ProgramFKs = REPLACE(@ProgramFKs,'"','')	
+	
+
 
 	-- main report
 	declare @tbl4DataReport table(	
@@ -51,8 +57,8 @@ begin
 	)
 	SELECT h.HVCasePK FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN HVScreen h1 ON h1.HVCaseFK = cp.HVCaseFK AND h1.ProgramFK = cp.ProgramFK
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK	
 	
 	WHERE h1.ScreenDate < @StartDate
 	AND (h.KempeDate >= @StartDate OR h.KempeDate IS NULL)
@@ -77,8 +83,8 @@ begin
 	)
 	SELECT h.HVCasePK,H1.ReferralMade,h1.ScreenResult FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN HVScreen h1 ON h1.HVCaseFK = h.HVCasePK AND h1.ProgramFK = cp.ProgramFK
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
 	WHERE h1.ScreenDate >= @StartDate AND h1.ScreenDate <= @EndDate
 	AND cp.ProgramFK = @ProgramFKs
 	
@@ -102,8 +108,8 @@ begin
 	)
 	SELECT h.HVCasePK,p.KempeResult, p.CaseStatus FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK	
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
+	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
 	WHERE p.KempeDate >= @StartDate AND p.KempeDate <= @EndDate
 	AND cp.ProgramFK = @ProgramFKs
 	AND p.CaseStatus > '01'
@@ -127,8 +133,8 @@ begin
 	)
 	SELECT h.HVCasePK FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK	
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
+	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
 	WHERE p.PADate >= @StartDate AND p.PADate <= @EndDate
 	AND cp.ProgramFK = @ProgramFKs
 	AND p.CaseStatus = '03'	
@@ -148,8 +154,8 @@ begin
 	)
 	SELECT h.HVCasePK FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK	
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
+	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
 	WHERE p.PADate < @StartDate AND p.PADate < @EndDate
 	AND cp.ProgramFK = @ProgramFKs
 	AND p.CaseStatus = '02'	
@@ -172,9 +178,9 @@ begin
 	)
 	SELECT h.HVCasePK FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	--INNER JOIN Preintake pre ON pre.HVCaseFK = h.HVCasePK
-	left join codeLevel on cp.CurrentLevelFK = codeLevel.codeLevelPK	
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+	left join codeLevel on cp.CurrentLevelFK = codeLevel.codeLevelPK
 	WHERE 
 	cp.ProgramFK = @ProgramFKs
 	--AND pre.CaseStatus = '03'
@@ -195,7 +201,7 @@ begin
 	)
 	SELECT h.HVCasePK FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 
 	cp.ProgramFK = @ProgramFKs
 	AND (h.IntakeDate >= @StartDate AND h.IntakeDate <= @EndDate)
@@ -215,7 +221,7 @@ begin
 	)
 	SELECT h.HVCasePK  FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 
 	( cp.ProgramFK = @ProgramFKs OR  (cp.TransferredToProgramFK = @ProgramFKs AND cp.CaseStartDate < @StartDate) ) -- handling transfer cases
 	AND h.IntakeDate < @StartDate 
@@ -247,7 +253,7 @@ begin
 	
 	 FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 	
 	( cp.ProgramFK = @ProgramFKs OR  (cp.TransferredToProgramFK = @ProgramFKs AND (cp.CaseStartDate between  @StartDate AND @EndDate)) ) -- handling transfer cases for Families enrolled this period
 	AND h.IntakeDate >= @StartDate 
@@ -275,7 +281,7 @@ begin
 	)
 	SELECT h.HVCasePK FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 
 	( cp.ProgramFK = @ProgramFKs OR  (cp.TransferredToProgramFK = @ProgramFKs AND (cp.CaseStartDate between  @StartDate AND @EndDate)) ) -- handling transfer cases for Families enrolled this period
 	AND cp.DischargeDate >= @StartDate 
@@ -304,9 +310,10 @@ begin
 	)	
 	SELECT HVCasePK, IntakePK, cp.ProgramFK, PBTANF FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	LEFT JOIN Intake i ON i.HVCaseFK = h.HVCasePK
 	INNER JOIN CommonAttributes ca ON ca.FormFK = i.IntakePK and ca.FormType = 'IN'  -- to get PBTANF, item 26 on the intake form
-	--inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK  --- Turning this ON, adds a minute to time execution. So I turned it off time being.
+	
 	WHERE 
 	( cp.ProgramFK = @ProgramFKs OR  (cp.TransferredToProgramFK = @ProgramFKs AND (cp.CaseStartDate between  @StartDate AND @EndDate)) ) -- handling transfer cases for Families enrolled this period
 	AND (h.IntakeDate IS NOT NULL AND h.IntakeDate <= @EndDate)
@@ -391,6 +398,8 @@ begin
 --SELECT * FROM  @tbl4DataReportRow14RestOfIt
 -- rspDataReport 5, '06/01/2012', '09/30/2012'			
 
+INSERT INTO @tbl4DataReport(ReportTitle,Total)
+VALUES('SCREEN (PRE-ASSESSMENT) AND ASSESSMENT SUMMARY', '')
 	
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
 VALUES ('1.  Positive Screens Pending Assessment at Beginning of this Period', @nposScreens)
@@ -423,6 +432,14 @@ VALUES('4.  Screens Terminated on Pre-Assessment Form this Period', @n4)
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
 VALUES('5.  Screens Pending Assessment at End of this Period ([(1+2a) - (3+4)])', (@nposScreens + @n2a) - (@n3 + @n4))
 
+
+INSERT INTO @tbl4DataReport(ReportTitle,Total)
+VALUES('', '')
+INSERT INTO @tbl4DataReport(ReportTitle,Total)
+VALUES('PRE-INTAKE (POST-ASSESSMENT) SUMMARY', '')
+
+
+
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
 VALUES('6.  Pre-Intake Families at Beginning of this Period (Participants Pending Enrollment at Beginning of this Period)', @n6)
 
@@ -437,6 +454,12 @@ VALUES('9.  Families Enrolled on Pre-Intake Form this Period', @n9)
 
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
 VALUES('10.  Pre-Intake Families at the End of this Period ([(6+7) - (8+9)])', (@n6 + @n3a) - (@n8 + @n9))
+
+INSERT INTO @tbl4DataReport(ReportTitle,Total)
+VALUES('', '')
+INSERT INTO @tbl4DataReport(ReportTitle,Total)
+VALUES('ENROLLED FAMILIES', '')
+
 
 -- Enrolled Families
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
@@ -470,6 +493,10 @@ INSERT INTO @tbl4DataReport(ReportTitle,Total)VALUES('       f. Level 2', @n14f)
 INSERT INTO @tbl4DataReport(ReportTitle,Total)VALUES('       g. Level 3', @n14g)
 INSERT INTO @tbl4DataReport(ReportTitle,Total)VALUES('       h. Level 4', @n14h)
 INSERT INTO @tbl4DataReport(ReportTitle,Total)VALUES('       i. Level X', @n14i)
+
+INSERT INTO @tbl4DataReport(ReportTitle,Total)
+VALUES('15.  Pre-Intake and Enrolled Families at the End of this Period (10+14)', (@n6 + @n3a) - (@n8 + @n9) + (@n11 + @n12) - @n13 )
+
 
 -- rspDataReport 5, '06/01/2012', '09/30/2012'			
 
