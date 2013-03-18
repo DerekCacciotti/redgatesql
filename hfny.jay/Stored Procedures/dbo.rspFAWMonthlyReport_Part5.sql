@@ -15,8 +15,8 @@ CREATE PROCEDURE [dbo].[rspFAWMonthlyReport_Part5]
 	@EndDt datetime
 AS
 
---DECLARE @StartDt DATE = '01/01/2011'
---DECLARE @EndDt DATE = '01/31/2011'
+--DECLARE @StartDt DATE = '01/01/2012'
+--DECLARE @EndDt DATE = '01/31/2012'
 --DECLARE @programfk INT = 6
 
 DECLARE @NoAnyPreAssessment TABLE (
@@ -109,15 +109,18 @@ SELECT c.PC1ID [Participant]
   WHEN a.CaseStatus = '03' THEN rtrim(str(datediff(dd, b.ScreenDate , a.PADate),10))
   WHEN a.CaseStatus = '01' THEN rtrim(str(datediff(dd, b.ScreenDate, @EndDt),10))
   WHEN a.CaseStatus = '02' THEN rtrim(str(datediff(dd, b.ScreenDate, a.PADate),10))
+  WHEN a.CaseStatus = '04' THEN rtrim(str(datediff(dd, b.ScreenDate, a.PADate),10))
   WHEN a.CaseStatus = '99' THEN rtrim(str(datediff(dd, b.ScreenDate, @EndDt),10))
-  ELSE '0' END [DaysInPreassess]
+  ELSE 0 END [DaysInPreassess]
   
 , CASE WHEN a.PADate < @StartDt THEN 'No Status'
   WHEN a.CaseStatus = '03' THEN rtrim(x.ReportDischargeText) + ' ' + convert(VARCHAR(12), a.PADate, 101) 
   WHEN a.CaseStatus = '01' THEN 'Continue ' + convert(VARCHAR(12), @EndDt, 101) 
-  WHEN a.CaseStatus = '02' THEN 'Enrolled ' + convert(VARCHAR(12), b.KempeDate, 101)
+  WHEN a.CaseStatus = '02' THEN 'Accessment Completed ' + convert(VARCHAR(12), b.KempeDate, 101)
+  WHEN a.CaseStatus = '04' THEN 'Accessment Completed, ' + rtrim(x.ReportDischargeText) + ' ' + convert(VARCHAR(12), a.PADate, 101) 
   WHEN a.CaseStatus = '99' THEN 'No Preassessments'
   ELSE '' END [CurrentStatus]
+  
 , CASE WHEN a.PADate < @StartDt THEN 0 ELSE ISNULL(a.PAParentLetter, 0) END [Letters]
 , CASE WHEN a.PADate < @StartDt THEN 0 ELSE ISNULL(a.PACall2Parent, 0) END [Call2Parent]
 , CASE WHEN a.PADate < @StartDt THEN 0 ELSE ISNULL(a.PACallFromParent, 0) END [CallFromParent]

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -27,7 +28,7 @@ SELECT rtrim(d.PCLastName) + ', ' + rtrim(d.PCFirstName) [Participant]
 FROM Kempe AS a
 JOIN HVCase AS c ON a.HVCaseFK = c.HVCasePK
 JOIN PC d ON d.PCPK = c.PC1FK
-LEFT OUTER JOIN Preassessment AS b ON a.HVCaseFK = b.HVCaseFK AND b.CaseStatus = '02'
+LEFT OUTER JOIN Preassessment AS b ON a.HVCaseFK = b.HVCaseFK AND b.CaseStatus in ('02', '04')
 LEFT OUTER JOIN Worker faw ON a.FAWFK = faw.WorkerPK
 LEFT OUTER JOIN Worker fsw ON b.PAFSWFK = fsw.WorkerPK
 
