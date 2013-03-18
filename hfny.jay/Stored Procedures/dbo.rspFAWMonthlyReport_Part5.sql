@@ -117,7 +117,7 @@ SELECT c.PC1ID [Participant]
   WHEN a.CaseStatus = '03' THEN rtrim(x.ReportDischargeText) + ' ' + convert(VARCHAR(12), a.PADate, 101) 
   WHEN a.CaseStatus = '01' THEN 'Continue ' + convert(VARCHAR(12), @EndDt, 101) 
   WHEN a.CaseStatus = '02' THEN 'Accessment Completed ' + convert(VARCHAR(12), b.KempeDate, 101)
-  WHEN a.CaseStatus = '04' THEN 'Accessment Completed, ' + rtrim(x.ReportDischargeText) + ' ' + convert(VARCHAR(12), a.PADate, 101) 
+  WHEN a.CaseStatus = '04' THEN 'Accessment Completed, Not Assigned ' + rtrim(x.ReportDischargeText) + ' ' + convert(VARCHAR(12), a.PADate, 101) 
   WHEN a.CaseStatus = '99' THEN 'No Preassessments'
   ELSE '' END [CurrentStatus]
   
