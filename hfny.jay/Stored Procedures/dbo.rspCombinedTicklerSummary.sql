@@ -10,6 +10,7 @@ GO
 -- Create date: <Feb 5, 2012>
 -- Description:	<report: Combined Tickler Summary>
 --				Moved from FamSys - 02/05/12 jrobohn
+-- exec dbo.rspCombinedTicklerSummary @programfk='1',@rdate='2013-03-01 00:00:00',@supervisorfk=NULL,@workerfk=79
 -- =============================================
 CREATE procedure [dbo].[rspCombinedTicklerSummary]
 (
@@ -28,10 +29,26 @@ as
 
 	set @programfk = replace(@programfk,'"','')
 
-	select *
-		from (
-			  -- ASQ
-			  select LevelName
+	DECLARE @tblASQTicklerCohort TABLE(
+		HVCasePK INT,
+		LevelName varchar(50) NOT NULL,
+		[PC1ID] [char](13) NOT NULL,
+		pc1name varchar(200) NOT NULL,
+		[tcdob] [datetime] NULL,
+		[GestationalAge] INT,
+		[EventDescription] varchar(50) NULL,
+		[DueDate] [datetime] NULL,
+		[TargetChild] VARCHAR(200),
+		[fswname] VARCHAR(200),
+		[supervisor] VARCHAR(200),			
+		[ForWhom] VARCHAR(200)
+		
+	)		
+
+		INSERT INTO @tblASQTicklerCohort	
+			  select 
+					HVCasePK
+					,LevelName
 					,pc1id
 					,rtrim(pc1.pcfirstname)+' '+rtrim(pc1.pclastname) pc1name
 					,hvcase.tcdob
@@ -82,6 +99,80 @@ as
 									 else
 										 dateadd(dd,dueby,hvcase.tcdob)
 								 end) = month(@rdate)
+				
+
+				;				 
+							 
+				WITH cteLastHighestASQ AS
+				(
+				SELECT 
+						asqt.HVCasePK			 
+					  , max(TCAge) AS Interval
+				 
+				  FROM @tblASQTicklerCohort asqt  
+				  LEFT JOIN ASQ A ON asqt.HVCasePK = a.HVCaseFK 
+				 GROUP BY HVCasePK	
+				 --ORDER BY HVCasePK 
+				)
+
+				,
+				cteExcludeOptionalsIfCasesAreASQTCReceivingIsYes as
+				(
+					-- get hvcasepk's that we will exclude because for them ASQTCReceiving = 1 and EventDescription contains optional
+				SELECT DISTINCT 		
+					  cc.HVCasePK		 
+					  FROM @tblASQTicklerCohort cc
+				INNER  JOIN cteLastHighestASQ cl ON cl.HVCasePK = cc.HVCasePK
+				LEFT   JOIN ASQ asqq ON cl.HVCasePK = asqq.HVCaseFK -- OR asqq.HVCaseFK IS null
+				WHERE  
+					(asqq.TCAge  = cl.Interval OR cl.Interval IS NULL)
+					AND
+					(asqq.ASQTCReceiving = 1 AND  EventDescription LIKE '%optional%')
+					
+				)				
+
+
+
+
+	
+	select *
+		from (
+			  -- ASQ
+ 
+								 
+
+				SELECT DISTINCT 
+					   LevelName
+					 , PC1ID
+					 , pc1name
+					 , cc.HVCasePK
+					 , GestationalAge
+					 
+					 , CASE WHEN asqq.ASQTCReceiving = 1 THEN 'Please contact EI program for update'
+						 ELSE 
+						EventDescription
+						END AS EventDescription
+						
+					 , DueDate
+					 , TargetChild
+					 , fswname
+					 , supervisor
+					 , ForWhom				
+
+					 
+					  FROM @tblASQTicklerCohort cc
+				INNER  JOIN cteLastHighestASQ cl ON cl.HVCasePK = cc.HVCasePK
+				LEFT   JOIN ASQ asqq ON cl.HVCasePK = asqq.HVCaseFK -- OR asqq.HVCaseFK IS null
+
+				WHERE  
+					(asqq.TCAge  = cl.Interval OR cl.Interval IS NULL)
+					AND
+					cc.HVCasePK NOT IN (SELECT HVCasePK FROM cteExcludeOptionalsIfCasesAreASQTCReceivingIsYes)
+
+				
+								 
+								 
+								 
 			  union
 			  ---- ASQ-SE
 			  select LevelName
