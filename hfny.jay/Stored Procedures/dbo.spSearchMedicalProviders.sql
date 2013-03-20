@@ -1,12 +1,13 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 
 
-CREATE PROCEDURE [dbo].[spSearchMedicalProviders] (@MPFirstName VARCHAR(200) = NULL,
-@MPLastName VARCHAR(200) = NULL, @MPAddress VARCHAR(40)= NULL, @MPCity VARCHAR(20)=NULL, @MPState VARCHAR(2)=NULL,
-@MPZip VARCHAR(10)=NULL, @MPPhone VARCHAR(12)=NULL, @MPIsActive BIT = NULL,
+CREATE PROCEDURE [dbo].[spSearchMedicalProviders] (@MPFirstName VARCHAR(200) = '',
+@MPLastName VARCHAR(200) = '', @MPAddress VARCHAR(40)= '', @MPCity VARCHAR(20)='', @MPState VARCHAR(2)='',
+@MPZip VARCHAR(10)='', @MPPhone VARCHAR(12)='', @MPIsActive BIT = NULL,
 @ProgramFK INT = NULL)
 
 AS
@@ -16,13 +17,14 @@ SET NOCOUNT ON;
 SELECT *,
 	MPFirstName+' '+MPLastName as MPName	
 	FROM listMedicalProvider mp
-	WHERE (MPFirstName LIKE '%' + @MPFirstName + '%'
-	OR MPLastName LIKE '%' + @MPLastName + '%'
-	OR MPAddress  LIKE '%' + @MPAddress+ '%'
-	OR MPCity     LIKE '%' + @MPCity + '%'
-	OR MPState  = @MPState 
-	OR MPZip LIKE @MPZip + '%'
-	OR MPPhone LIKE '%' + @MPPhone + '%')
+	WHERE 
+	(@MPFirstName = '' OR MPFirstName LIKE @MPFirstName + '%')
+	AND (@MPLastName = '' or MPLastName LIKE @MPLastName + '%')
+	AND (@MPAddress = '' OR MPAddress LIKE '%' + @MPAddress + '%')
+	AND (@MPCity = '' OR MPCity LIKE @MPCity + '%')
+	AND (@MPState = '' OR MPState LIKE @MPState + '%')
+	AND (@MPZip = '' OR MPZip LIKE @MPZip + '%')
+	AND (@MPPhone = '' OR MPPhone LIKE '%' + @MPPhone + '%')
 	AND MPIsActive = ISNULL(@MPIsActive,mp.MPIsActive)
 	AND mp.ProgramFK = ISNULL(@ProgramFK, mp.ProgramFK)
 	ORDER BY 
