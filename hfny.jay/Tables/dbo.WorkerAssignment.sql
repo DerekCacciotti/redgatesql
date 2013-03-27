@@ -8,19 +8,25 @@ CREATE TABLE [dbo].[WorkerAssignment]
 [WorkerAssignmentDate] [datetime] NOT NULL,
 [WorkerAssignmentEditDate] [datetime] NULL,
 [WorkerAssignmentEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[WorkerFK] [int] NULL
+[WorkerFK] [int] NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssignment] ([WorkerFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssignment] ([WorkerFK]) ON [PRIMARY]
+
+ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD
+CONSTRAINT [FK_WorkerAssignment_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_HVCaseFK] ON [dbo].[WorkerAssignment] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_ProgramFK] ON [dbo].[WorkerAssignment] ([ProgramFK]) ON [PRIMARY]
 
-CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssignment] ([WorkerFK]) ON [PRIMARY]
+
 
 CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_HVCaseFK] ON [dbo].[WorkerAssignment] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_ProgramFK] ON [dbo].[WorkerAssignment] ([ProgramFK]) ON [PRIMARY]
 
-CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssignment] ([WorkerFK]) ON [PRIMARY]
+
 
 GO
 SET QUOTED_IDENTIFIER ON
@@ -41,6 +47,4 @@ GO
 ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD CONSTRAINT [FK_WorkerAssignment_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD CONSTRAINT [FK_WorkerAssignment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
-ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD CONSTRAINT [FK_WorkerAssignment_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO
