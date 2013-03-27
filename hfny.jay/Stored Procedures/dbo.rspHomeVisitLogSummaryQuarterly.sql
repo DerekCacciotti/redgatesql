@@ -55,7 +55,7 @@ set @programfk = replace(@programfk,'"','')
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
 		where 
 		--b.ProgramFK = @programfk and 
-		a.VisitStartTime between @StartDt and @EndDt
+		cast(a.VisitStartTime as date)  between @StartDt and @EndDt --jh fix
 		--and (b.DischargeDate is null
 		--or b.DischargeDate > @EndDt)
 		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
@@ -73,7 +73,7 @@ set @programfk = replace(@programfk,'"','')
 	end
 
 	--SELECT @StartDt, @StartDtX
-
+--cast(VisitStartTime as date) 
 	declare @xX int = 0
 	declare @yX int = 0
 	declare @OutOfHomeX int = 0
@@ -88,7 +88,7 @@ set @programfk = replace(@programfk,'"','')
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
 		where 
 		--b.ProgramFK = @programfk and 
-		a.VisitStartTime between @StartDtX and @EndDtX
+		cast(a.VisitStartTime as date)  between @StartDtX and @EndDtX
 		--and (b.DischargeDate is null
 		--or b.DischargeDate > @EndDtX)
 		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
@@ -114,8 +114,8 @@ set @programfk = replace(@programfk,'"','')
 		 ,sum(case when substring(c.VisitType,4,1) = '1' then 1 else 0 end) [Attemped]
 		 ,avg(case when substring(c.VisitType,4,1) != '1' 
 		 then (c.VisitLengthHour * 60 + c.VisitLengthMinute) else null end) [AverageLength]
-		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Prenatal]
-		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@y,10,0)+'%' [Postnatal]
+		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= cast(c.VisitStartTime as date)  then 1 else 0 end)*100.0/@y,10,0)+'%' [Prenatal]
+		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < cast(c.VisitStartTime as date) then 1 else 0 end)*100.0/@y,10,0)+'%' [Postnatal]
 		 
 		 -- type of visit
 		 ,str(sum(case when c.VisitType = '1000' then 1 else 0 end)*100.0/@x,10,0)+'%' [InPC1HomeOnly]
@@ -244,7 +244,7 @@ set @programfk = replace(@programfk,'"','')
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 		where 
 		--b.ProgramFK = @programfk and 
-		c.VisitStartTime between @StartDt and @EndDt
+		cast(c.VisitStartTime as date)  between @StartDt and @EndDt
 		--and (b.DischargeDate is null
 		--or b.DischargeDate > @EndDt)
 		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
@@ -260,8 +260,8 @@ set @programfk = replace(@programfk,'"','')
 		 ,sum(case when substring(c.VisitType,4,1) = '1' then 1 else 0 end) [AttempedX]
 		 ,avg(case when substring(c.VisitType,4,1) != '1' 
 		 then (c.VisitLengthHour * 60 + c.VisitLengthMinute) else null end) [AverageLengthX]
-		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= c.VisitStartTime then 1 else 0 end)*100.0/@yX,10,0)+'%' [PrenatalX]
-		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < c.VisitStartTime then 1 else 0 end)*100.0/@yX,10,0)+'%' [PostnatalX]
+		 ,str(sum(case when isnull(a.TCDOB,a.EDC) >= cast(c.VisitStartTime as date) then 1 else 0 end)*100.0/@yX,10,0)+'%' [PrenatalX]
+		 ,str(sum(case when isnull(a.TCDOB,a.EDC) < cast(c.VisitStartTime as date) then 1 else 0 end)*100.0/@yX,10,0)+'%' [PostnatalX]
 
          -- type of visit
 		 ,str(sum(case when c.VisitType = '1000' then 1 else 0 end)*100.0/@xX,10,0)+'%' [InPC1HomeOnlyX]
@@ -373,7 +373,7 @@ set @programfk = replace(@programfk,'"','')
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 		where 
 		--b.ProgramFK = @programfk and 
-		c.VisitStartTime between @StartDtX and @EndDtX
+		cast(c.VisitStartTime as date)  between @StartDtX and @EndDtX
 		--and (b.DischargeDate is null
 		--or b.DischargeDate > @EndDtX)
 		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
