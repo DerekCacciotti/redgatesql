@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -21,7 +22,7 @@ BEGIN
 ;WITH  cteFAWMain AS (
 	SELECT DISTINCT wp.workerfk
 	, 'FAW' AS CurrentRole
-	, wp.FAWStartDate AS StartDate
+	, FAWInitialStart AS StartDate
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) AS WorkerName
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
 	FROM WorkerProgram wp
@@ -30,7 +31,7 @@ BEGIN
 	AND (FAWEndDate IS NULL OR FAWEndDate > dateadd(day, 180, FAWStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
 	AND wp.ProgramFK = @progfk
-	GROUP BY wp.WorkerFK, LastName, FirstName, FAWStartDate
+	GROUP BY wp.WorkerFK, LastName, FirstName, FAWInitialStart
 )
 
 --Get FSW's in time period
@@ -39,21 +40,21 @@ BEGIN
 	SELECT DISTINCT wp.workerfk, 'FSW' AS CurrentRole
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) AS WorkerName
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
-    , wp.FSWStartDate AS StartDate
+    , FSWInitialStart  AS StartDate
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
 	WHERE FSWStartDate BETWEEN @sdate AND @edate
 	AND (FSWEndDate IS NULL OR FSWEndDate > dateadd(day, 180, FSWStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
 	AND wp.ProgramFK = @progfk
-	GROUP BY wp.WorkerFK, LastName, FirstName, FSWStartDate
+	GROUP BY wp.WorkerFK, LastName, FirstName, FSWInitialStart
 )
 
 --Get Supervisor's in time period
 , cteSupMain AS (
 
 	SELECT DISTINCT wp.workerfk
-	, wp.SupervisorStartDate AS StartDate
+	, SupervisorInitialStart AS StartDate
 	, 'Supervisor' AS CurrentRole
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) AS WorkerName
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
@@ -63,7 +64,7 @@ BEGIN
 	AND (SupervisorEndDate IS NULL OR SupervisorEndDate > dateadd(day, 180, SupervisorStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
 	AND wp.ProgramFK = @progfk
-	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorStartDate
+	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorInitialStart
 )
 
 --Now we get the trainings (or lack thereof)
@@ -82,6 +83,7 @@ BEGIN
 			, t1.TopicCode
 			, t1.topicname
 )
+
 
 , cteFSWMainTraining AS (
 	SELECT cteFSWMain.workerfk
@@ -156,6 +158,7 @@ BEGIN
 				, TopicCode
 				, topicname
 				, TrainingDate
+				, StartDate
 )
 
 --Now calculate the number meeting count, by currentrole
@@ -172,6 +175,11 @@ SELECT *, CAST(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decima
 	WHEN totalmeetingcount/TotalWorkers BETWEEN .9 AND .99 THEN '2'
 	WHEN totalmeetingcount/TotalWorkers < .9 THEN '1'
 	END AS Rating
+,	CASE cteCountMeeting.CurrentRole 
+		WHEN 'FAW' THEN '10-3a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
+		WHEN 'FSW' THEN '10-3b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
+		WHEN 'Supervisor' THEN '10-3c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
+	END AS CSST
 FROM cteAggregates
 INNER JOIN cteCountMeeting ON cteCountMeeting.CurrentRole = cteAggregates.CurrentRole
 ORDER BY cteAggregates.CurrentRole, RowNumber
