@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,6 +9,7 @@ GO
 -- Description:	<This report gets you 'A. Data report '>
 -- rspDataReport 5, '06/01/2012', '09/30/2012'			
 
+-- Fix: Pre-Intake Enroll completed 03/27/13
 
 -- =============================================
 
@@ -156,12 +156,13 @@ begin
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
-	WHERE p.PADate < @StartDate AND p.PADate < @EndDate
+	WHERE p.PADate < @StartDate
 	AND cp.ProgramFK = @ProgramFKs
 	AND p.CaseStatus = '02'	
 	AND KempeResult = 1
 	AND (h.IntakeDate  >= @StartDate OR h.IntakeDate IS NULL)
-	AND (cp.DischargeDate >= @StartDate OR cp.DischargeDate IS NULL)
+	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	AND (cp.DischargeDate >= @StartDate OR cp.DischargeDate IS NULL)	
 
 	DECLARE @n6 INT 
 	SET @n6 = (SELECT count(HVCasePK) FROM @tbl4DataReportRow6)	
@@ -185,6 +186,7 @@ begin
 	cp.ProgramFK = @ProgramFKs
 	--AND pre.CaseStatus = '03'
 	and codeLevel.LevelName = 'Preintake-term'
+	AND cp.CaseStartDate < @StartDate  -- handling transfer cases	
 	AND (cp.DischargeDate >= @StartDate AND cp.DischargeDate <= @EndDate AND cp.DischargeDate IS NOT NULL)
 
 	DECLARE @n8 INT 
@@ -205,6 +207,8 @@ begin
 	WHERE 
 	cp.ProgramFK = @ProgramFKs
 	AND (h.IntakeDate >= @StartDate AND h.IntakeDate <= @EndDate)
+	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	
 
 	DECLARE @n9 INT 
 	SET @n9 = (SELECT count(HVCasePK) FROM @tbl4DataReportRow9)		
@@ -223,9 +227,10 @@ begin
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 
-	( cp.ProgramFK = @ProgramFKs OR  (cp.TransferredToProgramFK = @ProgramFKs AND cp.CaseStartDate < @StartDate) ) -- handling transfer cases
+	cp.ProgramFK = @ProgramFKs
 	AND h.IntakeDate < @StartDate 
-	AND h.IntakeDate IS NOT null
+	AND h.IntakeDate IS NOT NULL
+	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
 	AND (cp.DischargeDate >= @StartDate OR cp.DischargeDate IS NULL)
 	
 
@@ -238,26 +243,32 @@ begin
 	declare @tbl4DataReportRow12 table(
 		HVCasePK INT,
 		Prenatal INT,
-		Postnatal int
+		Postnatal INT,
+		ProgramFK INT
 	)
 
 	INSERT INTO @tbl4DataReportRow12
 	(
 		HVCasePK,
 		Prenatal,
-		Postnatal
+		Postnatal,
+		ProgramFK
 	)
 	SELECT h.HVCasePK,
 	   CASE WHEN h.IntakeLevel = '1' THEN 1 ELSE 0 END AS Prenatal
 	 , CASE WHEN h.IntakeLevel = '2' THEN 1 ELSE 0 END AS Postnatal
+	 , cp.ProgramFK
 	
 	 FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 	
-	( cp.ProgramFK = @ProgramFKs OR  (cp.TransferredToProgramFK = @ProgramFKs AND (cp.CaseStartDate between  @StartDate AND @EndDate)) ) -- handling transfer cases for Families enrolled this period
+    cp.ProgramFK = @ProgramFKs
 	AND h.IntakeDate >= @StartDate 
 	AND h.IntakeDate <= @EndDate 	
+	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	
+
 	
 
 	DECLARE @n12 INT 
@@ -283,11 +294,12 @@ begin
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 
-	( cp.ProgramFK = @ProgramFKs OR  (cp.TransferredToProgramFK = @ProgramFKs AND (cp.CaseStartDate between  @StartDate AND @EndDate)) ) -- handling transfer cases for Families enrolled this period
+	cp.ProgramFK = @ProgramFKs
 	AND cp.DischargeDate >= @StartDate 
 	AND cp.DischargeDate <= @EndDate 	
 	AND h.IntakeDate IS NOT null
-
+	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	
 
 	DECLARE @n13 INT 
 	SET @n13 = (SELECT count(HVCasePK) FROM @tbl4DataReportRow13)	
@@ -298,7 +310,8 @@ begin
 	HVCasePK INT,
 	IntakePK INT,
 	ProgramFK INT, 
-	PBTANF [char](1)
+	PBTANF [char](1),
+	CurrentLevelFK INT 
 	)
 
 	INSERT INTO @tbl4DataReportRow14
@@ -306,18 +319,28 @@ begin
 		HVCasePK,
 		IntakePK,
 		ProgramFK,
-		PBTANF
+		PBTANF,
+		CurrentLevelFK
+		
 	)	
-	SELECT HVCasePK, IntakePK, cp.ProgramFK, PBTANF FROM HVCase h
+	SELECT HVCasePK, IntakePK, cp.ProgramFK, PBTANF, CurrentLevelFK  FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	LEFT JOIN Intake i ON i.HVCaseFK = h.HVCasePK
-	INNER JOIN CommonAttributes ca ON ca.FormFK = i.IntakePK and ca.FormType = 'IN'  -- to get PBTANF, item 26 on the intake form
+	LEFT JOIN CommonAttributes ca ON ca.FormFK = i.IntakePK and ca.FormType = 'IN'  -- to get PBTANF, item 26 on the intake form
 	
 	WHERE 
-	( cp.ProgramFK = @ProgramFKs OR  (cp.TransferredToProgramFK = @ProgramFKs AND (cp.CaseStartDate between  @StartDate AND @EndDate)) ) -- handling transfer cases for Families enrolled this period
-	AND (h.IntakeDate IS NOT NULL AND h.IntakeDate <= @EndDate)
+	cp.ProgramFK = @ProgramFKs
+	AND 
+	(
+	(h.IntakeDate IS NOT NULL AND h.IntakeDate <= @EndDate)
 	AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @EndDate)
+	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	AND (cp.DischargeDate >= @StartDate OR cp.DischargeDate IS NULL)
+	)
+	OR 
+	(CurrentLevelFK = 8 AND h.IntakeDate BETWEEN @StartDate AND @EndDate)
+
 
 
 	DECLARE @n14a INT 
@@ -330,7 +353,7 @@ begin
 	
 	declare @tbl4DataReportRow14RestOfIt table(
 	LevelName [char](50),
-	levelCount int
+	levelCount INT
 	)	
 	
 	
@@ -338,13 +361,17 @@ begin
 	
 	WITH cteDataReportRow14RestOfIt AS
 	(
-	SELECT LevelName, CASE WHEN hvlevelpk IS NOT NULL THEN 1 ELSE 0 END AS levelcount FROM @tbl4DataReportRow14 t14
+	SELECT 
+	CASE WHEN CurrentLevelFK = 8 THEN 'Preintake-enroll' ELSE LevelName END AS LevelName, 	
+	CASE WHEN hvlevelpk IS NOT NULL OR CurrentLevelFK = 8 THEN 1 ELSE 0 END AS levelcount
+	
+	FROM @tbl4DataReportRow14 t14
 			left join (select hvlevel.hvlevelpk
 							 ,hvlevel.hvcasefk
 							 ,hvlevel.programfk
 							 ,hvlevel.levelassigndate
 							 ,levelname
-							 ,caseweight
+							 ,caseweight							 
 						   from hvlevel
 							   inner join codelevel on codelevelpk = levelfk
 							   inner join (select hvcasefk
@@ -367,10 +394,9 @@ begin
 		   lr.LevelName
 		  ,CASE when levelCount IS NOT NULL THEN 1 ELSE 0 END AS levelCount
 		  FROM cteDataReportRow14RestOfIt	t14Rest
-	RIGHT JOIN (SELECT [LevelName] FROM [codeLevel] WHERE LevelName LIKE 'level%' AND Enrolled = 1)lr ON lr.LevelName = t14Rest.LevelName  -- add missing levelnames
+	RIGHT JOIN (SELECT [LevelName] FROM [codeLevel] WHERE ((LevelName LIKE 'level%' AND Enrolled = 1) OR LevelName LIKE 'Preintake-enroll'))  lr ON lr.LevelName = t14Rest.LevelName  -- add missing levelnames
 	ORDER BY LevelName 
 	
-
 	DECLARE @n14b INT 
 	SET @n14b = (SELECT sum(CASE when levelCount IS NOT NULL THEN 1 ELSE 0 END) AS tlevelCount FROM @tbl4DataReportRow14RestOfIt WHERE LevelName = 'Preintake-enroll')	
 	IF @n14b IS NULL BEGIN SET @n14b = 0 END 
@@ -396,7 +422,7 @@ begin
 
 
 --SELECT * FROM  @tbl4DataReportRow14RestOfIt
--- rspDataReport 5, '06/01/2012', '09/30/2012'			
+-- rspDataReport 2, '02/01/2013', '02/28/2013'			
 
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
 VALUES('SCREEN (PRE-ASSESSMENT) AND ASSESSMENT SUMMARY', '')
