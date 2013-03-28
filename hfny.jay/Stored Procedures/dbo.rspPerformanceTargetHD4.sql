@@ -9,6 +9,7 @@ GO
 -- Description:	<gets you data for Performance Target report - HD4. Medical Provider for target children>
 -- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
 -- rspPerformanceTargetReportSummary 5 ,'01/01/2012' ,'03/31/2012'
+-- rspPerformanceTargetReportSummary 2 ,'10/01/2012' ,'12/31/2012'
 
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetHD4]
@@ -21,22 +22,22 @@ CREATE procedure [dbo].[rspPerformanceTargetHD4]
 as
 begin
 
-	;
+;
 	with cteTotalCases
 	as
 	(
 	select
 		  ptc.HVCaseFK
-		 , ptc.PC1ID
-		 , ptc.OldID		
-		 , ptc.PC1FullName
-		 , ptc.CurrentWorkerFK
-		 , ptc.CurrentWorkerFullName
-		 , ptc.CurrentLevelName
-		 , ptc.ProgramFK
-		 , ptc.TCIDPK
-		 , ptc.TCDOB
-		 , cp.DischargeDate
+		 ,ptc.PC1ID
+		 ,ptc.OldID
+		 ,ptc.PC1FullName
+		 ,ptc.CurrentWorkerFK
+		 ,ptc.CurrentWorkerFullName
+		 ,ptc.CurrentLevelName
+		 ,ptc.ProgramFK
+		 ,ptc.TCIDPK
+		 ,ptc.TCDOB
+		 ,cp.DischargeDate
 		 ,case
 			  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
 				  datediff(day,ptc.tcdob,DischargeDate)
@@ -49,274 +50,296 @@ begin
 			  else
 				  @EndDate
 		  end as lastdate
-		  ,h.IntakeDate 
+		 ,h.IntakeDate
 		from @tblPTCases ptc
 			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
 			inner join CaseProgram cp on h.hvcasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
 	)
+--select * from cteTotalCases
+
 	,
-	
+
 	cteCohort
 	as
 	(
 	select HVCaseFK
-		  , PC1ID
-		  , OldID		 
-		  , PC1FullName
-		  , CurrentWorkerFK
-		  , CurrentWorkerFullName
-		  , CurrentLevelName
-		  , ProgramFK
-		  , TCIDPK
-		  , TCDOB
-		  , DischargeDate
-		  , tcAgeDays
-		  , lastdate
+		  ,PC1ID
+		  ,OldID
+		  ,PC1FullName
+		  ,CurrentWorkerFK
+		  ,CurrentWorkerFullName
+		  ,CurrentLevelName
+		  ,ProgramFK
+		  ,TCIDPK
+		  ,TCDOB
+		  ,DischargeDate
+		  ,tcAgeDays
+		  ,lastdate
 		from cteTotalCases
-		where ((TCDOB > IntakeDate AND tcAgeDays > 30 ) OR (TCDOB <= IntakeDate AND DATEADD(dd,30,IntakeDate)  <= lastdate )) -- Target children 30 days and older
-	)	
+		where ((TCDOB > IntakeDate
+			 and tcAgeDays > 30)
+			 or (TCDOB <= IntakeDate
+			 and DATEADD(dd,30,IntakeDate) <= lastdate)) -- Target children 30 days and older
+	)
 
--- TC less than 6 months old (while doing TCID, a row is inserted into CommonAttribute table). There are no followups for tc < 6 mos
--- There may be one or more CH Forms for TC < 6 months
--- Question: Is a one Medical Provider per case - Yes (so twins etc have only one doc)
-, cteTCLessThan6MonthsTCForm 
-AS
-(
-			select c.HVCaseFK
-				 , cach.TCHasMedicalProvider
-				 , FormDate
-
-			from cteCohort c
-			LEFT join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType='TC' 
-			WHERE c.tcAgeDays < 183
-			AND 
-			FormDate <= @EndDate
-			
-
-)
-
-, cteTCLessThan6MonthsCHForm 
-AS
-(
-			select c.HVCaseFK
-				 ,cach.TCHasMedicalProvider
-				 ,max(FormDate) AS FormDate  -- get the latest CH
-
-			from cteCohort c
-			LEFT join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType='CH' 
-			WHERE c.tcAgeDays < 183
-			AND 
-			FormDate <= @EndDate	
-			group by c.HVCaseFK, cach.TCHasMedicalProvider
-
-)
-
-,
-cteExpectedForm4TCLessThan6Months
+	-- TC less than 6 months old (while doing TCID, a row is inserted into CommonAttribute table). There are no followups for tc < 6 mos
+	-- There may be one or more CH Forms for TC < 6 months
+	-- Question: Is a one Medical Provider per case - Yes (so twins etc have only one doc)
+	,
+	cteTCLessThan6MonthsTCForm
 	as
-		(
-		
-		SELECT 'HD4' as PTCode
-			  , c.HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName	
-			  
-			 , CASE 
-					WHEN (chl6.TCHasMedicalProvider IS NOT NULL AND chl6.FormDate > tcl6.FormDate AND chl6.FormDate > '01/01/13' AND chl6.TCHasMedicalProvider = 1 ) -- latest of either TC or CH
-							THEN chl6.FormDate -- note: preference is given to the latest CH record first, if there is one
-							
-							ELSE   -- note: otherwise we will use tcid record's info
-							
-							(CASE WHEN (tcl6.TCHasMedicalProvider IS NOT NULL AND tcl6.TCHasMedicalProvider = 1) THEN tcl6.FormDate ELSE NULL END )
-						 					
-					END AS FormDate 			  
-			  
+	(
+	select c.HVCaseFK
+		  ,cach.TCHasMedicalProvider
+		  ,FormDate
+		  ,FormFK
+		  ,TCIDPK
+		from cteCohort c
+			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and TCIDPK = cach.FormFK and cach.FormType = 'TC'
+		where c.tcAgeDays < 183
+			 and
+			 (FormDate is null or FormDate <= @EndDate)
+	)
+	-- SELECT * FROM cteTCLessThan6MonthsTCForm
 
-			  , case 
-					when tcl6.FormDate IS NOT NULL then 1  -- there is no formreview for formtype = CH
-					ELSE
-					0
-					end 			  
-			  as FormReviewed			 
-		 
-			  , case -- Here FormOutOfWindow means that there must be an tcid record in CommonAttribute table for tc < 6 months
-					when chl6.FormDate IS NOT NULL OR tcl6.FormDate IS NOT NULL then 0				  
-					ELSE
-					1
-			    end as FormOutOfWindow				 
-			 
-			  , case -- there is atleast we one of either TC or CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
-					when chl6.FormDate IS NOT NULL OR tcl6.FormDate IS NOT NULL then 0				  
-					ELSE
-					1
-			    end as FormMissing	 
-			 
-			 , CASE 
-					WHEN (chl6.TCHasMedicalProvider IS NOT NULL AND chl6.FormDate > tcl6.FormDate AND chl6.FormDate > '01/01/13' AND chl6.TCHasMedicalProvider = 1 ) -- latest of either TC or CH
-							THEN 1 -- note: preference is given to the latest CH record first, if there is one
-							
-							ELSE   -- note: otherwise we will use tcid record's info
-							
-							(CASE WHEN (tcl6.TCHasMedicalProvider IS NOT NULL AND tcl6.TCHasMedicalProvider = 1) THEN 1 ELSE 0 END )
-						 					
-					END AS FormMeetsStandard 
-
-			 
-			 		 
-			 FROM cteCohort c
-			 INNER JOIN cteTCLessThan6MonthsTCForm tcl6 ON tcl6.HVCaseFK = c.HVCaseFK
-			 LEFT JOIN cteTCLessThan6MonthsCHForm chl6 ON chl6.hvcasefk = tcl6.hvcasefk
-		
-
-		)
-
-
--- TC 6 months or older
-, cteIntervals4TC6MonthsOrOlderTCForm  -- age appropriate follow up that is due for the TC
-AS
-(
-
-		select HVCaseFK, TCIDPK					
-					, max(Interval) as Interval
-			from cteCohort c
-				LEFT join codeDueByDates on ScheduledEvent = 'Follow Up' and c.tcAgeDays >= DueBy 
-				WHERE c.tcAgeDays >= 183
-				AND 
-				Interval <> (SELECT dbd.Interval FROM codeDueByDates dbd WHERE dbd.EventDescription = '18 month Follow Up') -- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
-				group by HVCaseFK, TCIDPK	
-
-)
-
-, cteLatestCHForm4TC6MonthsOrOlder -- latest CH form for the TC
-AS
-(
-
-			select c.HVCaseFK
-				 ,cach.TCHasMedicalProvider
-				 ,max(FormDate) AS FormDate  -- get the latest CH
-
-			from cteCohort c
-			LEFT join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType='CH' 
-			WHERE c.tcAgeDays >= 183
-			AND 
-			FormDate <= @EndDate
-			group by c.HVCaseFK, cach.TCHasMedicalProvider
-
-)
-
--- the following are not used. left it here for future look up
---	,
---	cteIntervalNextFollowUp
---	as
---		(
---			select HVCaseFK, TCIDPK				
---					, min(Interval) as Interval
---			from cteCohort
---				LEFT join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays < DueBy 
---				WHERE Interval <> (SELECT dbd.Interval FROM codeDueByDates dbd WHERE dbd.EventDescription = '18 month Follow Up') -- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
---			group by HVCaseFK, TCIDPK
---		)
-
---,
---	cteChangeFormBeforeNextFollowUp
---	as
---		(
-
---			SELECT c.HVCaseFK
---			,  cach.TCHasMedicalProvider, max(FormDate) AS FormDate
---			from cteCohort c	
---			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType='CH' 
---			INNER JOIN cteIntervalNextFollowUp ctf ON ctf.HVCaseFK = c.HVCaseFK
---			LEFT join codeDueByDates cd on ScheduledEvent = 'Follow Up' and cd.Interval = ctf.Interval  
---			WHERE c.tcAgeDays >= 183
---			AND 
---			FormDate < DATEADD(dd,cd.DueBy,tcdob)
---			GROUP BY c.HVCaseFK, cach.TCHasMedicalProvider
-
---		)
-
-
-
-,
-cteExpectedForm4TC6MonthsOrOlder
+	--select c.*,pc1id,TCFirstName,TCLastName,FormType,c.FormDate,MultipleBirth from cteTCLessThan6MonthsTCForm c
+	--inner join CaseProgram cp on cp.HVCaseFK = c.HVCaseFK
+	--inner join TCID T on T.HVCaseFK = c.HVCaseFK and t.TCIDPK = c.TCIDPK
+	--inner join CommonAttributes ca on ca.HVCaseFK = c.HVCaseFK and c.TCIDPK = ca.FormFK and FormType = 'TC'
+	--order by PC1ID
+	,
+	cteTCLessThan6MonthsCHForm
 	as
-		(
-		
-		SELECT 'HD4' as PTCode
-			  , c.HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName			 				 
-			 , CASE 
-					WHEN (cach.TCHasMedicalProvider IS NOT NULL AND cach.FormDate > cafu.FormDate AND cach.FormDate > '01/01/13' AND cach.TCHasMedicalProvider = 1 ) -- latest CH first preferred
-							THEN cach.FormDate -- note: preference is given to the latest CH record first, if there is one
-							
-							ELSE   -- note: otherwise we will use tcid record's info
-							
-							(CASE WHEN (cafu.TCHasMedicalProvider IS NOT NULL AND cafu.TCHasMedicalProvider = 1) THEN cafu.FormDate ELSE NULL END )
-						 					
-					END AS FormDate 			 
+	(
+	select c.HVCaseFK
+		  ,cach.TCHasMedicalProvider
+		  ,max(FormDate) as FormDate -- get the latest CH
+		  ,FormFK
+
+		from cteCohort c
+			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
+		where c.tcAgeDays < 183
+			 and
+			 FormDate <= @EndDate
+		group by c.HVCaseFK
+				,FormFK
+				,cach.TCHasMedicalProvider
+
+	)
+	,
+	cteExpectedForm4TCLessThan6Months
+	as
+	(
+
+	select 'HD4' as PTCode
+		  ,c.HVCaseFK
+		  ,PC1ID
+		  ,OldID
+		  ,TCDOB
+		  ,PC1FullName
+		  ,CurrentWorkerFullName
+		  ,CurrentLevelName
+		  ,case
+			   when (chl6.TCHasMedicalProvider is not null and chl6.FormDate > tcl6.FormDate and chl6.FormDate > '01/01/13' and 
+				   chl6.TCHasMedicalProvider = 1) -- latest of either TC or CH
+				   then chl6.FormDate -- note: preference is given to the latest CH record first, if there is one
+
+			   else -- note: otherwise we will use tcid record's info
+
+				   (case when (tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1) then tcl6.FormDate else 
+					   null end)
+
+		   end as FormDate
+		  ,case
+			   when tcl6.FormDate is not null then 1 -- there is no formreview for formtype = CH
+			   else
+				   0
+		   end
+		   as FormReviewed
+		  ,case -- Here FormOutOfWindow means that there must be an tcid record in CommonAttribute table for tc < 6 months
+			   when chl6.FormDate is not null or tcl6.FormDate is not null then 0
+			   else
+				   1
+		   end as FormOutOfWindow
+		  ,case 
+			  -- there is atleast we one of either TC or CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
+			   when chl6.FormDate is not null or tcl6.FormDate is not null then 0
+			   else
+				   1
+		   end as FormMissing
+		  ,case
+			   when (chl6.TCHasMedicalProvider is not null and chl6.FormDate > tcl6.FormDate and chl6.FormDate > '01/01/13' and 
+				   chl6.TCHasMedicalProvider = 1) -- latest of either TC or CH
+				   then 1 -- note: preference is given to the latest CH record first, if there is one
+			   else -- note: otherwise we will use tcid record's info
+				   (case when (tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1) then 1 else 0 end)
+		   end as FormMeetsTarget
+		from cteCohort c
+			left outer join cteTCLessThan6MonthsTCForm tcl6 on tcl6.HVCaseFK = c.HVCaseFK and tcl6.TCIDPK = c.TCIDPK
+			left outer join cteTCLessThan6MonthsCHForm chl6 on chl6.hvcasefk = tcl6.hvcasefk and chl6.FormFK = tcl6.TCIDPK
+	)
+
+	-- SELECT * FROM cteExpectedForm4TCLessThan6Months
+
+	-- TC 6 months or older
+	,
+	cteIntervals4TC6MonthsOrOlderTCForm -- age appropriate follow up that is due for the TC
+	as
+	(
+
+	select HVCaseFK
+		  ,TCIDPK
+		  ,max(Interval) as Interval
+		from cteCohort c
+			left join codeDueByDates on ScheduledEvent = 'Follow Up' and c.tcAgeDays >= DueBy
+		where c.tcAgeDays >= 183 and
+			 -- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
+			 Interval <> (select dbd.Interval
+							  from codeDueByDates dbd
+							  where dbd.EventDescription = '18 month Follow Up')
+		group by HVCaseFK
+				,TCIDPK
+
+	)
+
+	,
+	cteLatestCHForm4TC6MonthsOrOlder -- latest CH form for the TC
+	as
+	(
+
+	select c.HVCaseFK
+		  ,cach.TCHasMedicalProvider
+		  ,max(FormDate) as FormDate -- get the latest CH
+
+		from cteCohort c
+			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
+		where c.tcAgeDays >= 183
+			 and
+			 FormDate <= @EndDate
+		group by c.HVCaseFK
+				,cach.TCHasMedicalProvider
+
+	)
+
+	-- the following are not used. left it here for future look up
+	--	,
+	--	cteIntervalNextFollowUp
+	--	as
+	--		(
+	--			select HVCaseFK, TCIDPK				
+	--					, min(Interval) as Interval
+	--			from cteCohort
+	--				LEFT join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays < DueBy 
+	--				WHERE Interval <> (SELECT dbd.Interval FROM codeDueByDates dbd WHERE dbd.EventDescription = '18 month Follow Up') -- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
+	--			group by HVCaseFK, TCIDPK
+	--		)
+
+	--,
+	--	cteChangeFormBeforeNextFollowUp
+	--	as
+	--		(
+
+	--			SELECT c.HVCaseFK
+	--			,  cach.TCHasMedicalProvider, max(FormDate) AS FormDate
+	--			from cteCohort c	
+	--			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType='CH' 
+	--			INNER JOIN cteIntervalNextFollowUp ctf ON ctf.HVCaseFK = c.HVCaseFK
+	--			LEFT join codeDueByDates cd on ScheduledEvent = 'Follow Up' and cd.Interval = ctf.Interval  
+	--			WHERE c.tcAgeDays >= 183
+	--			AND 
+	--			FormDate < DATEADD(dd,cd.DueBy,tcdob)
+	--			GROUP BY c.HVCaseFK, cach.TCHasMedicalProvider
+
+	--		)
 
 
-			  , case 
-					when (cach.FormDate IS NOT NULL AND cach.TCHasMedicalProvider IS NOT NULL) OR (cafu.FormDate IS NOT NULL AND cafu.TCHasMedicalProvider IS NOT NULL) then 1  
-					ELSE
-					0
-					end 			  
-			  as FormReviewed			 
-		 
-			  , case -- Here FormOutOfWindow means that there must be either FU (Due now) or latest CH record in CommonAttribute table for tc >= 6 months
-					when (cach.FormDate IS NOT NULL AND cach.TCHasMedicalProvider IS NOT NULL) OR (cafu.FormDate IS NOT NULL AND cafu.TCHasMedicalProvider IS NOT NULL) then 0				  
-					ELSE
-					1
-			    end as FormOutOfWindow				 
-			 
-			  , case -- there is atleast we one of either FU (Due now) or latest CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
-					when (cach.FormDate IS NOT NULL AND cach.TCHasMedicalProvider IS NOT NULL) OR (cafu.FormDate IS NOT NULL AND cafu.TCHasMedicalProvider IS NOT NULL) then 0				  
-					ELSE
-					1
-			    end as FormMissing	 
-			 
-			 , CASE 
-					WHEN (cach.TCHasMedicalProvider IS NOT NULL AND cach.FormDate > cafu.FormDate AND cach.FormDate > '01/01/13' AND cach.TCHasMedicalProvider = 1 ) -- latest CH first preferred
-							THEN 1 -- note: preference is given to the latest CH record first, if there is one
-							
-							ELSE   -- note: otherwise we will use tcid record's info
-							
-							(CASE WHEN (cafu.TCHasMedicalProvider IS NOT NULL AND cafu.TCHasMedicalProvider = 1) THEN 1 ELSE 0 END )
-						 					
-					END AS FormMeetsStandard 
+
+	,
+	cteExpectedForm4TC6MonthsOrOlder
+	as
+	(
+
+	select 'HD4' as PTCode
+		  ,c.HVCaseFK
+		  ,PC1ID
+		  ,OldID
+		  ,TCDOB
+		  ,PC1FullName
+		  ,CurrentWorkerFullName
+		  ,CurrentLevelName
+		  ,case
+			   when (cach.TCHasMedicalProvider is not null and cach.FormDate > cafu.FormDate and cach.FormDate > '01/01/13' and 
+				   cach.TCHasMedicalProvider = 1) -- latest CH first preferred
+				   then cach.FormDate -- note: preference is given to the latest CH record first, if there is one
+
+			   else -- note: otherwise we will use tcid record's info
+
+				   (case when (cafu.TCHasMedicalProvider is not null and cafu.TCHasMedicalProvider = 1) then cafu.FormDate else 
+					   null end)
+
+		   end as FormDate
 
 
-			 
-			 		 
-			 FROM cteCohort c
-			 INNER join cteIntervals4TC6MonthsOrOlderTCForm tcGE6FUInterval on c.HVCaseFK = tcGE6FUInterval.HVCaseFK AND tcGE6FUInterval.TCIDPK = c.TCIDPK  -- GE = Greater or Equal
-			 left join CommonAttributes cafu on cafu.HVCaseFK = c.HVCaseFK and cafu.FormType='FU' and tcGE6FUInterval.Interval = cafu.FormInterval 	-- get the FU row
-			 
-			 LEFT JOIN cteLatestCHForm4TC6MonthsOrOlder ch ON ch.HVCaseFK = c.HVCaseFK 
-			 LEFT join CommonAttributes cach on cach.HVCaseFK = ch.HVCaseFK and cach.FormType='CH' and cach.FormDate = ch.FormDate  	-- get the latest CH row	
-	
+		  ,case
+			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) or (cafu.FormDate is not null and cafu.
+				   TCHasMedicalProvider is not null) then 1
+			   else
+				   0
+		   end
+		   as FormReviewed
 
-		)
+		  ,case 
+			  -- Here FormOutOfWindow means that there must be either FU (Due now) or latest CH record in CommonAttribute table for tc >= 6 months
+			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) or (cafu.FormDate is not null and cafu.
+				   TCHasMedicalProvider is not null) then 0
+			   else
+				   1
+		   end as FormOutOfWindow
+
+		  ,case 
+			  -- there is atleast we one of either FU (Due now) or latest CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
+			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) or (cafu.FormDate is not null and cafu.
+				   TCHasMedicalProvider is not null) then 0
+			   else
+				   1
+		   end as FormMissing
+
+		  ,case
+			   when (cach.TCHasMedicalProvider is not null and cach.FormDate > cafu.FormDate and cach.FormDate > '01/01/13' and 
+				   cach.TCHasMedicalProvider = 1) -- latest CH first preferred
+				   then 1 -- note: preference is given to the latest CH record first, if there is one
+
+			   else -- note: otherwise we will use tcid record's info
+
+				   (case when (cafu.TCHasMedicalProvider is not null and cafu.TCHasMedicalProvider = 1) then 1 else 0 end)
+
+		   end as FormMeetsTarget
 
 
-		-- let us put the above two disconnected tables (one for tc < 6 and other for TC >= 6)
-
-		SELECT * FROM cteExpectedForm4TCLessThan6Months
-		UNION
-		SELECT * FROM cteExpectedForm4TC6MonthsOrOlder 
-
-	---- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
 
 
+		from cteCohort c
+			inner join cteIntervals4TC6MonthsOrOlderTCForm tcGE6FUInterval on c.HVCaseFK = tcGE6FUInterval.HVCaseFK and 
+				tcGE6FUInterval.TCIDPK = c.TCIDPK -- GE = Greater or Equal
+			left join CommonAttributes cafu on cafu.HVCaseFK = c.HVCaseFK and cafu.FormType = 'FU' and tcGE6FUInterval.Interval = 
+				cafu.FormInterval -- get the FU row
 
+			left join cteLatestCHForm4TC6MonthsOrOlder ch on ch.HVCaseFK = c.HVCaseFK
+			left join CommonAttributes cach on cach.HVCaseFK = ch.HVCaseFK and cach.FormType = 'CH' and cach.FormDate = ch.
+				FormDate -- get the latest CH row	
+
+
+	)
+
+
+	-- let us put the above two disconnected tables (one for tc < 6 and other for TC >= 6)
+
+	select *
+		from cteExpectedForm4TCLessThan6Months
+	union
+	select *
+		from cteExpectedForm4TC6MonthsOrOlder
+
+---- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
 end
 GO

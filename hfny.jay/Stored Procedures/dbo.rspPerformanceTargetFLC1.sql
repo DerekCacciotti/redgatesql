@@ -25,7 +25,6 @@ CREATE procedure [dbo].[rspPerformanceTargetFLC1]
 
 as
 begin
-
 	with cteTotalCases
 	as
 	(
@@ -53,6 +52,9 @@ begin
 			  else
 				  @EndDate
 		  end as lastdate
+		 , PC1FK
+		 , PC2FK
+		 , OBPFK
 		from @tblPTCases ptc
 			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
 			inner join CaseProgram cp on h.HVCasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
@@ -94,12 +96,16 @@ begin
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
+			  , EventDescription as FormName
 			  , FormType
 			  , PC1InHome
 			  , PC2InHome
 			  , OBPInHome
 			  , IsCurrentlyEmployed
 			  , EducationalEnrollment
+			  , PC1FK
+			  , PC2FK
+			  , OBPFK
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
 			inner join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
@@ -112,7 +118,7 @@ begin
 												and fu.FollowUpInterval = ca.FormInterval 
 		)
 	,
-	cteStandardElements
+	cteTargetElements
 	as
 		(
 			select HVCaseFK
@@ -142,8 +148,9 @@ begin
 								end)
 						as OBPScore
 			from cteExpectedForm
-			group by HVCaseFK
+			group by HVCaseFK	
 		)
+		-- select * from cteTargetElements
 	,
 	cteDistinctFollowUps
 	as
@@ -156,10 +163,14 @@ begin
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
+			  , FormName
 			  , FormDate
 			  , FormReviewed
 			  , FormOutOfWindow
 			  , FormMissing
+			  , PC1FK
+			  , PC2FK
+			  , OBPFK
 			from cteExpectedForm
 		)
 	,
@@ -174,6 +185,7 @@ begin
 				, PC1FullName
 				, CurrentWorkerFullName
 				, CurrentLevelName
+				, FormName
 				, FormDate
 				, FormReviewed
 				, FormOutOfWindow
@@ -182,9 +194,41 @@ begin
 						then 1
 						else 0
 						end
-					as FormMeetsStandard
+					as FormMeetsTarget
+				, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+						when FormOutOfWindow = 1 then 'Form out of window'
+						when FormMissing = 1 then 'Form missing'
+						when PC1FK is not null and PC1Score = 0 and
+							 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
+							 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
+							then 'PC1 not employed or enrolled'
+						when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
+							 PC2FK is not null and PC2Score = 0 and
+							 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
+							then 'PC2 not employed or enrolled'
+						when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
+							 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
+							 OBPFK is not null and OBPScore = 0 
+							then 'OBP not employed or enrolled'
+						when PC1FK is not null and PC1Score = 0 and
+							 PC2FK is not null and PC2Score = 0 and
+							 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
+							then 'PC1/PC2 not employed or enrolled'
+						when PC1FK is not null and PC1Score = 0 and
+							 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
+							 OBPFK is not null and OBPScore = 0
+							then 'PC1/OBP not employed or enrolled'
+						when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
+							 PC2FK is not null and PC2Score = 0 and
+							 OBPFK is not null and OBPScore = 0
+							then 'PC2/OBP not employed or enrolled'
+						when PC1FK is not null and PC1Score = 0 and
+							 PC2FK is not null and PC2Score = 0 and
+							 OBPFK is not null and OBPScore = 0
+							then 'PC1/PC2/OBP not employed or enrolled'
+						else '' end as NotMeetingReason
 			from cteDistinctFollowUps dfu
-			inner join cteStandardElements se on se.HVCaseFK = dfu.HVCaseFK
+			inner join cteTargetElements se on se.HVCaseFK = dfu.HVCaseFK
 		)
 	
 	select * from cteMain
@@ -203,7 +247,9 @@ begin
 	--		, FormReviewed
 	--		, FormOutOfWindow
 	--		, FormMissing
-	--		, case when (TimeBreastFed >= '04' and FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0) then 1 else 0 end as FormMeetsStandard
+	--		, case when (TimeBreastFed >= '04' and FormReviewed = 1 and 
+	--						FormOutOfWindow = 0 and FormMissing = 0) then 1 
+	--				else 0 end as FormMeetsTarget
 	--from cteExpectedForm
 	-- order by OldID
 

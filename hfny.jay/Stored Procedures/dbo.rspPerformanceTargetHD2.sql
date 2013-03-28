@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -158,6 +159,7 @@ begin
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
+			  , 'TC Medical' as FormName
 			  , NULL as FormDate	
 			, case when ((ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
 						AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP) 
@@ -167,7 +169,10 @@ begin
 					end as FormReviewed		
 			, 0 as FormOutOfWindow
 			, 0 as FormMissing
-			, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) AND (ImmunizationCountMMR >= 1)) then 1 else 0 end as MeetsStandard
+			, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) AND (ImmunizationCountMMR >= 1)) then 1 
+					else 0 end as FormMeetsTarget
+			, case when ((ImmunizationCountDTaP >= 3) AND (ImmunizationCountPolio >= 2)) then '' 
+					else 'Missing Shots or Not on Time' end as NotMeetingReason
 	 from cteCohort coh
 	 LEFT join cteImmunizationsPolio immPolio on immPolio.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immPolio.TCIDPK 
 	 LEFT join cteImmunizationsDTaP immDTaP on immDTaP.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immDTaP.TCIDPK 

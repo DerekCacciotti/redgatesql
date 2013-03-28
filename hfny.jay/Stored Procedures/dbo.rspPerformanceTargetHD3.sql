@@ -101,22 +101,46 @@ begin
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
+			  , EventDescription as FormName
 			  , FollowUpDate as FormDate
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FollowUpPK is NULL OR FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
-			  , case when (fu.LeadAssessment = 1 OR fu.LeadAssessment = 0) then 1 else 0 end as FormMeetsStandard
+			  , case when (fu.LeadAssessment = 1 OR fu.LeadAssessment = 0) then 1 else 0 end as FormMeetsTarget
 			from cteCohort c
-			INNER join cteInterval i on c.HVCaseFK = i.HVCaseFK 
-			LEFT join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
+			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK 
+			inner join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
+											and i.Interval = cd.Interval 
+			left join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
 		)
-
+	,
+	cteMain
+	as
+		(
+		select PTCode
+			  ,HVCaseFK
+			  ,PC1ID
+			  ,OldID
+			  ,TCDOB
+			  ,PC1FullName
+			  ,CurrentWorkerFullName
+			  ,CurrentLevelName
+			  ,FormName
+			  ,FormDate
+			  ,FormReviewed
+			  ,FormOutOfWindow
+			  ,FormMissing
+			  ,FormMeetsTarget
+				, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+						when FormOutOfWindow = 1 then 'Form out of window'
+						when FormMissing = 1 then 'Form missing'
+						when FormMeetsTarget = 0 
+							then 'Lead Assessment not recorded'
+						else '' end as NotMeetingReason
+		from cteExpectedForm
+		)
 	
-	
-	
-	
-	
-	SELECT * FROM cteExpectedForm
+	select * from cteMain
 	-- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
 
 end
