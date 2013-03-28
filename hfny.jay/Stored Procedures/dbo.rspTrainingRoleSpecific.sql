@@ -27,7 +27,7 @@ BEGIN
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE FAWStartDate BETWEEN @sdate AND @edate
+	WHERE FAWStartDate BETWEEN @sdate AND dateadd(day, -183, @edate)
 	AND (FAWEndDate IS NULL OR FAWEndDate > dateadd(day, 180, FAWStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
 	AND wp.ProgramFK = @progfk
@@ -43,7 +43,7 @@ BEGIN
     , FSWInitialStart  AS StartDate
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE FSWStartDate BETWEEN @sdate AND @edate
+	WHERE FSWStartDate BETWEEN @sdate AND  dateadd(day, -183, @edate)
 	AND (FSWEndDate IS NULL OR FSWEndDate > dateadd(day, 180, FSWStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
 	AND wp.ProgramFK = @progfk
@@ -60,7 +60,7 @@ BEGIN
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE SupervisorStartDate BETWEEN @sdate AND @edate
+	WHERE SupervisorStartDate BETWEEN @sdate AND  dateadd(day, -183, @edate)
 	AND (SupervisorEndDate IS NULL OR SupervisorEndDate > dateadd(day, 180, SupervisorStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
 	AND wp.ProgramFK = @progfk
@@ -124,7 +124,7 @@ BEGIN
 				, topicname
 				, TrainingDate
 		FROM cteFAWMain
-		LEFT JOIN cteFAWMainTraining ON cteFAWMainTraining.WorkerFK = cteFAWMain.WorkerFK
+		INNER JOIN cteFAWMainTraining ON cteFAWMainTraining.WorkerFK = cteFAWMain.WorkerFK
 
 		UNION
 
@@ -133,7 +133,7 @@ BEGIN
 				, topicname
 				, TrainingDate
 		FROM cteFSWMain
-		LEFT JOIN cteFSWMainTraining ON cteFSWMainTraining.WorkerFK = cteFSWMain.WorkerFK
+		INNER JOIN cteFSWMainTraining ON cteFSWMainTraining.WorkerFK = cteFSWMain.WorkerFK
 
 		UNION
 
@@ -142,7 +142,7 @@ BEGIN
 				, topicname
 				, TrainingDate
 		FROM cteSupMain
-		LEFT JOIN cteSuperMainTraining ON cteSuperMainTraining.WorkerFK = cteSupMain.WorkerFK
+		INNER JOIN cteSuperMainTraining ON cteSuperMainTraining.WorkerFK = cteSupMain.WorkerFK
 )
 
 --add in the "MEETING" Target and Total workers.  Basically each training must occur within 6 months of start
