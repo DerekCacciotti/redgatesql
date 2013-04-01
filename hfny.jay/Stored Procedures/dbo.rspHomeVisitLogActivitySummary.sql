@@ -47,7 +47,7 @@ INNER JOIN CaseProgram cp
 ON cp.HVCaseFK = a.HVCaseFK
 WHERE 
 a.ProgramFK = @programfk 
-AND VisitStartTime between @StartDt AND @EndDt 
+AND cast(VisitStartTime AS date) between @StartDt AND @EndDt 
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
 AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
 GROUP BY 
@@ -386,7 +386,7 @@ INNER JOIN CaseProgram cp
 ON cp.HVCaseFK = a.HVCaseFK
 WHERE 
 a.ProgramFK = @programfk 
-AND VisitStartTime between @StartDt AND @EndDt 
+AND cast(VisitStartTime AS date) between @StartDt AND @EndDt 
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
 AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
 GROUP BY 
