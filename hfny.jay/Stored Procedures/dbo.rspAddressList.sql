@@ -32,10 +32,13 @@ as
 	set @programfk = replace(@programfk,'"','')
 
 	select
-		  ltrim(rtrim(pcfirstname))+' '+ltrim(rtrim(pclastname)) PC1
+		  pcfirstname
+		 ,pclastname
 		 ,pcstreet
 		 ,pcapt
-		 ,rtrim(pccity) + ', ' + rtrim(pcstate) + ' ' + case when len(rtrim(pczip))=6 then left(PCZip,5) else PCZip end as csz
+		 ,pccity
+		 ,pcstate
+		 ,case when len(rtrim(PCZip))=6 then left(PCZip,5) else PCZip end as pczip
 		 ,pcdob
 		 ,pc1id
 		 ,isnull(tcdob,edc) tcdob
