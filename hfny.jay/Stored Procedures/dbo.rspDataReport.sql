@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -112,7 +113,7 @@ begin
 	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
 	WHERE p.KempeDate >= @StartDate AND p.KempeDate <= @EndDate
 	AND cp.ProgramFK = @ProgramFKs
-	AND p.CaseStatus > '01'
+	AND p.CaseStatus IN ('02','04')
 	
 	DECLARE @n3 INT 
 	SET @n3 = (SELECT count(HVCasePK) FROM @tbl4DataReportRow3)
