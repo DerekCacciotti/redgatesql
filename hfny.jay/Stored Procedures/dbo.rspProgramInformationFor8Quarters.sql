@@ -12,7 +12,7 @@ GO
 -- exec [rspProgramInformationFor8Quarters] '5','03/31/13'
 -- exec [rspProgramInformationFor8Quarters] '2','06/30/12'
 -- exec [rspProgramInformationFor8Quarters] '5','06/30/12'
---
+-- exec dbo.rspProgramInformationFor8Quarters @programfk=',13,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
 
 -- =============================================
 CREATE procedure [dbo].[rspProgramInformationFor8Quarters](@programfk    varchar(max)    = null,                                                       
@@ -184,7 +184,7 @@ DECLARE @tblInitial_cohort TABLE(
 			[OldID] [char](23) NULL,
 			[PC1ID] [char](13) NOT NULL,
 			[ProgramFK] [int] NOT NULL,
-			[TransferredtoProgram] [varchar](30) NULL,
+			[TransferredtoProgram] [varchar](50) NULL,
 			[TransferredtoProgramFK] [int] NULL,
 			
 			[CalcTCDOB] [datetime] NULL			
