@@ -73,8 +73,11 @@ begin
 					, max(Interval) as Interval
 			from cteCohort
 				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
-				-- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
-				where Interval <> (select dbd.Interval from codeDueByDates dbd where dbd.EventDescription = '18 month Follow Up') 
+			-- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
+			-- therefore, they're not required until 2013
+			where Interval <> case when @StartDate >= '01/01/2013' then 'xx'
+								else '18'
+								end
 			group by HVCaseFK
 		)
 	,
@@ -89,6 +92,7 @@ begin
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
+			  , EventDescription as FormName
 			  , FollowUpDate as FormDate
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
@@ -113,6 +117,7 @@ begin
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
+			  , FormName
 			  , FormDate
 			  , FormReviewed
 			  , FormOutOfWindow
@@ -120,7 +125,15 @@ begin
 			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and PBTANF in ('2','3') 
 						then 1 
 						else 0 
-						end as FormMeetsStandard
+						end as FormMeetsTarget
+			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+						when FormOutOfWindow = 1 then 'Form out of window'
+						when FormMissing = 1 then 'Form missing'
+						when PBTANF is not null and PBTANF not in ('2','3') 
+							then 'Still Receiving TANF'
+						when PBTANF is null 
+							then 'TANF Answer missing'
+						else '' end as ReasonNotMeeting
 	from cteExpectedForm
 	-- order by OldID
 

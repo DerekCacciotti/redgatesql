@@ -29,7 +29,7 @@ begin
 	as
 	(
 	select
-		  ptc.HVCaseFK
+		 ptc.HVCaseFK
 		 , ptc.PC1ID
 		 , ptc.OldID
 		 , ptc.PC1FullName
@@ -76,8 +76,11 @@ begin
 					, max(Interval) as Interval
 			from cteCohort
 				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
-				-- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
-				where Interval <> (select dbd.Interval from codeDueByDates dbd where dbd.EventDescription = '18 month Follow Up') 
+			 -- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
+			 -- therefore, they're not required until 2013
+			 where Interval <> case when @StartDate >= '01/01/2013' then 'xx'
+								else '18'
+								end
 			group by HVCaseFK
 		)
 	,

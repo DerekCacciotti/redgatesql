@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -83,6 +84,7 @@ begin
 					, PC1ID
 					, OldID
 					, TCDOB
+					, '1 year PSI' as FormName
 					, PC1FullName
 					, CurrentWorkerFullName
 					, CurrentLevelName
@@ -90,7 +92,7 @@ begin
 					, case when (PSIPK is not null and dbo.IsFormReviewed(PSIDateComplete,'PS',PSIPK) = 1) then 1 else 0 end as FormReviewed
 					, case when (PSIPK is not null and PSIInWindow = 1) then 0 else 1 end as FormOutOfWindow
 					, case when PSIPK is null then 1 else 0 end as FormMissing
-					--, case when PSIPK is not null then 1 else 0 end as FormMeetsStandard
+					--, case when PSIPK is not null then 1 else 0 end as FormMeetsTarget
 					, PSITotalScoreValid
 					, PSITotalScore
 			  from cteCohort coh
@@ -104,12 +106,21 @@ begin
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
+			  , FormName
 			  , FormDate
 			  , FormReviewed
 			  , FormOutOfWindow
 			  , FormMissing
 			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and
-						PSITotalScoreValid = 1 and PSITotalScore <= 85 then 1 else 0 end as FormMeetsStandard
+						PSITotalScoreValid = 1 and PSITotalScore <= 85 then 1 else 0 end as FormMeetsTarget
+			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+						when FormOutOfWindow = 1 then 'Form out of window'
+						when FormMissing = 1 then 'Form missing'
+						when PSITotalScoreValid <> 1 
+							then 'PSI total score invalid'
+						when PSITotalScore > 85
+							then 'PSI score above cutoff'
+						else '' end as ReasonNotMeeting
 	from cteMain
 	-- order by OldID
 

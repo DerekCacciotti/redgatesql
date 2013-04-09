@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -137,11 +138,18 @@ begin
 				, PC1FullName
 				, CurrentWorkerFullName
 				, CurrentLevelName
+				, 'Service Referrals' as FormName
 				, null as FormDate -- ReferralDate as FormDate
 				, case when sr.FormReviewed = RefCount then 1 else 0 end as FormReviewed
 				, sr.FormOutOfWindow
 				, sr.FormMissing
-				, case when RefCount = GoodRefs then 1 else 0 end as FormMeetsStandard
+				, case when RefCount = GoodRefs then 1 else 0 end as FormMeetsTarget
+			  , case when sr.FormReviewed = RefCount then 'Form(s) not reviewed by supervisor'
+						when sr.FormOutOfWindow = 1 then 'Form(s) out of window'
+						when sr.FormMissing = 1 then 'Form(s) missing'
+						when sr.FormReviewed <> RefCount 
+							then 'Missing required referrals'
+						else '' end as ReasonNotMeeting
 			from cteReferrals r
 			inner join cteSummarizedReferrals sr on sr.HVCaseFK = r.HVCaseFK
 			-- order by OldID

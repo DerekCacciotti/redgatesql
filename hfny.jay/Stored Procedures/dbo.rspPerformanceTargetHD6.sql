@@ -13,9 +13,9 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetHD6]
 (
-    @StartDate      datetime,
-    @EndDate      datetime,
-    @tblPTCases  PTCases readonly
+    @StartDate	datetime,
+    @EndDate	datetime,
+    @tblPTCases	PTCases	readonly
 )
 
 as
@@ -73,8 +73,8 @@ begin
 		  , tcAgeDays
 		  , lastdate
 		from cteTotalCases
-		where DATEADD(dd,365.25*2.25,TCDOB)  < lastdate -- 27 months 
-		AND DATEADD(dd,365.25*2.75,TCDOB) > @StartDate  -- 33 months
+		where dateadd(dd,365.25*2.25,TCDOB)  < lastdate -- 27 months 
+		and dateadd(dd,365.25*2.75,TCDOB) > @StartDate  -- 33 months
 		
 	)	
 
@@ -122,15 +122,39 @@ begin
 					end as FormReviewed				
 			, 0 as FormOutOfWindow -- not out of window
 			, 0 as FormMissing
-			, case when WBVCount >= 2 then 1 else 0 end as MeetsStandard
+			, case when WBVCount >= 2 then 1 else 0 end as FormMeetsTarget
 	 from cteCohort coh
 	 LEFT join cteWBV wbv on wbv.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = wbv.TCIDPK 
 	 
-	)
-		
-	
-	SELECT * FROM cteWellBabyVisitCounts 	
+	),
 
+	cteMain
+	as
+	(
+		select PTCode
+				, HVCaseFK
+				, PC1ID
+				, OldID
+				, TCDOB
+				, PC1FullName
+				, CurrentWorkerFullName
+				, CurrentLevelName
+				, 'TC Medical' as FormName 
+				, FormDate
+				, FormReviewed
+				, FormOutOfWindow
+				, FormMissing
+				, FormMeetsTarget
+				, case when FormReviewed = 0 then 'Form(s) not reviewed by supervisor'
+						when FormOutOfWindow = 1 then 'Form out of window'
+						when FormMissing = 1 then 'Form missing'
+						when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 
+							then 'Missing Well Baby Visits'
+						else '' end as ReasonNotMeeting
+		from cteWellBabyVisitCounts
+	)
+	
+	select * from cteMain
 
 end
 GO

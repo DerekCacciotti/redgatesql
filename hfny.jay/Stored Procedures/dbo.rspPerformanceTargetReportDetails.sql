@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -121,14 +122,15 @@ begin
 		, PC1Fullname		varchar(50)
 		, WorkerFullName	varchar(50)
 		, CurrentLevelName	varchar(30)
+		, FormName			varchar(50)
 		, FormDate			datetime
 		, FormReviewed		int
 		, FormOutOfWindow	int
 		, FormMissing		int
-		, FormMeetsStandard	int
+		, FormMeetsTarget	int
+		, ReasonNotMeeting	varchar(50)
 		)
-		
-
+	
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
@@ -197,7 +199,7 @@ begin
 
 	select * 
 			, case when FormReviewed = 0 or FormOutOfWindow = 1 or FormMissing = 1 then 1 -- Invalid / Missing Cases
-					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and FormMeetsStandard = 0 then 2 -- Cases Not Meeting
+					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and FormMeetsTarget = 0 then 2 -- Cases Not Meeting
 					else 3
 					end as PrimarySort
 			, case when left(PTCode,2) = 'HD' then 1
@@ -205,7 +207,7 @@ begin
 					else 3
 					end as SecondarySort
 			, case when FormReviewed = 0 or FormOutOfWindow = 1 or FormMissing = 1 then 'Invalid / Missing Cases'
-					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and FormMeetsStandard = 0 then 'Cases Not Meeting'
+					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and FormMeetsTarget = 0 then 'Cases Not Meeting'
 					else 'Cases Meeting'
 					end as GroupHeader
 		from @tblPTDetails

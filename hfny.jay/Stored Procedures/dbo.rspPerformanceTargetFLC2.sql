@@ -76,8 +76,11 @@ begin
 					, max(Interval) as Interval
 			from cteCohort
 				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
-				-- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
-				where Interval <> (select dbd.Interval from codeDueByDates dbd where dbd.EventDescription = '18 month Follow Up') 
+			-- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
+			-- therefore, they're not required until 2013
+			where Interval <> case when @StartDate >= '01/01/2013' then 'xx'
+								else '18'
+								end
 			group by HVCaseFK
 		)
 	,
@@ -200,7 +203,7 @@ begin
 				, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when FormOutOfWindow = 1 then 'Form out of window'
 						when FormMissing = 1 then 'Form missing'
-						when PC1FK is not null and PC1InHome = '1' and PC1Score = 0 and
+						when PC1FK is not null and (PC1InHome = '0' or (PC1InHome = '1' and PC1Score = 0)) and
 							 (PC2FK is null or (PC2FK is not null and PC2InHome = '1' and PC2Score = 1)) and 
 							 (OBPFK is null or (OBPFK is not null and OBPInHome = '1' and OBPScore = 1)) 
 							then 'PC1 not employed or enrolled'
@@ -228,7 +231,7 @@ begin
 							 PC2FK is not null and PC2InHome = '1' and PC2Score = 0 and
 							 OBPFK is not null and OBPInHome = '1' and OBPScore = 0
 							then 'PC1/PC2/OBP not employed or enrolled'
-						else '' end as NotMeetingReason
+						else '' end as ReasonNotMeeting
 			from cteDistinctFollowUps dfu
 			inner join cteTargetElements se on se.HVCaseFK = dfu.HVCaseFK
 		)

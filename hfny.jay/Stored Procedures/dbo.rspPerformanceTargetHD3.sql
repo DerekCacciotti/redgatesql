@@ -15,9 +15,9 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetHD3]
 (
-    @StartDate      datetime,
-    @EndDate      datetime,
-    @tblPTCases  PTCases                           readonly
+    @StartDate	datetime,
+    @EndDate	datetime,
+    @tblPTCases	PTCases	readonly
 )
 
 as
@@ -26,56 +26,56 @@ begin
 	;
 	with cteTotalCases
 	as
-	(
-	select
-		  ptc.HVCaseFK
-		 , ptc.PC1ID
-		 , ptc.OldID		
-		 , ptc.PC1FullName
-		 , ptc.CurrentWorkerFK
-		 , ptc.CurrentWorkerFullName
-		 , ptc.CurrentLevelName
-		 , ptc.ProgramFK
-		 , ptc.TCIDPK
-		 , ptc.TCDOB
-		 , cp.DischargeDate
-		 ,case
-			  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-				  datediff(day,ptc.tcdob,DischargeDate)
-			  else
-				  datediff(day,ptc.tcdob,@EndDate)
-		  end as tcAgeDays
-		 ,case
-			  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-				  DischargeDate
-			  else
-				  @EndDate
-		  end as lastdate
-		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on h.hvcasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
-	)
+		(
+		select
+			  ptc.HVCaseFK
+			 , ptc.PC1ID
+			 , ptc.OldID		
+			 , ptc.PC1FullName
+			 , ptc.CurrentWorkerFK
+			 , ptc.CurrentWorkerFullName
+			 , ptc.CurrentLevelName
+			 , ptc.ProgramFK
+			 , ptc.TCIDPK
+			 , ptc.TCDOB
+			 , cp.DischargeDate
+			 ,case
+				  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
+					  datediff(day,ptc.tcdob,DischargeDate)
+				  else
+					  datediff(day,ptc.tcdob,@EndDate)
+			  end as tcAgeDays
+			 ,case
+				  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
+					  DischargeDate
+				  else
+					  @EndDate
+			  end as lastdate
+			from @tblPTCases ptc
+				inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
+				inner join CaseProgram cp on h.hvcasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
+		)
 	,
 	-- Report: HD1. Immunization at one year
 	cteCohort
 	as
-	(
-	select HVCaseFK
-		  , PC1ID
-		  , OldID		 
-		  , PC1FullName
-		  , CurrentWorkerFK
-		  , CurrentWorkerFullName
-		  , CurrentLevelName
-		  , ProgramFK
-		  , TCIDPK
-		  , TCDOB
-		  , DischargeDate
-		  , tcAgeDays
-		  , lastdate
-		from cteTotalCases
-		where datediff(day, tcdob + (.75 * 365.25), lastdate) > 0 -- Target children between 9 months and older
-	)	
+		(
+		select HVCaseFK
+			  , PC1ID
+			  , OldID		 
+			  , PC1FullName
+			  , CurrentWorkerFK
+			  , CurrentWorkerFullName
+			  , CurrentLevelName
+			  , ProgramFK
+			  , TCIDPK
+			  , TCDOB
+			  , DischargeDate
+			  , tcAgeDays
+			  , lastdate
+			from cteTotalCases
+			where datediff(day, tcdob + (.75 * 365.25), lastdate) > 0 -- Target children between 9 months and older
+		)	
 
 	,
 	cteInterval
@@ -85,7 +85,11 @@ begin
 					, max(Interval) as Interval
 			from cteCohort
 				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
-				WHERE Interval <> (SELECT dbd.Interval FROM codeDueByDates dbd WHERE dbd.EventDescription = '18 month Follow Up') -- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
+			-- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
+			-- therefore, they're not required until 2013
+			where Interval <> case when @StartDate >= '01/01/2013' then 'xx'
+								else '18'
+								end
 			group by HVCaseFK
 		)
 
@@ -106,7 +110,7 @@ begin
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FollowUpPK is NULL OR FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
-			  , case when (fu.LeadAssessment = 1 OR fu.LeadAssessment = 0) then 1 else 0 end as FormMeetsTarget
+			  , LeadAssessment
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK 
 			inner join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
@@ -118,30 +122,31 @@ begin
 	as
 		(
 		select PTCode
-			  ,HVCaseFK
-			  ,PC1ID
-			  ,OldID
-			  ,TCDOB
-			  ,PC1FullName
-			  ,CurrentWorkerFullName
-			  ,CurrentLevelName
-			  ,FormName
-			  ,FormDate
-			  ,FormReviewed
-			  ,FormOutOfWindow
-			  ,FormMissing
-			  ,FormMeetsTarget
-				, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
-						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormMissing = 1 then 'Form missing'
-						when FormMeetsTarget = 0 
-							then 'Lead Assessment not recorded'
-						else '' end as NotMeetingReason
+			  , HVCaseFK
+			  , PC1ID
+			  , OldID
+			  , TCDOB
+			  , PC1FullName
+			  , CurrentWorkerFullName
+			  , CurrentLevelName
+			  , FormName
+			  , FormDate
+			  , FormReviewed
+			  , FormOutOfWindow
+			  , FormMissing
+			  , case when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
+							(LeadAssessment = 1 OR LeadAssessment = 0) then 1 else 0 end as FormMeetsTarget
+			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+					when FormOutOfWindow = 1 then 'Form out of window'
+					when FormMissing = 1 then 'Form missing'
+					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
+							LeadAssessment is null then 'Lead Assessment is blank'
+					else '' end as NotMeetingReason
 		from cteExpectedForm
 		)
 	
 	select * from cteMain
-	-- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
+	-- rspPerformanceTargetReportSummary 2 ,'10/01/2012' ,'12/31/2012'	
 
 end
 GO

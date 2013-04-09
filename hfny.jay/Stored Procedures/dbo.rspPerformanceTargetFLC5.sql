@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,6 +10,7 @@ GO
 --				Target Child's 6 months birthday
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, null, 0, null
 -- rspPerformanceTargetReportSummary 19, '10/01/2012', '12/31/2012'
+-- rspPerformanceTargetReportSummary 5, '10/01/2012', '12/31/2012'
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetFLC5]
 (
@@ -75,9 +77,12 @@ begin
 			select HVCaseFK					
 					, max(Interval) as Interval
 			from cteCohort
-				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= MaximumDue
-				-- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
-				where Interval <> (select dbd.Interval from codeDueByDates dbd where dbd.EventDescription = '18 month Follow Up') 
+				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
+			-- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
+			-- therefore, they're not required until 2013
+			where Interval <> case when @StartDate >= '01/01/2013' then 'xx'
+								else '18'
+								end
 			group by HVCaseFK
 		)
 	,
@@ -92,6 +97,7 @@ begin
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
+			  , EventDescription as FormName
 			  , FollowUpDate as FormDate
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FollowUpPK is null or FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
@@ -118,6 +124,7 @@ begin
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
+			  , FormName
 			  , FormDate
 			  , FormReviewed
 			  , FormOutOfWindow
@@ -126,7 +133,15 @@ begin
 							EducationalEnrollment = '1' and ProgramType in ('01','02','03','06') 
 						then 1 
 						else 0 
-						end as FormMeetsStandard
+						end as FormMeetsTarget
+			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+						when FormOutOfWindow = 1 then 'Form out of window'
+						when FormMissing = 1 then 'Form missing'
+						when EducationalEnrollment <> '1' 
+							then 'Not currently enrolled'
+						when ProgramType in ('01','02','03','06') 
+							then 'Enrolled, but wrong program'
+						else '' end as ReasonNotMeeting
 	from cteExpectedForm
 	-- order by OldID
 
