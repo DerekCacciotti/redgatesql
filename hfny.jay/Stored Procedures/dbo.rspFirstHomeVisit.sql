@@ -42,7 +42,7 @@ as
 																tcdob
 															else
 																edc
-														end,VisitStartTime) < 0 then
+														end,cast(VisitStartTime AS DATE)) < 0 then
 										  'Prenatal'
 								  end)) over () as Prenatal
 					   ,sum(count(case
@@ -51,7 +51,7 @@ as
 																tcdob
 															else
 																edc
-														end,VisitStartTime) between 0 and 92 then
+														end,cast(VisitStartTime AS DATE)) between 0 and 92 then
 										  'Prenatal'
 								  end)) over () as Within3Months
 					   ,sum(count(case
@@ -60,7 +60,7 @@ as
 																tcdob
 															else
 																edc
-														end,VisitStartTime) > 92 then
+														end,cast(VisitStartTime AS DATE)) > 92 then
 										  'Prenatal'
 								  end)) over () as After3Months
 					   ,sum(count(case
@@ -69,7 +69,7 @@ as
 																tcdob
 															else
 																edc
-														end,VisitStartTime) <= 92 then
+														end,cast(VisitStartTime AS DATE)) <= 92 then
 										  'Prenatal'
 								  end)) over () as Prenatal_or_Within3
 			from (select min(VisitStartTime) as VisitStartTime

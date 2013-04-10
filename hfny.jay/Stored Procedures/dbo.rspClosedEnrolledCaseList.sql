@@ -61,8 +61,8 @@ set @programfk = REPLACE(@programfk,'"','')
 				join dbo.SplitString(@programfk,',') on cp1.programfk = listitem
 				inner join WorkerProgram wp1 on wp1.WorkerFK = cp1.CurrentFSWFK 
 				where VisitType <> '0001'
-					 and VisitStartTime <= @EndDt
-					 and VisitStartTime >= c.IntakeDate
+					 and cast(VisitStartTime AS DATE) <= @EndDt
+					 and cast(VisitStartTime AS DATE) >= c.IntakeDate
 					 and HVLog.HVCaseFK = c.HVCasePK
 					 --and HVLog.ProgramFK = @programfk
 					 and (case when @SiteFK = 0 then 1 when wp1.SiteFK = @SiteFK then 1 else 0 end = 1)) [HomeVisits]

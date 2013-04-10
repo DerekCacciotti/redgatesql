@@ -65,7 +65,7 @@ begin
 			  ,cp.DischargeDate
 			from [dbo].[udfLevelPieces](@programfk,@sdate,@edate) tlp
 				left outer join hvlog on tlp.casefk = hvlog.hvcasefk
-							   and VisitStartTime between tlp.StartDate and tlp.EndDate
+							   and cast(VisitStartTime AS DATE) between tlp.StartDate and tlp.EndDate
 				inner join CaseProgram cp on cp.HVCaseFK = tlp.Casefk
 						  and cp.ProgramFK = tlp.programfk
 

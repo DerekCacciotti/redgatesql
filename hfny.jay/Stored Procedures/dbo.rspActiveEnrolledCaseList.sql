@@ -54,8 +54,8 @@ SELECT TOP 1 codeApp.AppCodeText FROM codeApp WHERE ca.FormInterval = codeApp.Ap
 codeApp.AppCodeUsedWhere LIKE '%FU%' and codeApp.AppCodeGroup = 'TCAge' 
 ) END [TANFServiceAt]
 ,convert(VARCHAR(12), ca.FormDate, 101) [Eligible]
-,(SELECT count(*) FROM HVLog WHERE VisitType <> '0001'AND VisitStartTime <= @EndDt 
-AND VisitStartTime >= b.IntakeDate AND HVCaseFK = b.HVCasePK 
+,(SELECT count(*) FROM HVLog WHERE VisitType <> '0001'AND cast(VisitStartTime AS DATE) <= @EndDt 
+AND cast(VisitStartTime AS DATE) >= b.IntakeDate AND HVCaseFK = b.HVCasePK 
 ) [HomeVisits]
 -- folling fields are used for validating (to be removed)
 ,(

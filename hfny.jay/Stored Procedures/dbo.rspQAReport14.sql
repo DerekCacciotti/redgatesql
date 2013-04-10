@@ -156,7 +156,7 @@ WITH cteHVLogRegularVisits AS
 
 		SELECT HVCaseFK FROM HVLog h 
 		inner join dbo.SplitString(@programfk,',') on h.programfk = listitem
-		WHERE VisitStartTime BETWEEN @Back2MonthsFromAnalysisPoint AND @LastDayofPreviousMonth
+		WHERE cast(VisitStartTime AS DATE) BETWEEN @Back2MonthsFromAnalysisPoint AND @LastDayofPreviousMonth
 		AND VisitType <> '0001' -- all regular visits
 		GROUP BY HVCaseFK
 	

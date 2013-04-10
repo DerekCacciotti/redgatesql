@@ -33,7 +33,7 @@ as
 	as (select distinct FSWFK
 			from HVLog
 				inner join dbo.SplitString(@programfk,',') on HVLog.programfk = listitem
-			where datediff(month,VisitStartTime,getdate()) <= 12
+			where datediff(month,cast(VisitStartTime AS DATE),getdate()) <= 12
 	),
 	hvlogs (VisitStartTime,hvcasepk,visitType,FSWFK)
 	as (select VisitStartTime
