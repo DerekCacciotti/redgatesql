@@ -8,6 +8,7 @@ GO
 -- Create date: 03/31/11
 -- Description:	Main storedproc for Retention Rate report
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
+-- exec rspRetentionRates 19, '20080101', '20121231'
 -- =============================================
 -- =============================================
 CREATE PROCEDURE [dbo].[rspRetentionRates]
