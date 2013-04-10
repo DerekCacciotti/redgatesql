@@ -8,7 +8,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 11, 2013>
 -- Description:	<This report gets you 'A. Data report '>
--- rspDataReport 5, '06/01/2012', '09/30/2012'			
+-- rspDataReport 19, '03/01/2013', '03/31/2013'			
 
 -- Fix: Pre-Intake Enroll completed 03/27/13
 
@@ -255,10 +255,12 @@ begin
 		Postnatal,
 		ProgramFK
 	)
-	SELECT h.HVCasePK,
-	   CASE WHEN h.IntakeLevel = '1' THEN 1 ELSE 0 END AS Prenatal
-	 , CASE WHEN h.IntakeLevel = '2' THEN 1 ELSE 0 END AS Postnatal
+	SELECT h.HVCasePK,	 
+	   CASE WHEN ((h.tcdob is not NULL AND h.tcdob > h.IntakeDate) OR (h.tcdob is NULL AND h.edc > h.IntakeDate)) THEN 1 ELSE 0 END AS Prenatal
+	 , CASE WHEN (h.tcdob is not NULL AND h.tcdob <= h.IntakeDate) THEN 1 ELSE 0 END AS Postnatal	 
+	 
 	 , cp.ProgramFK
+
 	
 	 FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
@@ -446,7 +448,7 @@ VALUES('    2c. Negative Screens', (SELECT count(HVCasePK) FROM @tbl4DataReportR
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
 VALUES('3.  Kempe Assessments this Period', @n3)
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
-VALUES('    3a. Positive Kempe Assigned ( or Pending Assingment) to FSW', @n3a)
+VALUES('    3a. Positive Kempe Assigned ( or Pending Assignment) to FSW', @n3a)
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
 VALUES('    3b. Positive Kempe Assessments Not Assigned to FSW - Terminated', (SELECT count(HVCasePK) FROM @tbl4DataReportRow3 WHERE CaseStatus = '04'))
 INSERT INTO @tbl4DataReport(ReportTitle,Total)
