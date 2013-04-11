@@ -7,7 +7,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <July 20, 2012>
 -- Description:	<gets you data for Enrolled Program Caseload detail info>
--- exec [rspEnrolledProgramCaseloadDetail] 1,'06/01/2010','08/31/2010', null, null
+-- exec [rspEnrolledProgramCaseloadDetail] 3,'01/01/2013','03/31/2013', null, null
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseloadDetail]
 (
@@ -140,7 +140,7 @@ begin
 			 ,LevelChangeStar
 		from @tblInitRequiredData irq
 		where IntakeDate is not null
-			 and IntakeDate < @sdate
+			 and IntakeDate <= @edate
 			 and (DischargeDate is null
 			 or DischargeDate >= @sdate)
 	)
@@ -157,7 +157,7 @@ begin
 			inner join WorkerProgram wp on wp.WorkerFK = CurrentFSWFK -- get SiteFK,
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = irq.HVCasePK
 		where IntakeDate is not null
-			 and IntakeDate < @sdate
+			 and IntakeDate <= @edate
 			 and (irq.DischargeDate is null
 			 or irq.DischargeDate >= @sdate)
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
