@@ -17,7 +17,7 @@ GO
 -- exec dbo.rspProgramInformationFor8Quarters @programfk=',13,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
 -- exec dbo.rspProgramInformationFor8Quarters @programfk=',19,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
 
-
+-- exec [rspProgramInformationFor8Quarters] '3','12/31/12'
 -- =============================================
 CREATE procedure [dbo].[rspProgramInformationFor8Quarters](@programfk    varchar(max)    = null,                                                       
                                                         @edate        DATETIME,
@@ -282,8 +282,7 @@ INSERT INTO @tblInitial_cohort
 			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
 			WHERE 
 			case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1
-			AND 
-			cp.CaseStartDate <= @edate
+			AND cp.CaseStartDate < @edate  -- handling transfer cases
 
 
 
@@ -673,7 +672,7 @@ INSERT INTO @tblInitial_cohort
 		from @tblInitial_cohort h
 				INNER JOIN @tblMake8Quarter q8 ON h.IntakeDate <= [QuarterEndDate]	
 				WHERE h.IntakeDate IS NOT NULL 				
-				AND (h.DischargeDate IS NULL OR h.DischargeDate >= QuarterEndDate)		
+				AND (h.DischargeDate IS NULL OR h.DischargeDate > QuarterEndDate)		
 	),
 
 	cteFamiliesActiveAtEndOfThisQuarter6 AS
@@ -695,7 +694,7 @@ INSERT INTO @tblInitial_cohort
 		from @tblInitial_cohort h
 				INNER JOIN @tblMake8Quarter q8 ON h.IntakeDate <= [QuarterEndDate]	
 				WHERE h.IntakeDate IS NOT NULL 				
-				AND (h.DischargeDate IS NULL OR h.DischargeDate >= QuarterEndDate)		
+				AND (h.DischargeDate IS NULL OR h.DischargeDate > QuarterEndDate)		
 	),		
 
 
@@ -745,7 +744,7 @@ INSERT INTO @tblInitial_cohort
 		from @tblInitial_cohort h
 				INNER JOIN @tblMake8Quarter q8 ON h.IntakeDate <= [QuarterEndDate]	
 				WHERE h.IntakeDate IS NOT NULL 				
-				AND (h.DischargeDate IS NULL OR h.DischargeDate >= QuarterEndDate)		
+				AND (h.DischargeDate IS NULL OR h.DischargeDate > QuarterEndDate)		
 	)
 
 	,
@@ -834,7 +833,7 @@ INSERT INTO @tblInitial_cohort
 
 				INNER JOIN @tblMake8Quarter q8 ON h.IntakeDate <= [QuarterEndDate]	
 				WHERE h.IntakeDate IS NOT NULL 				
-				AND (h.DischargeDate IS NULL OR h.DischargeDate >= QuarterEndDate)		
+				AND (h.DischargeDate IS NULL OR h.DischargeDate > QuarterEndDate)		
 	),		
 
 
@@ -850,7 +849,7 @@ INSERT INTO @tblInitial_cohort
 				LEFT JOIN  ServiceReferral sr on sr.HVCaseFK = h.HVCaseFK AND (ReferralDate <= [QuarterEndDate]) -- leave it here the extra condition
 				WHERE h.IntakeDate IS NOT NULL 	
 				AND h.IntakeDate <= [QuarterEndDate]				
-				AND (h.DischargeDate IS NULL OR h.DischargeDate >= [QuarterEndDate]	)
+				AND (h.DischargeDate IS NULL OR h.DischargeDate > [QuarterEndDate]	)
 				AND ReferralDate IS NULL  -- This is important
 
 	),		
