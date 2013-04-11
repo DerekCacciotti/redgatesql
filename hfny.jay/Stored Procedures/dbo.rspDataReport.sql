@@ -162,7 +162,7 @@ begin
 	AND p.CaseStatus = '02'	
 	AND KempeResult = 1
 	AND (h.IntakeDate  >= @StartDate OR h.IntakeDate IS NULL)
-	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
 	AND (cp.DischargeDate >= @StartDate OR cp.DischargeDate IS NULL)	
 
 	DECLARE @n6 INT 
@@ -187,7 +187,7 @@ begin
 	cp.ProgramFK = @ProgramFKs
 	--AND pre.CaseStatus = '03'
 	and codeLevel.LevelName = 'Preintake-term'
-	AND cp.CaseStartDate < @StartDate  -- handling transfer cases	
+	AND cp.CaseStartDate < @EndDate  -- handling transfer cases	
 	AND (cp.DischargeDate >= @StartDate AND cp.DischargeDate <= @EndDate AND cp.DischargeDate IS NOT NULL)
 
 	DECLARE @n8 INT 
@@ -208,7 +208,7 @@ begin
 	WHERE 
 	cp.ProgramFK = @ProgramFKs
 	AND (h.IntakeDate >= @StartDate AND h.IntakeDate <= @EndDate)
-	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
 	
 
 	DECLARE @n9 INT 
@@ -231,7 +231,7 @@ begin
 	cp.ProgramFK = @ProgramFKs
 	AND h.IntakeDate < @StartDate 
 	AND h.IntakeDate IS NOT NULL
-	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
 	AND (cp.DischargeDate >= @StartDate OR cp.DischargeDate IS NULL)
 	
 
@@ -269,7 +269,7 @@ begin
     cp.ProgramFK = @ProgramFKs
 	AND h.IntakeDate >= @StartDate 
 	AND h.IntakeDate <= @EndDate 	
-	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
 	
 
 	
@@ -301,7 +301,7 @@ begin
 	AND cp.DischargeDate >= @StartDate 
 	AND cp.DischargeDate <= @EndDate 	
 	AND h.IntakeDate IS NOT null
-	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
+	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
 	
 
 	DECLARE @n13 INT 
@@ -338,8 +338,7 @@ begin
 	(
 	(h.IntakeDate IS NOT NULL AND h.IntakeDate <= @EndDate)
 	AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @EndDate)
-	AND cp.CaseStartDate < @StartDate  -- handling transfer cases
-	AND (cp.DischargeDate >= @StartDate OR cp.DischargeDate IS NULL)
+	AND cp.CaseStartDate < @EndDate  -- handling transfer cases	
 	)
 	OR 
 	(CurrentLevelFK = 8 AND h.IntakeDate BETWEEN @StartDate AND @EndDate)
