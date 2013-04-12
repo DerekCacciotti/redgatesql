@@ -109,12 +109,14 @@ begin
 					,pc1id
 					,casecount
 					,sum(visitlengthminute) over (partition by pc1wrkfk) as 'Minutes'
-					,sum(expvisitcount) over (partition by pc1wrkfk) as expvisitcount
+					--04/12/13 Chris Papas (partition by needed additional value (levelname) because it was duplicate counting when level change withing report period
+					,sum(expvisitcount) over (partition by pc1wrkfk + levelname) as expvisitcount
 					,min(startdate) over (partition by pc1wrkfk) as 'startdate'
 					,max(enddate) over (partition by pc1wrkfk) as 'enddate'
 					,levelname
 					,max(levelstart) over (partition by pc1wrkfk) as 'levelstart'
-					,sum(actvisitcount) over (partition by pc1wrkfk) as actvisitcount
+					--04/12/13 Chris Papas (partition by needed additional value (levelname) because it was duplicate counting when level change withing report period
+					,sum(actvisitcount) over (partition by pc1wrkfk + levelname) as actvisitcount
 					,sum(inhomevisitcount) over (partition by pc1wrkfk) as inhomevisitcount
 					,sum(attvisitcount) over (partition by pc1wrkfk) as attvisitcount
 					,max(dischargedate) over (partition by pc1wrkfk) as 'dischargedate'
