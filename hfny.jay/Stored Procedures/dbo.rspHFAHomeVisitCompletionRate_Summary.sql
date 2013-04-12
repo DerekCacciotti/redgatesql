@@ -48,6 +48,7 @@ begin
 							   and StartLevelDate <= @edate
 							   and hvr.programfk = hld.programfk) as levelstart
 					,floor(reqvisit) as expvisitcount
+					,reqvisit as expectedvisitNO_FLOOR
 					,sum(case
 							 when visittype <> '0001' then
 								 1
@@ -93,6 +94,8 @@ begin
 				 ,hvr.casefk
 				 ,hvr.programfk --,hld.StartLevelDate
 	)
+	
+	
 	,
 	cteLevelChanges
 	as
@@ -108,18 +111,16 @@ begin
 					,workerfk
 					,pc1id
 					,casecount
-					,sum(visitlengthminute) over (partition by pc1wrkfk) as 'Minutes'
-					--04/12/13 Chris Papas (partition by needed additional value (levelname) because it was duplicate counting when level change withing report period
+					,sum(visitlengthminute) over (partition by pc1wrkfk + levelname) as 'Minutes'
 					,sum(expvisitcount) over (partition by pc1wrkfk + levelname) as expvisitcount
-					,min(startdate) over (partition by pc1wrkfk) as 'startdate'
-					,max(enddate) over (partition by pc1wrkfk) as 'enddate'
+					,min(startdate) over (partition by pc1wrkfk + levelname) as 'startdate'
+					,max(enddate) over (partition by pc1wrkfk + levelname) as 'enddate'
 					,levelname
-					,max(levelstart) over (partition by pc1wrkfk) as 'levelstart'
-					--04/12/13 Chris Papas (partition by needed additional value (levelname) because it was duplicate counting when level change withing report period
+					,max(levelstart) over (partition by pc1wrkfk + levelname) as 'levelstart'
 					,sum(actvisitcount) over (partition by pc1wrkfk + levelname) as actvisitcount
-					,sum(inhomevisitcount) over (partition by pc1wrkfk) as inhomevisitcount
-					,sum(attvisitcount) over (partition by pc1wrkfk) as attvisitcount
-					,max(dischargedate) over (partition by pc1wrkfk) as 'dischargedate'
+					,sum(inhomevisitcount) over (partition by pc1wrkfk + levelname) as inhomevisitcount
+					,sum(attvisitcount) over (partition by pc1wrkfk + levelname) as attvisitcount
+					,max(dischargedate) over (partition by pc1wrkfk + levelname) as 'dischargedate'
 					,IntakeDate
 					,case when TCDOB is null
 							then EDC
@@ -130,6 +131,8 @@ begin
 			 inner join cteLevelChanges on cteLevelChanges.casefk = hvr.casefk
 			 inner join HVCase c on hvr.casefk = c.HVCasePK
 	)
+	
+	
 	,
 	cteMain
 	as

@@ -110,17 +110,17 @@ begin
 					,workerfk
 					,pc1id
 					,casecount
-					, max(hvlevelpk) over (partition by pc1id) as  'UseThisLevelPK'
-					,sum(visitlengthminute) over (partition by pc1wrkfk) as 'Minutes'
-					,sum(expvisitcount) over (partition by pc1wrkfk) as expvisitcount
-					,min(startdate) over (partition by pc1wrkfk) as 'startdate'
-					,max(enddate) over (partition by pc1wrkfk) as 'enddate'
+					, max(hvlevelpk) over (partition by pc1id + levelname) as  'UseThisLevelPK'
+					,sum(visitlengthminute) over (partition by pc1wrkfk + levelname) as 'Minutes'
+					,sum(expvisitcount) over (partition by pc1wrkfk + levelname) as expvisitcount
+					,min(startdate) over (partition by pc1wrkfk + levelname) as 'startdate'
+					,max(enddate) over (partition by pc1wrkfk + levelname) as 'enddate'
 					,levelname
-					,max(levelstart) over (partition by pc1wrkfk) as 'levelstart'
-					,sum(actvisitcount) over (partition by pc1wrkfk) as actvisitcount
-					,sum(inhomevisitcount) over (partition by pc1wrkfk) as inhomevisitcount
-					,sum(attvisitcount) over (partition by pc1wrkfk) as attvisitcount
-					,max(dischargedate) over (partition by pc1wrkfk) as 'dischargedate'
+					,max(levelstart) over (partition by pc1wrkfk + levelname) as 'levelstart'
+					,sum(actvisitcount) over (partition by pc1wrkfk + levelname) as actvisitcount
+					,sum(inhomevisitcount) over (partition by pc1wrkfk + levelname) as inhomevisitcount
+					,sum(attvisitcount) over (partition by pc1wrkfk + levelname) as attvisitcount
+					,max(dischargedate) over (partition by pc1wrkfk + levelname) as 'dischargedate'
 					,IntakeDate
 					,case when TCDOB is null
 							then EDC
