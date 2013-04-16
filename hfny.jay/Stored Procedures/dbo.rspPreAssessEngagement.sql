@@ -97,8 +97,14 @@ ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1bScreenResultNegative]
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1cPrenatal]
 ,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1dPostnatal / Q1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1dPostnatal]
+
+,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1ePositiveReferred / Q1Screened, 0) 
+ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1ePositiveReferredPercent]
 , Q1ePositiveReferred
+,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1fPositiveNotReferred / Q1Screened, 0) 
+ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1fPositiveNotReferredPercent]
 , Q1fPositiveNotReferred
+
 ,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f1IncomeIneligible / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f1IncomeIneligible
 ,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f2OutOfGeoTarget / Q1DischargeAll, 0) 
@@ -306,6 +312,12 @@ ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1cPrenatal]
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1dPostnatal]
 , T1ePositiveReferred
 , T1fPositiveNotReferred
+
+,cast(cast(CASE WHEN a.T1Screened > 0 THEN round(100.0 * T1ePositiveReferred / T1Screened, 0) 
+ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1ePositiveReferredPercent]
+,cast(cast(CASE WHEN a.T1Screened > 0 THEN round(100.0 * T1fPositiveNotReferred / T1Screened, 0) 
+ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1fPositiveNotReferredPercent]
+
 ,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f1IncomeIneligible / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f1IncomeIneligible
 ,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f2OutOfGeoTarget / T1DischargeAll, 0) 
