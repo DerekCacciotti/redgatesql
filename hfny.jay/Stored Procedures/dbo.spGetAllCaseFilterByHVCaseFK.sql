@@ -37,11 +37,13 @@ BEGIN
 				when FilterType='3' then 'Free form'
 			end as FilterTitle
           ,Hint
-		  ,case when CaseFilterNameChoice=1 then 'Yes' 
-				when CaseFilterNameChoice=0 then 'No' 
-				else '' end as CaseFilterNameChoice
-		  ,cfno.FilterOption as CaseFilterNameOptionFK
-		  ,CaseFilterValue
+          ,case when FilterType='1' then 
+          		  case when CaseFilterNameChoice=1 then 'Yes' 
+					when CaseFilterNameChoice=0 then 'No' 
+					else '' end 
+				when FilterType='2' then cfno.FilterOption
+				when FilterType='3' then CaseFilterValue
+			end as CaseFilterValue
           ,CaseFilterPK
           ,HVCaseFK
           ,cfn.ProgramFK

@@ -15,6 +15,8 @@ CREATE TABLE [dbo].[TrainingDetail]
 [ExemptDescription] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ExemptType] [varchar] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [TopicFK] ON [dbo].[TrainingDetail] ([TopicFK]) ON [PRIMARY]
+
 CREATE NONCLUSTERED INDEX [IX_TrainingDetailSubtopicFK] ON [dbo].[TrainingDetail] ([SubTopicFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_TrainingDetailTrainingFK] ON [dbo].[TrainingDetail] ([TrainingFK]) ON [PRIMARY]

@@ -13,6 +13,14 @@ CREATE TABLE [dbo].[FormReview]
 [ReviewDateTime] [datetime] NULL,
 [ReviewedBy] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FormReview_FormFK] ON [dbo].[FormReview] ([FormFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FormReview_FormType] ON [dbo].[FormReview] ([FormType]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FormReview_HVCaseFK] ON [dbo].[FormReview] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FormReview_ProgramFK] ON [dbo].[FormReview] ([ProgramFK]) ON [PRIMARY]
+
 CREATE NONCLUSTERED INDEX [IX_FormReview_FormDate_FormFK_FormType] ON [dbo].[FormReview] ([FormDate], [FormFK], [FormType]) ON [PRIMARY]
 
 GO

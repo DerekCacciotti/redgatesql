@@ -51,6 +51,7 @@ RETURN
 
 		SELECT DISTINCT w.WorkerPK
 			 , w.LastName AS 'WrkrLName'
+			 , w.FirstName AS 'WrkrFName'
 			 , w.FAWInitialStart --as per Jay, we will use Initial start for FAW date
 			 , w.SupervisorInitialStart
 			 , w.FSWInitialStart
@@ -77,7 +78,7 @@ RETURN
 		LEFT OUTER JOIN ctHVLog ON ctHVLog.FSWFK = w.WorkerPK
 		LEFT OUTER JOIN ctKempe ctk ON ctk.FAWFK = w.workerpk
 		LEFT OUTER JOIN ctSuper ON ctsuper.SupervisorFK=w.WorkerPK
-		GROUP BY wp.programfk, w.WorkerPK, w.LastName
+		GROUP BY wp.programfk, w.WorkerPK, w.LastName, w.FirstName
 		,wp.supervisorfk
 		,w.SupervisorInitialStart, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate
 		, ctHVLog.VisitStartTime, ctk.KempeDate, wp.FAWStartDate, w.FAWInitialStart, w.FSWInitialStart

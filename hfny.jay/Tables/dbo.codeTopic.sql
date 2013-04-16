@@ -8,6 +8,8 @@ CREATE TABLE [dbo].[codeTopic]
 [SATInterval] [nvarchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SATName] [nvarchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [TopicCode] ON [dbo].[codeTopic] ([TopicCode]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[codeTopic] ADD 
 CONSTRAINT [PK_codeTopic] PRIMARY KEY CLUSTERED  ([codeTopicPK]) ON [PRIMARY]
 GO
