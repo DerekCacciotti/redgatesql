@@ -114,7 +114,8 @@ LEFT OUTER JOIN PreIntakeActivity AS z ON z.HVCaseFK = x.HVCasePK
 AllSummary 
 AS (
 SELECT sum(CASE WHEN PIDate IS NOT NULL THEN 1 ELSE 0 END) [PreInTakeCases]
---, sum(CASE WHEN HVCasePK_At_Start IS NULL THEN 1 ELSE 0 END) [New_PreIntake_Cases]
+, sum(CASE WHEN HVCasePK_At_Start IS NULL THEN 1 ELSE 0 END) [New_PreIntake_Cases]
+, sum(CASE WHEN No_Status = 1 THEN 1 ELSE 0 END) [No_Status]
 , sum(CASE WHEN HVCasePK_At_Start IS NOT NULL THEN 1 ELSE 0 END) [At_Start_of_Month]
 , sum(CASE WHEN [AssignedFSW] = 1 THEN 1 ELSE 0 END) [AssignedFSW]
 , sum(CASE WHEN CaseStatus = '02' THEN 1 ELSE 0 END) [Enrolled]
@@ -140,37 +141,4 @@ FROM AllInOne
 
 -- calculate summary 
 SELECT * FROM AllSummary
-
-/*
-select count(*) [PreInTakeCases]
-	  ,(select count(*)
-			from At_Start_Of_Month) [At_Start_of_Month]
-	  ,sum(case when PIFSWFK is not null AND x.HVCaseFK IS NOT NULL then 1 else 0 end) [AssignedFSW]
-	  ,sum(case when CaseStatus = '02' then 1 else 0 end) [Enrolled]
-	  ,sum(case when CaseStatus = '03' then 1 else 0 end) [Terminated]
-	  ,sum(case when CaseStatus = '01' then 1 else 0 end) [Continued]
-	  ,(select count(*)
-			from At_End_Of_Month) [At_End_of_Month]
-	  ,sum(ISNULL(PIParentLetter,0)) [Letters]
-	  ,sum(ISNULL(PICall2Parent,0)) [Call2Parent]
-	  ,sum(ISNULL(PICallFromParent,0)) [CallFromParent]
-	  ,sum(ISNULL(PIVisitAttempt,0)) [VisitAttempted]
-	  ,sum(ISNULL(PIVisitMade,0)) [VisitConducted]
-	  ,sum(ISNULL(PIOtherHVProgram,0)) [Referrals]
-	  ,sum(ISNULL(PIParent2Office,0)) [Parent2Office]
-	  ,sum(ISNULL(PIProgramMaterial,0)) [ProgramMaterial]
-	  ,sum(ISNULL(PIGift,0)) [Gift]
-	  ,sum(ISNULL(PICaseReview,0)) [CaseReview]
-	  ,sum(ISNULL(PIOtherActivity,0)) [OtherActivity]
-
-	from Preintake pi
-	inner join WorkerProgram wp on wp.WorkerFK = PIFSWFK
-	inner join WorkerProgram sup on sup.WorkerFK = wp.SupervisorFK
-	LEFT OUTER JOIN PreAssessmentFSWAssignDate AS x ON pi.HVCaseFK = x.HVCaseFK
-	where pi.ProgramFK = @programfk
-		 and PIDate between @StartDt and @EndDt
-		 and wp.WorkerFK = isnull(@WorkerFK, wp.WorkerFK)
-		 and sup.WorkerFK = isnull(@SupervisorFK, sup.WorkerFK)
-
-*/
 GO
