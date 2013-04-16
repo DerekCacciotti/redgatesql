@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,7 +8,7 @@ GO
 -- Create date: Nov. 12, 2011
 -- Description:	<returns tcid values by HVCaseFk, for twins, triplets, etc.>
 -- =============================================
-create PROCEDURE [dbo].[spGetTCIDbyHVCaseFK](@HVCaseFK int)
+CREATE PROCEDURE [dbo].[spGetTCIDbyHVCaseFK](@HVCaseFK int)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -42,6 +43,7 @@ BEGIN
       ,[TCIDPK]
       ,[TCLastName]
       ,[VaricellaZoster]
+      ,[TCDOD]
   FROM [dbo].[TCID]
 	WHERE HVCaseFK=@HVCaseFK
 END
