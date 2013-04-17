@@ -46,7 +46,7 @@ as
 			   end DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				--inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asq version'
 				inner join codeduebydates on scheduledevent = 'ASQ'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
@@ -60,7 +60,7 @@ as
 			  ,dateadd(dd,dueby,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				--inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asqse version'
 				inner join codeduebydates on scheduledevent = 'ASQSE-1'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
@@ -77,7 +77,7 @@ as
 			  Case WHEN codeDueByDates.Interval = '00' and hvcase.IntakeDate > hvcase.TCDOB THEN HVCase.IntakeDate ELSE HVCase.TCDOB END) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'PSI'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -116,7 +116,7 @@ as
 			  ,dateadd(dd,dueby,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Follow Up'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -130,7 +130,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'DTaP'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -143,7 +143,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'HIB'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -156,7 +156,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'PCV'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -169,7 +169,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Polio'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -182,7 +182,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'MMR'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -195,7 +195,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'HEP-B'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -208,7 +208,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'VZ'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -221,7 +221,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Flu'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -234,7 +234,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Roto'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -247,7 +247,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'HEP-A'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -260,7 +260,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'WBV'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
@@ -273,7 +273,7 @@ as
 			  ,dateadd(dd,MinimumDue,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Lead'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id

@@ -16,6 +16,11 @@ CREATE procedure [dbo].[rspFamilyTimeLineHeader]
     @programfk varchar(max)
 )
 as
+
+
+--DECLARE @pc1id VARCHAR(13) = 'DS83010203701'
+--DECLARE @programfk varchar(max) = '1'
+
 	if @programfk is null
 	begin
 		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
@@ -54,12 +59,12 @@ as
 			left join pc ec on cpfk = ec.pcpk
 			inner join worker fsw on fsw.workerpk = currentfswfk
 			left join pc obp on obpfk = obp.pcpk
-			inner join workerprogram on currentfswfk = workerprogram.workerfk and workerprogram.programfk = caseprogram.programfk
+			inner join workerprogram on currentfswfk = workerprogram.workerfk --and workerprogram.programfk = caseprogram.programfk
 			inner join worker supervisor on supervisor.workerpk = workerprogram.supervisorfk
-			left join kempe on kempe.hvcasefk = hvcasepk and kempe.programfk = caseprogram.programfk
+			left join kempe on kempe.hvcasefk = hvcasepk --and kempe.programfk = caseprogram.programfk
 			left join pc pc2 on pc2fk = pc2.pcpk
 			--left join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-			INNER join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+			INNER join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 		where pc1id = @pc1id
 			 and caseprogress >= 11 
