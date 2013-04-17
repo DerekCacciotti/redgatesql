@@ -20,7 +20,7 @@ as
 begin
 
 --DECLARE @ProgramFK VARCHAR(MAX) = N'1'
---DECLARE @PC1ID CHAR(13) = N'AB91010007555'
+--DECLARE @PC1ID CHAR(13) = N'DS83010203701'
 --DECLARE @WorkerFK INT = NULL
 --DECLARE	@FAWFK INT = NULL
 --DECLARE @SupervisorFK INT = NULL
@@ -155,13 +155,15 @@ begin
 			where PC1ID = isnull(@PC1ID,PC1ID)
 				AND (CASE WHEN @PC1ID IS NOT NULL THEN 1 ELSE 
 				CASE WHEN cp.DischargeDate IS NOT NULL THEN 0 ELSE 1 END END = 1)
-				 and CurrentFSWFK = isnull(@WorkerFK,CurrentFSWFK)
-				 and CurrentFAWFK = isnull(@FAWFK,CurrentFAWFK)
-				 and sup.WorkerPK = isnull(@SupervisorFK,sup.WorkerPK)
+				 and isnull(CurrentFSWFK,0) = isnull(isnull(@WorkerFK,CurrentFSWFK),0)
+				 and isnull(CurrentFAWFK,0) = isnull(isnull(@FAWFK,CurrentFAWFK),0)
+				 and isnull(sup.WorkerPK,0) = isnull(isnull(@SupervisorFK,sup.WorkerPK),0)
 				 and caseprogress >= 6
 				 
 	-- and PC1ID='SP80040113929'
 	),
+	
+	
 	cteFSWAssignDate
 	as (select HVCaseFK
 			  ,max(WorkerAssignmentDate) as FSWAssignDate
@@ -407,5 +409,10 @@ select Main.HVCasePK
 	order by LastName
 			,FirstName
 			,PC1ID
+			
+			
+			
+			
+			
 END;
 GO
