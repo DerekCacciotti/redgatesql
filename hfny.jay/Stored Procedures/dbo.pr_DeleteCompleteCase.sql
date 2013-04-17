@@ -222,6 +222,26 @@ begin try
 	deallocate del_cursor;
 	--end
 
+	--PHQ9
+	declare del_cursor cursor for
+	select PHQ9PK
+		from PHQ9 P
+		where hvcasefk = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		exec spDelPHQ9 @PHQ9PK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
 	--TCID
 	declare del_cursor cursor for
 	select TCIDpk
@@ -335,6 +355,46 @@ begin try
 	while @@FETCH_STATUS = 0
 	begin
 		exec spDelPreintake @PreintakePK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	--AuditC
+	declare del_cursor cursor for
+	select AuditCPK
+		from AuditC
+		where hvcasefk = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		exec spDelAuditC @AuditCPK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	--HITS
+	declare del_cursor cursor for
+	select HITSPK
+		from HITS H
+		where hvcasefk = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		exec spDelHITS @HITSPK = @PK
 
 		fetch next from del_cursor into @PK
 
