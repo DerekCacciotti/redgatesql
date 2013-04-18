@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -118,6 +119,11 @@ BEGIN
 		WHEN 'FSW' THEN 'NYS1b. Assessment workers shadow experienced staff prior to direct work with families.'
 		WHEN 'Supervisor' THEN 'NYS1c. Supervisors shadow experienced staff prior to direct work with families.'
 	END AS CSST
+,	CASE cteFinal.Workertype 
+		WHEN 'FAW' THEN 'First Kempe Assessment'
+		WHEN 'FSW' THEN 'First Home Visit'
+		WHEN 'Supervisor' THEN 'First Supervisor Event'
+	END AS FirstEventDateType
  FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.Workertype = cteFinal.Workertype
 ORDER BY cteFinal.Workertype
