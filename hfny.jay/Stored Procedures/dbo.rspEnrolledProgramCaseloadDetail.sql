@@ -146,7 +146,7 @@ begin
 			 or DischargeDate >= @sdate)
 	)
 
-	select
+	select distinct 
 		  irq.PC1ID
 		 ,IntakeDate
 		 ,irq.DischargeDate
