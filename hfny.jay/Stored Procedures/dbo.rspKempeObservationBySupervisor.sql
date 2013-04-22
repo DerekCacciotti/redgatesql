@@ -69,10 +69,12 @@ as
 						  ,KempeDate
 						  ,FAWFK) q
 			inner join CaseProgram cp on cp.HVCaseFK = hvcasepk
+			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
+			
 			right join Worker w on w.WorkerPK = q.FAWFK
 			inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 			inner join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
-			inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
+			--inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
 			inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = hvcasepk
 		where w.WorkerPK in (select FAWFK from WorkerCohort)
 			 and wp.TerminationDate is NULL
