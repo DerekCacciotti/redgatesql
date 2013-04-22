@@ -10,6 +10,7 @@ GO
 -- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
 -- rspPerformanceTargetReportSummary 5 ,'01/01/2012' ,'03/31/2012'
 -- rspPerformanceTargetReportSummary 2 ,'10/01/2012' ,'12/31/2012'
+-- rspPerformanceTargetReportSummary 35 ,'10/01/2012' ,'12/31/2012'
 
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetHD4]
@@ -91,6 +92,8 @@ begin
 		  , cach.TCHasMedicalProvider
 		  , 'TC ID' as FormName
 		  , FormDate
+		  , TCIDPK
+		  , TCDOB
 		from cteCohort c
 			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'TC'
 		where c.tcAgeDays < 183
@@ -109,8 +112,7 @@ begin
 		from cteCohort c
 			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
 		where c.tcAgeDays < 183
-			 and
-			 FormDate <= @EndDate
+			 and FormDate <= @EndDate
 		group by c.HVCaseFK
 				,cach.TCHasMedicalProvider
 
@@ -125,49 +127,55 @@ begin
 		  ,c.HVCaseFK
 		  ,PC1ID
 		  ,OldID
-		  ,TCDOB
+		  ,c.TCDOB
 		  ,PC1FullName
 		  ,CurrentWorkerFullName
 		  ,CurrentLevelName
-		  ,case when chl6.TCHasMedicalProvider is not null and chl6.FormDate > tcl6.FormDate and chl6.FormDate > '01/01/13' and 
-					   chl6.TCHasMedicalProvider = 1 -- latest of either TC or CH
+		  -- latest of either TC or CH
+		  ,case when chl6.TCHasMedicalProvider is not null and chl6.FormDate > tcl6.FormDate 
+						and chl6.FormDate > '01/01/13' and chl6.TCHasMedicalProvider = 1 
 				   then 'Change Form'
 				else
 					case when tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1 
 					then 'TC ID'
 					else null end
 		   end as FormName
-		  ,case
-			   when chl6.TCHasMedicalProvider is not null and chl6.FormDate > tcl6.FormDate and chl6.FormDate > '01/01/13' and 
-				   chl6.TCHasMedicalProvider = 1 -- latest of either TC or CH
-				   then chl6.FormDate -- note: preference is given to the latest CH record first, if there is one
-			   else -- note: otherwise we will use tcid record's info
-				   case when tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1 then tcl6.FormDate else 
-					   null end
+		  -- latest of either TC or CH
+		  ,case when chl6.TCHasMedicalProvider is not null and chl6.FormDate > tcl6.FormDate 
+					and chl6.FormDate > '01/01/13' and chl6.TCHasMedicalProvider = 1 
+				then chl6.FormDate -- note: preference is given to the latest CH record first, if there is one
+				else -- note: otherwise we will use tcid record's info
+					case when tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1 
+						then tcl6.FormDate 
+						else null 
+					end
 		   end as FormDate
 		  ,case
-			   when tcl6.FormDate is not null then 1 -- there is no formreview for formtype = CH
-			   else
-				   0
+			   when chl6.FormDate is not null or -- there is no formreview for formtype = CH
+					(tcl6.FormDate is not null and dbo.IsFormReviewed(tcl6.TCDOB,'TC',tcl6.TCIDPK) = 1)
+					or (chl6.FormDate is null and tcl6.FormDate is null)
+					then 1 
+			   else 0
 		   end
 		   as FormReviewed
 		  ,case -- Here FormOutOfWindow means that there must be an tcid record in CommonAttribute table for tc < 6 months
 			   when chl6.FormDate is not null or tcl6.FormDate is not null then 0
-			   else
-				   1
+			   else 1
 		   end as FormOutOfWindow
 		  ,case 
 			  -- there is atleast we one of either TC or CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
 			   when chl6.FormDate is not null or tcl6.FormDate is not null then 0
-			   else
-				   1
+			   else 1
 		   end as FormMissing
 		  ,case
 				when chl6.TCHasMedicalProvider is not null and chl6.FormDate > tcl6.FormDate and chl6.FormDate > '01/01/13' and 
 					chl6.TCHasMedicalProvider = 1 -- latest of either TC or CH
 					then 1 -- note: preference is given to the latest CH record first, if there is one
 				else -- note: otherwise we will use tcid record's info
-					case when tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1 then 1 else 0 end
+					case when tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1 
+							then 1 
+							else 0 
+					end
 		   end as FormMeetsTarget
 		from cteCohort c
 			inner join cteTCLessThan6MonthsTCForm tcl6 on tcl6.HVCaseFK = c.HVCaseFK
@@ -187,10 +195,12 @@ begin
 		from cteCohort c
 			left join codeDueByDates on ScheduledEvent = 'Follow Up' and c.tcAgeDays >= DueBy
 		where c.tcAgeDays >= 183 and
-			 -- there are no 18 months follow up in foxpro, but it is there in new HFNY. So need discussion w/JH. ... khalsa
-			 Interval <> (select dbd.Interval
-							  from codeDueByDates dbd
-							  where dbd.EventDescription = '18 month Follow Up')
+			-- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
+			-- therefore, they're not required until 2013
+			Interval <> case when @StartDate >= '01/01/2013' 
+							then 'xx'
+							else '18'
+						end
 		group by HVCaseFK
 				,TCIDPK
 
@@ -205,12 +215,10 @@ begin
 		  ,cach.TCHasMedicalProvider
 		  ,'Change Form' as FormName
 		  ,max(FormDate) as FormDate -- get the latest CH
-
 		from cteCohort c
 			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
 		where c.tcAgeDays >= 183
-			 and
-			 FormDate <= @EndDate
+			 and FormDate <= @EndDate
 		group by c.HVCaseFK
 				,cach.TCHasMedicalProvider
 
@@ -269,8 +277,8 @@ begin
 					   null end
 		   end as FormName
 		  ,case
-			   when cach.TCHasMedicalProvider is not null and cach.FormDate > cafu.FormDate and cach.FormDate > '01/01/13' and 
-				   cach.TCHasMedicalProvider = 1 -- latest CH first preferred
+			   when cach.TCHasMedicalProvider is not null and cach.FormDate > cafu.FormDate 
+					and cach.FormDate > '01/01/13' and cach.TCHasMedicalProvider = 1 -- latest CH first preferred
 				   then cach.FormDate -- note: preference is given to the latest CH record first, if there is one
 
 			   else -- note: otherwise we will use tcid record's info
@@ -278,10 +286,11 @@ begin
 					   null end
 		   end as FormDate
 		  ,case
-			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) or (cafu.FormDate is not null and cafu.
-				   TCHasMedicalProvider is not null) then 1
-			   else
-				   0
+			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) 
+						or (cafu.FormDate is not null and cafu.TCHasMedicalProvider is not null 
+							and dbo.IsFormReviewed(cafu.FormDate,'FU',cafu.FormFK) = 1) 
+					then 1
+			   else 0
 		   end
 		   as FormReviewed
 		  ,case 
@@ -311,28 +320,28 @@ begin
 			left join CommonAttributes cafu on cafu.HVCaseFK = c.HVCaseFK and cafu.FormType = 'FU' and tcGE6FUInterval.Interval = 
 				cafu.FormInterval -- get the FU row
 			left join cteLatestCHForm4TC6MonthsOrOlder ch on ch.HVCaseFK = c.HVCaseFK
-			left join CommonAttributes cach on cach.HVCaseFK = ch.HVCaseFK and cach.FormType = 'CH' and cach.FormDate = ch.
-				FormDate -- get the latest CH row	
+			left join CommonAttributes cach on cach.HVCaseFK = ch.HVCaseFK and cach.FormType = 'CH' 
+												and cach.FormDate = ch.FormDate -- get the latest CH row	
 	)
 
-	-- let us put the above two disconnected tables (one for tc < 6 and other for TC >= 6)
-	select *
-			, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
-					when FormOutOfWindow = 1 then 'Form out of window'
-					when FormMissing = 1 then 'Form missing'
-					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
-							FormMeetsTarget = 0 then 'No Medical Provider recorded'
-					else '' end as NotMeetingReason
-		from cteExpectedForm4TCLessThan6Months
-	union
-	select *
-			, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
-					when FormOutOfWindow = 1 then 'Form out of window'
-					when FormMissing = 1 then 'Form missing'
-					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
-							FormMeetsTarget = 0 then 'No Medical Provider recorded'
-					else '' end as NotMeetingReason
-		from cteExpectedForm4TC6MonthsOrOlder
+-- let us put the above two disconnected tables (one for tc < 6 and other for TC >= 6)
+select *
+	  ,case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+		   when FormOutOfWindow = 1 then 'Form out of window'
+		   when FormMissing = 1 then 'Form missing'
+		   when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and
+			   FormMeetsTarget = 0 then 'No Medical Provider recorded'
+		   else '' end as NotMeetingReason
+	from cteExpectedForm4TCLessThan6Months
+union
+select *
+	  ,case when FormMissing = 1 then 'Form missing'
+		   when FormOutOfWindow = 1 then 'Form out of window'
+		   when FormReviewed = 0 then 'Form not reviewed by supervisor'
+		   when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and
+			   FormMeetsTarget = 0 then 'No Medical Provider recorded'
+		   else '' end as NotMeetingReason
+	from cteExpectedForm4TC6MonthsOrOlder
 
 ---- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
 

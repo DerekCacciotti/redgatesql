@@ -103,6 +103,7 @@ begin
 			  , case when (FollowUpPK is null or FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
 			  , EducationalEnrollment
+			  , ca.HighestGrade
 			  , e.ProgramType
 			from cteCohort c
 			left outer join cteInterval i on c.HVCaseFK = i.HVCaseFK
@@ -130,16 +131,19 @@ begin
 			  , FormOutOfWindow
 			  , FormMissing
 			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and 
-							EducationalEnrollment = '1' and ProgramType in ('01','02','03','06') 
+							(HighestGrade >='03' or 
+							 (HighestGrade < '03' and 
+								EducationalEnrollment = '1' 
+								and ProgramType in ('01','02','03','06')))
 						then 1 
 						else 0 
 						end as FormMeetsTarget
 			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when FormOutOfWindow = 1 then 'Form out of window'
 						when FormMissing = 1 then 'Form missing'
-						when EducationalEnrollment <> '1' 
+						when HighestGrade < '03' and EducationalEnrollment <> '1' 
 							then 'Not currently enrolled'
-						when ProgramType in ('01','02','03','06') 
+						when HighestGrade < '03' and EducationalEnrollment = '1' and ProgramType in ('01','02','03','06') 
 							then 'Enrolled, but wrong program'
 						else '' end as ReasonNotMeeting
 	from cteExpectedForm

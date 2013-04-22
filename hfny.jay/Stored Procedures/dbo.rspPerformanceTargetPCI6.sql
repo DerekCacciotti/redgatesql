@@ -79,7 +79,7 @@ begin
 	--,
 	cteMain
 	as
-		(select 'PCI5' as PTCode
+		(select 'PCI6' as PTCode
 					, coh.HVCaseFK
 					, PC1ID
 					, OldID

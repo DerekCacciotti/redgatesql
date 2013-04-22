@@ -119,7 +119,7 @@ begin
 						when PSITotalScoreValid <> 1 
 							then 'PSI total score invalid'
 						when PSITotalScore > 85
-							then 'PSI score above cutoff'
+							then 'PSI total score above cutoff'
 						else '' end as ReasonNotMeeting
 	from cteMain
 	-- order by OldID

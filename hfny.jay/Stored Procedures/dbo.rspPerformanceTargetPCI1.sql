@@ -97,6 +97,7 @@ begin
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
+			  , WasBreastFed
 			  , TimeBreastFed
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
@@ -125,7 +126,7 @@ begin
 			, FormReviewed
 			, FormOutOfWindow
 			, FormMissing
-			, case when (TimeBreastFed >= '04' and FormReviewed = 1 
+			, case when (WasBreastFed = 1 and TimeBreastFed >= '04' and FormReviewed = 1 
 							and FormOutOfWindow = 0 and FormMissing = 0) 
 					then 1 
 					else 0 
@@ -134,9 +135,11 @@ begin
 			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when FormOutOfWindow = 1 then 'Form out of window'
 						when FormMissing = 1 then 'Form missing'
-						when TimeBreastFed is null
+						when WasBreastFed is null or (WasBreastFed = 1 and TimeBreastFed is null)
 							then 'Breast fed question missing'
-						when TimeBreastFed < '04' 
+						when WasBreastFed = 0 
+							then 'No breast feeding'
+						when WasBreastFed = 1 and TimeBreastFed < '04' 
 							then 'Breast fed < 3 months'
 						else '' end as ReasonNotMeeting
 	from cteExpectedForm

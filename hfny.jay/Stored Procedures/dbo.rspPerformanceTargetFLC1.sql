@@ -193,7 +193,7 @@ begin
 				, FormReviewed
 				, FormOutOfWindow
 				, FormMissing
-				, case when PersonCount = (PC1Score + PC2Score + OBPScore) 
+				, case when (PC1Score + PC2Score + OBPScore) >= 1
 						then 1
 						else 0
 						end
@@ -201,35 +201,68 @@ begin
 				, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when FormOutOfWindow = 1 then 'Form out of window'
 						when FormMissing = 1 then 'Form missing'
-						when PC1FK is not null and PC1Score = 0 and
-							 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
-							 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
+						when PC1FK is not null 
+							 and PC2FK is null 
+							 and OBPFK is null 
+							 and PC1Score = 0
 							then 'PC1 not employed or enrolled'
-						when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
-							 PC2FK is not null and PC2Score = 0 and
-							 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
-							then 'PC2 not employed or enrolled'
-						when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
-							 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
-							 OBPFK is not null and OBPScore = 0 
-							then 'OBP not employed or enrolled'
-						when PC1FK is not null and PC1Score = 0 and
-							 PC2FK is not null and PC2Score = 0 and
-							 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
+						when PC1FK is not null 
+							 and PC2FK is not null 
+							 and OBPFK is null 
+							 and PC1Score = 0 
+							 and PC2Score = 0
 							then 'PC1/PC2 not employed or enrolled'
-						when PC1FK is not null and PC1Score = 0 and
-							 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
-							 OBPFK is not null and OBPScore = 0
+						when PC1FK is not null
+							 and PC2FK is null 
+							 and OBPFK is not null 
+							 and PC1Score = 0 
+							 and OBPScore = 0
 							then 'PC1/OBP not employed or enrolled'
-						when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
-							 PC2FK is not null and PC2Score = 0 and
-							 OBPFK is not null and OBPScore = 0
-							then 'PC2/OBP not employed or enrolled'
-						when PC1FK is not null and PC1Score = 0 and
-							 PC2FK is not null and PC2Score = 0 and
-							 OBPFK is not null and OBPScore = 0
+						when PC1FK is not null 
+							 and PC2FK is not null 
+							 and OBPFK is not null 
+							 and PC1Score = 0 
+							 and PC2Score = 0 
+							 and OBPScore = 0
 							then 'PC1/PC2/OBP not employed or enrolled'
-						else '' end as NotMeetingReason
+						else '' end as ReasonNotMeeting
+				--, case when PersonCount = (PC1Score + PC2Score + OBPScore) 
+				--		then 1
+				--		else 0
+				--		end
+				--	as FormMeetsTarget
+				--, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+				--		when FormOutOfWindow = 1 then 'Form out of window'
+				--		when FormMissing = 1 then 'Form missing'
+				--		when PC1FK is not null and PC1Score = 0 and
+				--			 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
+				--			 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
+				--			then 'PC1 not employed or enrolled'
+				--		when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
+				--			 PC2FK is not null and PC2Score = 0 and
+				--			 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
+				--			then 'PC2 not employed or enrolled'
+				--		when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
+				--			 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
+				--			 OBPFK is not null and OBPScore = 0 
+				--			then 'OBP not employed or enrolled'
+				--		when PC1FK is not null and PC1Score = 0 and
+				--			 PC2FK is not null and PC2Score = 0 and
+				--			 (OBPFK is null or (OBPFK is not null and OBPScore = 1)) 
+				--			then 'PC1/PC2 not employed or enrolled'
+				--		when PC1FK is not null and PC1Score = 0 and
+				--			 (PC2FK is null or (PC2FK is not null and PC2Score = 1)) and 
+				--			 OBPFK is not null and OBPScore = 0
+				--			then 'PC1/OBP not employed or enrolled'
+				--		when (PC1FK is null or (PC1FK is not null and PC1Score = 1)) and 
+				--			 PC2FK is not null and PC2Score = 0 and
+				--			 OBPFK is not null and OBPScore = 0
+				--			then 'PC2/OBP not employed or enrolled'
+				--		when PC1FK is not null and PC1Score = 0 and
+				--			 PC2FK is not null and PC2Score = 0 and
+				--			 OBPFK is not null and OBPScore = 0
+				--			then 'PC1/PC2/OBP not employed or enrolled'
+				--		else '' end as NotMeetingReason
 			from cteDistinctFollowUps dfu
 			inner join cteTargetElements se on se.HVCaseFK = dfu.HVCaseFK
 		)
