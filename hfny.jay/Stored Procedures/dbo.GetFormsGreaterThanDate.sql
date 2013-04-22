@@ -4,21 +4,22 @@ GO
 SET ANSI_NULLS ON
 GO
 
-CREATE PROCEDURE [dbo].[GetFormsGreaterThanDate]
+CREATE procedure [dbo].[GetFormsGreaterThanDate]
 (
-    @eventdate AS DATETIME,
-    @hvcasefk     INT
+    @eventdate as datetime,
+    @hvcasefk     int
 )
-AS
-	SELECT count(*) AS howmany
-		 , codeFormName
-	FROM
-		codeForm, FormReview
-	WHERE
-		codeFormAbbreviation = FormReview.formType
-		AND hvcasefk = @hvcasefk
-		AND DATEADD(D, 0, DATEDIFF(D, 0, formdate)) > @eventdate
+as
+	select count(*) as howmany
+		  ,codeFormName
+		from
+			codeForm,FormReview
+		where
+			 codeFormAbbreviation = FormReview.formType
+			 and hvcasefk = @hvcasefk
+			 and codeFormAbbreviation <> 'DS'
+			 and DATEADD(d,0,DATEDIFF(d,0,formdate)) > @eventdate
 		--AND formdate > @eventdate
-	GROUP BY
-		codeFormName
+		group by
+				codeFormName
 GO
