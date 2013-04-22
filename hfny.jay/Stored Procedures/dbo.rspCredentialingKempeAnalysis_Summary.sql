@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -1543,8 +1544,13 @@ INSERT INTO @tbl4CredentialingKempeAnalysis (SummaryText,TotalEnrolled,TotalNotE
 
 	  FROM @tblCohort h	  
 	  WHERE IntakeDate  IS NOT NULL   
-	  AND MOBPresent = 1 
-	  AND FOBPresent != 1 
+	  AND MOBPresent = 1 	  
+	  AND ((FOBPresent is null or FOBPresent = 0)
+	  and (MOBPartner is null or MOBPartner = 0)
+	  and (FOBPartner is null or FOBPartner = 0)
+	  and (MOBGrandmother is null or MOBGrandmother = 0)
+	  and (otherPresent is null or otherPresent = 0))
+	 
 UNION	  
 	SELECT	 
 			 2 AS SummaryId
@@ -1564,10 +1570,15 @@ UNION
 
 	  FROM @tblCohort h
 	  
-	  WHERE IntakeDate  IS NOT NULL   
-	  AND MOBPresent != 1
-	  AND FOBPresent = 1 
-UNION	  -- Need to sit with JOhn
+	  WHERE IntakeDate  IS NOT NULL 	  
+	  AND FOBPresent = 1 	  
+	  AND ((MOBPresent is null or FOBPresent = 0)
+	  and (MOBPartner is null or MOBPartner = 0)
+	  and (FOBPartner is null or FOBPartner = 0)
+	  and (MOBGrandmother is null or MOBGrandmother = 0)
+	  and (otherPresent is null or otherPresent = 0))	  
+
+UNION	  
 	SELECT	 
 			 4 AS SummaryId
 			 , '      Parent and Current Partner' AS SummaryText
@@ -1576,7 +1587,9 @@ UNION	  -- Need to sit with JOhn
 	  FROM @tblCohort h
 	  
 	  WHERE IntakeDate  IS NOT NULL   
-	  AND MOBPartner = 1 or FOBPartner = 1 or MOBGrandmother= 1
+	  -- Parent and Current Partner
+	  and (MOBPresent is not null or  FOBPresent is not null)
+	  AND (MOBPartner = 1 or FOBPartner = 1 or MOBGrandmother= 1 or otherPresent= 1)
 )
 ,
  ctePresentWhoNotEnrolled AS
@@ -1595,8 +1608,12 @@ UNION	  -- Need to sit with JOhn
 	  FROM @tblCohort h
 	  
 	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
-	 AND MOBPresent = 1 
-	 AND FOBPresent != 1 
+	  AND MOBPresent = 1 	  
+	  AND ((FOBPresent is null or FOBPresent = 0)
+	  and (MOBPartner is null or MOBPartner = 0)
+	  and (FOBPartner is null or FOBPartner = 0)
+	  and (MOBGrandmother is null or MOBGrandmother = 0)
+	  and (otherPresent is null or otherPresent = 0))
 
     UNION
 	SELECT	 
@@ -1630,9 +1647,13 @@ UNION	  -- Need to sit with JOhn
 	  FROM @tblCohort h
 	  
 	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
-	  AND MOBPresent != 1 
-	  AND FOBPresent = 1 
-    union   -- Need to sit with JOhn
+	  AND FOBPresent = 1 	  
+	  AND ((MOBPresent is null or FOBPresent = 0)
+	  and (MOBPartner is null or MOBPartner = 0)
+	  and (FOBPartner is null or FOBPartner = 0)
+	  and (MOBGrandmother is null or MOBGrandmother = 0)
+	  and (otherPresent is null or otherPresent = 0))	  
+    union   
 	SELECT	 
 			  4 AS SummaryId
 			 ,CONVERT(VARCHAR, count(h.HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(h.HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS TotalNotEnrolled	 
@@ -1646,8 +1667,10 @@ UNION	  -- Need to sit with JOhn
 
 	  FROM @tblCohort h
 	  
-	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
-	  AND MOBPartner = 1 or FOBPartner = 1 or MOBGrandmother= 1
+	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL 
+	  -- Parent and Current Partner
+	  and (MOBPresent is not null or  FOBPresent is not null)
+	  AND (MOBPartner = 1 or FOBPartner = 1 or MOBGrandmother= 1 or otherPresent= 1)
 )
 ,
 ctePresentWho AS  -- put ctePresentWhoEnrolled and ctePresentWhoNotEnrolled together
