@@ -9,6 +9,10 @@ GO
 -- Description:	Main storedproc for Retention Rate report
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
 -- exec rspRetentionRates 19, '20080101', '20121231'
+-- exec rspRetentionRates 37, '20090401', '20110331'
+-- exec rspRetentionRates 17, '20090401', '20110331'
+-- exec rspRetentionRates 20, '20080401', '20110331'
+
 -- =============================================
 -- =============================================
 CREATE PROCEDURE [dbo].[rspRetentionRates]
@@ -618,7 +622,8 @@ select distinct pc1id
 		, CountOfFSWs
 from cteMain
 -- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
-where DischargeReasonCode is NULL or DischargeReasonCode not in ('07','17','18')
+where DischargeReasonCode is NULL or -- DischargeReasonCode not in ('07','17','18') 
+		(DischargeReasonCode not in ('07','17','18') or datediff(day,IntakeDate,DischargeDate)>=(4*6*30.44))
 order by PC1ID,IntakeDate
 --endregion
 

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -5,11 +6,13 @@ GO
 -- =============================================
 -- Author:		jrobohn
 -- Create date: 03/31/11
--- Description:	Main storedproc for Retention Rate report
+-- Description:	Derived from main storedproc for Retention Rate report - this is the details
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
--- =============================================
+-- exec rspRetentionRates_Detail 37, '20090401', '20110331'
+-- exec rspRetentionRates_Detail 13, '20090401', '20110331'
+
 -- =============================================
 CREATE PROCEDURE [dbo].[rspRetentionRates_Detail]
 	-- Add the parameters for the stored procedure here
@@ -52,7 +55,9 @@ BEGIN
 		, TwoYearsDischarge int);
 	
 	declare @tblPC1withStats table (
-		PC1ID char(12)
+		PC1ID char(13)
+		, OldID char(23)
+		, HVCaseFK_old int
 		, IntakeDate datetime
 		, DischargeDate datetime
 		, LastHomeVisit datetime
@@ -148,7 +153,8 @@ BEGIN
 		, TrimesterAtIntake3rd int
 		, TrimesterAtIntake2nd int
 		, TrimesterAtIntake1st int
-		, CountOfFSWs int);
+		, CountOfFSWs int
+		, TotalDaysEnrolled int);
 	
 --endregion
 --region cteDischargeData - Get all discharge related data
@@ -274,6 +280,8 @@ BEGIN
 	cteMain as
 	------------------------
 		(select PC1ID
+			   ,OldID
+			   ,HVCaseFK_old
 			   ,IntakeDate
 			   ,LastHomeVisit
 			   ,CountOfFSWs
@@ -415,10 +423,12 @@ BEGIN
 --from cteDischargeData
 --select *
 --from cteMain
---order by PC1ID
+--order by HVCaseFK_old -- PC1ID
 --region Add rows to @tblPC1withStats for each case/pc1id in the cohort, which will create the basis for the final stats
 insert into @tblPC1withStats 
 		(PC1ID
+		, OldID
+		, HVCaseFK_old
 		, IntakeDate
 		, DischargeDate
 		, LastHomeVisit
@@ -514,8 +524,11 @@ insert into @tblPC1withStats
 		, TrimesterAtIntake3rd
 		, TrimesterAtIntake2nd
 		, TrimesterAtIntake1st
-		, CountOfFSWs)
+		, CountOfFSWs
+		, TotalDaysEnrolled)
 select distinct pc1id
+		, OldID
+		, HVCaseFK_old
 		, IntakeDate
 		, DischargeDate
 		, LastHomeVisit
@@ -616,14 +629,18 @@ select distinct pc1id
 		, case when IntakeDate<TCDOB and datediff(day,IntakeDate,TCDOB) between round(30.44*3,0)+1 and round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake2nd
 		, case when IntakeDate<TCDOB and datediff(day,IntakeDate,TCDOB) > round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake1st		
 		, CountOfFSWs
+		, datediff(day,IntakeDate,DischargeDate) as TotalDaysEnrolled
 from cteMain
 -- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
-where DischargeReasonCode is NULL or DischargeReasonCode not in ('07','17','18')
+where DischargeReasonCode is NULL or -- DischargeReasonCode not in ('07','17','18') 
+		(DischargeReasonCode not in ('07','17','18') or datediff(day,IntakeDate,DischargeDate)>=(4*6*30.44))
 order by PC1ID,IntakeDate
 --endregion
 
 select *
 from @tblPC1withStats
+order by HVCaseFK_old
+-- order by RetentionMonths
 
 END
 
