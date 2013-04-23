@@ -296,6 +296,41 @@ DECLARE @tbl4QAReport7Expected TABLE(
 	cteInterval [char](2) NOT NULL
 )
 
+-- get all hvcases that we will exclude because ASQTCReceiving = 1 for them
+DECLARE @tblExcludeCases TABLE(
+	HVCasePK INT	
+) 
+ 
+ ;
+ WITH cteLastHighestASQ AS
+(
+SELECT 
+		ra.HVCasePK
+		,ra.TCIDPK 			 
+	  , max(TCAge) AS Interval
+ 
+  FROM @tbl4QAReport7Detail ra  
+  left join tcid on tcid.hvcasefk = ra.hvcasepk     
+  LEFT JOIN ASQ A ON ra.HVCasePK = a.HVCaseFK and a.TCIDFK = ra.TCIDPK 
+ GROUP BY ra.HVCasePK, ra.TCIDPK 	
+ --ORDER BY HVCasePK 
+)
+
+INSERT INTO @tblExcludeCases
+(
+HVCasePK
+)
+	-- get hvcasepk's that we will exclude because for them ASQTCReceiving = 1 and EventDescription contains optional
+SELECT DISTINCT 		
+	  cc.HVCasePK		 
+	  FROM @tbl4QAReport7Detail cc
+INNER  JOIN cteLastHighestASQ cl ON cl.HVCasePK = cc.HVCasePK
+LEFT   JOIN ASQ asqq ON cl.HVCasePK = asqq.HVCaseFK -- OR asqq.HVCaseFK IS null
+WHERE  
+	(asqq.TCAge  = cl.Interval OR cl.Interval IS NULL)
+	AND
+	(asqq.ASQTCReceiving = 1)
+
 
 INSERT INTO @tbl4QAReport7Expected(
 	HVCasePK,
@@ -370,6 +405,7 @@ INSERT INTO @tbl4QAReport7Expected(
  inner join codeduebydates cd on scheduledevent = 'ASQ' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
  -- The following line gets those tcid's with ASQ's that are due for the Interval
  INNER JOIN ASQ Q ON Q.TCIDFK  = qa1.TCIDPK AND Q.TCAge = cteIn.Interval -- note 'Interval' is the minimum interval 
+ where qa1.HVCasePK not in (select HVCasePK from @tblExcludeCases) -- exclude cases that contains ASQTCReceiving = 1 as per John
  ORDER BY HVCasePK 
  
  
@@ -896,6 +932,7 @@ SELECT
 	 , LastASQIntervalCompleted
  FROM @tbl4QAReport7NotExpectedModified qa5
 LEFT join codeduebydates cd on scheduledevent = 'ASQ' AND qa5.IntervalExpected = cd.Interval -- to get dueby to calculate 'FormDueDate'
+where HVCasePK not in (select HVCasePK from @tblExcludeCases) -- exclude cases that contains ASQTCReceiving = 1 as per John
 ORDER BY HVCasePK 
 --- rspQAReport7 1 ,'summary'
 
