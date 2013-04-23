@@ -18,6 +18,7 @@ GO
 -- exec dbo.rspProgramInformationFor8Quarters @programfk=',19,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
 
 -- exec [rspProgramInformationFor8Quarters] '3','12/31/12'
+-- exec [rspProgramInformationFor8Quarters] '19','12/31/11'
 -- =============================================
 CREATE procedure [dbo].[rspProgramInformationFor8Quarters](@programfk    varchar(max)    = null,                                                       
                                                         @edate        DATETIME,
@@ -748,19 +749,6 @@ INSERT INTO @tblInitial_cohort
 	)
 
 	,
-	cteLevelAssigned AS	
-	(
-	select hvcasefk
-		 ,programfk
-		 ,max(levelassigndate) as levelassigndate
-	   from hvlevel h2
-	   INNER JOIN @tblMake8Quarter q8 ON levelassigndate <= [QuarterEndDate]	
-	   group by hvcasefk
-			   ,programfk
-	
-	)
-	,
-
 	cteFamiliesActiveAtEndOfThisQuarter6b AS
 	( -- "    b. % on Level X at end of Quarter"
 
@@ -768,30 +756,21 @@ INSERT INTO @tblInitial_cohort
 			, count(h.HVCasePK) over (partition by q8.[QuarterNumber]) as 'FamiliesActiveAtEndOfThisQuarterOnLevelX'
 			, q86b.FamiliesActiveAtEndOfThisQuarter AS FamiliesActiveAtEndOfThisQuarter
 		from @tblInitial_cohort h 		
-			left join (select hvlevel.hvlevelpk
-							 ,hvlevel.hvcasefk
-							 ,hvlevel.programfk
-							 ,hvlevel.levelassigndate
-							 ,levelname
-							 ,caseweight							 
-						   from hvlevel
-							   inner join codelevel on codelevelpk = levelfk
-							   inner join cteLevelAssigned e2 on e2.hvcasefk = hvlevel.hvcasefk and e2.programfk = hvlevel.programfk and e2.levelassigndate = hvlevel.levelassigndate)
-													    e3 on e3.hvcasefk = h.hvcasepk and e3.programfk = h.programfk	
-	
-	
-	
-				INNER JOIN @tblMake8Quarter q8 ON h.IntakeDate <= [QuarterEndDate]	
-				INNER JOIN cteFamiliesActiveAtEndOfThisQuarter6Again2 q86b ON q86b.QuarterNumber = q8.QuarterNumber		
+				
+			INNER JOIN @tblMake8Quarter q8 ON h.IntakeDate <= [QuarterEndDate]	
+			INNER JOIN cteFamiliesActiveAtEndOfThisQuarter6Again2 q86b ON q86b.QuarterNumber = q8.QuarterNumber	
+			--Note: we are making use of operator i.e. 'Outer Apply'
+			-- because a columns values cann't be passed to a function in a join without this operator  ... khalsa
+			outer apply [udfHVLevel](@programfk, q8.QuarterEndDate) e3
 
 
-				WHERE h.IntakeDate IS NOT NULL AND h.IntakeDate <= q8.QuarterEndDate			
-				AND (h.DischargeDate IS NULL OR h.DischargeDate > QuarterEndDate)				
-				AND e3.LevelName like 'Level X'	
+			WHERE h.IntakeDate IS NOT NULL AND h.IntakeDate <= q8.QuarterEndDate			
+			AND (h.DischargeDate IS NULL OR h.DischargeDate > QuarterEndDate)				
+			AND e3.LevelName like 'Level X'	
+			and e3.hvcasefk = h.hvcasepk and e3.programfk = h.programfk		
 
 
 	),		
-
 
 	cteFamiliesActiveAtEndOfThisQuarter6bHandlingMissingQuarters AS
 
