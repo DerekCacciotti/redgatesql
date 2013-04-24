@@ -386,7 +386,7 @@ WITH cteRaceEnrolled AS
 (
 	SELECT	 
 			 1 AS SummaryId
-			 , '      White' AS SummaryText
+			 , '      White, non-Hispanic' AS SummaryText
 			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalEnrolled,0), 0), 0))  + '%)' AS TotalEnrolled
 
 	  FROM @tblCohort
@@ -395,7 +395,7 @@ WITH cteRaceEnrolled AS
 UNION	  
 	SELECT	 
 			 2 AS SummaryId
-			 , '      Black' AS SummaryText
+			 , '      Black, non-Hispanic' AS SummaryText
 			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalEnrolled,0), 0), 0))  + '%)' AS TotalEnrolled
 
 	  FROM @tblCohort
@@ -404,30 +404,59 @@ UNION
 UNION	  
 	SELECT	 
 			 3 AS SummaryId
-			 , '      Hispanic' AS SummaryText
+			 , '      Hispanic/Latina/Latino' AS SummaryText
 			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalEnrolled,0), 0), 0))  + '%)' AS TotalEnrolled
 
 	  FROM @tblCohort
 	  WHERE IntakeDate  IS NOT NULL   
 	  AND Race = '03'
-UNION	  
+	  
+UNION
 	SELECT	 
 			 4 AS SummaryId
+			 , '      Asian' AS SummaryText
+			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalEnrolled,0), 0), 0))  + '%)' AS TotalEnrolled
+
+	  FROM @tblCohort
+	  WHERE IntakeDate  IS NOT NULL   
+	  AND Race = '04'
+UNION	  
+	SELECT	 
+			 5 AS SummaryId
+			 , '      Native American' AS SummaryText
+			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalEnrolled,0), 0), 0))  + '%)' AS TotalEnrolled
+
+	  FROM @tblCohort
+	  WHERE IntakeDate  IS NOT NULL   
+	  AND Race = '05'
+UNION	  
+	SELECT	 
+			 6 AS SummaryId
+			 , '      Multiracial' AS SummaryText
+			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalEnrolled,0), 0), 0))  + '%)' AS TotalEnrolled
+
+	  FROM @tblCohort
+	  WHERE IntakeDate  IS NOT NULL   
+	  AND Race = '06'
+	  
+UNION	  
+	SELECT	 
+			 7 AS SummaryId
 			 , '      Other' AS SummaryText
 			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalEnrolled,0), 0), 0))  + '%)' AS TotalEnrolled
 
 	  FROM @tblCohort
 	  WHERE IntakeDate  IS NOT NULL   
-	  AND Race NOT IN ('01','02','03') AND Race IS NOT NULL 
+	  AND Race = '07'
 UNION	  
 	SELECT	 
-			 5 AS SummaryId
-			 , '      Unknown' AS SummaryText
+			 8 AS SummaryId
+			 , '      Missing' AS SummaryText
 			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalEnrolled,0), 0), 0))  + '%)' AS TotalEnrolled
 
 	  FROM @tblCohort
 	  WHERE IntakeDate  IS NOT NULL   
-	  AND Race IS NULL 
+	  AND Race IS NULL or Race = ''
 
 )
 ,
@@ -491,7 +520,7 @@ UNION
 
 	  FROM @tblCohort
 	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
-	  AND Race NOT IN ('01','02','03') AND Race IS NOT NULL 
+	  AND Race = '04'
     UNION
 	SELECT	 
 			  5 AS SummaryId
@@ -506,7 +535,53 @@ UNION
 
 	  FROM @tblCohort
 	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
-	  AND Race IS NULL 
+	  AND Race = '05'
+    UNION
+	SELECT	 
+			  6 AS SummaryId
+			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS TotalNotEnrolled	 
+			 
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '36' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '36' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Refused
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '12' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '12' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_UnableToLocate
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '19' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '19' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_TCAgedOut
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '07' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '07' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_OutOfTargetArea
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason IN ('25') THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason IN ('25') THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Transfered
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason NOT IN ('36','12','19','07','25') THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason NOT IN ('36','12','19','07','25') THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_AllOthers
+
+	  FROM @tblCohort
+	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
+	  AND Race = '06'
+    UNION
+	SELECT	 
+			  7 AS SummaryId
+			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS TotalNotEnrolled	 
+			 
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '36' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '36' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Refused
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '12' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '12' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_UnableToLocate
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '19' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '19' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_TCAgedOut
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '07' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '07' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_OutOfTargetArea
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason IN ('25') THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason IN ('25') THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Transfered
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason NOT IN ('36','12','19','07','25') THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason NOT IN ('36','12','19','07','25') THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_AllOthers
+
+	  FROM @tblCohort
+	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
+	  AND Race = '07'
+
+    UNION
+	SELECT	 
+			  8 AS SummaryId
+			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS TotalNotEnrolled	 
+			 
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '36' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '36' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Refused
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '12' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '12' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_UnableToLocate
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '19' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '19' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_TCAgedOut
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason = '07' THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason = '07' THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_OutOfTargetArea
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason IN ('25') THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason IN ('25') THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Transfered
+			 ,CONVERT(VARCHAR, sum(CASE WHEN DischargeReason NOT IN ('36','12','19','07','25') THEN 1 ELSE 0 END) )  + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( sum(CASE WHEN DischargeReason NOT IN ('36','12','19','07','25') THEN 1 ELSE 0 END) AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_AllOthers
+
+	  FROM @tblCohort
+	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
+	  AND Race IS NULL or Race = '' 
   
 	  
 	  
