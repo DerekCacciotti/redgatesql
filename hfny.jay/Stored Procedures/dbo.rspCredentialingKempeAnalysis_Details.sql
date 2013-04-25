@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,6 +9,7 @@ GO
 -- Create date: <04/15/2013>
 -- Description:	<This Credentialing report gets you 'Details for 1-2.A Acceptance Rates and 1-2.B Refusal Rates Analysis'>
 -- rspCredentialingKempeAnalysis_Details 2, '01/01/2011', '12/31/2011'
+-- rspCredentialingKempeAnalysis_Details 4, '04/01/2012', '03/31/2013'
 
 -- =============================================
 
@@ -105,7 +107,7 @@ as
 
 	 
 	 WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
-	 ORDER BY ReportDischargeText, OldID
+	 ORDER BY ReportDischargeText, PC1ID
 
 -- rspCredentialingKempeAnalysis_Details 2, '01/01/2011', '12/31/2011'
 

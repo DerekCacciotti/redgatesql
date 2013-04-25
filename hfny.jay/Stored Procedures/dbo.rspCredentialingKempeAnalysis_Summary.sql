@@ -9,6 +9,7 @@ GO
 -- Create date: <04/04/2013>
 -- Description:	<This Credentialing report gets you 'Summary for 1-2.A Acceptance Rates and 1-2.B Refusal Rates Analysis'>
 -- rspCredentialingKempeAnalysis_Summary 2, '01/01/2011', '12/31/2011'
+-- rspCredentialingKempeAnalysis_Summary 1, '04/01/2012', '03/31/2013'
 
 -- =============================================
 
@@ -191,7 +192,7 @@ WITH cteTotalEnrolled AS
 (
 	SELECT	 
 			 1 AS SummaryId
-			 , 'Totals = ( ' + @Totals + ' )'  AS SummaryText
+			 , 'Totals ( N = ' + @Totals + ' )'  AS SummaryText
 			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@Totals,0), 0), 0))  + '%)' AS TotalEnrolled
 		
 	  FROM @tblCohort
