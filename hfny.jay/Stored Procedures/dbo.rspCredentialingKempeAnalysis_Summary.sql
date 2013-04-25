@@ -170,14 +170,30 @@ INSERT INTO @tblCohort(
 	 --ORDER BY OldID 
 	
 -- **************************************** Here goes the report calcuations *********************	
+
+-- We need to calculate %. So let us get ready
+DECLARE @TotalEnrolled [varchar](100)
+DECLARE @TotalNotEnrolled [varchar](100)
+DECLARE @Totals [varchar](100)
+
+
+Set @TotalEnrolled = (SELECT count(HVCasePK) as TotalEnrolled FROM @tblCohort WHERE IntakeDate  IS NOT NULL)
+Set @TotalNotEnrolled = (SELECT count(HVCasePK) as TotalNotEnrolled FROM @tblCohort WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL)
+Set @Totals = convert(varchar, (convert(int, @TotalEnrolled) + convert(int, @TotalNotEnrolled)) )
+
+
+
+-- rspCredentialingKempeAnalysis_Summary 2, '01/01/2011', '12/31/2011'
+
 ;
 -- Totals -- 
 WITH cteTotalEnrolled AS
 (
 	SELECT	 
 			 1 AS SummaryId
-			 , 'Totals' AS SummaryText
-			 , count(HVCasePK) AS TotalEnrolled
+			 , 'Totals = ( ' + @Totals + ' )'  AS SummaryText
+			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@Totals,0), 0), 0))  + '%)' AS TotalEnrolled
+		
 	  FROM @tblCohort
 	  WHERE IntakeDate  IS NOT NULL   
 	  
@@ -187,7 +203,7 @@ TotalNotEnrolled AS
 (
 	SELECT	 
 			 1 AS SummaryId
-			 ,count(HVCasePK) AS TotalNotEnrolled
+			 ,CONVERT(VARCHAR, count(HVCasePK)) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( count(HVCasePK) AS FLOAT) * 100/ NULLIF(@Totals,0), 0), 0))  + '%)' AS TotalNotEnrolled	 
 			 ,sum(CASE WHEN DischargeReason = '36' THEN 1 ELSE 0 END) [Totals4NotEnrolled_Refused]
 			 ,sum(CASE WHEN DischargeReason = '12' THEN 1 ELSE 0 END) [Totals4NotEnrolled_UnableToLocate]
 			 ,sum(CASE WHEN DischargeReason = '19' THEN 1 ELSE 0 END) [Totals4NotEnrolled_TCAgedOut]
@@ -208,12 +224,12 @@ SELECT
 	 , TotalEnrolled	
 	 , TotalNotEnrolled
 	 
-	 ,CONVERT(VARCHAR,Totals4NotEnrolled_Refused) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_Refused AS FLOAT) * 100/ NULLIF(TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Refused
-	 ,CONVERT(VARCHAR,Totals4NotEnrolled_UnableToLocate) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_UnableToLocate AS FLOAT) * 100/ NULLIF(TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_UnableToLocate
-	 ,CONVERT(VARCHAR,Totals4NotEnrolled_TCAgedOut) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_TCAgedOut AS FLOAT) * 100/ NULLIF(TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_TCAgedOut
-	 ,CONVERT(VARCHAR,Totals4NotEnrolled_OutOfTargetArea) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_OutOfTargetArea AS FLOAT) * 100/ NULLIF(TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_OutOfTargetArea
-	 ,CONVERT(VARCHAR,Totals4NotEnrolled_Transfered) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_Transfered AS FLOAT) * 100/ NULLIF(TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Transfered
-	 ,CONVERT(VARCHAR,Totals4NotEnrolled_AllOthers) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_AllOthers AS FLOAT) * 100/ NULLIF(TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_AllOthers
+	 ,CONVERT(VARCHAR,Totals4NotEnrolled_Refused) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_Refused AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Refused
+	 ,CONVERT(VARCHAR,Totals4NotEnrolled_UnableToLocate) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_UnableToLocate AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_UnableToLocate
+	 ,CONVERT(VARCHAR,Totals4NotEnrolled_TCAgedOut) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_TCAgedOut AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_TCAgedOut
+	 ,CONVERT(VARCHAR,Totals4NotEnrolled_OutOfTargetArea) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_OutOfTargetArea AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_OutOfTargetArea
+	 ,CONVERT(VARCHAR,Totals4NotEnrolled_Transfered) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_Transfered AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_Transfered
+	 ,CONVERT(VARCHAR,Totals4NotEnrolled_AllOthers) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(Totals4NotEnrolled_AllOthers AS FLOAT) * 100/ NULLIF(@TotalNotEnrolled,0), 0), 0))  + '%)' AS Totals4NotEnrolled_AllOthers
 
 	 
 	 FROM cteTotalEnrolled te
@@ -222,9 +238,9 @@ SELECT
 )
 
 
------- Totals --
+-- Totals --
 INSERT INTO @tbl4CredentialingKempeAnalysis (SummaryText,TotalEnrolled,TotalNotEnrolled,Totals4NotEnrolled_Refused,Totals4NotEnrolled_UnableToLocate,Totals4NotEnrolled_TCAgedOut,Totals4NotEnrolled_OutOfTargetArea,Totals4NotEnrolled_Transfered,Totals4NotEnrolled_AllOthers) SELECT * FROM CteTotals
-------insert blank line
+--insert blank line
 --INSERT INTO @tbl4CredentialingKempeAnalysis (SummaryText,TotalEnrolled,TotalNotEnrolled,Totals4NotEnrolled_Refused,Totals4NotEnrolled_UnableToLocate,Totals4NotEnrolled_TCAgedOut,Totals4NotEnrolled_OutOfTargetArea,Totals4NotEnrolled_Transfered,Totals4NotEnrolled_AllOthers) SELECT '','','','','','','','',''
 
 
@@ -232,15 +248,6 @@ INSERT INTO @tbl4CredentialingKempeAnalysis (SummaryText,TotalEnrolled,TotalNotE
 
 ---------- Age --
 INSERT INTO @tbl4CredentialingKempeAnalysis (SummaryText,TotalEnrolled,TotalNotEnrolled,Totals4NotEnrolled_Refused,Totals4NotEnrolled_UnableToLocate,Totals4NotEnrolled_TCAgedOut,Totals4NotEnrolled_OutOfTargetArea,Totals4NotEnrolled_Transfered,Totals4NotEnrolled_AllOthers) SELECT 'Age','','','','','','','',''
-
-
--- We need to calculate %. So let us get ready
-DECLARE @TotalEnrolled [varchar](100)
-DECLARE @TotalNotEnrolled [varchar](100)
-
-
-Set @TotalEnrolled = (SELECT TOP 1 TotalEnrolled FROM @tbl4CredentialingKempeAnalysis)
-Set @TotalNotEnrolled = (SELECT TOP 1 TotalNotEnrolled FROM @tbl4CredentialingKempeAnalysis)
 
 
 ;
