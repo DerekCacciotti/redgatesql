@@ -110,9 +110,9 @@ BEGIN
 )
 
  SELECT cteFinal.Workertype, workername, firsteventdate, FirstShadowDate, MeetsTarget, workercounter, totalmeetingcount
- ,  CASE WHEN totalmeetingcount/workercounter = 1 THEN '3' 
-	WHEN totalmeetingcount/workercounter BETWEEN .9 AND .99 THEN '2'
-	WHEN totalmeetingcount/workercounter < .9 THEN '1'
+ ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) = 1 THEN '3' 
+	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
+	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) < .9 THEN '1'
 	END AS Rating
 ,	CASE cteFinal.Workertype 
 		WHEN 'FAW' THEN 'NYS1a. Home visitors shadow experienced staff prior to direct work with families.'
@@ -124,6 +124,7 @@ BEGIN
 		WHEN 'FSW' THEN 'First Home Visit'
 		WHEN 'Supervisor' THEN 'First Supervisor Event'
 	END AS FirstEventDateType
+, cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) AS PercentMeeting
  FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.Workertype = cteFinal.Workertype
 ORDER BY cteFinal.Workertype
