@@ -175,11 +175,13 @@ begin
 	
 	
 -- PC1 Medical Insurance, Benefits, TANF service eligible (xx1)
+	
+-- PC1 Medical Insurance, Benefits, TANF service eligible (xx1)
 pc1MedicalInsurance
 AS (
 SELECT hh.HVCaseFK
 , convert(VARCHAR(MAX), ca.FormDate, 101) [PC1FormDate]
-, CASE WHEN ca.PC1ReceivingMedicaid = 1 THEN 'MA' 
+, CASE WHEN ca.PC1ReceivingMedicaid = '1' THEN 'MA' 
 WHEN ca.HIFamilyChildHealthPlus = 1 THEN 'HealthPlus'
 WHEN ca.HIPrivate = 1 THEN 'Private'
 WHEN ca.HIUninsured = 1 THEN 'Uninsured'
@@ -187,17 +189,17 @@ WHEN ca.HIUnknown = 1 THEN 'Other'
 WHEN ca.HIOther = 1 THEN 'Other'
 ELSE '' END [PC1MedicalInsurance]
 , case when HIMedicaidCaseNumber is not null and HIMedicaidCaseNumber <> '' THEN 'On File' ELSE 'Not on file' END [PC1MAOnFile]
-, CASE WHEN ca.PBEmergencyAssistance = 1 THEN 'EA ' ELSE '' END +
-CASE WHEN ca.PBFoodStamps = 1 THEN 'FS ' ELSE '' END +
-CASE WHEN ca.PBSSI = 1 THEN 'SSI ' ELSE '' END +
-Case WHEN ca.PBTANF = 1 THEN 'TANF ' ELSE '' END +
-Case WHEN ca.PBWIC = 1 THEN 'WIC' ELSE '' END [PC1Benefits]
+, CASE WHEN ca.PBEmergencyAssistance = '1' THEN 'EA ' ELSE '' END +
+CASE WHEN ca.PBFoodStamps = '1' THEN 'FS ' ELSE '' END +
+CASE WHEN ca.PBSSI = '1' THEN 'SSI ' ELSE '' END +
+Case WHEN ca.PBTANF = '1' THEN 'TANF ' ELSE '' END +
+Case WHEN ca.PBWIC = '1' THEN 'WIC' ELSE '' END [PC1Benefits]
 , CASE WHEN  ca.TANFServices = 1 THEN 'Yes' 
-WHEN ca.TANFServicesNo = 1 THEN (
-CASE WHEN ca.TANFServicesNoSpecify = '01' THEN 'No-Income above 200% of Poverty'                                                                       
-WHEN ca.TANFServicesNoSpecify = '02' THEN 'No-Immigration Status'
-WHEN ca.TANFServicesNoSpecify = '03' THEN 'No-Refused to complete application'
-WHEN ca.TANFServicesNoSpecify = '04' THEN 'No-' + ca.TANFServicesNoSpecify
+WHEN ca.TANFServices = 0 THEN (
+CASE WHEN ca.TANFServicesNo = '01' THEN 'No-Income above 200% of Poverty'                                                                       
+WHEN ca.TANFServicesNo = '02' THEN 'No-Immigration Status'
+WHEN ca.TANFServicesNo = '03' THEN 'No-Refused to complete application'
+WHEN ca.TANFServicesNo = '04' THEN 'No-' + ca.TANFServicesNoSpecify
 ELSE 'No' END
 )
 ELSE '' END [TANFServiceEligible]
@@ -254,7 +256,7 @@ TCMedicalInsurance
 AS (
 -- TC Doctor name/phone and Facility name/phone (xx3)
 SELECT hh.HVCaseFK 
-, CASE WHEN ca.TCReceivingMedicaid = 1 THEN 'MA' 
+, CASE WHEN ca.TCReceivingMedicaid = '1' THEN 'MA' 
 WHEN ca.TCHIFamilyChildHealthPlus = 1 THEN 'HealthPlus'
 WHEN ca.TCHIPrivateInsurance = 1 THEN 'Private'
 WHEN ca.TCHIUninsured = 1 THEN 'Uninsured'
