@@ -11,7 +11,6 @@ GO
 CREATE PROCEDURE [dbo].[rspTrainingRoleSpecific]
 	-- Add the parameters for the stored procedure here
 	@sdate AS DATETIME,
-	@edate AS DATETIME,
 	@progfk AS INT
 AS
 BEGIN
@@ -27,12 +26,13 @@ BEGIN
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE FAWStartDate BETWEEN @sdate AND dateadd(day, -183, @edate)
+	WHERE FAWStartDate BETWEEN @sdate AND dateadd(day, -183, GETDATE())
 	AND (FAWEndDate IS NULL OR FAWEndDate > dateadd(day, 180, FAWStartDate))
-	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
+	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
 	AND wp.ProgramFK = @progfk
 	GROUP BY wp.WorkerFK, LastName, FirstName, FAWInitialStart
 )
+
 
 --Get FSW's in time period
 , cteFSWMain AS (
@@ -43,9 +43,9 @@ BEGIN
     , FSWInitialStart  AS StartDate
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE FSWStartDate BETWEEN @sdate AND  dateadd(day, -183, @edate)
+	WHERE FSWStartDate BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
 	AND (FSWEndDate IS NULL OR FSWEndDate > dateadd(day, 180, FSWStartDate))
-	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
+	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
 	AND wp.ProgramFK = @progfk
 	GROUP BY wp.WorkerFK, LastName, FirstName, FSWInitialStart
 )
@@ -60,9 +60,9 @@ BEGIN
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE SupervisorStartDate BETWEEN @sdate AND  dateadd(day, -183, @edate)
+	WHERE SupervisorStartDate BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
 	AND (SupervisorEndDate IS NULL OR SupervisorEndDate > dateadd(day, 180, SupervisorStartDate))
-	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > @edate)
+	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
 	AND wp.ProgramFK = @progfk
 	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorInitialStart
 )
@@ -124,7 +124,7 @@ BEGIN
 				, topicname
 				, TrainingDate
 		FROM cteFAWMain
-		INNER JOIN cteFAWMainTraining ON cteFAWMainTraining.WorkerFK = cteFAWMain.WorkerFK
+		LEFT JOIN cteFAWMainTraining ON cteFAWMainTraining.WorkerFK = cteFAWMain.WorkerFK
 
 		UNION
 
@@ -133,7 +133,7 @@ BEGIN
 				, topicname
 				, TrainingDate
 		FROM cteFSWMain
-		INNER JOIN cteFSWMainTraining ON cteFSWMainTraining.WorkerFK = cteFSWMain.WorkerFK
+		LEFT JOIN cteFSWMainTraining ON cteFSWMainTraining.WorkerFK = cteFSWMain.WorkerFK
 
 		UNION
 
@@ -142,7 +142,7 @@ BEGIN
 				, topicname
 				, TrainingDate
 		FROM cteSupMain
-		INNER JOIN cteSuperMainTraining ON cteSuperMainTraining.WorkerFK = cteSupMain.WorkerFK
+		LEFT JOIN cteSuperMainTraining ON cteSuperMainTraining.WorkerFK = cteSupMain.WorkerFK
 )
 
 --add in the "MEETING" Target and Total workers.  Basically each training must occur within 6 months of start
@@ -169,11 +169,11 @@ BEGIN
 		GROUP BY CurrentRole
 )
 
---now put it all together
+----now put it all together
 SELECT *, CAST(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)) AS MeetingPercent
-,	CASE WHEN totalmeetingcount/TotalWorkers = 1 THEN '3' 
-	WHEN totalmeetingcount/TotalWorkers BETWEEN .9 AND .99 THEN '2'
-	WHEN totalmeetingcount/TotalWorkers < .9 THEN '1'
+,	CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) = 1 THEN '3' 
+	WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) > .9 THEN '2'
+	WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) < .9 THEN '1'
 	END AS Rating
 ,	CASE cteCountMeeting.CurrentRole 
 		WHEN 'FAW' THEN '10-3a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'

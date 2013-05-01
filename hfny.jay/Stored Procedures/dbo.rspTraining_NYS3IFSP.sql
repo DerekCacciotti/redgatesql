@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -105,11 +106,12 @@ BEGIN
 )
 
  SELECT cteFinal.workername, firsteventdate, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
- ,  CASE WHEN totalmeetingcount/workercount = 1 THEN '3' 
-	WHEN totalmeetingcount/workercount BETWEEN .9 AND .99 THEN '2'
-	WHEN totalmeetingcount/workercount < .9 THEN '1'
+ ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) = 1 THEN '3' 
+	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
+	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) < .9 THEN '1'
 	END AS Rating
 ,	'NYS3. Staff (Supervisors and Homve Visitors) receive IFSP training within three months of hire to a HFNY position.' AS CSST
+, cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) AS PercentMeeting
 FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.GenericColumn = cteFinal.GenericColumn
 ORDER BY cteFinal.workername
