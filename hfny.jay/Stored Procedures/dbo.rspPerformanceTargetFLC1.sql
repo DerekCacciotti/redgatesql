@@ -14,6 +14,7 @@ GO
 -- testing siteFK below
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, 1
 -- based on initial work on PTHD1 by dkhalsa
+-- rspPerformanceTargetReportSummary 7, '09/01/12', '11/30/12'
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetFLC1]
 (
@@ -28,33 +29,32 @@ begin
 	with cteTotalCases
 	as
 	(
-	select
-		 ptc.HVCaseFK
-		 , ptc.PC1ID
-		 , ptc.OldID
-		 , ptc.PC1FullName
-		 , ptc.CurrentWorkerFK
-		 , ptc.CurrentWorkerFullName
-		 , ptc.CurrentLevelName
-		 , ptc.ProgramFK
-		 , ptc.TCIDPK
-		 , ptc.TCDOB
-		 , DischargeDate
-		 , case
-			  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-				  datediff(day,ptc.tcdob,DischargeDate)
-			  else
-				  datediff(day,ptc.tcdob,@EndDate)
-		  end as tcAgeDays
-		 , case
-			  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-				  DischargeDate
-			  else
-				  @EndDate
-		  end as lastdate
-		 , PC1FK
-		 , PC2FK
-		 , OBPFK
+		select ptc.HVCaseFK
+				, ptc.PC1ID
+				, ptc.OldID
+				, ptc.PC1FullName
+				, ptc.CurrentWorkerFK
+				, ptc.CurrentWorkerFullName
+				, ptc.CurrentLevelName
+				, ptc.ProgramFK
+				, ptc.TCIDPK
+				, ptc.TCDOB
+				, DischargeDate
+				, case
+				  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
+					  datediff(day,ptc.tcdob,DischargeDate)
+				  else
+					  datediff(day,ptc.tcdob,@EndDate)
+				end as tcAgeDays
+				, case
+				  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
+					  DischargeDate
+				  else
+					  @EndDate
+				end as lastdate
+				, PC1FK
+				, PC2FK
+				, OBPFK
 		from @tblPTCases ptc
 			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
 			inner join CaseProgram cp on h.HVCasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
@@ -76,9 +76,9 @@ begin
 					, max(Interval) as Interval
 			from cteCohort
 				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
-			 -- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
-			 -- therefore, they're not required until 2013
-			 where Interval <> case when @StartDate >= '01/01/2013' then 'xx'
+			-- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
+			-- therefore, they're not required until 2013
+			where Interval <> case when @StartDate >= '01/01/2013' then 'xx'
 								else '18'
 								end
 			group by HVCaseFK
@@ -88,27 +88,28 @@ begin
 	as
 		(
 		select 'FLC1' as PTCode
-			  , c.HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName
-			  , FollowUpDate as FormDate
-			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
-			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
-			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
-			  , EventDescription as FormName
-			  , FormType
-			  , PC1InHome
-			  , PC2InHome
-			  , OBPInHome
-			  , IsCurrentlyEmployed
-			  , EducationalEnrollment
-			  , PC1FK
-			  , PC2FK
-			  , OBPFK
+				, c.HVCaseFK
+				, PC1ID
+				, OldID
+				, TCDOB
+				, PC1FullName
+				, CurrentWorkerFullName
+				, CurrentLevelName
+				, FollowUpDate as FormDate
+				, case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
+				, case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
+				, case when FollowUpPK is null then 1 else 0 end as FormMissing
+				, EventDescription as FormName
+				, FormType
+				, PC1InHome
+				, PC2InHome
+				, OBPInHome
+				, IsCurrentlyEmployed
+				, EducationalEnrollment
+				, PC1FK
+				, PC2FK
+				, OBPFK
+				, tcAgeDays
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
 			inner join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
@@ -127,31 +128,40 @@ begin
 			select HVCaseFK
 				, count(HVCaseFK) as PersonCount
 				, sum(case when FormType = 'FU-PC1' and 
-								(PC1InHome= '0' or 
+								-- (PC1InHome= '0' or 
 									(PC1InHome = '1' and 
-										(IsCurrentlyEmployed = '1' or EducationalEnrollment = '1')))
+										(IsCurrentlyEmployed = '1' or EducationalEnrollment = '1'))
+								--	)
 								then 1
 								else 0
 								end)
 						as PC1Score
+				, sum(case when PC1InHome = '1' then 1 else 0 end) 
+						as PC1InHome
 				, sum(case when FormType = 'FU-PC2' and 
-								(PC2InHome= '0' or 
+								-- (PC2InHome= '0' or 
 									(PC2InHome = '1' and 
-										(IsCurrentlyEmployed = '1' or EducationalEnrollment = '1')))
+										(IsCurrentlyEmployed = '1' or EducationalEnrollment = '1'))
+								--	)
 								then 1
 								else 0
 								end)
 						as PC2Score
+				, sum(case when PC2InHome = '1' then 1 else 0 end) 
+						as PC2InHome
 				, sum(case when FormType = 'FU-OBP' and 
-								(OBPInHome= '0' or 
+								-- (OBPInHome= '0' or 
 									(OBPInHome = '1' and 
-										(IsCurrentlyEmployed = '1' or EducationalEnrollment = '1')))
+										(IsCurrentlyEmployed = '1' or EducationalEnrollment = '1'))
+								--	)
 								then 1
 								else 0
 								end)
 						as OBPScore
+				, sum(case when OBPInHome = '1' then 1 else 0 end) 
+						as OBPInHome
 			from cteExpectedForm
-			group by HVCaseFK	
+			group by HVCaseFK
 		)
 		-- select * from cteTargetElements
 	,
@@ -159,21 +169,21 @@ begin
 	as
 		(
 		select distinct PTCode
-			  , HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName
-			  , FormName
-			  , FormDate
-			  , FormReviewed
-			  , FormOutOfWindow
-			  , FormMissing
-			  , PC1FK
-			  , PC2FK
-			  , OBPFK
+						, HVCaseFK
+						, PC1ID
+						, OldID
+						, TCDOB
+						, PC1FullName
+						, CurrentWorkerFullName
+						, CurrentLevelName
+						, FormName
+						, FormDate
+						, FormReviewed
+						, FormOutOfWindow
+						, FormMissing
+						, PC1FK
+						, PC2FK
+						, OBPFK
 			from cteExpectedForm
 		)
 	,
@@ -201,31 +211,59 @@ begin
 				, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when FormOutOfWindow = 1 then 'Form out of window'
 						when FormMissing = 1 then 'Form missing'
-						when PC1FK is not null 
+						when PC1FK is not null and te.PC1InHome >= 1
 							 and PC2FK is null 
 							 and OBPFK is null 
 							 and PC1Score = 0
 							then 'PC1 not employed or enrolled'
-						when PC1FK is not null 
-							 and PC2FK is not null 
+						when PC1FK is not null and te.PC1InHome >= 1
+							 and PC2FK is not null and te.PC2InHome >= 1
 							 and OBPFK is null 
 							 and PC1Score = 0 
 							 and PC2Score = 0
 							then 'PC1/PC2 not employed or enrolled'
-						when PC1FK is not null
+						when PC1FK is not null and te.PC1InHome >= 1
 							 and PC2FK is null 
-							 and OBPFK is not null 
+							 and OBPFK is not null and te.OBPInHome >= 1
 							 and PC1Score = 0 
 							 and OBPScore = 0
 							then 'PC1/OBP not employed or enrolled'
-						when PC1FK is not null 
-							 and PC2FK is not null 
-							 and OBPFK is not null 
+						when PC1FK is not null and te.PC1InHome >= 1
+							 and PC2FK is not null and te.PC2InHome >= 1
+							 and OBPFK is not null and te.OBPInHome >= 1
 							 and PC1Score = 0 
 							 and PC2Score = 0 
 							 and OBPScore = 0
 							then 'PC1/PC2/OBP not employed or enrolled'
 						else '' end as ReasonNotMeeting
+				--, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+				--		when FormOutOfWindow = 1 then 'Form out of window'
+				--		when FormMissing = 1 then 'Form missing'
+				--		when PC1FK is not null 
+				--			 and PC2FK is null 
+				--			 and OBPFK is null 
+				--			 and PC1Score = 0
+				--			then 'PC1 not employed or enrolled'
+				--		when PC1FK is not null 
+				--			 and PC2FK is not null 
+				--			 and OBPFK is null 
+				--			 and PC1Score = 0 
+				--			 and PC2Score = 0
+				--			then 'PC1/PC2 not employed or enrolled'
+				--		when PC1FK is not null
+				--			 and PC2FK is null 
+				--			 and OBPFK is not null 
+				--			 and PC1Score = 0 
+				--			 and OBPScore = 0
+				--			then 'PC1/OBP not employed or enrolled'
+				--		when PC1FK is not null 
+				--			 and PC2FK is not null 
+				--			 and OBPFK is not null 
+				--			 and PC1Score = 0 
+				--			 and PC2Score = 0 
+				--			 and OBPScore = 0
+				--			then 'PC1/PC2/OBP not employed or enrolled'
+				--		else '' end as ReasonNotMeeting
 				--, case when PersonCount = (PC1Score + PC2Score + OBPScore) 
 				--		then 1
 				--		else 0
@@ -264,7 +302,7 @@ begin
 				--			then 'PC1/PC2/OBP not employed or enrolled'
 				--		else '' end as NotMeetingReason
 			from cteDistinctFollowUps dfu
-			inner join cteTargetElements se on se.HVCaseFK = dfu.HVCaseFK
+			inner join cteTargetElements te on te.HVCaseFK = dfu.HVCaseFK
 		)
 	
 	select * from cteMain

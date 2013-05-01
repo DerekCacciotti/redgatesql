@@ -82,8 +82,10 @@ begin
 				, ServiceCode
 				, ServiceReceived
 				, case when dbo.IsFormReviewed(sr.ReferralDate,'SR',ServiceReferralPK) = 1 then 1 else 0 end as FormReviewed
-				, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
-				, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
+				, 0 as FormOutOfWindow
+				, 0 as FormMissing
+				--, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
+				--, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
 			from cteCohort coh
 			left outer join ServiceReferral sr on sr.HVCaseFK = coh.HVCaseFK
 			where DomesticViolence = '1' and ServiceCode = '51' and FamilyCode = '01'
@@ -94,8 +96,10 @@ begin
 				, ServiceCode
 				, ServiceReceived
 				, case when dbo.IsFormReviewed(sr.ReferralDate,'SR',ServiceReferralPK) = 1 then 1 else 0 end as FormReviewed
-				, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
-				, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
+				, 0 as FormOutOfWindow
+				, 0 as FormMissing
+				--, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
+				--, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
 			from cteCohort coh
 			left outer join ServiceReferral sr on sr.HVCaseFK = coh.HVCaseFK
 			where (Depression = '1' or MentalIllness = '1') and (ServiceCode = '49' or ServiceCode = '50') and FamilyCode = '01'
@@ -106,8 +110,10 @@ begin
 				, ServiceCode
 				, ServiceReceived
 				, case when dbo.IsFormReviewed(sr.ReferralDate,'SR',ServiceReferralPK) = 1 then 1 else 0 end as FormReviewed
-				, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
-				, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
+				, 0 as FormOutOfWindow
+				, 0 as FormMissing
+				--, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
+				--, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
 			from cteCohort coh
 			left outer join ServiceReferral sr on sr.HVCaseFK = coh.HVCaseFK
 			where (AlcoholAbuse = '1' or SubstanceAbuse = '1') and ServiceCode = '52' and FamilyCode = '01'
