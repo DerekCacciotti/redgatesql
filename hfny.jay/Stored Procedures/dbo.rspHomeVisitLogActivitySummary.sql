@@ -359,7 +359,7 @@ OR substring(CAHousing,1,1) = '1'
 OR substring(CAAdvocacy,1,1) = '1'
 OR substring(CATranslation,1,1) = '1'
 OR substring(CALaborSupport,1,1) = '1'
-OR substring(CAChildSupport,2,1) = '1'
+OR substring(CAChildSupport,1,1) = '1'
 OR substring(CAVisitation,1,1) = '1'
 OR substring(CAOther,1,1) = '1'
 THEN 1 ELSE 0 END) * 100  [CA1],
