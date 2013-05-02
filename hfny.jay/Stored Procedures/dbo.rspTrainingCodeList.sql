@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,7 +7,7 @@ GO
 -- Author:		Chris Papas
 -- Create date: 5/2/2013
 -- Description:	Report: Training Topics by Program
--- EXEC rspTrainingCodeList 8
+-- EXEC rspTrainingCodeList 1
 -- =============================================
 CREATE PROCEDURE [dbo].rspTrainingCodeList
 	-- Add the parameters for the stored procedure here
@@ -27,7 +28,7 @@ BEGIN
 , cteSubTopics AS (
 	SELECT '2' AS NewOrder,  TopicFK AS codetopicpk, TopicCode, '' AS TopicName, '' AS SATName
 	, '' AS SATReqBy,  st.subtopiccode, SubTopicName
-	, CASE WHEN RequiredBy = 'SITE' THEN '10-6    (' + RequiredBy + ')'
+	, CASE WHEN RequiredBy = 'SITE' THEN '10-6     (' + RequiredBy + ')'
 	ELSE t.SATName + '   (' + RequiredBy + ')'
 	END AS RequiredBy 
 	FROM SubTopic st 
