@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -37,8 +38,9 @@ SELECT a.WorkerFK, 1 AS [FSW]
 , CASE WHEN a.FSWEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [FSW_T]
 FROM WorkerProgram AS a
 INNER JOIN dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
-WHERE a.FSW = 1 AND a.FSWStartDate <= @StartDt 
+WHERE (a.FSWStartDate IS NOT NULL AND a.FSWStartDate <= @EndDt) 
 AND (a.FSWEndDate IS NULL OR a.FSWEndDate > @StartDt)
+AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
@@ -47,8 +49,9 @@ SELECT a.WorkerFK, 1 AS [FAW]
 , CASE WHEN a.FAWEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [FAW_T]
 FROM WorkerProgram AS a
 INNER JOIN dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
-WHERE a.FAW = 1 AND a.FAWStartDate <= @StartDt 
+WHERE (a.FAWStartDate IS NOT NULL AND a.FAWStartDate <= @EndDt) 
 AND (a.FAWEndDate IS NULL OR a.FAWEndDate > @StartDt)
+AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
@@ -68,8 +71,9 @@ SELECT a.WorkerFK, 1 AS [FAdv]
 , CASE WHEN a.FatherAdvocateEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [FAdv_T]
 FROM WorkerProgram AS a
 INNER JOIN dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
-WHERE a.FatherAdvocate = 1 AND a.FatherAdvocateStartDate <= @StartDt 
+WHERE (a.FatherAdvocateStartDate IS NOT NULL AND a.FatherAdvocateStartDate <= @EndDt) 
 AND (a.FatherAdvocateEndDate IS NULL OR a.FatherAdvocateEndDate > @StartDt)
+AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
@@ -90,8 +94,9 @@ SELECT a.WorkerFK, 1 AS [Supervisor]
 , CASE WHEN a.SupervisorEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [Supervisor_T]
 FROM WorkerProgram AS a
 INNER JOIN dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
-WHERE a.Supervisor = 1 AND a.SupervisorStartDate <= @StartDt 
+WHERE (a.SupervisorStartDate IS NOT NULL AND a.SupervisorStartDate <= @EndDt) 
 AND (a.SupervisorEndDate IS NULL OR a.SupervisorEndDate > @StartDt)
+AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
@@ -115,8 +120,9 @@ SELECT a.WorkerFK, 1 AS [Manager]
 , CASE WHEN a.ProgramManagerEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [Manager_T]
 FROM WorkerProgram AS a
 INNER JOIN dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
-WHERE a.ProgramManager = 1 AND a.ProgramManagerStartDate <= @StartDt 
+WHERE (a.ProgramManagerStartDate IS NOT NULL AND a.ProgramManagerStartDate <= @EndDt) 
 AND (a.ProgramManagerEndDate IS NULL OR a.ProgramManagerEndDate > @StartDt)
+AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
@@ -154,7 +160,7 @@ CASE WHEN a.Manager = 1 THEN 'PM' ELSE '' END [Func]
 FROM fsw_faw_fadv_supervisor_manager AS a
 JOIN Worker AS w ON a.WorkerFK = w.WorkerPK
 JOIN WorkerProgram AS wp ON wp.WorkerFK = a.WorkerFK
-LEFT OUTER JOIN codeApp AS b ON EducationLevel = b.AppCode AND b.AppCodeGroup = 'Education'
+LEFT OUTER JOIN codeApp AS b ON EducationLevel = b.AppCode AND b.AppCodeGroup = 'WorkerEducationLevel'
 )
 
 SELECT * FROM xxx ORDER BY LastName
