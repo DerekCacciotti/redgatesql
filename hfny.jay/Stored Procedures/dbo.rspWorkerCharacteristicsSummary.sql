@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -265,7 +266,7 @@ SELECT EducationLevel
 FROM xxx
 GROUP BY EducationLevel
 ) AS b ON b.EducationLevel = a.AppCode
-WHERE AppCodeGroup = 'Education'
+WHERE AppCodeGroup = 'WorkerEducationLevel'
 ),
 
 edu_all AS (
