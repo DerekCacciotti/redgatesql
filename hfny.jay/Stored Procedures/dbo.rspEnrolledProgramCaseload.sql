@@ -7,7 +7,8 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Jyly 16th, 2012>
 -- Description:	<gets you data for Enrolled Program Caseload Quarterly and Contract Period>
--- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2010',null,0, null
+-- exec [rspEnrolledProgramCaseload] ',19,','07/01/2012','09/30/2012',null,0, null,1
+-- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2011',null,0, null,0
 -- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2010',null,1
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)    = null,
@@ -15,7 +16,8 @@ CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)  
                                                         @edate        datetime,                                                        
                                                         @sitefk int             = NULL,
                                                         @CustomQuarterlyDates BIT,
-                                                        @casefilterspositive varchar(200)                                                         
+                                                        @casefilterspositive varchar(200),
+                                                        @IncludeClosedCases		bit             = 0                                                         
                                                         )
 
 as
@@ -115,6 +117,24 @@ INSERT INTO @tblInitRequiredData(
 	[SiteFK])
 SELECT * FROM @tblInitRequiredDataTemp
 WHERE SiteFK = isnull(@sitefk,SiteFK)
+---- inclusion / exclusion of closed case
+--				and (DischargeDate is null
+--					or case -- closed cases are not included
+--						 when @IncludeClosedCases = 0 or @IncludeClosedCases is null then
+--							 (case
+--								 when DischargeDate > @eDate then
+--									 1
+--								 else
+--									 0
+--							 end)
+--						 else -- include closed cases
+--							 (case
+--								 when DischargeDate >= @sDate then
+--									 1
+--								 else
+--									 0
+--							 end)
+--					 end = 1)
 
 ---------------------------------------------
 
@@ -137,7 +157,8 @@ FROM @tblInitRequiredData irq
 LEFT JOIN TCID T ON irq.HVCasePK = T.HVCaseFK 
 WHERE IntakeDate IS NOT NULL 
 AND IntakeDate < @sdate
-AND (DischargeDate IS NULL OR DischargeDate >= @sdate)			
+AND (DischargeDate IS NULL OR DischargeDate >= @sdate)	
+and irq.tcdob <=  @edate -- as per JH - take our babies who are born after the end period of the report		
 )
 
 
@@ -175,7 +196,8 @@ IF (@CustomQuarterlyDates = 0)
 			LEFT JOIN TCID T ON irq.HVCasePK = T.HVCaseFK 
 			WHERE IntakeDate IS NOT NULL 
 			AND IntakeDate < @ContractStartDate
-			AND (DischargeDate IS NULL OR DischargeDate >= @ContractStartDate)			
+			AND (DischargeDate IS NULL OR DischargeDate >= @ContractStartDate)	
+			and irq.tcdob <=  @edate -- as per JH - take our babies who are born after the end period of the report		
 			)
 
 
