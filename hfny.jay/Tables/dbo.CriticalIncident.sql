@@ -122,13 +122,10 @@ From [CriticalIncident] INNER JOIN Inserted ON [CriticalIncident].[CriticalIncid
 GO
 ALTER TABLE [dbo].[CriticalIncident] ADD CONSTRAINT [PK__Critical__C34E6F0D5EBF139D] PRIMARY KEY CLUSTERED  ([CriticalIncidentPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[CriticalIncident] WITH NOCHECK ADD CONSTRAINT [FK_CriticalIncident_AssignedWorkerFK] FOREIGN KEY ([AssignedWorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
+
 ALTER TABLE [dbo].[CriticalIncident] WITH NOCHECK ADD CONSTRAINT [FK_CriticalIncident_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[CriticalIncident] WITH NOCHECK ADD CONSTRAINT [FK_CriticalIncident_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
 ALTER TABLE [dbo].[CriticalIncident] WITH NOCHECK ADD CONSTRAINT [FK_CriticalIncident_ServiceLevelFK] FOREIGN KEY ([ServiceLevelFK]) REFERENCES [dbo].[HVLevel] ([HVLevelPK])
-GO
-ALTER TABLE [dbo].[CriticalIncident] WITH NOCHECK ADD CONSTRAINT [FK_CriticalIncident_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO

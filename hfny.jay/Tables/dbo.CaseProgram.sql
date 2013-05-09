@@ -96,12 +96,6 @@ Update CaseProgram Set CaseProgram.CaseProgramEditDate= getdate()
 From [CaseProgram] INNER JOIN Inserted ON [CaseProgram].[CaseProgramPK]= Inserted.[CaseProgramPK]
 GO
 
-ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_CurrentFAFK] FOREIGN KEY ([CurrentFAFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
-ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_CurrentFAWFK] FOREIGN KEY ([CurrentFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
-ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_CurrentFSWFK] FOREIGN KEY ([CurrentFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
 ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_CurrentLevelFK] FOREIGN KEY ([CurrentLevelFK]) REFERENCES [dbo].[codeLevel] ([codeLevelPK])
 GO
 ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])

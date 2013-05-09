@@ -112,8 +112,7 @@ From [ServiceReferral] INNER JOIN Inserted ON [ServiceReferral].[ServiceReferral
 GO
 ALTER TABLE [dbo].[ServiceReferral] ADD CONSTRAINT [PK__ServiceR__9084E71E73852659] PRIMARY KEY CLUSTERED  ([ServiceReferralPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
+
 ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])

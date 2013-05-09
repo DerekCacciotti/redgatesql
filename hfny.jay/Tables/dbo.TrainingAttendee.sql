@@ -35,7 +35,6 @@ GO
 
 ALTER TABLE [dbo].[TrainingAttendee] ADD
 CONSTRAINT [FK_TrainingAttendee_TrainingFK] FOREIGN KEY ([TrainingFK]) REFERENCES [dbo].[Training] ([TrainingPK])
-ALTER TABLE [dbo].[TrainingAttendee] ADD
-CONSTRAINT [FK_TrainingAttendee_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+
 
 GO

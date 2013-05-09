@@ -20,6 +20,7 @@ CREATE TABLE [dbo].[Worker]
 [PreviousName] [char] (51) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Race] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RaceSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[State] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Street] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisorCoreDate] [datetime] NULL,
 [SupervisorFirstEvent] [datetime] NULL,
@@ -34,6 +35,8 @@ CREATE TABLE [dbo].[Worker]
 [Zip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LoginCreated] [bit] NOT NULL CONSTRAINT [DF_Worker_LoginCreated] DEFAULT ((0))
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[Worker] ADD 
+CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -47,6 +50,4 @@ For Update
 AS
 Update Worker Set Worker.WorkerEditDate= getdate()
 From [Worker] INNER JOIN Inserted ON [Worker].[WorkerPK]= Inserted.[WorkerPK]
-GO
-ALTER TABLE [dbo].[Worker] ADD CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
 GO

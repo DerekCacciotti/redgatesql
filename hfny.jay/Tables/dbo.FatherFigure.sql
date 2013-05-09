@@ -93,8 +93,7 @@ From [FatherFigure] INNER JOIN Inserted ON [FatherFigure].[FatherFigurePK]= Inse
 GO
 ALTER TABLE [dbo].[FatherFigure] ADD CONSTRAINT [PK__FatherFi__BBD3B90B6D0D32F4] PRIMARY KEY CLUSTERED  ([FatherFigurePK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD CONSTRAINT [FK_FatherFigure_FatherAdvocateFK] FOREIGN KEY ([FatherAdvocateFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
+
 ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD CONSTRAINT [FK_FatherFigure_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD CONSTRAINT [FK_FatherFigure_PCFK] FOREIGN KEY ([PCFK]) REFERENCES [dbo].[PC] ([PCPK])

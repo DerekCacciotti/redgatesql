@@ -100,8 +100,7 @@ From [Intake] INNER JOIN Inserted ON [Intake].[IntakePK]= Inserted.[IntakePK]
 GO
 ALTER TABLE [dbo].[Intake] ADD CONSTRAINT [PK__Intake__7E1E6135208CD6FA] PRIMARY KEY CLUSTERED  ([IntakePK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD CONSTRAINT [FK_Intake_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
+
 ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD CONSTRAINT [FK_Intake_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD CONSTRAINT [FK_Intake_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])

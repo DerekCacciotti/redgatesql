@@ -14,8 +14,7 @@ CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssi
 
 CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssignment] ([WorkerFK]) ON [PRIMARY]
 
-ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD
-CONSTRAINT [FK_WorkerAssignment_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_HVCaseFK] ON [dbo].[WorkerAssignment] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_ProgramFK] ON [dbo].[WorkerAssignment] ([ProgramFK]) ON [PRIMARY]

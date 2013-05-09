@@ -129,7 +129,6 @@ ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD CONSTRAINT [FK_Preintake_HVCaseFK
 GO
 ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD CONSTRAINT [FK_Preintake_KempeFK] FOREIGN KEY ([KempeFK]) REFERENCES [dbo].[Kempe] ([KempePK])
 GO
-ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD CONSTRAINT [FK_Preintake_PIFSWFK] FOREIGN KEY ([PIFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
+
 ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD CONSTRAINT [FK_Preintake_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO

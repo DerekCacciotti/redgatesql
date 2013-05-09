@@ -72,7 +72,3 @@ CREATE NONCLUSTERED INDEX [IX_FK_Supervision_WorkerFK] ON [dbo].[Supervision] ([
 GO
 ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD CONSTRAINT [FK_Supervision_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
-ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD CONSTRAINT [FK_Supervision_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO

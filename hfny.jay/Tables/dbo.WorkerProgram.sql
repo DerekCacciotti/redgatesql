@@ -69,7 +69,3 @@ CREATE NONCLUSTERED INDEX [IX_WorkerProgram] ON [dbo].[WorkerProgram] ([WorkerFK
 GO
 ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD CONSTRAINT [FK_WorkerProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
-ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD CONSTRAINT [FK_WorkerProgram_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
-ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD CONSTRAINT [FK_WorkerProgram_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
