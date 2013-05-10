@@ -53,7 +53,8 @@ begin
 			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName
 			 , cp.CurrentFSWFK
 			 , rtrim(w.FirstName) + ' ' + rtrim(w.LastName) as CurrentWorkerFullName
-			 , LevelName as CurrentLevelName
+			 -- , dbo.udfLevelOnDate(cp.ProgramFK, HVCasePK, @EndDate) as CurrentLevelName
+			 , hvl.levelname as CurrentLevelName
 			 , @ProgramFKs
 			 , tcid.TCIDPK
 			 , case
@@ -67,7 +68,8 @@ begin
 				inner join PC P on P.PCPK = h.PC1FK
 				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
 				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
-				inner join codeLevel l on l.codeLevelPK = cp.CurrentLevelFK
+				-- inner join codeLevel l on l.codeLevelPK = cp.CurrentLevelFK
+				inner join dbo.udfHVLevel(@ProgramFKs, @EndDate) hvl on hvl.hvcasefk = cp.HVCaseFK
 				inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
 				left join tcid on tcid.hvcasefk = h.hvcasepk -- for dead babies dod
 			where

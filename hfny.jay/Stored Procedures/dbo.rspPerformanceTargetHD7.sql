@@ -452,7 +452,7 @@ begin
 				, case when FormMissing = 1 then 'Form missing'
 						when FormOutOfWindow = 1 then 'Form out of window'
 						when FormReviewed = 0 then 'Form not reviewed by supervisor'
-						when MeetsTargetCode = '0' then 'Under cutoff scores without EIP service'
+						when MeetsTargetCode = '0' then 'Under cutoff scores without EIP referral'
 						else '' end as NotMeetingReason
 			  --, MeetsTargetCode
 			  --, tcAgeDays
