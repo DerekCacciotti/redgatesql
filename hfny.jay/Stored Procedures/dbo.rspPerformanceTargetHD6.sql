@@ -145,9 +145,9 @@ begin
 				, FormOutOfWindow
 				, FormMissing
 				, FormMeetsTarget
-				, case when FormReviewed = 0 then 'Form(s) not reviewed by supervisor'
+				, case when FormMissing = 1 then 'Form missing'
 						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormMissing = 1 then 'Form missing'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 
 							then 'Missing Well Baby Visits'
 						else '' end as ReasonNotMeeting

@@ -99,23 +99,23 @@ begin
 			  left outer join PSI P on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '01'
 		)
 	select PTCode
-			  , HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName
-			  , FormName
-			  , FormDate
-			  , FormReviewed
-			  , FormOutOfWindow
-			  , FormMissing
-			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and
+				, HVCaseFK
+				, PC1ID
+				, OldID
+				, TCDOB
+				, PC1FullName
+				, CurrentWorkerFullName
+				, CurrentLevelName
+				, FormName
+				, FormDate
+				, FormReviewed
+				, FormOutOfWindow
+				, FormMissing
+				, case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and
 						PSITotalScoreValid = 1 and PSITotalScore <= 85 then 1 else 0 end as FormMeetsTarget
-			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+				, case when FormMissing = 1 then 'Form missing'
 						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormMissing = 1 then 'Form missing'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when PSITotalScoreValid <> 1 
 							then 'PSI total score invalid'
 						when PSITotalScore > 85

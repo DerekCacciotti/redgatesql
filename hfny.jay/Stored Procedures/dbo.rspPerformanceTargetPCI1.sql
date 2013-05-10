@@ -132,9 +132,9 @@ begin
 					else 0 
 					end 
 				as FormMeetsTarget
-			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+			  , case when FormMissing = 1 then 'Form missing'
 						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormMissing = 1 then 'Form missing'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when WasBreastFed is null or (WasBreastFed = 1 and TimeBreastFed is null)
 							then 'Breast fed question missing'
 						when WasBreastFed = 0 

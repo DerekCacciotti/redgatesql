@@ -110,9 +110,9 @@ begin
 							and FormReviewed = 1 then 1 
 						else 0 
 				end as FormMeetsTarget
-			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+			  , case when FormMissing = 1 then 'Form missing'
 						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormMissing = 1 then 'Form missing'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						else '' end as ReasonNotMeeting
 	from cteMain
 	-- order by OldID

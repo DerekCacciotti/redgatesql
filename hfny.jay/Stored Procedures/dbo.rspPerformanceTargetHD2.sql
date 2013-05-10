@@ -15,9 +15,9 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetHD2]
 (
-    @StartDate      datetime,
-    @EndDate      datetime,
-    @tblPTCases  PTCases                           readonly
+    @StartDate	datetime,
+    @EndDate	datetime,
+    @tblPTCases	PTCases	readonly
 )
 
 as
@@ -152,27 +152,28 @@ begin
 	as
 	(
 		select 'HD2' as PTCode
-			  , coh.HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName
-			  , 'TC Medical' as FormName
-			  , NULL as FormDate	
-			, case when ((ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
-						AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP) 
-						AND (ImmunizationCountMMR IS NULL OR ImmunizationCountMMR = FormReviewedCountMMR)) -- # of shots = # of forms reveiwed
-					then 1 
-					else 0 
-					end as FormReviewed		
-			, 0 as FormOutOfWindow
-			, 0 as FormMissing
-			, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) AND (ImmunizationCountMMR >= 1)) then 1 
-					else 0 end as FormMeetsTarget
-			, case when ((ImmunizationCountDTaP >= 3) AND (ImmunizationCountPolio >= 2)) then '' 
-					else 'Missing Shots or Not on Time' end as NotMeetingReason
+				, coh.HVCaseFK
+				, PC1ID
+				, OldID
+				, TCDOB
+				, PC1FullName
+				, CurrentWorkerFullName
+				, CurrentLevelName
+				, 'TC Medical' as FormName
+				, NULL as FormDate	
+				-- # of shots = # of forms reveiwed
+				, case when ((ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
+							AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP) 
+							AND (ImmunizationCountMMR IS NULL OR ImmunizationCountMMR = FormReviewedCountMMR))
+						then 1 
+						else 0 
+						end as FormReviewed		
+				, 0 as FormOutOfWindow
+				, 0 as FormMissing
+				, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) and (ImmunizationCountMMR >= 1)) then 1 
+						else 0 end as FormMeetsTarget
+				, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) and (ImmunizationCountMMR >= 1)) then '' 
+						else 'Missing Shots or Not on Time' end as NotMeetingReason
 	 from cteCohort coh
 	 LEFT join cteImmunizationsPolio immPolio on immPolio.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immPolio.TCIDPK 
 	 LEFT join cteImmunizationsDTaP immDTaP on immDTaP.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immDTaP.TCIDPK 

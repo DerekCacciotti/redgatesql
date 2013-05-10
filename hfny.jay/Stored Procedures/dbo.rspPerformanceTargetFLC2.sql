@@ -206,34 +206,42 @@ begin
 						else 0
 						end
 					as FormMeetsTarget
-				, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+				, case when FormMissing = 1 then 'Form missing'
 						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormMissing = 1 then 'Form missing'
-						when PC1FK is not null and te.PC1InHome >= 1
-							 and PC2FK is null 
-							 and OBPFK is null 
-							 and PC1Score = 0
-							then 'PC1 not employed or enrolled'
-						when PC1FK is not null and te.PC1InHome >= 1
-							 and PC2FK is not null and te.PC2InHome >= 1
-							 and OBPFK is null 
-							 and PC1Score = 0 
-							 and PC2Score = 0
-							then 'PC1/PC2 not employed or enrolled'
-						when PC1FK is not null and te.PC1InHome >= 1
-							 and PC2FK is null 
-							 and OBPFK is not null and te.OBPInHome >= 1
-							 and PC1Score = 0 
-							 and OBPScore = 0
-							then 'PC1/OBP not employed or enrolled'
-						when PC1FK is not null and te.PC1InHome >= 1
-							 and PC2FK is not null and te.PC2InHome >= 1
-							 and OBPFK is not null and te.OBPInHome >= 1
-							 and PC1Score = 0 
-							 and PC2Score = 0 
-							 and OBPScore = 0
-							then 'PC1/PC2/OBP not employed or enrolled'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
+						when (PC1FK is not null and te.PC1InHome >= 1 and PC1Score = 0)
+								or (PC2FK is not null and te.PC2InHome >= 1 and PC2Score = 0)
+								or (OBPFK is not null and te.OBPInHome >= 1 and OBPScore = 0)
+							then 'Family members not employed or enrolled'
 						else '' end as ReasonNotMeeting
+				--, case when FormMissing = 1 then 'Form missing'
+				--		when FormOutOfWindow = 1 then 'Form out of window'
+				--		when FormReviewed = 0 then 'Form not reviewed by supervisor'
+				--		when PC1FK is not null and te.PC1InHome >= 1
+				--			 and PC2FK is null 
+				--			 and OBPFK is null 
+				--			 and PC1Score = 0
+				--			then 'PC1 not employed or enrolled'
+				--		when PC1FK is not null and te.PC1InHome >= 1
+				--			 and PC2FK is not null and te.PC2InHome >= 1
+				--			 and OBPFK is null 
+				--			 and PC1Score = 0 
+				--			 and PC2Score = 0
+				--			then 'PC1/PC2 not employed or enrolled'
+				--		when PC1FK is not null and te.PC1InHome >= 1
+				--			 and PC2FK is null 
+				--			 and OBPFK is not null and te.OBPInHome >= 1
+				--			 and PC1Score = 0 
+				--			 and OBPScore = 0
+				--			then 'PC1/OBP not employed or enrolled'
+				--		when PC1FK is not null and te.PC1InHome >= 1
+				--			 and PC2FK is not null and te.PC2InHome >= 1
+				--			 and OBPFK is not null and te.OBPInHome >= 1
+				--			 and PC1Score = 0 
+				--			 and PC2Score = 0 
+				--			 and OBPScore = 0
+				--			then 'PC1/PC2/OBP not employed or enrolled'
+				--		else '' end as ReasonNotMeeting
 				--, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
 				--		when FormOutOfWindow = 1 then 'Form out of window'
 				--		when FormMissing = 1 then 'Form missing'

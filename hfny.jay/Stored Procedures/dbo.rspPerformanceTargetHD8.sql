@@ -277,18 +277,18 @@ begin
 	)
 	-- let us put the above two disconnected tables (one for tc < 6 and other for TC >= 6)
 	select *
-			, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+			, case when FormMissing = 1 then 'Form missing'
 					when FormOutOfWindow = 1 then 'Form out of window'
-					when FormMissing = 1 then 'Form missing'
+					when FormReviewed = 0 then 'Form not reviewed by supervisor'
 					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
 							FormMeetsTarget = 0 then 'No Medical Provider recorded'
 					else '' end as NotMeetingReason
 		from cteExpectedForm4TCLessThan6Months
 	union
 	select *
-			, case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+			, case when FormMissing = 1 then 'Form missing'
 					when FormOutOfWindow = 1 then 'Form out of window'
-					when FormMissing = 1 then 'Form missing'
+					when FormReviewed = 0 then 'Form not reviewed by supervisor'
 					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
 							FormMeetsTarget = 0 then 'No Medical Provider recorded'
 					else '' end as NotMeetingReason

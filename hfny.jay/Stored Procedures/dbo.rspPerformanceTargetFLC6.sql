@@ -137,9 +137,9 @@ begin
 						then 1 
 						else 0 
 						end as FormMeetsTarget
-			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+			  , case when FormMissing = 1 then 'Form missing'
 						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormMissing = 1 then 'Form missing'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when HighestGrade < '03' and EducationalEnrollment <> '1' 
 							then 'Not currently enrolled'
 						when HighestGrade < '03' and EducationalEnrollment = '1' and ProgramType in ('01','02','03','06') 

@@ -408,52 +408,52 @@ begin
 	as
 	(
 		select PTCode
-			  , mt.HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName
-			  , case when substring(MeetsTargetCode,2,1) = '1' then FormText1
-		  			 when substring(MeetsTargetCode,2,1) = '2' then FormText2
-		  			 when substring(MeetsTargetCode,2,1) = '3' then FormText3
-		  			 when substring(MeetsTargetCode,2,1) = '4' then FormText4
-		  			 when MeetsTargetCode = '0' and asqpk1 is not null then FormText1
-		  			 when MeetsTargetCode = '0' and asqpk2 is not null then FormText2
-		  			 when MeetsTargetCode = '0' and asqpk3 is not null then FormText3
-		  			 when MeetsTargetCode = '0' and asqpk1 is null 
-		  					and charindex('(optional)',FormText1) > 0
-		  					and asqpk2 is not null then FormText2
-		  			 when MeetsTargetCode = '0' and asqpk1 is null 
-		  					and charindex('(optional)',FormText1) > 0
-		  					and asqpk2 is null 
-		  					and charindex('(optional)',FormText2) > 0
-		  					and asqpk3 is not null then FormText3
-		  			 when MeetsTargetCode = '0' and asqpk1 is null 
-		  					and asqpk2 is null 
-		  					and asqpk3 is null then FormText1
-		  		else null
-		  		end
-		  		as FormName
-			  , case when substring(MeetsTargetCode,2,1) = '1' then FormDate1
-		  			 when substring(MeetsTargetCode,2,1) = '2' then FormDate2
-		  			 when substring(MeetsTargetCode,2,1) = '3' then FormDate3
-		  			 when substring(MeetsTargetCode,2,1) = '4' then FormDate4
-		  			 when MeetsTargetCode = '0' and ASQPK1 is not null then FormDate1
-		  			 when MeetsTargetCode = '0' and ASQPK2 is not null then FormDate2
-		  			 when MeetsTargetCode = '0' and ASQPK3 is not null then FormDate3
+				, mt.HVCaseFK
+				, PC1ID
+				, OldID
+				, TCDOB
+				, PC1FullName
+				, CurrentWorkerFullName
+				, CurrentLevelName
+				, case when substring(MeetsTargetCode,2,1) = '1' then FormText1
+						 when substring(MeetsTargetCode,2,1) = '2' then FormText2
+						 when substring(MeetsTargetCode,2,1) = '3' then FormText3
+						 when substring(MeetsTargetCode,2,1) = '4' then FormText4
+						 when MeetsTargetCode = '0' and asqpk1 is not null then FormText1
+						 when MeetsTargetCode = '0' and asqpk2 is not null then FormText2
+						 when MeetsTargetCode = '0' and asqpk3 is not null then FormText3
+						 when MeetsTargetCode = '0' and asqpk1 is null 
+								and charindex('(optional)',FormText1) > 0
+								and asqpk2 is not null then FormText2
+						 when MeetsTargetCode = '0' and asqpk1 is null 
+								and charindex('(optional)',FormText1) > 0
+								and asqpk2 is null 
+								and charindex('(optional)',FormText2) > 0
+								and asqpk3 is not null then FormText3
+						 when MeetsTargetCode = '0' and asqpk1 is null 
+								and asqpk2 is null 
+								and asqpk3 is null then FormText1
+					else null
+					end
+					as FormName
+				, case when substring(MeetsTargetCode,2,1) = '1' then FormDate1
+						 when substring(MeetsTargetCode,2,1) = '2' then FormDate2
+						 when substring(MeetsTargetCode,2,1) = '3' then FormDate3
+						 when substring(MeetsTargetCode,2,1) = '4' then FormDate4
+						 when MeetsTargetCode = '0' and ASQPK1 is not null then FormDate1
+						 when MeetsTargetCode = '0' and ASQPK2 is not null then FormDate2
+						 when MeetsTargetCode = '0' and ASQPK3 is not null then FormDate3
 				else null
 				end as FormDate
-			  , FormReviewed
-			  , FormOutOfWindow
-			  , FormMissing
-			  , left(MeetsTargetCode,1) as FormMeetsTarget
-			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
-					 when FormOutOfWindow = 1 then 'Form out of window'
-					 when FormMissing = 1 then 'Form missing'
-					 when MeetsTargetCode = '0' then 'Under cutoff scores without EIP service'
-					 else '' end as NotMeetingReason
+				, FormReviewed
+				, FormOutOfWindow
+				, FormMissing
+				, left(MeetsTargetCode,1) as FormMeetsTarget
+				, case when FormMissing = 1 then 'Form missing'
+						when FormOutOfWindow = 1 then 'Form out of window'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
+						when MeetsTargetCode = '0' then 'Under cutoff scores without EIP service'
+						else '' end as NotMeetingReason
 			  --, MeetsTargetCode
 			  --, tcAgeDays
 			  --, tcAgeDays / 30.44 as TCAgeMonths

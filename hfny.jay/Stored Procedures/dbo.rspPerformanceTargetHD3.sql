@@ -136,12 +136,12 @@ begin
 			  , FormMissing
 			  , case when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
 							(LeadAssessment = 1 OR LeadAssessment = 0) then 1 else 0 end as FormMeetsTarget
-			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
-					when FormOutOfWindow = 1 then 'Form out of window'
-					when FormMissing = 1 then 'Form missing'
-					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
+			  , case when FormMissing = 1 then 'Form missing'
+						when FormOutOfWindow = 1 then 'Form out of window'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
+						when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
 							LeadAssessment is null then 'Lead Assessment is blank'
-					else '' end as NotMeetingReason
+						else '' end as NotMeetingReason
 		from cteExpectedForm
 		)
 	

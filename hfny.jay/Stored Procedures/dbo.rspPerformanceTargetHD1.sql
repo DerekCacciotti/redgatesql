@@ -15,9 +15,9 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetHD1]
 (
-    @StartDate      datetime,
-    @EndDate      datetime,
-    @tblPTCases  PTCases                           readonly
+    @StartDate	datetime,
+    @EndDate	datetime,
+    @tblPTCases	PTCases	readonly
 )
 
 as
@@ -139,8 +139,9 @@ begin
 			  , CurrentLevelName
 			  , 'TC Medical' as FormName
 			  , NULL as FormDate	
+			  -- check that # of shots = # of forms reviewed
 			  , case when ( (ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
-						AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP)) -- # of shots = # of forms reveiwed
+						AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP))
 					then 1 
 					else 0 
 					end as FormReviewed				

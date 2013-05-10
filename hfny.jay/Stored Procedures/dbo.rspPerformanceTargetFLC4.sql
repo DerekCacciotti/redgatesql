@@ -126,9 +126,9 @@ begin
 						then 1 
 						else 0 
 						end as FormMeetsTarget
-			  , case when FormReviewed = 0 then 'Form not reviewed by supervisor'
+			  , case when FormMissing = 1 then 'Form missing'
 						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormMissing = 1 then 'Form missing'
+						when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when PBTANF is not null and PBTANF not in ('2','3') 
 							then 'Still receiving TANF'
 						when PBTANF is null 

@@ -150,11 +150,10 @@ begin
 				, sr.FormOutOfWindow
 				, sr.FormMissing
 				, case when RefCount = GoodRefs then 1 else 0 end as FormMeetsTarget
-			  , case when sr.FormReviewed <> RefCount then 'Form(s) not reviewed by supervisor'
+				, case when sr.FormMissing = 1 then 'Form(s) missing'
 						when sr.FormOutOfWindow = 1 then 'Form(s) out of window'
-						when sr.FormMissing = 1 then 'Form(s) missing'
-						when sr.FormReviewed <> RefCount 
-							then 'Missing required referrals'
+						when sr.FormReviewed <> RefCount then 'Form(s) not reviewed by supervisor'
+						when RefCount <> GoodRefs then 'Missing required referrals'
 						else '' end as ReasonNotMeeting
 			from cteReferrals r
 			inner join cteSummarizedReferrals sr on sr.HVCaseFK = r.HVCaseFK
