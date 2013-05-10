@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[codeReportCatalog]
 (
 [codeReportCatalogPK] [int] NOT NULL IDENTITY(1, 1),
-[CriteriaOptions] [varchar] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CriteriaOptions] [varchar] (25) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Defaults] [varchar] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Keywords] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OldReportFK] [int] NULL,
