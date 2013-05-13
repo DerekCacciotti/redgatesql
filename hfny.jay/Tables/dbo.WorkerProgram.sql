@@ -35,6 +35,10 @@ CREATE TABLE [dbo].[WorkerProgram]
 [YearEarlyChildExperience] [int] NULL,
 [YearHVExperience] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_WorkerProgram_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_WorkerProgram_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_ProgramFK] ON [dbo].[WorkerProgram] ([ProgramFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_SiteFK] ON [dbo].[WorkerProgram] ([SiteFK]) ON [PRIMARY]

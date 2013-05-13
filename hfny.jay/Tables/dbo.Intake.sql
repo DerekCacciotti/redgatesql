@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[Intake]
 [IntakeEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD
+CONSTRAINT [FK_Intake_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Intake_FSWFK] ON [dbo].[Intake] ([FSWFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Intake_HVCaseFK] ON [dbo].[Intake] ([HVCaseFK]) ON [PRIMARY]

@@ -20,6 +20,8 @@ CREATE TABLE [dbo].[ServiceReferral]
 [ServiceReferralEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [StartDate] [datetime] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD
+CONSTRAINT [FK_ServiceReferral_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_FSWFK] ON [dbo].[ServiceReferral] ([FSWFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_HVCaseFK] ON [dbo].[ServiceReferral] ([HVCaseFK]) ON [PRIMARY]

@@ -33,6 +33,8 @@ CREATE TABLE [dbo].[Preintake]
 [ProgramFK] [int] NOT NULL,
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD
+CONSTRAINT [FK_Preintake_PIFSWFK] FOREIGN KEY ([PIFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Preintake_HVCaseFK] ON [dbo].[Preintake] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Preintake_KempeFK] ON [dbo].[Preintake] ([KempeFK]) ON [PRIMARY]

@@ -28,6 +28,10 @@ CREATE TABLE [dbo].[CriticalIncident]
 [StaffReport] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisorFK] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[CriticalIncident] WITH NOCHECK ADD
+CONSTRAINT [FK_CriticalIncident_AssignedWorkerFK] FOREIGN KEY ([AssignedWorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[CriticalIncident] WITH NOCHECK ADD
+CONSTRAINT [FK_CriticalIncident_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_CriticalIncident_AssignedWorkerFK] ON [dbo].[CriticalIncident] ([AssignedWorkerFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_CriticalIncident_HVCaseFK] ON [dbo].[CriticalIncident] ([HVCaseFK]) ON [PRIMARY]

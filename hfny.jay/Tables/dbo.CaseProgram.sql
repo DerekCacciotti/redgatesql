@@ -31,6 +31,12 @@ CREATE TABLE [dbo].[CaseProgram]
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TransferredtoProgramFK] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_CaseProgram_CurrentFAFK] FOREIGN KEY ([CurrentFAFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_CaseProgram_CurrentFAWFK] FOREIGN KEY ([CurrentFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_CaseProgram_CurrentFSWFK] FOREIGN KEY ([CurrentFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 ALTER TABLE [dbo].[CaseProgram] ADD 
 CONSTRAINT [PK_CaseProgram] PRIMARY KEY CLUSTERED  ([CaseProgramPK]) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAFK] ON [dbo].[CaseProgram] ([CurrentFAFK]) ON [PRIMARY]
