@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -101,7 +102,7 @@ as
 				LEFT JOIN FatherFigure ff ON ff.HVCaseFK = HVCase.HVCasePK
 				LEFT JOIN codeApp a ON a.AppCode = ff.RelationToTargetChild AND a.AppCodeUsedWhere LIKE 'FF%'			
 				left join tcid on tcid.hvcasefk = hvcasepk AND TCID.TCDOD IS NULL
-				inner join worker fa on CurrentFAFK = fa.workerpk  -- fa
+				inner join worker fa on ff.FatherAdvocateFK = fa.workerpk  -- fa
 				inner join worker fsw on CurrentFSWFK = fsw.workerpk   -- fsw
 				
 				LEFT join pc obp on obp.pcpk = ff.pcfk -- father figure like obp
