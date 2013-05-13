@@ -9,7 +9,7 @@ GO
 -- Description:	<This report gets you 'R. Father Figures Case List '> -- similar to FSW Case List
 -- rspDataReport_bak 5, '06/01/2012', '09/30/2012'			
 
--- exec rspFatherhoodAdvocateCaseList 1
+-- exec rspFatherhoodAdvocateCaseList 2
 -- =============================================
 
 
@@ -111,7 +111,7 @@ as
 				inner join workerprogram on workerprogram.workerfk = fa.workerpk
 				inner join worker supervisor on supervisorfk = supervisor.workerpk
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where ff.FatherAdvocateFK = isnull(@workerfk,currentFAFK)
+			where ff.FatherAdvocateFK = isnull(@workerfk,ff.FatherAdvocateFK)
 				 and supervisorfk = isnull(@supervisorfk,supervisorfk)				 
 				 and dischargedate is NULL  -- only open cases
 				 AND DateInactive IS NULL  -- only active father figures
