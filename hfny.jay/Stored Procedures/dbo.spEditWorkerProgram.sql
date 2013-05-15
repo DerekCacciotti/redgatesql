@@ -31,9 +31,7 @@ CREATE PROCEDURE [dbo].[spEditWorkerProgram](@WorkerProgramPK int=NULL,
 @WorkerFK int=NULL,
 @WorkerNotes varchar(500)=NULL,
 @WorkerProgramEditor char(10)=NULL,
-@WorkPhone char(12)=NULL,
-@YearEarlyChildExperience int=NULL,
-@YearHVExperience int=NULL)
+@WorkPhone char(12)=NULL)
 AS
 UPDATE WorkerProgram
 SET 
@@ -64,8 +62,6 @@ TerminationDate = @TerminationDate,
 WorkerFK = @WorkerFK, 
 WorkerNotes = @WorkerNotes, 
 WorkerProgramEditor = @WorkerProgramEditor, 
-WorkPhone = @WorkPhone, 
-YearEarlyChildExperience = @YearEarlyChildExperience, 
-YearHVExperience = @YearHVExperience
+WorkPhone = @WorkPhone
 WHERE WorkerProgramPK = @WorkerProgramPK
 GO

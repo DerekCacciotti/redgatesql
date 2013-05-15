@@ -22,6 +22,7 @@ CREATE PROCEDURE [dbo].[spAddWorker](@Apt char(10)=NULL,
 @PreviousName char(51)=NULL,
 @Race char(2)=NULL,
 @RaceSpecify varchar(500)=NULL,
+@State char(2)=NULL,
 @Street char(30)=NULL,
 @SupervisorCoreDate datetime=NULL,
 @SupervisorFirstEvent datetime=NULL,
@@ -29,9 +30,12 @@ CREATE PROCEDURE [dbo].[spAddWorker](@Apt char(10)=NULL,
 @WorkerCreator char(10)=NULL,
 @WorkerDOB datetime=NULL,
 @WorkerPK_old int=NULL,
-@YoungestChild char(2)=NULL,
+@YoungestChild int=NULL,
 @Zip char(10)=NULL,
-@LoginCreated bit=NULL)
+@LoginCreated bit=NULL,
+@YearsHVExperience int=NULL,
+@YearsEarlyChildhoodExperience int=NULL,
+@YearsChildAbuseClasses int=NULL)
 AS
 INSERT INTO Worker(
 Apt,
@@ -53,6 +57,7 @@ OtherLanguage,
 PreviousName,
 Race,
 RaceSpecify,
+State,
 Street,
 SupervisorCoreDate,
 SupervisorFirstEvent,
@@ -62,7 +67,10 @@ WorkerDOB,
 WorkerPK_old,
 YoungestChild,
 Zip,
-LoginCreated
+LoginCreated,
+YearsHVExperience,
+YearsEarlyChildhoodExperience,
+YearsChildAbuseClasses
 )
 VALUES(
 @Apt,
@@ -84,6 +92,7 @@ VALUES(
 @PreviousName,
 @Race,
 @RaceSpecify,
+@State,
 @Street,
 @SupervisorCoreDate,
 @SupervisorFirstEvent,
@@ -93,7 +102,10 @@ VALUES(
 @WorkerPK_old,
 @YoungestChild,
 @Zip,
-@LoginCreated
+@LoginCreated,
+@YearsHVExperience,
+@YearsEarlyChildhoodExperience,
+@YearsChildAbuseClasses
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

@@ -31,9 +31,7 @@ CREATE TABLE [dbo].[WorkerProgram]
 [WorkerProgramCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [WorkerProgramEditDate] [datetime] NULL,
 [WorkerProgramEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[WorkPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[YearEarlyChildExperience] [int] NULL,
-[YearHVExperience] [int] NULL
+[WorkPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_WorkerProgram_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])

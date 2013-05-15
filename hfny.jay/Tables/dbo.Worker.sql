@@ -31,9 +31,12 @@ CREATE TABLE [dbo].[Worker]
 [WorkerEditDate] [datetime] NULL,
 [WorkerEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WorkerPK_old] [int] NOT NULL,
-[YoungestChild] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[YoungestChild] [int] NULL,
 [Zip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[LoginCreated] [bit] NOT NULL CONSTRAINT [DF_Worker_LoginCreated] DEFAULT ((0))
+[LoginCreated] [bit] NOT NULL CONSTRAINT [DF_Worker_LoginCreated] DEFAULT ((0)),
+[YearsHVExperience] [int] NULL,
+[YearsEarlyChildhoodExperience] [int] NULL,
+[YearsChildAbuseClasses] [int] NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[Worker] ADD 
 CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]

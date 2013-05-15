@@ -23,6 +23,7 @@ CREATE PROCEDURE [dbo].[spEditWorker](@WorkerPK int=NULL,
 @PreviousName char(51)=NULL,
 @Race char(2)=NULL,
 @RaceSpecify varchar(500)=NULL,
+@State char(2)=NULL,
 @Street char(30)=NULL,
 @SupervisorCoreDate datetime=NULL,
 @SupervisorFirstEvent datetime=NULL,
@@ -30,9 +31,12 @@ CREATE PROCEDURE [dbo].[spEditWorker](@WorkerPK int=NULL,
 @WorkerDOB datetime=NULL,
 @WorkerEditor char(10)=NULL,
 @WorkerPK_old int=NULL,
-@YoungestChild char(2)=NULL,
+@YoungestChild int=NULL,
 @Zip char(10)=NULL,
-@LoginCreated bit=NULL)
+@LoginCreated bit=NULL,
+@YearsHVExperience int=NULL,
+@YearsEarlyChildhoodExperience int=NULL,
+@YearsChildAbuseClasses int=NULL)
 AS
 UPDATE Worker
 SET 
@@ -55,6 +59,7 @@ OtherLanguage = @OtherLanguage,
 PreviousName = @PreviousName, 
 Race = @Race, 
 RaceSpecify = @RaceSpecify, 
+State = @State, 
 Street = @Street, 
 SupervisorCoreDate = @SupervisorCoreDate, 
 SupervisorFirstEvent = @SupervisorFirstEvent, 
@@ -64,6 +69,9 @@ WorkerEditor = @WorkerEditor,
 WorkerPK_old = @WorkerPK_old, 
 YoungestChild = @YoungestChild, 
 Zip = @Zip, 
-LoginCreated = @LoginCreated
+LoginCreated = @LoginCreated, 
+YearsHVExperience = @YearsHVExperience, 
+YearsEarlyChildhoodExperience = @YearsEarlyChildhoodExperience, 
+YearsChildAbuseClasses = @YearsChildAbuseClasses
 WHERE WorkerPK = @WorkerPK
 GO

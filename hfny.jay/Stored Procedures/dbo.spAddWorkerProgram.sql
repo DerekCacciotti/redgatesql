@@ -30,9 +30,7 @@ CREATE PROCEDURE [dbo].[spAddWorkerProgram](@CommunityOutreach bit=NULL,
 @WorkerFK int=NULL,
 @WorkerNotes varchar(500)=NULL,
 @WorkerProgramCreator char(10)=NULL,
-@WorkPhone char(12)=NULL,
-@YearEarlyChildExperience int=NULL,
-@YearHVExperience int=NULL)
+@WorkPhone char(12)=NULL)
 AS
 INSERT INTO WorkerProgram(
 CommunityOutreach,
@@ -62,9 +60,7 @@ TerminationDate,
 WorkerFK,
 WorkerNotes,
 WorkerProgramCreator,
-WorkPhone,
-YearEarlyChildExperience,
-YearHVExperience
+WorkPhone
 )
 VALUES(
 @CommunityOutreach,
@@ -94,9 +90,7 @@ VALUES(
 @WorkerFK,
 @WorkerNotes,
 @WorkerProgramCreator,
-@WorkPhone,
-@YearEarlyChildExperience,
-@YearHVExperience
+@WorkPhone
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
