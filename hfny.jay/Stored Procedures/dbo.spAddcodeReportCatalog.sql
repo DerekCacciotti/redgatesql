@@ -3,7 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddcodeReportCatalog](@CriteriaOptions varchar(20)=NULL,
+CREATE PROCEDURE [dbo].[spAddcodeReportCatalog](@CriteriaOptions varchar(25)=NULL,
 @Defaults varchar(20)=NULL,
 @Keywords varchar(max)=NULL,
 @OldReportFK int=NULL,
