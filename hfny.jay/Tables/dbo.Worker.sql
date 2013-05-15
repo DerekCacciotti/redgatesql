@@ -38,6 +38,12 @@ CREATE TABLE [dbo].[Worker]
 [YearsEarlyChildhoodExperience] [int] NULL,
 [YearsChildAbuseClasses] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_Worker_FirstName] ON [dbo].[Worker] ([FirstName]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_Worker_LastName] ON [dbo].[Worker] ([LastName]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_Worker_LastName_FirstName] ON [dbo].[Worker] ([LastName], [FirstName]) ON [PRIMARY]
+
 ALTER TABLE [dbo].[Worker] ADD 
 CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
 GO
