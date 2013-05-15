@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[spEditcodeTopic](@codeTopicPK int=NULL,
 @TopicPK_old int=NULL,
 @SATCompareDateField nvarchar(50)=NULL,
 @SATInterval nvarchar(50)=NULL,
-@SATName nvarchar(10)=NULL)
+@SATName nvarchar(10)=NULL,
+@SATReqBy nvarchar(50)=NULL)
 AS
 UPDATE codeTopic
 SET 
@@ -18,6 +19,7 @@ TopicCode = @TopicCode,
 TopicPK_old = @TopicPK_old, 
 SATCompareDateField = @SATCompareDateField, 
 SATInterval = @SATInterval, 
-SATName = @SATName
+SATName = @SATName, 
+SATReqBy = @SATReqBy
 WHERE codeTopicPK = @codeTopicPK
 GO

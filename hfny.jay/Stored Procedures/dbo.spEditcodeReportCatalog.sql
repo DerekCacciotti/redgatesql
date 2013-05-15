@@ -4,7 +4,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditcodeReportCatalog](@codeReportCatalogPK int=NULL,
-@CriteriaOptions varchar(20)=NULL,
+@CriteriaOptions varchar(25)=NULL,
 @Defaults varchar(20)=NULL,
 @Keywords varchar(max)=NULL,
 @OldReportFK int=NULL,
