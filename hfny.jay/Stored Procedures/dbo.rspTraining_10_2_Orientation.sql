@@ -59,7 +59,7 @@ BEGIN
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode = 1.0
+	WHERE t1.TopicCode BETWEEN 1.0 AND 5.0
 	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
 	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
 			, t1.TopicCode
@@ -70,247 +70,54 @@ BEGIN
 			, FAW
 			, rownumber
 )
+
+
 
 , cteAddMissingWorkers_cte10_2a AS (
 	--if a worker has NO trainings, they won't appear at all, so add them back
-	SELECT cteMain.RowNumber
-		, cteMain.workerpk
-		, '1.0' AS TopicCode
-		, cte10_2a.topicname
-		, cte10_2a.TrainingDate
-		, cte10_2a.FirstHomeVisitDate
-		, cte10_2a.FirstKempeDate
-		, cte10_2a.SupervisorFirstEvent
-		, cte10_2a.FirstEvent
-		, cteMain.WorkerName
-		, cteMain.Supervisor
-		, cteMain.FSW
-		, cteMain.FAW
-	FROM cte10_2a
-	RIGHT JOIN cteMain ON cteMain.WorkerPK = cte10_2a.WorkerPK
+	SELECT WorkerPK
+	, codeTopic.TopicCode
+	, WorkerName
+	, Supervisor
+	, FSW
+	, FAW
+	, FirstEvent
+	, FirstHomeVisitDate
+	, FirstKempeDate
+	, SupervisorFirstEvent
+	FROM cteMain, codetopic
+	WHERE codetopic.TopicCode BETWEEN 1.0 AND 5.0
 )
+
 
 --Now we get the trainings (or lack thereof) for topic code 2.0
 , cte10_2b AS (
-	SELECT RowNumber
-		, cteMain.workerpk
-		, t1.TopicCode
-		, t1.topicname
-		, MIN(t.TrainingDate) AS TrainingDate
-		, FirstHomeVisitDate
-		, FirstKempeDate
-		, SupervisorFirstEvent
-		, FirstEvent
-		, WorkerName
-		, Supervisor
-		, FSW
-		, FAW
-	FROM cteMain
-			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = cteMain.WorkerPK
-			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
-			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=2.0
-	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
-	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
-			, t1.TopicCode
-			, t1.topicname
-			, WorkerName
-			, Supervisor
-			, FSW
-			, FAW
-			, rownumber
-)
 
-
-, cteAddMissingWorkers_cte10_2b AS (
 	--if a worker has NO trainings, they won't appear at all, so add them back
-	SELECT cteMain.RowNumber
-		, cteMain.workerpk
-		, '2.0' AS TopicCode
-		, cte10_2b.topicname
-		, cte10_2b.TrainingDate
-		, cte10_2b.FirstHomeVisitDate
-		, cte10_2b.FirstKempeDate
-		, cte10_2b.SupervisorFirstEvent
-		, cte10_2b.FirstEvent
-		, cteMain.WorkerName
-		, cteMain.Supervisor
-		, cteMain.FSW
-		, cteMain.FAW
-	FROM cte10_2b
-	RIGHT JOIN cteMain ON cteMain.WorkerPK = cte10_2b.WorkerPK
-)
-
---Now we get the trainings (or lack thereof) for topic code 3.0
-, cte10_2c AS (
 	SELECT RowNumber
-		, cteMain.workerpk
-		, t1.TopicCode
-		, t1.topicname
-		, MIN(t.TrainingDate) AS TrainingDate
-		, FirstHomeVisitDate
-		, FirstKempeDate
-		, SupervisorFirstEvent
-		, FirstEvent
-		, WorkerName
-		, Supervisor
-		, FSW
-		, FAW
-	FROM cteMain
-			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = cteMain.WorkerPK
-			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
-			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=3.0
-	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
-	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
-			, t1.TopicCode
-			, t1.topicname
-			, WorkerName
-			, Supervisor
-			, FSW
-			, FAW
-			, rownumber
-)
+		, b.TopicCode
+		, b.WorkerPK
+		, t.topicname
+		, TrainingDate
+		, b.FirstHomeVisitDate
+		, b.FirstKempeDate
+		, b.SupervisorFirstEvent
+		, b.FirstEvent
+		, b.WorkerName
+		, b.Supervisor
+		, b.FSW
+		, b.FAW
+	FROM cte10_2a t
+	RIGHT JOIN cteAddMissingWorkers_cte10_2a b
+	ON b.WorkerPK = t.WorkerPK
+	AND b.TopicCode = t.TopicCode
 
-, cteAddMissingWorkers_cte10_2c AS (
-	--if a worker has NO trainings, they won't appear at all, so add them back
-	SELECT cteMain.RowNumber
-		, cteMain.workerpk
-		, '3.0' AS TopicCode
-		, cte10_2c.topicname
-		, cte10_2c.TrainingDate
-		, cte10_2c.FirstHomeVisitDate
-		, cte10_2c.FirstKempeDate
-		, cte10_2c.SupervisorFirstEvent
-		, cte10_2c.FirstEvent
-		, cteMain.WorkerName
-		, cteMain.Supervisor
-		, cteMain.FSW
-		, cteMain.FAW
-	FROM cte10_2c
-	RIGHT JOIN cteMain ON cteMain.WorkerPK = cte10_2c.WorkerPK
-)
 
---Now we get the trainings (or lack thereof) for topic code 4.0
-, cte10_2d AS (
-	SELECT RowNumber
-		, cteMain.workerpk
-		, t1.TopicCode
-		, t1.topicname
-		, MIN(t.TrainingDate) AS TrainingDate
-		, FirstHomeVisitDate
-		, FirstKempeDate
-		, SupervisorFirstEvent
-		, FirstEvent
-		, WorkerName
-		, Supervisor
-		, FSW
-		, FAW
-	FROM cteMain
-			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = cteMain.WorkerPK
-			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
-			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=4.0
-	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
-	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
-			, t1.TopicCode
-			, t1.topicname
-			, WorkerName
-			, Supervisor
-			, FSW
-			, FAW
-			, rownumber
 )
-
-, cteAddMissingWorkers_cte10_2d AS (
-	--if a worker has NO trainings, they won't appear at all, so add them back
-	SELECT cteMain.RowNumber
-		, cteMain.workerpk
-		, '4.0' AS TopicCode
-		, cte10_2d.topicname
-		, cte10_2d.TrainingDate
-		, cte10_2d.FirstHomeVisitDate
-		, cte10_2d.FirstKempeDate
-		, cte10_2d.SupervisorFirstEvent
-		, cte10_2d.FirstEvent
-		, cteMain.WorkerName
-		, cteMain.Supervisor
-		, cteMain.FSW
-		, cteMain.FAW
-	FROM cte10_2d
-	RIGHT JOIN cteMain ON cteMain.WorkerPK = cte10_2d.WorkerPK
-)
-
---Now we get the trainings (or lack thereof) for topic code 5.0
-, cte10_2e AS (
-	SELECT RowNumber
-		, cteMain.workerpk
-		, t1.TopicCode
-		, t1.topicname
-		, MIN(t.TrainingDate) AS TrainingDate
-		, FirstHomeVisitDate
-		, FirstKempeDate
-		, SupervisorFirstEvent
-		, FirstEvent
-		, WorkerName
-		, Supervisor
-		, FSW
-		, FAW
-	FROM cteMain
-			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = cteMain.WorkerPK
-			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
-			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=5.0
-	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
-	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
-			, t1.TopicCode
-			, t1.topicname
-			, WorkerName
-			, Supervisor
-			, FSW
-			, FAW
-			, rownumber
-)
-
-, cteAddMissingWorkers_cte10_2e AS (
-	--if a worker has NO trainings, they won't appear at all, so add them back
-	SELECT cteMain.RowNumber
-		, cteMain.workerpk
-		, '5.0' AS TopicCode
-		, cte10_2e.topicname
-		, cte10_2e.TrainingDate
-		, cte10_2e.FirstHomeVisitDate
-		, cte10_2e.FirstKempeDate
-		, cte10_2e.SupervisorFirstEvent
-		, cte10_2e.FirstEvent
-		, cteMain.WorkerName
-		, cteMain.Supervisor
-		, cteMain.FSW
-		, cteMain.FAW
-	FROM cte10_2e
-	RIGHT JOIN cteMain ON cteMain.WorkerPK = cte10_2e.WorkerPK
-)
-
-, cteUNION AS(
-	SELECT * FROM cteAddMissingWorkers_cte10_2a
-	UNION
-	SELECT * FROM cteAddMissingWorkers_cte10_2b
-	UNION	
-	SELECT * FROM cteAddMissingWorkers_cte10_2c
-	UNION	
-	SELECT * FROM cteAddMissingWorkers_cte10_2d
-	UNION	
-	SELECT * FROM cteAddMissingWorkers_cte10_2e
-)
-
 
 , cteMeetTarget AS (
 	SELECT MAX(RowNumber) OVER(PARTITION BY TopicCode) as TotalWorkers
-	, cteunion.WorkerPK
+	, cte10_2b.WorkerPK
 	, WorkerName
 	, Supervisor
 	, FSW
@@ -320,11 +127,11 @@ BEGIN
 	, TrainingDate
 	, FirstHomeVisitDate
 	, FirstKempeDate
-	, cteunion.SupervisorFirstEvent
+	, cte10_2b.SupervisorFirstEvent
 	, FirstEvent
 	, CASE WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' ELSE 'F' END AS 'Meets Target'
-	FROM cteUNION
-	GROUP BY cteunion.WorkerPK
+	FROM cte10_2b
+	GROUP BY cte10_2b.WorkerPK
 	, WorkerName
 	, Supervisor
 	, FSW
@@ -334,7 +141,7 @@ BEGIN
 	, TrainingDate
 	, FirstHomeVisitDate
 	, FirstKempeDate
-	, cteunion.SupervisorFirstEvent
+	, cte10_2b.SupervisorFirstEvent
 	, FirstEvent
 	, rownumber
 )
