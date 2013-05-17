@@ -56,7 +56,7 @@ begin
 	as
 		(
 		select tc.*
-				, PBTANF	
+				, PBTANF				
 			from cteTotalCases tc
 			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
 			inner join Intake i on i.HVCaseFK = c.HVCasePK
@@ -97,6 +97,7 @@ begin
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
+			  , ca.ReceivingPublicBenefits
 			  , ca.PBTANF
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
@@ -122,7 +123,8 @@ begin
 			  , FormReviewed
 			  , FormOutOfWindow
 			  , FormMissing
-			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and PBTANF in ('2','3') 
+			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and 
+						(ReceivingPublicBenefits = '0' or PBTANF in ('2','3'))
 						then 1 
 						else 0 
 						end as FormMeetsTarget
@@ -131,7 +133,7 @@ begin
 						when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when PBTANF is not null and PBTANF not in ('2','3') 
 							then 'Still receiving TANF'
-						when PBTANF is null 
+						when ReceivingPublicBenefits = '1' and PBTANF is null 
 							then 'TANF answer missing'
 						else '' end as ReasonNotMeeting
 	from cteExpectedForm

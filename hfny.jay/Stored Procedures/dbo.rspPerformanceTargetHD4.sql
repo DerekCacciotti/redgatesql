@@ -136,9 +136,10 @@ begin
 						and chl6.FormDate > '01/01/13' and chl6.TCHasMedicalProvider = 1 
 				   then 'Change Form'
 				else
-					case when tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1 
-					then 'TC ID'
-					else null end
+					'TC ID'
+					--case when tcl6.TCHasMedicalProvider is not null and tcl6.TCHasMedicalProvider = 1 
+					--then 'TC ID'
+					--else null end
 		   end as FormName
 		  -- latest of either TC or CH
 		  ,case when chl6.TCHasMedicalProvider is not null and chl6.FormDate > tcl6.FormDate 
@@ -268,22 +269,27 @@ begin
 		  ,CurrentWorkerFullName
 		  ,CurrentLevelName
 		  ,case
-			   when cach.TCHasMedicalProvider is not null and cach.FormDate > cafu.FormDate and cach.FormDate > '01/01/13' and 
-				   cach.TCHasMedicalProvider = 1 -- latest CH first preferred
-				   then 'Change Form' -- note: preference is given to the latest CH record first, if there is one
+			   when cach.TCHasMedicalProvider is not null and cach.FormDate > cafu.FormDate 
+					and cach.FormDate > '01/01/13' and cach.TCHasMedicalProvider = 1 -- latest CH first preferred
+				then 'Change Form' -- note: preference is given to the latest CH record first, if there is one
 
-			   else -- note: otherwise we will use tcid record's info
-				   case when cafu.TCHasMedicalProvider is not null and cafu.TCHasMedicalProvider = 1 then 'Follow Up' else 
-					   null end
+			   else -- note: otherwise we will use follow up record's info
+					rtrim(capp.AppCodeText) + ' Follow Up'
+					--case when cafu.TCHasMedicalProvider is not null and cafu.TCHasMedicalProvider = 1 
+					--		then 'Follow Up' 
+					--	else null 
+					--end
 		   end as FormName
 		  ,case
 			   when cach.TCHasMedicalProvider is not null and cach.FormDate > cafu.FormDate 
 					and cach.FormDate > '01/01/13' and cach.TCHasMedicalProvider = 1 -- latest CH first preferred
 				   then cach.FormDate -- note: preference is given to the latest CH record first, if there is one
 
-			   else -- note: otherwise we will use tcid record's info
-				   case when cafu.TCHasMedicalProvider is not null and cafu.TCHasMedicalProvider = 1 then cafu.FormDate else 
-					   null end
+			   else -- note: otherwise we will use follow up record's info
+					case when cafu.TCHasMedicalProvider is not null and cafu.TCHasMedicalProvider = 1 
+						then cafu.FormDate 
+						else null 
+					end
 		   end as FormDate
 		  ,case
 			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) 
@@ -295,15 +301,15 @@ begin
 		   as FormReviewed
 		  ,case 
 			  -- Here FormOutOfWindow means that there must be either FU (Due now) or latest CH record in CommonAttribute table for tc >= 6 months
-			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) or (cafu.FormDate is not null and cafu.
-				   TCHasMedicalProvider is not null) then 0
+			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) or 
+					(cafu.FormDate is not null and cafu.TCHasMedicalProvider is not null) then 0
 			   else
 				   1
 		   end as FormOutOfWindow
 		  ,case 
-			  -- there is atleast we one of either FU (Due now) or latest CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
-			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) or (cafu.FormDate is not null and cafu.
-				   TCHasMedicalProvider is not null) then 0
+			  -- there is at least one of either FU (Due now) or latest CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
+			   when (cach.FormDate is not null and cach.TCHasMedicalProvider is not null) or 
+					(cafu.FormDate is not null and cafu.TCHasMedicalProvider is not null) then 0
 			   else
 				   1
 		   end as FormMissing
@@ -315,10 +321,12 @@ begin
 				   case when cafu.TCHasMedicalProvider is not null and cafu.TCHasMedicalProvider = 1 then 1 else 0 end
 		   end as FormMeetsTarget
 		from cteCohort c
-			inner join cteIntervals4TC6MonthsOrOlderTCForm tcGE6FUInterval on c.HVCaseFK = tcGE6FUInterval.HVCaseFK and 
-				tcGE6FUInterval.TCIDPK = c.TCIDPK -- GE = Greater or Equal
-			left join CommonAttributes cafu on cafu.HVCaseFK = c.HVCaseFK and cafu.FormType = 'FU' and tcGE6FUInterval.Interval = 
-				cafu.FormInterval -- get the FU row
+			inner join cteIntervals4TC6MonthsOrOlderTCForm tcGE6FUInterval on c.HVCaseFK = tcGE6FUInterval.HVCaseFK 
+																				and tcGE6FUInterval.TCIDPK = c.TCIDPK -- GE = Greater or Equal
+			left outer join codeApp capp on tcGE6FUInterval.Interval = AppCode and AppCodeGroup = 'TCAge' and 
+												AppCodeUsedWhere like '%AQ%'
+			left join CommonAttributes cafu on cafu.HVCaseFK = c.HVCaseFK and cafu.FormType = 'FU' 
+												and tcGE6FUInterval.Interval = cafu.FormInterval -- get the FU row
 			left join cteLatestCHForm4TC6MonthsOrOlder ch on ch.HVCaseFK = c.HVCaseFK
 			left join CommonAttributes cach on cach.HVCaseFK = ch.HVCaseFK and cach.FormType = 'CH' 
 												and cach.FormDate = ch.FormDate -- get the latest CH row	

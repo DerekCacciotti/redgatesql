@@ -87,7 +87,7 @@ begin
 					, PC1FullName
 					, CurrentWorkerFullName
 					, CurrentLevelName
-					, '1 year PSI' as FormName
+					, '6 month PSI' as FormName
 					, PSIDateComplete as FormDate
 					, case when (PSIPK is not null and dbo.IsFormReviewed(PSIDateComplete,'PS',PSIPK) = 1) then 1 else 0 end as FormReviewed
 					, case when (PSIPK is not null and PSIInWindow = 1) then 0 else 1 end as FormOutOfWindow

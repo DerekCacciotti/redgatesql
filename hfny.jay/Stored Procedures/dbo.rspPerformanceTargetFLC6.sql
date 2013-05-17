@@ -79,9 +79,10 @@ begin
 				inner join codeDueByDates on ScheduledEvent = 'Follow Up' and tcAgeDays >= DueBy
 			-- there are no 18 month follow ups (interval code '18') in foxpro, though they're there now
 			-- therefore, they're not required until 2013
-			where Interval <> case when @StartDate >= '01/01/2013' then 'xx'
-								else '18'
-								end
+			where Interval = '12' 
+			--<> case when @StartDate >= '01/01/2013' then 'xx'
+			--					else '18'
+			--					end
 			group by HVCaseFK
 		)
 	,
@@ -114,7 +115,7 @@ begin
 			left outer join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
 			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType = 'FU-PC1' 
 												and fu.FollowUpInterval = ca.FormInterval 
-			left outer join Education e on e.FormType = 'FU' and e.FormFK = ca.FormFK
+			left outer join Education e on e.FormType = 'FU' and e.FormFK = ca.FormFK and e.PCType = 'PC1'
 		)
 	select PTCode
 			  , HVCaseFK
@@ -142,7 +143,7 @@ begin
 						when FormReviewed = 0 then 'Form not reviewed by supervisor'
 						when HighestGrade < '03' and EducationalEnrollment <> '1' 
 							then 'Not currently enrolled'
-						when HighestGrade < '03' and EducationalEnrollment = '1' and ProgramType in ('01','02','03','06') 
+						when HighestGrade < '03' and EducationalEnrollment = '1' and ProgramType not in ('01','02','03','06') 
 							then 'Enrolled, but wrong program'
 						else '' end as ReasonNotMeeting
 	from cteExpectedForm

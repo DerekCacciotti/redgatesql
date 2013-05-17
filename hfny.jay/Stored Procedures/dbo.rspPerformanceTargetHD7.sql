@@ -59,18 +59,24 @@ begin
 	as
 	(
 		select ctc.HVCaseFK
-			  ,PC1ID
-			  ,OldID
-			  ,PC1FullName
-			  ,CurrentWorkerFK
-			  ,CurrentWorkerFullName
-			  ,CurrentLevelName
-			  ,ctc.ProgramFK
-			  ,ctc.TCIDPK
-			  ,ctc.TCDOB
-			  ,DischargeDate
-			  ,tcAgeDays
-			  ,lastdate
+			  , PC1ID
+			  , OldID
+			  , PC1FullName
+			  , CurrentWorkerFK
+			  , CurrentWorkerFullName
+			  , CurrentLevelName
+			  , ctc.ProgramFK
+			  , ctc.TCIDPK
+			  , ctc.TCDOB
+			  , DischargeDate
+			  , tcAgeDays
+			  , case when datediff(month,ctc.TCDOB,lastdate) >= 24 or GestationalAge = 40
+						then tcAgeDays
+					when datediff(month,ctc.TCDOB,lastdate) < 24 and GestationalAge < 40
+						then tcAgeDays - ((40-GestationalAge) * 7)
+				end as tcASQAgeDays
+			  , lastdate
+			  , GestationalAge			  
 			from cteTotalCases ctc
 				inner join TCID T on T.HVCaseFK = ctc.HVCaseFK and T.TCIDPK = ctc.TCIDPK 
 					-- looking at each child individualy i.e. gestationalage
@@ -93,7 +99,7 @@ begin
 			 ,max(cd.Interval) as Interval -- given child age, this is the interval that one expect to find ASQ record in the DB
 
 			from cteCohort c
-				inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcAgeDays >= DueBy
+				inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcASQAgeDays >= DueBy
 			group by HVCaseFK
 					,c.TCIDPK 
 						-- Must 'group by HVCasePK, TCIDPK' to bring in twins etc (twins have same hvcasepks) (not just 'group by HVCasePK')
@@ -111,7 +117,7 @@ begin
 
 			from cteCohort c
 				inner join cteASQDueInterval i on i.HVCaseFK = c.HVCaseFK and i.TCIDPK = c.TCIDPK
-				inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcAgeDays >= DueBy
+				inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcASQAgeDays >= DueBy
 			where cd.Interval < i.Interval
 			group by c.HVCaseFK
 					,c.TCIDPK 
@@ -128,7 +134,7 @@ begin
 
 			from cteCohort c
 				inner join cteASQDueIntervalOneBefore i on i.HVCaseFK = c.HVCaseFK and i.TCIDPK = c.TCIDPK
-				inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcAgeDays >= DueBy
+				inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcASQAgeDays >= DueBy
 			where cd.Interval < i.Interval
 			group by c.HVCaseFK
 					,c.TCIDPK 
@@ -146,7 +152,7 @@ begin
           , max(A.TCAge) as Interval -- given child age, this is the interval that one expect to find ASQ record in the DB
        
        from cteCohort c
-       inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcAgeDays >= DueBy 
+       inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcASQAgeDays >= DueBy 
        inner join ASQ A on c.HVCaseFK = A.HVCaseFK and A.TCIDFK = c.TCIDPK  
        group by c.HVCaseFK,c.TCIDPK 
     )
@@ -180,12 +186,16 @@ begin
 		  		else 0
 		  		end
 		  		as FormReviewed
-			  , case when a1.ASQPK is not null and a1.ASQInWindow = 1 then 0
+			  , case when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) = 0 then 0
+					 when a1.ASQPK is not null and a1.ASQInWindow = 1 then 0
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
 		  			 		a2.ASQPK is not null and a2.ASQInWindow = 1 then 0
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
 		  					a2.ASQPK is null and charindex('(optional)',capp2.AppCodeText) > 0 and 
 		  					a3.ASQPK is not null and a3.ASQInWindow = 1 then 0
+		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
+		  					a2.ASQPK is null and charindex('(optional)',capp2.AppCodeText) > 0 and
+		  					a3.ASQPK is null then 0
 		  			 when a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
 		  					a4.ASQPK is not null and a4.ASQInWindow = 1 
 		  					then 0
@@ -193,6 +203,7 @@ begin
 		  		end
 		  		as FormOutOfWindow
 			  , case when a1.ASQPK is not null then 0
+					 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) = 0 then 1
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
 		  			 		a2.ASQPK is not null then 0
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
@@ -207,23 +218,24 @@ begin
 		  		as FormMissing
 		  	  , tcAgeDays
 		  	  , tcAgeDays / 30.44 as TCAgeMonths
-		  	  -- ,	a1.ASQPK  as asqpk1
-		  	  -- , casi.Interval as interval1
-		  	  -- , a1.ASQInWindow as inwindow1
-		  	  -- , capp1.AppCodeText as FormText1
-		  	  -- , a2.ASQPK as asqpk2
-		  	  -- , casi2.Interval as interval2
-		  	  -- , a2.ASQInWindow as inwindow2
-		  	  -- , capp2.AppCodeText as FormText2
-		  	  -- , a3.ASQPK  as asqpk3
-		  	  -- , casi3.Interval as interval3
-		  	  -- , a3.ASQInWindow as inwindow3
-		  	  -- , capp3.AppCodeText as FormText3
-		  	  -- , a4.ASQPK  as asqpk4
-		  	  -- , lasq.Interval as interval4
-		  	  -- , a4.ASQInWindow as inwindow4
-		  	  -- , capp4.AppCodeText as FormText4
-		  	  -- , a4.DateCompleted as a4DateCompleted
+		  	  , tcASQAgeDays
+		  	   ,	a1.ASQPK  as asqpk1
+		  	   , casi.Interval as interval1
+		  	   , a1.ASQInWindow as inwindow1
+		  	   , capp1.AppCodeText as FormText1
+		  	   , a2.ASQPK as asqpk2
+		  	   , casi2.Interval as interval2
+		  	   , a2.ASQInWindow as inwindow2
+		  	   , capp2.AppCodeText as FormText2
+		  	   , a3.ASQPK  as asqpk3
+		  	   , casi3.Interval as interval3
+		  	   , a3.ASQInWindow as inwindow3
+		  	   , capp3.AppCodeText as FormText3
+		  	   , a4.ASQPK  as asqpk4
+		  	   , lasq.Interval as interval4
+		  	   , a4.ASQInWindow as inwindow4
+		  	   , capp4.AppCodeText as FormText4
+		  	   , a4.DateCompleted as a4DateCompleted
 			from cteCohort c
 				left outer join cteASQDueInterval casi on casi.hvcasefk = c.hvcasefk and casi.tcidpk = c.tcidpk
 				left outer join ASQ a1 on a1.hvcasefk = c.hvcasefk and casi.tcidpk = a1.tcidfk and a1.TCAge = casi.Interval
@@ -249,7 +261,8 @@ begin
 				left outer join codeApp capp4 on a4.TCAge = capp4.AppCode and capp4.AppCodeGroup = 'TCAge' and 
 													charindex('AQ',capp4.AppCodeUsedWhere) > 0
 	)
-	-- SELECT * FROM cteExpectedForm
+	--SELECT * FROM cteExpectedForm
+	--where pc1id = 'AC87140056486'	
 	,
 	
 	-- calculate whether the forms meet the target
@@ -361,9 +374,9 @@ begin
 			   					and FormOutOfWindow = 0)
 	   					then '13' 
 						when a4.ASQPK is not null and a4.ASQTCReceiving = '1'
-						 	and FormMissing = 0 
-						 	and FormReviewed = 1 
-						 	and FormOutOfWindow = 0
+						 	--and FormMissing = 0 
+						 	--and FormReviewed = 1 
+						 	--and FormOutOfWindow = 0
 					 	then '14'
 				else '0'
 		      end as MeetsTargetCode -- FormMeetsTarget
@@ -419,7 +432,14 @@ begin
 						 when substring(MeetsTargetCode,2,1) = '2' then FormText2
 						 when substring(MeetsTargetCode,2,1) = '3' then FormText3
 						 when substring(MeetsTargetCode,2,1) = '4' then FormText4
+						 when MeetsTargetCode = '0' and asqpk1 is null 
+							and charindex('(optional)',FormText1) = 0 then FormText1
 						 when MeetsTargetCode = '0' and asqpk1 is not null then FormText1
+						 when MeetsTargetCode = '0' and asqpk1 is null 
+							and charindex('(optional)',FormText1) > 0 
+							and asqpk2 is null 
+							and charindex('(optional)',FormText2) = 0 
+							then FormText2							
 						 when MeetsTargetCode = '0' and asqpk2 is not null then FormText2
 						 when MeetsTargetCode = '0' and asqpk3 is not null then FormText3
 						 when MeetsTargetCode = '0' and asqpk1 is null 
@@ -429,10 +449,10 @@ begin
 								and charindex('(optional)',FormText1) > 0
 								and asqpk2 is null 
 								and charindex('(optional)',FormText2) > 0
-								and asqpk3 is not null then FormText3
-						 when MeetsTargetCode = '0' and asqpk1 is null 
-								and asqpk2 is null 
-								and asqpk3 is null then FormText1
+								then FormText3
+						 --when MeetsTargetCode = '0' and asqpk1 is null 
+							--	and asqpk2 is null 
+							--	and asqpk3 is null then FormText1
 					else null
 					end
 					as FormName
@@ -481,6 +501,8 @@ begin
 	)  
 	
 	select * from cteMain
-
+	--where pc1id = 'AC87140056486'
+	--order by PC1ID
+			
 end
 GO
