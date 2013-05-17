@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -33,7 +34,8 @@ begin
 		inner join TCID t on fu.HVCaseFK = t.HVCaseFK
 		inner join HVCase h on h.HVCasePK = cp.HVCaseFK
 		inner join PC p on p.PCPK = h.PC1FK
-		where fu.ProgramFK = 6 and FollowUpDate between @StartDate and @EndDate
+		where fu.ProgramFK = @ProgramFK 
+				and FollowUpDate between @StartDate and @EndDate
 		),
 	cteLeadScreenings as 
 		(select PC1ID
@@ -47,7 +49,8 @@ begin
 		inner join TCID T on T.TCIDPK = tcm.TCIDFK
 		inner join HVCase h on h.HVCasePK = cp.HVCaseFK
 		inner join PC p on p.PCPK = h.PC1FK
-		where tcm.ProgramFK = 6 and TCItemDate between @StartDate and @EndDate
+		where tcm.ProgramFK = @ProgramFK 
+				and TCItemDate between @StartDate and @EndDate
 				and TCMedicalItem = (select MedicalItemCode from codeMedicalItem where MedicalItemText = 'Lead Screening')
 		)		
 	select isnull(la.PC1ID, ls.PC1ID) as PC1ID
