@@ -12,6 +12,7 @@ GO
 -- rspPerformanceTargetReportSummary 2 ,'10/01/2012' ,'12/31/2012'
 -- rspPerformanceTargetReportSummary 2 ,'04/01/2012' ,'06/30/2012'
 -- rspPerformanceTargetReportSummary 24,'10/01/2012' ,'12/31/2012'
+-- rspPerformanceTargetReportSummary 9,'04/01/2013' ,'06/30/2013'
 -- mods by jrobohn 20130222 - clean up names, code and layout
 -- mods by jrobohn 20130223 - added PCI1 report
 -- =============================================
@@ -79,6 +80,7 @@ begin
 				left join tcid on tcid.hvcasefk = h.hvcasepk -- for dead babies dod
 			where
 				cp.ProgramFK = @ProgramFKs
+				and CurrentFSWFK = isnull(@FSWFK, CurrentFSWFK)
 				and h.CaseProgress >= 9
 				-- dead babies
 				 and (h.IntakeDate is not null

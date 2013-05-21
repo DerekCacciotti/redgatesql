@@ -84,29 +84,32 @@ begin
 	(
 		select c.HVCaseFK
 			  , cach.PC1HasMedicalProvider
-			  , 'TC ID' as FormName
+			  , 'Intake' as FormName
 			  , FormDate
 			from cteCohort c
 				left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'IN'
 			where c.tcAgeDays < 183
-				 and
-				 FormDate <= @EndDate
+				 and FormDate <= @EndDate
 	)
 	,
 	cteTCLessThan6MonthsCHForm
 	as
 		(
 		select c.HVCaseFK
-			  , cach.PC1HasMedicalProvider
+			  , case when cach.PC1MedicalFacilityFK is not null or cach.PC1MedicalProviderFK is not null
+					then 1
+					else 0
+				end as PC1HasMedicalProvider
 			  , 'Change Form' as FormName
 			  , max(FormDate) as FormDate -- get the latest CH
 			from cteCohort c
 				left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
 			where c.tcAgeDays < 183
-				 and
-				 FormDate <= @EndDate
+				 and FormDate <= @EndDate
 			group by c.HVCaseFK
-					,cach.PC1HasMedicalProvider
+					, cach.PC1HasMedicalProvider
+					, cach.PC1MedicalFacilityFK
+					, cach.PC1MedicalProviderFK
 		)
 	,
 	cteExpectedForm4TCLessThan6Months
@@ -155,15 +158,15 @@ begin
 					   1
 			   end as FormMissing
 			  ,case
-				   when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate and chl6.FormDate > '01/01/13' and 
-					   chl6.PC1HasMedicalProvider = 1 -- latest of either TC or CH
+				   when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate 
+						and chl6.FormDate > '01/01/13' and chl6.PC1HasMedicalProvider = 1 -- latest of either TC or CH
 					   then 1 -- note: preference is given to the latest CH record first, if there is one
 				   else -- note: otherwise we will use tcid record's info
 					   case when inl6.PC1HasMedicalProvider is not null and inl6.PC1HasMedicalProvider = 1 then 1 else 0 end
 			   end as FormMeetsTarget
 			from cteCohort c
 				inner join cteTCLessThan6MonthsINForm inl6 on inl6.HVCaseFK = c.HVCaseFK
-				left join cteTCLessThan6MonthsCHForm chl6 on chl6.hvcasefk = inl6.hvcasefk
+				left outer join cteTCLessThan6MonthsCHForm chl6 on chl6.hvcasefk = inl6.hvcasefk
 
 		)
 
@@ -194,7 +197,6 @@ begin
 	cteLatestCHForm4TC6MonthsOrOlder -- latest CH form for the TC
 	as
 	(
-
 	select c.HVCaseFK
 		  , cach.PC1HasMedicalProvider
 		  , 'Change Form' as FormName
@@ -202,8 +204,7 @@ begin
 		from cteCohort c
 			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
 		where c.tcAgeDays >= 183
-			 and
-			 FormDate <= @EndDate
+			 and FormDate <= @EndDate
 		group by c.HVCaseFK
 				,cach.PC1HasMedicalProvider
 	)
@@ -221,12 +222,12 @@ begin
 		  ,CurrentWorkerFullName
 		  ,CurrentLevelName
 		  ,case
-			   when cach.PC1HasMedicalProvider is not null and cach.FormDate > cafu.FormDate and cach.FormDate > '01/01/13' and 
+			   when cach.PC1HasMedicalProvider is not null and cach.FormDate > cafu.FormDate and cach.FormDate > '01/04/13' and 
 				   cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
 				   then 'Change Form' -- note: preference is given to the latest CH record first, if there is one
 
 			   else -- note: otherwise we will use tcid record's info
-					rtrim(capp.AppCodeText) + ' Follow Up'
+					replace(rtrim(capp.AppCodeText),'s','') + ' Follow Up'
 				 --  case when cafu.PC1HasMedicalProvider is not null and cafu.PC1HasMedicalProvider = 1 
 					--then 'Follow Up' 
 					--else null 
@@ -234,7 +235,7 @@ begin
 		   end as FormName
 		  ,case
 			   when cach.PC1HasMedicalProvider is not null and cach.FormDate > cafu.FormDate and 
-					cach.FormDate > '01/01/13' and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
+					cach.FormDate > '01/04/13' and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
 				   then cach.FormDate -- note: preference is given to the latest CH record first, if there is one
 			   else -- note: otherwise we will use tcid record's info
 					case 
@@ -263,9 +264,10 @@ begin
 					(cafu.FormDate is not null and cafu.PC1HasMedicalProvider is not null) then 0
 			   else
 				   1
-		   end as FormMissing		  ,case
+		   end as FormMissing		  
+		  ,case
 			   when cach.PC1HasMedicalProvider is not null and cach.FormDate > cafu.FormDate and 
-					cach.FormDate > '01/01/13' and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
+					cach.FormDate > '01/04/13' and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
 				   then 1 -- note: preference is given to the latest CH record first, if there is one
 			   else -- note: otherwise we will use tcid record's info
 				   case when cafu.PC1HasMedicalProvider is not null and cafu.PC1HasMedicalProvider = 1 then 1 else 0 end
@@ -283,26 +285,70 @@ begin
 			left join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = tcGE6FUInterval.Interval
 		where fu.PC1InHome = '1'
 	)
-	-- let us put the above two disconnected tables (one for tc < 6 and other for TC >= 6)
-	select *
-			, case when FormMissing = 1 then 'Form missing'
-					when FormOutOfWindow = 1 then 'Form out of window'
-					when FormReviewed = 0 then 'Form not reviewed by supervisor'
-					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
-							FormMeetsTarget = 0 then 'No Medical Provider recorded'
-					else '' end as NotMeetingReason
-		from cteExpectedForm4TCLessThan6Months
-	union
-	select *
-			, case when FormMissing = 1 then 'Form missing'
-					when FormOutOfWindow = 1 then 'Form out of window'
-					when FormReviewed = 0 then 'Form not reviewed by supervisor'
-					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
-							FormMeetsTarget = 0 then 'No Medical Provider recorded'
-					else '' end as NotMeetingReason
-		from cteExpectedForm4TC6MonthsOrOlder
-
----- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
+	-- combine the above two disconnected tables (one for tc < 6 and other for TC >= 6)
+	, cteMain as
+		(select PTCode
+			   ,HVCaseFK
+			   ,PC1ID
+			   ,OldID
+			   ,TCDOB
+			   ,PC1FullName
+			   ,CurrentWorkerFullName
+			   ,CurrentLevelName
+			   ,FormName
+			   ,FormDate
+			   ,FormReviewed
+			   ,FormOutOfWindow
+			   ,FormMissing
+			   ,FormMeetsTarget
+					, case when FormMissing = 1 then 'Form missing'
+							when FormOutOfWindow = 1 then 'Form out of window'
+							when FormReviewed = 0 then 'Form not reviewed by supervisor'
+							when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
+									FormMeetsTarget = 0 then 'No Medical Provider recorded'
+							else '' end as NotMeetingReason
+				from cteExpectedForm4TCLessThan6Months
+			union
+			select PTCode
+				  ,HVCaseFK
+				  ,PC1ID
+				  ,OldID
+				  ,TCDOB
+				  ,PC1FullName
+				  ,CurrentWorkerFullName
+				  ,CurrentLevelName
+				  ,FormName
+				  ,FormDate
+				  ,FormReviewed
+				  ,FormOutOfWindow
+				  ,FormMissing
+				  ,FormMeetsTarget
+					, case when FormMissing = 1 then 'Form missing'
+							when FormOutOfWindow = 1 then 'Form out of window'
+							when FormReviewed = 0 then 'Form not reviewed by supervisor'
+							when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and 
+									FormMeetsTarget = 0 then 'No Medical Provider recorded'
+							else '' end as NotMeetingReason
+				from cteExpectedForm4TC6MonthsOrOlder
+		)
+	
+select distinct isnull(PTCode,'HD8')
+	  ,c.HVCaseFK
+	  ,c.PC1ID,c.OldID
+	  ,c.TCDOB
+	  ,c.PC1FullName
+	  ,isnull(c.CurrentWorkerFullName,c.CurrentWorkerFullName) as CurrentWorkerFullName
+	  ,isnull(c.CurrentLevelName,m.CurrentLevelName) as CurrentLevelName
+	  ,isnull(FormName,isnull(rtrim(cast(i.Interval as int)) + ' month Follow Up', 'Intake')) as FormName
+	  ,FormDate
+	  ,FormReviewed
+	  ,FormOutOfWindow
+	  ,isnull(FormMissing,1) as FormMissing
+	  ,FormMeetsTarget
+from cteCohort c
+left outer join cteMain m on c.HVCaseFK = m.HVCaseFK
+left outer join cteIntervals4TC6MonthsOrOlderTCForm i on i.HVCaseFK = c.HVCaseFK
+order by c.PC1ID
 
 end
 GO
