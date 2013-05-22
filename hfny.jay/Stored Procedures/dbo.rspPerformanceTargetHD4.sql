@@ -394,11 +394,11 @@ begin
 		  ,FormOutOfWindow
 		  ,isnull(FormMissing,1) as FormMissing
 		  ,FormMeetsTarget
-		  ,NotMeetingReason
+		  ,isnull(NotMeetingReason, 'Form missing')
 	from cteCohort c
 	left outer join cteMain m on c.HVCaseFK = m.HVCaseFK
 	left outer join cteIntervals4TC6MonthsOrOlderTCForm i on i.HVCaseFK = c.HVCaseFK
-	order by c.HVCaseFK
+	-- order by c.HVCaseFK
 
 end
 GO

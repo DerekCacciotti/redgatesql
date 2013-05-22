@@ -123,7 +123,7 @@ begin
 			  ,PC1FullName
 			  ,CurrentWorkerFullName
 			  ,CurrentLevelName
-			  ,case when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate and chl6.FormDate > '01/01/13' and 
+			  ,case when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate and chl6.FormDate > '01/04/13' and 
 						   chl6.PC1HasMedicalProvider = 1 -- latest of either TC or CH
 					   then 'Change Form'
 					else
@@ -133,7 +133,7 @@ begin
 						--else null end
 			   end as FormName
 			  ,case
-				   when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate and chl6.FormDate > '01/01/13' and 
+				   when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate and chl6.FormDate > '01/04/13' and 
 					   chl6.PC1HasMedicalProvider = 1 -- latest of either TC or CH
 					   then chl6.FormDate -- note: preference is given to the latest CH record first, if there is one
 				   else -- note: otherwise we will use tcid record's info
@@ -159,7 +159,7 @@ begin
 			   end as FormMissing
 			  ,case
 				   when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate 
-						and chl6.FormDate > '01/01/13' and chl6.PC1HasMedicalProvider = 1 -- latest of either TC or CH
+						and chl6.FormDate > '01/04/13' and chl6.PC1HasMedicalProvider = 1 -- latest of either TC or CH
 					   then 1 -- note: preference is given to the latest CH record first, if there is one
 				   else -- note: otherwise we will use tcid record's info
 					   case when inl6.PC1HasMedicalProvider is not null and inl6.PC1HasMedicalProvider = 1 then 1 else 0 end
@@ -332,23 +332,24 @@ begin
 				from cteExpectedForm4TC6MonthsOrOlder
 		)
 	
-select distinct isnull(PTCode,'HD8')
-	  ,c.HVCaseFK
-	  ,c.PC1ID,c.OldID
-	  ,c.TCDOB
-	  ,c.PC1FullName
-	  ,isnull(c.CurrentWorkerFullName,c.CurrentWorkerFullName) as CurrentWorkerFullName
-	  ,isnull(c.CurrentLevelName,m.CurrentLevelName) as CurrentLevelName
-	  ,isnull(FormName,isnull(rtrim(cast(i.Interval as int)) + ' month Follow Up', 'Intake')) as FormName
-	  ,FormDate
-	  ,FormReviewed
-	  ,FormOutOfWindow
-	  ,isnull(FormMissing,1) as FormMissing
-	  ,FormMeetsTarget
-from cteCohort c
-left outer join cteMain m on c.HVCaseFK = m.HVCaseFK
-left outer join cteIntervals4TC6MonthsOrOlderTCForm i on i.HVCaseFK = c.HVCaseFK
-order by c.PC1ID
+	select distinct isnull(PTCode,'HD8')
+		  ,c.HVCaseFK
+		  ,c.PC1ID,c.OldID
+		  ,c.TCDOB
+		  ,c.PC1FullName
+		  ,isnull(c.CurrentWorkerFullName,c.CurrentWorkerFullName) as CurrentWorkerFullName
+		  ,isnull(c.CurrentLevelName,m.CurrentLevelName) as CurrentLevelName
+		  ,isnull(FormName,isnull(rtrim(cast(i.Interval as int)) + ' month Follow Up', 'Intake')) as FormName
+		  ,FormDate
+		  ,FormReviewed
+		  ,FormOutOfWindow
+		  ,isnull(FormMissing,1) as FormMissing
+		  ,FormMeetsTarget
+		  ,isnull(NotMeetingReason, 'Form missing')
+	from cteCohort c
+	left outer join cteMain m on c.HVCaseFK = m.HVCaseFK
+	left outer join cteIntervals4TC6MonthsOrOlderTCForm i on i.HVCaseFK = c.HVCaseFK
+	-- order by c.PC1ID
 
 end
 GO
