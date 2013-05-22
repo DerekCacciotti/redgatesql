@@ -11,7 +11,6 @@ GO
 CREATE PROCEDURE [dbo].[rspTraining_NYS3IFSP]
 	-- Add the parameters for the stored procedure here
 	@sdate AS DATETIME,
-	@edate AS DATETIME,
 	@progfk AS INT
 AS
 BEGIN
