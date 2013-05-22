@@ -89,7 +89,7 @@ BEGIN
 , cteFinal as (
 	SELECT WorkerPK, workername, firsteventdate, FirstIFSPDate, workercount
 		,CASE WHEN FirstIFSPDate Is Null THEN 'F'
-		WHEN dateadd(dd, 91, FirstEventDate) > FirstIFSPDate THEN 'T'
+		WHEN dateadd(dd, 91, FirstEventDate) < FirstIFSPDate THEN 'F'		
 		ELSE 'T' END AS MeetsTarget
 		, '1' AS GenericColumn --used for next cte cteCountMeeting
 	From cteGetShadowDate
@@ -109,7 +109,7 @@ BEGIN
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) < .9 THEN '1'
 	END AS Rating
-,	'NYS3. Staff (Supervisors and Homve Visitors) receive IFSP training within three months of hire to a HFNY position.' AS CSST
+,	'NYS3. Staff (Supervisors and Home Visitors) receive IFSP training within three months of hire to a HFNY position.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) AS PercentMeeting
 FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.GenericColumn = cteFinal.GenericColumn
