@@ -12,7 +12,7 @@ GO
 -- rspPerformanceTargetReportSummary 2 ,'10/01/2012' ,'12/31/2012'
 -- rspPerformanceTargetReportSummary 2 ,'04/01/2012' ,'06/30/2012'
 -- rspPerformanceTargetReportSummary 24,'10/01/2012' ,'12/31/2012'
--- rspPerformanceTargetReportSummary 9,'04/01/2013' ,'06/30/2013'
+-- rspPerformanceTargetReportSummary 9, '04/01/2013', '06/30/2013', 471
 -- mods by jrobohn 20130222 - clean up names, code and layout
 -- mods by jrobohn 20130223 - added PCI1 report
 -- =============================================
@@ -139,7 +139,6 @@ begin
 		, FormMeetsTarget	int
 		, ReasonNotMeeting	varchar(50)
 		)
-		
 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails

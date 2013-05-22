@@ -97,6 +97,7 @@ begin
 			  , case when dbo.IsFormReviewed(FollowUpDate,'FU',FollowUpPK) = 1 then 1 else 0 end as FormReviewed
 			  , case when (FUPInWindow = 1) then 0 else 1 end as FormOutOfWindow
 			  , case when FollowUpPK is null then 1 else 0 end as FormMissing
+			  , ca.ReceivingPublicBenefits
 			  , ca.PBTANF
 			from cteCohort c
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK
@@ -110,30 +111,32 @@ begin
 												and fu.FollowUpInterval = ca.FormInterval 
 		)
 	select PTCode
-			  , HVCaseFK
-			  , PC1ID
-			  , OldID
-			  , TCDOB
-			  , PC1FullName
-			  , CurrentWorkerFullName
-			  , CurrentLevelName
-			  , FormName
-			  , FormDate
-			  , FormReviewed
-			  , FormOutOfWindow
-			  , FormMissing
-			  , case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and PBTANF in ('2','3') 
-						then 1 
-						else 0 
-						end as FormMeetsTarget
-			  , case when FormMissing = 1 then 'Form missing'
-						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormReviewed = 0 then 'Form not reviewed by supervisor'
-						when PBTANF is not null and PBTANF not in ('2','3') 
-							then 'Still Receiving TANF'
-						when PBTANF is null 
-							then 'TANF Answer missing'
-						else '' end as ReasonNotMeeting
+			, HVCaseFK
+			, PC1ID
+			, OldID
+			, TCDOB
+			, PC1FullName
+			, CurrentWorkerFullName
+			, CurrentLevelName
+			, FormName
+			, FormDate
+			, FormReviewed
+			, FormOutOfWindow
+			, FormMissing
+			, case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and 
+						(ReceivingPublicBenefits = '0' or PBTANF in ('2','3'))
+					then 1 
+					else 0 
+				end as FormMeetsTarget
+			, case when FormMissing = 1 then 'Form missing'
+					when FormOutOfWindow = 1 then 'Form out of window'
+					when FormReviewed = 0 then 'Form not reviewed by supervisor'
+					when PBTANF is not null and PBTANF not in ('2','3') 
+					  then 'Still receiving TANF'
+					when ReceivingPublicBenefits = '1' and PBTANF is null 
+					  then 'TANF answer missing'
+					else '' 
+				end as ReasonNotMeeting
 	from cteExpectedForm
 	-- order by OldID
 

@@ -74,6 +74,7 @@ begin
 				left join tcid on tcid.hvcasefk = h.hvcasepk -- for dead babies dod
 			where
 				cp.ProgramFK = @ProgramFKs
+				and CurrentFSWFK = isnull(@FSWFK, CurrentFSWFK)
 				and h.CaseProgress >= 9
 				-- dead babies
 				 and (h.IntakeDate is not null
@@ -203,15 +204,15 @@ begin
 			, case when FormReviewed = 0 or FormOutOfWindow = 1 or FormMissing = 1 then 1 -- Invalid / Missing Cases
 					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and FormMeetsTarget = 0 then 2 -- Cases Not Meeting
 					else 3
-					end as PrimarySort
+				end as PrimarySort
 			, case when left(PTCode,2) = 'HD' then 1
 					when left(PTCode,3) = 'PCI' then 2
 					else 3
-					end as SecondarySort
+				end as SecondarySort
 			, case when FormReviewed = 0 or FormOutOfWindow = 1 or FormMissing = 1 then 'Invalid / Missing Cases'
 					when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and FormMeetsTarget = 0 then 'Cases Not Meeting'
 					else 'Cases Meeting'
-					end as GroupHeader
+				end as GroupHeader
 		from @tblPTDetails
 		order by PrimarySort
 					, SecondarySort
