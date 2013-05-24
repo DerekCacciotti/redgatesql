@@ -163,17 +163,11 @@ SELECT TotalWorkers
 , FAW
 , cteMeetTarget.topiccode
 , cteCountMeeting.TopicCode
-	, CASE WHEN cteCountMeeting.TopicCode = 1.0 THEN '10-2a. Staff (assessment workers, home visitors and supervisors) are oriented
-		to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting
-		/family support prior to direct work with children and families' 
-	WHEN cteCountMeeting.TopicCode = 2.0 THEN '10-2b. Staff (assessment workers, home visitors and supervisors) are oriented 
-		to the programs relationship with other community resources prior to direct work with children and families'  
-	WHEN cteCountMeeting.TopicCode = 3.0 THEN '10-2c. Staff (assessment workers, home visitors and supervisors) are oriented
-		to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
-	WHEN cteCountMeeting.TopicCode = 4.0 THEN '10-2d. Staff (assessment workers, home visitors and supervisors) are oriented
-		to issues of confidentiality prior to direct work with children and families' 
-	WHEN cteCountMeeting.TopicCode = 5.0 THEN '10-2e. Staff (assessment workers, home visitors and supervisors) are oriented
-		to issues related to boundaries prior to direct work with children and families' 
+	, CASE WHEN cteCountMeeting.TopicCode = 1.0 THEN '10-2a. Staff (assessment workers, home visitors and supervisors) are oriented to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting/family support prior to direct work with children and families' 
+	WHEN cteCountMeeting.TopicCode = 2.0 THEN '10-2b. Staff (assessment workers, home visitors and supervisors) are oriented to the programs relationship with other community resources prior to direct work with children and families'  
+	WHEN cteCountMeeting.TopicCode = 3.0 THEN '10-2c. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
+	WHEN cteCountMeeting.TopicCode = 4.0 THEN '10-2d. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
+	WHEN cteCountMeeting.TopicCode = 5.0 THEN '10-2e. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
 	END AS TopicName
 , TrainingDate
 , FirstHomeVisitDate
