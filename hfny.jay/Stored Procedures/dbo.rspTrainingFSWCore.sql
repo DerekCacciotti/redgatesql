@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -18,7 +19,7 @@ BEGIN
 	SET NOCOUNT ON;
 --Get FAW's in time period
 
-;WITH  cteEventDates AS (
+;WITH  cteEventDate AS (
 	SELECT workerpk, wrkrLName
 	, '1' AS MyWrkrCount
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName
@@ -28,10 +29,23 @@ BEGIN
 	AND FirstHomeVisitDate IS NOT NULL
 )
 
+, cteEventDates AS (
+	SELECT workerpk, wrkrLName
+	, MyWrkrCount
+	, WorkerName
+	, FirstHomeVisitDate
+	, PC1ID
+	 FROM cteEventDate
+	 INNER JOIN dbo.HVLog h ON h.FSWFK=WorkerPK
+	 INNER JOIN CaseProgram cp ON cp.HVCaseFK=h.HVCaseFK
+	 WHERE h.VisitStartTime = FirstHomeVisitDate AND h.FSWFK=WorkerPK
+)
+
 , cteFSWCore AS (
 	select WorkerPK, WorkerName
 	, FirstHomeVisitDate
 	, COUNT(workerpk) OVER (PARTITION BY MyWrkrCount) AS WorkerCount
+	, PC1ID
 	, (Select MIN(trainingdate) as TrainingDate 
 									from TrainingAttendee ta
 									LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
@@ -42,10 +56,12 @@ BEGIN
 		AS FSWCoreDate
 	from cteEventDates
 	GROUP BY WorkerPK, WorkerName, FirstHomeVisitDate, MyWrkrCount
+	, PC1ID
 )
 
 , cteFinal as (
 	SELECT WorkerPK, workername, FirstHomeVisitDate, FSWCoreDate, WorkerCount
+	, PC1ID
 		, MeetsTarget =
 			CASE 
 				WHEN FSWCoreDate Is Null THEN 'F'
@@ -64,6 +80,7 @@ BEGIN
 )
 
  SELECT cteFinal.workername, FirstHomeVisitDate, FSWCoreDate, MeetsTarget, cteFinal.workercount, totalmeetingcount
+	, PC1ID
  ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) = 1 THEN '3' 
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) < .9 THEN '1'
