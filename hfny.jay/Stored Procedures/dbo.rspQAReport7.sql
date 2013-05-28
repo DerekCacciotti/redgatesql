@@ -11,13 +11,11 @@ GO
 -- rspQAReport7 3, 'summary'	--- for summary page
 -- rspQAReport7 1			--- for main report - location = 1
 -- rspQAReport7 null			--- for main report for all locations
-
--- Edit Date: 5/24/2013 To fix Erie County from timing out, changed @programfk from varchar(max) to varchar(2)
 -- =============================================
 
 
 CREATE procedure [dbo].[rspQAReport7](
-@programfk    varchar(2)    = NULL,
+@programfk    varchar(max)    = NULL,
 @ReportType char(7) = NULL 
 
 )

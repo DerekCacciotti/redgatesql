@@ -11,11 +11,10 @@ GO
 
 -- rspQAReportSummary 31				--- for summary report - location = 2
 
--- Edit Date: 5/24/2013 To fix Erie County from timing out, changed @programfk from varchar(max) to varchar(2)
 -- =============================================
 
 CREATE PROCEDURE [dbo].[rspQAReportSummary](
-@programfk    varchar(2)    = NULL
+@programfk    varchar(max)    = NULL
 )
 
 
