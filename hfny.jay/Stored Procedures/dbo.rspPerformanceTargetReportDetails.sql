@@ -55,7 +55,7 @@ begin
 			 , rtrim(w.FirstName) + ' ' + rtrim(w.LastName) as CurrentWorkerFullName
 			 -- , dbo.udfLevelOnDate(cp.ProgramFK, HVCasePK, @EndDate) as CurrentLevelName
 			 , hvl.levelname as CurrentLevelName
-			 , @ProgramFKs
+			 , cp.ProgramFK
 			 , tcid.TCIDPK
 			 , case
 				  when h.tcdob is not null then
@@ -71,10 +71,11 @@ begin
 				-- inner join codeLevel l on l.codeLevelPK = cp.CurrentLevelFK
 				inner join dbo.udfHVLevel(@ProgramFKs, @EndDate) hvl on hvl.hvcasefk = cp.HVCaseFK
 				inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
+				inner join dbo.SplitString(@ProgramFKs, ',') ss on ss.ListItem = cp.ProgramFK
 				left join tcid on tcid.hvcasefk = h.hvcasepk -- for dead babies dod
 			where
-				cp.ProgramFK = @ProgramFKs
-				and CurrentFSWFK = isnull(@FSWFK, CurrentFSWFK)
+				--cp.ProgramFK = @ProgramFKs and 
+				CurrentFSWFK = isnull(@FSWFK, CurrentFSWFK)
 				and h.CaseProgress >= 9
 				-- dead babies
 				 and (h.IntakeDate is not null
