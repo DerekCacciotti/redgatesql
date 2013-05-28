@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -68,7 +69,7 @@ BEGIN
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) < .9 THEN '1'
 	END AS Rating
-,	'2.2C. Staff and volunteers who use the assessment tool(s) have been trained in its/their use prior to administering it/them.' AS CSST
+,	'2.3C. Staff and volunteers who use the assessment tool(s) have been trained in its/their use prior to administering it/them.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) AS PercentMeeting
 FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.WorkerCount = cteFinal.WorkerCount
