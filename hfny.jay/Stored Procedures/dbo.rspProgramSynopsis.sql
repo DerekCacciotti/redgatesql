@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -272,7 +273,7 @@ ctePreAssessments as
 		,'' as psrCol4,'' as psrCol5,'' as psrCol6,'' as psrCol7
 		FROM @tblCommonCohort AS a 	
 		INNER JOIN PC ON a.PC1FK = PC.PCPK -- to get pcdob	
-		WHERE a.ScreenDate < @edate
+		WHERE a.ScreenDate <= @edate
 		and (a.KempeDate > @edate or a.KempeDate is null)
 		and ( not (a.DischargeDate BETWEEN a.ScreenDate AND @edate) or DischargeDate is null )
 		
