@@ -1033,7 +1033,7 @@ INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0,
 				FROM cteASQ m
 				left join ASQ A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.TCAge
 				where A.ASQPK is null
-
+				order by workername, PC1ID  
 
 
 --- ASQSE DATA ---
@@ -1085,7 +1085,7 @@ INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0,
 				FROM cteASQSE m
 				left join ASQSE A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.ASQSETCAge
 				where A.ASQSEPK is null
-
+				order by workername, PC1ID  
 
 
 
@@ -1130,7 +1130,7 @@ INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0,
 				FROM cteFollowUp m
 				left JOIN FollowUp fu ON fu.HVCaseFK = m.HVCasePK AND fu.FollowUpInterval = m.Interval
 				where fu.FollowUpPK is null
-
+				order by workername, PC1ID  
 
 --- PSI DATA ---
 
@@ -1168,7 +1168,7 @@ INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0,
 				FROM ctePSI m
 				left JOIN PSI P ON P.HVCaseFK = m.HVCasePK AND P.PSIInterval = m.Interval
 				where P.PSIPK is null
-
+				order by workername, PC1ID  
 
 
 -- INSERT New Admission DATA
