@@ -36,35 +36,35 @@ if @AllWorkers = 0 or @AllWorkers is null
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and faw = 1
-					and @EventDate between FAWStartDate AND isnull(FAWEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between FAWStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FSW' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and fsw = 1
-					and @EventDate between FSWStartDate AND isnull(FSWEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between FSWStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FAdv' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and FatherAdvocate = 1
-					and @EventDate between FatherAdvocateStartDate AND isnull(FatherAdvocateEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between FatherAdvocateStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'SUP' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and supervisor = 1
-					and @EventDate between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between SupervisorStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'PM' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and programmanager = 1
-					and @EventDate between ProgramManagerStartDate AND isnull(ProgramManagerEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between ProgramManagerStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
 			)
 
 		select distinct rtrim(LastName) + ', ' + rtrim(FirstName) + case when TerminationDate is not null then ' *' else '' end as WorkerName
