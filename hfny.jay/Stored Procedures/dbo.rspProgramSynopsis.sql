@@ -783,7 +783,7 @@ where sr.ReferralDate >= cc.IntakeDate and sr.ReferralDate between @sdate and @e
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
 values(9,2,'',
 @Referralscol1,
-@Referralscol2,
+isnull(@Referralscol2,0),
 @Referralscol3,
 '',
 '',
