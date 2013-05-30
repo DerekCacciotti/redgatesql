@@ -84,7 +84,7 @@ as
 				inner join pc on pc.pcpk = pc1fk
 				left join tcid on tcid.hvcasefk = hvcasepk AND TCID.TCDOD IS NULL
 				inner join worker fsw on CurrentFSWFK = fsw.workerpk
-				inner join workerprogram on workerprogram.workerfk = fsw.workerpk
+				inner join workerprogram on workerprogram.workerfk = fsw.workerpk and workerprogram.programfk = caseprogram.programfk
 				inner join worker supervisor on supervisorfk = supervisor.workerpk
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where currentFSWFK = isnull(@workerfk,currentFSWFK)

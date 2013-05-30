@@ -92,7 +92,7 @@ set @programfk = REPLACE(@programfk,'"','')
 			join HVScreen on HVScreen.HVCaseFK = c.HVCasePK
 			-- FSW & site = cp.CurrentFSWFK <-> Worker.WorkerPK -> Worker.LastName + Worker.FirstName ?? site ??
 			left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
-			join Workerprogram as wp on wp.WorkerFK = w.WorkerPK
+			join Workerprogram as wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = @programfk
 			-- intake date & age at intake = cp.HVCaseFK <-> Intake.HVCaseFK -> Intake.IntakeDate -> (PCDOB - IntakeDate)
 			join Intake on Intake.HVCaseFK = c.HVCasePK
 			-- closed date & close reason = cp.DischargeDate, cp.DischargeReason <-> codeDischarge.DischargeCode 

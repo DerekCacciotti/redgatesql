@@ -91,7 +91,7 @@ as
 				left join kempe on kempe.hvcasefk = caseprogram.hvcasefk and kempe.programfk = caseprogram.programfk
 				inner join pc on pc.pcpk = pc1fk
 				inner join worker faw on CurrentFAWFK = faw.workerpk
-				inner join workerprogram on workerfk = faw.workerpk
+				inner join workerprogram on workerfk = faw.workerpk and workerprogram.programfk = caseprogram.programfk
 			--INNER JOIN dbo.SplitString(@programfk,',') ON caseprogram.programfk  = listitem
 			where workerfk = isnull(@workerpk,workerfk)
 				 and dischargedate is null
