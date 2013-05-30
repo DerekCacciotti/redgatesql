@@ -15,7 +15,7 @@ GO
 
 CREATE PROCEDURE [dbo].[rspQAReportSummary](
 @programfk    varchar(max)    = NULL
-)
+)with recompile
 
 
 AS

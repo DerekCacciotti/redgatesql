@@ -18,7 +18,7 @@ CREATE procedure [dbo].[rspQAReport9](
 @programfk    varchar(max)    = NULL,
 @ReportType char(7) = NULL 
 
-)
+)with recompile
 AS
 	if @programfk is null
 	BEGIN
