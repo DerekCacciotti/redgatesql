@@ -10,7 +10,7 @@ GO
 -- Description:	<This report gets you 'ProgramSynopsis i.e. The Program Synopsis is used as a monthly summary of activity for the program.
 -- It can be run for any time period as well. Screens, Kempes, enrollment, referrals, home visits and form information give the user a quick management look at program status.'>
 
--- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
+-- rspProgramSynopsis 5, '04/01/2013', '04/30/2013'
 
 -- =============================================
 
@@ -1417,7 +1417,9 @@ SELECT 	'17','2', ''
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)	
 SELECT 	'18','2', ''
 	,LevelName
-	,sum(levelCount) as NumberOfCases
+	,case when LevelName = 'Preintake-enroll' then sum(CASE when levelCount IS NOT NULL THEN 1 ELSE 0 END)
+	 else sum(levelCount)
+	 end  as NumberOfCases	 
 	,''
 	,''
 	,''
@@ -1426,6 +1428,7 @@ SELECT 	'18','2', ''
 	,''	
 	 FROM @tbl4DataReportRow14RestOfIt
 group by LevelName 
+
 
 
 -- Now print the report ... Khalsa
