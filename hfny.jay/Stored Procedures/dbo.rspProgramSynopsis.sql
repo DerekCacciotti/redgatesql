@@ -224,7 +224,7 @@ INSERT INTO @tblCommonCohort
 	inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK	
 	inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 	left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
-	left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK	
+	left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.ProgramFK = ListItem -- it now handles transfer work duplication correctly as per CP
 	inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK  -- may be we  need to put it somewhere else if no filter is being used
 	WHERE 
 	case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1
