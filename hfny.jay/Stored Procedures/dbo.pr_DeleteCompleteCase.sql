@@ -462,6 +462,28 @@ begin try
 	close del_cursor;
 	deallocate del_cursor;
 
+	--PSI--possible multi-records
+	declare del_cursor cursor for
+	select psipk
+		from PSI
+		where hvcasefk = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		exec spDelPSI @ASQPK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+
+
 	--WorkerAssignment
 	declare del_cursor cursor for
 	select WorkerAssignmentpk
