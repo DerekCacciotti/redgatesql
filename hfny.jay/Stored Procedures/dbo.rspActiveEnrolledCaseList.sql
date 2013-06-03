@@ -31,6 +31,7 @@ AS
     set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
 
 SELECT rtrim(PC.PCLastName) + cast(PC.PCPK AS VARCHAR(10)) [key01]
+, a.PC1ID
 , rtrim(PC.PCLastName) + ', ' + rtrim(PC.PCFirstName) [Name]
 , convert(VARCHAR(12), PC.PCDOB, 101) [DOB]
 , PC.SSNo [SSNo]
