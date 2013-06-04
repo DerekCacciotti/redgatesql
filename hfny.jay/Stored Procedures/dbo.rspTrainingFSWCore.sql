@@ -30,15 +30,21 @@ BEGIN
 )
 
 , cteEventDates AS (
-	SELECT workerpk, wrkrLName
+	SELECT WorkerPK
+	, wrkrLName
 	, MyWrkrCount
 	, WorkerName
 	, FirstHomeVisitDate
-	, PC1ID
+	, min(PC1ID) AS PC1ID
 	 FROM cteEventDate
 	 INNER JOIN dbo.HVLog h ON h.FSWFK=WorkerPK
 	 INNER JOIN CaseProgram cp ON cp.HVCaseFK=h.HVCaseFK
 	 WHERE h.VisitStartTime = FirstHomeVisitDate AND h.FSWFK=WorkerPK
+	 GROUP BY WorkerPK
+	, wrkrLName
+	, MyWrkrCount
+	, WorkerName
+	, FirstHomeVisitDate
 )
 
 , cteFSWCore AS (
