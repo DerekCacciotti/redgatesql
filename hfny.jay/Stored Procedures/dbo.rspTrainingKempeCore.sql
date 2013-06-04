@@ -19,7 +19,7 @@ BEGIN
 	SET NOCOUNT ON;
 --Get FAW's in time period
 
-;WITH  cteEventDates AS (
+;WITH  cteEventDate AS (
 	SELECT workerpk, wrkrLName
 	, '1' AS MyWrkrCount
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName
@@ -29,9 +29,28 @@ BEGIN
 	AND FirstKempeDate IS NOT null
 )
 
+, cteEventDates AS (
+	SELECT WorkerPK
+	, wrkrLName
+	, MyWrkrCount
+	, WorkerName
+	, FirstKempeDate
+	, min(PC1ID) AS PC1ID
+	 FROM cteEventDate
+	 INNER JOIN dbo.Kempe k ON k.FAWFK=WorkerPK
+	 INNER JOIN CaseProgram cp ON cp.HVCaseFK=k.HVCaseFK
+	 WHERE k.KempeDate = FirstKempeDate AND k.FAWFK=WorkerPK
+	 GROUP BY WorkerPK
+	, wrkrLName
+	, MyWrkrCount
+	, WorkerName
+	, FirstKempeDate
+)
+
 , cteKempeCore AS (
 	select WorkerPK, WorkerName
 	, FirstKempeDate
+	, PC1ID
 	, COUNT(workerpk) OVER (PARTITION BY MyWrkrCount) AS WorkerCount
 	, (Select MIN(trainingdate) as TrainingDate 
 									from TrainingAttendee ta
@@ -42,11 +61,11 @@ BEGIN
 									)
 		AS KempCoreDate
 	from cteEventDates
-	GROUP BY WorkerPK, WorkerName, FirstKempeDate, MyWrkrCount
+	GROUP BY WorkerPK, WorkerName, FirstKempeDate, MyWrkrCount, PC1ID
 )
 
 , cteFinal as (
-	SELECT WorkerPK, workername, FirstKempeDate, KempCoreDate, WorkerCount
+	SELECT WorkerPK, workername, FirstKempeDate, KempCoreDate, WorkerCount, PC1ID
 		, MeetsTarget =
 			CASE 
 				WHEN KempCoreDate Is Null THEN 'F'
@@ -71,6 +90,7 @@ BEGIN
 	END AS Rating
 ,	'2.3C. Staff and volunteers who use the assessment tool(s) have been trained in its/their use prior to administering it/them.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) AS PercentMeeting
+, PC1ID
 FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.WorkerCount = cteFinal.WorkerCount
 ORDER BY cteFinal.workername
