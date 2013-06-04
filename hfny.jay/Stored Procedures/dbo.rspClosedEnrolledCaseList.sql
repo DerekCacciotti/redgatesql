@@ -32,6 +32,7 @@ set @programfk = REPLACE(@programfk,'"','')
 	set @SiteFK = isnull(@SiteFK, 0)
 	
 	select rtrim(PC.PCLastName)+cast(PC.PCPK as varchar(10)) [key01]
+	      , cp.PC1ID
 		  ,rtrim(PC.PCLastName)+', '+rtrim(PC.PCFirstName) [Name]
 		  ,convert(varchar(12),PC.PCDOB,101) [DOB]
 		  ,PC.SSNo [SSNo]
