@@ -10,19 +10,20 @@ GO
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
+-- exec rspRetentionRates_Detail 1, '20090501', '20110430'
 -- exec rspRetentionRates_Detail 37, '20090401', '20110331'
 -- exec rspRetentionRates_Detail 13, '20090401', '20110331'
 
 -- =============================================
 CREATE PROCEDURE [dbo].[rspRetentionRates_Detail]
 	-- Add the parameters for the stored procedure here
-	@programfk INT, @startdate DATETIME, @enddate DATETIME
+	@ProgramFK INT, @StartDate DATETIME, @EndDate DATETIME
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
---region declarations
+--#region declarations
 	declare @tblResults table (
 		LineDescription varchar(50)
 		, LineGroupingLevel int
@@ -60,6 +61,8 @@ BEGIN
 		, HVCaseFK_old int
 		, IntakeDate datetime
 		, DischargeDate datetime
+		, DischargeReasonCode char(3)
+		, DischargeReason char(100)
 		, LastHomeVisit datetime
 		, RetentionMonths int
 		, ActiveAt6Months int
@@ -155,13 +158,86 @@ BEGIN
 		, TrimesterAtIntake1st int
 		, CountOfFSWs int
 		, TotalDaysEnrolled int);
+--#endregion
+--#region cteCohort - Get the cohort for the report
+	with cteCohort as
+	-----------------------
+		(select HVCasePK
+			from HVCase h 
+			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				  and cp.ProgramFK=@ProgramFK
+		)	
+
+	--select * 
+	--from cteCohort
+	--order by HVCasePK
+
+	--select HVCasePK, count(HVCasePK)
+	--from cteCohort
+	--group by HVCasePK
+	--having count(HVCasePK) > 1
 	
---endregion
---region cteDischargeData - Get all discharge related data
-    with cteDischargeData as 
+--#endregion
+--#region cteLastFollowUp - Get last follow up completed for all cases in cohort
+	, cteLastFollowUp as 
+	-----------------------
+		(select max(FollowUpPK) as FollowUpPK
+			   , max(FollowUpDate) as FollowUpDate
+			   , fu.HVCaseFK
+			from FollowUp fu
+			inner join cteCohort c on c.HVCasePK = fu.HVCaseFK
+			group by fu.HVCaseFK
+		)
+	
+	--select * 
+	--from cteLastFollowUp 
+	--order by HVCaseFK
+
+--#endregion
+--#region cteFollowUp* - get follow up common attribute rows and columns that we need for each person from the last follow up
+	, cteFollowUpPC1 as
+	-------------------
+		(select MaritalStatus
+				, PBTANF as PC1TANFAtDischarge
+				, cappmarital.AppCodeText as MaritalStatusAtDischarge
+				, cappgrade.AppCodeText as PC1EducationAtDischarge
+				, IsCurrentlyEmployed AS PC1EmploymentAtDischarge
+				, EducationalEnrollment AS EducationalEnrollmentAtDischarge
+				, ca.HVCaseFK 
+		   from CommonAttributes ca
+		   left outer join codeApp cappmarital ON cappmarital.AppCode=MaritalStatus and cappmarital.AppCodeGroup='MaritalStatus'
+		   left outer join codeApp cappgrade ON cappgrade.AppCode=HighestGrade and cappgrade.AppCodeGroup='Education'
+		   inner join cteLastFollowUp fu on FollowUpPK = FormFK
+		  where FormType='FU-PC1'
+		)
+	, cteFollowUpOBP as
+	-------------------
+		(select IsCurrentlyEmployed as OBPEmploymentAtDischarge
+				, OBPInHome as OBPInHomeAtDischarge
+				, ca.HVCaseFK 
+		   from CommonAttributes ca
+		   left outer join codeApp capp ON capp.AppCode=MaritalStatus and AppCodeGroup='MaritalStatus'
+		   inner join cteLastFollowUp fu on FollowUpPK = FormFK
+		  where FormType='FU-OBP'
+		)
+	, cteFollowUpPC2 as
+	-------------------
+		(select IsCurrentlyEmployed AS PC2EmploymentAtDischarge
+				, ca.HVCaseFK 
+		   from CommonAttributes ca
+		   left outer join codeApp capp ON capp.AppCode=MaritalStatus and AppCodeGroup='MaritalStatus'
+		   inner join cteLastFollowUp fu on FollowUpPK = FormFK
+		  where FormType='FU-PC2'
+		)
+--#endregion
+--#region cteDischargeData - Get all discharge related data
+    , cteDischargeData as 
 	------------------------
-		(select HVCasePK as HVCaseFK
+		(select h.HVCasePK as HVCaseFK
+			    ,cd.DischargeCode as DischargeCode
 			    ,cd.DischargeReason as DischargeReason
+				,PC1TANFAtDischarge
 				,MaritalStatusAtDischarge
 				,PC1EducationAtDischarge
 				,PC1EmploymentAtDischarge
@@ -200,84 +276,63 @@ BEGIN
 				,PC2inHome as PC2InHomeAtDischarge
 				,PC2EmploymentAtDischarge
 				,OBPEmploymentAtDischarge
-		from HVCase c
-		inner join CaseProgram cp on cp.HVCaseFK=c.HVCasePK
-		inner join Kempe k on k.HVCaseFK=c.HVCasePK
+		from HVCase h
+		inner join CaseProgram cp on cp.HVCaseFK=h.HVCasePK
+		inner join Kempe k on k.HVCaseFK=h.HVCasePK
 		inner join codeLevel cl ON cl.codeLevelPK=CurrentLevelFK
 		inner join codeDischarge cd on cd.DischargeCode=cp.DischargeReason 
-		left outer join (select *
-						from FollowUp fu
-						where fu.FollowUpInterval in (98,99)) fu ON fu.HVCaseFK=c.HVCasePK
+		inner join cteCohort c on h.HVCasePK = c.HVCasePK
+		inner join cteLastFollowUp lfu on lfu.HVCaseFK = c.HVCasePK
+		left outer join FollowUp fu ON fu.FollowUpPK = lfu.FollowUpPK
 		left outer join PC1Issues pc1is ON pc1is.PC1IssuesPK=fu.PC1IssuesFK
-		left outer join (select MaritalStatus
-								,AppCodeText as MaritalStatusAtDischarge
-								,IsCurrentlyEmployed AS PC1EmploymentAtDischarge
-								,EducationalEnrollment AS EducationalEnrollmentAtDischarge
-								,HVCaseFK 
-						   from CommonAttributes ca
-						   left outer join codeApp capp ON capp.AppCode=MaritalStatus and AppCodeGroup='MaritalStatus'
-						  where FormType='FU-PC1' AND FormInterval IN (98,99)) pc1fuca ON pc1fuca.HVCaseFK=c.HVCasePK
-		left outer join (SELECT IsCurrentlyEmployed AS OBPEmploymentAtDischarge
-								,OBPInHome as OBPInHomeAtDischarge
-								,HVCaseFK 
-						   FROM CommonAttributes ca
-						  WHERE FormType='FU-OBP' AND FormInterval IN (98,99)) obpfuca ON obpfuca.HVCaseFK=c.HVCasePK
-		left outer join (SELECT IsCurrentlyEmployed AS PC2EmploymentAtDischarge
-								, HVCaseFK
-						   FROM CommonAttributes ca
-						  WHERE FormType='FU-PC2' AND FormInterval IN (98,99)) pc2fuca ON pc2fuca.HVCaseFK=c.HVCasePK
-		left outer join (SELECT AppCodeText as PC1EducationAtDischarge,HighestGrade,HVCaseFK 
-						   FROM CommonAttributes ca
-						   LEFT OUTER JOIN codeApp capp ON capp.AppCode=HighestGrade and AppCodeGroup='Education'
-						  WHERE FormType='FU-PC1' AND FormInterval IN (98,99)) pc1edufu ON pc1edufu.HVCaseFK=c.HVCasePK
-		where (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-			  and cp.ProgramFK=@programfk
-			  AND Fu.FollowUpInterval IN (98,99)),
---endregion
---region cteCaseLastHomeVisit - get the last home visit for each case in the cohort 
-	cteCaseLastHomeVisit AS 
+		left outer join cteFollowUpPC1 pc1fuca ON pc1fuca.HVCaseFK=c.HVCasePK
+		left outer join cteFollowUpOBP obpfuca ON obpfuca.HVCaseFK=c.HVCasePK
+		left outer join cteFollowUpPC2 pc2fuca ON pc2fuca.HVCaseFK=c.HVCasePK
+			  -- and Fu.FollowUpInterval IN (98,99))
+		--where DischargeDate <= @EndDate
+		)
+
+	--select * from cteDischargeData
+	--order by HVCaseFK
+
+--#endregion
+--#region cteCaseLastHomeVisit - get the last home visit for each case in the cohort 
+	, cteCaseLastHomeVisit AS 
 	------------------------
-		(SELECT HVCaseFK,MAX(vl.VisitStartTime) AS LastHomeVisit,COUNT(vl.VisitStartTime) AS CountOfHomeVisits
-			FROM HVLog vl
-			INNER JOIN hvcase c ON c.HVCasePK=vl.HVCaseFK 
-			WHERE (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-				and vl.ProgramFK=@programfk
-			GROUP BY HVCaseFK), 
---endregion
---region cteCaseFSWCount - get the count of FSWs for each case in the cohort, i.e. how many times it's changed
-	cteCaseFSWCount AS 
+		(select HVCaseFK
+				  , max(vl.VisitStartTime) as LastHomeVisit
+				  , count(vl.VisitStartTime) as CountOfHomeVisits
+			from HVLog vl
+			inner join hvcase c ON c.HVCasePK=vl.HVCaseFK 
+			where VisitType <> '0001' and 
+					(IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+						and vl.ProgramFK=@ProgramFK
+			group by HVCaseFK
+		)
+--#endregion
+--#region cteCaseFSWCount - get the count of FSWs for each case in the cohort, i.e. how many times it's changed
+	, cteCaseFSWCount AS 
 	------------------------
 		 (SELECT HVCaseFK, COUNT(wa.WorkerAssignmentPK) AS CountOfFSWs
 		   FROM dbo.WorkerAssignment wa
 			INNER JOIN hvcase c ON c.HVCasePK=wa.HVCaseFK 
-			WHERE (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-				and wa.ProgramFK=@programfk
-			GROUP BY HVCaseFK),
---endregion
---region ctePC1AgeAtIntake - get the PC1's age at intake
-	ctePC1AgeAtIntake as
+			WHERE (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				and wa.ProgramFK=@ProgramFK
+			group by HVCaseFK)
+--#endregion
+--#region ctePC1AgeAtIntake - get the PC1's age at intake
+	, ctePC1AgeAtIntake as
 	------------------------
 		(select HVCasePK as HVCaseFK
 				,round(datediff(day,PCDOB,IntakeDate)/365.25,0) as PC1AgeAtIntake
 			from PC 
 			inner join PCProgram pcp on pcp.PCFK=PCPK
 			inner join HVCase c on c.PC1FK=PCPK
-			WHERE (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-				and pcp.ProgramFK=@programfk),
---endregion
---region ctePC1TANFAtDischarge - get the TANF status at discharge from TIP Status Change for PC1
-	ctePC1TANFAtDischarge as 
-	------------------------
-	(select HVCaseFK, FormDate,PBTANF as PC1TANFAtDischarge
-			from CommonAttributes ca
-			where formtype = 'TP'
-				and CONVERT(DATETIME,FormDate,112)+CommonAttributesPK in (select CAMatchingKey=MAX(CONVERT(DATETIME,FormDate,112)+CommonAttributesPK)
-											from CommonAttributes cainner
-											where cainner.hvcasefk=ca.hvcasefk 
-													and formtype='TP')),
---endregion
---region cteMain - main select for the report sproc, gets data at intake and joins to data at discharge
-	cteMain as
+			WHERE (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				and pcp.ProgramFK=@ProgramFK)
+--#endregion
+--#region cteMain - main select for the report sproc, gets data at intake and joins to data at discharge
+	, cteMain as
 	------------------------
 		(select PC1ID
 			   ,OldID
@@ -288,7 +343,7 @@ BEGIN
 			   ,CountOfHomeVisits
 			   ,DischargeDate
 			   ,LevelName
-			   ,cp.DischargeReason AS DischargeReasonCode
+			   ,cp.DischargeReason as DischargeReasonCode
                ,dd.DischargeReason
 			   ,PC1AgeAtIntake
 			   ,case 
@@ -385,7 +440,6 @@ BEGIN
 				,PC1TANFAtIntake
 		FROM HVCase c
 		left outer join cteDischargeData dd ON dd.hvcasefk=c.HVCasePK
-		left outer join ctePC1TANFAtDischarge tanf on tanf.HVCaseFK=c.HVCasePK
 		inner join cteCaseLastHomeVisit lhv ON lhv.HVCaseFK=c.HVCasePK
 		inner join cteCaseFSWCount fc ON fc.HVCaseFK=c.HVCasePK
 		inner join ctePC1AgeAtIntake aai on aai.HVCaseFK=c.HVCasePK
@@ -416,21 +470,27 @@ BEGIN
 						   FROM CommonAttributes ca
 						   LEFT OUTER JOIN codeApp capp ON capp.AppCode=HighestGrade and AppCodeGroup='Education'
 						  WHERE FormType='IN-PC1') pc1eduai ON pc1eduai.HVCaseFK=c.HVCasePK
-		where (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-			  and cp.ProgramFK=@programfk)
---endregion
+		where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				  and cp.ProgramFK=@ProgramFK
+		)
+--#endregion
 --select *
 --from cteDischargeData
+
 --select *
 --from cteMain
---order by HVCaseFK_old -- PC1ID
---region Add rows to @tblPC1withStats for each case/pc1id in the cohort, which will create the basis for the final stats
+--where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
+--order by DischargeReasonCode, PC1ID
+
+--#region Add rows to @tblPC1withStats for each case/pc1id in the cohort, which will create the basis for the final stats
 insert into @tblPC1withStats 
 		(PC1ID
 		, OldID
 		, HVCaseFK_old
 		, IntakeDate
 		, DischargeDate
+		, DischargeReasonCode
+		, DischargeReason
 		, LastHomeVisit
 		, RetentionMonths
 		, ActiveAt6Months
@@ -531,6 +591,8 @@ select distinct pc1id
 		, HVCaseFK_old
 		, IntakeDate
 		, DischargeDate
+		, DischargeReasonCode
+		, DischargeReason
 		, LastHomeVisit
 		, datediff(mm,IntakeDate,LastHomeVisit) as RetentionMonths
 		, ActiveAt6Months
@@ -546,10 +608,10 @@ select distinct pc1id
 		, case when left(RaceText,8)='Hispanic' then 1 else 0 end as RaceHispanic
 		, case when left(RaceText,5) in('Asian','Nativ','Multi','Other') then 1 else 0 end as RaceOther
 		, case when RaceText is null or RaceText='' then 1 else 0 end as RaceUnknownMissing
-		, case when MaritalStatusAtIntake in ('Married, first time','Remarried','Separated') then 1 else 0 end as MarriedAtIntake
-		, case when MaritalStatusAtDischarge in ('Married, first time','Remarried','Separated') then 1 else 0 end as MarriedAtDischarge
-		, case when left(MaritalStatusAtIntake,6) in ('Single','Living','Divorc','Widowe') then 1 else 0 end as NotMarriedAtIntake
-		, case when left(MaritalStatusAtDischarge,6) in ('Single','Living','Divorc','Widowe') then 1 else 0 end as NotMarriedAtDischarge
+		, case when MaritalStatusAtIntake = 'Married' then 1 else 0 end as MarriedAtIntake
+		, case when MaritalStatusAtDischarge = 'Married' then 1 else 0 end as MarriedAtDischarge
+		, case when MaritalStatusAtIntake = 'Not married' then 1 else 0 end as NotMarriedAtIntake
+		, case when MaritalStatusAtIntake = 'Not married' then 1 else 0 end as NotMarriedAtDischarge
 		, case when MaritalStatusAtIntake is null or MaritalStatusAtIntake='' then 1 else 0 end as MarriedUnknownMissingAtIntake
 		, case when MaritalStatusAtDischarge is null or MaritalStatusAtDischarge='' then 1 else 0 end as MarriedUnknownMissingAtDischarge
 		, case when OtherChildrenInHouseholdAtIntake > 0 then 1 else 0 end as OtherChildrenInHouseholdAtIntake
@@ -604,7 +666,7 @@ select distinct pc1id
 		, case when PC2InHomeAtIntake = 1 and (PC2EmploymentAtIntake is null or PC2EmploymentAtIntake = '') then 1 else 0 end as PC2EmploymentAtIntakeUnknownMissing
 		, case when PC2InHomeAtDischarge = 1 and (PC2EmploymentAtDischarge is null or PC2EmploymentAtDischarge = '') then 1 else 0 end as PC2EmploymentAtDischargeUnknownMissing
 		, case when PC1EmploymentAtIntake = 1 or PC2EmploymentAtIntake = 1 or OBPEmploymentAtIntake = 1 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtIntakeYes
-		, case when PC1EmploymentAtDischarge = 1 or PC2EmploymentAtDischarge = 1 or OBPEmploymentAtIntake = 1 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtDischargeYes
+		, case when PC1EmploymentAtDischarge = 1 or PC2EmploymentAtDischarge = 1 or OBPEmploymentAtDischarge = 1 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtDischargeYes
 		, case when PC1EmploymentAtIntake = 0 and PC2EmploymentAtIntake = 0 and OBPEmploymentAtIntake = 0 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtIntakeNo
 		, case when PC1EmploymentAtDischarge = 0 and PC2EmploymentAtDischarge = 0 and OBPEmploymentAtDischarge = 0 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtDischargeNo
 		, case when (PC1EmploymentAtIntake is null or PC1EmploymentAtIntake = '') 
@@ -629,20 +691,20 @@ select distinct pc1id
 		, case when IntakeDate<TCDOB and datediff(day,IntakeDate,TCDOB) between round(30.44*3,0)+1 and round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake2nd
 		, case when IntakeDate<TCDOB and datediff(day,IntakeDate,TCDOB) > round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake1st		
 		, CountOfFSWs
-		, datediff(day,IntakeDate,DischargeDate) as TotalDaysEnrolled
+		, datediff(day,IntakeDate,LastHomeVisit) as TotalDaysEnrolled
 from cteMain
 -- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
-where DischargeReasonCode is NULL or -- DischargeReasonCode not in ('07','17','18') 
-		(DischargeReasonCode not in ('07','17','18') or datediff(day,IntakeDate,DischargeDate)>=(4*6*30.44))
+where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
+		-- (DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') or datediff(day,IntakeDate,DischargeDate)>=(4*6*30.44))
 order by PC1ID,IntakeDate
---endregion
+--#endregion
 
 select *
 from @tblPC1withStats
-order by HVCaseFK_old
--- order by RetentionMonths
+-- order by HVCaseFK_old
+order by pc1id, dischargereasoncode, RetentionMonths
 
-END
+end
 
 
 GO

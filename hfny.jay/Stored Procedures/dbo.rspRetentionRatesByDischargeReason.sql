@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -144,7 +145,7 @@ print @enddate
 
 --select *
 --from cteMain
---where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '37')
+--where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
 --order by DischargeReasonCode, PC1ID
 
 --#endregion
@@ -164,7 +165,7 @@ insert into @tblPC1withStats
 			left outer join codeDischarge d on cteMain.DischargeReasonCode = DischargeCode -- and 
 		-- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
 		where DischargeReasonCode is null
-			 or DischargeReasonCode not in ('07', '17', '18', '37')
+			 or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
 		order by ReportDischargeText
 				,PC1ID
 				,IntakeDate

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,7 +8,7 @@ GO
 -- Create date: 03/31/11
 -- Description:	Main storedproc for Retention Rate report
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
--- exec rspRetentionRates 19, '04/01/09', '03/31/11'
+-- exec rspRetentionRates 1, '05/01/09', '04/30/11'
 -- exec rspRetentionRates 19, '20080101', '20121231'
 -- exec rspRetentionRates 37, '20090401', '20110331'
 -- exec rspRetentionRates 17, '20090401', '20110331'
@@ -18,7 +19,7 @@ GO
 CREATE PROCEDURE [dbo].[rspRetentionRates]
 	-- Add the parameters for the stored procedure here
 	@programfk INT, @startdate DATETIME, @enddate DATETIME
-AS
+as
 BEGIN
 -- SET NOCOUNT ON added to prevent extra result sets from
 -- interfering with SELECT statements.
@@ -196,6 +197,7 @@ SET NOCOUNT ON;
 	, cteFollowUpPC1 as
 	-------------------
 		(select MaritalStatus
+				, PBTANF as PC1TANFAtDischarge
 				, cappmarital.AppCodeText as MaritalStatusAtDischarge
 				, cappgrade.AppCodeText as PC1EducationAtDischarge
 				, IsCurrentlyEmployed AS PC1EmploymentAtDischarge
@@ -232,6 +234,7 @@ SET NOCOUNT ON;
 	------------------------
 		(select h.HVCasePK as HVCaseFK
 			    ,cd.DischargeReason as DischargeReason
+				,PC1TANFAtDischarge
 				,MaritalStatusAtDischarge
 				,PC1EducationAtDischarge
 				,PC1EmploymentAtDischarge
@@ -297,20 +300,21 @@ SET NOCOUNT ON;
 				  , count(vl.VisitStartTime) as CountOfHomeVisits
 			from HVLog vl
 			inner join hvcase c on c.HVCasePK = vl.HVCaseFK
-			where (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-					 and vl.ProgramFK = @programfk
+			where VisitType <> '0001' and 
+					(IntakeDate is not null and IntakeDate between @startdate and @enddate)
+							 and vl.ProgramFK = @programfk
 			group by HVCaseFK
 		)
 --#endregion
 --#region cteCaseFSWCount - get the count of FSWs for each case in the cohort, i.e. how many times it's changed
 	, cteCaseFSWCount AS 
 	------------------------
-		 (SELECT HVCaseFK, COUNT(wa.WorkerAssignmentPK) AS CountOfFSWs
-		   FROM dbo.WorkerAssignment wa
-			INNER JOIN hvcase c ON c.HVCasePK=wa.HVCaseFK 
-			WHERE (IntakeDate is not null and IntakeDate between @startdate and @enddate)
+		 (select HVCaseFK, count(wa.WorkerAssignmentPK) as CountOfFSWs
+		   from dbo.WorkerAssignment wa
+			inner join hvcase c on c.HVCasePK=wa.HVCaseFK 
+			where (IntakeDate is not null and IntakeDate between @startdate and @enddate)
 				and wa.ProgramFK=@programfk
-			GROUP BY HVCaseFK)
+			group by HVCaseFK)
 --#endregion
 --#region ctePC1AgeAtIntake - get the PC1's age at intake
 	, ctePC1AgeAtIntake as
@@ -322,18 +326,6 @@ SET NOCOUNT ON;
 			inner join HVCase c on c.PC1FK=PCPK
 			WHERE (IntakeDate is not null and IntakeDate between @startdate and @enddate)
 				and pcp.ProgramFK=@programfk)
---#endregion
---#region ctePC1TANFAtDischarge - get the TANF status at discharge from TIP Status Change for PC1
-	, ctePC1TANFAtDischarge as 
-	------------------------
-	(select HVCaseFK, FormDate,PBTANF as PC1TANFAtDischarge
-			from CommonAttributes ca
-			where formtype = 'TP'
-				and CONVERT(DATETIME,FormDate,112)+CommonAttributesPK in 
-						(select CAMatchingKey=MAX(CONVERT(DATETIME,FormDate,112)+CommonAttributesPK)
-							from CommonAttributes cainner
-							where cainner.hvcasefk=ca.hvcasefk 
-									and formtype='TP'))
 --#endregion
 --#region cteMain - main select for the report sproc, gets data at intake and joins to data at discharge
 	, cteMain as
@@ -442,7 +434,6 @@ SET NOCOUNT ON;
 				,PC1TANFAtIntake
 			FROM HVCase c
 			left outer join cteDischargeData dd ON dd.hvcasefk=c.HVCasePK
-			left outer join ctePC1TANFAtDischarge tanf on tanf.HVCaseFK=c.HVCasePK
 			inner join cteCaseLastHomeVisit lhv ON lhv.HVCaseFK=c.HVCasePK
 			inner join cteCaseFSWCount fc ON fc.HVCaseFK=c.HVCasePK
 			inner join ctePC1AgeAtIntake aai on aai.HVCaseFK=c.HVCasePK
@@ -482,7 +473,7 @@ SET NOCOUNT ON;
 
 --select *
 --from cteMain
---where DischargeReasonCode is NULL or DischargeReasonCode not in ('07','17','18','37')
+--where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
 --order by DischargeReasonCode, PC1ID
 
 --#region Add rows to @tblPC1withStats for each case/pc1id in the cohort, which will create the basis for the final stats
@@ -687,8 +678,8 @@ select distinct pc1id
 		, CountOfFSWs
 from cteMain
 -- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
-where DischargeReasonCode is NULL or DischargeReasonCode not in ('07','17','18', '37') 
-		-- (DischargeReasonCode not in ('07','17','18','37') or datediff(day,IntakeDate,DischargeDate)>=(4*6*30.44))
+where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37')
+		-- (DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') or datediff(day,IntakeDate,DischargeDate)>=(4*6*30.44))
 order by PC1ID,IntakeDate
 --#endregion
 --SELECT * FROM @tblPC1withStats
@@ -1890,6 +1881,7 @@ values ('    Missing / Unknown'
 		, @TwentyFourMonthsAtIntake
 		, @TwentyFourMonthsAtDischarge)
 --#endregion
+--#region Other Children in Household
 -- Other Children in Household
 --		Yes
 --		No
@@ -2125,7 +2117,8 @@ values ('    No'
 		, @EighteenMonthsAtDischarge
 		, @TwentyFourMonthsAtIntake
 		, @TwentyFourMonthsAtDischarge)
-
+--#endregion
+--#region Receiving TANF Services
 -- Receiving TANF Services
 --		Yes
 --		No
@@ -2361,7 +2354,8 @@ values ('    No'
 		, @EighteenMonthsAtDischarge
 		, @TwentyFourMonthsAtIntake
 		, @TwentyFourMonthsAtDischarge)
-
+--#endregion
+--#region Average Kempe Score
 -- Average Kempe Score
 set @LineGroupingLevel = @LineGroupingLevel + 1
 
@@ -2434,7 +2428,8 @@ values ('Average Kempe Score'
 		, @TwelveMonthsAtIntake
 		, @EighteenMonthsAtIntake
 		, @TwentyFourMonthsAtIntake)
-
+--#endregion
+--#region Education
 -- Education
 --		Less than 12
 --		HS / GED
@@ -2862,8 +2857,8 @@ values ('    Missing / Unknown'
 		, @EighteenMonthsAtDischarge
 		, @TwentyFourMonthsAtIntake
 		, @TwentyFourMonthsAtDischarge)
-
-
+--#endregion
+--#region PC1 Enrolled In Education Program
 -- PC1 Enrolled In Education Program
 --		Yes
 --		No
@@ -3195,7 +3190,8 @@ values ('    Missing / Unknown'
 		, @EighteenMonthsAtDischarge
 		, @TwentyFourMonthsAtIntake
 		, @TwentyFourMonthsAtDischarge)
-        
+--#endregion
+--#region PC1 Employed
 -- PC1 Employed
 --		Yes
 --		No
@@ -3527,7 +3523,7 @@ values ('    Missing / Unknown'
 		, @EighteenMonthsAtDischarge
 		, @TwentyFourMonthsAtIntake
 		, @TwentyFourMonthsAtDischarge)
-        
+--#endregion        
 -- OBP in Household
 set @LineGroupingLevel = @LineGroupingLevel + 1
 
