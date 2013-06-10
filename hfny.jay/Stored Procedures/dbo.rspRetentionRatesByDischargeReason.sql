@@ -95,8 +95,8 @@ print @enddate
 		   ,count(vl.VisitStartTime) as CountOfHomeVisits
 		from HVLog vl
 		inner join hvcase c on c.HVCasePK = vl.HVCaseFK
-		where (IntakeDate is not null
-			  and intakeDate between @StartDate and @EndDate)
+			where VisitType <> '0001' and 
+					(IntakeDate is not null and IntakeDate between @startdate and @enddate)
 			  and vl.ProgramFK = @ProgramFK
 		group by HVCaseFK
 	)

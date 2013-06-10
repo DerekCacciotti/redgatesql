@@ -8,7 +8,7 @@ GO
 -- Create date: 03/31/11
 -- Description:	Main storedproc for Retention Rate report
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
--- exec rspRetentionRates 1, '05/01/09', '04/30/11'
+-- exec rspRetentionRates 9, '05/01/09', '04/30/11'
 -- exec rspRetentionRates 19, '20080101', '20121231'
 -- exec rspRetentionRates 37, '20090401', '20110331'
 -- exec rspRetentionRates 17, '20090401', '20110331'
@@ -18,7 +18,9 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[rspRetentionRates]
 	-- Add the parameters for the stored procedure here
-	@programfk INT, @startdate DATETIME, @enddate DATETIME
+	@ProgramFK int
+	, @StartDate datetime
+	, @EndDate datetime
 as
 BEGIN
 -- SET NOCOUNT ON added to prevent extra result sets from
@@ -163,8 +165,8 @@ SET NOCOUNT ON;
 		(select HVCasePK
 			from HVCase h 
 			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
-			where (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-				  and cp.ProgramFK=@programfk
+			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				  and cp.ProgramFK=@ProgramFK
 		)	
 
 	--select * 
@@ -294,15 +296,15 @@ SET NOCOUNT ON;
 --#endregion
 --#region cteCaseLastHomeVisit - get the last home visit for each case in the cohort 
 	, cteCaseLastHomeVisit AS 
-	------------------------
+	-----------------------------
 		(select HVCaseFK
 				  , max(vl.VisitStartTime) as LastHomeVisit
 				  , count(vl.VisitStartTime) as CountOfHomeVisits
 			from HVLog vl
 			inner join hvcase c on c.HVCasePK = vl.HVCaseFK
 			where VisitType <> '0001' and 
-					(IntakeDate is not null and IntakeDate between @startdate and @enddate)
-							 and vl.ProgramFK = @programfk
+					(IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+							 and vl.ProgramFK = @ProgramFK
 			group by HVCaseFK
 		)
 --#endregion
@@ -312,8 +314,8 @@ SET NOCOUNT ON;
 		 (select HVCaseFK, count(wa.WorkerAssignmentPK) as CountOfFSWs
 		   from dbo.WorkerAssignment wa
 			inner join hvcase c on c.HVCasePK=wa.HVCaseFK 
-			where (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-				and wa.ProgramFK=@programfk
+			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				and wa.ProgramFK=@ProgramFK
 			group by HVCaseFK)
 --#endregion
 --#region ctePC1AgeAtIntake - get the PC1's age at intake
@@ -324,8 +326,8 @@ SET NOCOUNT ON;
 			from PC 
 			inner join PCProgram pcp on pcp.PCFK=PCPK
 			inner join HVCase c on c.PC1FK=PCPK
-			WHERE (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-				and pcp.ProgramFK=@programfk)
+			WHERE (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				and pcp.ProgramFK=@ProgramFK)
 --#endregion
 --#region cteMain - main select for the report sproc, gets data at intake and joins to data at discharge
 	, cteMain as
@@ -464,8 +466,8 @@ SET NOCOUNT ON;
 							   FROM CommonAttributes ca
 							   LEFT OUTER JOIN codeApp capp ON capp.AppCode=HighestGrade and AppCodeGroup='Education'
 							  WHERE FormType='IN-PC1') pc1eduai ON pc1eduai.HVCaseFK=c.HVCasePK
-			where (IntakeDate is not null and IntakeDate between @startdate and @enddate)
-				  and cp.ProgramFK=@programfk
+			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				  and cp.ProgramFK=@ProgramFK
 		)
 --#endregion
 --select *
@@ -6029,7 +6031,7 @@ insert into @tblResults (LineDescription
 						, TwoYearsDischarge)
 values ('Cases With >1 Home Visitor'
 		, @LineGroupingLevel
-		, 0
+		, 1
         , @TotalCohortCount
 		, @RetentionRateSixMonths
 		, @RetentionRateOneYear
