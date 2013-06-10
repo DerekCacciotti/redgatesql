@@ -181,7 +181,8 @@ begin
 		  					a4.ASQPK is not null and a4.ASQTCReceiving = '1' and 
 		  					dbo.IsFormReviewed(a4.DateCompleted,'AQ',a4.ASQPK) = 1 then 1
 		  			 when a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
-		  					a4.ASQPK is not null and dbo.IsFormReviewed(a4.DateCompleted,'AQ',a4.ASQPK) = 1 
+		  					a4.ASQPK is not null and a4.ASQTCReceiving = '1' and 
+		  					dbo.IsFormReviewed(a4.DateCompleted,'AQ',a4.ASQPK) = 1 
 		  					then 1
 		  		else 0
 		  		end
@@ -190,6 +191,8 @@ begin
 					 when a1.ASQPK is not null and a1.ASQInWindow = 1 then 0
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
 		  			 		a2.ASQPK is not null and a2.ASQInWindow = 1 then 0
+		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
+		  					a2.ASQPK is null and charindex('(optional)',capp2.AppCodeText) = 0 then 0
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
 		  					a2.ASQPK is null and charindex('(optional)',capp2.AppCodeText) > 0 and 
 		  					a3.ASQPK is not null and a3.ASQInWindow = 1 then 0
@@ -203,16 +206,21 @@ begin
 		  		end
 		  		as FormOutOfWindow
 			  , case when a1.ASQPK is not null then 0
-					 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) = 0 then 1
+					 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) = 0 
+							and (a4.ASQPK is not null and (a4.ASQTCReceiving <> '1' or a4.ASQTCReceiving is null)) then 1
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
 		  			 		a2.ASQPK is not null then 0
+		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
+							a2.ASQPK is null and charindex('(optional)',capp2.AppCodeText) = 0 
+							and (a4.ASQPK is not null and (a4.ASQTCReceiving <> '1' or a4.ASQTCReceiving is null)) then 1
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
 		  					a2.ASQPK is null and charindex('(optional)',capp2.AppCodeText) > 0 and 
 		  					a3.ASQPK is not null then 0
 		  			 when a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
 		  					(a4.ASQPK is not null and a4.ASQTCReceiving = '1') then 0
 		  			 when a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
-		  					(a4.ASQPK is null or (a4.ASQPK is not null and a4.ASQTCReceiving <> '1')) then 1
+		  					(a4.ASQPK is null or (a4.ASQPK is not null and 
+		  						(a4.ASQTCReceiving <> '1' or a4.ASQTCReceiving is null))) then 1
 		  		else 0
 		  		end
 		  		as FormMissing
@@ -235,6 +243,7 @@ begin
 		  	   , lasq.Interval as interval4
 		  	   , a4.ASQInWindow as inwindow4
 		  	   , capp4.AppCodeText as FormText4
+		  	   , a4.ASQTCReceiving as a4TCReceiving
 		  	   , a4.DateCompleted as a4DateCompleted
 			from cteCohort c
 				left outer join cteASQDueInterval casi on casi.hvcasefk = c.hvcasefk and casi.tcidpk = c.tcidpk
@@ -461,8 +470,13 @@ begin
 						 when substring(MeetsTargetCode,2,1) = '3' then FormDate3
 						 when substring(MeetsTargetCode,2,1) = '4' then FormDate4
 						 when MeetsTargetCode = '0' and ASQPK1 is not null then FormDate1
-						 when MeetsTargetCode = '0' and ASQPK2 is not null then FormDate2
-						 when MeetsTargetCode = '0' and ASQPK3 is not null then FormDate3
+						 when MeetsTargetCode = '0' and ASQPK2 is not null 
+								and charindex('(optional)',FormText1) > 0
+							then FormDate2
+						 when MeetsTargetCode = '0' and ASQPK3 is not null 
+								and charindex('(optional)',FormText1) > 0
+								and charindex('(optional)',FormText2) > 0
+							then FormDate3
 				else null
 				end as FormDate
 				, FormReviewed
