@@ -152,11 +152,7 @@ ELSE
 		Worker,
 		currentLevel 
 	 FROM @tbl4QAReport4Detail	
-	WHERE HVCasePK NOT IN 
-		(
-		SELECT HVCaseFK FROM Intake i 
-		inner join dbo.SplitString(@programfk,',') on i.programfk = listitem
-		)
+		where CaseProgress < 10
 
 	ORDER BY Worker, PC1ID 	
 
