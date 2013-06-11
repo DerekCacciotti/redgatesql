@@ -73,15 +73,32 @@ WHERE b.HVCaseFK IS NULL AND (c.DischargeDate IS NULL OR c.DischargeDate > @Star
 ;
 
 -- no status pre-assessment cases (no form this month)
+--;WITH zzz AS (
+--SELECT x.*
+--FROM Preassessment AS x
+--JOIN (SELECT a.HVCaseFK, max(a.PADate) [maxDate]
+--FROM Preassessment AS a
+--WHERE a.ProgramFK = @programfk AND a.PADate < @StartDt
+--GROUP BY a.HVCaseFK) AS y
+--ON x.HVCaseFK = y.HVCaseFK AND x.PADate = maxDate
+--WHERE x.CaseStatus = '01')
+
+-- no status pre-assessment cases (no form this month)
 ;WITH zzz AS (
-SELECT x.*
+SELECT xx.* 
+FROM (SELECT x.*
 FROM Preassessment AS x
 JOIN (SELECT a.HVCaseFK, max(a.PADate) [maxDate]
 FROM Preassessment AS a
 WHERE a.ProgramFK = @programfk AND a.PADate < @StartDt
 GROUP BY a.HVCaseFK) AS y
 ON x.HVCaseFK = y.HVCaseFK AND x.PADate = maxDate
-WHERE x.CaseStatus = '01')
+WHERE x.CaseStatus = '01') AS xx
+JOIN CaseProgram AS yy ON xx.HVCaseFK = yy.HVCaseFK
+WHERE (yy.DischargeDate IS NULL OR yy.DischargeDate >= @StartDt)
+)
+
+
 ,
 qqq AS (
 SELECT *
