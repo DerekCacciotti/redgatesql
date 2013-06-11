@@ -103,11 +103,7 @@ IF @ReportType = 'summary'
 	DECLARE @numOfActiveIntakeCases INT = 0
 	SET @numOfActiveIntakeCases = (
 	SELECT count(HVCasePK) FROM @tbl4QAReport4Detail
-	WHERE HVCasePK NOT IN 
-		(
-		SELECT HVCaseFK FROM Intake i 
-		inner join dbo.SplitString(@programfk,',') on i.programfk = listitem
-		)			
+	where CaseProgress < 10	
 
 	)
 
