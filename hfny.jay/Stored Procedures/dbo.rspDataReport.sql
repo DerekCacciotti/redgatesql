@@ -8,7 +8,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 11, 2013>
 -- Description:	<This report gets you 'A. Data report '>
--- rspDataReport 19, '03/01/2013', '03/31/2013'			
+-- rspDataReport 22, '03/01/2013', '05/31/2013'		
 
 -- Fix: Pre-Intake Enroll completed 03/27/13
 
@@ -107,13 +107,32 @@ begin
 		KempeResult,
 		CaseStatus
 	)
-	SELECT h.HVCasePK,p.KempeResult, p.CaseStatus FROM HVCase h
-	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
+	SELECT h.HVCasePK,p.KempeResult, p.CaseStatus FROM HVCase h		  
+	inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK	
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
-	WHERE p.KempeDate >= @StartDate AND p.KempeDate <= @EndDate
-	AND cp.ProgramFK = @ProgramFKs
-	AND p.CaseStatus IN ('02','04')
+	LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
+	WHERE k.KempeDate BETWEEN @StartDate AND @EndDate	
+	and p.KempeResult is not null
+	AND cp.CaseStartDate <= @EndDate	
+	AND p.CaseStatus IN ('02','04')	
+
+
+
+	-- Old code for your fyi
+	--INSERT INTO @tbl4DataReportRow3
+	--(
+	--	HVCasePK,
+	--	KempeResult,
+	--	CaseStatus
+	--)
+	--SELECT h.HVCasePK,p.KempeResult, p.CaseStatus FROM HVCase h
+	--INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
+	--inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
+	--INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
+	--WHERE p.KempeDate >= @StartDate AND p.KempeDate <= @EndDate
+	--AND cp.ProgramFK = @ProgramFKs
+	--AND p.CaseStatus IN ('02','04')
 	
 	DECLARE @n3 INT 
 	SET @n3 = (SELECT count(HVCasePK) FROM @tbl4DataReportRow3)
