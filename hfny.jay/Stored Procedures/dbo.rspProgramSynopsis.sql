@@ -10,7 +10,7 @@ GO
 -- Description:	<This report gets you 'ProgramSynopsis i.e. The Program Synopsis is used as a monthly summary of activity for the program.
 -- It can be run for any time period as well. Screens, Kempes, enrollment, referrals, home visits and form information give the user a quick management look at program status.'>
 
--- rspProgramSynopsis 5, '04/01/2013', '04/30/2013'
+-- rspProgramSynopsis 22, '05/01/2013', '05/31/2013'
 
 -- =============================================
 
@@ -395,7 +395,8 @@ insert into @tblASQCohort
 						   else
 							   dateadd(dd,dueby,hvcase.tcdob)
 					   end) = month(@edate)
-			and EventDescription not like '%optional%'  -- optionals are not required so take them out		
+			and EventDescription not like '%optional%'  -- optionals are not required so take them out	
+				
 
 	
 declare @ASQcol1 varchar(10)
@@ -434,7 +435,7 @@ set @ASQcol4 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQCohort m
 -- Referred to EIP		
 set @ASQcol5 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQCohort m
 				left join ASQ A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.TCAge
-				where A.ASQTCReceiving = 1
+				where A.TCReferred = 1
 				) 	
 	
 	
@@ -1033,6 +1034,7 @@ INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0,
 				FROM cteASQ m
 				left join ASQ A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.TCAge
 				where A.ASQPK is null
+				and A.TCReferred <> 1 -- exclude if case is referred for EIP service
 				order by workername, PC1ID  
 
 
