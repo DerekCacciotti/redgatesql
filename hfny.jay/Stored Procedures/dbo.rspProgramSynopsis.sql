@@ -3,6 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- Stored Procedure
 
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
@@ -10,7 +11,9 @@ GO
 -- Description:	<This report gets you 'ProgramSynopsis i.e. The Program Synopsis is used as a monthly summary of activity for the program.
 -- It can be run for any time period as well. Screens, Kempes, enrollment, referrals, home visits and form information give the user a quick management look at program status.'>
 
--- rspProgramSynopsis 22, '05/01/2013', '05/31/2013'
+-- rspProgramSynopsis 5, '04/01/2013', '04/30/2013'
+-- rspProgramSynopsis 3, '05/01/2013', '05/31/2013'
+
 
 -- =============================================
 
@@ -87,7 +90,7 @@ DECLARE @tblCommonCohort TABLE(
 			[TCDOB_EDC] [datetime] NULL,
 			[TCDOD] [datetime] NULL,
 			[TCNumber] [int] NULL,
-           
+
 			[CaseProgramPK] [int],
 			[CaseProgramCreateDate] [datetime] NOT NULL,
 			[CaseProgramCreator] [char](10) NOT NULL,
@@ -119,7 +122,7 @@ DECLARE @tblCommonCohort TABLE(
 			[ProgramFK] [int] NOT NULL,
 			[TransferredtoProgram] [varchar](50) NULL,
 			[TransferredtoProgramFK] [int] null,
-			
+
 			XDateAge int,
 			--tcAgeDays int,
 			workername varchar(200)	     
@@ -168,7 +171,7 @@ INSERT INTO @tblCommonCohort
 			end as TCDOB_EDC
 		  ,TCDOD
 		  ,TCNumber
-		  
+
 		  ,CaseProgramPK
 		  ,CaseProgramCreateDate
 		  ,CaseProgramCreator
@@ -219,7 +222,7 @@ INSERT INTO @tblCommonCohort
 			--	  datediff(day,h.edc,@edate)
 		 -- end as tcAgeDays	  
 		  , ltrim(rtrim(w.FirstName)) + ' ' + ltrim(rtrim(w.LastName)) as workername
-		  
+
 		  FROM HVCase h 
 	inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK	
 	inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
@@ -230,11 +233,11 @@ INSERT INTO @tblCommonCohort
 	case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1
 	AND 
 	cp.CaseStartDate <= @edate	
-	
-	
-	
+
+
+
 	--SELECT * FROM @tblCommonCohort 
-	
+
 -- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
 
 -- **create cursor without filters for the screen,preasses, kempe, preintake sections
@@ -243,7 +246,7 @@ INSERT INTO @tblCommonCohort
 ; WITH cteProgramScreens AS
 	(	SELECT 1 as rowNumber,2 as roworder,'' as col0,
 		count(HVCasePK) [Q1Screened]
-		
+
 		, sum(CASE WHEN c.ScreenResult = 1 THEN 1 ELSE 0 END) [Q1aScreenResultPositive]
 		, sum(CASE WHEN c.ScreenResult != 1 THEN 1 ELSE 0 END) [Q1bScreenResultNegative]
 
@@ -257,12 +260,12 @@ INSERT INTO @tblCommonCohort
 		JOIN HVScreen AS c ON a.HVCasePK = c.HVCaseFK
 		WHERE a.ScreenDate BETWEEN @sdate AND @edate
 	)
-	
+
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
 SELECT * FROM cteProgramScreens
-	
+
 ;	
-	
+
 With
 ctePreAssessments as
 	(	SELECT 2 as rowNumber,2 as roworder,'' as col0,
@@ -276,7 +279,7 @@ ctePreAssessments as
 		WHERE a.ScreenDate <= @edate
 		and (a.KempeDate > @edate or a.KempeDate is null)
 		and ( not (a.DischargeDate BETWEEN a.ScreenDate AND @edate) or DischargeDate is null )
-		
+
 	)
 
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -296,7 +299,7 @@ cteKempeAssessments as
 		, sum(CASE WHEN TCDOB_EDC <= k.KempeDate and k.KempeResult = 1 THEN 1 ELSE 0 END) [Q3cPostnatalPositive]
 		, sum(CASE WHEN TCDOB_EDC <= k.KempeDate and k.KempeResult = 0 THEN 1 ELSE 0 END) [Q3cPostnatalNegative]
 		,'' as psrCol6
-		
+
 		FROM @tblCommonCohort AS a 
 		LEFT JOIN Kempe k ON k.HVCaseFK = a.HVCasePK
 		WHERE k.KempeDate BETWEEN @sdate AND @edate
@@ -364,25 +367,25 @@ DECLARE @tblASQCohort TABLE(
 	[TCIDPK] int,
 	[Interval]	char(2)
 )		
-	
+
 insert into @tblASQCohort
 	select  
 
 		  hvcase.HVCasePK
 		  ,TCID.TCIDPK 
 		  ,Interval 		   
-		   
+
 		from caseprogram
 			inner join hvcase on hvcasepk = caseprogram.hvcasefk
 			inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk AND TCID.TCDOD IS NULL
 			inner join codeduebydates on scheduledevent = 'ASQ' --optionValue
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			
+
 		where 
 		     HVCase.TCDOD IS NULL
 			 and caseprogress >= 11
 			 and (dischargedate is null or dischargedate > @edate)
-			 
+
 			 and year(case
 						  when interval < 24 then
 							  dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
@@ -395,10 +398,10 @@ insert into @tblASQCohort
 						   else
 							   dateadd(dd,dueby,hvcase.tcdob)
 					   end) = month(@edate)
-			and EventDescription not like '%optional%'  -- optionals are not required so take them out	
-				
+			and EventDescription not like '%optional%'  -- optionals are not required so take them out		
 
-	
+
+
 declare @ASQcol1 varchar(10)
 declare @ASQcol2 varchar(10)
 declare @ASQcol3 varchar(10)
@@ -417,8 +420,8 @@ set @ASQcol3 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQCohort m
 				left join ASQ A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.TCAge
 				where A.ASQInWindow = 1
 				) 
-				
-				
+
+
 -- Under cut off	
 
 set @ASQcol4 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQCohort m
@@ -430,15 +433,15 @@ set @ASQcol4 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQCohort m
 				or UnderPersonalSocial = 1
 				or UnderProblemSolving = 1	
 				) 
-				
-				
+
+
 -- Referred to EIP		
 set @ASQcol5 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQCohort m
 				left join ASQ A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.TCAge
 				where A.TCReferred = 1
 				) 	
-	
-	
+
+
 --SELECT @ASQcol1, @ASQcol2, @ASQcol3, @ASQcol4, @ASQcol5
 
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -462,25 +465,25 @@ DECLARE @tblASQSECohort TABLE(
 	[TCIDPK] int,
 	[Interval]	char(2)
 )		
-	
+
 insert into @tblASQSECohort
 	select  
 
 		  hvcase.HVCasePK
 		  ,TCID.TCIDPK 
 		  ,Interval 		   
-		   
+
 		from caseprogram
 			inner join hvcase on hvcasepk = caseprogram.hvcasefk
 			inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk AND TCID.TCDOD IS NULL
 			inner join codeduebydates on scheduledevent = 'ASQSE-1' --optionValue
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			
+
 		where 
 		     HVCase.TCDOD IS NULL
 			 and caseprogress >= 11
 			 and (dischargedate is null or dischargedate > @edate)	
-			 
+
 			 and year(case
 						  when interval < 24 then
 							  dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
@@ -493,9 +496,9 @@ insert into @tblASQSECohort
 						   else
 							   dateadd(dd,dueby,hvcase.tcdob)
 					   end) = month(@edate)
-				
 
-	
+
+
 declare @ASQSEcol1 varchar(10)
 declare @ASQSEcol2 varchar(10)
 declare @ASQSEcol3 varchar(10)
@@ -515,8 +518,8 @@ set @ASQSEcol3 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQSECohort m
 				left join ASQSE A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.ASQSETCAge
 				where A.ASQSEInWindow = 1
 				) 
-				
-				
+
+
 -- Under cut off	
 
 set @ASQSEcol4 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQSECohort m
@@ -524,15 +527,15 @@ set @ASQSEcol4 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQSECohort m
 				where 
 				ASQSEOverCutOff = 1
 				) 
-				
-				
+
+
 -- Referred to EIP		
 set @ASQSEcol5 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQSECohort m
 				left join ASQSE A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.ASQSETCAge
 				where A.ASQSEReceiving = 1
 				) 	
-	
-	
+
+
 --SELECT @ASQSEcol1, @ASQSEcol2, @ASQSEcol3, @ASQSEcol4, @ASQSEcol5
 
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -565,7 +568,7 @@ SELECT
 		cc.HVCasePK	 
 		,tcid.TCIDPK
 	  , max(Interval) AS Interval 
- 
+
  		from @tblCommonCohort cc			
 			inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK
 			inner join codeduebydates on scheduledevent = 'Follow Up' AND cc.XDateAge >= DueBy -- minimum interval
@@ -574,33 +577,33 @@ SELECT
 			where Interval <> case when @sDate >= '01/01/2013' then 'xx'
 								else '18'
 								end
-			
-			
+
+
 
  GROUP BY HVCasePK
  , tcid.TCIDPK
- 
- 
- 
+
+
+
  DECLARE @tblFUCohort TABLE(	
 	[HVCasePK] [int],
 	[TCIDPK] int,
 	[Interval]	char(2)
 )		
-	
+
 insert into @tblFUCohort 
  SELECT 
  cteIn.HVCasePK,
  cteIn.TCIDPK,
  cteIn.Interval  
- 
+
  FROM @tblCommonCohort cc
  --inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK
- 
+
  INNER JOIN @tblFUMinimumInterval cteIn ON cc.HVCasePK = cteIn.HVCasePK
   --and TCID.TCIDPK = cteIn.TCIDPK  -- we will use column 'Interval' next, which we just added
  inner join codeduebydates cd on scheduledevent = 'Follow Up' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
-			
+
 		where 
 		     cc.TCDOD IS NULL
 			 and caseprogress >= 11
@@ -671,46 +674,71 @@ SELECT
 		cc.HVCasePK	 
 		,tcid.TCIDPK
 	  , max(Interval) AS Interval 
- 
+
  		from @tblCommonCohort cc			
 			inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK
 			inner join codeduebydates on scheduledevent = 'PSI' AND cc.XDateAge >= DueBy -- minimum interval
 
  GROUP BY HVCasePK
  , tcid.TCIDPK
- 
- 
- 
+
+
+
  --SELECT * FROM @tblPSIMinimumInterval
  -- where HVCasePK = 126505
- 
- 
- 
+
+
+
  DECLARE @tblPSICohort TABLE(	
 	[HVCasePK] [int],
 	[TCIDPK] int,
 	[Interval]	char(2)
 )		
-	
+
+;with cteIgnorePSI
+as
+( -- for psi, ignore due intervals 00 and 01 if baby is born before intake date
+SELECT 
+
+ cteIn.HVCasePK,
+ cteIn.TCIDPK,
+ case
+	when datediff(day,IntakeDate,TCDOB_EDC) <= 0 and cteIn.Interval = '00' then 1
+	when abs(datediff(m,IntakeDate,TCDOB_EDC)) >= 7 and cteIn.Interval = '01' and datediff(day,IntakeDate,TCDOB_EDC) < 0  then 1
+	else
+	0
+	end as ignore
+
+
+ FROM @tblCommonCohort cc
+ INNER JOIN @tblPSIMinimumInterval cteIn ON cc.HVCasePK = cteIn.HVCasePK
+
+)		
+
+
+
 insert into @tblPSICohort 
  SELECT 
  cteIn.HVCasePK,
  cteIn.TCIDPK,
  cteIn.Interval 
 
- 
+
  FROM @tblCommonCohort cc
  inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK
- 
+
  INNER JOIN @tblPSIMinimumInterval cteIn ON cc.HVCasePK = cteIn.HVCasePK
   and TCID.TCIDPK = cteIn.TCIDPK  -- we will use column 'Interval' next, which we just added
+  inner join cteIgnorePSI ig on ig.hvcasepk = cc.hvcasepk and cteIn.TCIDPK = ig.TCIDPK
  inner join codeduebydates cd on scheduledevent = 'PSI' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
- 
+
  where  
 	  ((cc.IntakeDate <= @edate) AND (cc.IntakeDate IS NOT NULL))			  
 			AND (cc.DischargeDate IS NULL OR cc.DischargeDate > @edate)  
 	 and
 	 dateadd(dd,cd.DueBy,TCDOB_EDC) between @sdate and @edate
+	and 
+	ignore <> 1
 
 
 --SELECT * FROM @tblPSICohort 
@@ -759,11 +787,11 @@ values(8,2,'',
 
 
 	-- Referrals
-	
+
 declare @Referralscol1 varchar(10)
 declare @Referralscol2 varchar(10)
 declare @Referralscol3 varchar(10)
-	
+
 set @Referralscol1 = (SELECT sum(PAOtherHVProgram) as NumOfPAs
 FROM @tblCommonCohort cc
 inner join Preassessment p on p.HVCaseFK = cc.HVCasePK
@@ -995,16 +1023,16 @@ with cteASQ as
 		  dateadd(dd,dueby,cc.TCDOB_EDC)
     end as ASQDueDate
 	,WorkerName
-	
+
 	FROM @tblCommonCohort cc
 	inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.programfk AND TCID.TCDOD IS NULL
 	inner join codeduebydates on scheduledevent = 'ASQ' --optionValue
-			
+
 		where 
 		     cc.TCDOD IS NULL
 			 and cc.caseprogress >= 11
 			 and (cc.dischargedate is null or cc.dischargedate > @edate)
-			 
+
 			 and year(case
 						  when interval < 24 then
 							  dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
@@ -1051,16 +1079,16 @@ with cteASQSE as
 		  dateadd(dd,dueby,cc.TCDOB_EDC)
     end as ASQSEDueDate
 	,WorkerName
-	
+
 	FROM @tblCommonCohort cc
 	inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.programfk AND TCID.TCDOD IS NULL
 	inner join codeduebydates on scheduledevent = 'ASQSE-1' --optionValue
-			
+
 		where 
 		     cc.TCDOD IS NULL
 			 and caseprogress >= 11
 			 and (dischargedate is null or dischargedate > @edate)	
-			 
+
 			 and year(case
 						  when interval < 24 then
 							  dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
@@ -1106,14 +1134,14 @@ with cteFollowUp as
 		  dateadd(dd,dueby,cc.TCDOB_EDC)
     end as FollowUpDueDate
 	,WorkerName
-	 
+
  FROM @tblCommonCohort cc
  inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK
- 
+
  INNER JOIN @tblFUMinimumInterval cteIn ON cc.HVCasePK = cteIn.HVCasePK
   --and TCID.TCIDPK = cteIn.TCIDPK  -- we will use column 'Interval' next, which we just added
  inner join codeduebydates cd on scheduledevent = 'Follow Up' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
-			
+
 		where 
 		     cc.TCDOD IS NULL
 			 and caseprogress >= 11
@@ -1124,7 +1152,7 @@ with cteFollowUp as
 
 )
 
-	
+
 -- INSERT Follow Up DATA
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
 				SELECT '12','2', '', PC1ID, TCName, Convert(VARCHAR(12), m.TCDOB, 101) as TCDOB				
@@ -1137,7 +1165,27 @@ INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0,
 --- PSI DATA ---
 
 ;
-with ctePSI as
+;with cteIgnorePSI2
+as
+( -- for psi, ignore due intervals 00 and 01 if baby is born before intake date
+SELECT 
+
+ cteIn.HVCasePK,
+ cteIn.TCIDPK,
+ case
+	when datediff(day,IntakeDate,TCDOB_EDC) <= 0 and cteIn.Interval = '00' then 1
+	when abs(datediff(m,IntakeDate,TCDOB_EDC)) >= 7 and cteIn.Interval = '01' and datediff(day,IntakeDate,TCDOB_EDC) < 0  then 1
+	else
+	0
+	end as ignore
+
+
+ FROM @tblCommonCohort cc
+ INNER JOIN @tblPSIMinimumInterval cteIn ON cc.HVCasePK = cteIn.HVCasePK
+
+)	
+
+,ctePSI as
 (
 	SELECT 
 	PC1ID, TCFirstName + ' ' + TCLastName as TCName, cc.TCDOB_EDC as TCDOB, cc.HVCasePK,TCID.TCIDPK,cd.Interval, EventDescription 
@@ -1148,20 +1196,23 @@ with ctePSI as
 		  dateadd(dd,dueby,cc.TCDOB_EDC)
     end as PSIDueDate
 	,WorkerName
-	 
+
  FROM @tblCommonCohort cc
  inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK
- 
+
  INNER JOIN @tblPSIMinimumInterval cteIn ON cc.HVCasePK = cteIn.HVCasePK
   --and TCID.TCIDPK = cteIn.TCIDPK  -- we will use column 'Interval' next, which we just added
+ inner join cteIgnorePSI2 ig on ig.hvcasepk = cc.hvcasepk and cteIn.TCIDPK = ig.TCIDPK
  inner join codeduebydates cd on scheduledevent = 'PSI' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
 WHERE			
 	  ((cc.IntakeDate <= @edate) AND (cc.IntakeDate IS NOT NULL))			  
 			AND (cc.DischargeDate IS NULL OR cc.DischargeDate > @edate)  
 	 and
-	 dateadd(dd,cd.DueBy,TCDOB_EDC) between @sdate and @edate
+	 dateadd(dd,cd.DueBy,TCDOB_EDC) between @sdate and @edate	
+	and ignore <> 1
 
 )
+
 
 -- INSERT PSI DATA
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -1243,7 +1294,7 @@ SELECT 	'16','2', ''
 	    ,CASE WHEN ca.TANFServices = 1 THEN 'Yes' ELSE 'No' END TANFServicesEligibility
 	    ,Convert(VARCHAR(12), DischargeDate, 101) as CloseDate
 	    ,codeDischarge.dischargereason as ReasonClosed
-	   
+
 
 		FROM @tblCommonCohort AS cc 
 		inner join pc on pc.pcpk = cc.pc1fk
@@ -1253,7 +1304,7 @@ SELECT 	'16','2', ''
 		inner join cteNumOfFSWs fsws on fsws.HVCasePK = cc.HVCasePK
 
 		where (DischargeDate between @sdate and @edate)
-		
+
 -- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
 
 
@@ -1321,7 +1372,7 @@ select distinct      workername
 		 from cteLevelXCohort hvr
 			 inner join pc on pc.pcpk = hvr.PC1FK
 	)	
-	
+
 -- INSERT Families on Creative Outreach (Level X) DATA	
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)	
 SELECT 	'17','2', ''
@@ -1351,11 +1402,11 @@ SELECT 	'17','2', ''
 		HVCasePK,
 		ProgramFK,
 		CurrentLevelFK
-		
+
 	)	
 	SELECT HVCasePK, cc.ProgramFK, CurrentLevelFK  FROM @tblCommonCohort AS cc 
 	LEFT JOIN Intake i ON i.HVCaseFK = cc.HVCasePK
-	
+
 	WHERE 
 	(
 	(cc.IntakeDate IS NOT NULL AND cc.IntakeDate <= @edate)
@@ -1371,16 +1422,16 @@ SELECT 	'17','2', ''
 	LevelName [char](50),
 	levelCount INT
 	)	
-	
-	
+
+
 	;
-	
+
 	WITH cteDataReportRow14RestOfIt AS
 	(
 	SELECT 
 	CASE WHEN CurrentLevelFK = 8 THEN 'Preintake-enroll' ELSE LevelName END AS LevelName, 	
 	CASE WHEN hvlevelpk IS NOT NULL OR CurrentLevelFK = 8 THEN 1 ELSE 0 END AS levelcount
-	
+
 	FROM @tbl4CaseLoadSummary t14
 			left join (select hvlevel.hvlevelpk
 							 ,hvlevel.hvcasefk
@@ -1398,7 +1449,7 @@ SELECT 	'17','2', ''
 											   group by hvcasefk
 													   ,programfk) e2 on e2.hvcasefk = hvlevel.hvcasefk and e2.programfk = hvlevel.programfk and e2.levelassigndate = hvlevel.levelassigndate)
 													    e3 on e3.hvcasefk = t14.hvcasepk and e3.programfk = t14.programfk
-				
+
 	)
 
 	INSERT INTO @tbl4DataReportRow14RestOfIt
@@ -1412,7 +1463,7 @@ SELECT 	'17','2', ''
 		  FROM cteDataReportRow14RestOfIt	t14Rest
 	RIGHT JOIN (SELECT [LevelName] FROM [codeLevel] WHERE ((LevelName LIKE 'level%' AND Enrolled = 1) OR LevelName LIKE 'Preintake-enroll'))  lr ON lr.LevelName = t14Rest.LevelName  -- add missing levelnames
 	ORDER BY LevelName 
-	
+
 
 
 -- INSERT Caselaod Summary DATA	
