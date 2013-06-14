@@ -18,7 +18,7 @@ BEGIN
 	SET NOCOUNT ON;
 --Get FAW's in time period
 
-;WITH  cteEventDates AS (
+;WITH  cteEventDate AS (
 	SELECT workerpk, wrkrLName
 	, '1' AS MyWrkrCount
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName
@@ -28,9 +28,28 @@ BEGIN
 	AND FirstASQDate IS NOT null
 )
 
+, cteEventDates AS (
+	SELECT WorkerPK
+	, wrkrLName
+	, MyWrkrCount
+	, WorkerName
+	, FirstASQDate
+	, min(PC1ID) AS PC1ID
+	 FROM cteEventDate
+	 INNER JOIN ASQ a ON a.FSWFK=WorkerPK
+	 INNER JOIN CaseProgram cp ON cp.HVCaseFK=a.HVCaseFK
+	 WHERE a.DateCompleted = FirstASQDate AND a.FSWFK=WorkerPK
+	 GROUP BY WorkerPK
+	, wrkrLName
+	, MyWrkrCount
+	, WorkerName
+	, FirstASQDate
+)
+
 , cteASQCore AS (
 	select WorkerPK, WorkerName
 	, FirstASQDate
+	, PC1ID
 	, COUNT(workerpk) OVER (PARTITION BY MyWrkrCount) AS WorkerCount
 	, (Select MIN(trainingdate) as TrainingDate 
 									from TrainingAttendee ta
@@ -41,11 +60,11 @@ BEGIN
 									)
 		AS ASQCoreDate
 	from cteEventDates
-	GROUP BY WorkerPK, WorkerName, FirstASQDate, MyWrkrCount
+	GROUP BY WorkerPK, WorkerName, FirstASQDate, MyWrkrCount, PC1ID
 )
 
 , cteFinal as (
-	SELECT WorkerPK, workername, FirstASQDate, ASQCoreDate, WorkerCount
+	SELECT WorkerPK, workername, FirstASQDate, ASQCoreDate, WorkerCount, PC1ID
 		, MeetsTarget =
 			CASE 
 				WHEN ASQCoreDate Is Null THEN 'F'
@@ -70,6 +89,7 @@ BEGIN
 	END AS Rating
 ,	'6-6 Those who administer developmental screenings have been trained in the use of the tool before administering it.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) AS PercentMeeting
+, PC1ID
 FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.WorkerCount = cteFinal.WorkerCount
 ORDER BY cteFinal.workername
