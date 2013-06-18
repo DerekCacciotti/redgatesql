@@ -17,7 +17,7 @@ GO
 CREATE procedure [dbo].[spGetAllFAdvsbyProgram]
     @ProgramFK int      = null,
     @EventDate datetime = null
-as
+AS
 begin
 	set nocount on;
 
@@ -27,8 +27,9 @@ begin
 		from Worker w
 			inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 		where programfk = @ProgramFK
-		AND (TerminationDate IS NULL OR FatherAdvocateStartDate < @EventDate)
-		AND FatherAdvocate=1
+		AND --(TerminationDate IS NULL OR FatherAdvocateStartDate < @EventDate)
+		
+		@EventDate between FatherAdvocateStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
 		order by LastName
 end
 GO
