@@ -259,15 +259,15 @@ begin
 		where PerformanceTargetCode not in (select PTCode from cteSummary sum2) -- missing on missing.PerformanceTargetCode = s.PTCode 
 	order by PTSortOrder, PTCode
 	
-	select *
-			, case when left(PTCode,2) = 'HD'
-					then 1
-					when left(PTCode,3) = 'PCI'
-					then 2
-					else 3
-				end as PTSortOrder
-	 from @tblPTDetails
-		order by PTSortOrder, PTCode, PC1ID
+	--select *
+	--		, case when left(PTCode,2) = 'HD'
+	--				then 1
+	--				when left(PTCode,3) = 'PCI'
+	--				then 2
+	--				else 3
+	--			end as PTSortOrder
+	-- from @tblPTDetails
+	--	order by PTSortOrder, PTCode, PC1ID
 
 -- rspPerformanceTargetReportSummary '1,17,19', '07/01/2012', '09/30/2012'
 end
