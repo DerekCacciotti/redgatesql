@@ -383,9 +383,9 @@ begin
 			   					and FormOutOfWindow = 0)
 	   					then '13' 
 						when a4.ASQPK is not null and a4.ASQTCReceiving = '1'
-						 	--and FormMissing = 0 
-						 	--and FormReviewed = 1 
-						 	--and FormOutOfWindow = 0
+						 	and FormMissing = 0 
+						 	and FormReviewed = 1 
+						 	and FormOutOfWindow = 0
 					 	then '14'
 				else '0'
 		      end as MeetsTargetCode -- FormMeetsTarget

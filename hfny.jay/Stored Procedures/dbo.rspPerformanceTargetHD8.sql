@@ -167,7 +167,6 @@ begin
 			from cteCohort c
 				inner join cteTCLessThan6MonthsINForm inl6 on inl6.HVCaseFK = c.HVCaseFK
 				left outer join cteTCLessThan6MonthsCHForm chl6 on chl6.hvcasefk = inl6.hvcasefk
-
 		)
 
 	--SELECT * FROM cteExpectedForm4TCLessThan6Months
@@ -245,23 +244,23 @@ begin
 					end
 		   end as FormDate
 		  ,case
-			   when (cach.FormDate is not null and cach.PC1HasMedicalProvider is not null) or 
-					(cafu.FormDate is not null and cafu.PC1HasMedicalProvider is not null) 
+			   when (cach.FormDate is not null) or	-- and cach.PC1HasMedicalProvider is not null
+					(cafu.FormDate is not null)		-- and cafu.PC1HasMedicalProvider is not null
 					then 1
 			   else 0
 		   end
 		   as FormReviewed
 		  ,case 
 			  -- Here FormOutOfWindow means that there must be either FU (Due now) or latest CH record in CommonAttribute table for tc >= 6 months
-			   when (cach.FormDate is not null and cach.PC1HasMedicalProvider is not null) or 
-					(cafu.FormDate is not null and cafu.PC1HasMedicalProvider is not null) then 0
+			   when (cach.FormDate is not null) or		--  and cach.PC1HasMedicalProvider is not null
+					(cafu.FormDate is not null) then 0	-- and cafu.PC1HasMedicalProvider is not null
 			   else
 				   1
 		   end as FormOutOfWindow
 		  ,case 
 			  -- there is atleast we one of either FU (Due now) or latest CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
-			   when (cach.FormDate is not null and cach.PC1HasMedicalProvider is not null) or 
-					(cafu.FormDate is not null and cafu.PC1HasMedicalProvider is not null) then 0
+			   when (cach.FormDate is not null) or		--  and cach.PC1HasMedicalProvider is not null
+					(cafu.FormDate is not null) then 0	-- and cafu.PC1HasMedicalProvider is not null
 			   else
 				   1
 		   end as FormMissing		  
@@ -345,7 +344,7 @@ begin
 		  ,FormOutOfWindow
 		  ,isnull(FormMissing,1) as FormMissing
 		  ,FormMeetsTarget
-		  ,isnull(NotMeetingReason, 'Form missing')
+		  ,isnull(NotMeetingReason, 'Form missing') as NotMeetingReason
 	from cteCohort c
 	left outer join cteMain m on c.HVCaseFK = m.HVCaseFK
 	left outer join cteIntervals4TC6MonthsOrOlderTCForm i on i.HVCaseFK = c.HVCaseFK
