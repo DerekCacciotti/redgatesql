@@ -7,115 +7,133 @@ GO
 -- Author:		Dar Chen
 -- Create date: 06/11/2012
 -- Description:	Active Enrolled Case List
+-- mod 2013Jun24 jrobohn reformat and add case filter criteria
 -- =============================================
-CREATE PROCEDURE [dbo].[rspActiveEnrolledCaseList] 
-	-- Add the parameters for the stored procedure here
-	@programfk VARCHAR(MAX) = NULL, 
-	@StartDt datetime,
-	@EndDt DATETIME,
-	@SiteFK INT = 0
-AS
+CREATE procedure [dbo].[rspActiveEnrolledCaseList]-- Add the parameters for the stored procedure here
+    @programfk           varchar(max)    = null,
+    @StartDt             datetime,
+    @EndDt               datetime,
+    @SiteFK              int             = 0,
+    @casefilterspositive varchar(200)
+as
 
---DECLARE @StartDt DATE = '01/01/2011'
---DECLARE @EndDt DATE = '05/31/2011'
---DECLARE @programfk VARCHAR(MAX) = '1'
---DECLARE @SiteFK INT = -1
+	--DECLARE @StartDt DATE = '01/01/2011'
+	--DECLARE @EndDt DATE = '05/31/2011'
+	--DECLARE @programfk VARCHAR(MAX) = '1'
+	--DECLARE @SiteFK INT = -1
 
-  if @programfk is null
+	if @programfk is null
 	begin
 		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
 										   from HVProgram
 										   for xml path ('')),2,8000)
 	end
 	set @programfk = replace(@programfk,'"','')
-    set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
 
-SELECT rtrim(PC.PCLastName) + cast(PC.PCPK AS VARCHAR(10)) [key01]
-, a.PC1ID
-, rtrim(PC.PCLastName) + ', ' + rtrim(PC.PCFirstName) [Name]
-, convert(VARCHAR(12), PC.PCDOB, 101) [DOB]
-, PC.SSNo [SSNo]
-, convert(VARCHAR(12), Kempe.KempeDate, 101) [KemptDate]
-, convert(VARCHAR(12), HVScreen.ScreenDate, 101) [ScreenDate]
-, rtrim(Worker.LastName) + ', ' + rtrim(Worker.FirstName) [FSW]
-, convert(VARCHAR(12), Intake.IntakeDate, 101) [IntakeDate]
-, CAST(DATEDIFF(YEAR, PC.PCDOB, Intake.IntakeDate) AS VARCHAR(10)) + ' y' [AgeAtIntake]
-, CASE WHEN a.DischargeDate IS NULL THEN '' ELSE convert(VARCHAR(12), a.DischargeDate, 101) END [CloseDate]
-, CASE WHEN a.DischargeDate IS NULL THEN 'Case Open' ELSE rtrim(codeDischarge.DischargeReason) END [CloseReason]
+	select rtrim(PC.PCLastName)+cast(PC.PCPK as varchar(10)) [key01]
+		  ,a.PC1ID
+		  ,rtrim(PC.PCLastName)+', '+rtrim(PC.PCFirstName) [Name]
+		  ,convert(varchar(12),PC.PCDOB,101) [DOB]
+		  ,PC.SSNo [SSNo]
+		  ,convert(varchar(12),Kempe.KempeDate,101) [KemptDate]
+		  ,convert(varchar(12),HVScreen.ScreenDate,101) [ScreenDate]
+		  ,rtrim(Worker.LastName)+', '+rtrim(Worker.FirstName) [FSW]
+		  ,convert(varchar(12),Intake.IntakeDate,101) [IntakeDate]
+		  ,CAST(DATEDIFF(year,PC.PCDOB,Intake.IntakeDate) as varchar(10))+' y' [AgeAtIntake]
+		  ,case when a.DischargeDate is null then '' else convert(varchar(12),a.DischargeDate,101) end [CloseDate]
+		  ,case when a.DischargeDate is null then 'Case Open' else rtrim(codeDischarge.DischargeReason) end [CloseReason]
 
---, CAST(DATEDIFF(month, Intake.IntakeDate, @EndDt) AS VARCHAR(10)) + ' m' [LengthInProgram]
+		  --, CAST(DATEDIFF(month, Intake.IntakeDate, @EndDt) AS VARCHAR(10)) + ' m' [LengthInProgram]
 
-, CASE WHEN a.DischargeDate IS NULL or a.DischargeDate > @EndDt 
-  THEN CAST(DATEDIFF(month, Intake.IntakeDate, @EndDt) AS VARCHAR(10)) + ' m' ELSE
-  CAST(DATEDIFF(month, Intake.IntakeDate, a.DischargeDate) AS VARCHAR(10)) + ' m' END [LengthInProgram]
+		  ,case when a.DischargeDate is null or a.DischargeDate > @EndDt
+				   then CAST(DATEDIFF(month,Intake.IntakeDate,@EndDt) as varchar(10))+' m' else
+				   CAST(DATEDIFF(month,Intake.IntakeDate,a.DischargeDate) as varchar(10))+' m' end [LengthInProgram]
 
-, CASE WHEN ca.TANFServices = 1 THEN 'Yes' ELSE 'No' END [TANF]
-, CASE WHEN ca.FormType = 'IN' THEN 'Intake' ELSE (
-		SELECT TOP 1 codeApp.AppCodeText FROM codeApp WHERE ca.FormInterval = codeApp.AppCode AND 
-		codeApp.AppCodeUsedWhere LIKE '%FU%' and codeApp.AppCodeGroup = 'TCAge' 
-		) END [TANFServiceAt]
-,convert(VARCHAR(12), ca.FormDate, 101) [Eligible]
-,(SELECT count(*) FROM HVLog WHERE VisitType <> '0001'AND cast(VisitStartTime AS DATE) <= @EndDt 
-AND cast(VisitStartTime AS DATE) >= b.IntakeDate AND HVCaseFK = b.HVCasePK 
-) [HomeVisits]
--- folling fields are used for validating (to be removed)
-,(
-		SELECT TOP 1 ca.CommonAttributesPK FROM CommonAttributes ca 
-		where ca.HVCaseFK = b.HVCasePK AND ca.FormDate <= @EndDt AND ca.FormType IN ('FU', 'IN')
-		ORDER BY ca.FormDate DESC
-		) [CommonAttributesPKID]
-		,ca.FormDate, ca.TANFServices, ca.FormType, ca.FormInterval
-		,rtrim(T.TCLastName) + ', ' + rtrim(T.TCFirstName) [tcName]
-		,convert(VARCHAR(12), T.TCDOB, 101) [tcDOB]
-		, CASE WHEN ls.SiteCode IS NULL THEN '' ELSE ls.SiteCode END SiteCode
+		  ,case when ca.TANFServices = 1 then 'Yes' else 'No' end [TANF]
+		  ,case when ca.FormType = 'IN' then 'Intake' 
+					else (select top 1 codeApp.AppCodeText
+								from codeApp
+								where ca.FormInterval = codeApp.AppCode
+										and
+										codeApp.AppCodeUsedWhere like '%FU%'
+										and codeApp.AppCodeGroup = 'TCAge'
+							) end [TANFServiceAt]
+		  ,convert(varchar(12),ca.FormDate,101) [Eligible]
+		  ,(select count(*)
+				from HVLog
+				where VisitType <> '0001'
+					 and cast(VisitStartTime as date) <= @EndDt
+					 and cast(VisitStartTime as date) >= b.IntakeDate
+					 and HVCaseFK = b.HVCasePK
+		   ) [HomeVisits]
+		  -- folling fields are used for validating (to be removed)
+		  ,(select top 1 ca.CommonAttributesPK
+				from CommonAttributes ca
+				where ca.HVCaseFK = b.HVCasePK
+					 and ca.FormDate <= @EndDt
+					 and ca.FormType in ('FU','IN')
+				order by ca.FormDate desc
+		   ) [CommonAttributesPKID]
+		  ,ca.FormDate
+		  ,ca.TANFServices
+		  ,ca.FormType
+		  ,ca.FormInterval
+		  ,rtrim(T.TCLastName)+', '+rtrim(T.TCFirstName) [tcName]
+		  ,convert(varchar(12),T.TCDOB,101) [tcDOB]
+		  ,case when ls.SiteCode is null then '' else ls.SiteCode end SiteCode
 
-		FROM CaseProgram AS a
-		JOIN HVCase AS b ON a.HVCaseFK = b.HVCasePK
-		inner join dbo.SplitString(@programfk,',') on a.programfk = listitem
-		-- pc1 name, dob, and SS# = b.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB, PC.SSNo
-		JOIN PC ON PC.PCPK = b.PC1FK
-		-- screen date = a.HVCaseFK <-> Kempe.HVCaseFK -> Kempe.KempeDate
-		JOIN Kempe ON Kempe.HVCaseFK = b.HVCasePK
-		--
-		-- kempe date = a.HVCaseFK <-> HVScreen.HVCaseFK -> HVScreen.ScreenDate
-		JOIN HVScreen ON HVScreen.HVCaseFK = b.HVCasePK
-		--
-		-- FSW & site = a.CurrentFSWFK <-> Worker.WorkerPK -> Worker.LastName + Worker.FirstName ?? site ??
-		LEFT OUTER JOIN Worker ON Worker.WorkerPK = a.CurrentFSWFK
-		JOIN Workerprogram AS wp on wp.WorkerFK = Worker.WorkerPK AND wp.ProgramFK = @programfk
-		LEFT OUTER JOIN listSite AS ls ON wp.SiteFK = ls.listSitePK
-		--
-		-- intake date & age at intake = a.HVCaseFK <-> Intake.HVCaseFK -> Intake.IntakeDate -> (PCDOB - IntakeDate)
-		JOIN Intake ON Intake.HVCaseFK = b.HVCasePK
-		--
-		-- closed date & close reason = a.DischargeDate, a.DischargeReason <-> codeDischarge.DischargeCode 
-		--                              -> codeDischarge.DischargeReason
-		LEFT OUTER JOIN codeDischarge ON a.DischargeReason = codeDischarge.DischargeCode
-		--
-		-- length in program = @EndDt - IntakeDate
+		from CaseProgram as a
+			join HVCase as b on a.HVCaseFK = b.HVCasePK
+			inner join dbo.SplitString(@programfk,',') on a.programfk = listitem
+			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCaseFK
+			-- pc1 name, dob, and SS# = b.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB, PC.SSNo
+			join PC on PC.PCPK = b.PC1FK
+			-- screen date = a.HVCaseFK <-> Kempe.HVCaseFK -> Kempe.KempeDate
+			join Kempe on Kempe.HVCaseFK = b.HVCasePK
+			--
+			-- kempe date = a.HVCaseFK <-> HVScreen.HVCaseFK -> HVScreen.ScreenDate
+			join HVScreen on HVScreen.HVCaseFK = b.HVCasePK
+			--
+			-- FSW & site = a.CurrentFSWFK <-> Worker.WorkerPK -> Worker.LastName + Worker.FirstName ?? site ??
+			left outer join Worker on Worker.WorkerPK = a.CurrentFSWFK
+			join Workerprogram as wp on wp.WorkerFK = Worker.WorkerPK and wp.ProgramFK = @programfk
+			left outer join listSite as ls on wp.SiteFK = ls.listSitePK
+			--
+			-- intake date & age at intake = a.HVCaseFK <-> Intake.HVCaseFK -> Intake.IntakeDate -> (PCDOB - IntakeDate)
+			join Intake on Intake.HVCaseFK = b.HVCasePK
+			--
+			-- closed date & close reason = a.DischargeDate, a.DischargeReason <-> codeDischarge.DischargeCode 
+			--                              -> codeDischarge.DischargeReason
+			left outer join codeDischarge on a.DischargeReason = codeDischarge.DischargeCode
+			--
+			-- length in program = @EndDt - IntakeDate
 
-		-- TANFservices, &  eligible = CA (CommonAttributes) : a.HVCaseFK <-> CA.HVCaseFK and CA.FormType IN ('FU', 'IN')
-		-- , CA.FormDate <= @EndDt and CA.TANFServices = 1 
-		-- if CA.FormType = 'IN' then FormInterval = 'In Take' else CA.FormInterval <-> codeApp.AppCode and
-		-- codeApp.AppCodeUsedWhere LIKE '%FU%' and AppCodeGroup = 'TCAge' -> codeApp.AppCodeText
-		-- CA.FormDate = Eligible date
-		-- CA.TANFServices = TANF
-		-- ON ca.HVCaseFK = b.HVCasePK AND ca.FormDate <= @EndDt AND ca.FormType IN ('FU', 'IN')
-		LEFT OUTER JOIN CommonAttributes ca 
-		ON ca.CommonAttributesPK = (SELECT TOP 1 CommonAttributesPK FROM CommonAttributes 
-		where HVCaseFK = b.HVCasePK AND FormDate <= @EndDt AND FormType IN ('FU', 'IN')
-		ORDER BY FormDate DESC)
+			-- TANFservices, &  eligible = CA (CommonAttributes) : a.HVCaseFK <-> CA.HVCaseFK and CA.FormType IN ('FU', 'IN')
+			-- , CA.FormDate <= @EndDt and CA.TANFServices = 1 
+			-- if CA.FormType = 'IN' then FormInterval = 'In Take' else CA.FormInterval <-> codeApp.AppCode and
+			-- codeApp.AppCodeUsedWhere LIKE '%FU%' and AppCodeGroup = 'TCAge' -> codeApp.AppCodeText
+			-- CA.FormDate = Eligible date
+			-- CA.TANFServices = TANF
+			-- ON ca.HVCaseFK = b.HVCasePK AND ca.FormDate <= @EndDt AND ca.FormType IN ('FU', 'IN')
+			left outer join CommonAttributes ca
+						   on ca.CommonAttributesPK = (select top 1 CommonAttributesPK
+														   from CommonAttributes
+														   where HVCaseFK = b.HVCasePK
+																and FormDate <= @EndDt
+																and FormType in ('FU','IN')
+														   order by FormDate desc)
 
--- # of actual home visits since intake = a.HVCaseFK <-> HVLog.HVCaseFK, ProgramFK, 
--- VisitType <> '0001', VisitStartTime < @EndDt and VisitStartTime >= b.IntakeDate
+			-- # of actual home visits since intake = a.HVCaseFK <-> HVLog.HVCaseFK, ProgramFK, 
+			-- VisitType <> '0001', VisitStartTime < @EndDt and VisitStartTime >= b.IntakeDate
 
-LEFT OUTER JOIN TCID T ON T.HVCaseFK = b.HVCasePK AND T.TCDOD IS NULL
+			left outer join TCID T on T.HVCaseFK = b.HVCasePK and T.TCDOD is null
 
-WHERE b.IntakeDate < @EndDt AND (a.DischargeDate IS NULL OR a.DischargeDate > @StartDt)
---AND a.ProgramFK = @programfk
-and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
---AND (@SiteFK = -1 OR (ISNULL(wp.SiteFK, -1) = @SiteFK))
-ORDER BY [key01]
-
-
+		where b.IntakeDate < @EndDt
+			 and (a.DischargeDate is null
+			 or a.DischargeDate > @StartDt)
+			 --AND a.ProgramFK = @programfk
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+		--AND (@SiteFK = -1 OR (ISNULL(wp.SiteFK, -1) = @SiteFK))
+		order by [key01]
 GO
