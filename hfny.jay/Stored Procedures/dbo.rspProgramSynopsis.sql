@@ -13,6 +13,7 @@ GO
 
 -- rspProgramSynopsis 5, '04/01/2013', '04/30/2013'
 -- rspProgramSynopsis 3, '05/01/2013', '05/31/2013'
+-- rspProgramSynopsis 11, '04/01/2013', '06/30/2013'
 
 
 -- =============================================
@@ -391,15 +392,14 @@ insert into @tblASQCohort
 							  dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
 						  else
 							  dateadd(dd,dueby,hvcase.tcdob)
-					  end) = year(@edate)
+					  end) between year(@sdate) and year(@edate)
 			 and month(case
 						   when interval < 24 then
 							   dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
 						   else
 							   dateadd(dd,dueby,hvcase.tcdob)
-					   end) = month(@edate)
+					   end) between month(@sdate) and month(@edate)
 			and EventDescription not like '%optional%'  -- optionals are not required so take them out		
-
 
 
 declare @ASQcol1 varchar(10)
@@ -489,13 +489,13 @@ insert into @tblASQSECohort
 							  dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
 						  else
 							  dateadd(dd,dueby,hvcase.tcdob)
-					  end) = year(@edate)
+					  end) between year(@sdate) and year(@edate)
 			 and month(case
 						   when interval < 24 then
 							   dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
 						   else
 							   dateadd(dd,dueby,hvcase.tcdob)
-					   end) = month(@edate)
+					   end) between month(@sdate) and month(@edate)
 
 
 
@@ -609,8 +609,8 @@ insert into @tblFUCohort
 			 and caseprogress >= 11
 			 and (dischargedate is null or dischargedate > @edate)
 			 --and (IntakeDate is not null or IntakeDate <= @edate)
-			 and year(dateadd(dd,dueby,cc.TCDOB_EDC)) = year(@edate)
-			 and month(dateadd(dd,dueby,cc.TCDOB_EDC)) = month(@edate)	
+			 and year(dateadd(dd,dueby,cc.TCDOB_EDC)) between year(@sdate) and year(@edate)
+			 and month(dateadd(dd,dueby,cc.TCDOB_EDC)) between month(@sdate) and month(@edate)
 
 
 
@@ -1038,13 +1038,13 @@ with cteASQ as
 							  dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
 						  else
 							  dateadd(dd,dueby,cc.TCDOB_EDC)
-					  end) = year(@edate)
+					  end) between year(@sdate) and year(@edate)
 			 and month(case
 						   when interval < 24 then
 							   dateadd(dd,dueby,(((40-gestationalage)*7)+cc.TCDOB_EDC))
 						   else
 							   dateadd(dd,dueby,cc.TCDOB_EDC)
-					   end) = month(@edate)
+					   end) between month(@sdate) and month(@edate)
 			and EventDescription not like '%optional%'  -- optionals are not required so take them out	
 
 )
@@ -1094,13 +1094,13 @@ with cteASQSE as
 							  dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
 						  else
 							  dateadd(dd,dueby,cc.TCDOB_EDC)
-					  end) = year(@edate)
+					  end) between year(@sdate) and year(@edate)
 			 and month(case
 						   when interval < 24 then
 							   dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
 						   else
 							   dateadd(dd,dueby,cc.TCDOB_EDC)
-					   end) = month(@edate)
+					   end) between month(@sdate) and month(@edate)
 )
 
 
@@ -1147,8 +1147,8 @@ with cteFollowUp as
 			 and caseprogress >= 11
 			 and (dischargedate is null or dischargedate > @edate)
 			 --and (IntakeDate is not null or IntakeDate <= @edate)
-			 and year(dateadd(dd,dueby,cc.TCDOB_EDC)) = year(@edate)
-			 and month(dateadd(dd,dueby,cc.TCDOB_EDC)) = month(@edate)	
+			 and year(dateadd(dd,dueby,cc.TCDOB_EDC)) between year(@sdate) and year(@edate)
+			 and month(dateadd(dd,dueby,cc.TCDOB_EDC)) between month(@sdate) and month(@edate)
 
 )
 
