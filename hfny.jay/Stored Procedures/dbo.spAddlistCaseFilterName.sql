@@ -1,23 +1,27 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddlistCaseFilterName](@FieldTitle varchar(50)=NULL,
-@FilterType int=NULL,
+@FilterType char(2)=NULL,
 @Hint varchar(100)=NULL,
-@ProgramFK int=NULL)
+@ProgramFK int=NULL,
+@Inactive bit=NULL)
 AS
 INSERT INTO listCaseFilterName(
 FieldTitle,
 FilterType,
 Hint,
-ProgramFK
+ProgramFK,
+Inactive
 )
 VALUES(
 @FieldTitle,
 @FilterType,
 @Hint,
-@ProgramFK
+@ProgramFK,
+@Inactive
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

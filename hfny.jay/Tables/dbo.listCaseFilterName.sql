@@ -2,9 +2,10 @@ CREATE TABLE [dbo].[listCaseFilterName]
 (
 [listCaseFilterNamePK] [int] NOT NULL IDENTITY(1, 1),
 [FieldTitle] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[FilterType] [int] NOT NULL,
+[FilterType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [Hint] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[ProgramFK] [int] NOT NULL
+[ProgramFK] [int] NOT NULL,
+[Inactive] [bit] NULL
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_listCaseFilterName_ProgramFK] ON [dbo].[listCaseFilterName] ([ProgramFK]) ON [PRIMARY]
 
