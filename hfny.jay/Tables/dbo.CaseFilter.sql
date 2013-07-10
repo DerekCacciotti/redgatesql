@@ -57,12 +57,4 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- -- -- -- -- -- -- -- -- -- -- -- -- -- --
--- create trigger TR_CaseFilterEditDate ON CaseFilter
--- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_CaseFilterEditDate] ON [dbo].[CaseFilter]
-For Update 
-AS
-Update CaseFilter Set CaseFilter.CaseFilterEditDate= getdate()
-From [CaseFilter] INNER JOIN Inserted ON [CaseFilter].[CaseFilterPK]= Inserted.[CaseFilterPK]
-GO
+
