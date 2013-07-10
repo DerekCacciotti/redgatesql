@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,6 +5,7 @@ GO
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Jan 4, 2012>
+-- Edit date: 7/10/2013 (Chris Papas) - cteMain levelname fix
 -- Description:	<Converted FamSys report - Home Visit Achievement Rate - Aggregate>
 --				04/29 Changed to NYS FSW Home Visit Record
 -- exe 
@@ -122,11 +122,35 @@ begin
 			 inner join cteLevelChanges on cteLevelChanges.casefk = hvr.casefk
 			 inner join HVCase c on hvr.casefk = c.HVCasePK
 )
-	,
-	cteMain
-	as
+	--07/10/2013 [Chris Papas], continual errors with getting the correct Level.
+	-- both ,max(levelname) over (partition by pc1id) as levelname
+	--and (SELECT TOP 1 levelname ORDER BY enddate) AS levelname, were returning the wrong levels in certain circumstances.
+	--FIX is below and as follows: Row_Number() OVER (Partition By casefk ORDER BY [levelstart] DESC) as RowNum
+	--END 7/10/2013 fix
+	
+	, cteMain as
 	-- make the aggregate table
-	(select distinct workername
+	(select workername
+			,workerfk
+			,pc1id
+			,casecount
+			,DirectServiceTime
+			,expvisitcount
+			,startdate
+			,enddate
+			,levelname
+			,levelstart
+			,actvisitcount
+			,inhomevisitcount
+			,attvisitcount
+			,VisitRate
+			,InHomeRate
+			,dischargedate
+			,IntakeDate
+			,TCDOB
+			,LevelChanges
+			from (
+				select distinct workername
 					,workerfk
 					,pc1id
 					,casecount
@@ -134,10 +158,9 @@ begin
 					,expvisitcount
 					,startdate
 					,enddate
-					,max(levelname) over (partition by pc1id) as levelname
-					--CHRIS PAPAS - below line was bringing in duplicates (ex. AL8713016704 for July 2010 - June 2011)
-					 --, (SELECT TOP 1 levelname ORDER BY enddate) AS levelname
-					 ,levelstart
+					,Row_Number() OVER (Partition By casefk ORDER BY [levelstart] DESC) as RowNum
+					,levelname
+					,levelstart
 					,actvisitcount
 					,inhomevisitcount
 					,attvisitcount
@@ -177,8 +200,11 @@ begin
 					,IntakeDate
 					,TCDOB
 					,LevelChanges
-		 from cteSummary
+				from cteSummary
+			) a where RowNum=1
 	)
+	
+	
 	select *
 		  ,case
 			   when expvisitcount = 0
