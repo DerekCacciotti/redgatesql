@@ -1247,6 +1247,8 @@ SELECT 	'14','2', '',
 
 -- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
 
+-- rspProgramSynopsis 13, '05/01/2013', '05/31/2013'
+
 -- INSERT Discharges at Preintake Stage DATA
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)	
 SELECT 	'15','2', '',    
@@ -1263,9 +1265,11 @@ SELECT 	'15','2', '',
 		inner join pc on pc.pcpk = cc.pc1fk
 		INNER JOIN Preassessment p ON cc.HVCasePK = p.HVCaseFK 
 		inner join codeDischarge on DischargeCode = cc.DischargeReason
+		left join codeLevel on cc.CurrentLevelFK = codeLevel.codeLevelPK
 
 
 		where (DischargeDate between @sdate and @edate)
+		and codeLevel.LevelName = 'Preintake-term'
 		and IntakeDate is not null	
 		and p.CaseStatus = '02'
 
