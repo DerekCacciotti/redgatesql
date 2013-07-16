@@ -10,16 +10,16 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <January 4th, 2013>
 -- Description:	<gets you data for Quarterly report i.e. J. Program Information for 8 Quarters>
--- exec [rspProgramInformationFor8Quarters] '5','03/31/13'
--- exec [rspProgramInformationFor8Quarters] '2','06/30/12'
--- exec [rspProgramInformationFor8Quarters] '5','06/30/12'
--- exec dbo.rspProgramInformationFor8Quarters @programfk=',13,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
--- exec dbo.rspProgramInformationFor8Quarters @programfk=',19,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
+-- exec [rspProgramInformationFor8Quarters_Test] '5','03/31/13'
+-- exec [rspProgramInformationFor8Quarters_Test] '2','06/30/12'
+-- exec [rspProgramInformationFor8Quarters_Test] '5','06/30/12'
+-- exec dbo.rspProgramInformationFor8Quarters_Test @programfk=',13,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
+-- exec dbo.rspProgramInformationFor8Quarters_Test @programfk=',19,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
 
--- exec [rspProgramInformationFor8Quarters] '3','12/31/12'
--- exec [rspProgramInformationFor8Quarters] '19','06/30/13'
+-- exec [rspProgramInformationFor8Quarters_Test] '3','12/31/12'
+-- exec [rspProgramInformationFor8Quarters_Test] '19','06/30/13'
 -- =============================================
-CREATE procedure [dbo].[rspProgramInformationFor8Quarters](@programfk    varchar(max)    = null,                                                       
+CREATE procedure [dbo].[rspProgramInformationFor8Quarters_Test](@programfk    varchar(max)    = null,                                                       
                                                         @edate        DATETIME,
                                                         @sitefk int             = 0,
                                                         @casefilterspositive  varchar(100) = ''  
@@ -99,7 +99,7 @@ INSERT INTO @tblMake8Quarter([QuarterNumber],[QuarterStartDate],[QuarterEndDate]
 INSERT INTO @tblMake8Quarter([QuarterNumber],[QuarterStartDate],[QuarterEndDate])SELECT 1, DATEADD(dd,1,DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-24,@edate) )+1,0))), DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-21,@edate) )+1,0)) AS QuarterEndDate
 
 -- SELECT * FROM @tblMake8Quarter  -- equivalent to csr8q cursor
--- exec [rspProgramInformationFor8Quarters] '5','06/30/2012'
+-- exec [rspProgramInformationFor8Quarters_Test] '5','06/30/2012'
 
 
 ---- ***************** ----
@@ -284,7 +284,7 @@ INSERT INTO @tblInitial_cohort
 			case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1
 			AND cp.CaseStartDate < @edate  -- handling transfer cases
 
-
+-- exec [rspProgramInformationFor8Quarters_Test] '19','06/30/13'	
 
 	;
 	-- 1
@@ -311,7 +311,7 @@ INSERT INTO @tblInitial_cohort
 	(	-- "2. Total Kempe Assessments"
 		-- Kempe Assessment Row 2
 	SELECT DISTINCT QuarterNumber,  count(*) over (partition by [QuarterNumber]) as 'numberOfKempAssessments'
-		from @tblInitial_cohort h
+		from @tblInitial_cohort h 
 		inner join  Kempe k on k.HVCaseFK = h.HVCaseFK
 			INNER JOIN @tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),	
@@ -335,7 +335,11 @@ INSERT INTO @tblInitial_cohort
 			from @tblInitial_cohort h
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
 			INNER JOIN @tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
-	),	
+	)
+	
+
+	
+	,	
 
 	cteKempAssessments_For2a AS
 	( 	
@@ -1219,7 +1223,7 @@ INSERT INTO @tblInitial_cohort
 
 
 
----- exec [rspProgramInformationFor8Quarters] '2','06/30/2012'
+---- exec [rspProgramInformationFor8Quarters_Test] '2','06/30/2012'
 
 
 --SELECT * FROM cteLengthInProgramFinal
@@ -1437,7 +1441,7 @@ INSERT INTO @tblInitial_cohort
 			,'    d. 2 years and Over'			
 
 
----- exec [rspProgramInformationFor8Quarters] '2','06/30/2012'
+---- exec [rspProgramInformationFor8Quarters_Test] '2','06/30/2012'
 --SELECT * from @tblQ8ReportMain
 
 
@@ -1713,6 +1717,6 @@ INNER JOIN @tblcol8 c8 ON c8.Q8Columns = c99.Q8Columns
 
 
 
--- exec [rspProgramInformationFor8Quarters] '5','06/30/2012'
+-- exec [rspProgramInformationFor8Quarters_Test] '5','06/30/2012'
 END
 GO
