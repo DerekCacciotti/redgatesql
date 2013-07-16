@@ -11,7 +11,7 @@ GO
 -- Description:	<gets you data for Pre-Intake Engagement Quarterly and Contract Period>
 -- exec [rspPreIntakeEngagement] ',1,','09/01/2010','11/30/2010',null,0
 -- exec [rspPreIntakeEngagement] ',1,','09/01/2010','11/30/2010',null,1
-
+-- exec [rspPreIntakeEngagement] ',19,','04/01/2013' , '06/30/2013',null,0
 -- =============================================
 CREATE procedure [dbo].[rspPreIntakeEngagement](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
@@ -110,8 +110,8 @@ end as tcdob
 FROM HVCase h 
 INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
 INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
-INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
-INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
+left JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
+left JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
 inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 
 -- SiteFK = isnull(@sitefk,SiteFK) does not work because column SiteFK may be null itself 
@@ -357,18 +357,16 @@ IF (@CustomQuarterlyDates = 0)
 		DECLARE @nQ2CPj INT 
 
 
-
-
 		SET @TotalNumberOfKempesContractPeriod = 
 		(
 			SELECT count(irq.HVCasePK)
 			FROM @tblInitRequiredData irq
-			INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
+			inner join Kempe k on k.HVCaseFK = irq.HVCasePK	
 			WHERE 
-			irq.KempeDate BETWEEN @ContractStartDate AND @edate
-			AND p.CaseStatus = '02'
+			k.KempeDate BETWEEN @ContractStartDate AND @edate
 
 		)
+
 
 		SET @nQ2CPa = 
 		(
