@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,7 +10,7 @@ GO
 -- Description:	Procedure to return dueby (duedate), minimumdue, maximumdue, &
 --     eventdescription
 -- =============================================
-create PROCEDURE [dbo].[spGetDueByDateInfo] @ScheduledEvent varchar(20), @interval char(2)
+CREATE PROCEDURE [dbo].[spGetDueByDateInfo] @ScheduledEvent varchar(20), @interval char(2)
 
 AS
 BEGIN
@@ -18,13 +19,14 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-SELECT [codeDueByDatesPK]
-      ,[ScheduledEvent]
-      ,[Interval]
-      ,[DueBy]
-      ,[MinimumDue]
-      ,[MaximumDue]
-      ,[EventDescription]
+SELECT codeDueByDatesPK
+	  ,DueBy
+	  ,EventDescription
+	  ,Interval
+	  ,MaximumDue
+	  ,MinimumDue
+	  ,ScheduledEvent
+	  ,Frequency
   FROM [dbo].[codeDueByDates]
   WHERE [ScheduledEvent] = @ScheduledEvent and [Interval] = @Interval
 END
