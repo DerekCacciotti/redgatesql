@@ -8,7 +8,13 @@ CREATE TABLE [dbo].[Intake]
 [IntakeDate] [datetime] NOT NULL,
 [IntakeEditdate] [datetime] NULL,
 [IntakeEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[ProgramFK] [int] NOT NULL
+[ProgramFK] [int] NOT NULL,
+[MIECHV_Race_AmericanIndian] [bit] NULL,
+[MIECHV_Race_Asian] [bit] NULL,
+[MIECHV_Race_Black] [bit] NULL,
+[MIECHV_Race_Hawaiian] [bit] NULL,
+[MIECHV_Race_White] [bit] NULL,
+[MIECHV_Hispanic] [nvarchar] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD
 CONSTRAINT [FK_Intake_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
