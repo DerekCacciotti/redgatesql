@@ -30,7 +30,13 @@ CREATE TABLE [dbo].[TCID]
 [TCIDPK_old] [int] NOT NULL,
 [TCLastName] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [VaricellaZoster] [bit] NULL,
-[NoImmunizationsReason] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[NoImmunizationsReason] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[MIECHV_Race_AmericanIndian] [bit] NULL,
+[MIECHV_Race_Asian] [bit] NULL,
+[MIECHV_Race_Black] [bit] NULL,
+[MIECHV_Race_Hawaiian] [bit] NULL,
+[MIECHV_Race_White] [bit] NULL,
+[MIECHV_Hispanic] [nvarchar] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

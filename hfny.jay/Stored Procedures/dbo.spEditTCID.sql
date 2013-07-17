@@ -30,7 +30,13 @@ CREATE PROCEDURE [dbo].[spEditTCID](@TCIDPK int=NULL,
 @TCIDPK_old int=NULL,
 @TCLastName varchar(200)=NULL,
 @VaricellaZoster bit=NULL,
-@NoImmunizationsReason char(2)=NULL)
+@NoImmunizationsReason char(2)=NULL,
+@MIECHV_Race_AmericanIndian bit=NULL,
+@MIECHV_Race_Asian bit=NULL,
+@MIECHV_Race_Black bit=NULL,
+@MIECHV_Race_Hawaiian bit=NULL,
+@MIECHV_Race_White bit=NULL,
+@MIECHV_Hispanic nvarchar(1)=NULL)
 AS
 UPDATE TCID
 SET 
@@ -60,6 +66,12 @@ TCIDFormCompleteDate = @TCIDFormCompleteDate,
 TCIDPK_old = @TCIDPK_old, 
 TCLastName = @TCLastName, 
 VaricellaZoster = @VaricellaZoster, 
-NoImmunizationsReason = @NoImmunizationsReason
+NoImmunizationsReason = @NoImmunizationsReason, 
+MIECHV_Race_AmericanIndian = @MIECHV_Race_AmericanIndian, 
+MIECHV_Race_Asian = @MIECHV_Race_Asian, 
+MIECHV_Race_Black = @MIECHV_Race_Black, 
+MIECHV_Race_Hawaiian = @MIECHV_Race_Hawaiian, 
+MIECHV_Race_White = @MIECHV_Race_White, 
+MIECHV_Hispanic = @MIECHV_Hispanic
 WHERE TCIDPK = @TCIDPK
 GO
