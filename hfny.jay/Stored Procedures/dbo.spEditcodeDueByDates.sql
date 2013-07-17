@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +9,8 @@ CREATE PROCEDURE [dbo].[spEditcodeDueByDates](@codeDueByDatesPK int=NULL,
 @Interval char(2)=NULL,
 @MaximumDue int=NULL,
 @MinimumDue int=NULL,
-@ScheduledEvent varchar(20)=NULL)
+@ScheduledEvent varchar(20)=NULL,
+@Frequency int=NULL)
 AS
 UPDATE codeDueByDates
 SET 
@@ -17,6 +19,7 @@ EventDescription = @EventDescription,
 Interval = @Interval, 
 MaximumDue = @MaximumDue, 
 MinimumDue = @MinimumDue, 
-ScheduledEvent = @ScheduledEvent
+ScheduledEvent = @ScheduledEvent, 
+Frequency = @Frequency
 WHERE codeDueByDatesPK = @codeDueByDatesPK
 GO
