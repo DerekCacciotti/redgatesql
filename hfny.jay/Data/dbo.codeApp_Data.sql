@@ -1,7 +1,4 @@
 SET IDENTITY_INSERT [dbo].[codeApp] ON
-INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (269, '04', 'CaseFilterType                ', 'Date                                                                                                ', 'CF')
-SET IDENTITY_INSERT [dbo].[codeApp] OFF
-SET IDENTITY_INSERT [dbo].[codeApp] ON
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (1, '01', 'ASQVersion                    ', 'First Edition 1995                                                                                  ', 'ASQ,SS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (2, '02', 'ASQVersion                    ', 'Second Edition 1995                                                                                 ', 'ASQ,SS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (3, '03', 'ASQVersion                    ', 'Third Edition 2009                                                                                  ', 'ASQ,SS')
@@ -254,5 +251,5 @@ INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeTex
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (265, '04', 'MaritalStatus                 ', 'Divorced                                                                                            ', 'KE, IN, FU')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (266, '05', 'MaritalStatus                 ', 'Widowed                                                                                             ', 'KE, IN, FU')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (267, '06', 'MaritalStatus                 ', 'Unknown / Did Not Report                                                                            ', 'KE, IN, FU')
-INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (268, '09', 'MaritalStatus                 ', 'Not Married                                                                                         ', '')
+INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (269, '04', 'CaseFilterType                ', 'Date                                                                                                ', 'CF')
 SET IDENTITY_INSERT [dbo].[codeApp] OFF
