@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,7 +11,7 @@ GO
 -- Description:	<gets you data for Family Characteristics Quarterly and Contract Period>
 -- exec [rspFamilyCharacteristics5] ',1,','09/01/2010','11/30/2010',null,0
 -- exec [rspFamilyCharacteristics5] ',1,','09/01/2010','11/30/2010',null,1
-
+-- exec rspFamilyCharacteristics5 '32','01/01/13','06/30/13',NULL,NULL
 -- =============================================
 CREATE procedure [dbo].[rspFamilyCharacteristics5](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
