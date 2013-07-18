@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,6 +13,22 @@ CREATE PROCEDURE [dbo].[beta_lockinfo] @allprocesses bit     = 0,
 -- on a number of items. Note that we do not include subthreads or
 -- requests in the aggregation. The IDENTITY column is there, because
 -- we don't want character data in the clustered index.
+
+
+
+  --Parameters:
+  --@allprocesses - If 0, only include "interesting processes", i.e.
+  --                processes running something or holding locks. 1 - show
+  --                all processes.
+  --@textmode     - If 0, output is sent as-is, intended for grid mode.
+  --                If 1, output columns are trimmed the width derived from
+  --                data, and a blank line is inserted between spids.
+  --@procdata     - A - show process-common data on all rows. F - show
+  --                process-common data only on the first rows. Defaults
+  --                to A in text mode and F in grid mode.
+  --@debug        - If 1, prints progress messages with timings.
+
+
 DECLARE @locks TABLE (
    database_id     int      NOT NULL,
    entity_id       bigint   NULL,
