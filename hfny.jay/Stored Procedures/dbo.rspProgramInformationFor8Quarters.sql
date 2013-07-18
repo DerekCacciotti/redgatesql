@@ -24,7 +24,7 @@ CREATE procedure [dbo].[rspProgramInformationFor8Quarters](@programfk    varchar
                                                         @edate        DATETIME,
                                                         @sitefk int             = 0,
                                                         @casefilterspositive  varchar(100) = ''  
-                                                        ) with recompile
+                                                        ) 
 
 as
 BEGIN
@@ -313,7 +313,8 @@ INSERT INTO #tblInitial_cohort
 		-- Kempe Assessment Row 2
 	SELECT DISTINCT QuarterNumber,  count(*) over (partition by [QuarterNumber]) as 'numberOfKempAssessments'
 		from #tblInitial_cohort h
-			INNER JOIN #tblMake8Quarter q8 ON KempeDate between [QuarterStartDate] and [QuarterEndDate]
+		inner join  Kempe k on k.HVCaseFK = h.HVCaseFK
+			INNER JOIN #tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),	
 	cteKempAssessmentsFor2 AS
 	(	-- "2. Total Kempe Assessments"
@@ -334,7 +335,7 @@ INSERT INTO #tblInitial_cohort
 			,SUM(CASE WHEN k.KempeResult = 1 THEN 1 ELSE 0 END ) OVER(PARTITION BY [QuarterNumber]) AS 'KempPositive'			
 			from #tblInitial_cohort h
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
-			INNER JOIN #tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
+			INNER JOIN #tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),	
 
 	cteKempAssessments_For2a AS
@@ -367,7 +368,7 @@ INSERT INTO #tblInitial_cohort
 			,SUM(CASE WHEN k.KempeResult = 1 THEN 1 ELSE 0 END ) OVER(PARTITION BY [QuarterNumber]) AS 'KempPositive'			
 			from #tblInitial_cohort h
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
-			INNER JOIN #tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
+			INNER JOIN #tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),
 
 	cteKempAssessments_For2a_1 AS
@@ -401,7 +402,7 @@ INSERT INTO #tblInitial_cohort
 			,SUM(CASE WHEN k.KempeResult = 1 THEN 1 ELSE 0 END ) OVER(PARTITION BY [QuarterNumber]) AS 'KempPositive'			
 			from #tblInitial_cohort h
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
-			INNER JOIN #tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
+			INNER JOIN #tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),
 
 	cteKempAssessments_For2a_2 AS
@@ -436,7 +437,7 @@ INSERT INTO #tblInitial_cohort
 			,SUM(CASE WHEN k.KempeResult = 1 THEN 1 ELSE 0 END ) OVER(PARTITION BY [QuarterNumber]) AS 'KempPositive'			
 			from #tblInitial_cohort h
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
-			INNER JOIN #tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
+			INNER JOIN #tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),
 	cteKempAssessments_For2a_3 AS
 	( 
@@ -467,7 +468,7 @@ INSERT INTO #tblInitial_cohort
 			,avg(case when k.MomScore = 'U' then 0 else cast(k.MomScore as DECIMAL) END) OVER(PARTITION BY [QuarterNumber]) AS 'AvgPositiveMotherScore' 
 			from #tblInitial_cohort h
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK AND k.KempeResult = 1 -- keeping 'k.KempeResult = 1' it here (not as in where clause down), it saved 3 seconds of execution time ... Khalsa
-			INNER JOIN #tblMake8Quarter q8 ON h.KempeDate between [QuarterStartDate] and [QuarterEndDate]
+			INNER JOIN #tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
 	),
 
 	cteKempAssessments_For2b AS
