@@ -11,7 +11,7 @@ GO
 -- Description:	<gets you data for Pre-Intake Engagement Quarterly and Contract Period>
 -- exec [rspPreIntakeEngagement] ',1,','09/01/2010','11/30/2010',null,0
 -- exec [rspPreIntakeEngagement] ',1,','09/01/2010','11/30/2010',null,1
--- exec [rspPreIntakeEngagement] ',19,','04/01/2013' , '06/30/2013',null,0
+-- exec [rspPreIntakeEngagement] ',2,','04/01/2013' , '06/30/2013',null,0
 -- =============================================
 CREATE procedure [dbo].[rspPreIntakeEngagement](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
@@ -200,10 +200,10 @@ SET @TotalNumberOfKempesThisPeriodQuarterly =
 (
 	SELECT count(irq.HVCasePK)
 	FROM @tblInitRequiredData irq
-	INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
+	--INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
-	AND p.CaseStatus = '02'
+	--AND p.CaseStatus = '02'
 
 )
 
