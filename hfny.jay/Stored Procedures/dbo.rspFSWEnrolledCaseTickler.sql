@@ -11,6 +11,7 @@ GO
 -- Be patient when running this report as it may take a few seconds. This report should be run monthly.
 
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
+-- rspFSWEnrolledCaseTickler_test1 1, '07/31/2013'
 
 -- =============================================
 
@@ -1130,12 +1131,13 @@ SELECT distinct cc.HVCasePK
       ,case when ls.Last5Visits is not null then left(ls.Last5Visits,len(ls.Last5Visits)-1) else '' end as Last5Visits
       
 	  ,case 
-			when TCReceiving1 = 1 or TCReceiving2 = 1 or TCReceiving3 = 1 or TCReceiving4 = 1 then ' Child receiving EIP ' 
-	        when casq.Interval is null or casq.Interval = '00' then ' due by ' + case when IntakeDate < dev_bdate then 
+			when TCReceiving1 = 1 or TCReceiving2 = 1 or TCReceiving3 = 1 or TCReceiving4 = 1 then ' Child receiving EIP '
+			when casq.Interval is null then ''
+	        when casq.Interval = '00' then ' due by ' + case when IntakeDate < dev_bdate then 
 					convert(varchar(20), dev_bdate, 101) else convert(varchar(20), IntakeDate, 101) end
 			else cdasq.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
 			--else cdasq.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,tcdob), 101)
-			end as ASQDue   
+			end as ASQDue  
      
 		--, hvl.levelname as CurrentLevelName
 		--, convert(varchar(12), hvl.levelassigndate , 101) as levelassigndate		
