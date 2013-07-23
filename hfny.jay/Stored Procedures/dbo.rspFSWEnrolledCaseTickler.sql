@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -14,7 +15,7 @@ GO
 -- =============================================
 
 
-create procedure [dbo].[rspFSWEnrolledCaseTickler](
+CREATE procedure [dbo].[rspFSWEnrolledCaseTickler](
 	@programfk    varchar(max)    = NULL,
     @edate     datetime,
     @supervisorfk int             = null,
@@ -23,6 +24,9 @@ create procedure [dbo].[rspFSWEnrolledCaseTickler](
 )
 as
 
+IF 1=0 BEGIN
+    SET FMTONLY OFF
+END
 	if @programfk is null
 	begin
 		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
@@ -47,6 +51,10 @@ as
 	declare @firstDayOfPreviousMonth datetime
 	set @firstDayOfPreviousMonth = DATEADD(DD, -DAY(DATEADD(DD, -DAY(@edate),@edate))+1,DATEADD(DD, -DAY(@edate),@edate))  
 	
+	-- Previous Month's Name
+	declare @NameOfPreviousMonth varchar(50)
+	set @NameOfPreviousMonth = DATENAME(MONTH,@lastDayOfPreviousMonth)
+	--select @NameOfPreviousMonth
 	
 	-- Last 3 Month's Home Visits
 
@@ -59,7 +67,7 @@ as
 	
 
 	
-	DECLARE @tblCommonCohort TABLE(
+	create table #tblCommonCohort(
 				[HVCasePK] [int],
 				[TCIDPK] [int],
 				[tcname]  [varchar](200) NULL,								
@@ -84,7 +92,7 @@ as
 				TCAgeDays int
 	)
 
-	INSERT INTO @tblCommonCohort
+	INSERT INTO #tblCommonCohort
 	select distinct
 		h.HVCasePK,
 		t.TCIDPK, 
@@ -155,7 +163,7 @@ as
 
 
 -- add tcagedays. we need it in when we count shots later
-update @tblCommonCohort 
+update #tblCommonCohort 
 set TCAgeDays = (case when (DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @eDate) then datediff(day,tcdob,DischargeDate) else  datediff(day,tcdob,@eDate)  end )
 
 
@@ -216,7 +224,7 @@ set TCAgeDays = (case when (DischargeDate is not null and DischargeDate <> '' an
 						,cc.ProgramFK
 						, TCIDPK
 						, TCDOB
-							 FROM @tblCommonCohort cc
+							 FROM #tblCommonCohort cc
 						
 
 
@@ -240,7 +248,7 @@ SELECT
 		cc.TCIDPK	
 	  , max(Interval) AS Interval 
 
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			--left join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK -- you don't need it because psi test is for parent only (not for child) ( or per case)
 			left join codeduebydates on scheduledevent = 'PSI' AND cc.XDateAge >= DueBy -- minimum interval
 	 
@@ -260,7 +268,7 @@ SELECT m.HVCasePK, m.TCIDPK
 			end as PSIDue				
 				
 	 
- from @tblCommonCohort m
+ from #tblCommonCohort m
 left join ctePSIIntervalAlreadyShouldHaveBeenDone psim on psim.hvcasepk = m.hvcasepk and m.TCIDPK = psim.TCIDPK 
 left join codeduebydates cd on scheduledevent = 'PSI' AND psim.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
  -- The following line gets those tcid's with PSI's that are due for the Interval
@@ -276,7 +284,7 @@ as
 SELECT cc.HVCasePK ,cc.TCIDPK
 	  ,max(PSIDateComplete) AS PSIMaxDate -- We mean really the last date in the database
 	  ,max(PSIInterval) as psiinterval
- FROM @tblCommonCohort cc
+ FROM #tblCommonCohort cc
  left join PSI P on P.HVCaseFK = cc.HVCasePK  -- it is case based because it is for parent only
 GROUP BY cc.HVCasePK,cc.TCIDPK
 
@@ -310,7 +318,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,
 	else ''
 	end  as lastpsi
 
- FROM @tblCommonCohort cc 
+ FROM #tblCommonCohort cc 
  left join cteLastPSIGetOtherNeededFields lpsi on lpsi.hvcasePK = cc.hvcasePK and cc.tcidpk = lpsi.tcidpk
  left join codeduebydates cd on scheduledevent = 'PSI' AND lpsi.psiinterval = cd.Interval -- to get dueby, max, min (given interval)
 )
@@ -327,7 +335,7 @@ SELECT
 		cc.TCIDPK	
 	  , max(Interval) AS Interval -- for tc less than 6 month olds, interval will be null
 
- 		from @tblCommonCohort cc
+ 		from #tblCommonCohort cc
  		left join codeduebydates on scheduledevent = 'Follow Up' AND cc.XDateAge >= DueBy -- minimum interval
 
  GROUP BY HVCasePK, TCIDPK
@@ -347,7 +355,7 @@ SELECT m.HVCasePK, m.TCIDPK, OldID
 			end as FollowUpDue				
 				
 	 
- from @tblCommonCohort m
+ from #tblCommonCohort m
 left join cteFollowUpIntervalAlreadyShouldHaveBeenDone fui on fui.hvcasepk = m.hvcasepk and m.TCIDPK = fui.TCIDPK 
 left join codeduebydates cd on scheduledevent = 'Follow Up' AND fui.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
 left join FollowUp fu on fu.HVCaseFK = m.HVCasePK and fu.FollowUpInterval = fui.Interval  
@@ -363,7 +371,7 @@ as
 (
 SELECT cc.HVCasePK ,cc.TCIDPK
 	  ,max(FollowUpDate) AS FollowUpMaxDate -- We mean really the last date in the database
- FROM @tblCommonCohort cc
+ FROM #tblCommonCohort cc
  left join FollowUp fu on fu.HVCaseFK = cc.HVCasePK 
 GROUP BY cc.HVCasePK,cc.TCIDPK
 
@@ -388,7 +396,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,oldid,
     case 
     when FollowUpPK is null then ' Missing'	
 	when FollowUpMaxDate is not null then	
-		'Last PSI: ' + cd.EventDescription +
+		'Last Follow-Up: ' + cd.EventDescription +
 		
 			case when lfu.FUPInWindow = 1 then ' In Window on ' else ' Out of Window on ' end 
 		
@@ -398,7 +406,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,oldid,
 	else ''
 	end  as lastFollowUp
 
- FROM @tblCommonCohort cc 
+ FROM #tblCommonCohort cc 
  left join cteLastFollowUpGetOtherNeededFields lfu on lfu.hvcasePK = cc.hvcasePK and cc.tcidpk = lfu.tcidpk
  left join codeduebydates cd on scheduledevent = 'Follow Up' AND lfu.FollowUpInterval = cd.Interval -- to get dueby, max, min (given interval)
 )
@@ -417,7 +425,7 @@ SELECT
 		,sum(case when (startdate is null and ReasonNoService is null) then 1 else 0 end) as ref_fup
 	  , max(sr.ReferralDate) AS ref_last
  
- FROM @tblCommonCohort cc 
+ FROM #tblCommonCohort cc 
 	inner join ServiceReferral sr on sr.HVCaseFK = cc.HVCasePK 
 	where sr.ReferralDate >= cc.IntakeDate  and sr.ReferralDate <= @edate
  GROUP BY HVCasePK 
@@ -437,7 +445,7 @@ SELECT
 	 end as  tcid_dd -- dd = done
 
  
- FROM @tblCommonCohort cc 
+ FROM #tblCommonCohort cc 
 )
 
 -- Last Months Home Visits
@@ -449,7 +457,7 @@ as
 	SELECT HVCasePK
 	,sum(minimumvisit * datediff(week,@firstDayOfPreviousMonth,@lastDayOfPreviousMonth)) as expectedvisitcount
 	
-	FROM @tblCommonCohort cc 
+	FROM #tblCommonCohort cc 
 	inner join [HVLevelDetail] hld on hld.hvcasefk = cc.HVCasePK 
 	where (StartLevelDate <= @lastDayOfPreviousMonth)
 	and (EndLevelDate >= @firstDayOfPreviousMonth or EndLevelDate is null)	
@@ -485,7 +493,7 @@ as
 
 	,sum(visitlengthminute)+sum(visitlengthhour)*60  as VisitLengthInminutesMOnthly
 	
-	FROM @tblCommonCohort cc 	
+	FROM #tblCommonCohort cc 	
 	left outer join hvlog on cc.hvcasepk = hvlog.hvcasefk
 							   and cast(VisitStartTime AS DATE) between @firstDayOfPreviousMonth and @lastDayOfPreviousMonth
 							   
@@ -502,7 +510,7 @@ as
 	SELECT HVCasePK
 	,sum(minimumvisit * datediff(week,@firstDayOfThirdPreviousMonth,@lastDayOfPreviousMonth)) as expected3Monthsvisitcount
 	
-	FROM @tblCommonCohort cc 
+	FROM #tblCommonCohort cc 
 	inner join [HVLevelDetail] hld on hld.hvcasefk = cc.HVCasePK 
 	where (StartLevelDate <= @lastDayOfPreviousMonth)
 	and (EndLevelDate >= @firstDayOfThirdPreviousMonth or EndLevelDate is null)	
@@ -537,7 +545,7 @@ as
 		 end) as attempted3Monthsvisitcount
 	,sum(visitlengthminute)+sum(visitlengthhour)*60 as VisitLengthInminutes3MOnthly
 	
-	FROM @tblCommonCohort cc 	
+	FROM #tblCommonCohort cc 	
 	left outer join hvlog on cc.hvcasepk = hvlog.hvcasefk
 							   and cast(VisitStartTime AS DATE) between @firstDayOfThirdPreviousMonth and @lastDayOfPreviousMonth
 							   
@@ -558,7 +566,7 @@ select  HVCasePK
 	   as VisitStartTime
 	  ,VisitType
 	  ,RowNumber = row_number() over (partition by h.HVCaseFK order by VisitStartTime desc)
-	   FROM @tblCommonCohort cc
+	   FROM #tblCommonCohort cc
 inner join HVLog h on h.HVCaseFK = cc.HVCasePK and cast(VisitStartTime AS DATE) between @firstDayOfThirdPreviousMonth and @edate
 )
 ,cteLast5VisitsConcatenated
@@ -574,7 +582,7 @@ select  cc.HVCasePK,
 		
 		) as Last5Visits
 
-	   FROM @tblCommonCohort cc	  
+	   FROM #tblCommonCohort cc	  
 	   group by cc.HVCasePK 
 
 )
@@ -584,7 +592,7 @@ as
 	select HVCasePK
 	,levelname, StartLevelDate 
 	,RowNumber = row_number() over (partition by hld.HVCaseFK order by StartLevelDate desc)
-	FROM @tblCommonCohort cc 
+	FROM #tblCommonCohort cc 
 	inner join [HVLevelDetail] hld on hld.hvcasefk = cc.HVCasePK 
 	where (StartLevelDate <= @edate)  -- just within the given month only
 	and (EndLevelDate >= @FirstDayOfCurrentMonth or EndLevelDate is null)	
@@ -612,7 +620,7 @@ as
 		
 		) as StartLevelDate
 		
-	   FROM @tblCommonCohort cc	  
+	   FROM #tblCommonCohort cc	  
 	   group by cc.HVCasePK 
 
 
@@ -630,7 +638,7 @@ as
 		   case when T.TCDOD < @edate and T.TCDOD is not null then T.TCDOD else null end as tcdod,
 		  dateadd(dd, (40 -T.GestationalAge)*7, T.TCDOB) as dev_bdate,
 		  case when T.tcidPK is not null then 'Complete' else '' end as tciddone
-	 FROM @tblCommonCohort cc
+	 FROM #tblCommonCohort cc
 	left join TCID T on t.HVCaseFK = cc.HVCasePK and T.TCIDPK = cc.TCIDPK 	  
 )
 ,
@@ -639,7 +647,7 @@ as
 (
 SELECT cc.HVCasePK ,cc.TCIDPK
 	  ,max(TCItemDate) AS TCMedicalMaxDate -- We mean really the last date in the database as per JR
- FROM @tblCommonCohort cc
+ FROM #tblCommonCohort cc
  LEFT JOIN TCMedical t ON cc.HVCasePK = t.HVCaseFK and cc.TCIDPK = t.TCIDFK
 GROUP BY cc.HVCasePK,cc.TCIDPK
 
@@ -666,7 +674,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,oldid,
 	else ''
 	end  as lastdate
 
- FROM @tblCommonCohort cc 
+ FROM #tblCommonCohort cc 
  left join cteTCMedical tcm on tcm.hvcasePK = cc.hvcasePK and cc.tcidpk = tcm.tcidpk
 )
 
@@ -693,7 +701,7 @@ SELECT cc.HVCasePK,
 	  GestationalAge,
 	  cc.TCDOB	  		
 		
- FROM @tblCommonCohort cc
+ FROM #tblCommonCohort cc
 left join TCID T on T.HVCaseFK = cc.HVCasePK 		
 
 )
@@ -749,7 +757,7 @@ as
 					then 1 
 					else 0 
 					end) as FormReviewedCountPolio
-		from @tblCommonCohort coh
+		from #tblCommonCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.HVCasePK and TCMedical.TCIDFK = coh.TCIDPK
 			left join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and @edate 
@@ -772,7 +780,7 @@ as
 					then 1 
 					else 0 
 					end) as FormReviewedCountDTaP
-		from @tblCommonCohort coh
+		from #tblCommonCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.HVCasePK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and @edate
@@ -795,7 +803,7 @@ as
 					then 1 
 					else 0 
 					end) as FormReviewedCountMMR
-		from @tblCommonCohort coh
+		from #tblCommonCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.HVCasePK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and @edate
@@ -817,7 +825,7 @@ as
 					then 1 
 					else 0 
 					end) as FormReviewedCountHIB
-		from @tblCommonCohort coh
+		from #tblCommonCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.HVCasePK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and @edate
@@ -839,7 +847,7 @@ as
 					then 1 
 					else 0 
 					end) as FormReviewedCountHEP
-		from @tblCommonCohort coh
+		from #tblCommonCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.HVCasePK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and @edate
@@ -862,7 +870,7 @@ as
 					then 1 
 					else 0 
 					end) as FormReviewedCountHEP
-		from @tblCommonCohort coh
+		from #tblCommonCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.HVCasePK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and @edate
@@ -884,7 +892,7 @@ as
 					then 1 
 					else 0 
 					end) as FormReviewedCountHEP
-		from @tblCommonCohort coh
+		from #tblCommonCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.HVCasePK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and @edate
@@ -907,7 +915,7 @@ as
 					then 1 
 					else 0 
 					end) as FormReviewedCountHEP
-		from @tblCommonCohort coh
+		from #tblCommonCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.HVCasePK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and @edate
@@ -932,7 +940,7 @@ SELECT
 	  , min(MaximumDue) as MaximumDue	  
 	  , min(Frequency) as Frequency
 	  
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			left join codeduebydates on scheduledevent = 'DTaP' AND DueBy > cc.TCAgeDays -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
@@ -949,7 +957,7 @@ SELECT
 	  , min(MaximumDue) as MaximumDue	  
 	  , min(Frequency) as Frequency
 	  
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			left join codeduebydates on scheduledevent = 'HEP-B' AND DueBy > cc.TCAgeDays -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
@@ -966,7 +974,7 @@ SELECT
 	  , min(MaximumDue) as MaximumDue	  
 	  , min(Frequency) as Frequency
 	  
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			left join codeduebydates on scheduledevent = 'HIB' AND DueBy > cc.TCAgeDays -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
@@ -983,7 +991,7 @@ SELECT
 	  , min(MaximumDue) as MaximumDue	  
 	  , min(Frequency) as Frequency
 	  
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			left join codeduebydates on scheduledevent = 'Lead' AND DueBy > cc.TCAgeDays -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
@@ -1000,7 +1008,7 @@ SELECT
 	  , min(MaximumDue) as MaximumDue	  
 	  , min(Frequency) as Frequency
 	  
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			left join codeduebydates on scheduledevent = 'MMR' AND DueBy > cc.TCAgeDays -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
@@ -1017,7 +1025,7 @@ SELECT
 	  , min(MaximumDue) as MaximumDue	  
 	  , min(Frequency) as Frequency
 	  
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			left join codeduebydates on scheduledevent = 'Polio' AND DueBy > cc.TCAgeDays  -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
@@ -1034,7 +1042,7 @@ SELECT
 	  , min(MaximumDue) as MaximumDue	  
 	  , min(Frequency) as Frequency
 	  
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			left join codeduebydates on scheduledevent = 'VZ' AND DueBy > cc.TCAgeDays -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
@@ -1051,7 +1059,7 @@ SELECT
 	  , min(MaximumDue) as MaximumDue	  
 	  , min(Frequency) as Frequency
 	  
- 		from @tblCommonCohort cc			
+ 		from #tblCommonCohort cc			
 			left join codeduebydates on scheduledevent = 'WBV' AND DueBy > cc.TCAgeDays -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
@@ -1063,7 +1071,7 @@ SELECT distinct cc.HVCasePK
 	  ,cc.ProgramFK
 	  ,cc.OldID
 	  ,cc.PC1ID
-	  ,cc.tcdob
+	  ,CONVERT(varchar, cc.tcdob, 101) as tcdob
 	  ,TCAgeDays
 	  ,SupervisorName
 	  ,SupervisorFK
@@ -1077,8 +1085,8 @@ SELECT distinct cc.HVCasePK
 	  ,CaseProgress
 	  ,TCNumber
 	  ,MultipleBirth
-	  ,cl.LevelName
-	  ,cl.StartLevelDate 
+	  ,cl.LevelName	  
+	  ,CONVERT(varchar, cl.StartLevelDate, 101) as  StartLevelDate 
 	  ,Intakedd   
 	  ,tcid_dd
 
@@ -1094,7 +1102,10 @@ SELECT distinct cc.HVCasePK
 	  ,ref.HVCasePK
 	  ,ref_enr
 	  ,ref_fup
-	  ,ref_last
+	  ,CONVERT(varchar, ref_last, 101) as ref_last
+	  
+	  
+	  
 	  ,expectedvisitcount
 	  ,actualvisitcount
 	  ,attemptedvisitcount
@@ -1228,17 +1239,10 @@ SELECT distinct cc.HVCasePK
 		+ 
 		case when WBV.ImmunizationCountWBV is null then ' 0 completed' else cast(WBV.ImmunizationCountWBV as varchar(2)) + ' completed' end 		
 		end as WBVCount	
-
-		, case when cteWBV.Frequency is  null then '0' else cast(cteWBV.Frequency as varchar(2)) + 
+		, '' as WBVCount1
 		
-		case when WBV.ImmunizationCountWBV is null or cteWBV.Frequency > WBV.ImmunizationCountWBV then ' due by ' + convert(varchar(12), dateadd(dd,cteWBV.MaximumDue, cc.tcdob ), 101) + '; ' 
-		else
-		'  due; ' 
-		end
 		
-		+ 
-		case when WBV.ImmunizationCountWBV is null then ' 0 completed' else cast(WBV.ImmunizationCountWBV as varchar(2)) + ' completed' end 		
-		end as WBVCount			
+		
 
 		, case when cteLead.Frequency is  null then '0' else cast(cteLead.Frequency as varchar(2)) + 
 		
@@ -1252,7 +1256,17 @@ SELECT distinct cc.HVCasePK
 		end as LeadScreen	
 		
 	  
-	   FROM @tblCommonCohort cc
+	     ,'Evaluation Form Due Dates' as Header1
+	     ,'Evalution Form History' as Header2
+	     ,'Referrals' as Header3
+	     ,'Last Month''s Home Visits' as Header4
+	     ,'Last 3 Month''s Home Visits' as Header5
+	     ,'Target Child Due Dates' as Header6
+
+		 ,@NameOfPreviousMonth as LastMonthsName
+	  
+	  
+	   FROM #tblCommonCohort cc
 	   
 		left join ctePSIFormDueDates psiIntervalDue on psiIntervalDue.hvcasepk = cc.HVCasePK  and cc.TCIDPK = psiIntervalDue.TCIDPK 
 
@@ -1310,9 +1324,10 @@ SELECT distinct cc.HVCasePK
 	  left join cteLastFollowUpForm clfu on clfu.HVCasePK = cc.HVCasePK and clfu.TCIDPK = cc.TCIDPK
 	  
   
-order by OldID
+--order by OldID
+order by PC1ID
 
+--drop table #tblCommonCohort
 
-
- -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
+ -- rspFSWEnrolledCaseTickler 5, '07/31/2013'
 GO
