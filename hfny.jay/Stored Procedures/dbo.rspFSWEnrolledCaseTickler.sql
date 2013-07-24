@@ -11,7 +11,7 @@ GO
 -- Be patient when running this report as it may take a few seconds. This report should be run monthly.
 
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
--- rspFSWEnrolledCaseTickler_test1 1, '07/31/2013'
+-- rspFSWEnrolledCaseTickler 1, '07/01/2013'
 
 -- =============================================
 
@@ -90,8 +90,8 @@ END
 				[tcid_dd] varchar(50),				
 				XDateAge int,
 				CurrentLevelFK int,
-				TCAgeDays int
-	)
+				TCAgeDays int,
+				[Childdob] [datetime] NULL,	)
 
 	INSERT INTO #tblCommonCohort
 	select distinct
@@ -128,7 +128,8 @@ END
 			   datediff(dd, h.edc, @edate)
 		end as XDateAge,
 		cp.CurrentLevelFK,
-		''
+		'',
+		h.tcdob
 
 		
 		
@@ -261,9 +262,14 @@ ctePSIFormDueDates
 as
 (
 SELECT m.HVCasePK, m.TCIDPK
---, P.PSIInterval as PSIInterval, psim.Interval as psim_Interval,  PSIPK , tcdob
-	 	  ,case when psim.Interval is null and PSIPK is null then ' Intake/Birth due after baby''s birth'
-	 	  --,case when psim.Interval is null and PSIPK is null then ' Intake/Birth due by ' + convert(varchar(12), dateadd(dd,31, m.IntakeDate), 101)
+--, P.PSIInterval as PSIInterval, psim.Interval as psim_Interval,  PSIPK , tcdob,TCAgeDays
+		  --,case when psim.Interval is null then ''	
+		  ,case when psim.Interval is null and PSIPK is null then 
+		  
+						case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(20),  convert(varchar(12), dateadd(dd,30, tcdob), 101))  -- there is a baby
+						else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
+						end
+				
 			when  PSIPK is null then cd.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
 			else ''
 			end as PSIDue				
@@ -276,6 +282,7 @@ left join codeduebydates cd on scheduledevent = 'PSI' AND psim.[Interval] = cd.I
  left join PSI P on P.HVCaseFK = m.HVCasePK and P.PSIInterval= psim.Interval 
 
 )
+
 
 -- last psi that was completed
 ,
@@ -307,6 +314,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,
 
     
     case 
+    when PSIInterval is null then ''	
     when PSIPK is null then ' Missing'	
 	when PSIMaxDate is not null then	
 		'Last PSI: ' + cd.EventDescription +
@@ -395,6 +403,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,oldid,
 
     
     case 
+    when FollowUpInterval is null then ''	
     when FollowUpPK is null then ' Missing'	
 	when FollowUpMaxDate is not null then	
 		'Last Follow-Up: ' + cd.EventDescription +
@@ -740,10 +749,7 @@ as
 )
 
 
-
-
 -- Shots
-
 
    
 	,
@@ -1091,12 +1097,13 @@ SELECT distinct cc.HVCasePK
 	  ,Intakedd   
 	  ,tcid_dd
 
-	  ,cpsid.PSIDue 
-	  ,cpsiu.lastpsi
+	  ,case when cpsid.PSIDue is null then '' else cpsid.PSIDue end as PSIDue 
+	  ,case when cpsiu.lastpsi is null then '' else cpsiu.lastpsi end as lastpsi 
 	  
-	  ,clfd.FollowUpDue
-	  ,clfu.lastFollowUp
-	  
+
+	  ,case when clfd.FollowUpDue is null then '' else clfd.FollowUpDue end as FollowUpDue
+	  ,case when clfu.lastFollowUp is null then '' else clfu.lastFollowUp end as lastFollowUp 
+  
 	  
 	  
 	  ,XDateAge
@@ -1137,7 +1144,7 @@ SELECT distinct cc.HVCasePK
 					convert(varchar(20), dev_bdate, 101) else convert(varchar(20), IntakeDate, 101) end
 			else cdasq.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
 			--else cdasq.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,tcdob), 101)
-			end as ASQDue  
+			end as ASQDue   
      
 		--, hvl.levelname as CurrentLevelName
 		--, convert(varchar(12), hvl.levelassigndate , 101) as levelassigndate		
@@ -1327,9 +1334,9 @@ SELECT distinct cc.HVCasePK
 	  
   
 --order by OldID
-order by PC1ID
+ order by PC1ID
 
---drop table #tblCommonCohort
+drop table #tblCommonCohort
 
- -- rspFSWEnrolledCaseTickler 5, '07/31/2013'
+ -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
 GO
