@@ -11,7 +11,7 @@ GO
 -- Be patient when running this report as it may take a few seconds. This report should be run monthly.
 
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
--- rspFSWEnrolledCaseTickler 1, '07/01/2013'
+-- rspFSWEnrolledCaseTickler 1, '07/31/2013'
 
 -- =============================================
 
@@ -119,7 +119,7 @@ END
 		CASE WHEN h.TCNumber > 1 THEN 'Yes' ELSE 'No' End
 		as [MultipleBirth],
 		case when CaseProgress >= 10 then 'Complete' else convert(VARCHAR(20), dateadd(dd,30,IntakeDate), 101) end as  intakedd,	 
-		case when CaseProgress >= 11 then 'Complete' else '' end as  tcid_dd,	 
+		case when CaseProgress >= 11 then 'Complete' else 'Not Complete' end as  tcid_dd,	 
 		 
 		case
 		   when h.tcdob is not null then
@@ -678,9 +678,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,oldid,
      then 'due by ' + convert(varchar(20), dateadd(dd, 30,intakedate), 101)	
      	
 	when TCMedicalMaxDate is not null then	
-		'Last date entered on Medical Form: ' + convert(varchar(20), TCMedicalMaxDate, 101)	
-	
-	
+		 convert(varchar(20), TCMedicalMaxDate, 101)
 	else ''
 	end  as lastdate
 
@@ -1163,7 +1161,7 @@ SELECT distinct cc.HVCasePK
 			, case when cc.TCIDPK is not null then ld.lastdate else '' end as lastdateOnMedicalForm	
 		
 		
-		,case when ctePolio.Frequency is  null then '0' else cast(ctePolio.Frequency as varchar(2)) + 
+		,case when ctePolio.Frequency is  null then ' ' else cast(ctePolio.Frequency as varchar(2)) + 
 		
 		case when polio.ImmunizationCountPolio is null or  ctePolio.Frequency > polio.ImmunizationCountPolio then ' due by ' + convert(varchar(12), dateadd(dd,ctePolio.MaximumDue, cc.tcdob ), 101) + '; ' 
 		else
@@ -1175,7 +1173,7 @@ SELECT distinct cc.HVCasePK
 		end as PolioCount
 		
 		
-		, case when cteDTP.Frequency is  null then '0' else cast(cteDTP.Frequency as varchar(2)) + 
+		, case when cteDTP.Frequency is  null then ' ' else cast(cteDTP.Frequency as varchar(2)) + 
 		
 		case when DTap.ImmunizationCountDTaP is null or  cteDTP.Frequency > DTap.ImmunizationCountDTaP then ' due by ' + convert(varchar(12), dateadd(dd,cteDTP.MaximumDue, cc.tcdob ), 101) + '; ' 
 		else
@@ -1187,7 +1185,7 @@ SELECT distinct cc.HVCasePK
 		end as DTaPCount		
 	
 	
-		, case when cteMMR.Frequency is  null then '0' else cast(cteMMR.Frequency as varchar(2)) + 
+		, case when cteMMR.Frequency is  null then ' ' else cast(cteMMR.Frequency as varchar(2)) + 
 		
 		case when MMR.ImmunizationCountMMR is null or  cteMMR.Frequency > MMR.ImmunizationCountMMR then ' due by ' + convert(varchar(12), dateadd(dd,cteMMR.MaximumDue, cc.tcdob ), 101) + '; ' 
 		else
@@ -1198,7 +1196,7 @@ SELECT distinct cc.HVCasePK
 		case when MMR.ImmunizationCountMMR is null then ' 0 completed' else cast(MMR.ImmunizationCountMMR as varchar(2)) + ' completed' end 		
 		end as MMRCount
 		
-		, case when cteHIB.Frequency is  null then '0' else cast(cteHIB.Frequency as varchar(2)) + 
+		, case when cteHIB.Frequency is  null then ' ' else cast(cteHIB.Frequency as varchar(2)) + 
 		
 		case when HIB.ImmunizationCountHIB is null or  cteHIB.Frequency > HIB.ImmunizationCountHIB then ' due by ' + convert(varchar(12), dateadd(dd,cteHIB.MaximumDue, cc.tcdob ), 101) + '; ' 
 		else
@@ -1215,7 +1213,7 @@ SELECT distinct cc.HVCasePK
 		
 		
 		
-		, case when cteHEPB.Frequency is  null then '0' else cast(cteHEPB.Frequency as varchar(2)) + 
+		, case when cteHEPB.Frequency is  null then ' ' else cast(cteHEPB.Frequency as varchar(2)) + 
 		
 			case when HEP.ImmunizationCountHEP is null or  cteHEPB.Frequency > HEP.ImmunizationCountHEP then ' due by ' + convert(varchar(12), dateadd(dd,cteHEPB.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1226,7 +1224,7 @@ SELECT distinct cc.HVCasePK
 		case when HEP.ImmunizationCountHEP is null then ' 0 completed' else cast(HEP.ImmunizationCountHEP as varchar(2)) + ' completed' end 		
 		end as HEPCount	
 		
-		, case when cteChickenPox.Frequency is  null then '0' else cast(cteChickenPox.Frequency as varchar(2)) +
+		, case when cteChickenPox.Frequency is  null then ' ' else cast(cteChickenPox.Frequency as varchar(2)) +
 		
 			case when ChickenPox.ImmunizationCountVZ is null or  cteChickenPox.Frequency > ChickenPox.ImmunizationCountVZ then ' due by ' + convert(varchar(12), dateadd(dd,cteChickenPox.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1238,7 +1236,7 @@ SELECT distinct cc.HVCasePK
 		case when ChickenPox.ImmunizationCountVZ is null then ' 0 completed' else cast(ChickenPox.ImmunizationCountVZ as varchar(2)) + ' completed' end 		
 		end as ChickenPoxCount	
 		
-		, case when cteWBV.Frequency is  null then '0' else cast(cteWBV.Frequency as varchar(2)) + 
+		, case when cteWBV.Frequency is  null then ' ' else cast(cteWBV.Frequency as varchar(2)) + 
 		
 			case when WBV.ImmunizationCountWBV is null or  cteWBV.Frequency > WBV.ImmunizationCountWBV then ' due by ' + convert(varchar(12), dateadd(dd,cteWBV.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1253,7 +1251,7 @@ SELECT distinct cc.HVCasePK
 		
 		
 
-		, case when cteLead.Frequency is  null then '0' else cast(cteLead.Frequency as varchar(2)) + 
+		, case when cteLead.Frequency is  null then ' ' else cast(cteLead.Frequency as varchar(2)) + 
 		
 			case when LeadScreen.ImmunizationCountLeadScreening is null or  cteLead.Frequency > LeadScreen.ImmunizationCountLeadScreening then ' due by ' + convert(varchar(12), dateadd(dd,cteLead.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1273,7 +1271,7 @@ SELECT distinct cc.HVCasePK
 	     ,'Target Child Due Dates' as Header6
 
 		 ,@NameOfPreviousMonth as LastMonthsName
-	  
+		 --,Childdob
 	  
 	   FROM #tblCommonCohort cc
 	   
@@ -1334,7 +1332,7 @@ SELECT distinct cc.HVCasePK
 	  
   
 --order by OldID
- order by PC1ID
+ order by tcdob
 
 drop table #tblCommonCohort
 
