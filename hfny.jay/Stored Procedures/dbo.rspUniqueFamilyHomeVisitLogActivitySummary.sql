@@ -741,8 +741,9 @@ SELECT a.*, d.AttemptedFamily, d.Attempted
 CASE WHEN c.WorkerPK IS NULL THEN 'All Workers' ELSE 
 rtrim(c.LastName) + ', ' + rtrim(c.FirstName) END WorkerName
 
-FROM base11 AS a JOIN base2 AS b ON a.FSWFK = b.FSWFK AND a.PC1ID = b.PC1ID
-JOIN base0 AS d ON a.FSWFK = d.FSWFK AND a.PC1ID = d.PC1ID
+FROM base11 AS a 
+FULL OUTER JOIN base2 AS b ON a.FSWFK = b.FSWFK AND a.PC1ID = b.PC1ID
+FULL OUTER JOIN base0 AS d ON a.FSWFK = d.FSWFK AND a.PC1ID = d.PC1ID
 LEFT OUTER JOIN Worker AS c ON 
 CASE WHEN (@showWorkerDetail = 'N' AND @workerfk IS NOT NULL) THEN @workerfk 
 ELSE a.FSWFK END = c.WorkerPK
