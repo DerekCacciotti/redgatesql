@@ -103,7 +103,7 @@ begin
 					from
 						(select HVCasePK
 							   ,cp.ProgramFK
-							   ,cast(isnull(CaseFilterNameFK,listCaseFilterNamePK) as varchar(10))
+							   ,cast(isnull(CaseFilterNameFK,listCaseFilterNamePK) as varchar(10))+';'
 								+case 
 									when cfn.FilterType = 1
 										then case when cf.CaseFilterNameChoice=1 then 'Yes' else 'No' end
