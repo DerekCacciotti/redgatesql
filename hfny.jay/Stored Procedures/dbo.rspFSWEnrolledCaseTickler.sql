@@ -169,10 +169,64 @@ update #tblCommonCohort
 set TCAgeDays = (case when (DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @eDate) then datediff(day,tcdob,DischargeDate) else  datediff(day,tcdob,@eDate)  end )
 
 
+-- Max CodeDueBy Frequency for each ScheduledEvent table
+------------------------
+
+create table #CodeDueByMaxFrequencies (
+			[ScheduledEvent] [varchar](20),
+			[Frequency] [int]
+
+)
+
+insert into #CodeDueByMaxFrequencies
+SELECT 
+      [ScheduledEvent]
+      ,max([Frequency]) as Frequency
+  FROM [HFNY].[dbo].[codeDueByDates]
+  group by [ScheduledEvent]
+
+-------------------------
+
+declare @maxFrequency4ASQ  varchar(2)
+declare @maxFrequency4ASQSE1  varchar(2)
+declare @maxFrequency4DTaP  varchar(2)
+declare @maxFrequency4Flu  varchar(2)
+declare @maxFrequency4FollowUp  varchar(2)
+declare @maxFrequency4HEPA  varchar(2)
+declare @maxFrequency4HEPB  varchar(2)
+declare @maxFrequency4HIB  varchar(2)
+declare @maxFrequency4Lead  varchar(2)
+declare @maxFrequency4MMR  varchar(2)
+declare @maxFrequency4PCV  varchar(2)
+declare @maxFrequency4Polio  varchar(2)
+declare @maxFrequency4PSI  varchar(2)
+declare @maxFrequency4Roto  varchar(2)
+declare @maxFrequency4VZ  varchar(2)
+declare @maxFrequency4WBV  varchar(2)
+
+set @maxFrequency4ASQ  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'ASQ')
+set @maxFrequency4ASQSE1  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'ASQSE-1')
+set @maxFrequency4DTaP  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'DTaP')
+set @maxFrequency4Flu  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Flu')
+set @maxFrequency4FollowUp  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Follow Up')
+set @maxFrequency4HEPA  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'HEP-A')
+set @maxFrequency4HEPB  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'HEP-B')
+set @maxFrequency4HIB  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'HIB')
+set @maxFrequency4Lead  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Lead')
+set @maxFrequency4MMR  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'MMR')
+set @maxFrequency4PCV  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'PCV')
+set @maxFrequency4Polio  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Polio')
+set @maxFrequency4PSI  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'PSI')
+set @maxFrequency4Roto  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Roto')
+set @maxFrequency4VZ  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'VZ')
+set @maxFrequency4WBV  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'WBV')
+
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012' 
 
 ------- start - getting ready for code that will handle Last ASQ for tc ----- 
 -- Note: This almost exact same as code performance target HD7 
+	
+	--- Note: We are not using this approach anymore ... khalsa
 	
 	declare @tblPTDetails table
 		(
@@ -241,8 +295,40 @@ set TCAgeDays = (case when (DischargeDate is not null and DischargeDate <> '' an
 		
 
 ;
+-- last ASQ
+
+with cteLastASQ
+as
+(
+SELECT cc.HVCasePK
+	  ,max(TCAge) Interval -- We mean really the last date in the database as per JR
+ FROM #tblCommonCohort cc
+ left join ASQ A ON cc.HVCasePK = A.HVCaseFK 
+GROUP BY cc.HVCasePK
+
+)
+
+,
+cteLastASQCompleted  -- get other fields belonging to last asq
+as
+(
+SELECT cc.HVCasePK,A.ASQInWindow,A.ASQTCReceiving,A.TCAge,A.TCReferred,A.DateCompleted,cd.EventDescription
+ FROM #tblCommonCohort cc 
+ left join cteLastASQ LastASQ on LastASQ.hvcasePK = cc.hvcasePK
+ left join ASQ A on A.TCAge = LastASQ.Interval and A.HVCaseFK = LastASQ.hvcasePK
+ 
+ --- ToDo: on monday .... khalsa
+ 
+ left join codeduebydates cd on scheduledevent = 'ASQ' AND LastASQ.Interval = cd.Interval -- to get dueby, max, min (given interval)
+)
+
+--SELECT * FROM cteLastASQCompleted
+--order by hvcasepk
+
+-- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+
 -- missing psi due
-with ctePSIIntervalAlreadyShouldHaveBeenDone
+,ctePSIIntervalAlreadyShouldHaveBeenDone
 as
 (
 SELECT 
@@ -563,10 +649,18 @@ as
 
 	)
 
+,cteUniqueHVCases  -- To handle twins for last 5 home visits
+as
+(
+	select distinct HVCasePK FROM #tblCommonCohort cc
+
+)
+
+
 ,cteLast5Visits
 as
 (
-select  HVCasePK
+select HVCasePK
 		 ,case
 			 when visittype = '0001' then
 				 Convert(VARCHAR(12), VisitStartTime, 101) + 'a'  -- attempted visits
@@ -576,9 +670,11 @@ select  HVCasePK
 	   as VisitStartTime
 	  ,VisitType
 	  ,RowNumber = row_number() over (partition by h.HVCaseFK order by VisitStartTime desc)
-	   FROM #tblCommonCohort cc
-inner join HVLog h on h.HVCaseFK = cc.HVCasePK and cast(VisitStartTime AS DATE) between @firstDayOfThirdPreviousMonth and @edate
+	   FROM cteUniqueHVCases cc
+		inner join HVLog h on h.HVCaseFK = cc.HVCasePK
 )
+
+
 ,cteLast5VisitsConcatenated
 as
 (-- Problem: How to concatenate VisitStartTime? Here is a solution ... khalsa
@@ -587,7 +683,8 @@ select  cc.HVCasePK,
 			select top 5 VisitStartTime + ', '  -- last 5 home visits only please
 			from cteLast5Visits ls
 			where ls.HVCasePK = cc.HVCasePK 
-			order by VisitStartTime desc
+			--order by VisitStartTime desc
+			order by HVCasePK,RowNumber asc  -- This Order by is important. it gives the latest 5 visits in desc ... khalsa
 			for xml path('')  
 		
 		) as Last5Visits
@@ -596,6 +693,7 @@ select  cc.HVCasePK,
 	   group by cc.HVCasePK 
 
 )
+
 ,cteLevel
 as
 (  -- Problem: There may be two levels in a given month. one level ending and other starting. How do we pick up the last one? .. khalsa
@@ -841,7 +939,7 @@ as
 				
 	)			
 	,
-	cteImmunizationsHEP
+	cteImmunizationsHEPB
 	as
 	(
 	select coh.HVCasePK
@@ -863,6 +961,7 @@ as
 				, MedicalItemTitle
 				
 	)	
+	
 	
 	,
 	cteImmunizationsHEPA
@@ -886,7 +985,8 @@ as
 				, coh.TCIDPK
 				, MedicalItemTitle
 				
-	)			
+	)	
+		
 	,
 	cteImmunizationsFLU
 	as
@@ -1058,6 +1158,8 @@ SELECT
  GROUP BY HVCasePK, TCIDPK
  
 )	
+
+
 ,cteHEPAInterval
 as
 (
@@ -1075,6 +1177,35 @@ SELECT
  GROUP BY HVCasePK, TCIDPK
  
 )	
+
+--SELECT * FROM cteHEPBInterval
+--order by hvcasepk
+
+--SELECT 
+--		cc.HVCasePK,
+--		cc.TCIDPK
+--		,cc.TCAgeDays	
+--	  ,  Interval 
+--	  , DueBy
+--	  ,  MaximumDue	  
+--	  ,  Frequency
+	  
+-- 		from #tblCommonCohort cc			
+--			left join codeduebydates on scheduledevent = 'HEP-A' AND DueBy > cc.TCAgeDays -- minimum interval
+
+--where hvcasepk = 7555
+
+
+
+
+
+-- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+
+
+
+
+
+
 ,cteFLUInterval
 as
 (
@@ -1295,8 +1426,8 @@ SELECT distinct cc.HVCasePK
 	  
       ,case when ls.Last5Visits is not null then left(ls.Last5Visits,len(ls.Last5Visits)-1) else '' end as Last5Visits
       
-	  ,case 
-			when TCReceiving1 = 1 or TCReceiving2 = 1 or TCReceiving3 = 1 or TCReceiving4 = 1 then ' Child receiving EIP '
+	  ,case when casq.Interval = lastASQ.TCAge then ''
+			when asqd.TCReceiving1 = 1 or asqd.TCReceiving2 = 1 or asqd.TCReceiving3 = 1 or asqd.TCReceiving4 = 1 then ' Child receiving EIP '
 			when casq.Interval is null then ''
 	        when casq.Interval = '00' then ' due by ' + case when IntakeDate < dev_bdate then 
 					convert(varchar(20), dev_bdate, 101) else convert(varchar(20), IntakeDate, 101) end
@@ -1306,22 +1437,40 @@ SELECT distinct cc.HVCasePK
      
 		--, hvl.levelname as CurrentLevelName
 		--, convert(varchar(12), hvl.levelassigndate , 101) as levelassigndate		
-		, case 
-			 when TCReceiving1 = 1 or TCReceiving2 = 1 or TCReceiving3 = 1 or TCReceiving4 = 1 then ' Child receiving EIP ' 
 		
-			 when lastASQ.FormOutOfWindow = 0 and lastASQ.FormName is not null then lastASQ.FormName + ' In Window On ' + convert(varchar(12), lastASQ.FormDate , 101)
-			 when lastASQ.FormOutOfWindow = 1 and lastASQ.FormName is not null  then lastASQ.FormName + ' Out of Window On ' + convert(varchar(12), lastASQ.FormDate , 101)
-			 when lastASQ.FormMissing = 1 and lastASQ.FormName is not null  then lastASQ.FormName + ' Missing ' 
-			 
-			 when lastASQ.FormName is null then '' end
+		-- cd.ASQInWindow,cd.ASQTCReceiving,cd.TCAge,cd.TCReferred
+		
+		, case 
+			 when ASQTCReceiving = 1 then ' Child receiving EIP ' 
+		
+			 when lastASQ.ASQInWindow = 0  then lastASQ.EventDescription + ' In Window On ' + convert(varchar(12), lastASQ.DateCompleted, 101)
+			 when lastASQ.ASQInWindow = 1  then lastASQ.EventDescription + ' Out of Window On ' + convert(varchar(12), lastASQ.DateCompleted , 101)			 
+			 else '' end
 			 
 			 
 			 as formname
 			 
+		--, case 
+		--	 when TCReceiving1 = 1 or TCReceiving2 = 1 or TCReceiving3 = 1 or TCReceiving4 = 1 then ' Child receiving EIP ' 
+		
+		--	 when lastASQ.FormOutOfWindow = 0 and lastASQ.FormName is not null then lastASQ.FormName + ' In Window On ' + convert(varchar(12), lastASQ.FormDate , 101)
+		--	 when lastASQ.FormOutOfWindow = 1 and lastASQ.FormName is not null  then lastASQ.FormName + ' Out of Window On ' + convert(varchar(12), lastASQ.FormDate , 101)
+		--	 when lastASQ.FormMissing = 1 and lastASQ.FormName is not null  then lastASQ.FormName + ' Missing ' 
+			 
+		--	 when lastASQ.FormName is null then '' end
+			 
+			 
+		--	 as formname			 
+			 
+			 
 			, case when cc.TCIDPK is not null then ld.lastdate else '' end as lastdateOnMedicalForm	
 		
 		
-		,case when ctePolio.Frequency is  null then ' ' else cast(ctePolio.Frequency as varchar(2)) + 
+		,case 	
+		when cc.caseprogress <= 10 then ''
+		when ctePolio.Frequency is  null then 
+					@maxFrequency4Polio + ' Due: ' +  cast(isnull(polio.ImmunizationCountPolio,0) as varchar(2)) + ' completed'			
+					else cast(ctePolio.Frequency as varchar(2)) + 
 		
 		case when polio.ImmunizationCountPolio is null or  ctePolio.Frequency > polio.ImmunizationCountPolio then ' due by ' + convert(varchar(12), dateadd(dd,ctePolio.MaximumDue, cc.tcdob ), 101) + '; ' 
 		else
@@ -1333,7 +1482,11 @@ SELECT distinct cc.HVCasePK
 		end as PolioCount
 		
 		
-		, case when cteDTP.Frequency is  null then ' ' else cast(cteDTP.Frequency as varchar(2)) + 
+		, case
+		when cc.caseprogress <= 10 then ''
+		when cteDTP.Frequency is  null then 
+					@maxFrequency4DTaP + ' Due: ' +  cast(isnull(DTap.ImmunizationCountDTaP,0) as varchar(2)) + ' completed'	
+					else cast(cteDTP.Frequency as varchar(2)) + 
 		
 		case when DTap.ImmunizationCountDTaP is null or  cteDTP.Frequency > DTap.ImmunizationCountDTaP then ' due by ' + convert(varchar(12), dateadd(dd,cteDTP.MaximumDue, cc.tcdob ), 101) + '; ' 
 		else
@@ -1345,7 +1498,11 @@ SELECT distinct cc.HVCasePK
 		end as DTaPCount		
 	
 	
-		, case when cteMMR.Frequency is  null then ' ' else cast(cteMMR.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteMMR.Frequency is  null then 
+					@maxFrequency4MMR + ' Due: ' +  cast(isnull(MMR.ImmunizationCountMMR,0) as varchar(2)) + ' completed'
+					else cast(cteMMR.Frequency as varchar(2)) + 
 		
 		case when MMR.ImmunizationCountMMR is null or  cteMMR.Frequency > MMR.ImmunizationCountMMR then ' due by ' + convert(varchar(12), dateadd(dd,cteMMR.MaximumDue, cc.tcdob ), 101) + '; ' 
 		else
@@ -1353,10 +1510,15 @@ SELECT distinct cc.HVCasePK
 		end
 		
 		 + 		
-		case when MMR.ImmunizationCountMMR is null then ' 0 completed' else cast(MMR.ImmunizationCountMMR as varchar(2)) + ' completed' end 		
+		case 
+		when MMR.ImmunizationCountMMR is null then ' 0 completed' else cast(MMR.ImmunizationCountMMR as varchar(2)) + ' completed' end 		
 		end as MMRCount
 		
-		, case when cteHIB.Frequency is  null then ' ' else cast(cteHIB.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteHIB.Frequency is  null then 
+					@maxFrequency4HIB + ' Due: ' +  cast(isnull(HIB.ImmunizationCountHIB,0) as varchar(2)) + ' completed'
+					else cast(cteHIB.Frequency as varchar(2)) + 
 		
 		case when HIB.ImmunizationCountHIB is null or  cteHIB.Frequency > HIB.ImmunizationCountHIB then ' due by ' + convert(varchar(12), dateadd(dd,cteHIB.MaximumDue, cc.tcdob ), 101) + '; ' 
 		else
@@ -1369,19 +1531,32 @@ SELECT distinct cc.HVCasePK
 		
 		
 		-- HEP-B
-		, case when cteHEPB.Frequency is  null then ' ' else cast(cteHEPB.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteHEPB.Frequency is  null then 
 		
-			case when HEP.ImmunizationCountHEP is null or  cteHEPB.Frequency > HEP.ImmunizationCountHEP then ' due by ' + convert(varchar(12), dateadd(dd,cteHEPB.MaximumDue, cc.tcdob ), 101) + '; ' 
+				@maxFrequency4HEPB + ' Due: ' +  cast(isnull(HEPB.ImmunizationCountHEP,0) as varchar(2)) + ' completed'		
+		
+		else cast(cteHEPB.Frequency as varchar(2)) + 
+		
+			case when HEPB.ImmunizationCountHEP is null or  cteHEPB.Frequency > HEPB.ImmunizationCountHEP then ' due by ' + convert(varchar(12), dateadd(dd,cteHEPB.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
 			'  due; ' 
 			end	
 		
 		+ 
-		case when HEP.ImmunizationCountHEP is null then ' 0 completed' else cast(HEP.ImmunizationCountHEP as varchar(2)) + ' completed' end 		
+		case when HEPB.ImmunizationCountHEP is null then ' 0 completed' else cast(HEPB.ImmunizationCountHEP as varchar(2)) + ' completed' end 		
 		end as HEPCount	
 		
 		-- HEP-A
-		, case when cteHEPA.Frequency is  null then ' ' else cast(cteHEPA.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteHEPA.Frequency is  null then 			
+		
+				@maxFrequency4HEPA + ' Due: ' + cast(isnull(HEPA.ImmunizationCountHEPA,0) as varchar(2)) + ' completed'
+
+		
+		 else cast(cteHEPA.Frequency as varchar(2)) + 
 		
 			case when HEPA.ImmunizationCountHEPA is null or  cteHEPA.Frequency > HEPA.ImmunizationCountHEPA then ' due by ' + convert(varchar(12), dateadd(dd,cteHEPA.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1393,7 +1568,12 @@ SELECT distinct cc.HVCasePK
 		end as HEPACount			
 		
 		-- FLU
-		, case when cteFLU.Frequency is  null then ' ' else cast(cteFLU.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteFLU.Frequency is  null then 
+				@maxFrequency4Flu + ' Due: ' +  cast(isnull(FLU.ImmunizationCountFLU,0) as varchar(2)) + ' completed'
+		
+		else cast(cteFLU.Frequency as varchar(2)) + 
 		
 			case when FLU.ImmunizationCountFLU is null or  cteFLU.Frequency > FLU.ImmunizationCountFLU then ' due by ' + convert(varchar(12), dateadd(dd,cteFLU.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1405,7 +1585,12 @@ SELECT distinct cc.HVCasePK
 		end as FLUCount			
 		
 		-- ROTO
-		, case when cteROTO.Frequency is  null then ' ' else cast(cteROTO.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteROTO.Frequency is  null then 
+				@maxFrequency4Roto + ' Due: ' +  cast(isnull(ROTO.ImmunizationCountROTO,0) as varchar(2)) + ' completed'
+		
+		else cast(cteROTO.Frequency as varchar(2)) + 
 		
 			case when ROTO.ImmunizationCountROTO is null or  cteROTO.Frequency > ROTO.ImmunizationCountROTO then ' due by ' + convert(varchar(12), dateadd(dd,cteROTO.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1418,7 +1603,12 @@ SELECT distinct cc.HVCasePK
 
 
 		-- PCV
-		, case when ctePCV.Frequency is  null then ' ' else cast(ctePCV.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when ctePCV.Frequency is  null then 
+				@maxFrequency4PCV + ' Due: ' +  cast(isnull(PCV.ImmunizationCountPCV,0) as varchar(2)) + ' completed'
+		
+		else cast(ctePCV.Frequency as varchar(2)) + 
 		
 			case when PCV.ImmunizationCountPCV is null or  ctePCV.Frequency > PCV.ImmunizationCountPCV then ' due by ' + convert(varchar(12), dateadd(dd,ctePCV.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1431,7 +1621,12 @@ SELECT distinct cc.HVCasePK
 		
 		
 		
-		, case when cteChickenPox.Frequency is  null then ' ' else cast(cteChickenPox.Frequency as varchar(2)) +
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteChickenPox.Frequency is  null then 
+				@maxFrequency4VZ + ' Due: ' +  cast(isnull(ChickenPox.ImmunizationCountVZ,0) as varchar(2)) + ' completed'
+		
+		else cast(cteChickenPox.Frequency as varchar(2)) +
 		
 			case when ChickenPox.ImmunizationCountVZ is null or  cteChickenPox.Frequency > ChickenPox.ImmunizationCountVZ then ' due by ' + convert(varchar(12), dateadd(dd,cteChickenPox.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1443,7 +1638,12 @@ SELECT distinct cc.HVCasePK
 		case when ChickenPox.ImmunizationCountVZ is null then ' 0 completed' else cast(ChickenPox.ImmunizationCountVZ as varchar(2)) + ' completed' end 		
 		end as ChickenPoxCount	
 		
-		, case when cteWBV.Frequency is  null then ' ' else cast(cteWBV.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteWBV.Frequency is  null then 
+				@maxFrequency4WBV + ' Due: ' +  cast(isnull(WBV.ImmunizationCountWBV,0) as varchar(2)) + ' completed'
+		
+		else cast(cteWBV.Frequency as varchar(2)) + 
 		
 			case when WBV.ImmunizationCountWBV is null or  cteWBV.Frequency > WBV.ImmunizationCountWBV then ' due by ' + convert(varchar(12), dateadd(dd,cteWBV.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1458,7 +1658,12 @@ SELECT distinct cc.HVCasePK
 		
 		
 
-		, case when cteLead.Frequency is  null then ' ' else cast(cteLead.Frequency as varchar(2)) + 
+		, case 
+		when cc.caseprogress <= 10 then ''
+		when cteLead.Frequency is  null then 
+				@maxFrequency4Lead + ' Due: ' +  cast(isnull(LeadScreen.ImmunizationCountLeadScreening,0) as varchar(2)) + ' completed'
+		
+		else cast(cteLead.Frequency as varchar(2)) + 
 		
 			case when LeadScreen.ImmunizationCountLeadScreening is null or  cteLead.Frequency > LeadScreen.ImmunizationCountLeadScreening then ' due by ' + convert(varchar(12), dateadd(dd,cteLead.MaximumDue, cc.tcdob ), 101) + '; ' 
 			else
@@ -1500,7 +1705,9 @@ SELECT distinct cc.HVCasePK
 	  left join cteASQDueInterval casq on casq.HVCasePK = cc.HVCasePK and casq.TCIDPK = cc.TCIDPK 
 	  left join codeDueByDates cdasq on scheduledevent = 'ASQ' and cdasq.Interval = casq.Interval  
 	  
-	  left join @tblPTDetails lastASQ on lastASQ.HVCaseFK = cc.HVCasePK and lastASQ.TCIDPK = cc.TCIDPK 
+	  left join @tblPTDetails asqd on asqd.HVCaseFK = cc.HVCasePK
+	  
+	  left join cteLastASQCompleted lastASQ on lastASQ.HVCasePK = cc.HVCasePK  -- for lastasq
 	  left join cteLastDateOnMedicalForm ld on ld.HVCasePK = cc.HVCasePK and ld.TCIDPK = cc.TCIDPK
 	  
 	  inner join dbo.udfHVLevel(@programfk, @edate) hvl on hvl.hvcasefk = cc.HVCasePK  -- to get CurrentLevelName, CurrentLevelDate
@@ -1511,7 +1718,7 @@ SELECT distinct cc.HVCasePK
 	  left join cteImmunizationsMMR MMR on MMR.HVCasePK = cc.HVCasePK and MMR.TCIDPK = cc.TCIDPK	  
 	  left join cteImmunizationsHIB HIB on HIB.HVCasePK = cc.HVCasePK and HIB.TCIDPK = cc.TCIDPK
 	  
-	  left join cteImmunizationsHEP HEP on HEP.HVCasePK = cc.HVCasePK and HEP.TCIDPK = cc.TCIDPK
+	  left join cteImmunizationsHEPB HEPB on HEPB.HVCasePK = cc.HVCasePK and HEPB.TCIDPK = cc.TCIDPK
 
 	  -- Added later on
 	  left join cteImmunizationsHEPA HEPA on HEPA.HVCasePK = cc.HVCasePK and HEPA.TCIDPK = cc.TCIDPK
@@ -1554,11 +1761,12 @@ SELECT distinct cc.HVCasePK
 	  left join cteLastFollowUpForm clfu on clfu.HVCasePK = cc.HVCasePK and clfu.TCIDPK = cc.TCIDPK
 	  
   
---order by OldID
+----order by OldID
 order by pc1id
  --order by tcdob
+  --order by cc.HVCasePK
 
 drop table #tblCommonCohort
-
+drop table #CodeDueByMaxFrequencies
  -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
 GO
