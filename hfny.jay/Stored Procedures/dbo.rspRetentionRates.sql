@@ -6058,8 +6058,39 @@ values ('Cases With >1 Home Visitor'
 --select *
 --from @tblPC1withStats
 
-select *
+--Chris Papas (3/29/2012) Modified this final select to get the proper retention rates for period requested
+
+select LineDescription
+	  ,LineGroupingLevel
+	  ,DisplayPercentages
+	  ,TotalEnrolledParticipants
+	  ,case when datediff(ww,@enddate,getdate()) >= 26 then RetentionRateSixMonths else null end as RetentionRateSixMonths
+	  ,case when datediff(ww,@enddate,getdate()) >= 52 then RetentionRateOneYear else null end as RetentionRateOneYear
+	  ,case when datediff(ww,@enddate,getdate()) >= 78 then RetentionRateEighteenMonths else null end as RetentionRateEighteenMonths
+	  ,case when datediff(ww,@enddate,getdate()) >= 104 then RetentionRateTwoYears else null end as RetentionRateTwoYears
+	  ,case when datediff(ww,@enddate,getdate()) >= 26 then EnrolledParticipantsSixMonths else null end as EnrolledParticipantsSixMonths
+	  ,case when datediff(ww,@enddate,getdate()) >= 52 then EnrolledParticipantsOneYear else null end as EnrolledParticipantsOneYear
+	  ,case when datediff(ww,@enddate,getdate()) >= 78 then EnrolledParticipantsEighteenMonths else null end as EnrolledParticipantsEighteenMonths
+	  ,case when datediff(ww,@enddate,getdate()) >= 104 then EnrolledParticipantsTwoYears else null end as EnrolledParticipantsTwoYears
+	  ,case when datediff(ww,@enddate,getdate()) >= 26 then RunningTotalDischargedSixMonths else null end as RunningTotalDischargedSixMonths
+	  ,case when datediff(ww,@enddate,getdate()) >= 52 then RunningTotalDischargedOneYear else null end as RunningTotalDischargedOneYear
+	  ,case when datediff(ww,@enddate,getdate()) >= 78 then RunningTotalDischargedEighteenMonths else null end as RunningTotalDischargedEighteenMonths
+	  ,case when datediff(ww,@enddate,getdate()) >= 104 then RunningTotalDischargedTwoYears else null end as RunningTotalDischargedTwoYears
+	  ,case when datediff(ww,@enddate,getdate()) >= 26 then TotalNSixMonths else null end as TotalNSixMonths
+	  ,case when datediff(ww,@enddate,getdate()) >= 52 then TotalNOneYear else null end as TotalNOneYear
+	  ,case when datediff(ww,@enddate,getdate()) >= 78 then TotalNEighteenMonths else null end as TotalNEighteenMonths
+	  ,case when datediff(ww,@enddate,getdate()) >= 104 then TotalNTwoYears else null end as TotalNTwoYears
+	  ,AllParticipants
+	  ,case when datediff(ww,@enddate,getdate()) >= 26 then SixMonthsIntake else null end as SixMonthsIntake
+	  ,case when datediff(ww,@enddate,getdate()) >= 26 then SixMonthsDischarge else null end as SixMonthsDischarge
+	  ,case when datediff(ww,@enddate,getdate()) >= 52 then OneYearIntake else null end as OneYearIntake
+	  ,case when datediff(ww,@enddate,getdate()) >= 52 then OneYearDischarge else null end as OneYearDischarge
+	  ,case when datediff(ww,@enddate,getdate()) >= 78 then EighteenMonthsIntake else null end as EighteenMonthsIntake
+	  ,case when datediff(ww,@enddate,getdate()) >= 78 then EighteenMonthsDischarge else null end as EighteenMonthsDischarge
+	  ,case when datediff(ww,@enddate,getdate()) >= 104 then TwoYearsIntake else null end as TwoYearsIntake
+	  ,case when datediff(ww,@enddate,getdate()) >= 104 then TwoYearsDischarge else null end as TwoYearsDischarge
 from @tblResults
+--SELECT * from @tblResults
 
 --select VendorID, Employee, Orders
 --from
