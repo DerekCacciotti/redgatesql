@@ -90,6 +90,7 @@ FSWFK, PC1ID
 ,sum(CASE WHEN PC2Participated  > 0 THEN 1 ELSE 0 END) [PC2Participated]
 ,sum(CASE WHEN OBPParticipated  > 0 THEN 1 ELSE 0 END) [OBPParticipated]
 ,sum(CASE WHEN FatherFigureParticipated  > 0 THEN 1 ELSE 0 END) [FatherFigureParticipated]
+,sum(CASE WHEN FatherAdvocateParticipated  > 0 THEN 1 ELSE 0 END) [FatherAdvocateParticipated]
 ,sum(CASE WHEN TCParticipated  > 0 THEN 1 ELSE 0 END) [TCParticipated]
 ,sum(CASE WHEN GrandParentParticipated  > 0 THEN 1 ELSE 0 END) [GrandParentParticipated]
 ,sum(CASE WHEN SiblingParticipated  > 0 THEN 1 ELSE 0 END) [SiblingParticipated]
@@ -97,6 +98,7 @@ FSWFK, PC1ID
 ,sum(CASE WHEN HVSupervisorParticipated  > 0 THEN 1 ELSE 0 END) [HVSupervisorParticipated]
 ,sum(CASE WHEN SupervisorObservation  > 0 THEN 1 ELSE 0 END) [SupervisorObservation]
 ,sum(CASE WHEN OtherParticipated  > 0 THEN 1 ELSE 0 END) [OtherParticipated]
+
 
 -- child development
 ,sum(CASE WHEN CDChildDevelopment > 0 THEN 1 ELSE 0 END) [CDChildDevelopment]
@@ -260,6 +262,7 @@ a.HVCaseFK
 ,sum(CASE WHEN PC2Participated  = 1 THEN 1 ELSE 0 END) [PC2Participated]
 ,sum(CASE WHEN OBPParticipated  = 1 THEN 1 ELSE 0 END) [OBPParticipated]
 ,sum(CASE WHEN FatherFigureParticipated  = 1 THEN 1 ELSE 0 END) [FatherFigureParticipated]
+,sum(CASE WHEN FatherAdvocateParticipated = 1 THEN 1 ELSE 0 END) [FatherAdvocateParticipated]
 ,sum(CASE WHEN TCParticipated  = 1 THEN 1 ELSE 0 END) [TCParticipated]
 ,sum(CASE WHEN GrandParentParticipated  = 1 THEN 1 ELSE 0 END) [GrandParentParticipated]
 ,sum(CASE WHEN SiblingParticipated  = 1 THEN 1 ELSE 0 END) [SiblingParticipated]
@@ -565,6 +568,7 @@ SELECT a.*, d.AttemptedFamily, d.Attempted
 [PC2Participated],
 [OBPParticipated],
 [FatherFigureParticipated], 
+[FatherAdvocateParticipated],
 [TCParticipated],
 [GrandParentParticipated],
 [SiblingParticipated],
