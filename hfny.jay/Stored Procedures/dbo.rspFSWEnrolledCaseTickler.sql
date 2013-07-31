@@ -231,8 +231,7 @@ set @maxFrequency4WBV  = (select top 1 Frequency from #CodeDueByMaxFrequencies w
 	
 	--- Note: We are not using this approach anymore ... khalsa
 	
-	declare @tblPTDetails table
-		(
+	create table #tblPTDetails(
 		PTCode				char(5)
 		, HVCaseFK			int
 		, TCIDPK			int
@@ -290,7 +289,7 @@ set @maxFrequency4WBV  = (select top 1 Frequency from #CodeDueByMaxFrequencies w
 
 
 
-	insert into @tblPTDetails
+	insert into #tblPTDetails
 			exec rspFSWEnrolledCaseTicklerASQSummary null,@eDate,@tblPTCohort
 
 ------- end - getting ready for code that will handle Last ASQ for tc ----- 
@@ -1575,7 +1574,7 @@ SELECT distinct cc.HVCasePK
 					else ''
 					 
 						
-		end as HEPBCount	
+		end as HEPCount	
 
 	
 		-- HEP-A
@@ -1796,7 +1795,7 @@ SELECT distinct cc.HVCasePK
 	  left join cteASQDueInterval casq on casq.HVCasePK = cc.HVCasePK and casq.TCIDPK = cc.TCIDPK 
 	  left join codeDueByDates cdasq on scheduledevent = 'ASQ' and cdasq.Interval = casq.Interval  
 	  
-	  left join @tblPTDetails asqd on asqd.HVCaseFK = cc.HVCasePK
+	  left join #tblPTDetails asqd on asqd.HVCaseFK = cc.HVCasePK
 	  
 	  left join cteLastASQCompleted lastASQ on lastASQ.HVCasePK = cc.HVCasePK  -- for lastasq
 	  left join cteLastDateOnMedicalForm ld on ld.HVCasePK = cc.HVCasePK and ld.TCIDPK = cc.TCIDPK
@@ -1859,5 +1858,6 @@ order by pc1id
 
 drop table #tblCommonCohort
 drop table #CodeDueByMaxFrequencies
+drop table #tblPTDetails
  -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
 GO
