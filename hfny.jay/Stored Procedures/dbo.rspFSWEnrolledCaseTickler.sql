@@ -11,7 +11,9 @@ GO
 -- Be patient when running this report as it may take a few seconds. This report should be run monthly.
 
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
--- rspFSWEnrolledCaseTickler 2, '07/31/2013'
+-- rspFSWEnrolledCaseTickler 31, '07/31/2013'
+-- rspFSWEnrolledCaseTickler 31, '08/30/2013'
+
 
 -- =============================================
 
@@ -1856,7 +1858,7 @@ SELECT distinct cc.HVCasePK
 		
 	  
 	     ,'Evaluation Form Due Dates' as Header1
-	     ,'Evalution Form History' as Header2
+	     ,'Evaluation Form History' as Header2
 	     ,'Referrals' as Header3
 	     ,'Last Month''s Home Visits' as Header4
 	     ,'Last 3 Month''s Home Visits' as Header5
