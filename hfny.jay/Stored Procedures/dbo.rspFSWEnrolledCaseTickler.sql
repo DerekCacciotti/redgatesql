@@ -11,7 +11,7 @@ GO
 -- Be patient when running this report as it may take a few seconds. This report should be run monthly.
 
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
--- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+-- rspFSWEnrolledCaseTickler 2, '07/31/2013'
 
 -- =============================================
 
@@ -324,10 +324,91 @@ SELECT cc.HVCasePK,A.ASQInWindow,A.ASQTCReceiving,A.TCAge,A.TCReferred,A.DateCom
  left join codeduebydates cd on scheduledevent = 'ASQ' AND LastASQ.Interval = cd.Interval -- to get dueby, max, min (given interval)
 )
 
---SELECT * FROM cteLastASQCompleted
---order by hvcasepk
+
+-- ASQSE that is due now
+, cteASQSEThatIsDueNow
+as
+(
+SELECT 
+		cc.HVCasePK	 
+		,cc.TCIDPK
+	  , max(Interval) Interval
+
+ 		FROM #tblCommonCohort cc
+			left join codeduebydates on scheduledevent = 'ASQSE-1' AND cc.XDateAge >= DueBy -- minimum interval
+
+ GROUP BY HVCasePK ,cc.TCIDPK
+)
+
+, cteASQSEEIPStatus -- is the child referred to EIP
+as
+(
+
+SELECT cc.HVCasePK,cc.TCIDPK
+	  ,max(ASQSEReceiving) ASQSEReceiving -- We mean really the last date in the database as per JR
+ FROM #tblCommonCohort cc
+ left join ASQSE A ON cc.HVCasePK = A.HVCaseFK and cc.TCIDPK = A.TCIDFK 
+GROUP BY cc.HVCasePK,cc.TCIDPK
+
+)
+
+, cteASQSEThatIsDueNowWithEIPStatus
+as
+(
+SELECT 
+		cc.HVCasePK	 
+		,cc.TCIDPK
+	    ,Interval
+	    ,ASQSEReceiving
+
+ 		FROM cteASQSEThatIsDueNow cc
+ 			left join cteASQSEEIPStatus eip ON cc.HVCasePK = eip.HVCasePK and cc.TCIDPK = eip.TCIDPK 
+
+)
+
+
+
+--SELECT * FROM cteASQSEThatIsDueNowWithEIPStatus
+--order by HVCasePK ,TCIDPK
+
+ -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+
+---- last ASQSE
+
+, cteLastASQSE
+as
+(
+SELECT cc.HVCasePK,cc.TCIDPK
+	  ,max(ASQSETCAge) Interval -- We mean really the last date in the database as per JR
+ FROM #tblCommonCohort cc
+ left join ASQSE A ON cc.HVCasePK = A.HVCaseFK and cc.TCIDPK = A.TCIDFK 
+GROUP BY cc.HVCasePK,cc.TCIDPK
+
+)
+
+,
+cteLastASQSECompleted  -- get other fields belonging to last ASQSE
+as
+(
+select distinct cc.HVCasePK,cc.TCIDPK,A.ASQSEInWindow,A.ASQSEReceiving,A.ASQSETCAge,A.ASQSEReferred,A.ASQSEDateCompleted,cd.EventDescription
+ FROM #tblCommonCohort cc 
+ left join cteLastASQSE LastASQSE on LastASQSE.hvcasePK = cc.hvcasePK
+ left join ASQSE A on A.ASQSETCAge = LastASQSE.Interval and A.HVCaseFK = LastASQSE.hvcasePK and A.TCIDFK = LastASQSE.TCIDPK
+ 
+ --- ToDo: on monday .... khalsa
+ 
+ left join codeduebydates cd on scheduledevent = 'ASQSE-1' AND LastASQSE.Interval = cd.Interval -- to get dueby, max, min (given interval)
+)
+
+
+--SELECT * FROM cteLastASQSECompleted
+--order by HVCasePK,TCIDPK
+
 
 -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+
+
+
 
 -- missing psi due
 ,ctePSIIntervalAlreadyShouldHaveBeenDone
@@ -519,15 +600,26 @@ as
 (
 SELECT 
 		cc.HVCasePK	
-		,count(cc.HVCasePK) as ref_enr
-		,sum(case when (startdate is null and ReasonNoService is null) then 1 else 0 end) as ref_fup
+		,count(cc.HVCasePK) as ref_enr		
+		,sum(case when (startdate is null and 
+				(sr.ServiceReceived is null
+					or sr.ServiceReceived = 0
+						or sr.ServiceReceived = RTRIM(''))
+							and (sr.ReasonNoService = rtrim(''))
+		
+				) then 1 else 0 end) as ref_fup
+		
 	  , max(sr.ReferralDate) AS ref_last
  
  FROM #tblCommonCohort cc 
-	inner join ServiceReferral sr on sr.HVCaseFK = cc.HVCasePK 
-	where sr.ReferralDate >= cc.IntakeDate  and sr.ReferralDate <= @edate
+	inner join ServiceReferral sr on sr.HVCaseFK = cc.HVCasePK and	sr.ProgramFK = cc.ProgramFK
+	inner join codeApp ca on sr.FamilyCode = ca.AppCode
+		  and ca.AppCodeGroup = 'FamilyMemberReferred'	
+	where 
+	sr.ReferralDate >= cc.IntakeDate  and sr.ReferralDate <= @edate
  GROUP BY HVCasePK 
 )
+
 ,
 cteTCIDFormDone
 as
@@ -1378,17 +1470,15 @@ SELECT distinct cc.HVCasePK
 	  
 
 	  ,case when clfd.FollowUpDue is null then '' else clfd.FollowUpDue end as FollowUpDue
-	  ,case when clfu.lastFollowUp is null then '' else clfu.lastFollowUp end as lastFollowUp 
-  
+	  ,case when clfu.lastFollowUp is null then '' else clfu.lastFollowUp end as lastFollowUp  
 	  
 	  
 	  ,XDateAge
 	  ,ref.HVCasePK
-	  ,ref_enr
-	  ,ref_fup
-	  ,CONVERT(varchar, ref_last, 101) as ref_last
 	  
-	  
+	  ,case when ref_enr is null then '' else ref_enr end as ref_enr 
+	  ,case when ref_fup is null then '' else ref_fup end as ref_fup   
+	  ,case when ref_last is null then '' else CONVERT(varchar, ref_last, 101) end as ref_last	  
 	  
 	  ,expectedvisitcount
 	  ,actualvisitcount
@@ -1574,7 +1664,7 @@ SELECT distinct cc.HVCasePK
 					else ''
 					 
 						
-		end as HEPCount	
+		end as HEPBCount	
 
 	
 		-- HEP-A
@@ -1774,6 +1864,29 @@ SELECT distinct cc.HVCasePK
 
 		 ,@NameOfPreviousMonth as LastMonthsName
 		 --,Childdob
+		 -- cc.HVCasePK,cc.TCIDPK,A.ASQSEInWindow,A.ASQSEReceiving,A.ASQSETCAge,A.ASQSEReferred,A.ASQSEDateCompleted,cd.EventDescription
+		 
+		 
+		  ,case when casqse.Interval = lasqse.ASQSETCAge then ''
+				when casqse.ASQSEReceiving = 1 then ' Child receiving EIP '
+				when casqse.Interval is null then ''				
+				else cdasqse.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
+				--else cdasqse.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,tcdob), 101)
+				end as ASQSEDue   		 
+		 
+		 
+		 , case 
+			 when lasqse.ASQSEReceiving = 1 then ' Child receiving EIP ' 
+		
+			 when lasqse.ASQSEInWindow = 0  then lasqse.EventDescription + ' Out of Window On ' + convert(varchar(12), lasqse.ASQSEDateCompleted, 101)
+			 when lasqse.ASQSEInWindow = 1  then lasqse.EventDescription + ' In Window On ' + convert(varchar(12), lasqse.ASQSEDateCompleted , 101)			 
+			 else '' end
+			 
+			 
+			 as lastASQSEFormCompleted
+		 
+		 
+		 
 	  
 	   FROM #tblCommonCohort cc
 	   
@@ -1795,10 +1908,20 @@ SELECT distinct cc.HVCasePK
 	  left join cteASQDueInterval casq on casq.HVCasePK = cc.HVCasePK and casq.TCIDPK = cc.TCIDPK 
 	  left join codeDueByDates cdasq on scheduledevent = 'ASQ' and cdasq.Interval = casq.Interval  
 	  
+	  left join cteASQSEThatIsDueNowWithEIPStatus casqse on casqse.HVCasePK = cc.HVCasePK and casqse.TCIDPK = cc.TCIDPK 
+	  left join codeDueByDates cdasqse on cdasqse.scheduledevent = 'ASQSE-1' and cdasqse.Interval = casqse.Interval  
+	  
+	  
+	  
+	  
+	  
 	  left join #tblPTDetails asqd on asqd.HVCaseFK = cc.HVCasePK
 	  
 	  left join cteLastASQCompleted lastASQ on lastASQ.HVCasePK = cc.HVCasePK  -- for lastasq
 	  left join cteLastDateOnMedicalForm ld on ld.HVCasePK = cc.HVCasePK and ld.TCIDPK = cc.TCIDPK
+	  left join cteLastASQSECompleted lasqse on lasqse.HVCasePK = cc.HVCasePK and lasqse.TCIDPK = cc.TCIDPK
+	  
+	  
 	  
 	  inner join dbo.udfHVLevel(@programfk, @edate) hvl on hvl.hvcasefk = cc.HVCasePK  -- to get CurrentLevelName, CurrentLevelDate
 
