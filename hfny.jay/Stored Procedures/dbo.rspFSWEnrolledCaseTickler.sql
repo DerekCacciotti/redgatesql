@@ -11,9 +11,7 @@ GO
 -- Be patient when running this report as it may take a few seconds. This report should be run monthly.
 
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
--- rspFSWEnrolledCaseTickler 31, '07/31/2013'
--- rspFSWEnrolledCaseTickler 31, '08/30/2013'
-
+-- rspFSWEnrolledCaseTickler 1, '08/30/2013'
 
 -- =============================================
 
@@ -441,7 +439,7 @@ SELECT m.HVCasePK, m.TCIDPK
 						else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
 						end
 				
-			when  PSIPK is null then cd.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
+			when  PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
 			else ''
 			end as PSIDue				
 				
@@ -530,7 +528,7 @@ SELECT m.HVCasePK, m.TCIDPK, OldID
 --, P.PSIInterval as PSIInterval, psim.Interval as psim_Interval,  PSIPK , tcdob
 	 	  ,case when fui.Interval is null then ''
 	 	  --,case when psim.Interval is null and PSIPK is null then ' Intake/Birth due by ' + convert(varchar(12), dateadd(dd,31, m.IntakeDate), 101)
-			when  FollowUpPK is null then cd.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
+			when  FollowUpPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
 			else ''
 			end as FollowUpDue				
 				
@@ -593,9 +591,12 @@ SELECT cc.HVCasePK ,cc.TCIDPK,oldid,
 )
 
 
+,cteUniqueHVCases2  -- To handle twins for service referrals count
+as
+(
+	select distinct HVCasePK, ProgramFK, IntakeDate FROM #tblCommonCohort cc
 
--- rspFSWEnrolledCaseTickler 5, '12/31/2012' 
---where HVCasePK = 32950
+)
 
 ,cteReferrals
 as
@@ -613,7 +614,7 @@ SELECT
 		
 	  , max(sr.ReferralDate) AS ref_last
  
- FROM #tblCommonCohort cc 
+ FROM cteUniqueHVCases2 cc 
 	inner join ServiceReferral sr on sr.HVCaseFK = cc.HVCasePK and	sr.ProgramFK = cc.ProgramFK
 	inner join codeApp ca on sr.FamilyCode = ca.AppCode
 		  and ca.AppCodeGroup = 'FamilyMemberReferred'	
@@ -1508,10 +1509,10 @@ SELECT distinct cc.HVCasePK
 	  ,case when casq.Interval = lastASQ.TCAge then ''
 			when asqd.TCReceiving1 = 1 or asqd.TCReceiving2 = 1 or asqd.TCReceiving3 = 1 or asqd.TCReceiving4 = 1 then ' Child receiving EIP '
 			when casq.Interval is null then ''
-	        when casq.Interval = '00' then ' due by ' + case when IntakeDate < dev_bdate then 
+	        when casq.Interval = '00' then ' Due by ' + case when IntakeDate < dev_bdate then 
 					convert(varchar(20), dev_bdate, 101) else convert(varchar(20), IntakeDate, 101) end
-			else cdasq.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
-			--else cdasq.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,tcdob), 101)
+			else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
+			--else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,tcdob), 101)
 			end as ASQDue   
      
 		--, hvl.levelname as CurrentLevelName
@@ -1522,8 +1523,8 @@ SELECT distinct cc.HVCasePK
 		, case 
 			 when ASQTCReceiving = 1 then ' Child receiving EIP ' 
 		
-			 when lastASQ.ASQInWindow = 0  then lastASQ.EventDescription + ' In Window On ' + convert(varchar(12), lastASQ.DateCompleted, 101)
-			 when lastASQ.ASQInWindow = 1  then lastASQ.EventDescription + ' Out of Window On ' + convert(varchar(12), lastASQ.DateCompleted , 101)			 
+			 when lastASQ.ASQInWindow = 0  then lastASQ.EventDescription + ' Out of Window On ' + convert(varchar(12), lastASQ.DateCompleted, 101)
+			 when lastASQ.ASQInWindow = 1  then lastASQ.EventDescription + ' In Window On ' + convert(varchar(12), lastASQ.DateCompleted , 101)			 
 			 else '' end
 			 
 			 
@@ -1554,15 +1555,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this ctePolio.Frequency is not null (contains a number)
 					when polio.ImmunizationCountPolio is not null and  ctePolio.Frequency > polio.ImmunizationCountPolio then 
-					cast(ctePolio.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,ctePolio.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(ctePolio.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,ctePolio.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(polio.ImmunizationCountPolio as varchar(2)) + ' completed'
 					
 					when polio.ImmunizationCountPolio is not null and  ctePolio.Frequency <= polio.ImmunizationCountPolio then 
-					cast(ctePolio.Frequency as varchar(2)) + ' due; '  +
+					cast(ctePolio.Frequency as varchar(2)) + ' Due; '  +
 					cast(polio.ImmunizationCountPolio as varchar(2)) + ' completed'							
 					
 					when polio.ImmunizationCountPolio is null then
-					cast(ctePolio.Frequency as varchar(2)) + ' due; '  +
+					cast(ctePolio.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1579,15 +1580,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteDTP.Frequency is not null (contains a number)
 					when DTap.ImmunizationCountDTaP is not null and  cteDTP.Frequency > DTap.ImmunizationCountDTaP then 
-					cast(cteDTP.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteDTP.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteDTP.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteDTP.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(DTap.ImmunizationCountDTaP as varchar(2)) + ' completed'
 					
 					when DTap.ImmunizationCountDTaP is not null and  cteDTP.Frequency <= DTap.ImmunizationCountDTaP then 
-					cast(cteDTP.Frequency as varchar(2)) + ' due; '  +
+					cast(cteDTP.Frequency as varchar(2)) + ' Due; '  +
 					cast(DTap.ImmunizationCountDTaP as varchar(2)) + ' completed'							
 					
 					when DTap.ImmunizationCountDTaP is null then
-					cast(cteDTP.Frequency as varchar(2)) + ' due; '  +
+					cast(cteDTP.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1603,15 +1604,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteMMR.Frequency is not null (contains a number)
 					when MMR.ImmunizationCountMMR is not null and  cteMMR.Frequency > MMR.ImmunizationCountMMR then 
-					cast(cteMMR.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteMMR.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteMMR.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteMMR.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(MMR.ImmunizationCountMMR as varchar(2)) + ' completed'
 					
 					when MMR.ImmunizationCountMMR is not null and  cteMMR.Frequency <= MMR.ImmunizationCountMMR then 
-					cast(cteMMR.Frequency as varchar(2)) + ' due; '  +
+					cast(cteMMR.Frequency as varchar(2)) + ' Due; '  +
 					cast(MMR.ImmunizationCountMMR as varchar(2)) + ' completed'							
 					
 					when MMR.ImmunizationCountMMR is null then
-					cast(cteMMR.Frequency as varchar(2)) + ' due; '  +
+					cast(cteMMR.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1627,15 +1628,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteHIB.Frequency is not null (contains a number)
 					when HIB.ImmunizationCountHIB is not null and  cteHIB.Frequency > HIB.ImmunizationCountHIB then 
-					cast(cteHIB.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteHIB.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteHIB.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHIB.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(HIB.ImmunizationCountHIB as varchar(2)) + ' completed'
 					
 					when HIB.ImmunizationCountHIB is not null and  cteHIB.Frequency <= HIB.ImmunizationCountHIB then 
-					cast(cteHIB.Frequency as varchar(2)) + ' due; '  +
+					cast(cteHIB.Frequency as varchar(2)) + ' Due; '  +
 					cast(HIB.ImmunizationCountHIB as varchar(2)) + ' completed'							
 					
 					when HIB.ImmunizationCountHIB is null then
-					cast(cteHIB.Frequency as varchar(2)) + ' due; '  +
+					cast(cteHIB.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1652,15 +1653,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteHEPB.Frequency is not null (contains a number)
 					when HEPB.ImmunizationCountHEP is not null and  cteHEPB.Frequency > HEPB.ImmunizationCountHEP then 
-					cast(cteHEPB.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteHEPB.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteHEPB.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHEPB.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(HEPB.ImmunizationCountHEP as varchar(2)) + ' completed'
 					
 					when HEPB.ImmunizationCountHEP is not null and  cteHEPB.Frequency <= HEPB.ImmunizationCountHEP then 
-					cast(cteHEPB.Frequency as varchar(2)) + ' due; '  +
+					cast(cteHEPB.Frequency as varchar(2)) + ' Due; '  +
 					cast(HEPB.ImmunizationCountHEP as varchar(2)) + ' completed'							
 					
 					when HEPB.ImmunizationCountHEP is null then
-					cast(cteHEPB.Frequency as varchar(2)) + ' due; '  +
+					cast(cteHEPB.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1678,15 +1679,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteHEPA.Frequency is not null (contains a number)
 					when HEPA.ImmunizationCountHEPA is not null and  cteHEPA.Frequency > HEPA.ImmunizationCountHEPA then 
-					cast(cteHEPA.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteHEPA.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteHEPA.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHEPA.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(HEPA.ImmunizationCountHEPA as varchar(2)) + ' completed'
 					
 					when HEPA.ImmunizationCountHEPA is not null and  cteHEPA.Frequency <= HEPA.ImmunizationCountHEPA then 
-					cast(cteHEPA.Frequency as varchar(2)) + ' due; '  +
+					cast(cteHEPA.Frequency as varchar(2)) + ' Due; '  +
 					cast(HEPA.ImmunizationCountHEPA as varchar(2)) + ' completed'							
 					
 					when HEPA.ImmunizationCountHEPA is null then
-					cast(cteHEPA.Frequency as varchar(2)) + ' due; '  +
+					cast(cteHEPA.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1704,15 +1705,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteFLU.Frequency is not null (contains a number)
 					when FLU.ImmunizationCountFLU is not null and  cteFLU.Frequency > FLU.ImmunizationCountFLU then 
-					cast(cteFLU.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteFLU.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteFLU.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteFLU.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(FLU.ImmunizationCountFLU as varchar(2)) + ' completed'
 					
 					when FLU.ImmunizationCountFLU is not null and  cteFLU.Frequency <= FLU.ImmunizationCountFLU then 
-					cast(cteFLU.Frequency as varchar(2)) + ' due; '  +
+					cast(cteFLU.Frequency as varchar(2)) + ' Due; '  +
 					cast(FLU.ImmunizationCountFLU as varchar(2)) + ' completed'							
 					
 					when FLU.ImmunizationCountFLU is null then
-					cast(cteFLU.Frequency as varchar(2)) + ' due; '  +
+					cast(cteFLU.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1730,15 +1731,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteROTO.Frequency is not null (contains a number)
 					when ROTO.ImmunizationCountROTO is not null and  cteROTO.Frequency > ROTO.ImmunizationCountROTO then 
-					cast(cteROTO.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteROTO.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteROTO.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteROTO.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(ROTO.ImmunizationCountROTO as varchar(2)) + ' completed'
 					
 					when ROTO.ImmunizationCountROTO is not null and  cteROTO.Frequency <= ROTO.ImmunizationCountROTO then 
-					cast(cteROTO.Frequency as varchar(2)) + ' due; '  +
+					cast(cteROTO.Frequency as varchar(2)) + ' Due; '  +
 					cast(ROTO.ImmunizationCountROTO as varchar(2)) + ' completed'							
 					
 					when ROTO.ImmunizationCountROTO is null then
-					cast(cteROTO.Frequency as varchar(2)) + ' due; '  +
+					cast(cteROTO.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1757,15 +1758,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this ctePCV.Frequency is not null (contains a number)
 					when PCV.ImmunizationCountPCV is not null and  ctePCV.Frequency > PCV.ImmunizationCountPCV then 
-					cast(ctePCV.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,ctePCV.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(ctePCV.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,ctePCV.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(PCV.ImmunizationCountPCV as varchar(2)) + ' completed'
 					
 					when PCV.ImmunizationCountPCV is not null and  ctePCV.Frequency <= PCV.ImmunizationCountPCV then 
-					cast(ctePCV.Frequency as varchar(2)) + ' due; '  +
+					cast(ctePCV.Frequency as varchar(2)) + ' Due; '  +
 					cast(PCV.ImmunizationCountPCV as varchar(2)) + ' completed'							
 					
 					when PCV.ImmunizationCountPCV is null then
-					cast(ctePCV.Frequency as varchar(2)) + ' due; '  +
+					cast(ctePCV.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1784,15 +1785,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteChickenPox.Frequency is not null (contains a number)
 					when ChickenPox.ImmunizationCountVZ is not null and  cteChickenPox.Frequency > ChickenPox.ImmunizationCountVZ then 
-					cast(cteChickenPox.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteChickenPox.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteChickenPox.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteChickenPox.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(ChickenPox.ImmunizationCountVZ as varchar(2)) + ' completed'
 					
 					when ChickenPox.ImmunizationCountVZ is not null and  cteChickenPox.Frequency <= ChickenPox.ImmunizationCountVZ then 
-					cast(cteChickenPox.Frequency as varchar(2)) + ' due; '  +
+					cast(cteChickenPox.Frequency as varchar(2)) + ' Due; '  +
 					cast(ChickenPox.ImmunizationCountVZ as varchar(2)) + ' completed'							
 					
 					when ChickenPox.ImmunizationCountVZ is null then
-					cast(cteChickenPox.Frequency as varchar(2)) + ' due; '  +
+					cast(cteChickenPox.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1810,15 +1811,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteWBV.Frequency is not null (contains a number)
 					when WBV.ImmunizationCountWBV is not null and  cteWBV.Frequency > WBV.ImmunizationCountWBV then 
-					cast(cteWBV.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteWBV.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteWBV.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteWBV.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(WBV.ImmunizationCountWBV as varchar(2)) + ' completed'
 					
 					when WBV.ImmunizationCountWBV is not null and  cteWBV.Frequency <= WBV.ImmunizationCountWBV then 
-					cast(cteWBV.Frequency as varchar(2)) + ' due; '  +
+					cast(cteWBV.Frequency as varchar(2)) + ' Due; '  +
 					cast(WBV.ImmunizationCountWBV as varchar(2)) + ' completed'							
 					
 					when WBV.ImmunizationCountWBV is null then
-					cast(cteWBV.Frequency as varchar(2)) + ' due; '  +
+					cast(cteWBV.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1839,15 +1840,15 @@ SELECT distinct cc.HVCasePK
 																 
 					-- after this cteLead.Frequency is not null (contains a number)
 					when LeadScreen.ImmunizationCountLeadScreening is not null and  cteLead.Frequency > LeadScreen.ImmunizationCountLeadScreening then 
-					cast(cteLead.Frequency as varchar(2)) + ' due by ' + convert(varchar(12), dateadd(dd,cteLead.MaximumDue, cc.tcdob ), 101) + '; ' +
+					cast(cteLead.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteLead.MaximumDue, cc.tcdob ), 101) + '; ' +
 					cast(LeadScreen.ImmunizationCountLeadScreening as varchar(2)) + ' completed'
 					
 					when LeadScreen.ImmunizationCountLeadScreening is not null and  cteLead.Frequency <= LeadScreen.ImmunizationCountLeadScreening then 
-					cast(cteLead.Frequency as varchar(2)) + ' due; '  +
+					cast(cteLead.Frequency as varchar(2)) + ' Due; '  +
 					cast(LeadScreen.ImmunizationCountLeadScreening as varchar(2)) + ' completed'							
 					
 					when LeadScreen.ImmunizationCountLeadScreening is null then
-					cast(cteLead.Frequency as varchar(2)) + ' due; '  +
+					cast(cteLead.Frequency as varchar(2)) + ' Due; '  +
 					' 0 completed' 
 					 
 					else ''
@@ -1872,8 +1873,8 @@ SELECT distinct cc.HVCasePK
 		  ,case when casqse.Interval = lasqse.ASQSETCAge then ''
 				when casqse.ASQSEReceiving = 1 then ' Child receiving EIP '
 				when casqse.Interval is null then ''				
-				else cdasqse.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
-				--else cdasqse.EventDescription + ' due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,tcdob), 101)
+				else cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
+				--else cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,tcdob), 101)
 				end as ASQSEDue   		 
 		 
 		 
