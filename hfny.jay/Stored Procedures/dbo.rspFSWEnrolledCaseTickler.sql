@@ -1243,7 +1243,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'DTaP' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'DTaP' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1260,7 +1260,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'HEP-B' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'HEP-B' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1279,7 +1279,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'HEP-A' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'HEP-A' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1297,7 +1297,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'Flu' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'Flu' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate) -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1314,7 +1314,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'Roto' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'Roto' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1331,7 +1331,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'PCV' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'PCV' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1349,7 +1349,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'HIB' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'HIB' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1366,7 +1366,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'Lead' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'Lead' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1383,7 +1383,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'MMR' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'MMR' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1420,7 +1420,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'VZ' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'VZ' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
@@ -1437,7 +1437,7 @@ SELECT
 	  , max(Frequency) as Frequency
 	  
  		from #tblCommonCohort cc			
-			left join codeduebydates on scheduledevent = 'WBV' AND MaximumDue < cc.TCAgeDays -- minimum interval
+			left join codeduebydates on scheduledevent = 'WBV' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
 	 
  GROUP BY HVCasePK, TCIDPK
  
