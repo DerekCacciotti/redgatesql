@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,13 +9,13 @@ GO
 -- Description:	The FSW Tickler provides the program staff with both a schedule of upcoming events and a form history of the case.
 -- Be patient when running this report as it may take a few seconds. This report should be run monthly.
 
--- rspFSWEnrolledCaseTickler 5, '12/31/2012'
--- rspFSWEnrolledCaseTickler 1, '08/30/2013'
+-- rspFSWEnrolledCaseTickler_test7 5, '12/31/2012'
+-- rspFSWEnrolledCaseTickler_test7 1, '08/31/2013'
 
 -- =============================================
 
 
-CREATE procedure [dbo].[rspFSWEnrolledCaseTickler](
+CREATE procedure [dbo].[rspFSWEnrolledCaseTickler_test7](
 	@programfk    varchar(max)    = NULL,
     @edate     datetime,
     @supervisorfk int             = null,
@@ -224,7 +223,7 @@ set @maxFrequency4Roto  = (select top 1 Frequency from #CodeDueByMaxFrequencies 
 set @maxFrequency4VZ  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'VZ')
 set @maxFrequency4WBV  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'WBV')
 
--- rspFSWEnrolledCaseTickler 5, '12/31/2012' 
+-- rspFSWEnrolledCaseTickler_test7 5, '12/31/2012' 
 
 ------- start - getting ready for code that will handle Last ASQ for tc ----- 
 -- Note: This almost exact same as code performance target HD7 
@@ -371,7 +370,7 @@ SELECT
 --SELECT * FROM cteASQSEThatIsDueNowWithEIPStatus
 --order by HVCasePK ,TCIDPK
 
- -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+ -- rspFSWEnrolledCaseTickler_test7 1, '07/31/2013'
 
 ---- last ASQSE
 
@@ -405,7 +404,7 @@ select distinct cc.HVCasePK,cc.TCIDPK,A.ASQSEInWindow,A.ASQSEReceiving,A.ASQSETC
 --order by HVCasePK,TCIDPK
 
 
--- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+-- rspFSWEnrolledCaseTickler_test7 1, '07/31/2013'
 
 
 
@@ -881,7 +880,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,oldid,
  left join cteTCMedical tcm on tcm.hvcasePK = cc.hvcasePK and cc.tcidpk = tcm.tcidpk
 )
 
- -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
+ -- rspFSWEnrolledCaseTickler_test7 5, '12/31/2012'
 
 
 ,cteTCIDCohort
@@ -972,7 +971,7 @@ as
 
 --SELECT * FROM cteImmunizationsPolio
 --order by hvcasepk
----- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+---- rspFSWEnrolledCaseTickler_test7 1, '07/31/2013'
 
 
 
@@ -1444,7 +1443,6 @@ SELECT
 )	
 
 
-
 SELECT distinct cc.HVCasePK
 	  ,cc.ProgramFK
 	  ,cc.OldID
@@ -1546,7 +1544,7 @@ SELECT distinct cc.HVCasePK
 			 
 			, case when cc.TCIDPK is not null then ld.lastdate else '' end as lastdateOnMedicalForm	
 		
--- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+-- rspFSWEnrolledCaseTickler_test7 1, '07/31/2013'
 		,ctePolio.Frequency,polio.ImmunizationCountPolio,@maxFrequency4Polio
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
@@ -1670,7 +1668,7 @@ SELECT distinct cc.HVCasePK
 						
 		end as HEPBCount	
 
-	
+	,HEPA.ImmunizationCountHEPA, cteHEPA.Frequency
 		-- HEP-A
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
@@ -1978,7 +1976,7 @@ SELECT distinct cc.HVCasePK
 	  left join cteLastFollowUpForm clfu on clfu.HVCasePK = cc.HVCasePK and clfu.TCIDPK = cc.TCIDPK
 	  
   
-----order by OldID
+--order by OldID
 order by pc1id
  --order by tcdob
   --order by cc.HVCasePK
@@ -1986,5 +1984,5 @@ order by pc1id
 drop table #tblCommonCohort
 drop table #CodeDueByMaxFrequencies
 drop table #tblPTDetails
- -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+ -- rspFSWEnrolledCaseTickler_test7 1, '07/31/2013'
 GO
