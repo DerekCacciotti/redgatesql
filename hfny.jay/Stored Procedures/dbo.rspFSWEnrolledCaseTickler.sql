@@ -11,7 +11,7 @@ GO
 -- Be patient when running this report as it may take a few seconds. This report should be run monthly.
 
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
--- rspFSWEnrolledCaseTickler 1, '08/30/2013'
+-- rspFSWEnrolledCaseTickler 1, '08/31/2013'
 
 -- =============================================
 
@@ -1551,8 +1551,16 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
-					when ctePolio.Frequency is  null then 				
-								@maxFrequency4Polio + ' Due: ' +  cast(isnull(polio.ImmunizationCountPolio,0) as varchar(2)) + ' completed'
+					when ctePolio.Frequency is  null and polio.ImmunizationCountPolio is null then
+						'' -- figure it out what to do w/ John
+					
+					when ctePolio.Frequency is  null then								
+								cast(isnull(ctePolio.Frequency,0) as varchar(2)) + ' Due: ' +  cast(isnull(polio.ImmunizationCountPolio,0) as varchar(2)) + ' completed'
+								
+					when polio.ImmunizationCountPolio is null then
+					cast(ctePolio.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,ctePolio.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 								
+								
 																 
 					-- after this ctePolio.Frequency is not null (contains a number)
 					when polio.ImmunizationCountPolio is not null and  ctePolio.Frequency > polio.ImmunizationCountPolio then 
@@ -1561,11 +1569,8 @@ SELECT distinct cc.HVCasePK
 					
 					when polio.ImmunizationCountPolio is not null and  ctePolio.Frequency <= polio.ImmunizationCountPolio then 
 					cast(ctePolio.Frequency as varchar(2)) + ' Due; '  +
-					cast(polio.ImmunizationCountPolio as varchar(2)) + ' completed'							
-					
-					when polio.ImmunizationCountPolio is null then
-					cast(ctePolio.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,ctePolio.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+					cast(polio.ImmunizationCountPolio as varchar(2)) + ' completed'	
+
 					 
 					else ''
 					 
@@ -1576,8 +1581,16 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					
+					when cteDTP.Frequency is  null and DTap.ImmunizationCountDTaP is null then
+						'' -- figure it out what to do w/ John
+
 					when cteDTP.Frequency is  null then 				
-								@maxFrequency4DTaP + ' Due: ' +  cast(isnull(DTap.ImmunizationCountDTaP,0) as varchar(2)) + ' completed'
+								cast(isnull(cteDTP.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(DTap.ImmunizationCountDTaP,0) as varchar(2)) + ' completed'					
+								
+					when DTap.ImmunizationCountDTaP is null then
+					cast(cteDTP.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteDTP.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 	
 																 
 					-- after this cteDTP.Frequency is not null (contains a number)
 					when DTap.ImmunizationCountDTaP is not null and  cteDTP.Frequency > DTap.ImmunizationCountDTaP then 
@@ -1588,9 +1601,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteDTP.Frequency as varchar(2)) + ' Due; '  +
 					cast(DTap.ImmunizationCountDTaP as varchar(2)) + ' completed'							
 					
-					when DTap.ImmunizationCountDTaP is null then
-					cast(cteDTP.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteDTP.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1600,8 +1611,17 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					
+					when cteMMR.Frequency is  null and  MMR.ImmunizationCountMMR is null then
+						'' -- figure it out what to do w/ John
+
 					when cteMMR.Frequency is  null then 				
-								@maxFrequency4MMR + ' Due: ' +  cast(isnull(MMR.ImmunizationCountMMR,0) as varchar(2)) + ' completed'
+								cast(isnull(cteMMR.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(MMR.ImmunizationCountMMR,0) as varchar(2)) + ' completed'					
+								
+					when MMR.ImmunizationCountMMR is null then
+					cast(cteMMR.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteMMR.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 				
+										
 																 
 					-- after this cteMMR.Frequency is not null (contains a number)
 					when MMR.ImmunizationCountMMR is not null and  cteMMR.Frequency > MMR.ImmunizationCountMMR then 
@@ -1612,9 +1632,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteMMR.Frequency as varchar(2)) + ' Due; '  +
 					cast(MMR.ImmunizationCountMMR as varchar(2)) + ' completed'							
 					
-					when MMR.ImmunizationCountMMR is null then
-					cast(cteMMR.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteMMR.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1624,8 +1642,16 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					when cteHIB.Frequency is  null and  HIB.ImmunizationCountHIB is null then
+						'' -- figure it out what to do w/ John
+
 					when cteHIB.Frequency is  null then 				
-								@maxFrequency4HIB + ' Due: ' +  cast(isnull(HIB.ImmunizationCountHIB,0) as varchar(2)) + ' completed'
+								cast(isnull(cteHIB.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(HIB.ImmunizationCountHIB,0) as varchar(2)) + ' completed'					
+								
+					when HIB.ImmunizationCountHIB is null then
+					cast(cteHIB.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHIB.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 					
+
 																 
 					-- after this cteHIB.Frequency is not null (contains a number)
 					when HIB.ImmunizationCountHIB is not null and  cteHIB.Frequency > HIB.ImmunizationCountHIB then 
@@ -1636,9 +1662,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteHIB.Frequency as varchar(2)) + ' Due; '  +
 					cast(HIB.ImmunizationCountHIB as varchar(2)) + ' completed'							
 					
-					when HIB.ImmunizationCountHIB is null then
-					cast(cteHIB.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHIB.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1649,9 +1673,18 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					
+					when cteHEPB.Frequency is  null and  HEPB.ImmunizationCountHEP is null then
+						'' -- figure it out what to do w/ John
+
 					when cteHEPB.Frequency is  null then 				
-								@maxFrequency4HEPB + ' Due: ' +  cast(isnull(HEPB.ImmunizationCountHEP,0) as varchar(2)) + ' completed'
-																 
+								cast(isnull(cteHEPB.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(HEPB.ImmunizationCountHEP,0) as varchar(2)) + ' completed'					
+								
+					when HEPB.ImmunizationCountHEP is null then
+					cast(cteHEPB.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHEPB.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 
+					 			
+															 
 					-- after this cteHEPB.Frequency is not null (contains a number)
 					when HEPB.ImmunizationCountHEP is not null and  cteHEPB.Frequency > HEPB.ImmunizationCountHEP then 
 					cast(cteHEPB.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHEPB.MaximumDue, cc.tcdob ), 101) + '; ' +
@@ -1661,10 +1694,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteHEPB.Frequency as varchar(2)) + ' Due; '  +
 					cast(HEPB.ImmunizationCountHEP as varchar(2)) + ' completed'							
 					
-					when HEPB.ImmunizationCountHEP is null then
-					cast(cteHEPB.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHEPB.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
-					 
+
 					else ''
 					 
 						
@@ -1675,8 +1705,15 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					when cteHEPA.Frequency is  null and  HEPA.ImmunizationCountHEPA is null then
+						'' -- figure it out what to do w/ John
+
 					when cteHEPA.Frequency is  null then 				
-								@maxFrequency4HEPA + ' Due: ' +  cast(isnull(HEPA.ImmunizationCountHEPA,0) as varchar(2)) + ' completed'
+								cast(isnull(cteHEPA.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(HEPA.ImmunizationCountHEPA,0) as varchar(2)) + ' completed'					
+								
+					when HEPA.ImmunizationCountHEPA is null then
+					cast(cteHEPA.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHEPA.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 				
 																 
 					-- after this cteHEPA.Frequency is not null (contains a number)
 					when HEPA.ImmunizationCountHEPA is not null and  cteHEPA.Frequency > HEPA.ImmunizationCountHEPA then 
@@ -1687,9 +1724,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteHEPA.Frequency as varchar(2)) + ' Due; '  +
 					cast(HEPA.ImmunizationCountHEPA as varchar(2)) + ' completed'							
 					
-					when HEPA.ImmunizationCountHEPA is null then
-					cast(cteHEPA.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteHEPA.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1701,8 +1736,16 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					when cteFLU.Frequency is  null and  FLU.ImmunizationCountFLU is null then
+						'' -- figure it out what to do w/ John
+
 					when cteFLU.Frequency is  null then 				
-								@maxFrequency4FLU + ' Due: ' +  cast(isnull(FLU.ImmunizationCountFLU,0) as varchar(2)) + ' completed'
+								cast(isnull(cteFLU.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(FLU.ImmunizationCountFLU,0) as varchar(2)) + ' completed'					
+								
+					when FLU.ImmunizationCountFLU is null then
+					cast(cteFLU.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteFLU.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 								
+					
 																 
 					-- after this cteFLU.Frequency is not null (contains a number)
 					when FLU.ImmunizationCountFLU is not null and  cteFLU.Frequency > FLU.ImmunizationCountFLU then 
@@ -1713,9 +1756,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteFLU.Frequency as varchar(2)) + ' Due; '  +
 					cast(FLU.ImmunizationCountFLU as varchar(2)) + ' completed'							
 					
-					when FLU.ImmunizationCountFLU is null then
-					cast(cteFLU.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteFLU.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1727,8 +1768,16 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					when cteROTO.Frequency is  null and  ROTO.ImmunizationCountROTO is null then
+						'' -- figure it out what to do w/ John
+
 					when cteROTO.Frequency is  null then 				
-								@maxFrequency4ROTO + ' Due: ' +  cast(isnull(ROTO.ImmunizationCountROTO,0) as varchar(2)) + ' completed'
+								cast(isnull(cteROTO.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(ROTO.ImmunizationCountROTO,0) as varchar(2)) + ' completed'					
+								
+					when ROTO.ImmunizationCountROTO is null then
+					cast(cteROTO.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteROTO.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 							
+
 																 
 					-- after this cteROTO.Frequency is not null (contains a number)
 					when ROTO.ImmunizationCountROTO is not null and  cteROTO.Frequency > ROTO.ImmunizationCountROTO then 
@@ -1739,9 +1788,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteROTO.Frequency as varchar(2)) + ' Due; '  +
 					cast(ROTO.ImmunizationCountROTO as varchar(2)) + ' completed'							
 					
-					when ROTO.ImmunizationCountROTO is null then
-					cast(cteROTO.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteROTO.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1754,8 +1801,16 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					when ctePCV.Frequency is  null and  PCV.ImmunizationCountPCV is null then
+						'' -- figure it out what to do w/ John
+
 					when ctePCV.Frequency is  null then 				
-								@maxFrequency4PCV + ' Due: ' +  cast(isnull(PCV.ImmunizationCountPCV,0) as varchar(2)) + ' completed'
+								cast(isnull(ctePCV.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(PCV.ImmunizationCountPCV,0) as varchar(2)) + ' completed'					
+								
+					when PCV.ImmunizationCountPCV is null then
+					cast(ctePCV.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,ctePCV.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 						
+					
 																 
 					-- after this ctePCV.Frequency is not null (contains a number)
 					when PCV.ImmunizationCountPCV is not null and  ctePCV.Frequency > PCV.ImmunizationCountPCV then 
@@ -1766,9 +1821,7 @@ SELECT distinct cc.HVCasePK
 					cast(ctePCV.Frequency as varchar(2)) + ' Due; '  +
 					cast(PCV.ImmunizationCountPCV as varchar(2)) + ' completed'							
 					
-					when PCV.ImmunizationCountPCV is null then
-					cast(ctePCV.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,ctePCV.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1781,8 +1834,17 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					
+					when cteChickenPox.Frequency is  null and  ChickenPox.ImmunizationCountVZ is null then
+						'' -- figure it out what to do w/ John
+
 					when cteChickenPox.Frequency is  null then 				
-								@maxFrequency4VZ + ' Due: ' +  cast(isnull(ChickenPox.ImmunizationCountVZ,0) as varchar(2)) + ' completed'
+								cast(isnull(cteChickenPox.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(ChickenPox.ImmunizationCountVZ,0) as varchar(2)) + ' completed'					
+								
+					when ChickenPox.ImmunizationCountVZ is null then
+					cast(cteChickenPox.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteChickenPox.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 						
+					
 																 
 					-- after this cteChickenPox.Frequency is not null (contains a number)
 					when ChickenPox.ImmunizationCountVZ is not null and  cteChickenPox.Frequency > ChickenPox.ImmunizationCountVZ then 
@@ -1793,9 +1855,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteChickenPox.Frequency as varchar(2)) + ' Due; '  +
 					cast(ChickenPox.ImmunizationCountVZ as varchar(2)) + ' completed'							
 					
-					when ChickenPox.ImmunizationCountVZ is null then
-					cast(cteChickenPox.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteChickenPox.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1807,8 +1867,16 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					when cteWBV.Frequency is  null and  WBV.ImmunizationCountWBV is null then
+						'' -- figure it out what to do w/ John
+
 					when cteWBV.Frequency is  null then 				
-								@maxFrequency4WBV + ' Due: ' +  cast(isnull(WBV.ImmunizationCountWBV,0) as varchar(2)) + ' completed'
+								cast(isnull(cteWBV.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(WBV.ImmunizationCountWBV,0) as varchar(2)) + ' completed'					
+								
+					when WBV.ImmunizationCountWBV is null then
+					cast(cteWBV.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteWBV.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 							
+					
 																 
 					-- after this cteWBV.Frequency is not null (contains a number)
 					when WBV.ImmunizationCountWBV is not null and  cteWBV.Frequency > WBV.ImmunizationCountWBV then 
@@ -1819,9 +1887,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteWBV.Frequency as varchar(2)) + ' Due; '  +
 					cast(WBV.ImmunizationCountWBV as varchar(2)) + ' completed'							
 					
-					when WBV.ImmunizationCountWBV is null then
-					cast(cteWBV.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteWBV.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
@@ -1836,8 +1902,16 @@ SELECT distinct cc.HVCasePK
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
+					when cteLead.Frequency is  null and  LeadScreen.ImmunizationCountLeadScreening is null then
+						'' -- figure it out what to do w/ John
+
 					when cteLead.Frequency is  null then 				
-								@maxFrequency4Lead + ' Due: ' +  cast(isnull(LeadScreen.ImmunizationCountLeadScreening,0) as varchar(2)) + ' completed'
+								cast(isnull(cteLead.Frequency,0) as varchar(2))  + ' Due: ' +  cast(isnull(LeadScreen.ImmunizationCountLeadScreening,0) as varchar(2)) + ' completed'					
+								
+					when LeadScreen.ImmunizationCountLeadScreening is null then
+					cast(cteLead.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteLead.MaximumDue, cc.tcdob ), 101) + '; ' +
+					' 0 completed' 						
+					
 																 
 					-- after this cteLead.Frequency is not null (contains a number)
 					when LeadScreen.ImmunizationCountLeadScreening is not null and  cteLead.Frequency > LeadScreen.ImmunizationCountLeadScreening then 
@@ -1848,9 +1922,7 @@ SELECT distinct cc.HVCasePK
 					cast(cteLead.Frequency as varchar(2)) + ' Due; '  +
 					cast(LeadScreen.ImmunizationCountLeadScreening as varchar(2)) + ' completed'							
 					
-					when LeadScreen.ImmunizationCountLeadScreening is null then
-					cast(cteLead.Frequency as varchar(2)) + ' Due by ' + convert(varchar(12), dateadd(dd,cteLead.MaximumDue, cc.tcdob ), 101) + '; ' +
-					' 0 completed' 
+
 					 
 					else ''
 					 
