@@ -581,8 +581,7 @@ SELECT
 	inner join ServiceReferral sr on sr.HVCaseFK = cc.HVCasePK and	sr.ProgramFK = cc.ProgramFK
 	inner join codeApp ca on sr.FamilyCode = ca.AppCode
 		  and ca.AppCodeGroup = 'FamilyMemberReferred'	
-	where 
-	sr.ReferralDate >= cc.IntakeDate  and sr.ReferralDate <= @edate
+
  GROUP BY HVCasePK 
 )
 
@@ -2012,9 +2011,10 @@ SELECT distinct cc.HVCasePK
 	  left join cteFollowUpFormDueDates clfd on clfd.HVCasePK = cc.HVCasePK and clfd.TCIDPK = cc.TCIDPK
 	  left join cteLastFollowUpForm clfu on clfu.HVCasePK = cc.HVCasePK and clfu.TCIDPK = cc.TCIDPK
 	  
-  
+
+order by FSWNAME,PC1ID   
 ----order by OldID
-order by pc1id
+--order by pc1id
  --order by tcdob
   --order by cc.HVCasePK
 
