@@ -187,43 +187,6 @@ SELECT
 
 
 --SELECT * FROM #CodeDueByMaxFrequencies
-
--------------------------
-
-declare @maxFrequency4ASQ  varchar(2)
-declare @maxFrequency4ASQSE1  varchar(2)
-declare @maxFrequency4DTaP  varchar(2)
-declare @maxFrequency4Flu  varchar(2)
-declare @maxFrequency4FollowUp  varchar(2)
-declare @maxFrequency4HEPA  varchar(2)
-declare @maxFrequency4HEPB  varchar(2)
-declare @maxFrequency4HIB  varchar(2)
-declare @maxFrequency4Lead  varchar(2)
-declare @maxFrequency4MMR  varchar(2)
-declare @maxFrequency4PCV  varchar(2)
-declare @maxFrequency4Polio  varchar(2)
-declare @maxFrequency4PSI  varchar(2)
-declare @maxFrequency4Roto  varchar(2)
-declare @maxFrequency4VZ  varchar(2)
-declare @maxFrequency4WBV  varchar(2)
-
-set @maxFrequency4ASQ  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'ASQ')
-set @maxFrequency4ASQSE1  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'ASQSE-1')
-set @maxFrequency4DTaP  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'DTaP')
-set @maxFrequency4Flu  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Flu')
-set @maxFrequency4FollowUp  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Follow Up')
-set @maxFrequency4HEPA  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'HEP-A')
-set @maxFrequency4HEPB  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'HEP-B')
-set @maxFrequency4HIB  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'HIB')
-set @maxFrequency4Lead  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Lead')
-set @maxFrequency4MMR  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'MMR')
-set @maxFrequency4PCV  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'PCV')
-set @maxFrequency4Polio  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Polio')
-set @maxFrequency4PSI  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'PSI')
-set @maxFrequency4Roto  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'Roto')
-set @maxFrequency4VZ  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'VZ')
-set @maxFrequency4WBV  = (select top 1 Frequency from #CodeDueByMaxFrequencies where ScheduledEvent = 'WBV')
-
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012' 
 
 ------- start - getting ready for code that will handle Last ASQ for tc ----- 
@@ -1547,7 +1510,7 @@ SELECT distinct cc.HVCasePK
 			, case when cc.TCIDPK is not null then ld.lastdate else '' end as lastdateOnMedicalForm	
 		
 -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
-		,ctePolio.Frequency,polio.ImmunizationCountPolio,@maxFrequency4Polio
+		,ctePolio.Frequency,polio.ImmunizationCountPolio
 		,case 	
 					when cc.caseprogress <= 10 then '' -- no child, blank it out
 					
