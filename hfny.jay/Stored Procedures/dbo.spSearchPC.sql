@@ -46,8 +46,17 @@ CASE WHEN pc.ethnicity = @Ethnicity THEN 1 ELSE 0 END +
 CASE WHEN pc.race = @Race THEN 1 ELSE 0 END DESC
 */
 
+
+--DECLARE @PCFirstName VARCHAR(20) = NULL
+--DECLARE @PCLastName VARCHAR(30) = 'green'
+--DECLARE @PCDOB DATETIME = NULL
+--DECLARE @PCPhone VARCHAR(12) = NULL
+--DECLARE @PCEmergencyPhone VARCHAR(12) = NULL
+--DECLARE @ProgramFK INT = NULL
+
 ; WITH xxx AS (
-SELECT DISTINCT pc.pcpk, pc.pcfirstname,pc.pclastname,pc.pcdob,pc.pcphone,pc.PCEmergencyPhone, pc.race, pc.racespecify
+SELECT DISTINCT pc.pcpk, pc.pcfirstname, pc.pclastname, pc.pcdob, pc.pcphone
+, pc.PCEmergencyPhone, pc.race, pc.racespecify
 FROM PC AS pc
 WHERE 
 (pc.pcfirstname LIKE @PCFirstName + '%'
@@ -58,18 +67,27 @@ OR pc.pcemergencyphone = @PCEmergencyPhone)
 AND pc.pcpk IN (SELECT pcfk FROM pcprogram WHERE ProgramFK = ISNULL(@ProgramFK, ProgramFK))
 )
 
-, yy1 AS (
-SELECT b.PCPK, max(a.HVCasePK) [HVCasePK]
-FROM HVCase AS a
+, yyyNew AS (
+SELECT b.PCPK
+, max(convert(VARCHAR(8),isnull(c.DischargeDate, getdate()),112) + cast(c.CaseProgramPK AS VARCHAR(10))) max1
+FROM HVCase AS a 
 JOIN xxx AS b ON b.PCPK = a.PC1FK
+JOIN CaseProgram AS c ON a.HVCasePK = c.HVCaseFK
 GROUP BY b.PCPK
 )
 
 , yyy AS (
-SELECT a.*, c.LevelName
-FROM yy1 AS a
-JOIN CaseProgram b ON a.HVCasePK = b.HVCaseFK
+SELECT a.PCPK, c.LevelName
+FROM yyyNew AS a
+JOIN CaseProgram b ON b.CaseProgramPK = cast(substring(a.max1,9,10) AS INT)
 JOIN codeLevel AS c ON c.codeLevelPK = b.CurrentLevelFK
+)
+
+, zzzPC1 AS (
+SELECT b.PCPK, count(*) [pc1]
+FROM HVCase AS a
+JOIN xxx AS b ON b.PCPK = a.pc1fk
+GROUP BY b.PCPK
 )
 
 , zzzPC2 AS (
@@ -91,18 +109,20 @@ SELECT
 a.pcpk, a.pcfirstname, a.pclastname, a.pcdob, a.pcphone, a.PCEmergencyPhone
 ,CASE WHEN AppCodeText = 'Other' THEN racespecify ELSE AppCodeText END AS race, a.racespecify
 , status = 
-CASE WHEN b.PCPK IS NOT NULL THEN b.LevelName + ' ' ELSE '' END +
+CASE WHEN b.PCPK IS NOT NULL THEN b.LevelName ELSE '' END
+, roles = 
+CASE WHEN e.PCPK IS NOT NULL THEN 'PC1 ' ELSE '' END +
 CASE WHEN c.PCPK IS NOT NULL THEN 'PC2 ' ELSE '' END +
 CASE WHEN d.PCPK IS NOT NULL THEN 'OBP ' ELSE '' END
 FROM xxx AS a
 LEFT OUTER JOIN yyy AS b ON b.pcpk = a.pcpk
+LEFT OUTER JOIN zzzPC1 AS e ON e.pcpk = a.pcpk
 LEFT OUTER JOIN zzzPC2 AS c ON c.pcpk = a.pcpk
 LEFT OUTER JOIN zzzOBP AS d ON d.pcpk = a.pcpk
 LEFT JOIN codeApp ON appcode = a.race AND appcodegroup = 'Race'
 )
 
-select * from qqq
-
+select * from qqq ORDER BY pclastname, pcfirstname
 
 
 
