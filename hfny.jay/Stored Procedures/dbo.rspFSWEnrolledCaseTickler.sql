@@ -610,14 +610,14 @@ as
 (
 
 	SELECT HVCasePK
-	,sum(minimumvisit * datediff(week,@firstDayOfPreviousMonth,@lastDayOfPreviousMonth)) as expectedvisitcount
+	
+	,floor(sum(reqvisit)) as expectedvisitcount
 	
 	FROM #tblCommonCohort cc 
-	inner join [HVLevelDetail] hld on hld.hvcasefk = cc.HVCasePK 
-	where (StartLevelDate <= @lastDayOfPreviousMonth)
-	and (EndLevelDate >= @firstDayOfPreviousMonth or EndLevelDate is null)	
+	left join [dbo].[udfLevelPieces](@programfk,@firstDayOfPreviousMonth,@lastDayOfPreviousMonth) tlp on tlp.casefk = cc.HVCasePK 
 
 	group by HVCasePK
+
 	)
 
 ,
@@ -661,16 +661,14 @@ as
 cteExpected3MonthsHomeVisits
 as
 (
-
-	SELECT HVCasePK
-	,sum(minimumvisit * datediff(week,@firstDayOfThirdPreviousMonth,@lastDayOfPreviousMonth)) as expected3Monthsvisitcount
+	
+	SELECT HVCasePK	
+	,floor(sum(reqvisit)) as expected3Monthsvisitcount
 	
 	FROM #tblCommonCohort cc 
-	inner join [HVLevelDetail] hld on hld.hvcasefk = cc.HVCasePK 
-	where (StartLevelDate <= @lastDayOfPreviousMonth)
-	and (EndLevelDate >= @firstDayOfThirdPreviousMonth or EndLevelDate is null)	
-
+	left join [dbo].[udfLevelPieces](@programfk,@firstDayOfThirdPreviousMonth,@lastDayOfPreviousMonth) tlp on tlp.casefk = cc.HVCasePK 	
 	group by HVCasePK
+	
 	)
 
 ,
