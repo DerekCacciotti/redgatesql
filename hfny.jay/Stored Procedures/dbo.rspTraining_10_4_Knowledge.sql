@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -178,19 +179,17 @@ SELECT [TopicName]
 		, cteMeetTarget.subtopiccode
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
-		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '10-4a. Staff (assessment workers, home visitors and supervisors) are oriented to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting/family support prior to direct work with children and families' 
-			WHEN cteMeetTarget.TopicCode = 15.0 THEN '10-4b. Staff (assessment workers, home visitors and supervisors) are oriented to the programs relationship with other community resources prior to direct work with children and families'  
-			WHEN cteMeetTarget.TopicCode = 16.0 THEN '10-4c. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
-			WHEN cteMeetTarget.TopicCode = 17.0 THEN '10-4d. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
-			WHEN cteMeetTarget.TopicCode = 18.0 THEN '10-4e. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
-			WHEN cteMeetTarget.TopicCode = 19.0 THEN '10-4f. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
+		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '10-4a. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Infant Care within six months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 15.0 THEN '10-4b. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Child Health and Safety within six months of the date of hire'  
+			WHEN cteMeetTarget.TopicCode = 16.0 THEN '10-4c. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Maternal and Family Health within six months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 17.0 THEN '10-4d. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Infant and Child Development within six months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 18.0 THEN '10-4e. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Role of Culture in Parenting within six months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 19.0 THEN '10-4f. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Supporting the Parent-Child Relationship within six months of the date of hire' 
 			END AS TopicName
 		, TrainingDate
 		, HireDate
 		, [Meets Target]
 		, TotalMeetingCount
-		, COUNT(TotalMeetingCount) OVER (PARTITION BY cteMeetTarget.TopicCode) AS MeetingCountCalculated
-		, CONVERT(VARCHAR(MAX), CONVERT(INT,100*(CAST(MAX(TotalMeetingCount) OVER (PARTITION BY cteMeetTarget.TopicCode, cteMeetTarget.SubTopicCode) AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)))))+ '%'  AS MeetingPercent
 		, CASE WHEN 
 				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
@@ -221,7 +220,7 @@ SELECT [TopicName]
 		, cteCountMeeting.totalmeetingcount
 )
 
-SELECT TotalWorkers
+	SELECT DISTINCT TotalWorkers
 		, WorkerPK
 		, WorkerName
 		, Supervisor
@@ -230,17 +229,12 @@ SELECT TotalWorkers
 		, ProgramManager
 		, FatherAdvocate
 		, topiccode
-		, subtopiccode
-		, ContentCompleted	
-		, CAMeetingTarget	
+		, ContentCompleted AS IndivContentCompleted
+		, CAMeetingTarget AS IndivContentMeeting
+		, CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) AS IndivPercByTopic
 		, TopicName
-		, TrainingDate
 		, HireDate
-		, [Meets Target]
-		, TotalMeetingCount
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
-		, MeetingCountCalculated
-		, MeetingPercent
 		,	CASE WHEN CAMeetingTarget = TotalContentAreasByTopicAndWorker THEN '3' 
 			WHEN ContentCompleted = TotalContentAreasByTopicAndWorker THEN '2'
 			ELSE '1'
@@ -256,7 +250,6 @@ SELECT TotalWorkers
 		  ELSE 0
 		  END AS TotalMeetsTargetForMajority
 		FROM cteAlmostFinal
-		ORDER BY topiccode, subtopiccode
 
 END
 GO
