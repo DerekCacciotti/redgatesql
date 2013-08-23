@@ -19,6 +19,7 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
+
 ;WITH  cteMain AS (
 	SELECT w.WorkerPK
 		, RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName) AS WorkerName
@@ -87,6 +88,7 @@ SELECT [TopicName]
 		, s.subtopiccode
 		, MIN(trainingdate) AS TrainingDate
 		, cteMain.HireDate
+		, MAX(CAST(IsExempt as INT)) as IsExempt
 	FROM TrainingAttendee ta 
 			INNER JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			INNER JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
@@ -120,6 +122,7 @@ SELECT [TopicName]
 		, [SATName]
 		, cteWorkersTopics.[SubTopicCode]
 		, [SubTopicName]
+		, IsExempt
 		FROM cte10_4a
 		right JOIN cteWorkersTopics ON cteWorkersTopics.workerpk = cte10_4a.workerfk 
 		AND cte10_4a.TopicCode = cteWorkersTopics.TopicCode AND cte10_4a.SubTopicCode = cteWorkersTopics.SubTopicCode
@@ -140,7 +143,9 @@ SELECT [TopicName]
 	, subtopiccode
 	, TrainingDate
 	, CASE WHEN TrainingDate IS NOT NULL THEN 1 END AS ContentCompleted
-	, CASE WHEN TrainingDate <= dateadd(day, 183, HireDate) THEN 1 ELSE 0 END AS 'Meets Target'
+	, CASE WHEN TrainingDate <= dateadd(day, 183, HireDate) THEN 1 
+		when IsExempt='1' then '1'
+			ELSE 0 END AS 'Meets Target'
 	FROM cteAddMissingWorkers
 	GROUP BY WorkerPK
 	, WorkerName
@@ -155,9 +160,10 @@ SELECT [TopicName]
 	, subtopiccode
 	, TrainingDate
 	, rownumber
+	, IsExempt
 )
 
---Now calculate the number meeting count, by currentrole
+--Now calculate the number meeting count
 , cteCountMeeting AS (
 		SELECT TopicCode, subtopiccode, workerpk, count(*) OVER (PARTITION BY TopicCode, subtopiccode) AS totalmeetingcount
 		FROM cteMeetTarget
@@ -189,7 +195,7 @@ SELECT [TopicName]
 		, TrainingDate
 		, HireDate
 		, [Meets Target]
-		, TotalMeetingCount
+		, sum(TotalMeetingCount) as TotalMeetingCount
 		, CASE WHEN 
 				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
@@ -201,6 +207,11 @@ SELECT [TopicName]
 				BETWEEN .5 AND .99 THEN 1
 			END AS MeetsTargetForMajority
 		, CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT) AS TotalContentAreasByTopicAndWorker
+		, CASE WHEN 
+				CAST(SUM([ContentCompleted]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
+					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT)
+				= 1 then 1
+				END AS TotalCompletedToDate
 		FROM cteMeetTarget
 		LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode AND ctecountmeeting.subtopiccode=cteMeetTarget.subtopiccode AND ctecountmeeting.workerpk=cteMeetTarget.workerpk
 		GROUP BY TotalWorkers
@@ -220,6 +231,8 @@ SELECT [TopicName]
 		, cteCountMeeting.totalmeetingcount
 )
 
+
+		
 	SELECT DISTINCT TotalWorkers
 		, WorkerPK
 		, WorkerName
@@ -249,7 +262,7 @@ SELECT [TopicName]
 		, CASE WHEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
 		  ELSE 0
 		  END AS TotalMeetsTargetForMajority
+		, SUM(TotalCompletedToDate) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalCompletedToDate
 		FROM cteAlmostFinal
-
 END
 GO
