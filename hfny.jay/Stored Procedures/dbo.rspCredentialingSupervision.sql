@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -135,12 +136,7 @@ END
     and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)	
 	
 	
-	order by w.workername
-	
-	
-	
-	
-	
+	order by w.workername	
 	
 	
 	
@@ -270,6 +266,29 @@ END
 				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 
 	)
+	
+	,cteAssignedSupervisorFKS as
+	(
+		SELECT 		
+		 tw.workerpk
+		,wp.SupervisorFK
+		 FROM #tblWorkers tw
+		inner join workerprogram wp on wp.workerfk = tw.workerpk
+	)
+	
+	,cteAssignedSupervisorsName as
+	(
+		SELECT SupervisorFK
+			  ,asf.WorkerPK
+			  ,ltrim(rtrim(w.LastName)) + ', ' + ltrim(rtrim(w.FirstName)) as AssignedSupervisorName
+			   FROM cteAssignedSupervisorFKS asf
+		left join Worker w on w.workerpk = asf.SupervisorFK
+	)
+	
+	
+-- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013'
+	
+--SELECT * FROM cteAssignedSupervisorsName	
 	
 	,cteSupervisionReasonsNotTookPlace	as 
 	(
@@ -594,11 +613,12 @@ SELECT WorkerName
 			  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) between 75 and 90 then 2
 			  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) < 75 then 1
 		  end as HFARating
-		  
+		 ,asn.AssignedSupervisorName 
 		  
 	FROM cteReport1 cr
 	left join cteScoreByWorker sw on sw.WorkerName = cr.WorkerName 
 	left join Worker w on w.WorkerPK = cr.WorkerPK
+	left join cteAssignedSupervisorsName asn on asn.workerpk = cr.workerpk
 	--where MeetsStandard <> 'N/A'
 	order by cr.workername,cr.weeknumber, cr.SupervisionDate
 	
