@@ -12,7 +12,7 @@ GO
 
 -- rspFSWEnrolledCaseTickler 5, '12/31/2012'
 -- rspFSWEnrolledCaseTickler 1, '08/31/2013'
-
+ -- rspFSWEnrolledCaseTickler 4, '09/30/2013'
 -- =============================================
 
 
@@ -265,11 +265,11 @@ SELECT
 with cteLastASQ
 as
 (
-SELECT cc.HVCasePK
+SELECT cc.HVCasePK, cc.TCIDPK
 	  ,max(TCAge) Interval -- We mean really the last date in the database as per JR
  FROM #tblCommonCohort cc
- left join ASQ A ON cc.HVCasePK = A.HVCaseFK 
-GROUP BY cc.HVCasePK
+ left join ASQ A ON cc.HVCasePK = A.HVCaseFK and A.TCIDFK = cc.TCIDPK
+GROUP BY cc.HVCasePK, cc.TCIDPK
 
 )
 
@@ -277,10 +277,10 @@ GROUP BY cc.HVCasePK
 cteLastASQCompleted  -- get other fields belonging to last asq
 as
 (
-SELECT cc.HVCasePK,A.ASQInWindow,A.ASQTCReceiving,A.TCAge,A.TCReferred,A.DateCompleted,cd.EventDescription
+SELECT cc.HVCasePK,A.ASQInWindow,A.ASQTCReceiving,A.TCAge,A.TCReferred,A.DateCompleted,cd.EventDescription,cc.TCIDPK
  FROM #tblCommonCohort cc 
- left join cteLastASQ LastASQ on LastASQ.hvcasePK = cc.hvcasePK
- left join ASQ A on A.TCAge = LastASQ.Interval and A.HVCaseFK = LastASQ.hvcasePK
+ left join cteLastASQ LastASQ on LastASQ.hvcasePK = cc.hvcasePK and LastASQ.TCIDPK = cc.TCIDPK
+ left join ASQ A on A.TCAge = LastASQ.Interval and A.HVCaseFK = LastASQ.hvcasePK  and A.TCIDFK = cc.TCIDPK
  
  --- ToDo: on monday .... khalsa
  
@@ -334,9 +334,9 @@ SELECT
 --SELECT * FROM cteASQSEThatIsDueNowWithEIPStatus
 --order by HVCasePK ,TCIDPK
 
- -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+ -- rspFSWEnrolledCaseTickler 4, '09/30/2013'
 
----- last ASQSE
+-- last ASQSE
 
 , cteLastASQSE
 as
@@ -355,7 +355,7 @@ as
 (
 select distinct cc.HVCasePK,cc.TCIDPK,A.ASQSEInWindow,A.ASQSEReceiving,A.ASQSETCAge,A.ASQSEReferred,A.ASQSEDateCompleted,cd.EventDescription
  FROM #tblCommonCohort cc 
- left join cteLastASQSE LastASQSE on LastASQSE.hvcasePK = cc.hvcasePK
+ left join cteLastASQSE LastASQSE on LastASQSE.hvcasePK = cc.hvcasePK and cc.tcidpk = LastASQSE.tcidpk
  left join ASQSE A on A.ASQSETCAge = LastASQSE.Interval and A.HVCaseFK = LastASQSE.hvcasePK and A.TCIDFK = LastASQSE.TCIDPK
  
  --- ToDo: on monday .... khalsa
@@ -365,10 +365,11 @@ select distinct cc.HVCasePK,cc.TCIDPK,A.ASQSEInWindow,A.ASQSEReceiving,A.ASQSETC
 
 
 --SELECT * FROM cteLastASQSECompleted
+--where HVCasePK = 20624
 --order by HVCasePK,TCIDPK
 
 
--- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+ --rspFSWEnrolledCaseTickler 4, '09/30/2013'
 
 
 
@@ -1454,7 +1455,6 @@ SELECT distinct cc.HVCasePK
 	  ,CAST((VisitLengthInminutesMOnthly / 60) AS VARCHAR(8)) + ':' + 
        RIGHT('0' + CAST((VisitLengthInminutesMOnthly % 60) AS VARCHAR(2)), 2) as VisitLengthInOneMonth
 	  
-	  
 	  ,expected3Monthsvisitcount
 	  ,actual3Monthsvisitcount
 	  ,attempted3Monthsvisitcount
@@ -1466,12 +1466,15 @@ SELECT distinct cc.HVCasePK
        RIGHT('0' + CAST((VisitLengthInminutes3MOnthly % 60) AS VARCHAR(2)), 2) as VisitLengthInThreeMonth
 	  
       ,case when ls.Last5Visits is not null then left(ls.Last5Visits,len(ls.Last5Visits)-1) else '' end as Last5Visits
-      
+     
 	  ,case when casq.Interval = lastASQ.TCAge then ''
 			when asqd.TCReceiving1 = 1 or asqd.TCReceiving2 = 1 or asqd.TCReceiving3 = 1 or asqd.TCReceiving4 = 1 then ' Child receiving EIP '
 			when casq.Interval is null then ''
-	        when casq.Interval = '00' then ' Due by ' + case when IntakeDate < dev_bdate then 
+	        when casq.Interval = '00' then ' Due by ' + 
+	        
+	        case when IntakeDate < dev_bdate then 
 					convert(varchar(20), dev_bdate, 101) else convert(varchar(20), IntakeDate, 101) end
+					
 			else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
 			--else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,tcdob), 101)
 			end as ASQDue   
@@ -1479,7 +1482,7 @@ SELECT distinct cc.HVCasePK
 		--, hvl.levelname as CurrentLevelName
 		--, convert(varchar(12), hvl.levelassigndate , 101) as levelassigndate		
 		
-		-- cd.ASQInWindow,cd.ASQTCReceiving,cd.TCAge,cd.TCReferred
+		 --cd.ASQInWindow,cd.ASQTCReceiving,cd.TCAge,cd.TCReferred
 		
 		, case 
 			 when ASQTCReceiving = 1 then ' Child receiving EIP ' 
@@ -1951,15 +1954,14 @@ SELECT distinct cc.HVCasePK
 	  
 	  
 	  
-	  left join #tblPTDetails asqd on asqd.HVCaseFK = cc.HVCasePK
+	  left join #tblPTDetails asqd on asqd.HVCaseFK = cc.HVCasePK and asqd.TCIDPK = cc.TCIDPK 
 	  
-	  left join cteLastASQCompleted lastASQ on lastASQ.HVCasePK = cc.HVCasePK  -- for lastasq
+	  left join cteLastASQCompleted lastASQ on lastASQ.HVCasePK = cc.HVCasePK and lastASQ.TCIDPK = cc.TCIDPK   -- for lastasq
 	  left join cteLastDateOnMedicalForm ld on ld.HVCasePK = cc.HVCasePK and ld.TCIDPK = cc.TCIDPK
 	  left join cteLastASQSECompleted lasqse on lasqse.HVCasePK = cc.HVCasePK and lasqse.TCIDPK = cc.TCIDPK
 	  
 	  
-	  
-	  inner join dbo.udfHVLevel(@programfk, @edate) hvl on hvl.hvcasefk = cc.HVCasePK  -- to get CurrentLevelName, CurrentLevelDate
+	  left join dbo.udfHVLevel(@programfk, @edate) hvl on hvl.hvcasefk = cc.HVCasePK  -- to get CurrentLevelName, CurrentLevelDate
 
 	  -- shots count
 	  left join cteImmunizationsPolio polio on polio.HVCasePK = cc.HVCasePK and polio.TCIDPK = cc.TCIDPK
@@ -2019,5 +2021,5 @@ order by FSWNAME,PC1ID
 drop table #tblCommonCohort
 drop table #CodeDueByMaxFrequencies
 drop table #tblPTDetails
- -- rspFSWEnrolledCaseTickler 1, '07/31/2013'
+ -- rspFSWEnrolledCaseTickler 4, '09/30/2013'
 GO
