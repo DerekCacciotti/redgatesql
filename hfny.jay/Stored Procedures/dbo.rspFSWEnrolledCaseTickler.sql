@@ -610,14 +610,11 @@ cteExpectedMonthlyHomeVisits
 as
 (
 
-	SELECT HVCasePK
-	
-	,floor(sum(reqvisit)) as expectedvisitcount
+	SELECT HVCasePK	
+	,reqvisit as expectedvisitcount
 	
 	FROM #tblCommonCohort cc 
 	left join [dbo].[udfLevelPieces](@programfk,@firstDayOfPreviousMonth,@lastDayOfPreviousMonth) tlp on tlp.casefk = cc.HVCasePK 
-
-	group by HVCasePK
 
 	)
 
@@ -664,11 +661,11 @@ as
 (
 	
 	SELECT HVCasePK	
-	,floor(sum(reqvisit)) as expected3Monthsvisitcount
+	,reqvisit as expected3Monthsvisitcount
 	
 	FROM #tblCommonCohort cc 
 	left join [dbo].[udfLevelPieces](@programfk,@firstDayOfThirdPreviousMonth,@lastDayOfPreviousMonth) tlp on tlp.casefk = cc.HVCasePK 	
-	group by HVCasePK
+	
 	
 	)
 
