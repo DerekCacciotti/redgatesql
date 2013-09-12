@@ -67,6 +67,13 @@ END
 	set @firstDayOfThirdPreviousMonth = DATEADD(DD, -DAY(DATEADD(DD, -DAY(@TwoMonthsBack),@TwoMonthsBack))+1, DATEADD(DD, -DAY(@TwoMonthsBack),@TwoMonthsBack))  
 	
 
+	declare @LastThreeMonthsNames varchar(150)	
+	set @LastThreeMonthsNames = DATENAME(MONTH, DATEADD(m, -3,@edate)) 
+								+ ', ' + 
+								DATENAME(MONTH,DATEADD(m, -2,@edate))
+								+ ', ' + 
+								DATENAME(MONTH,DATEADD(m, -1,@edate))								
+								
 	
 	create table #tblCommonCohort(
 				[HVCasePK] [int],
@@ -605,17 +612,25 @@ SELECT
 )
 
 -- Last Months Home Visits
+,cteUniqueCases4Monthly
+as
+(
+select distinct HVCasePK		
+	FROM #tblCommonCohort cc
+)
+
 ,
 cteExpectedMonthlyHomeVisits
 as
 (
 
-	SELECT HVCasePK	
-	,reqvisit as expectedvisitcount
+	select HVCasePK	
+	,sum(reqvisit) as expectedvisitcount
 	
-	FROM #tblCommonCohort cc 
+	FROM cteUniqueCases4Monthly cc 
 	left join [dbo].[udfLevelPieces](@programfk,@firstDayOfPreviousMonth,@lastDayOfPreviousMonth) tlp on tlp.casefk = cc.HVCasePK 
 
+	group by HVCasePK 
 	)
 
 ,
@@ -655,17 +670,28 @@ as
 	)
 
 -- Last 3 Months Home Visits
+
+,cteUniqueCases4ThreeMonthly
+as
+(
+select distinct HVCasePK		
+	FROM #tblCommonCohort cc
+)
+
+
+
 ,
 cteExpected3MonthsHomeVisits
 as
 (
 	
 	SELECT HVCasePK	
-	,reqvisit as expected3Monthsvisitcount
+	,sum(reqvisit) as expected3Monthsvisitcount
 	
-	FROM #tblCommonCohort cc 
+	FROM cteUniqueCases4ThreeMonthly cc 
 	left join [dbo].[udfLevelPieces](@programfk,@firstDayOfThirdPreviousMonth,@lastDayOfPreviousMonth) tlp on tlp.casefk = cc.HVCasePK 	
 	
+	group by HVCasePK
 	
 	)
 
@@ -724,11 +750,19 @@ select HVCasePK
 		 end
 	   as VisitStartTime
 	  ,VisitType
-	  ,RowNumber = row_number() over (partition by h.HVCaseFK order by VisitStartTime desc)
+	  ,RowNumber = row_number() over (partition by h.HVCaseFK order by VisitStartTime asc)
 	   FROM cteUniqueHVCases cc
 		inner join HVLog h on h.HVCaseFK = cc.HVCasePK
 )
 
+,cteTakeBottom5Visits
+as
+( -- gets the "last 5" rows from a table without ordering
+	SELECT *
+	 FROM cteLast5Visits ol
+	where RowNumber > (SELECT (MAX([RowNumber]) - 5) FROM cteLast5Visits il where ol.HVCasePK = il.HVCasePK )  -- interesting how I acheived it  ... khalsa
+
+)
 
 ,cteLast5VisitsConcatenated
 as
@@ -736,7 +770,7 @@ as
 select  cc.HVCasePK,
 		(
 			select top 5 VisitStartTime + ', '  -- last 5 home visits only please
-			from cteLast5Visits ls
+			from cteTakeBottom5Visits ls
 			where ls.HVCasePK = cc.HVCasePK 
 			--order by VisitStartTime desc
 			order by HVCasePK,RowNumber asc  -- This Order by is important. it gives the latest 5 visits in desc ... khalsa
@@ -1464,7 +1498,7 @@ SELECT distinct cc.HVCasePK
 	  
       ,case when ls.Last5Visits is not null then left(ls.Last5Visits,len(ls.Last5Visits)-1) else '' end as Last5Visits
      
-	  ,case when casq.Interval = lastASQ.TCAge then ''
+	  ,case when lastASQ.TCAge >= casq.Interval then ''
 			when asqd.TCReceiving1 = 1 or asqd.TCReceiving2 = 1 or asqd.TCReceiving3 = 1 or asqd.TCReceiving4 = 1 then ' Child receiving EIP '
 			when casq.Interval is null then ''
 	        when casq.Interval = '00' then ' Due by ' + 
@@ -1894,16 +1928,15 @@ SELECT distinct cc.HVCasePK
 	     ,'Evaluation Form Due Dates' as Header1
 	     ,'Evaluation Form History' as Header2
 	     ,'Referrals' as Header3
-	     ,'Last Month''s Home Visits' as Header4
-	     ,'Last 3 Month''s Home Visits' as Header5
+	     , @NameOfPreviousMonth + ' Home Visits' as Header4
+	     , @LastThreeMonthsNames + ' Home Visits' as Header5
 	     ,'Target Child Due Dates' as Header6
 
 		 ,@NameOfPreviousMonth as LastMonthsName
 		 --,Childdob
 		 -- cc.HVCasePK,cc.TCIDPK,A.ASQSEInWindow,A.ASQSEReceiving,A.ASQSETCAge,A.ASQSEReferred,A.ASQSEDateCompleted,cd.EventDescription
 		 
-		 
-		  ,case when casqse.Interval = lasqse.ASQSETCAge then ''
+		  ,case when  lasqse.ASQSETCAge >= casqse.Interval then ''
 				when casqse.ASQSEReceiving = 1 then ' Child receiving EIP '
 				when casqse.Interval is null then ''				
 				else cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
