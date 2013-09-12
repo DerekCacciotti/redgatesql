@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,5 +13,5 @@ CREATE PROCEDURE [dbo].[spGetAllPrograms]
 
 AS
   SELECT * FROM dbo.HVProgram 
-  ORDER BY programname
+  ORDER BY HVProgramPK  -- programname
 GO
