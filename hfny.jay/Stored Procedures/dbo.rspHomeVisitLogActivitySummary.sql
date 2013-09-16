@@ -68,6 +68,9 @@ CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
 ,count(DISTINCT (CASE WHEN substring(VisitType,4,1) != '1' THEN a.HVCaseFK ELSE NULL END)) [UniqueFamilies],
 sum(CASE substring(VisitType,4,1) WHEN '1' THEN 1 ELSE 0 END) [Attempted] , 
 sum(CASE substring(VisitType,4,1) WHEN '1' THEN 0 ELSE 1 END) [CompletedVisit],
+
+sum(CASE WHEN substring(VisitType,4,1) != '1' AND isnull(h.TCDOB, h.EDC) > a.VisitStartTime THEN 1 ELSE 0 END) [CompletedPenatalVisit],
+
 sum(CASE WHEN substring(VisitType,1,3) IN ('100', '110', '010')  THEN 1 ELSE 0 END) [InHome],
 sum(CASE WHEN substring(VisitType,1,3) = '001' THEN 1 ELSE 0 END) [OutOfHome],
 sum(CASE WHEN substring(VisitType,1,3) IN ('101', '111', '011')  THEN 1 ELSE 0 END) [BothInAndOutHome],
@@ -384,6 +387,8 @@ INNER JOIN worker fsw
 ON a.FSWFK = fsw.workerpk
 INNER JOIN CaseProgram cp
 ON cp.HVCaseFK = a.HVCaseFK
+INNER JOIN HVCase AS h
+ON h.HVCasePK = a.HVCaseFK
 WHERE 
 a.ProgramFK = @programfk 
 AND cast(VisitStartTime AS date) between @StartDt AND @EndDt 
@@ -396,7 +401,7 @@ CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END
 
 SELECT a.*, 
 
-[UniqueFamilies], [Attempted], [CompletedVisit], [InHome], [OutOfHome], [BothInAndOutHome], 
+[UniqueFamilies], [Attempted], [CompletedVisit], [CompletedPenatalVisit], [InHome], [OutOfHome], [BothInAndOutHome], 
 ([AvgMinuteForCompletedVisit] / x) [AvgMinuteForCompletedVisit],
 
 [PC1Participated] / x [PC1Participated],
