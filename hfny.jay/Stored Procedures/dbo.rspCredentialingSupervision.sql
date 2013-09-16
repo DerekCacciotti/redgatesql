@@ -9,7 +9,7 @@ GO
 -- Create date: August 8, 2013
 -- Description:	Credentialing report for Supervisions
 
--- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013'
+-- rspCredentialingSupervision 3, '07/01/2013', '08/31/2013'
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,152,null
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,null,5
 
@@ -163,7 +163,7 @@ END
 	(
 	  select 1 as WeekNumber,
 	    @sDate StartDate, 
-		dateadd(d,7,@sDate) EndDate
+		dateadd(d,6,@sDate) EndDate
 		
 	  union all
 	  
@@ -176,9 +176,12 @@ END
 	  from cteGenerateWeeksGiven2Dates
 	  
 	  
-	  where dateadd(d,7, StartDate)<=  @eDate	  
+	  where dateadd(d,6, StartDate)<=  @eDate	  
 	  
-	)	
+	)		
+	
+	
+	
 	
 	
 	
@@ -223,7 +226,7 @@ END
 		(
 		SELECT *
 			-- note: we added 1 in datediff(d, StartDate,EndDate) because substraction gives one day less. e.g. 7-1 = 6			
-			, datediff(d, StartDate,EndDate) as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
+			, datediff(d, StartDate,EndDate) + 1 as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
 			--,case when WorkerFK is null and SupervisionPK is null then null else datediff(d, StartDate,EndDate) end as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
 			  
 			   FROM #tblWeekPeriods wp 		
