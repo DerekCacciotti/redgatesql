@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,15 +5,15 @@ GO
 
 -- =============================================
 -- Author:		Devinder Singh Khalsa
--- Create date: August 8, 2013
--- Description:	Credentialing report for Supervisions
+-- Create date: September 16th, 2013
+-- Description:	Credentialing report for Supervisions Summary
 
--- rspCredentialingSupervision 3, '07/01/2013', '08/31/2013'
--- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,152,null
--- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,null,5
+-- rspCredentialingSupervisionSummary 4, '06/01/2013', '08/31/2013'
+-- rspCredentialingSupervisionSummary 1, '06/01/2013', '08/31/2013',null,152,null
+-- rspCredentialingSupervisionSummary 1, '06/01/2013', '08/31/2013',null,null,5
 
 -- =============================================
-CREATE procedure [dbo].[rspCredentialingSupervision]
+CREATE procedure [dbo].[rspCredentialingSupervisionSummary]
 	@ProgramFK  int           = null,
     @sDate  datetime      =   null,
     @eDate  datetime      =  null,
@@ -142,8 +141,8 @@ END
 	
 	
 
-	-- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'		
-	-- rspCredentialingSupervision 1, '03/01/2013', '03/31/2013'		
+	-- rspCredentialingSupervisionSummary 1, '01/06/2013', '02/02/2013'		
+	-- rspCredentialingSupervisionSummary 1, '03/01/2013', '03/31/2013'		
 			
 	--Step#: 2
 	-- use a recursive CTE to generate the list of dates  ... Khalsa
@@ -178,10 +177,7 @@ END
 	  
 	  where dateadd(d,6, StartDate)<=  @eDate	  
 	  
-	)		
-	
-	
-	
+	)	
 	
 	
 	
@@ -211,7 +207,7 @@ END
 
 	
 
---	 rspCredentialingSupervision 1, '04/01/2013', '04/30/2013'		
+--	 rspCredentialingSupervisionSummary 1, '04/01/2013', '04/30/2013'		
 		
 --		SELECT * FROM #tblWorkers
 --		where WorkerPK = 152  -- worker: Burdick, Catherine
@@ -240,7 +236,7 @@ END
 	--SELECT * FROM cteWorkersWithSupervisions
 	--order by workername,weeknumber, SupervisionDate
 		
--- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'					
+-- rspCredentialingSupervisionSummary 1, '01/06/2013', '02/02/2013'					
 		
 		
 		,cteWorkersWithSupervisionsII
@@ -289,7 +285,7 @@ END
 	)
 	
 	
--- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013'
+-- rspCredentialingSupervisionSummary 1, '06/01/2013', '08/31/2013'
 	
 --SELECT * FROM cteAssignedSupervisorsName	
 	
@@ -355,7 +351,7 @@ END
 	
 --	--SELECT * FROM cteSupervisionReasonsNotTookPlace
 	
----- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'		
+---- rspCredentialingSupervisionSummary 1, '01/06/2013', '02/02/2013'		
 
 	,cteSupervisionDurations
 	as
@@ -436,7 +432,7 @@ END
 	--SELECT * FROM cteSupervisionEvents
 	--order by workername,weeknumber, SupervisionDate
 	
---	rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'			
+--	rspCredentialingSupervisionSummary 1, '01/06/2013', '02/02/2013'			
 
 	, cteReportDetails
 		as
@@ -545,10 +541,6 @@ as
 			 FROM cteReportDetails	
 )			 
 
---SELECT * FROM ctecteReportDetailsModified
---			order by workername, weeknumber, SupervisionDate
-
--- rspCredentialingSupervision 1, '03/01/2013', '03/31/2013'	
 
 
 	
@@ -577,59 +569,60 @@ SELECT WorkerName
  group by WorkerName
  )
  
-		 
-		SELECT cr.WorkerName	
-		  ,convert(varchar(12),startdate,101) as startdate
-		  --,enddate
-		  ,convert(varchar(12),SupervisionDate,101) as SupervisionDate
-		  --,SupervisionHours
-		  --,SupervisionMinutes
-		  ,CASE -- convert into to string
-				WHEN SupervisionHours > 0 AND SupervisionMinutes > 0 THEN CONVERT(varchar(10),SupervisionHours) + ':' + CONVERT(varchar(10),SupervisionMinutes)
-				WHEN SupervisionHours > 0 AND (SupervisionMinutes = 0 OR SupervisionMinutes IS NULL) THEN CONVERT(varchar(10),SupervisionHours) + ':00'
-				WHEN (SupervisionHours = 0 OR SupervisionHours  IS NULL) AND SupervisionMinutes > 0 THEN '00:' + CONVERT(varchar(10),SupervisionMinutes)
-				--WHEN (SupervisionHours = 0 OR SupervisionHours  IS NULL) AND (SupervisionMinutes = 0 OR SupervisionMinutes IS NULL) THEN '00:00'
-				ELSE ' ' END
+,cteSubSummary
+as
+(		 
+		SELECT distinct 
+				cr.WorkerName		
+				,asn.AssignedSupervisorName
+				,NumOfExpectedSessions
+				,NumOfAllowedExecuses
+				,NumOfExpectedSessions - NumOfAllowedExecuses as NumOfAdjExptdSupervisions
+				,NumOfMeetStandardYes as NumOfAcceptableSupervisions
+				,CONVERT(VARCHAR,NumOfMeetStandardYes) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0))  + '%)'	AS PerctOfAccptbleSupervisions
+		
+				,case 
+					  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) >= 90 then 3
+					  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) between 75 and 90 then 2
+					  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) < 75 then 1
+				  end as HFARating		
 
-			as Duration  
-		  ,case when TakePlace = 1 then 'Y' else 'N' end as TakePlace		  
-		  ,MeetsStandard1 as MeetsStandard
-		  ,SupervisorName
-		  ,ReasonSupeVisionNotHeld
-		  ,firstevent
-		  ,cr.workerpk
-		  ,case when FAWInitialStart is not null then 'FAW'
-			    when FSWInitialStart is not null then 'FSW'
-			    else
-			    ''
-			    end as workerRole
-		  
-		  ,DaysInTheCurrentWeek
-		  ,NumOfExpectedSessions
-		  ,NumOfAllowedExecuses
-		  ,NumOfExpectedSessions - NumOfAllowedExecuses as NumOfAdjExptdSupervisions
-		  ,NumOfMeetStandardYes
-		  ,CONVERT(VARCHAR,NumOfMeetStandardYes) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0))  + '%)'	AS PerctOfAccptbleSupervisions
-		  ,
-		  case 
-			  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) >= 90 then 3
-			  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) between 75 and 90 then 2
-			  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) < 75 then 1
-		  end as HFARating
-		 ,asn.AssignedSupervisorName 
+
 		  
 	FROM cteReport1 cr
 	left join cteScoreByWorker sw on sw.WorkerName = cr.WorkerName 
 	left join Worker w on w.WorkerPK = cr.WorkerPK
 	left join cteAssignedSupervisorsName asn on asn.workerpk = cr.workerpk
-	--where MeetsStandard <> 'N/A'
-	order by cr.workername,cr.weeknumber, cr.SupervisionDate
+
+)	
+
+,cteCalculateHFABPSRating
+as
+(
+
+SELECT 
+		case when min(HFARating) = 3 then 3  -- All staff receives 90% or above of expected supervision sessions
+			when min(HFARating) = 2 then 2  -- All staff receives 75% or above of expected supervision sessions
+			when min(HFARating) = 1 then 1  -- Some staff receives less than 75% of expected supervision sessions
+			end
+			as HFABPSRating	 	  
+	   FROM cteSubSummary
+
+
+)				
+				
+SELECT *  
+	  
+	   FROM cteSubSummary
+	   inner join cteCalculateHFABPSRating cc on 1=1
+		order by workername
 	
+		
+	-- rspCredentialingSupervisionSummary 4, '06/01/2013', '08/31/2013'					
+	-- rspCredentialingSupervisionSummary 3, '07/01/2013', '08/31/2013'		
 				
 	
--- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'			
--- rspCredentialingSupervision 1, '04/01/2013', '04/30/2013'		
--- rspCredentialingSupervision 1, '03/01/2013', '03/31/2013'		
+	
 
 	drop table #tblFAWFSWWorkers
 	drop table #tblSUPPMWorkers
