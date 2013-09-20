@@ -36,14 +36,14 @@ BEGIN
 							,FollowUpInterval as TCAge
 							,FollowUpPK
 							,PC1InHome
-							,cafuobp.OBPInHome
+							,isnull(cafuobp.OBPInHome, '') as OBPInHome
 							,PC2InHome
 							,FUPInWindow
 							,fu.ProgramFK
 							,fu.HVCaseFK
 					from FollowUp fu
 					inner join CommonAttributes ca on ca.FormFK=fu.FollowUpPK and ca.FormInterval=fu.FollowUpInterval AND ca.FormType = 'FU'
-					inner join CommonAttributes cafuobp on cafuobp.FormFK=fu.FollowUpPK and cafuobp.FormInterval=fu.FollowUpInterval AND cafuobp.FormType = 'FU-OBP'
+					left outer join CommonAttributes cafuobp on cafuobp.FormFK=fu.FollowUpPK and cafuobp.FormInterval=fu.FollowUpInterval AND cafuobp.FormType = 'FU-OBP'
 					where fu.HVCaseFK =@HVCaseFK		
 					) b 
 	on a.appCode=b.TCAge
