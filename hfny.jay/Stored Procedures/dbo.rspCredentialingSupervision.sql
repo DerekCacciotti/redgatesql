@@ -9,7 +9,7 @@ GO
 -- Create date: August 8, 2013
 -- Description:	Credentialing report for Supervisions
 
--- rspCredentialingSupervision 3, '07/01/2013', '08/31/2013'
+-- rspCredentialingSupervision 8, '06/01/2013', '08/31/2013'
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,152,null
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,null,5
 
@@ -598,8 +598,9 @@ SELECT WorkerName
 		  ,ReasonSupeVisionNotHeld
 		  ,firstevent
 		  ,cr.workerpk
-		  ,case when FAWInitialStart is not null then 'FAW'
-			    when FSWInitialStart is not null then 'FSW'
+		  ,case when FAWInitialStart is not null and FSWInitialStart is not null then 'FAW,FSW'
+				when FAWInitialStart is not null then 'FAW'
+			    when FSWInitialStart is not null then 'FSW'			    
 			    else
 			    ''
 			    end as workerRole
