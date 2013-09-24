@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -11,15 +10,15 @@ GO
 -- Description:	<This report gets you 'ProgramSynopsis i.e. The Program Synopsis is used as a monthly summary of activity for the program.
 -- It can be run for any time period as well. Screens, Kempes, enrollment, referrals, home visits and form information give the user a quick management look at program status.'>
 
--- rspProgramSynopsis 5, '04/01/2013', '04/30/2013'
--- rspProgramSynopsis 3, '05/01/2013', '05/31/2013'
--- rspProgramSynopsis 11, '04/01/2013', '06/30/2013'
--- rspProgramSynopsis 22, '09/01/2012', '08/31/2013'
+-- rspProgramSynopsis_bak 22, '09/01/2012', '08/31/2013'
+-- rspProgramSynopsis_bak 3, '05/01/2013', '05/31/2013'
+-- rspProgramSynopsis_bak 11, '04/01/2013', '06/30/2013'
+
 
 -- =============================================
 
 
-CREATE procedure [dbo].[rspProgramSynopsis](
+CREATE procedure [dbo].[rspProgramSynopsis_bak](
 	@programfk    varchar(max)    = NULL,
     @sdate     datetime,
     @edate     datetime,
@@ -239,7 +238,7 @@ INSERT INTO @tblCommonCohort
 
 	--SELECT * FROM @tblCommonCohort 
 
--- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
+-- rspProgramSynopsis_bak 19, '04/01/2011', '04/30/2011'
 
 -- **create cursor without filters for the screen,preasses, kempe, preintake sections
 -- Program Screens (no filter)
@@ -619,7 +618,7 @@ insert into @tblFUCohort
 --order by HVCasePK,TCIDPK 
 
 
--- rspProgramSynopsis 1, '04/01/2013', '04/30/2013'	
+-- rspProgramSynopsis_bak 1, '04/01/2013', '04/30/2013'	
 
 declare @FUcol1 varchar(10)
 declare @FUcol2 varchar(10)
@@ -994,7 +993,7 @@ VALUES(18,3,'', '', '', '', '', '', '', '','')
 
 
 
--- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
+-- rspProgramSynopsis_bak 19, '04/01/2011', '04/30/2011'
 
 
 
@@ -1052,7 +1051,7 @@ with cteASQ as
 
 
 
--- rspProgramSynopsis 1, '04/01/2013', '04/30/2013'	
+-- rspProgramSynopsis_bak 1, '04/01/2013', '04/30/2013'	
 
 
 -- INSERT ASQ DATA
@@ -1105,7 +1104,7 @@ with cteASQSE as
 
 
 
--- rspProgramSynopsis 1, '04/01/2013', '04/30/2013'	
+-- rspProgramSynopsis_bak 1, '04/01/2013', '04/30/2013'	
 
 
  -- INSERT ASQ DATA
@@ -1245,9 +1244,9 @@ SELECT 	'14','2', '',
 		and p.CaseStatus = '02'
 
 
--- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
+-- rspProgramSynopsis_bak 19, '04/01/2011', '04/30/2011'
 
--- rspProgramSynopsis 13, '05/01/2013', '05/31/2013'
+-- rspProgramSynopsis_bak 13, '05/01/2013', '05/31/2013'
 
 -- INSERT Discharges at Preintake Stage DATA
 --INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)	
@@ -1273,6 +1272,7 @@ SELECT 	'14','2', '',
 --		and IntakeDate is not null	
 --		and p.CaseStatus = '02'
 
+
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
 SELECT 	'15','2', '',    
 	    PC1ID
@@ -1296,7 +1296,14 @@ SELECT 	'15','2', '',
 		AND cc.CaseStartDate < @edate  -- handling transfer cases	
 		AND (cc.DischargeDate >= @sdate AND cc.DischargeDate <= @edate AND cc.DischargeDate IS NOT NULL)
 		and FSWAssignDate is not null
+		
+		
 
+
+-- rspProgramSynopsis_bak 22, '09/01/2012', '08/31/2013'
+
+
+	
 
 
 
@@ -1337,7 +1344,7 @@ SELECT 	'16','2', ''
 
 		where (DischargeDate between @sdate and @edate)
 
--- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
+-- rspProgramSynopsis_bak 19, '04/01/2011', '04/30/2011'
 
 
 -- Families on Creative Outreach (Level X)
