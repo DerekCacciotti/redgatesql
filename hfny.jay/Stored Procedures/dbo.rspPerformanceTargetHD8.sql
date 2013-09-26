@@ -83,9 +83,10 @@ begin
 	as
 	(
 		select c.HVCaseFK
-			  , cach.PC1HasMedicalProvider
-			  , 'Intake' as FormName
-			  , FormDate
+				, cach.PC1HasMedicalProvider
+				, 'Intake' as FormName
+				, FormDate
+				, FormFK
 			from cteCohort c
 				left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'IN'
 			where c.tcAgeDays < 183
@@ -123,9 +124,12 @@ begin
 			  ,PC1FullName
 			  ,CurrentWorkerFullName
 			  ,CurrentLevelName
-			  ,case when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate and chl6.FormDate > '01/04/13' and 
-						   chl6.PC1HasMedicalProvider = 1 -- latest of either TC or CH
-					   then 'Change Form'
+			  -- latest of either Intake or CH
+			  ,case 
+					when (chl6.FormDate > inl6.FormDate or inl6.FormDate is null)
+							and chl6.FormDate > '01/04/13' 
+							-- and chl6.PC1HasMedicalProvider is not null and chl6.PC1HasMedicalProvider = 1 
+						then 'Change Form'
 					else
 						'Intake'
 						--case when inl6.PC1HasMedicalProvider is not null and inl6.PC1HasMedicalProvider = 1 
@@ -133,27 +137,36 @@ begin
 						--else null end
 			   end as FormName
 			  ,case
-				   when chl6.PC1HasMedicalProvider is not null and chl6.FormDate > inl6.FormDate and chl6.FormDate > '01/04/13' and 
-					   chl6.PC1HasMedicalProvider = 1 -- latest of either TC or CH
-					   then chl6.FormDate -- note: preference is given to the latest CH record first, if there is one
-				   else -- note: otherwise we will use tcid record's info
-					   case when inl6.PC1HasMedicalProvider is not null and inl6.PC1HasMedicalProvider = 1 then inl6.FormDate else 
-						   null end
+					when (chl6.FormDate > inl6.FormDate or inl6.FormDate is null)
+							and chl6.FormDate > '01/04/13' 
+							-- and chl6.PC1HasMedicalProvider is not null and chl6.PC1HasMedicalProvider = 1
+						then chl6.FormDate -- note: preference is given to the latest CH record first, if there is one
+					else -- note: otherwise we will use tcid record's info
+						case 
+							when inl6.FormDate is not null -- inl6.PC1HasMedicalProvider is not null and inl6.PC1HasMedicalProvider = 1 
+								then inl6.FormDate 
+							else null 
+						end
 			   end as FormDate
-			  ,case
-				   when inl6.FormDate is not null then 1 -- there is no formreview for formtype = CH
-				   else
-					   0
+			  ,case -- there is no formreview for formtype = CH
+					when (chl6.FormDate is not null) or	-- and cach.PC1HasMedicalProvider is not null
+							(inl6.FormDate is not null		-- and cafu.PC1HasMedicalProvider is not null
+								and dbo.IsFormReviewed(inl6.FormDate,'IN',inl6.FormFK) = 1)
+						then 1
+				   else 0
 			   end
 			   as FormReviewed
 			  ,case -- Here FormOutOfWindow means that there must be an tcid record in CommonAttribute table for tc < 6 months
-				   when chl6.FormDate is not null or inl6.FormDate is not null then 0
+				   when (chl6.FormDate is not null) or		--  and chl6.TCHasMedicalProvider is not null
+						(inl6.FormDate is not null) then 0	-- and inl6.TCHasMedicalProvider is not null
 				   else
 					   1
 			   end as FormOutOfWindow
 			  ,case 
-				  -- there is atleast we one of either TC or CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
-				   when chl6.FormDate is not null or inl6.FormDate is not null then 0
+				  -- there is at least we one of either TC or CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
+				   when (chl6.FormDate is not null and 
+						chl6.FormDate > '01/04/13') or		--  and chl6.TCHasMedicalProvider is not null
+						(inl6.FormDate is not null) then 0	-- and inl6.TCHasMedicalProvider is not null
 				   else
 					   1
 			   end as FormMissing
@@ -221,8 +234,9 @@ begin
 		  ,CurrentWorkerFullName
 		  ,CurrentLevelName
 		  ,case
-			   when cach.PC1HasMedicalProvider is not null and cach.FormDate > cafu.FormDate and cach.FormDate > '01/04/13' and 
-				   cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
+			   when (cach.FormDate > cafu.FormDate or cafu.FormDate is null) and 
+					cach.FormDate > '01/04/13' 
+					-- and cach.PC1HasMedicalProvider is not null and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
 				   then 'Change Form' -- note: preference is given to the latest CH record first, if there is one
 
 			   else -- note: otherwise we will use tcid record's info
@@ -233,19 +247,21 @@ begin
 				 --  end
 		   end as FormName
 		  ,case
-			   when cach.PC1HasMedicalProvider is not null and cach.FormDate > cafu.FormDate and 
-					cach.FormDate > '01/04/13' and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
+			   when (cach.FormDate > cafu.FormDate or cafu.FormDate is null) and 
+					cach.FormDate > '01/04/13' 
+					-- and cach.PC1HasMedicalProvider is not null and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
 				   then cach.FormDate -- note: preference is given to the latest CH record first, if there is one
 			   else -- note: otherwise we will use tcid record's info
 					case 
-						when cafu.PC1HasMedicalProvider is not null and cafu.PC1HasMedicalProvider = 1 
+						when cafu.FormDate is not null -- cafu.PC1HasMedicalProvider is not null and cafu.PC1HasMedicalProvider = 1 
 							then cafu.FormDate 
 						else null 
 					end
 		   end as FormDate
 		  ,case
 			   when (cach.FormDate is not null) or	-- and cach.PC1HasMedicalProvider is not null
-					(cafu.FormDate is not null)		-- and cafu.PC1HasMedicalProvider is not null
+					(cafu.FormDate is not null		-- and cafu.PC1HasMedicalProvider is not null
+							and dbo.IsFormReviewed(cafu.FormDate,'FU',cafu.FormFK) = 1)
 					then 1
 			   else 0
 		   end
@@ -258,8 +274,9 @@ begin
 				   1
 		   end as FormOutOfWindow
 		  ,case 
-			  -- there is atleast we one of either FU (Due now) or latest CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
-			   when (cach.FormDate is not null) or		--  and cach.PC1HasMedicalProvider is not null
+			  -- there is at least we one of either FU (Due now) or latest CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
+			   when (cach.FormDate is not null and 
+					cach.FormDate > '01/04/13') or		--  and cach.PC1HasMedicalProvider is not null
 					(cafu.FormDate is not null) then 0	-- and cafu.PC1HasMedicalProvider is not null
 			   else
 				   1
