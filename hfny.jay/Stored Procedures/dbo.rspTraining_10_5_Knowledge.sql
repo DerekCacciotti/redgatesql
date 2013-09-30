@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -248,7 +249,7 @@ SELECT [TopicName]
 		, HireDate
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
 		,	CASE WHEN CAMeetingTarget = TotalContentAreasByTopicAndWorker THEN '3' 
-			WHEN ContentCompleted = TotalContentAreasByTopicAndWorker THEN '2'
+			WHEN CAMeetingTarget/TotalContentAreasByTopicAndWorker > .5 THEN '2'
 			ELSE '1'
 			END AS TopicRatingByWorker
 		,	CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
