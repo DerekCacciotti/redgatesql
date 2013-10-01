@@ -143,7 +143,7 @@ SELECT [TopicName]
 	, subtopiccode
 	, TrainingDate
 	, CASE WHEN TrainingDate IS NOT NULL THEN 1 END AS ContentCompleted
-	, CASE WHEN TrainingDate <= dateadd(day, 183, HireDate) THEN 1 
+	, CASE WHEN TrainingDate <= dateadd(day, 365, HireDate) THEN 1 
 		when IsExempt='1' then '1'
 			ELSE 0 END AS 'Meets Target'
 	FROM cteAddMissingWorkers
