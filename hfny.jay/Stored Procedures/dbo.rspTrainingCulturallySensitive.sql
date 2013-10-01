@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -18,6 +19,7 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 --Get FAW's in time period
+
 ;WITH  cteEventDates AS (
 	SELECT workerpk, wrkrLName
 	, '1' AS MyWrkrCount
@@ -27,24 +29,39 @@ BEGIN
 	AND DATEDIFF(d,HireDate, @edate) > 365
 )
 
-, cteCultSenses AS (
+
+, cteCultureSensitive AS (
+	select WorkerPK
+	, WorkerName
+	, HireDate
+	, Mywrkrcount
+	, MIN(TrainingDate) as CulturallySensitiveDate
+	, CulturalCompetency
+	, ROW_NUMBER() OVER ( PARTITION BY workerpk ORDER BY CulturalCompetency DESC ) AS 'RowNumber'
+	From cteEventDates
+	LEFT JOIN TrainingAttendee ta ON cteEventDates.WorkerPK = ta.WorkerFK 
+	LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
+	LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
+	LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
+	WHERE --CulturalCompetency = 1
+	TrainingDate between @sdate AND @edate
+	GROUP BY WorkerPK
+	, CulturalCompetency
+	, WorkerName
+	, HireDate, MyWrkrCount
+)
+
+,  cteCultSenses as (
 	select WorkerPK
 	, WorkerName
 	, HireDate
 	, COUNT(workerpk) OVER (PARTITION BY MyWrkrCount) AS WorkerCount
-	, MIN(TrainingDate) as CulturallySensitiveDate
-	--, MIN(TrainingTitle) AS TrainingTitle
-	from cteEventDates
-	INNER JOIN TrainingAttendee ta ON cteEventDates.WorkerPK = ta.WorkerFK 
-	LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
-	LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
-	LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
-	WHERE CulturalCompetency = 1
-	AND TrainingDate between @sdate AND @edate
-	GROUP BY WorkerPK
-	, WorkerName
-	, HireDate, MyWrkrCount
+	, CulturallySensitiveDate
+	, CulturalCompetency
+	from cteCultureSensitive
+	where RowNumber=1
 )
+
 
 , cteCultSense AS (
 	select WorkerPK
@@ -53,23 +70,26 @@ BEGIN
 	, WorkerCount
 	, CulturallySensitiveDate
 	, MIN(TrainingTitle) AS TrainingTitle
+	, cteCultSenses.CulturalCompetency
 	from cteCultSenses
-	INNER JOIN TrainingAttendee ta ON cteCultSenses.WorkerPK = ta.WorkerFK
+	LEFT JOIN TrainingAttendee ta ON cteCultSenses.WorkerPK = ta.WorkerFK
 	LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK AND cteCultSenses.CulturallySensitiveDate = t.TrainingDate
 	LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
-	WHERE CulturalCompetency = 1
-	AND TrainingDate between @sdate AND @edate
+	WHERE --CulturalCompetency = 1
+	TrainingDate between @sdate AND @edate
 	GROUP BY WorkerPK
 	, WorkerName
 	, HireDate, WorkerCount
 	, CulturallySensitiveDate
+	, cteCultSenses.CulturalCompetency
 )
 
 , cteFinal as (
 	SELECT WorkerPK, workername, HireDate, CulturallySensitiveDate, WorkerCount, TrainingTitle
 		, MeetsTarget =
 			CASE 
-				WHEN CulturallySensitiveDate Is Null THEN 'F'
+				WHEN CulturalCompetency Is Null THEN 'F'
+				when CulturalCompetency = 0 then 'F'
 				ELSE 'T'
 			END
 	From cteCultSense
@@ -93,7 +113,6 @@ BEGIN
 FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.WorkerCount = cteFinal.WorkerCount
 ORDER BY cteFinal.workername
-
 
 END
 GO
