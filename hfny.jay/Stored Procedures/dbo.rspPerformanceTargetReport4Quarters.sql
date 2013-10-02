@@ -8,12 +8,12 @@ GO
 -- Author:		Jay Robohn
 -- Create date: Sept. 19, 2013
 -- Description:	The Performance Target Summary report modified to do the Performance Targets For 4 Quarters report
--- rspPerformanceTargetReport4Quarters 4 ,'07/01/2013' ,'09/30/2013'
+-- rspPerformanceTargetReport4Quarters 4 ,'06/01/2013' ,'08/31/2013'
 -- rspPerformanceTargetReport4Quarters 2 ,'10/01/2012' ,'12/31/2012'
 -- rspPerformanceTargetReport4Quarters 2 ,'04/01/2012' ,'06/30/2012'
 -- rspPerformanceTargetReport4Quarters 24,'10/01/2012' ,'12/31/2012'
 -- rspPerformanceTargetReport4Quarters 9, '07/01/2013', '09/30/2013', 471
--- mods by jrobohn 20130222 - clean up names, code and layout
+-- mods by jrobohn 20130222 - clean up names, code and layoutset
 -- mods by jrobohn 20130223 - added PCI1 report
 -- =============================================
 
@@ -262,19 +262,33 @@ begin
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetFLC7 @StartDate,@EndDate,@tblPTCohort 
 	
-	insert into @tblPTSummary (PTCode, Qtr1TotalCases, Qtr1ValidCases, Qtr1CasesMeetingTarget, Qtr1PercentageMeetingPT)
+	insert into @tblPTSummary (PTCode
+								, Qtr1TotalCases
+								, Qtr1ValidCases
+								, Qtr1CasesMeetingTarget
+								, Qtr1PercentageMeetingPT)
 		select PTCode
 				, count(PTCode)
 				, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end)
 				, sum(case when FormMeetsTarget = 1 then 1 else 0 end)
-				, round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
-						(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
-						as Qtr1PercentageMeetingTarget
+				, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
+							round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
+									(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
+					end
+					as Qtr1PercentageMeetingTarget
 				--, sum(case when FormMeetsTarget = 1 then 1 else 0 end)  as Sum_FormMeetsTarget
 				--, count(PTCode) as Count_PTCode				
 		from @tblPTDetailsTemp
 		group by PTCode
-	
+		union 
+		select PerformanceTargetCode
+				, 0
+				, 0
+				, 0
+				, 0 as Qtr1PercentageMeetingTarget
+		from codePerformanceTargetTitle ptt
+		where PerformanceTargetCode not in (select PTCode from @tblPTDetailsTemp)
+		
 	-- select * from @tblPTSummary
 	insert into @tblPTDetails
 		select '1',* from @tblPTDetailsTemp
@@ -425,14 +439,18 @@ begin
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetFLC7 @StartDate,@EndDate,@tblPTCohort 
 
+
+
 ;	with cteQtr2PercentageMeeting as
 		(
 			select PTCode
 					, count(PTCode) as TotalCases
 					, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) as TotalValidCases
 					, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as TotalCasesMeetingTarget
-					, round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
-						(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
+					, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
+								round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
+										(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
+						end
 						as PercentageMeetingTarget
 			from @tblPTDetailsTemp
 			group by PTCode
@@ -597,8 +615,10 @@ begin
 					, count(PTCode) as TotalCases
 					, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) as TotalValidCases
 					, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as TotalCasesMeetingTarget
-					, round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
-						(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
+					, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
+								round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
+										(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
+						end
 						as PercentageMeetingTarget
 			from @tblPTDetailsTemp
 			group by PTCode
@@ -763,8 +783,10 @@ begin
 					, count(PTCode) as TotalCases
 					, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) as TotalValidCases
 					, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as TotalCasesMeetingTarget
-					, round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
-						(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
+					, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
+								round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
+										(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
+						end
 						as PercentageMeetingTarget
 			from @tblPTDetailsTemp
 			group by PTCode
