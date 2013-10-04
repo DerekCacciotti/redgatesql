@@ -131,10 +131,10 @@ ON workerprogram.supervisorfk = supervisor.workerpk
 			 
 			 
 			 AND caseprogram.currentFSWFK = ISNULL(@workerfk, caseprogram.currentFSWFK)
-AND workerprogram.supervisorfk = ISNULL(@supervisorfk, workerprogram.supervisorfk)
+AND workerprogram.supervisorfk = ISNULL(@supervisorfk, workerprogram.supervisorfk)		 
 			 
-			 
-		order by supervisor, workername, OldID, ScreenDate
+		
+		order by supervisor, workername, pc1id, ScreenDate
 		
 
 	/* SET NOCOUNT ON */
