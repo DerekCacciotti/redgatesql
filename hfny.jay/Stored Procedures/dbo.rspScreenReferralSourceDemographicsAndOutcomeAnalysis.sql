@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -676,12 +677,23 @@ DECLARE @numOfTotalEnrolled43 INT = 0
 
 
 
-SET @numOfALLScreens43 = (SELECT count(*) FROM #tblMainCohort where datediff(ww, ConceptionDate, ScreenDate) > 26)
-SET @numOfTotalPositiveScreens43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+--SET @numOfALLScreens43 = (SELECT count(*) FROM #tblMainCohort where datediff(ww, ConceptionDate, ScreenDate) > 26)
+--SET @numOfTotalPositiveScreens43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+--SET @numOfTotalPositiveScreensNotReferred43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+--SET @numOfTotalNegativeScreens43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+--SET @numOfTotalKempesCompleted43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+--SET @numOfTotalEnrolled43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+SET @numOfALLScreens43 = (SELECT count(*) FROM #tblMainCohort where datediff(ww, ConceptionDate, ScreenDate) > 26 and (ScreenDate < babydate) )
+SET @numOfTotalPositiveScreens43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and (ScreenDate < babydate)  and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and (ScreenDate < babydate) and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and (ScreenDate < babydate) and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and (ScreenDate < babydate) and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled43 = (SELECT count(*) FROM #tblMainCohort where  (datediff(ww, ConceptionDate, ScreenDate) > 26) and (ScreenDate < babydate) and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
