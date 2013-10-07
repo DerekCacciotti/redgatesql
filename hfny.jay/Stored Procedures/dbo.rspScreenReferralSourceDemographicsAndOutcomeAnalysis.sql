@@ -98,6 +98,8 @@ END
 	  ,OBPInHome [char](1) null 
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
+	  ,ReferralSource [char](2) null
+	  ,AppCodeText [char](100) null
 	 
 	)
 
@@ -134,7 +136,8 @@ END
 	  ,OBPInHome [char](1) null 
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
-
+	  ,ReferralSource [char](2) null
+	  ,AppCodeText [char](100) null
 	)
 
 -- Negative Screens table
@@ -170,7 +173,8 @@ END
 	  ,OBPInHome [char](1) null
 	  ,ReceivingPreNatalCare [char](1) null 
 	  ,DischargeReason [char](100) null
-
+	  ,ReferralSource [char](2) null
+	  ,AppCodeText [char](100) null
 	)
 	
 -- Kempes Completed table
@@ -206,7 +210,8 @@ END
 	  ,OBPInHome [char](1) null 
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
-
+	  ,ReferralSource [char](2) null
+	  ,AppCodeText [char](100) null
 	)	
 
 -- Enrolled Completed table
@@ -242,7 +247,8 @@ END
 	  ,OBPInHome [char](1) null 
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
-
+	  ,ReferralSource [char](2) null
+	  ,AppCodeText [char](100) null
 	)	
 
 
@@ -281,7 +287,8 @@ END
 	  ,OBPInHome [char](1) null
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
-
+	  ,ReferralSource [char](2) null
+	  ,AppCodeText [char](100) null
 	
 	)
 
@@ -327,6 +334,8 @@ END
 		  ,ca.OBPInHome
 		  ,ca.ReceivingPreNatalCare 
 		  ,cd.DischargeReason
+		  ,ReferralSource
+		  ,b.AppCodeText
 		 
 
 		  
@@ -341,6 +350,7 @@ END
 	LEFT OUTER JOIN dbo.listReferralSource lrs on lrs.listReferralSourcePK = hvs.ReferralSourceFK
 	left outer join dbo.codeDischarge cd on cd.DischargeCode = cp.DischargeReason and DischargeUsedWhere like '%SC%'
 
+	LEFT OUTER JOIN codeApp AS b ON b.AppCode = hvs.ReferralSource AND b.AppCodeGroup = 'TypeofReferral' and b.AppCodeUsedWhere like '%sc%' 
 	
 
 	where  
@@ -1109,7 +1119,7 @@ VALUES(6, '    Other', 29
 /*************************************************/
 -- add the title for Biological Parents in the row
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(7, 'Biological Parents', 30, '', '', '', '', '', '')  
+VALUES(7, 'OBP In Home', 30, '', '', '', '', '', '')  
 
 ---- calcualte Biological Parents- Yes  
 DECLARE @numOfALLScreens57 INT = 0
@@ -1169,7 +1179,7 @@ VALUES(7, '    No', 32
 /*************************************************/
 -- add the title for Prenatal Care in the row
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(8, 'Prenatal Care', 33, '', '', '', '', '', '')  
+VALUES(8, 'Receiving Prenatal Care', 33, '', '', '', '', '', '')  
 
 ---- calcualte Prenatal Care- Yes  
 DECLARE @numOfALLScreens59 INT = 0
@@ -1305,9 +1315,15 @@ count(HVCasePK) countTotal
 			 
 			 
 			 
-,CASE WHEN ReferralSourceName IS NULL THEN 'No Referral Source' ELSE ReferralSourceName END ReferralSourceName
+,CASE WHEN AppCodeText IS NULL THEN '    No Referral Source' ELSE '    ' + AppCodeText END ReferralSourceName
+,CASE WHEN ReferralSource = '0…' Then '99' ELSE ReferralSource END AppCode  -- get it for order the resultset later on
+
 FROM #tblMainCohort c
-group by CASE WHEN ReferralSourceName IS NULL THEN 'No Referral Source' ELSE ReferralSourceName END
+--group by CASE WHEN AppCodeText IS NULL THEN '    No Referral Source' ELSE '    ' + AppCodeText end
+group by 
+CASE WHEN ReferralSource = '0…' Then '99' ELSE ReferralSource end,
+CASE WHEN AppCodeText IS NULL THEN '    No Referral Source' ELSE '    ' + AppCodeText end
+
 
 )
 ,
@@ -1315,7 +1331,8 @@ cteReferralSourceTypeStatistics
 as
 (
 SELECT 
-9 as reportIndex
+AppCode
+,9 as reportIndex
 ,ReferralSourceName
 ,ROW_NUMBER() OVER(ORDER BY ReferralSourceName) + 37 AS RowNumber  -- note that there are 37 rows before this one
 
@@ -1334,8 +1351,19 @@ FROM cteReferralSourceTypeCount
 
 -- insert all the ReferralSourceType into the table as rows of data
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-SELECT * FROM cteReferralSourceTypeStatistics
+SELECT 
+	   reportIndex
+	  ,ReferralSourceName
+	  ,RowNumber
+	  ,Total
+	  ,TotalPositiveScreens
+	  ,PositiveScreensNotReferred
+	  ,TotalNegativeScreens
+	  ,TotalKempesCompleted
+	  ,TotalEnrolled
 
+ FROM cteReferralSourceTypeStatistics
+ order by AppCode 
 
 -- rspScreenReferralSourceDemographicsAndOutcomeAnalysis 5,'09/01/2011','08/31/2012'
 
@@ -1487,5 +1515,4 @@ drop table #tblPositiveScreensNotReferred
 drop table #tblNegativeScreens
 drop table #tblKempesCompleted
 drop table #tblEnrolled
-
 GO
