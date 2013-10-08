@@ -249,7 +249,7 @@ SELECT [TopicName]
 		, HireDate
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
 		,	CASE WHEN CAMeetingTarget = TotalContentAreasByTopicAndWorker THEN '3' 
-			WHEN CAMeetingTarget/TotalContentAreasByTopicAndWorker > .5 THEN '2'
+			WHEN CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) > .5 THEN '2'
 			ELSE '1'
 			END AS TopicRatingByWorker
 		,	CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
