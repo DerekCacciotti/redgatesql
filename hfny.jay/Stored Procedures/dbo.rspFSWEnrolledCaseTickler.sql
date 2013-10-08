@@ -125,7 +125,7 @@ END
 		h.TCNumber,
 		CASE WHEN h.TCNumber > 1 THEN 'Yes' ELSE 'No' End
 		as [MultipleBirth],
-		case when CaseProgress >= 10 then 'Complete' else convert(VARCHAR(20), dateadd(dd,30,IntakeDate), 101) end as  intakedd,	 
+		case when CaseProgress >= 10 then 'Complete' else 'due by ' + convert(VARCHAR(20), dateadd(dd,30,IntakeDate), 101) end as  intakedd,	 
 		case when CaseProgress >= 11 then 'Complete' else 'Not Complete' end as  tcid_dd,	 
 		 
 		case
