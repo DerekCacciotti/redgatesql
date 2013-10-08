@@ -8,6 +8,7 @@ GO
 -- Author:		Devinder Singh Khalsa
 -- Create date: Oct. 3rd, 2013
 -- Description:	Screen Referral Source Demographics And Outcome Analysis
+-- rspScreenReferralSourceDemographicsAndOutcomeAnalysis 1,'10/01/2012','09/30/2013'
 -- rspScreenReferralSourceDemographicsAndOutcomeAnalysis 5,'09/01/2011','08/31/2012'
 -- rspScreenReferralSourceDemographicsAndOutcomeAnalysis 5,'09/01/2011','08/31/2012', 449  (note: 449 = self referral)
 -- =============================================
@@ -61,8 +62,10 @@ END
 			[PositiveScreensNotReferred] [varchar](12),
 			[NegativeScreens] [varchar](12),
 			[KempesCompleted] [varchar](12),
-			[Enrolled] [varchar](12)	
+			[Enrolled] [varchar](12),
+			[NumOfUnduplicatedScreens] [varchar](10)	
 	)
+
 
 
 -- Positive Screens table
@@ -293,7 +296,7 @@ END
 	)
 
 	INSERT INTO #tblMainCohort
-	SELECT distinct  -- We need distinct here to remove duplicates
+	SELECT 
 		 ConceptionDate = case when h.TCDOB is null then dateadd(week, -40, h.EDC)								
 								when tcid.TCIDPK is NULL and h.TCDOB is not null
 									then dateadd(week, -40, h.TCDOB)
@@ -385,7 +388,6 @@ END
 
 
 ------------------SELECT * FROM #tblMainCohort
-
 
 -- calculate main totals
 DECLARE @numOfALLScreens INT = 0
@@ -1493,12 +1495,48 @@ VALUES(10, '    Under 21', @lastRowNumber + 5
 )
 
 
+
+
+
+-- get the count of unduplicated screens
+;
+with cteUnduplicatedScreens as
+(
+	select
+		--distinct  -- We need distinct here to remove duplicates
+		distinct
+		PC1FK
+		 
+
+		  
+		   FROM hvscreen hvs
+	inner join HVCase h on h.HVCasePK = hvs.HVCaseFK
+	inner join caseprogram cp on h.hvcasepk = cp.hvcasefk
+	inner join dbo.SplitString(@programfk, ',') on cp.programfk = listitem	
+	INNER JOIN PC ON h.PC1FK = PC.PCPK -- to get pcdob	
+	LEFT JOIN CommonAttributes ca ON ca.hvcasefk = h.hvcasepk AND ca.formtype = 'SC'
+
+	left join dbo.TCID ON dbo.TCID.HVCaseFK = h.HVCasePK
+	LEFT OUTER JOIN dbo.listReferralSource lrs on lrs.listReferralSourcePK = hvs.ReferralSourceFK
+	left outer join dbo.codeDischarge cd on cd.DischargeCode = cp.DischargeReason and DischargeUsedWhere like '%SC%'
+
+	LEFT OUTER JOIN codeApp AS b ON b.AppCode = hvs.ReferralSource AND b.AppCodeGroup = 'TypeofReferral' and b.AppCodeUsedWhere like '%sc%' 
+	
+
+	where  
+	lrs.listReferralSourcePK = isnull(@listReferralSourcePK,lrs.listReferralSourcePK)
+	and
+	h.ScreenDate between @sDate and @eDate	
+	
+
+)
+
+-- update the column i.e. NumOfUnduplicatedScreens		
+update #tblScreenAnalysisSummary
+set NumOfUnduplicatedScreens = (SELECT count(*) as count1 FROM cteUnduplicatedScreens)			
+
+
 SELECT * FROM #tblScreenAnalysisSummary
-
-
-
--- rspScreenReferralSourceDemographicsAndOutcomeAnalysis 5,'09/01/2011','08/31/2012'
--- rspScreenReferralSourceDemographicsAndOutcomeAnalysis 5,'09/01/2012','08/31/2013'
 
 
 
