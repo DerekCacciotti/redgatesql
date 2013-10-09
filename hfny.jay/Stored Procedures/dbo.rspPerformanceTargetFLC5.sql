@@ -10,7 +10,8 @@ GO
 --				Target Child's 6 months birthday
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, null, 0, null
 -- rspPerformanceTargetReportSummary 19, '10/01/2012', '12/31/2012'
--- rspPerformanceTargetReportSummary 5, '10/01/2012', '12/31/2012'
+-- rspPerformanceTargetReportSummary 5, '07/01/2013', '09/30/2013'
+-- rspPerformanceTargetReportDetails 5, '07/01/2013', '09/30/2013'
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetFLC5]
 (
@@ -117,6 +118,7 @@ begin
 			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType = 'FU-PC1' 
 												and fu.FollowUpInterval = ca.FormInterval 
 			left outer join Education e on e.FormType = 'FU' and e.FormFK = ca.FormFK and e.PCType = 'PC1'
+											and ProgramType in ('01','02','03','06')
 		)
 	select distinct PTCode
 			  , HVCaseFK

@@ -116,8 +116,9 @@ begin
 			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType = 'FU-PC1' 
 												and fu.FollowUpInterval = ca.FormInterval 
 			left outer join Education e on e.FormType = 'FU' and e.FormFK = ca.FormFK and e.PCType = 'PC1'
+											and ProgramType in ('01','02','03','06')
 		)
-	select PTCode
+	select distinct PTCode
 			  , HVCaseFK
 			  , PC1ID
 			  , OldID
