@@ -180,8 +180,8 @@ SELECT
  FROM @tbl4QAReport5Detail	
 WHERE HVCasePK NOT IN 
 	(
-	SELECT HVCaseFK FROM TCID T 
-	inner join dbo.SplitString(@programfk,',') on T.programfk = listitem
+			SELECT HVCaseFK FROM @tbl4QAReport5Detail qa
+			inner join TCID T  on T.HVCaseFK = qa.HVCasePK 		
 	)
 
 ORDER BY Worker, PC1ID 	
