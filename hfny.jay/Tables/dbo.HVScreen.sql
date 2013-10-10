@@ -39,7 +39,7 @@ CREATE TABLE [dbo].[HVScreen]
 [ScreenerPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ScreenResult] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ScreenVersion] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[TargetArea] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[TargetArea] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
