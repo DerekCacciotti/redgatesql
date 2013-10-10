@@ -1108,7 +1108,7 @@ SET @numOfTotalEnrolled56 = (SELECT count(*) FROM #tblMainCohort where TargetAre
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(6, '    Other', 29 
+VALUES(6, '    Unknown', 29 
 ,CONVERT(VARCHAR,@numOfALLScreens56) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens56 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens56) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens56 AS FLOAT) * 100/ NULLIF(@numOfALLScreens56,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred56) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred56 AS FLOAT) * 100/ NULLIF(@numOfALLScreens56,0), 0), 0))  + '%)'
@@ -1117,6 +1117,34 @@ VALUES(6, '    Other', 29
 ,CONVERT(VARCHAR,@numOfTotalEnrolled56) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled56 AS FLOAT) * 100/ NULLIF(@numOfALLScreens56,0), 0), 0))  + '%)'
 )
 
+
+-- Here is the rest of the pc1' Target Area - they did not tell waht is their Target Area
+---- calcualte Target Area  - Missing  
+DECLARE @numOfALLScreens561 INT = 0
+DECLARE @numOfTotalPositiveScreens561 INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferred561 INT = 0
+DECLARE @numOfTotalNegativeScreens561 INT = 0
+DECLARE @numOfTotalKempesCompleted561 INT = 0
+DECLARE @numOfTotalEnrolled561 INT = 0  
+
+
+SET @numOfALLScreens561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-')
+SET @numOfTotalPositiveScreens561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(6, '    Missing', 29
+,CONVERT(VARCHAR,@numOfALLScreens561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreens561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens561,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens561,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreens561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens561,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompleted561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens561,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolled561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens561,0), 0), 0))  + '%)'
+)
 
 /*************************************************/
 -- add the title for Biological Parents in the row
@@ -1175,6 +1203,35 @@ VALUES(7, '    No', 32
 ,CONVERT(VARCHAR,@numOfTotalNegativeScreens58) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens58 AS FLOAT) * 100/ NULLIF(@numOfALLScreens58,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalKempesCompleted58) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted58 AS FLOAT) * 100/ NULLIF(@numOfALLScreens58,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalEnrolled58) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled58 AS FLOAT) * 100/ NULLIF(@numOfALLScreens58,0), 0), 0))  + '%)'
+)
+
+
+-- Here is the rest of the Biological Parents - they did not tell waht is their Biological Parents
+---- calcualte Biological Parents  - Missing  
+DECLARE @numOfALLScreens581 INT = 0
+DECLARE @numOfTotalPositiveScreens581 INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferred581 INT = 0
+DECLARE @numOfTotalNegativeScreens581 INT = 0
+DECLARE @numOfTotalKempesCompleted581 INT = 0
+DECLARE @numOfTotalEnrolled581 INT = 0  
+
+
+SET @numOfALLScreens581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-')
+SET @numOfTotalPositiveScreens581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(7, '    Missing', 32
+,CONVERT(VARCHAR,@numOfALLScreens581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreens581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens581,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens581,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreens581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens581,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompleted581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens581,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolled581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens581,0), 0), 0))  + '%)'
 )
 
 
@@ -1266,6 +1323,34 @@ VALUES(8, '    Unknown', 36
 ,CONVERT(VARCHAR,@numOfTotalEnrolled61) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled61 AS FLOAT) * 100/ NULLIF(@numOfALLScreens61,0), 0), 0))  + '%)'
 )
 
+
+-- Here is the rest of the Prenatal Care - they did not tell waht is their Prenatal Care
+---- calcualte Prenatal Care  - Missing  
+DECLARE @numOfALLScreens611 INT = 0
+DECLARE @numOfTotalPositiveScreens611 INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferred611 INT = 0
+DECLARE @numOfTotalNegativeScreens611 INT = 0
+DECLARE @numOfTotalKempesCompleted611 INT = 0
+DECLARE @numOfTotalEnrolled611 INT = 0  
+
+
+SET @numOfALLScreens611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-')
+SET @numOfTotalPositiveScreens611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(8, '    Missing', 36
+,CONVERT(VARCHAR,@numOfALLScreens611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreens611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens611,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens611,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreens611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens611,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompleted611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens611,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolled611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens611,0), 0), 0))  + '%)'
+)
 
 
 
