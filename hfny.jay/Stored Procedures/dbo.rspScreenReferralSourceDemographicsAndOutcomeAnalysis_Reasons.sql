@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -88,11 +89,16 @@ end
 	inner join HVCase h on h.HVCasePK = hvs.HVCaseFK
 	inner join caseprogram cp on h.hvcasepk = cp.hvcasefk
 	inner join dbo.SplitString(@programfk, ',') on cp.programfk = listitem
+	LEFT OUTER JOIN dbo.listReferralSource lrs on lrs.listReferralSourcePK = hvs.ReferralSourceFK
 	left outer join dbo.codeDischarge cd on cd.DischargeCode = cp.DischargeReason and DischargeUsedWhere like '%SC%'
+	
+	
 
 	
 
 	where  
+	lrs.listReferralSourcePK = isnull(@listReferralSourcePK,lrs.listReferralSourcePK)
+	and
 	h.ScreenDate between @sDate and @eDate	
 	order by h.HVCasePK 
 	
