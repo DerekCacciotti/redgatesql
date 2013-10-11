@@ -8,7 +8,7 @@ GO
 -- Create date: <Febu. 28, 2013>
 -- Description:	<gets you data for Performance Target report - HD8. Medical Provider for Primary CareTaker 1 >
 -- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
--- rspPerformanceTargetReportSummary 5 ,'01/01/2012' ,'03/31/2012'
+-- rspPerformanceTargetReportSummary 9 ,'07/01/2013' ,'09/30/2013'
 
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetHD8]
@@ -233,7 +233,15 @@ begin
 		  ,PC1FullName
 		  ,CurrentWorkerFullName
 		  ,CurrentLevelName
-		  ,case
+		  , case 
+				when cach.FormDate > cafu.FormDate and cach.FormDate > '01/04/13'
+					then '1'
+				when cafu.FormDate is null
+					then '1'
+				else
+					fu.PC1InHome
+			end as PC1InHome
+		  , case
 			   when (cach.FormDate > cafu.FormDate or cafu.FormDate is null) and 
 					cach.FormDate > '01/04/13' 
 					-- and cach.PC1HasMedicalProvider is not null and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
@@ -246,7 +254,7 @@ begin
 					--else null 
 				 --  end
 		   end as FormName
-		  ,case
+		  , case
 			   when (cach.FormDate > cafu.FormDate or cafu.FormDate is null) and 
 					cach.FormDate > '01/04/13' 
 					-- and cach.PC1HasMedicalProvider is not null and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
@@ -258,7 +266,7 @@ begin
 						else null 
 					end
 		   end as FormDate
-		  ,case
+		  , case
 			   when (cach.FormDate is not null) or	-- and cach.PC1HasMedicalProvider is not null
 					(cafu.FormDate is not null		-- and cafu.PC1HasMedicalProvider is not null
 							and dbo.IsFormReviewed(cafu.FormDate,'FU',cafu.FormFK) = 1)
@@ -266,14 +274,14 @@ begin
 			   else 0
 		   end
 		   as FormReviewed
-		  ,case 
+		  , case 
 			  -- Here FormOutOfWindow means that there must be either FU (Due now) or latest CH record in CommonAttribute table for tc >= 6 months
 			   when (cach.FormDate is not null) or		--  and cach.PC1HasMedicalProvider is not null
 					(cafu.FormDate is not null) then 0	-- and cafu.PC1HasMedicalProvider is not null
 			   else
 				   1
 		   end as FormOutOfWindow
-		  ,case 
+		  , case 
 			  -- there is at least we one of either FU (Due now) or latest CH record in CommonAttribute table (FormDate belongs to CommonAttribute table)
 			   when (cach.FormDate is not null and 
 					cach.FormDate > '01/04/13') or		--  and cach.PC1HasMedicalProvider is not null
@@ -281,7 +289,7 @@ begin
 			   else
 				   1
 		   end as FormMissing		  
-		  ,case
+		  , case
 			   when cach.PC1HasMedicalProvider is not null and cach.FormDate > cafu.FormDate and 
 					cach.FormDate > '01/04/13' and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
 				   then 1 -- note: preference is given to the latest CH record first, if there is one
@@ -299,7 +307,7 @@ begin
 			left join CommonAttributes cach on cach.HVCaseFK = ch.HVCaseFK and cach.FormType = 'CH' and cach.FormDate = ch.
 				FormDate -- get the latest CH row	
 			left join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = tcGE6FUInterval.Interval
-		where fu.PC1InHome = '1'
+		-- where fu.PC1InHome = '1'
 	)
 	-- combine the above two disconnected tables (one for tc < 6 and other for TC >= 6)
 	, cteMain as
@@ -311,6 +319,7 @@ begin
 			   ,PC1FullName
 			   ,CurrentWorkerFullName
 			   ,CurrentLevelName
+			   ,'1' as PC1InHome
 			   ,FormName
 			   ,FormDate
 			   ,FormReviewed
@@ -333,6 +342,7 @@ begin
 				  ,PC1FullName
 				  ,CurrentWorkerFullName
 				  ,CurrentLevelName
+				  ,PC1InHome
 				  ,FormName
 				  ,FormDate
 				  ,FormReviewed
@@ -365,6 +375,7 @@ begin
 	from cteCohort c
 	left outer join cteMain m on c.HVCaseFK = m.HVCaseFK
 	left outer join cteIntervals4TC6MonthsOrOlderTCForm i on i.HVCaseFK = c.HVCaseFK
+	where PC1InHome is null or PC1InHome <> '0'
 	-- order by c.PC1ID
 
 end
