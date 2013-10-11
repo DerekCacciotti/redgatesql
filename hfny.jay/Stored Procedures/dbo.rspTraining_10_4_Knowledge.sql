@@ -31,8 +31,8 @@ BEGIN
 		, wp.FatherAdvocate
 		, ROW_NUMBER() OVER(ORDER BY w.workerpk DESC) AS 'RowNumber'
 	FROM Worker w 
-	INNER JOIN WorkerProgram wp ON w.WorkerPK = wp.WorkerFK
-	WHERE wp.HireDate > DATEADD(d, -181, GETDATE())
+	INNER JOIN WorkerProgram wp ON w.WorkerPK = wp.WorkerFK	
+	WHERE (wp.HireDate >=  @sdate and wp.HireDate < DATEADD(d, -181, GETDATE()))
 	AND ((wp.FAW = 1 AND wp.FAWEndDate IS NULL)
 	OR (wp.FSW = 1 AND wp.FSWEndDate IS NULL)
 	OR (wp.Supervisor =1 AND wp.SupervisorEndDate IS NULL))
