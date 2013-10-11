@@ -9,6 +9,8 @@ GO
 -- Create date: <June 3, 2010>
 -- Description:	<report: Credentialing 1-1D. Assessment Info>
 -- exec rspCredentialingAssessmentInfo '20050101', '20051231', '34', null, '13Program,13Control', ''
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingAssessmentInfo]
 (
@@ -84,9 +86,9 @@ begin
 						  from kempe 
 						  inner join hvcase ON kempe.hvcasefk = hvcasepk
 						  inner join CaseProgram cp on hvcase.HVCasePK = cp.HVcaseFK
-						  inner join worker faw on FAWFK = faw.workerpk
-				          inner join workerprogram on workerprogram.workerfk = faw.workerpk
 						  inner join dbo.SplitString(@ProgramFKs,',') ss on cp.ProgramFK = listitem
+						  inner join worker faw on FAWFK = faw.workerpk
+				          inner join workerprogram on workerprogram.workerfk = faw.workerpk AND workerprogram.programfk = listitem
 						  where 
 							   Kempe.KempeDate >= @StartDate
 							   and Kempe.KempeDate <= @EndDate

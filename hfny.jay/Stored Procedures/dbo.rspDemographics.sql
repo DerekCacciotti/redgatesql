@@ -1,7 +1,12 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+/****** Object:  StoredProcedure [dbo].[rspDemographics]    Script Date: 10/11/2013 14:27:01 ******/
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
+
 CREATE procedure [dbo].[rspDemographics]
 (
     @StartDate date,
@@ -56,7 +61,7 @@ begin
 				inner join dbo.SplitString(@ProgramFK,',') on cp.programfk = listitem
 				left outer join CommonAttributes caIntakePC2 on caIntakePC2.HVCaseFK = c.HVCasePK and caIntakePC1.FormType = 'IN-PC2'
 				left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
-				left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+				left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = listitem
 				left outer join codeApp aRace on P.Race = aRace.AppCode and aRace.AppCodeGroup = 'Race'
 				left outer join codeApp aEducation on caIntakePC1.HighestGrade = aEducation.AppCode and aEducation.AppCodeGroup = 'Education'
 			where IntakeDate <= @EndDate

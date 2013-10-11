@@ -21,6 +21,7 @@ AS
 --DECLARE @UnderCutoffOnly char(1)        = 'N'
 --DECLARE @pc1ID           varchar(13)    = ''
 --DECLARE @sitefk          int            = null
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 
 
   if @programfk is null
@@ -68,7 +69,7 @@ AS
 			inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
 			inner join worker fsw on d.CurrentFSWFK = fsw.workerpk
-			inner join workerprogram wp on wp.workerfk = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
 			inner join
 					  (select TCIDFK

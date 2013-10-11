@@ -110,17 +110,22 @@ begin
 					,workerfk
 					,pc1id
 					,casecount
-					, max(hvlevelpk) over (partition by pc1id) as  'UseThisLevelPK'
-					,sum(visitlengthminute) over (partition by pc1wrkfk) as 'Minutes'
-					,sum(expvisitcount) over (partition by pc1wrkfk) as expvisitcount
-					,min(startdate) over (partition by pc1wrkfk) as 'startdate'
-					,max(enddate) over (partition by pc1wrkfk) as 'enddate'
+					--EDIT: Chris Papas 10/11/2013
+					--removed max(hvlevelpk) bringing in wrong pk when someone inserts a previous level (e.g. hvlevelpk is larger, but levelstart is not)
+					--, max(hvlevelpk) over (partition by pc1id ) as  'UseThisLevelPK'
+					--replaced with this line
+					,(SELECT TOP 1 hvlevelpk FROM cteHVRecords ORDER BY levelstart DESC) AS [UseThisLevelPK]
+					--END 10/11/2013 EDIT
+					,sum(visitlengthminute) over (partition by pc1wrkfk ) as 'Minutes'
+					,sum(expvisitcount) over (partition by pc1wrkfk ) as expvisitcount
+					,min(startdate) over (partition by pc1wrkfk ) as 'startdate'
+					,max(enddate) over (partition by pc1wrkfk ) as 'enddate'
 					,levelname
-					,max(levelstart) over (partition by pc1wrkfk) as 'levelstart'
-					,sum(actvisitcount) over (partition by pc1wrkfk) as actvisitcount
-					,sum(inhomevisitcount) over (partition by pc1wrkfk) as inhomevisitcount
-					,sum(attvisitcount) over (partition by pc1wrkfk) as attvisitcount
-					,max(dischargedate) over (partition by pc1wrkfk) as 'dischargedate'
+					,max(levelstart) over (partition by pc1wrkfk ) as 'levelstart'
+					,sum(actvisitcount) over (partition by pc1wrkfk ) as actvisitcount
+					,sum(inhomevisitcount) over (partition by pc1wrkfk ) as inhomevisitcount
+					,sum(attvisitcount) over (partition by pc1wrkfk ) as attvisitcount
+					,max(dischargedate) over (partition by pc1wrkfk ) as 'dischargedate'
 					,IntakeDate
 					,case when TCDOB is null
 							then EDC

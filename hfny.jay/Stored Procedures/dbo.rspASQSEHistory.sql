@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -20,6 +21,8 @@ AS
 --DECLARE @UnderCutoffOnly char(1)        = 'Y'
 --DECLARE @pc1ID           varchar(13)    = ''
 --DECLARE @sitefk          int            = null
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 
   if @programfk is null
 	begin
@@ -57,7 +60,7 @@ AS
 			inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
 			inner join worker fsw on d.CurrentFSWFK = fsw.workerpk
-			inner join workerprogram wp on wp.workerfk = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
 		where
 			 d.DischargeDate is NULL

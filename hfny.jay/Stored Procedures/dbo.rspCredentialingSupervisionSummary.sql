@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -11,6 +12,8 @@ GO
 -- rspCredentialingSupervisionSummary 4, '06/01/2013', '08/31/2013'
 -- rspCredentialingSupervisionSummary 1, '06/01/2013', '08/31/2013',null,152,null
 -- rspCredentialingSupervisionSummary 1, '06/01/2013', '08/31/2013',null,null,5
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingSupervisionSummary]
@@ -123,7 +126,7 @@ END
 		     , fn.FirstEvent
 		  
 		   FROM #tblFAWFSWWorkers w 
-		   inner join workerprogram wp on wp.workerfk = w.workerpk
+		   inner join workerprogram wp on wp.workerfk = w.workerpk AND wp.programfk = listitem
 	INNER JOIN dbo.fnGetWorkerEventDatesALL(@ProgramFK, NULL, NULL) fn ON fn.workerpk = w.workerpk
 	where w.workerpk not in (SELECT workerpk FROM #tblSUPPMWorkers)
 	and
@@ -260,7 +263,7 @@ END
 				, WorkerPK
 				, 'SUP' as workertype
 		from Worker w
-		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = listitem
 		where programfk = @ProgramFK 
 				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 
@@ -272,7 +275,7 @@ END
 		 tw.workerpk
 		,wp.SupervisorFK
 		 FROM #tblWorkers tw
-		inner join workerprogram wp on wp.workerfk = tw.workerpk
+		inner join workerprogram wp on wp.workerfk = tw.workerpk AND wp.programfk = listitem
 	)
 	
 	,cteAssignedSupervisorsName as

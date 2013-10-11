@@ -9,6 +9,7 @@ GO
 -- Create date: 08/25/2010
 -- Description:	Get everyone who's CASE has EVER been in the program for > 3 years (1095 days)
 --				Moved from FamSys - 02/05/12 jrobohn
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rsp3YearsInProgram]
 (
@@ -46,14 +47,14 @@ begin
 		 ,case when DischargeDate is null then 'Case Open, '+rtrim(LevelName)
 			  else rtrim(codeDischarge.DischargeReason) end [Outcome]
 		from CaseProgram cp
-			inner join worker fsw on CurrentFSWFK = fsw.workerpk
-			inner join workerprogram wp on wp.workerfk = fsw.workerpk
 			left join HVCase c on c.HVCasePK = cp.HVCaseFK
 			left join codeDischarge on cp.DischargeReason = codeDischarge.DischargeCode
 			left join codeLevel on cp.CurrentLevelFK = codeLevel.codeLevelPK
 			left join HVProgram p on cp.ProgramFK = p.HVProgramPK
 			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = HVCasePK
+			inner join worker fsw on CurrentFSWFK = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk AND wp.programfk = listitem
 		where c.IntakeDate is not null
 			 and datediff(day,IntakeDate,case when DischargeDate is null then getdate()
 				 else DischargeDate end) > 1095

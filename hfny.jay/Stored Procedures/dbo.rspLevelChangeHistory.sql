@@ -7,6 +7,7 @@ GO
 -- Author:		<Jay Robohn>
 -- Create date: <Jan 18, 2012>
 -- Description:	<HFNY MIS report - Level Change History>
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspLevelChangeHistory](@programfk varchar(max)    = null,
                                                @pc1id     varchar(13)     = null, 
@@ -54,7 +55,7 @@ begin
 			
 			--inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
 			inner join worker fsw on cp.CurrentFSWFK = fsw.workerpk
-			inner join workerprogram wp on wp.workerfk = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
 			
 		where PC1ID = isnull(@PC1ID,pc1id)

@@ -11,6 +11,8 @@ GO
 -- Description:	<report: Combined Tickler Summary>
 --				Moved from FamSys - 02/05/12 jrobohn
 -- exec dbo.rspCombinedTicklerSummary @programfk='1',@rdate='2013-03-01 00:00:00',@supervisorfk=NULL,@workerfk=79
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspCombinedTicklerSummary]
 (
@@ -77,7 +79,7 @@ as
 					  --inner join codeduebydates on scheduledevent = optionValue
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
-					  inner join workerprogram on workerfk = fsw.workerpk
+					  inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.ProgramFK=ListItem
 					  inner join worker supervisor on supervisorfk = supervisor.workerpk
 					  inner join codelevel on codelevelpk = currentlevelfk
 					  left join asq on asq.hvcasefk = hvcasepk and asq.programfk = caseprogram.programfk and codeduebydates.interval = TCAge

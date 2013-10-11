@@ -9,6 +9,8 @@ GO
 -- Create date: <Feb 5, 2012>
 -- Description:	<report: Use of Creative Outreach - Detail>
 --				Moved from FamSys - 02/05/12 jrobohn
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspCreativeOutreach_Detail]
 (
@@ -78,7 +80,7 @@ as
 			where LevelFK = 22) e3 on e3.hvcasefk = caseprogram.hvcasefk and e3.programfk = caseprogram.programfk
 			inner join codeDischarge on DischargeCode = caseprogram.DischargeReason
 			inner join Worker on Worker.WorkerPK = CaseProgram.CurrentFSWFK
-		    inner join WorkerProgram wp on CurrentFSWFK = WorkerFK
+		    inner join WorkerProgram wp on CurrentFSWFK = WorkerFK AND wp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = HVCasePK
 		where caseprogress >= 9
 			 and intakedate <= @edate

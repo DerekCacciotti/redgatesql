@@ -8,6 +8,8 @@ GO
 -- Author:		<Jay Robohn orig by Dorothy Baum>
 -- Create date: <June 3, 2010>
 -- Description:	<report: Credentialing 1-1D. Assessment Info>
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspCredAssessmentInfo]
 (
@@ -94,7 +96,7 @@ begin
 						  JOIN hvcase ON kempe.hvcasefk = hvcasepk
 						  join caseprogram on hvcase.HVCasePK = caseprogram.HVcaseFK
 						  inner join worker fsw on CurrentFSWFK = fsw.workerpk
-				          inner join workerprogram on workerprogram.workerfk = fsw.workerpk
+				          inner join workerprogram on workerprogram.workerfk = fsw.workerpk AND workerprogram.programfk = @ProgramFKs
 					  
 						  where 
 							   Kempe.KempeDate >= @StartDate
@@ -211,7 +213,7 @@ begin
 						  JOIN hvcase ON kempe.hvcasefk = hvcasepk
 						  join caseprogram on hvcase.HVCasePK = caseprogram.HVcaseFK
 						  inner join worker fsw on CurrentFSWFK = fsw.workerpk
-				          inner join workerprogram on workerprogram.workerfk = fsw.workerpk
+				          inner join workerprogram on workerprogram.workerfk = fsw.workerpk AND workerprogram.programfk = @programfks
 					  
 						  
 						  

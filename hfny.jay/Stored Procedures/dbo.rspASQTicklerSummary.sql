@@ -14,6 +14,8 @@ GO
 --				Moved from FamSys - 02/05/12 jrobohn
 -- Modified: Exclude ASQs if case is receiving services for EI
 -- rspASQTicklerSummary 1, '12/12/2012'
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspASQTicklerSummary]
 (
@@ -74,7 +76,7 @@ DECLARE @tblASQTicklerSummaryCohort TABLE(
 			inner join codeduebydates on scheduledevent = 'ASQ' --optionValue
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			inner join worker fsw on fsw.workerpk = currentfswfk
-			inner join workerprogram on workerfk = fsw.workerpk
+			inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.programfk = listitem
 			inner join worker supervisor on supervisorfk = supervisor.workerpk
 			left join asq on asq.hvcasefk = hvcasepk and asq.programfk = caseprogram.programfk and codeduebydates.interval = TCAge
 		where asq.hvcasefk is NULL

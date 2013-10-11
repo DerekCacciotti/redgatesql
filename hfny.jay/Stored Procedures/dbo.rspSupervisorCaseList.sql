@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,6 +11,7 @@ GO
 -- Author:		<Dorothy Baum>
 -- Create date: <June 14, 2010>
 -- Description:	<report: Supervisor Case List>
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspSupervisorCaseList]
 (
@@ -55,16 +57,16 @@ begin
 				 where caseweight is not null) cl
 			left outer join caseprogram
 						   on caseprogram.currentLevelFK = cl.codeLevelPK
+			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			inner join worker
 					  on caseprogram.currentFSWFK = worker.workerpk
 			inner join workerprogram wp
-					  on wp.workerfk = worker.workerpk
+					  on wp.workerfk = worker.workerpk AND wp.programfk = listitem
 			left outer join (select workerpk
 								  ,firstName as supfname
 								  ,LastName as suplname
 								from worker) sw
 						   on wp.supervisorfk = sw.workerpk
-			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 		where
 			 dischargedate is null
 			 and sw.workerpk = isnull(@SupPK,sw.workerpk)

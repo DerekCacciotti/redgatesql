@@ -10,6 +10,8 @@ GO
 -- exec [rspEnrolledProgramCaseload] ',19,','07/01/2012','09/30/2012',null,0, null,1
 -- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2011',null,0, null,0
 -- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2010',null,1
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
@@ -99,10 +101,10 @@ end as tcdob
 ,h.TCNumber,cp.DischargeDate, cp.DischargeReason,CASE WHEN wp.SiteFK IS NULL THEN 0 ELSE wp.SiteFK END AS SiteFK
 FROM HVCase h 
 INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
-INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
-INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK -- get SiteFK
 inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem	
 inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
+INNER JOIN Worker w ON w.WorkerPK = cp.CurrentFSWFK
+INNER JOIN WorkerProgram wp ON wp.WorkerFK = w.WorkerPK AND wp.programfk = listitem
 
 -- SiteFK = isnull(@sitefk,SiteFK) does not work because column SiteFK may be null itself 
 -- so to solve this problem we make use of @tblInitRequiredDataTemp

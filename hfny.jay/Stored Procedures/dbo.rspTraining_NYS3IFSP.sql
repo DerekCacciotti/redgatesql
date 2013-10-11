@@ -21,7 +21,9 @@ BEGIN
 ;WITH  cteEventDates AS (
 	SELECT workerpk, wrkrLName
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName, hiredate
-	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
+	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent 
+	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
+	WHERE (HireDate >=  @sdate and HireDate < DATEADD(d, -91, GETDATE()))
 )
 
 

@@ -12,6 +12,8 @@ GO
 -- rspCredentialingSupervision 8, '06/01/2013', '08/31/2013'
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,152,null
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,null,5
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingSupervision]
@@ -124,7 +126,7 @@ END
 		     , fn.FirstEvent
 		  
 		   FROM #tblFAWFSWWorkers w 
-		   inner join workerprogram wp on wp.workerfk = w.workerpk
+		   inner join workerprogram wp on wp.workerfk = w.workerpk AND wp.programfk = listitem
 	INNER JOIN dbo.fnGetWorkerEventDatesALL(@ProgramFK, NULL, NULL) fn ON fn.workerpk = w.workerpk
 	where w.workerpk not in (SELECT workerpk FROM #tblSUPPMWorkers)
 	and

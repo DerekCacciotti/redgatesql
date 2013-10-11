@@ -9,6 +9,8 @@ GO
 -- Description:	Closed Enrolled Case List
 -- exec rspClosedEnrolledCaseList 1,'20120701','20120731',null 1
 -- exec rspClosedEnrolledCaseList_original 1,'20120701','20120731'
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspClosedEnrolledCaseList]-- Add the parameters for the stored procedure here
     @programfk VARCHAR(MAX) = null,
@@ -60,7 +62,7 @@ set @programfk = REPLACE(@programfk,'"','')
 				from HVLog
 				inner join CaseProgram cp1 on cp1.HVCaseFK = HVLog.HVCaseFK
 				join dbo.SplitString(@programfk,',') on cp1.programfk = listitem
-				inner join WorkerProgram wp1 on wp1.WorkerFK = cp1.CurrentFSWFK 
+				inner join WorkerProgram wp1 on wp1.WorkerFK = cp1.CurrentFSWFK AND wp1.programfk = listitem
 				where VisitType <> '0001'
 					 and cast(VisitStartTime AS DATE) <= @EndDt
 					 and cast(VisitStartTime AS DATE) >= c.IntakeDate

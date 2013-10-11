@@ -8,6 +8,8 @@ GO
 -- Create date: <Feb 5, 2012>
 -- Description:	<report: ASQSE Tickler Summary>
 --				Moved from FamSys - 02/05/12 jrobohn
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspASQSETicklerSummary]
 (@programfk    varchar(max)    = null,
@@ -53,7 +55,7 @@ as
 			inner join worker fsw
 					  on fsw.workerpk = currentfswfk
 			inner join workerprogram
-					  on workerfk = fsw.workerpk
+					  on workerfk = fsw.workerpk  AND workerprogram.programfk = listitem
 			inner join worker supervisor
 					  on supervisorfk = supervisor.workerpk
 			left join asqse

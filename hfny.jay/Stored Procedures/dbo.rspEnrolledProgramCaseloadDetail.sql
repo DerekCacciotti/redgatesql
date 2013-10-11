@@ -9,6 +9,8 @@ GO
 -- Description:	<gets you data for Enrolled Program Caseload detail info>
 -- exec [rspEnrolledProgramCaseloadDetail] 3,'01/01/2013','03/31/2013', null, null
 -- exec [rspEnrolledProgramCaseloadDetail] 37,'01/01/2013','03/31/2013', null, null
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseloadDetail]
 (
@@ -103,11 +105,11 @@ begin
 			 ,case when lc.hvcasefk is null then '' else '*' end as levelchange
 			from HVCase h
 				inner join CaseProgram cp on h.HVCasePK = cp.HVCaseFK
-				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
-				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK -- get SiteFK
-				left join cteLevelChange lc on lc.hvcasefk = cp.HVCaseFK
 				inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 				inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = HVCasePK
+				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
+				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = listitem
+				left join cteLevelChange lc on lc.hvcasefk = cp.HVCaseFK
 			where (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
 	insert into @tblInitRequiredData (
