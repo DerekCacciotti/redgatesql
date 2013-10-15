@@ -3,10 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- Stored Procedure
-
--- Stored Procedure
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <January 4th, 2013>
@@ -465,7 +461,7 @@ INSERT INTO #tblInitial_cohort
 	( -- "    b. Average Positive Mother Score"
 	-- MomScore
 	SELECT DISTINCT q8.QuarterNumber	
-			,avg(case when k.MomScore = 'U' then 0 else cast(k.MomScore as DECIMAL) END) OVER(PARTITION BY [QuarterNumber]) AS 'AvgPositiveMotherScore' 
+			,avg(case when k.MomScore = '' then 0 else cast(k.MomScore as DECIMAL) END) OVER(PARTITION BY [QuarterNumber]) AS 'AvgPositiveMotherScore' 
 			from #tblInitial_cohort h
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK AND k.KempeResult = 1 -- keeping 'k.KempeResult = 1' it here (not as in where clause down), it saved 3 seconds of execution time ... Khalsa
 			INNER JOIN #tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
@@ -757,7 +753,7 @@ INSERT INTO #tblInitial_cohort
 			, count(h.HVCasePK) over (partition by q8.[QuarterNumber]) as 'FamiliesActiveAtEndOfThisQuarterOnLevelX'
 			, q86b.FamiliesActiveAtEndOfThisQuarter AS FamiliesActiveAtEndOfThisQuarter
 		from #tblInitial_cohort h 		
-				
+
 			INNER JOIN #tblMake8Quarter q8 ON h.IntakeDate <= [QuarterEndDate]	
 			INNER JOIN cteFamiliesActiveAtEndOfThisQuarter6Again2 q86b ON q86b.QuarterNumber = q8.QuarterNumber	
 			--Note: we are making use of operator i.e. 'Outer Apply'
