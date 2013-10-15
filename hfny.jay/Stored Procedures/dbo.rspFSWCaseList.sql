@@ -3,7 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
+-- Edit date: 10/11/2013 CP  -- transfered worker fix NOT NECESSARY. The code already took care of it.
 
 
 CREATE procedure [dbo].[rspFSWCaseList](@programfk    varchar(max)    = null,

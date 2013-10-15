@@ -10,6 +10,8 @@ GO
 -- Author:    <Jay Robohn>
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspFollowUpTicklerSummary]
 (
@@ -46,7 +48,7 @@ as
 			inner join codeduebydates on scheduledevent = 'Follow Up'
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			inner join worker fsw on fsw.workerpk = currentfswfk
-			inner join workerprogram on workerfk = fsw.workerpk
+			inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.programfk = listitem
 			inner join worker supervisor on supervisorfk = supervisor.workerpk
 			left join followup on followup.hvcasefk = hvcasepk and followup.programfk = caseprogram.programfk and codeduebydates.interval = followupinterval
 		where followup.hvcasefk is NULL

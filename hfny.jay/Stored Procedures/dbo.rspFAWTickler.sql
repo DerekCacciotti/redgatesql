@@ -8,6 +8,7 @@ GO
 -- Create date: <Jan 6, 2012>
 -- Description:	<Reporting stored proc for FAW tickler>
 --				<Note: does not currently support multiple programfks>
+-- Edit date: 10/11/2013 CP - workerprogram fix NOT NEEDED.  Already had in "and workerprogram.programfk = caseprogram.programfk"
 -- =============================================
 CREATE procedure [dbo].[rspFAWTickler]
 (

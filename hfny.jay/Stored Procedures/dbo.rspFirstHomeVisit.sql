@@ -8,6 +8,8 @@ GO
 -- Create date: 10/19/2010
 -- Description:	Report - 1.1.F Timing of First Home Visit
 --				Moved from FamSys - 02/05/12 jrobohn
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspFirstHomeVisit]
 (
@@ -79,8 +81,8 @@ as
 					  from hvlog
 						  left join HVCase on HVCase.HVCasePK = hvlog.hvcasefk
 						  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
-						  inner join WorkerProgram wp on WorkerFK = CurrentFSWFK
 						  inner join dbo.SplitString(@programfk,',') on hvlog.programfk = listitem
+						  inner join WorkerProgram wp on WorkerFK = CurrentFSWFK AND wp.programfk = listitem
 					  where CaseProgress >= 9
 						   and IntakeDate between @STDate and @EndDate
 						   and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)

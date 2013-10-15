@@ -10,6 +10,8 @@ GO
 -- rspDataReport_bak 5, '06/01/2012', '09/30/2012'			
 
 -- exec rspFatherhoodAdvocateCaseList 2
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 
 
@@ -107,10 +109,10 @@ as
 				
 				LEFT join pc obp on obp.pcpk = ff.pcfk -- father figure like obp
 				
-				
-				inner join workerprogram on workerprogram.workerfk = fa.workerpk
-				inner join worker supervisor on supervisorfk = supervisor.workerpk
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+				
+				inner join workerprogram on workerprogram.workerfk = fa.workerpk AND workerprogram.programfk = listitem
+				inner join worker supervisor on supervisorfk = supervisor.workerpk
 			where ff.FatherAdvocateFK = isnull(@workerfk,ff.FatherAdvocateFK)
 				 and supervisorfk = isnull(@supervisorfk,supervisorfk)				 
 				 and dischargedate is NULL  -- only open cases

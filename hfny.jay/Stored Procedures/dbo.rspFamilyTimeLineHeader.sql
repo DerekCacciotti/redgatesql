@@ -9,6 +9,8 @@ GO
 -- Create date: 
 -- Description:	<report: Family time line -- header>
 --				moved from FamSys Feb 20, 2012 by jrobohn
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+--            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspFamilyTimeLineHeader]
 (
@@ -59,13 +61,12 @@ as
 			left join pc ec on cpfk = ec.pcpk
 			inner join worker fsw on fsw.workerpk = currentfswfk
 			left join pc obp on obpfk = obp.pcpk
-			inner join workerprogram on currentfswfk = workerprogram.workerfk --and workerprogram.programfk = caseprogram.programfk
-			inner join worker supervisor on supervisor.workerpk = workerprogram.supervisorfk
-			left join kempe on kempe.hvcasefk = hvcasepk --and kempe.programfk = caseprogram.programfk
+			left join kempe on kempe.hvcasefk = hvcasepk 
 			left join pc pc2 on pc2fk = pc2.pcpk
-			--left join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-			INNER join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
+			INNER join tcid on tcid.hvcasefk = hvcasepk 
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+			inner join workerprogram on currentfswfk = workerprogram.workerfk AND workerprogram.programfk = listitem
+			inner join worker supervisor on supervisor.workerpk = workerprogram.supervisorfk
 		where pc1id = @pc1id
 			 and caseprogress >= 11 
 GO

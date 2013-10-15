@@ -126,7 +126,8 @@ END
 		     , fn.FirstEvent
 		  
 		   FROM #tblFAWFSWWorkers w 
-		   inner join workerprogram wp on wp.workerfk = w.workerpk AND wp.programfk = listitem
+		   inner join workerprogram wp on wp.workerfk = w.workerpk 
+		   --AND wp.programfk = @ProgramFK
 	INNER JOIN dbo.fnGetWorkerEventDatesALL(@ProgramFK, NULL, NULL) fn ON fn.workerpk = w.workerpk
 	where w.workerpk not in (SELECT workerpk FROM #tblSUPPMWorkers)
 	and
@@ -263,7 +264,7 @@ END
 				, WorkerPK
 				, 'SUP' as workertype
 		from Worker w
-		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = listitem
+		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = @ProgramFK
 		where programfk = @ProgramFK 
 				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 
@@ -275,7 +276,7 @@ END
 		 tw.workerpk
 		,wp.SupervisorFK
 		 FROM #tblWorkers tw
-		inner join workerprogram wp on wp.workerfk = tw.workerpk AND wp.programfk = listitem
+		inner join workerprogram wp on wp.workerfk = tw.workerpk AND wp.programfk = @ProgramFK
 	)
 	
 	,cteAssignedSupervisorsName as
