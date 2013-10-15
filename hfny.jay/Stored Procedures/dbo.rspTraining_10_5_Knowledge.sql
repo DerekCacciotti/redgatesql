@@ -253,7 +253,7 @@ SELECT [TopicName]
 			ELSE '1'
 			END AS TopicRatingByWorker
 		,	CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
-			WHEN (SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker) + (SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker) = TotalWorkers THEN '2'
+			WHEN (SUM(isnull(MeetsTargetForAll, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker) + (SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker) = TotalWorkers THEN '2'
 			ELSE '1'
 			END AS TopicRatingBySite
 		, CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
