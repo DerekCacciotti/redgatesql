@@ -66,7 +66,7 @@ BEGIN
 		GROUP BY GenericColumn
 )
 
- SELECT cteFinal.workername, HireDate, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
+ SELECT cteFinal.workername, HireDate as FirstEventDate, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
  ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) = 1 THEN '3' 
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) < .9 THEN '1'
