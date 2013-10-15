@@ -203,7 +203,10 @@ begin
 				, FormReviewed
 				, FormOutOfWindow
 				, FormMissing
-				, case when (PC1Score + PC2Score + OBPScore) >= 1
+				, case when FormReviewed = 1 
+							and FormOutOfWindow = 0
+							and FormMissing = 0
+							and (PC1Score + PC2Score + OBPScore) >= 1
 						then 1
 						else 0
 						end
