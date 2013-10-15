@@ -25,7 +25,7 @@ BEGIN
 	SELECT workerpk, wrkrLName
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName, hiredate
 	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent 
-	, '1' AS WorkerCounter
+	, '1' AS MyWrkrCount
 	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
 	WHERE (HireDate >=  @sdate and HireDate < DATEADD(d, -91, GETDATE()))
 )
@@ -33,7 +33,7 @@ BEGIN
 
 , cteGetShadowDate AS (
 		select WorkerPK, WrkrLName, WorkerName
-		, workercounter as WorkerCount
+		, COUNT(workerpk) OVER (PARTITION BY MyWrkrCount) AS WorkerCount
 		, hiredate
 		, (Select MIN(trainingdate) as TrainingDate 
 									from TrainingAttendee ta
@@ -44,8 +44,8 @@ BEGIN
 									)
 			AS FirstIFSPDate
 		 from cteEventDates
+		 group by WorkerPK, WrkrLName, WorkerName, HireDate, MyWrkrCount
 )
-
 
 , cteFinal as (
 	SELECT WorkerPK, workername, FirstIFSPDate, workercount
