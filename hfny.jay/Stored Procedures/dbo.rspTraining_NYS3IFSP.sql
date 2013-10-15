@@ -7,6 +7,8 @@ GO
 -- Author:		Chris Papas
 -- Create date: 04/15/2013
 -- Description:	Training [NYS 3 IFSP] New York State Required Trainings
+-- Edited On:		10/15/2013 - as per JH, this report should only look at hire date, not First Event Date
+-- Edited By:	Chris Papas
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTraining_NYS3IFSP]
 	-- Add the parameters for the stored procedure here
@@ -18,80 +20,38 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 --Get FAW's in time period
+
 ;WITH  cteEventDates AS (
 	SELECT workerpk, wrkrLName
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName, hiredate
 	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent 
+	, '1' AS WorkerCounter
 	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
 	WHERE (HireDate >=  @sdate and HireDate < DATEADD(d, -91, GETDATE()))
 )
-
-
-
-, cteFAW as (
-	Select workerpk, wrkrLName, WorkerName
-	, FirstKempeDate as FirstEventDate
-	, '1' AS WorkerCounter
-	FROM cteEventDates
-	WHERE FirstKempeDate >= @sdate
-)
-
-, cteFSW as (
-	Select workerpk, wrkrLName, WorkerName
-	, FirstHomeVisitDate as FirstEventDate
-	, '1' AS WorkerCounter
-	FROM cteEventDates
-	WHERE FirstHomeVisitDate >= @sdate
-)
-
-, cteSups as (
-	Select workerpk, wrkrLName, WorkerName
-	, SupervisorFirstEvent as FirstEventDate
-	, '1' AS WorkerCounter
-	FROM cteEventDates
-	WHERE SupervisorFirstEvent >= @sdate 
-)
-
---because this report is to get IFSP training 3 months after hire to any HFNY position, only get ONE worker per report (get first hire position date)
-, ctePutWorkersTogether1 as (
-		Select distinct workerpk, wrkrLName, WorkerName, workercounter, FirstEventDate FROM cteFAW
-		UNION
-		Select distinct workerpk, wrkrLName, WorkerName, workercounter, FirstEventDate FROM cteFSW
-		UNION
-		Select distinct workerpk, wrkrLName, WorkerName,  workercounter, FirstEventDate FROM cteSups
-)
-
-, ctePutWorkersTogether2 AS (
-	SELECT DISTINCT workerpk, wrkrLName, WorkerName, workercounter, min(FirstEventDate) AS FirstEventDate
-	FROM ctePutWorkersTogether1
-	GROUP BY workerpk, wrkrLName, WorkerName, workercounter
-)
-
-, ctePutWorkersTogether3 AS (
-	--this is where we count the total workers
-	SELECT count(workercounter) AS workercount FROM ctePutWorkersTogether2
-	GROUP BY WorkerCounter
-	)
-
+	
 
 , cteGetShadowDate AS (
 		select WorkerPK, WrkrLName, WorkerName
-		, FirstEventDate, workercount
+		, workercounter as WorkerCount
+		, hiredate
 		, (Select MIN(trainingdate) as TrainingDate 
 									from TrainingAttendee ta
 									LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
 									LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
 									LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
-									where (TopicCode = 7.0 and ta.WorkerFK=ctePutWorkersTogether2.WorkerPK)
+									where (TopicCode = 7.0 and ta.WorkerFK=cteEventDates.WorkerPK)
 									)
 			AS FirstIFSPDate
-		 from ctePutWorkersTogether2, ctePutWorkersTogether3
+		 from cteEventDates
 )
 
+
 , cteFinal as (
-	SELECT WorkerPK, workername, firsteventdate, FirstIFSPDate, workercount
+	SELECT WorkerPK, workername, FirstIFSPDate, workercount
+		, hiredate
 		,CASE WHEN FirstIFSPDate Is Null THEN 'F'
-		WHEN dateadd(dd, 91, FirstEventDate) < FirstIFSPDate THEN 'F'		
+		WHEN dateadd(dd, 91, HireDate) < FirstIFSPDate THEN 'F'		
 		ELSE 'T' END AS MeetsTarget
 		, '1' AS GenericColumn --used for next cte cteCountMeeting
 	From cteGetShadowDate
@@ -106,7 +66,7 @@ BEGIN
 		GROUP BY GenericColumn
 )
 
- SELECT cteFinal.workername, firsteventdate, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
+ SELECT cteFinal.workername, HireDate, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
  ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) = 1 THEN '3' 
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) < .9 THEN '1'
@@ -116,7 +76,6 @@ BEGIN
 FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.GenericColumn = cteFinal.GenericColumn
 ORDER BY cteFinal.workername
-
 
 END
 GO
