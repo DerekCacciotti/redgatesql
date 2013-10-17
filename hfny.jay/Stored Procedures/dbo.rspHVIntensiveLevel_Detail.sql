@@ -7,6 +7,7 @@ GO
 -- Author:    <Dar Chen>
 -- Create date: <Dec 11, 2012>
 -- Description: <4-1B. Intensive Home Visitation Level after Target Child is Born>
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspHVIntensiveLevel_Detail]
 (

@@ -8,6 +8,7 @@ GO
 -- Create date: 06/18/2010
 -- Description:	FAW Monthly Report
 -- exec rspPrimaryCaretaker1Issues 19, N'07/01/12', N'09/30/12', NULL, NULL
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspPrimaryCaretaker1Issues]-- Add the parameters for the stored procedure here
     @programfk VARCHAR(MAX) = null,
@@ -44,7 +45,7 @@ set @programfk = replace(@programfk,'"','')
 							join CaseProgram cp on cp.HVCaseFK = pc1i.HVCaseFK
 							INNER JOIN dbo.SplitString(@programfk,',') on pc1i.programfk = listitem
 							inner join HVCase h on h.HVCasePK = cp.HVCaseFK
-							inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK -- get SiteFK
+							inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK
 							inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
 						where -- pc1i.PC1IssuesDate between @StartDt and @EndDt
 							 --pc1i.ProgramFK = @programfk and 

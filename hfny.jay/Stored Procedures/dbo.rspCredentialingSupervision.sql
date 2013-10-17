@@ -9,6 +9,8 @@ GO
 -- Create date: August 8, 2013
 -- Description:	Credentialing report for Supervisions
 
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+
 -- rspCredentialingSupervision 31, '07/01/2013', '09/30/2013'
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,152,null
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,null,5
@@ -480,7 +482,7 @@ END
 				, WorkerPK
 				, 'SUP' as workertype
 		from Worker w
-		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.ProgramFK = @ProgramFK
 		where programfk = @ProgramFK 
 				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 
@@ -492,7 +494,7 @@ END
 		 tw.workerpk
 		,wp.SupervisorFK
 		 FROM #tblWorkers tw
-		inner join workerprogram wp on wp.workerfk = tw.workerpk
+		inner join workerprogram wp on wp.workerfk = tw.workerpk AND wp.ProgramFK = @ProgramFK
 	)
 	
 	,cteAssignedSupervisorsName as

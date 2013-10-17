@@ -4,6 +4,7 @@ GO
 SET ANSI_NULLS ON
 GO
 
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 CREATE PROCEDURE [dbo].[rspPSIHistory]
 ( @programfk VARCHAR(MAX) = NULL, 
   @supervisorfk INT = NULL, 
@@ -54,7 +55,7 @@ AND b.AppCodeUsedWhere LIKE '%PS%'
 INNER JOIN CaseProgram d ON d.HVCaseFK = a.HVCaseFK
 INNER JOIN dbo.SplitString(@programfk,',') on d.programfk = listitem
 INNER JOIN worker fsw ON d.CurrentFSWFK = fsw.workerpk
-INNER JOIN workerprogram wp ON wp.workerfk = fsw.workerpk
+INNER JOIN workerprogram wp ON wp.workerfk = fsw.workerpk AND wp.ProgramFK=ListItem
 INNER JOIN worker supervisor ON wp.supervisorfk = supervisor.workerpk
 
 INNER JOIN 

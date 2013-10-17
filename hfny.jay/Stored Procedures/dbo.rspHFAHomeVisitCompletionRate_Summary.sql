@@ -7,6 +7,8 @@ GO
 -- Author:		<Jay Robohn>
 -- Create date: <Jan 4, 2012>
 -- Description:	<Converted FamSys report - Home Visit Achievement Rate - Aggregate>
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating transferred workers - YEAH!
+
 -- =============================================
 CREATE procedure [dbo].[rspHFAHomeVisitCompletionRate_Summary](@programfk    varchar(max)    = null,
                                                        @sdate        datetime,

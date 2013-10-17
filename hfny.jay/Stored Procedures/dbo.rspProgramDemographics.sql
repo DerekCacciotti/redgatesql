@@ -8,6 +8,7 @@ GO
 -- Create date: 06/18/2010
 -- Description:	FAW Monthly Report
 -- exec rspProgramDemographics @programfk = 18, @StartDt = N'12/01/11', @EndDt = N'11/30/12', @SiteFK = 21 
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspProgramDemographics]
     --@programfk int = null,

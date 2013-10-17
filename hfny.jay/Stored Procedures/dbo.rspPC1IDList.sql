@@ -8,6 +8,7 @@ GO
 -- Create date: <Feb 5, 2012>
 -- Description:	<report: Use of Creative Outreach - Detail>
 --				Moved from FamSys - 02/05/12 jrobohn
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspPC1IDList]
 (
@@ -118,10 +119,10 @@ as
 			inner join worker fsw
 					  on CurrentFSWFK = fsw.workerpk
 			inner join workerprogram
-					  on workerfk = fsw.workerpk
+					  on workerfk = fsw.workerpk AND workerprogram.ProgramFK=@programfk
 			
 INNER JOIN worker supervisor
-ON workerprogram.supervisorfk = supervisor.workerpk
+ON workerprogram.supervisorfk = supervisor.workerpk AND workerprogram.ProgramFK=@programfk
 
 					  
 		where caseprogram.programfk = @programfk

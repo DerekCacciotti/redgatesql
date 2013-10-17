@@ -9,6 +9,7 @@ GO
 -- Create date: <Jul 11, 2012>
 -- Description: 
 -- exec rspKempePC1Issues 19, '20120701', '20120930', '', null
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspKempePC1Issues]
 (
@@ -54,8 +55,8 @@ begin
 		from PC1Issues pc1i
 		inner join caseprogram cp on cp.HVCaseFK = pc1i.HVCaseFK
 		inner join Kempe k on k.PC1IssuesFK = pc1i.PC1IssuesPK
-		inner join WorkerProgram wp on WorkerFK = FAWFK
 		inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
+		inner join WorkerProgram wp on WorkerFK = FAWFK AND wp.programfk = listitem
 		inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = pc1i.HVCaseFK
 		where PC1IssuesDate <= @EndDt
 				and Interval='1'
@@ -73,8 +74,8 @@ begin
 		from HVCase c
 			join ServiceReferral sr on sr.HVCaseFK = c.HVCasePK
 			inner join caseprogram cp on cp.HVCaseFK = c.HVCasePK
-			inner join WorkerProgram wp on WorkerFK = FSWFK
 			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
+			inner join WorkerProgram wp on WorkerFK = FSWFK AND wp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = c.HVCasePK
 		where c.IntakeDate between @StartDt and @EndDt
 			 and sr.ReferralDate-c.IntakeDate < 183
@@ -103,9 +104,9 @@ begin
 			join codeLevel l on cp.CurrentLevelFK = l.codeLevelPK
 			left outer join cteReferrals sr on sr.HVCasePK = c.HVCasePK
 			inner join worker fsw on fsw.workerpk = cp.currentfswfk
-			inner join workerprogram wp on wp.workerfk = fsw.workerpk
-			inner join worker sup on supervisorfk = sup.workerpk
 			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk AND wp.programfk = listitem
+			inner join worker sup on supervisorfk = sup.workerpk
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = c.HVCasePK
 		where c.IntakeDate between @StartDt and @EndDt
 			 --and cp.ProgramFK = @programfk

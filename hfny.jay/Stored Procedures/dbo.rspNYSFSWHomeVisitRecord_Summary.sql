@@ -8,6 +8,7 @@ GO
 -- Create date: <Jan 4, 2012>
 -- Description:	<Converted FamSys report - Home Visit Achievement Rate - Aggregate>
 --				04/29 Changed to NYS FSW Home Visit Record
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspNYSFSWHomeVisitRecord_Summary](@programfk    varchar(max)    = null,
                                                        @sdate        datetime,

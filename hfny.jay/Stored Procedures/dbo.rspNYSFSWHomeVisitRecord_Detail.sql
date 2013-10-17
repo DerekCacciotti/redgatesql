@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,6 +9,7 @@ GO
 -- Edit date: 7/10/2013 (Chris Papas) - cteMain levelname fix
 -- Description:	<Converted FamSys report - Home Visit Achievement Rate - Aggregate>
 --				04/29 Changed to NYS FSW Home Visit Record
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- exe 
 -- =============================================
 CREATE procedure [dbo].[rspNYSFSWHomeVisitRecord_Detail](@programfk    varchar(max)    = null,

@@ -8,6 +8,7 @@ GO
 -- Author:    <Jay Robohn>
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspKempeObservationBySupervisor]
 (

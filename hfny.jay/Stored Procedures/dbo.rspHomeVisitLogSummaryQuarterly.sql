@@ -7,6 +7,7 @@ GO
 -- Author:		Dar Chen
 -- Create date: Jul/23/2012
 -- Description:	Home Visit Log Summary Quarterly
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspHomeVisitLogSummaryQuarterly]
     @programfk VARCHAR(MAX) = null,
@@ -51,7 +52,7 @@ set @programfk = replace(@programfk,'"','')
 		from HVLog as a
 			join CaseProgram as b on b.HVCaseFK = a.HVCaseFK
 			INNER JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
-			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join WorkerProgram wp on WorkerFK = FSWFK AND wp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
 		where 
 		--b.ProgramFK = @programfk and 
@@ -84,7 +85,7 @@ set @programfk = replace(@programfk,'"','')
 		from HVLog as a
 			join CaseProgram as b on b.HVCaseFK = a.HVCaseFK
 			INNER JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
-			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join WorkerProgram wp on WorkerFK = FSWFK AND wp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = b.HVCaseFK
 		where 
 		--b.ProgramFK = @programfk and 
@@ -240,7 +241,7 @@ set @programfk = replace(@programfk,'"','')
 			join CaseProgram as b on b.HVCaseFK = a.HVCasePK
 			INNER JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 			join HVLog as c on a.HVCasePK = c.HVCaseFK
-			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join WorkerProgram wp on WorkerFK = FSWFK AND wp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 		where 
 		--b.ProgramFK = @programfk and 
@@ -369,7 +370,7 @@ set @programfk = replace(@programfk,'"','')
 			join CaseProgram as b on b.HVCaseFK = a.HVCasePK
 			INNER JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 			join HVLog as c on a.HVCasePK = c.HVCaseFK
-			inner join WorkerProgram wp on WorkerFK = FSWFK
+			inner join WorkerProgram wp on WorkerFK = FSWFK AND wp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 		where 
 		--b.ProgramFK = @programfk and 
