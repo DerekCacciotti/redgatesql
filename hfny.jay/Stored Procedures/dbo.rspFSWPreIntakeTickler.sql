@@ -12,7 +12,6 @@ GO
 -- Description: 
 -- exec rspFSWPreIntakeTickler 28, '20130201', null, null
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
---            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
 CREATE procedure [dbo].[rspFSWPreIntakeTickler]
 (
@@ -72,7 +71,7 @@ select c.PC1ID [pc1ID]
 		join Preassessment as d on a.HVCasePK = d.HVCaseFK and d.CaseStatus = '02'
 		left outer join lastpreintake as e on e.HVCaseFK = a.HVCasePK
 		inner join worker fsw on fsw.workerpk = c.currentfswfk
-		inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.workerfk = @programfk
+		inner join workerprogram on workerfk = fsw.workerpk  and WorkerProgram.ProgramFK=@programfk
 		inner join worker supervisor on supervisorfk = supervisor.workerpk
 
 	where c.DischargeDate is null
