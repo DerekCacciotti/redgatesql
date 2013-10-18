@@ -10,7 +10,7 @@ GO
 -- Author:    <Dar Chen>
 -- Create date: <Oct 1, 2012>
 -- Description: <>
--- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspPSITicklerSummary]
 (
@@ -47,7 +47,7 @@ as
 			inner join codeduebydates on scheduledevent = 'PSI'
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			inner join worker fsw on fsw.workerpk = currentfswfk
-			inner join workerprogram on workerfk = fsw.workerpk
+			inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.ProgramFK = ListItem
 			inner join worker supervisor on supervisorfk = supervisor.workerpk
 			
 			left join PSI on PSI.hvcasefk = hvcasepk and PSI.programfk = caseprogram.programfk 

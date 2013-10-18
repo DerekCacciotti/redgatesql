@@ -8,6 +8,9 @@ GO
 -- Create date: 05/03/2013
 -- Description:	Training [NYS 3 IFSP] New York State Required Trainings
 -- EXEC rspTraining_10_2_Orientation @progfk = 30, @sdate = '07/01/2008'
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+-- Edit date: 10/11/2013 CP - the bit values in workerprogram table (FSW, FAW, Supervisor, FatherAdvocate, Program Manager)
+--				are no longer being populated based on the latest workerform changes by Dar, so I've modified this report.
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTraining_10_2_Orientation]
 	-- Add the parameters for the stored procedure here
@@ -23,19 +26,23 @@ BEGIN
 	, g.FirstKempeDate, g.SupervisorFirstEvent
 	, g.FirstEvent
 		, RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName) AS WorkerName
-		, wp.Supervisor
-		, wp.FSW
-		, wp.FAW
+		, case when wp.SupervisorStartDate is not null then 1 end as Supervisor
+		, case when wp.FSWStartDate is not null then 1 end as FSW
+		, case when wp.FAWStartDate is not null then 1 end as FAW
 		, ROW_NUMBER() OVER(ORDER BY g.workerpk DESC) AS 'RowNumber'
 	FROM dbo.fnGetWorkerEventDatesALL(@progfk, NULL, NULL) g
 	INNER JOIN Worker w ON w.WorkerPK = g.WorkerPK
-	INNER JOIN WorkerProgram wp ON g.WorkerPK = wp.WorkerFK
+	INNER JOIN WorkerProgram wp ON g.WorkerPK = wp.WorkerFK AND wp.ProgramFK=@progfk
 	WHERE g.FirstEvent > @sdate
-	AND ((wp.FAW = 1 AND wp.FAWEndDate IS NULL)
-	OR (wp.FSW = 1 AND wp.FSWEndDate IS NULL)
-	OR (wp.Supervisor =1 AND wp.SupervisorEndDate IS NULL))
-	AND wp.HireDate > @sdate
+	AND ((wp.FAWStartDate > @sdate AND wp.FAWEndDate IS NULL)
+	OR (wp.FSWStartDate > @sdate AND wp.FSWEndDate IS NULL)
+	OR (wp.SupervisorStartDate  > @sdate AND wp.SupervisorEndDate IS NULL))
 	AND wp.TerminationDate IS NULL
+	AND wp.HireDate > @sdate
+	
+	
+	
+	
 	
 )
  

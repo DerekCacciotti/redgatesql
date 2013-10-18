@@ -145,7 +145,7 @@ END
 		inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 		inner join pc on pc.pcpk = pc1fk
 		left join worker fsw on cp.CurrentFSWFK = fsw.workerpk
-		INNER JOIN workerprogram wp ON wp.workerfk = fsw.workerpk
+		INNER JOIN workerprogram wp ON wp.workerfk = fsw.workerpk AND wp.ProgramFK = ListItem
 		left JOIN worker supervisor ON wp.supervisorfk = supervisor.workerpk
 		left join TCID T on T.HVCaseFK = h.HVCasePK 		
 		

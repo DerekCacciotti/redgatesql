@@ -7,6 +7,7 @@ GO
 -- Author:		Chris Papas
 -- Create date: 05/22/2013
 -- Description:	Training Data Training: New York State Required Trainings
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingDataTraining]
 	-- Add the parameters for the stored procedure here

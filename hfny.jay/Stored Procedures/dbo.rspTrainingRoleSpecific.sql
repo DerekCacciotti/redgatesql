@@ -7,6 +7,7 @@ GO
 -- Author:		Chris Papas
 -- Create date: 03/22/2013
 -- Description:	Training [10-3] Credential Evidence (Intensive Role Specific Training)
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingRoleSpecific]
 	-- Add the parameters for the stored procedure here

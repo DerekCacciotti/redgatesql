@@ -201,7 +201,7 @@ as
 					  --inner join codeduebydates on scheduledevent = optionValue
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
-					  inner join workerprogram on workerfk = fsw.workerpk
+					  inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.ProgramFK = ListItem
 					  inner join worker supervisor on supervisorfk = supervisor.workerpk
 					  inner join codelevel on codelevelpk = currentlevelfk
 					  left join asqse on asqse.hvcasefk = hvcasepk and asqse.programfk = caseprogram.programfk 
@@ -238,7 +238,7 @@ as
 					  inner join codeduebydates on scheduledevent = 'Follow Up'
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
-					  inner join workerprogram on workerfk = fsw.workerpk
+					  inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.ProgramFK=ListItem
 					  inner join worker supervisor on supervisorfk = supervisor.workerpk
 					  inner join codelevel on codelevelpk = currentlevelfk
 					  left join followup on followup.hvcasefk = hvcasepk and followup.programfk = caseprogram.programfk 
@@ -277,7 +277,7 @@ as
 					  inner join codeduebydates on scheduledevent = 'PSI'
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
-					  inner join workerprogram on workerfk = fsw.workerpk
+					  inner join workerprogram on workerfk = fsw.workerpk  AND workerprogram.ProgramFK=ListItem
 					  inner join worker supervisor on supervisorfk = supervisor.workerpk
 					  inner join codelevel on codelevelpk = currentlevelfk
 					  left join PSI on PSI.hvcasefk = hvcasepk and PSI.programfk = caseprogram.programfk 
