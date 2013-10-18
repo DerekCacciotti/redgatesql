@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,8 +9,9 @@ GO
 -- Create date: 08/23/2010
 -- Description:	Complete list of workers and their details (mostly for conversion data checking)
 --				Moved from FamSys - 02/05/12 jrobohn
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
-create procedure [dbo].[rspWorkerInfoList]
+CREATE procedure [dbo].[rspWorkerInfoList]
 (@programfk int)
 -- Add the parameters for the stored procedure here
 as
@@ -43,7 +45,7 @@ begin
 				  ,HireDate
 				  ,TerminationDate
 		from Worker
-			left join WorkerProgram on WorkerProgram.WorkerFK = Worker.WorkerPK
+			left join WorkerProgram on WorkerProgram.WorkerFK = Worker.WorkerPK AND WorkerProgram.ProgramFK=@programfk
 			left join HVPROGRAM on WorkerProgram.ProgramFK = HVProgram.HVProgramPK
 		where programfk = @programfk
 		order by Program_Name desc

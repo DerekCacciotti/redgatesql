@@ -11,6 +11,7 @@ GO
 -- rspQAReport16 12, 'summary'	--- for summary page
 -- rspQAReport16 12			--- for main report - location = 2
 -- rspQAReport16 null			--- for main report for all locations
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 
 

@@ -7,6 +7,7 @@ GO
 -- Author:		Dar Chen
 -- Create date: 04/24/2013
 -- Description:	Worker Characteristics Summary
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspWorkerCharacteristicsSummaryDetail]
     @programfk VARCHAR(MAX) = null,

@@ -8,6 +8,7 @@ GO
 -- Create date: 12/18/2012
 -- Edit Date: 02/21/2013
 -- Edit Reason: John no longer wants Exempt Trainings
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred, but fixed with change to fnGetWorkerEventDatesALL
 -- Description:	Worker Training Resume
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingResume]

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,6 +8,8 @@ GO
 -- Create date: 08/14/2012
 -- Description:	Get worker first event dates for workers INCLUDING TERMINATED
 		--Hire Date / First Kempe / First Home Visit / Termination / First Supervisor / First ASQ
+-- Edit Date: 10/18/2013 as per John, we want there most recent program, so don't bring in programs where the worker transferred from
+--		(example: "where k.ProgramFK = @prgfk" (this code ALSO eliminates duplicate rows if the worker transferred)
 -- =============================================
 CREATE FUNCTION [dbo].[fnGetWorkerEventDatesALL]
 (	
@@ -23,6 +26,7 @@ RETURN
 		WITH ctKempe AS
 		(SELECT DISTINCT fawfk, min(kempedate) AS KempeDate
 		FROM Kempe k 
+		where k.ProgramFK = @prgfk
 		GROUP BY fawfk, programfk
 		--Having ProgramFK=@prgfk
 		)
@@ -30,6 +34,7 @@ RETURN
 		, ctASQ AS
 		(SELECT DISTINCT FSWFK, min(DateCompleted) AS DateCompleted
 		FROM asq a
+		WHERE a.programfk = @prgfk
 		GROUP BY FSWFK, programfk
 		--Having ProgramFK=@prgfk
 		)
@@ -37,6 +42,7 @@ RETURN
 		, ctHVLog AS
 		(SELECT DISTINCT FSWFK, min(VisitStartTime) AS VisitStartTime
 		FROM hvlog
+		WHERE hvlog.programfk = @prgfk
 		GROUP BY FSWFK, programfk
 		--Having ProgramFK=@prgfk
 		)

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,6 +10,7 @@ GO
 -- Author:    <Dar Chen>
 -- Create date: <Oct 1, 2012>
 -- Description: <>
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspPSITicklerSummary]
 (

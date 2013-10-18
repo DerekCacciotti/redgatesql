@@ -7,6 +7,7 @@ GO
 -- Author:		Dar Chen
 -- Create date: 04/24/2012
 -- Description:	Home Visit Log Summary Quarterly
+-- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspWorkerCharacteristicsSummary]
     @programfk VARCHAR(MAX) = null,

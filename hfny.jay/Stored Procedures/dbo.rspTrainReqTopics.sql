@@ -3,11 +3,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 8/16/2012
 -- Description:	Report: Training Required Topics
 -- EXEC rspTrainReqTopics 1, NULL, NULL
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainReqTopics]
 	-- Add the parameters for the stored procedure here
@@ -20,8 +22,28 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
+
+declare @workerstring as nvarchar(max) = null
+
     -- Insert statements for procedure here
-;WITH ctAttendee AS
+
+if @worker is null
+	begin --get worker list for program
+		select @workerstring = substring((SELECT ','+ltrim(rtrim(str(workerfk)))
+									from WorkerProgram wp where wp.ProgramFK=@prgfk
+									for xml path ('')),2,8000)
+	end
+	
+	--print @worker	
+
+;with ctWorkerTable as
+(
+ select workerpk from Worker 
+	inner join dbo.SplitString(@workerstring, ',') on Worker.WorkerPK=ListItem
+)
+
+  
+,ctAttendee AS
 (
 SELECT t.TrainingPK
 	 , t.TrainingDate
@@ -32,14 +54,14 @@ SELECT t.TrainingPK
 	 , st.SubTopicName
 	 , t.IsExempt
 FROM Training t
-INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK
+INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK 
 INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK
-INNER JOIN Worker w ON w.WorkerPK = ta.workerfk
-INNER JOIN WorkerProgram wp ON wp.WorkerFK=w.WorkerPK
+INNER JOIN ctWorkerTable w ON w.WorkerPK = ta.workerfk
+INNER JOIN WorkerProgram wp ON wp.WorkerFK=w.WorkerPK AND wp.ProgramFK=@prgfk
 RIGHT JOIN codetopic ON codetopic.codeTopicPK = td.topicfk
 left JOIN SubTopic st ON st.SubTopicPK=td.SubTopicFK
---WHERE wp.TerminationDate IS NOT NULL
---WHERE t.ProgramFK = @prgfk  (Can't link on programfk because some workers will be transferred from a different program)
+where ta.WorkerFK is not null
+ 
 )
 
 
@@ -145,7 +167,7 @@ FROM Worker w
 INNER JOIN dbo.fnGetWorkerEventDates(@prgfk, @super, @worker) fn ON fn.workerpk = w.workerpk
 )
 
-SELECT [Name]
+SELECT distinct [Name]
 	 , [WorkerPK]
 	 , convert(VARCHAR(12), [FAWInitialStart], 101) AS [FAWInitialStart]
 	 , convert(VARCHAR(12), [SupervisorInitialStart], 101) AS [SupervisorInitialStart]

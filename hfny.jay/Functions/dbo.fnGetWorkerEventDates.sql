@@ -3,11 +3,14 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 08/14/2012
 -- Description:	Get worker first event dates for workers NOT TERMINATED
 		--Hire Date / First Kempe / First Home Visit / Termination / First Supervisor / First ASQ
+-- Edit Date: 10/18/2013 as per John, we want there most recent program, so don't bring in programs where the worker transferred from
+--		(example: "where k.ProgramFK = @prgfk" (this code ALSO eliminates duplicate rows if the worker transferred)
 -- =============================================
 CREATE FUNCTION [dbo].[fnGetWorkerEventDates]
 (	
@@ -24,6 +27,7 @@ RETURN
 		WITH ctKempe AS
 		(SELECT DISTINCT fawfk, min(kempedate) AS KempeDate
 		FROM Kempe k 
+		where k.ProgramFK = @prgfk
 		GROUP BY fawfk, programfk
 		--Having ProgramFK=@prgfk
 		)
@@ -31,6 +35,7 @@ RETURN
 		, ctASQ AS
 		(SELECT DISTINCT FSWFK, min(DateCompleted) AS DateCompleted
 		FROM asq a
+		where a.ProgramFK = @prgfk
 		GROUP BY FSWFK, programfk
 		--Having ProgramFK=@prgfk
 		)
@@ -38,13 +43,14 @@ RETURN
 		, ctHVLog AS
 		(SELECT DISTINCT FSWFK, min(VisitStartTime) AS VisitStartTime
 		FROM hvlog
+		where HVLog.ProgramFK = @prgfk
 		GROUP BY FSWFK, programfk
 		--Having ProgramFK=@prgfk
 		)
 		
 		,ctSuper AS
 		(SELECT DISTINCT SupervisorFK, min(SupervisionDate) AS SuperDate 
-		FROM Supervision s
+		FROM Supervision 
 		GROUP BY SupervisorFK
 		)
 
@@ -84,6 +90,7 @@ RETURN
 		, ctHVLog.VisitStartTime, ctk.KempeDate, wp.FAWStartDate, w.FAWInitialStart, w.FSWInitialStart
 		HAVING (wp.ProgramFK=@prgfk)
 		and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
+		and (@workerfk is null or w.WorkerPK = @workerfk) 
 		AND wp.TerminationDate IS NULL
 		AND w.LastName NOT LIKE '%Transfer%'
 )
