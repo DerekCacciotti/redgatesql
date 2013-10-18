@@ -216,45 +216,275 @@ END
 --		SELECT * FROM #tblWorkers
 --		where WorkerPK = 152  -- worker: Burdick, Catherine
 
+
+	-- Let us make sure that if a worker's firstevent date falls between @sdate and @edate then 
+	-- adjust number of weeks for that worker. It will be less because he did not do anything till firstevent
+	create table #tblWeekPeriodsAdjusted(
+			WeekNumber int			
+			,StartDate datetime
+			,EndDate datetime
+			,FirstEvent datetime
+			,WorkerPK int	
+		)	
+	
+
+	insert into #tblWeekPeriodsAdjusted	
+		SELECT 
+			WeekNumber
+			,StartDate
+			,EndDate		
+			,FirstEvent
+			,WorkerPK
+		 FROM #tblWeekPeriods
+		 inner join #tblWorkers w on FirstEvent < StartDate
+
+
+
+
+
+
+
+
+
+
+
+
 		-- Step#: 3
 		-- Now let us develop the report. We will use the above 2 temp tables now
 		
 		;
 		
+		
 		with cteWorkersWithSupervisions
 		as
 		(
-		SELECT *
+		SELECT 
+		
+				 wp.WeekNumber
+				,wp.StartDate
+				,wp.EndDate		
+				,wp.FirstEvent
+				,wp.WorkerPK		
+				
+			 , WorkerName
+			 , LastName
+			 , FirstName
+			 , TerminationDate
+			 --, WorkerPK
+			 , SortOrder
+			
+			 , WorkerFKFn
+			 , WrkrLName
+			 , FAWInitialStart
+			 , SupervisorInitialStart 
+			 , FSWInitialStart 
+			 , TerminationDateFn 
+			 , HireDate 
+			 , SupervisorFirstEvent 
+			 , FirstASQDate 
+			 , FirstHomeVisitDate 
+			 , FirstKempeDate 
+			 --, FirstEvent			
+				
+				
+				
+				
+		
+			  ,SupervisionPK
+			  ,ActivitiesOther
+			  ,ActivitiesOtherSpecify
+			  ,AreasGrowth
+			  ,AssessmentIssues
+			  ,AssessmentRate
+			  ,Boundaries
+			  ,Caseload
+			  ,Coaching
+			  ,CommunityResources
+			  ,CulturalSensitivity
+			  ,Curriculum
+			  ,FamilyProgress
+			  ,HomeVisitLogActivities
+			  ,HomeVisitRate
+			  ,IFSP
+			  ,ImplementTraining
+			  ,LevelChange
+			  ,Outreach
+			  ,ParticipantEmergency
+			  ,PersonalGrowth
+			  ,ProfessionalGrowth
+			  ,ReasonOther
+			  ,ReasonOtherSpecify
+			  ,RecordDocumentation
+			  ,Referrals
+			  ,Retention
+			  ,RolePlaying
+			  ,Safety
+			  ,ShortWeek
+			  ,StaffCourt
+			  ,StaffFamilyEmergency
+			  ,StaffForgot
+			  ,StaffIll
+			  ,StaffTraining
+			  ,StaffVacation
+			  ,StaffOutAllWeek
+			  ,StrengthBasedApproach
+			  ,Strengths
+			  ,SupervisionCreateDate
+			  ,SupervisionCreator
+			  ,SupervisionDate
+			  ,SupervisionEditDate
+			  ,SupervisionEditor
+			  ,SupervisionEndTime
+			  ,SupervisionHours
+			  ,SupervisionMinutes
+			  ,SupervisionNotes
+			  ,SupervisionStartTime
+			  ,SupervisorFamilyEmergency
+			  ,SupervisorFK
+			  ,SupervisorForgot
+			  ,SupervisorHoliday
+			  ,SupervisorIll
+			  ,SupervisorObservationAssessment
+			  ,SupervisorObservationHomeVisit
+			  ,SupervisorTraining
+			  ,SupervisorVacation
+			  ,TakePlace
+			  ,TechniquesApproaches
+			  ,Tools
+			  ,TrainingNeeds
+			  ,Weather
+			  ,WorkerFK	
 			-- note: we added 1 in datediff(d, StartDate,EndDate) because substraction gives one day less. e.g. 7-1 = 6			
 			, datediff(d, StartDate,EndDate) + 1 as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
 			--,case when WorkerFK is null and SupervisionPK is null then null else datediff(d, StartDate,EndDate) end as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
 			  
-			   FROM #tblWeekPeriods wp 		
-		left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
+			   FROM #tblWeekPeriodsAdjusted wp 		
+		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
+		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
 		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
 		)
 
---select datediff(d, '01/06/2013', '01/13/2013')		
---select datediff(d, '01/20/2013', '01/27/2013')	
+--------select datediff(d, '01/06/2013', '01/13/2013')		
+--------select datediff(d, '01/20/2013', '01/27/2013')	
 		
 	--SELECT * FROM cteWorkersWithSupervisions
 	--order by workername,weeknumber, SupervisionDate
+	
+-------- rspCredentialingSupervision 31, '07/01/2013', '09/30/2013'		
+-------- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'					
 		
--- rspCredentialingSupervisionSummary 1, '01/06/2013', '02/02/2013'					
-		
-		
+
+
 		,cteWorkersWithSupervisionsII
 		as
 		(
-		SELECT *			
-			,datediff(d, StartDate,EndDate) + 1 as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
-			--,case when WorkerFK is null and SupervisionPK is null then null else datediff(d, StartDate,EndDate) end as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
+		SELECT 
+		
+				 wp.WeekNumber
+				,wp.StartDate
+				,wp.EndDate		
+				,wp.FirstEvent
+				,wp.WorkerPK		
+				
+			 , WorkerName
+			 , LastName
+			 , FirstName
+			 , TerminationDate
+			 --, WorkerPK
+			 , SortOrder
 			
+			 , WorkerFKFn
+			 , WrkrLName
+			 , FAWInitialStart
+			 , SupervisorInitialStart 
+			 , FSWInitialStart 
+			 , TerminationDateFn 
+			 , HireDate 
+			 , SupervisorFirstEvent 
+			 , FirstASQDate 
+			 , FirstHomeVisitDate 
+			 , FirstKempeDate 
+			 --, FirstEvent			
+				
+				
+				
+				
+		
+			  ,SupervisionPK
+			  ,ActivitiesOther
+			  ,ActivitiesOtherSpecify
+			  ,AreasGrowth
+			  ,AssessmentIssues
+			  ,AssessmentRate
+			  ,Boundaries
+			  ,Caseload
+			  ,Coaching
+			  ,CommunityResources
+			  ,CulturalSensitivity
+			  ,Curriculum
+			  ,FamilyProgress
+			  ,HomeVisitLogActivities
+			  ,HomeVisitRate
+			  ,IFSP
+			  ,ImplementTraining
+			  ,LevelChange
+			  ,Outreach
+			  ,ParticipantEmergency
+			  ,PersonalGrowth
+			  ,ProfessionalGrowth
+			  ,ReasonOther
+			  ,ReasonOtherSpecify
+			  ,RecordDocumentation
+			  ,Referrals
+			  ,Retention
+			  ,RolePlaying
+			  ,Safety
+			  ,ShortWeek
+			  ,StaffCourt
+			  ,StaffFamilyEmergency
+			  ,StaffForgot
+			  ,StaffIll
+			  ,StaffTraining
+			  ,StaffVacation
+			  ,StaffOutAllWeek
+			  ,StrengthBasedApproach
+			  ,Strengths
+			  ,SupervisionCreateDate
+			  ,SupervisionCreator
+			  ,SupervisionDate
+			  ,SupervisionEditDate
+			  ,SupervisionEditor
+			  ,SupervisionEndTime
+			  ,SupervisionHours
+			  ,SupervisionMinutes
+			  ,SupervisionNotes
+			  ,SupervisionStartTime
+			  ,SupervisorFamilyEmergency
+			  ,SupervisorFK
+			  ,SupervisorForgot
+			  ,SupervisorHoliday
+			  ,SupervisorIll
+			  ,SupervisorObservationAssessment
+			  ,SupervisorObservationHomeVisit
+			  ,SupervisorTraining
+			  ,SupervisorVacation
+			  ,TakePlace
+			  ,TechniquesApproaches
+			  ,Tools
+			  ,TrainingNeeds
+			  ,Weather
+			  ,WorkerFK	
+			-- note: we added 1 in datediff(d, StartDate,EndDate) because substraction gives one day less. e.g. 7-1 = 6			
+			, datediff(d, StartDate,EndDate) + 1 as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
+			--,case when WorkerFK is null and SupervisionPK is null then null else datediff(d, StartDate,EndDate) end as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
 			  
-			   FROM #tblWeekPeriods wp 		
-		left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
+			   FROM #tblWeekPeriodsAdjusted wp 		
+		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
+		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
 		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
 		)
+
+
 				
 		
 	,cteSupervisors	as 
