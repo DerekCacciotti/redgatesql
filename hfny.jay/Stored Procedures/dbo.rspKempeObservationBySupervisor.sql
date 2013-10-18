@@ -8,7 +8,7 @@ GO
 -- Author:    <Jay Robohn>
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
--- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
+-- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspKempeObservationBySupervisor]
 (
@@ -73,7 +73,7 @@ as
 			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			
 			right join Worker w on w.WorkerPK = q.FAWFK
-			inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+			inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = listitem
 			inner join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
 			--inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
 			inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = hvcasepk
