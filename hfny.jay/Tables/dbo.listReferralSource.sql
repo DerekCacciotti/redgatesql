@@ -11,5 +11,3 @@ CREATE NONCLUSTERED INDEX [IX_FK_listReferralSource_ProgramFK] ON [dbo].[listRef
 GO
 ALTER TABLE [dbo].[listReferralSource] ADD CONSTRAINT [PK__listRefe__0A3058D637703C52] PRIMARY KEY CLUSTERED  ([listReferralSourcePK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[listReferralSource] WITH NOCHECK ADD CONSTRAINT [FK_listReferralSource_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

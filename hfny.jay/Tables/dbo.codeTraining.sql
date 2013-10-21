@@ -13,5 +13,3 @@ CREATE NONCLUSTERED INDEX [IX_FK_codeTraining_ProgramFK] ON [dbo].[codeTraining]
 GO
 ALTER TABLE [dbo].[codeTraining] ADD CONSTRAINT [PK__codeTrai__C0D5D6495629CD9C] PRIMARY KEY CLUSTERED  ([codeTrainingPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[codeTraining] WITH NOCHECK ADD CONSTRAINT [FK_codeTraining_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

@@ -25,8 +25,7 @@ CREATE NONCLUSTERED INDEX [IX_FK_HITS_ProgramFK] ON [dbo].[HITS] ([ProgramFK]) O
 
 ALTER TABLE [dbo].[HITS] ADD
 CONSTRAINT [FK_HITS_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
-ALTER TABLE [dbo].[HITS] ADD
-CONSTRAINT [FK_HITS_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_CaseProgramEditDate ON CaseProgram
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --

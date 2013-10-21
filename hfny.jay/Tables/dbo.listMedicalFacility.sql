@@ -32,5 +32,3 @@ From [listMedicalFacility] INNER JOIN Inserted ON [listMedicalFacility].[listMed
 GO
 ALTER TABLE [dbo].[listMedicalFacility] ADD CONSTRAINT [PK__listMedi__3205CD4C2DE6D218] PRIMARY KEY CLUSTERED  ([listMedicalFacilityPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[listMedicalFacility] WITH NOCHECK ADD CONSTRAINT [FK_listMedicalFacility_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

@@ -39,5 +39,3 @@ ALTER TABLE [dbo].[Education] ADD CONSTRAINT [PK__Educatio__4BBF34CC6383C8BA] PR
 GO
 ALTER TABLE [dbo].[Education] WITH NOCHECK ADD CONSTRAINT [FK_Education_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
-ALTER TABLE [dbo].[Education] WITH NOCHECK ADD CONSTRAINT [FK_Education_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

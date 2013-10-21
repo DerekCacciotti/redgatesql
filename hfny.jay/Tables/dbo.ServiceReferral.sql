@@ -117,7 +117,6 @@ GO
 
 ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
-ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
+
 ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_ProvidingAgencyFK] FOREIGN KEY ([ProvidingAgencyFK]) REFERENCES [dbo].[listServiceReferralAgency] ([listServiceReferralAgencyPK])
 GO

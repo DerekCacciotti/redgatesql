@@ -100,5 +100,3 @@ ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD CONSTRAINT [FK_FatherFigure_HV
 GO
 ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD CONSTRAINT [FK_FatherFigure_PCFK] FOREIGN KEY ([PCFK]) REFERENCES [dbo].[PC] ([PCPK])
 GO
-ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD CONSTRAINT [FK_FatherFigure_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

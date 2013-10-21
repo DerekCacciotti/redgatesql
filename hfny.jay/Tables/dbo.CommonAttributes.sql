@@ -101,8 +101,7 @@ ALTER TABLE [dbo].[CommonAttributes] ADD
 CONSTRAINT [FK_CommonAttributes_PC1MedicalProviderFK] FOREIGN KEY ([PC1MedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
 ALTER TABLE [dbo].[CommonAttributes] ADD
 CONSTRAINT [FK_CommonAttributes_PCFK] FOREIGN KEY ([PCFK]) REFERENCES [dbo].[PC] ([PCPK])
-ALTER TABLE [dbo].[CommonAttributes] ADD
-CONSTRAINT [FK_CommonAttributes_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+
 ALTER TABLE [dbo].[CommonAttributes] ADD
 CONSTRAINT [FK_CommonAttributes_TCMedicalFacilityFK] FOREIGN KEY ([TCMedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
 ALTER TABLE [dbo].[CommonAttributes] ADD

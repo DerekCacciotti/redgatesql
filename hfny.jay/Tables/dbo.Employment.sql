@@ -40,5 +40,3 @@ ALTER TABLE [dbo].[Employment] ADD CONSTRAINT [PK__Employme__FDF531DC68487DD7] P
 GO
 ALTER TABLE [dbo].[Employment] WITH NOCHECK ADD CONSTRAINT [FK_Employment_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
-ALTER TABLE [dbo].[Employment] WITH NOCHECK ADD CONSTRAINT [FK_Employment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

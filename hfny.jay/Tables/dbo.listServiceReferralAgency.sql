@@ -7,8 +7,7 @@ CREATE TABLE [dbo].[listServiceReferralAgency]
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_listServiceReferralAgency_ProgramFK] ON [dbo].[listServiceReferralAgency] ([ProgramFK]) ON [PRIMARY]
 
-ALTER TABLE [dbo].[listServiceReferralAgency] WITH NOCHECK ADD
-CONSTRAINT [FK_listServiceReferralAgency_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+
 
 GO
 ALTER TABLE [dbo].[listServiceReferralAgency] ADD CONSTRAINT [PK__listServ__2B4AD1FA3B40CD36] PRIMARY KEY CLUSTERED  ([listServiceReferralAgencyPK]) ON [PRIMARY]

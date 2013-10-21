@@ -43,8 +43,7 @@ ALTER TABLE [dbo].[CaseFilter] WITH NOCHECK ADD
 CONSTRAINT [FK_CaseFilter_CaseFilterNameFK] FOREIGN KEY ([CaseFilterNameFK]) REFERENCES [dbo].[listCaseFilterName] ([listCaseFilterNamePK])
 ALTER TABLE [dbo].[CaseFilter] WITH NOCHECK ADD
 CONSTRAINT [FK_CaseFilter_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
-ALTER TABLE [dbo].[CaseFilter] WITH NOCHECK ADD
-CONSTRAINT [FK_CaseFilter_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+
 
 
 
@@ -57,4 +56,3 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-

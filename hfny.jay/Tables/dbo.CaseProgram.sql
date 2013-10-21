@@ -106,7 +106,3 @@ ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_Curr
 GO
 ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
-ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
-ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD CONSTRAINT [FK_CaseProgram_TransferredtoProgramFK] FOREIGN KEY ([TransferredtoProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

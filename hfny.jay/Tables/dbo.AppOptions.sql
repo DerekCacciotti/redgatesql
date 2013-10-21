@@ -14,5 +14,3 @@ CREATE NONCLUSTERED INDEX [IX_FK_AppOptions_ProgramFK] ON [dbo].[AppOptions] ([P
 GO
 ALTER TABLE [dbo].[AppOptions] ADD CONSTRAINT [PK__AppOptio__6E5B65BC7F60ED59] PRIMARY KEY CLUSTERED  ([AppOptionsPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[AppOptions] WITH NOCHECK ADD CONSTRAINT [FK_AppOptions_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

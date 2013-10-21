@@ -47,5 +47,3 @@ ALTER TABLE [dbo].[WorkerAssignment] ADD CONSTRAINT [PK__WorkerAs__B02E01F929E13
 GO
 ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD CONSTRAINT [FK_WorkerAssignment_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
-ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD CONSTRAINT [FK_WorkerAssignment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

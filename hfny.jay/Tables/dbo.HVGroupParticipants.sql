@@ -35,5 +35,3 @@ ALTER TABLE [dbo].[HVGroupParticipants] WITH NOCHECK ADD CONSTRAINT [FK_HVGroupP
 GO
 ALTER TABLE [dbo].[HVGroupParticipants] WITH NOCHECK ADD CONSTRAINT [FK_HVGroupParticipants_HVGroupFK] FOREIGN KEY ([HVGroupFK]) REFERENCES [dbo].[HVGroup] ([HVGroupPK])
 GO
-ALTER TABLE [dbo].[HVGroupParticipants] WITH NOCHECK ADD CONSTRAINT [FK_HVGroupParticipants_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

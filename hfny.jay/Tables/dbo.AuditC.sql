@@ -44,8 +44,7 @@ ALTER TABLE [dbo].[AuditC] ADD
 CONSTRAINT [FK_AuditC_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 ALTER TABLE [dbo].[AuditC] ADD
 CONSTRAINT [FK_AuditC_MoreThanSix] FOREIGN KEY ([MoreThanSix]) REFERENCES [dbo].[codeAuditC] ([codeAuditCPK])
-ALTER TABLE [dbo].[AuditC] ADD
-CONSTRAINT [FK_AuditC_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+
 GO
 ALTER TABLE [dbo].[AuditC] ADD CONSTRAINT [PK_AuditC] PRIMARY KEY CLUSTERED  ([AuditCPK]) ON [PRIMARY]
 GO

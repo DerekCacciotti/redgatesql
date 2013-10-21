@@ -30,5 +30,3 @@ ALTER TABLE [dbo].[Trainer] ADD CONSTRAINT [PK__Trainer__3796C2A81209AD79] PRIMA
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_Trainer_ProgramFK] ON [dbo].[Trainer] ([ProgramFK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[Trainer] WITH NOCHECK ADD CONSTRAINT [FK_Trainer_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

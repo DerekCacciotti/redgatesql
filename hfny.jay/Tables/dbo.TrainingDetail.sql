@@ -43,5 +43,3 @@ From [TrainingDetail] INNER JOIN Inserted ON [TrainingDetail].[TrainingDetailPK]
 GO
 ALTER TABLE [dbo].[TrainingDetail] ADD CONSTRAINT [PK__Training__F23C2E472057CCD0] PRIMARY KEY CLUSTERED  ([TrainingDetailPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[TrainingDetail] WITH NOCHECK ADD CONSTRAINT [FK_TrainingDetail_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO

@@ -25,6 +25,7 @@ CREATE TABLE [dbo].[HVProgram]
 [LeadAgencyStreet] [char] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LeadAgencyZip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ModemNumber] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ProgramCapacity] [int] NULL,
 [ProgramCity] [char] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramCode] [char] (3) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFaxNumber] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -35,7 +36,13 @@ CREATE TABLE [dbo].[HVProgram]
 [ProgramZip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TargetZip] [nvarchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[HVProgram] ADD 
+CONSTRAINT [PK__HVProgra__1C343B0217036CC0] PRIMARY KEY CLUSTERED  ([HVProgramPK]) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_HVProgram_CountyFK] ON [dbo].[HVProgram] ([CountyFK]) ON [PRIMARY]
+
+ALTER TABLE [dbo].[HVProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_HVProgram_CountyFK] FOREIGN KEY ([CountyFK]) REFERENCES [dbo].[codeCounty] ([codeCountyPK])
+
 
 GO
 SET QUOTED_IDENTIFIER ON
@@ -50,8 +57,4 @@ For Update
 AS
 Update HVProgram Set HVProgram.HVProgramEditDate= getdate()
 From [HVProgram] INNER JOIN Inserted ON [HVProgram].[HVProgramPK]= Inserted.[HVProgramPK]
-GO
-ALTER TABLE [dbo].[HVProgram] ADD CONSTRAINT [PK__HVProgra__1C343B0217036CC0] PRIMARY KEY CLUSTERED  ([HVProgramPK]) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[HVProgram] WITH NOCHECK ADD CONSTRAINT [FK_HVProgram_CountyFK] FOREIGN KEY ([CountyFK]) REFERENCES [dbo].[codeCounty] ([codeCountyPK])
 GO

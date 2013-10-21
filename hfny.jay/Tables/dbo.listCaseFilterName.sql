@@ -9,8 +9,7 @@ CREATE TABLE [dbo].[listCaseFilterName]
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_listCaseFilterName_ProgramFK] ON [dbo].[listCaseFilterName] ([ProgramFK]) ON [PRIMARY]
 
-ALTER TABLE [dbo].[listCaseFilterName] WITH NOCHECK ADD
-CONSTRAINT [FK_listCaseFilterName_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+
 GO
 ALTER TABLE [dbo].[listCaseFilterName] ADD CONSTRAINT [PK__listCase__7B14331F2A164134] PRIMARY KEY CLUSTERED  ([listCaseFilterNamePK]) ON [PRIMARY]
 GO

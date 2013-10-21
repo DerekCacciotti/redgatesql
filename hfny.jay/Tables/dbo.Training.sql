@@ -123,8 +123,7 @@ CREATE NONCLUSTERED INDEX [IX_FK_Training_TrainingMethodFK] ON [dbo].[Training] 
 GO
 CREATE NONCLUSTERED INDEX [TrainingPK_ProgramFK] ON [dbo].[Training] ([TrainingPK], [ProgramFK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[Training] WITH NOCHECK ADD CONSTRAINT [FK_Training_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
+
 ALTER TABLE [dbo].[Training] WITH NOCHECK ADD CONSTRAINT [FK_Training_TrainerFK] FOREIGN KEY ([TrainerFK]) REFERENCES [dbo].[Trainer] ([TrainerPK])
 GO
 ALTER TABLE [dbo].[Training] WITH NOCHECK ADD CONSTRAINT [FK_Training_TrainingMethodFK] FOREIGN KEY ([TrainingMethodFK]) REFERENCES [dbo].[TrainingMethod] ([TrainingMethodPK])
