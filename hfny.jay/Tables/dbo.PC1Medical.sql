@@ -12,6 +12,8 @@ CREATE TABLE [dbo].[PC1Medical]
 [PC1MedicalItem] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[PC1Medical] WITH NOCHECK ADD
+CONSTRAINT [FK_PC1Medical_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_PC1Medical_HVCaseFK] ON [dbo].[PC1Medical] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_PC1Medical_ProgramFK] ON [dbo].[PC1Medical] ([ProgramFK]) ON [PRIMARY]

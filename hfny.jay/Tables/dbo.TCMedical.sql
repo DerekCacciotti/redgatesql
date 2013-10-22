@@ -20,6 +20,8 @@ CREATE TABLE [dbo].[TCMedical]
 [TCMedicalEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TCMedicalItem] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[TCMedical] WITH NOCHECK ADD
+CONSTRAINT [FK_TCMedical_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_HVCaseFK] ON [dbo].[TCMedical] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_ProgramFK] ON [dbo].[TCMedical] ([ProgramFK]) ON [PRIMARY]

@@ -37,6 +37,8 @@ CREATE TABLE [dbo].[Preassessment]
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD
+CONSTRAINT [FK_Preassessment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD
 CONSTRAINT [FK_Preassessment_PAFAWFK] FOREIGN KEY ([PAFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_HVCaseFK] ON [dbo].[Preassessment] ([HVCaseFK]) ON [PRIMARY]
 

@@ -18,6 +18,8 @@ CREATE TABLE [dbo].[Employment]
 [ProgramFK] [int] NOT NULL,
 [StillWorking] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[Employment] WITH NOCHECK ADD
+CONSTRAINT [FK_Employment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Employment_HVCaseFK] ON [dbo].[Employment] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Employment_ProgramFK] ON [dbo].[Employment] ([ProgramFK]) ON [PRIMARY]

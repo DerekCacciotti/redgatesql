@@ -24,6 +24,8 @@ CREATE TABLE [dbo].[OtherChild]
 [Relation2PC1] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Relation2PC1Specify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[OtherChild] WITH NOCHECK ADD
+CONSTRAINT [FK_OtherChild_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_OtherChild_HVCaseFK] ON [dbo].[OtherChild] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_OtherChild_ProgramFK] ON [dbo].[OtherChild] ([ProgramFK]) ON [PRIMARY]

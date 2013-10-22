@@ -9,6 +9,8 @@ CREATE TABLE [dbo].[HVGroupParticipants]
 [HVGroupParticipantsEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[HVGroupParticipants] WITH NOCHECK ADD
+CONSTRAINT [FK_HVGroupParticipants_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_HVGroupParticipants_GroupFatherFigureFK] ON [dbo].[HVGroupParticipants] ([GroupFatherFigureFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_HVGroupParticipants_HVGroupFK] ON [dbo].[HVGroupParticipants] ([HVGroupFK]) ON [PRIMARY]

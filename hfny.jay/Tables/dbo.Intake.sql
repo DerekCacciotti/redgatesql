@@ -17,6 +17,8 @@ CREATE TABLE [dbo].[Intake]
 [MIECHV_Hispanic] [nvarchar] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD
+CONSTRAINT [FK_Intake_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD
 CONSTRAINT [FK_Intake_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Intake_FSWFK] ON [dbo].[Intake] ([FSWFK]) ON [PRIMARY]
 

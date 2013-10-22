@@ -13,6 +13,8 @@ CREATE TABLE [dbo].[CaseFilter]
 [HVCaseFK] [int] NOT NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[CaseFilter] WITH NOCHECK ADD
+CONSTRAINT [FK_CaseFilter_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 ALTER TABLE [dbo].[CaseFilter] ADD 
 CONSTRAINT [PK__CaseFilt__9E62C9EB0CBAE877] PRIMARY KEY CLUSTERED  ([CaseFilterPK]) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_CaseFilter_CaseFilterNameFK] ON [dbo].[CaseFilter] ([CaseFilterNameFK]) ON [PRIMARY]

@@ -57,6 +57,8 @@ CREATE TABLE [dbo].[FollowUp]
 [TimesPregnant] [int] NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[FollowUp] WITH NOCHECK ADD
+CONSTRAINT [FK_FollowUp_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+ALTER TABLE [dbo].[FollowUp] WITH NOCHECK ADD
 CONSTRAINT [FK_FollowUp_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FollowUpInterval] ON [dbo].[FollowUp] ([FollowUpInterval]) ON [PRIMARY]
 

@@ -34,6 +34,8 @@ CREATE TABLE [dbo].[WorkerProgram]
 [WorkPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_WorkerProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_WorkerProgram_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_WorkerProgram_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])

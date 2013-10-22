@@ -17,6 +17,8 @@ CREATE TABLE [dbo].[HVGroup]
 [NumberParticipating] [int] NULL,
 [ProgramFK] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[HVGroup] WITH NOCHECK ADD
+CONSTRAINT [FK_HVGroup_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_HVGroup_ProgramFK] ON [dbo].[HVGroup] ([ProgramFK]) ON [PRIMARY]
 
 GO

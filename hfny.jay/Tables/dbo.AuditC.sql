@@ -17,6 +17,8 @@ CREATE TABLE [dbo].[AuditC]
 [ProgramFK] [int] NOT NULL,
 [TotalScore] [int] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[AuditC] ADD
+CONSTRAINT [FK_AuditC_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_AuditC_HVCaseFK] ON [dbo].[AuditC] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_AuditC_ProgramFK] ON [dbo].[AuditC] ([ProgramFK]) ON [PRIMARY]

@@ -73,6 +73,8 @@ CREATE TABLE [dbo].[Kempe]
 [SupervisorObservation] [bit] NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD
+CONSTRAINT [FK_Kempe_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD
 CONSTRAINT [FK_Kempe_FAWFK] FOREIGN KEY ([FAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Kempe_FAWFK] ON [dbo].[Kempe] ([FAWFK]) ON [PRIMARY]
 

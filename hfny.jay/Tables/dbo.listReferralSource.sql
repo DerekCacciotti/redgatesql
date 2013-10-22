@@ -6,6 +6,8 @@ CREATE TABLE [dbo].[listReferralSource]
 [RSIsActive] [bit] NOT NULL,
 [listReferralSourcePK_old] [int] NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[listReferralSource] WITH NOCHECK ADD
+CONSTRAINT [FK_listReferralSource_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_listReferralSource_ProgramFK] ON [dbo].[listReferralSource] ([ProgramFK]) ON [PRIMARY]
 
 GO

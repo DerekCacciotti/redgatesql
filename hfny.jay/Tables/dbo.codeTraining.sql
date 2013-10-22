@@ -8,6 +8,8 @@ CREATE TABLE [dbo].[codeTraining]
 [TrainingCodeGroup] [char] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [TrainingCodeUsedWhere] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[codeTraining] WITH NOCHECK ADD
+CONSTRAINT [FK_codeTraining_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_codeTraining_ProgramFK] ON [dbo].[codeTraining] ([ProgramFK]) ON [PRIMARY]
 
 GO

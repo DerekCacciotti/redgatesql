@@ -7,6 +7,8 @@ CREATE TABLE [dbo].[listCaseFilterName]
 [ProgramFK] [int] NOT NULL,
 [Inactive] [bit] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[listCaseFilterName] WITH NOCHECK ADD
+CONSTRAINT [FK_listCaseFilterName_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_listCaseFilterName_ProgramFK] ON [dbo].[listCaseFilterName] ([ProgramFK]) ON [PRIMARY]
 
 

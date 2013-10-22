@@ -17,6 +17,8 @@ CREATE TABLE [dbo].[Training]
 [TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [IsExempt] [bit] NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[Training] WITH NOCHECK ADD
+CONSTRAINT [FK_Training_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
 
 SET QUOTED_IDENTIFIER ON

@@ -4,6 +4,8 @@ CREATE TABLE [dbo].[PCProgram]
 [PCFK] [int] NOT NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[PCProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_PCProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 CREATE NONCLUSTERED INDEX [IX_FK_PCProgram_PCFK] ON [dbo].[PCProgram] ([PCFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_PCProgram_ProgramFK] ON [dbo].[PCProgram] ([ProgramFK]) ON [PRIMARY]

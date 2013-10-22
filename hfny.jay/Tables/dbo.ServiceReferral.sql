@@ -21,6 +21,8 @@ CREATE TABLE [dbo].[ServiceReferral]
 [StartDate] [datetime] NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD
+CONSTRAINT [FK_ServiceReferral_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD
 CONSTRAINT [FK_ServiceReferral_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_FSWFK] ON [dbo].[ServiceReferral] ([FSWFK]) ON [PRIMARY]
 
