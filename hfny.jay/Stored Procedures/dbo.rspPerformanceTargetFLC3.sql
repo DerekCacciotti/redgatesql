@@ -23,7 +23,7 @@ begin
 	with cteTotalCases
 	as
 	(
-	select
+	select distinct
 		  ptc.HVCaseFK
 		 , ptc.PC1ID
 		 , ptc.OldID
@@ -32,7 +32,6 @@ begin
 		 , ptc.CurrentWorkerFullName
 		 , ptc.CurrentLevelName
 		 , ptc.ProgramFK
-		 , ptc.TCIDPK
 		 , ptc.TCDOB
 		 , DischargeDate
 		 , case
