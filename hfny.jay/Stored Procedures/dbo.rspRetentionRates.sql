@@ -329,6 +329,19 @@ SET NOCOUNT ON;
 			WHERE (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
 				and pcp.ProgramFK=@ProgramFK)
 --#endregion
+--#region ctePC1AgeAtIntake - get the PC1's age at intake
+	, cteTCInformation as
+	------------------------
+		(select t.HVCaseFK
+				, max(t.TCDOB) as TCDOB
+				, max(GestationalAge) as GestationalAge
+			from TCID t
+			inner join HVCase c on c.HVCasePK = t.HVCaseFK
+			inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
+			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+					and cp.ProgramFK=@ProgramFK
+			group by t.HVCaseFK)
+--#endregion
 --#region cteMain - main select for the report sproc, gets data at intake and joins to data at discharge
 	, cteMain as
 	------------------------
@@ -375,13 +388,13 @@ SET NOCOUNT ON;
 			   ,EducationalEnrollment AS EducationalEnrollmentAtIntake
 			   ,PrimaryLanguage as PC1PrimaryLanguageAtIntake
 			   ,case 
-			   		when TCDOB is NULL then EDC
-					else TCDOB
+			   		when c.TCDOB is NULL then EDC
+					else c.TCDOB
 				end as TCDOB
 			   ,case 
-					when TCDOB is null and EDC is not null then 1
-					when TCDOB is not null and TCDOB > IntakeDate then 1
-					when TCDOB is not null and TCDOB <= IntakeDate then 0
+					when c.TCDOB is null and EDC is not null then 1
+					when c.TCDOB is not null and c.TCDOB > IntakeDate then 1
+					when c.TCDOB is not null and c.TCDOB <= IntakeDate then 0
 				end
 				as PrenatalEnrollment
 				,case
@@ -434,6 +447,12 @@ SET NOCOUNT ON;
 				,PC2EmploymentAtDischarge
 				,PC1TANFAtDischarge
 				,PC1TANFAtIntake
+				, case when c.TCDOB is null then dateadd(week, -40, c.EDC) 
+						when tci.HVCaseFK is null and c.TCDOB is not null
+							then dateadd(week, -40, c.TCDOB)
+						when tci.HVCaseFK is not NULL and c.TCDOB is not null 
+							then dateadd(week, -40, dateadd(week, (40 - isnull(GestationalAge, 40)), c.TCDOB) )
+					end as ConceptionDate
 			FROM HVCase c
 			left outer join cteDischargeData dd ON dd.hvcasefk=c.HVCasePK
 			inner join cteCaseLastHomeVisit lhv ON lhv.HVCaseFK=c.HVCasePK
@@ -444,6 +463,7 @@ SET NOCOUNT ON;
 			inner join Kempe k on k.HVCaseFK=c.HVCasePK
 			inner join PC1Issues pc1i ON pc1i.HVCaseFK=k.HVCaseFK AND pc1i.PC1IssuesPK=k.PC1IssuesFK
 			inner join codeLevel cl ON cl.codeLevelPK=CurrentLevelFK
+			left outer join cteTCInformation tci on tci.HVCaseFK = c.HVCasePK
 			left outer join codeApp carace on carace.AppCode=Race and AppCodeGroup='Race'
 			left outer join (select MaritalStatus, PBTANF as PC1TANFAtIntake
 									,AppCodeText as MaritalStatusAtIntake
@@ -674,9 +694,9 @@ select distinct pc1id
 		, case when PC1PrimaryLanguageAtIntake = '02' then 1 else 0 end as PC1PrimaryLanguageAtIntakeSpanish
 		, case when PC1PrimaryLanguageAtIntake = '03' or PC1PrimaryLanguageAtIntake is null or PC1PrimaryLanguageAtIntake = '' then 1 else 0 end as PC1PrimaryLanguageAtIntakeOtherUnknown
 		, case when IntakeDate>=TCDOB then 1 else 0 end as TrimesterAtIntakePostnatal
-		, case when IntakeDate<TCDOB and datediff(day,IntakeDate,TCDOB) between 1 and round(30.44*3,0) then 1 else 0 end as TrimesterAtIntake3rd
-		, case when IntakeDate<TCDOB and datediff(day,IntakeDate,TCDOB) between round(30.44*3,0)+1 and round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake2nd
-		, case when IntakeDate<TCDOB and datediff(day,IntakeDate,TCDOB) > round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake1st		
+		, case when IntakeDate<TCDOB and datediff(dd, ConceptionDate, IntakeDate) > round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake3rd
+		, case when IntakeDate<TCDOB and datediff(dd, ConceptionDate, IntakeDate) between round(30.44*3,0)+1 and round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake2nd
+		, case when IntakeDate<TCDOB and datediff(dd, ConceptionDate, IntakeDate) < 3*30.44  then 1 else 0 end as TrimesterAtIntake1st
 		, CountOfFSWs
 from cteMain
 -- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
