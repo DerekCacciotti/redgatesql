@@ -98,15 +98,15 @@ where PCType='PC2' and e.HVCaseFK in (select HVCasePK from #CaseListToBeMigrated
 
 
 ;-- part 2 - add ID Contact rows to common attributes using the no longer used OBPInHomeIntake column to set the OBPInHome column
-with cteCasesAtCP9
-as (select HVCasePK, ProgramFK, IntakeDate, OBPinHomeIntake, ScreenDate, KempeDate, CaseStartDate
-	from HVCase h 
-	inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
-	where CaseProgress>=9)
+--with cteCasesAtCP9
+--as (select HVCasePK, ProgramFK, IntakeDate, OBPinHomeIntake, ScreenDate, KempeDate, CaseStartDate
+--	from HVCase h 
+--	inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+--	where CaseProgress>=9)
 
-insert into CommonAttributes (CommonAttributesCreateDate, CommonAttributesCreator, FormDate, FormInterval, FormType, HVCaseFK, OBPInHome, ProgramFK)
-			select current_timestamp, 'HFNYConv', isnull(IntakeDate, isnull(KempeDate, isnull(ScreenDate, CaseStartDate))), '1', 'ID', HVCasePK, OBPinHomeIntake, ProgramFK
-			from cteCasesAtCP9
+--insert into CommonAttributes (CommonAttributesCreateDate, CommonAttributesCreator, FormDate, FormInterval, FormType, HVCaseFK, OBPInHome, ProgramFK)
+--			select current_timestamp, 'HFNYConv', isnull(IntakeDate, isnull(KempeDate, isnull(ScreenDate, CaseStartDate))), '1', 'ID', HVCasePK, OBPinHomeIntake, ProgramFK
+--			from cteCasesAtCP9
 
 -- select HVCasePK,PC2FK -- ,PC1FK,PC2Relation2TC
 -- into #CaseListToBeMigrated 
