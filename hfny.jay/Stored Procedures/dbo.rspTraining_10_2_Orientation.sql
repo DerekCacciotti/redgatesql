@@ -65,7 +65,7 @@ BEGIN
 			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = cteMain.WorkerPK
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
+			RIGHT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
 	WHERE t1.TopicCode BETWEEN 1.0 AND 5.0
 	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
 	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
@@ -101,7 +101,8 @@ BEGIN
 , cte10_2b AS (
 
 	--if a worker has NO trainings, they won't appear at all, so add them back
-	SELECT RowNumber
+
+	SELECT case when RowNumber is null then 1 else RowNumber end as RowNumber
 		, b.TopicCode
 		, b.WorkerPK
 		, t.topicname
@@ -162,7 +163,8 @@ BEGIN
 )
 
 
-SELECT TotalWorkers
+SELECT 
+ case when TotalWorkers is null then 0 else TotalWorkers end as TotalWorkers
 , WorkerPK
 , WorkerName
 , Supervisor
@@ -170,11 +172,11 @@ SELECT TotalWorkers
 , FAW
 , cteMeetTarget.topiccode
 , cteCountMeeting.TopicCode
-	, CASE WHEN cteCountMeeting.TopicCode = 1.0 THEN '10-2a. Staff (assessment workers, home visitors and supervisors) are oriented to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting/family support prior to direct work with children and families' 
-	WHEN cteCountMeeting.TopicCode = 2.0 THEN '10-2b. Staff (assessment workers, home visitors and supervisors) are oriented to the programs relationship with other community resources prior to direct work with children and families'  
-	WHEN cteCountMeeting.TopicCode = 3.0 THEN '10-2c. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
-	WHEN cteCountMeeting.TopicCode = 4.0 THEN '10-2d. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
-	WHEN cteCountMeeting.TopicCode = 5.0 THEN '10-2e. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
+, CASE WHEN cteMeetTarget.topiccode = 1.0 THEN '10-2a. Staff (assessment workers, home visitors and supervisors) are oriented to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting/family support prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 2.0 THEN '10-2b. Staff (assessment workers, home visitors and supervisors) are oriented to the programs relationship with other community resources prior to direct work with children and families'  
+	WHEN cteMeetTarget.topiccode = 3.0 THEN '10-2c. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 4.0 THEN '10-2d. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 5.0 THEN '10-2e. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
 	END AS TopicName
 , TrainingDate
 , FirstHomeVisitDate
@@ -182,15 +184,18 @@ SELECT TotalWorkers
 , SupervisorFirstEvent
 , FirstEvent
 , [Meets Target]
-, totalmeetingcount
-, CONVERT(VARCHAR(MAX), CONVERT(INT,100*(CAST(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)))))+ '%'  AS MeetingPercent
-,	CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) = 1 THEN '3' 
+, case when totalmeetingcount is null then 0 else totalmeetingcount end as totalmeetingcount
+, case when totalmeetingcount is null then '0%'
+  ELSE CONVERT(VARCHAR(MAX), CONVERT(INT,100*(CAST(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)))))+ '%'  
+  end as MeetingPercent
+,	CASE WHEN totalmeetingcount is null then '1'
+	when cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) = 1 THEN '3' 
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) > .9 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) < .9 THEN '1'
 	END AS Rating
 FROM cteMeetTarget
-INNER JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode
-ORDER BY cteCountMeeting.topiccode
+LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode
+ORDER BY cteMeetTarget.topiccode
 
 END
 GO
