@@ -35,10 +35,13 @@ BEGIN
 		, ROW_NUMBER() OVER(ORDER BY w.workerpk DESC) AS 'RowNumber'
 	FROM Worker w 
 	INNER JOIN WorkerProgram wp ON w.WorkerPK = wp.WorkerFK	and wp.ProgramFK = @progfk
-	WHERE ((wp.HireDate >=  @sdate and wp.HireDate < DATEADD(d, -181, GETDATE()))
-	AND (wp.FAWStartDate > @sdate AND wp.FAWEndDate IS NULL)
+	WHERE (wp.HireDate >=  @sdate and 
+	cast(wp.HireDate as date) < DATEADD(d, -181, CAST(GETDATE() AS DATE))
+	)
+	AND ((wp.FAWStartDate > @sdate AND wp.FAWEndDate IS NULL)
 	OR (wp.FSWStartDate > @sdate AND wp.FSWEndDate IS NULL)
-	OR (wp.SupervisorStartDate  > @sdate AND wp.SupervisorEndDate IS NULL))
+	OR (wp.SupervisorStartDate  > @sdate AND wp.SupervisorEndDate IS NULL)
+	)
 	AND wp.TerminationDate IS NULL
 	AND wp.ProgramFK=@progfk
 	
