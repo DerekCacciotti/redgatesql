@@ -11,6 +11,10 @@ GO
 -- EXEC rspTrainReqTopics 1, NULL, NULL
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
+
+--exec dbo.rspTrainReqTopics @prgfk=1,@super=NULL,@worker=15
+
+
 CREATE PROCEDURE [dbo].[rspTrainReqTopics]
 	-- Add the parameters for the stored procedure here
 	@prgfk AS INT,
@@ -33,6 +37,12 @@ if @worker is null
 									from WorkerProgram wp where wp.ProgramFK=@prgfk
 									for xml path ('')),2,8000)
 	end
+
+
+if @worker is NOT null
+	begin --get worker list for program
+		select @workerstring = @worker
+	END
 	
 	--print @worker	
 
@@ -57,7 +67,7 @@ FROM Training t
 INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK 
 INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK
 INNER JOIN ctWorkerTable w ON w.WorkerPK = ta.workerfk
-INNER JOIN WorkerProgram wp ON wp.WorkerFK=w.WorkerPK AND wp.ProgramFK=@prgfk
+INNER JOIN WorkerProgram wp ON wp.WorkerFK=w.WorkerPK -- AND wp.ProgramFK=@prgfk
 RIGHT JOIN codetopic ON codetopic.codeTopicPK = td.topicfk
 left JOIN SubTopic st ON st.SubTopicPK=td.SubTopicFK
 where ta.WorkerFK is not null
