@@ -67,7 +67,7 @@ FROM Training t
 INNER JOIN TrainingAttendee ta ON ta.TrainingFK=t.TrainingPK 
 INNER JOIN TrainingDetail td ON td.TrainingFK=t.TrainingPK
 INNER JOIN ctWorkerTable w ON w.WorkerPK = ta.workerfk
-INNER JOIN WorkerProgram wp ON wp.WorkerFK=w.WorkerPK -- AND wp.ProgramFK=@prgfk
+INNER JOIN WorkerProgram wp ON wp.WorkerFK=w.WorkerPK  AND wp.ProgramFK=@prgfk
 RIGHT JOIN codetopic ON codetopic.codeTopicPK = td.topicfk
 left JOIN SubTopic st ON st.SubTopicPK=td.SubTopicFK
 where ta.WorkerFK is not null
