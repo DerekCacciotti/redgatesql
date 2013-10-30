@@ -647,7 +647,7 @@ as
 				 0
 		 end) as actualvisitcount
 	,sum(case
-			 when visittype = '1000' then
+			 when substring(visittype,1,1) = '1' or substring(visittype,2,1) = '1' then
 				 1
 			 else
 				 0
