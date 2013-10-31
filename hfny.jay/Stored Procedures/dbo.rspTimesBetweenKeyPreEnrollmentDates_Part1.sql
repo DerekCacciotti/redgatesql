@@ -8,59 +8,58 @@ GO
 -- Create date: 06/18/2010
 -- Description:	FAW Monthly Report
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTimesBetweenKeyPreEnrollmentDates_Part1] 
-	-- Add the parameters for the stored procedure here
-	@programfk VARCHAR(MAX) = NULL, 
-	@StartDt datetime,
-	@EndDt datetime
-AS
+CREATE procedure [dbo].[rspTimesBetweenKeyPreEnrollmentDates_Part1]-- Add the parameters for the stored procedure here
+    @ProgramFK	varchar(max)    = null,
+    @StartDt	datetime,
+    @EndDt		datetime, 
+    @SiteFK		int = null,
+    @CaseFiltersPositive	varchar(100)    = ''
 
-if @programfk is null
+as
+
+	if @ProgramFK is null
 	begin
-		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+		select @ProgramFK = substring((select ',' + ltrim(rtrim(str(HVProgramPK)))
 										   from HVProgram
-										   for xml path ('')),2,8000)
+										   for xml path ('')), 2, 8000)
 	end
-set @programfk = replace(@programfk,'"','')
+	set @ProgramFK = replace(@ProgramFK, '"', '')
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @CaseFiltersPositive = case when @CaseFiltersPositive = '' then null else @CaseFiltersPositive end
 
---DECLARE @StartDt DATE = '01/01/2011'
---DECLARE @EndDt DATE = '01/31/2011'
---DECLARE @programfk INT = 17
+	--DECLARE @StartDt DATE = '01/01/2011'
+	--DECLARE @EndDt DATE = '01/31/2011'
+	--DECLARE @programfk INT = 17
 
-SELECT e.PC1ID 
-, rtrim(faw.LastName) + ', ' + rtrim(faw.FirstName) [faw]
-, b.ScreenDate
-, d.KempeDate 
-, datediff(day, b.ScreenDate, c.KempeDate) [ScreenToKempe]
-, c.FSWAssignDate
-, rtrim(fsw.LastName) + ', ' + rtrim(fsw.FirstName) [fsw]
-, datediff(day, c.KempeDate, c.FSWAssignDate) [KempeToFSW]
-, a.IntakeDate
-, datediff(day, c.FSWAssignDate, a.IntakeDate) [FSWToIntake]
-, datediff(day, b.ScreenDate, a.IntakeDate) [ScreenToIntake]
-, datediff(day, d.KempeDate, a.IntakeDate) [KempeToIntake]
+	select e.PC1ID
+		 , rtrim(faw.LastName) + ', ' + rtrim(faw.FirstName) [faw]
+		 , b.ScreenDate
+		 , d.KempeDate
+		 , datediff(day, b.ScreenDate, c.KempeDate) [ScreenToKempe]
+		 , c.FSWAssignDate
+		 , rtrim(fsw.LastName) + ', ' + rtrim(fsw.FirstName) [fsw]
+		 , datediff(day, c.KempeDate, c.FSWAssignDate) [KempeToFSW]
+		 , a.IntakeDate
+		 , datediff(day, c.FSWAssignDate, a.IntakeDate) [FSWToIntake]
+		 , datediff(day, b.ScreenDate, a.IntakeDate) [ScreenToIntake]
+		 , datediff(day, d.KempeDate, a.IntakeDate) [KempeToIntake]
 
-FROM HVCase AS a
-LEFT OUTER JOIN HVScreen AS b ON a.HVCasePK = b.HVCaseFK
-LEFT OUTER JOIN Preassessment AS c ON c.HVCaseFK = a.HVCasePK AND c.CaseStatus = '02' 
-LEFT OUTER JOIN Kempe  AS d ON d.HVCaseFK = a.HVCasePK
-JOIN dbo.CaseProgram AS e ON e.HVCaseFK = a.HVCasePK
-JOIN dbo.SplitString(@programfk,',') on e.programfk = listitem
-JOIN dbo.Worker AS faw ON faw.WorkerPK = b.FAWFK
-JOIN dbo.Worker AS fsw	ON fsw.WorkerPK = c.PAFSWFK
+		from HVCase as a
+			left outer join HVScreen as b on a.HVCasePK = b.HVCaseFK
+			left outer join Preassessment as c on c.HVCaseFK = a.HVCasePK and c.CaseStatus = '02'
+			left outer join Kempe as d on d.HVCaseFK = a.HVCasePK
+			inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFK) cf on cf.HVCaseFK = a.HVCasePK
+			join dbo.CaseProgram as e on e.HVCaseFK = a.HVCasePK
+			join dbo.SplitString(@programfk, ',') on e.programfk = listitem
+			join dbo.Worker as faw on faw.WorkerPK = b.FAWFK
+			join dbo.Worker as fsw on fsw.WorkerPK = c.PAFSWFK
+			inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK
 
-WHERE 
---e.ProgramFK = @programfk AND 
-a.IntakeDate BETWEEN @StartDt AND @EndDt
-ORDER BY e.PC1ID
+		where
+			--e.ProgramFK = @programfk AND 
+			a.IntakeDate between @StartDt and @EndDt
+			--siteFK
+			and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
-
-
-
-
-
-
-
-
-
+		order by e.PC1ID
 GO
