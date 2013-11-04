@@ -180,7 +180,10 @@ begin
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) = 0 and
 		  					a4.ASQPK is not null and a4.ASQTCReceiving = '1' and 
 		  					dbo.IsFormReviewed(a4.DateCompleted,'AQ',a4.ASQPK) = 1 then 1
-		  			 when a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
+		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) = 0 and
+		  					a4.ASQPK is not null and a4.ASQTCReceiving = '1' and 
+		  					dbo.IsFormReviewed(a4.DateCompleted,'AQ',a4.ASQPK) = 1 then 1
+		  			 when -- a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
 		  					a4.ASQPK is not null and a4.ASQTCReceiving = '1' and 
 		  					dbo.IsFormReviewed(a4.DateCompleted,'AQ',a4.ASQPK) = 1 
 		  					then 1
@@ -199,7 +202,7 @@ begin
 		  			 when a1.ASQPK is null and charindex('(optional)',capp1.AppCodeText) > 0 and 
 		  					a2.ASQPK is null and charindex('(optional)',capp2.AppCodeText) > 0 and
 		  					a3.ASQPK is null then 0
-		  			 when a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
+		  			 when -- a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
 		  					a4.ASQPK is not null and a4.ASQInWindow = 1 
 		  					then 0
 		  		else 1
@@ -218,7 +221,7 @@ begin
 		  					a3.ASQPK is not null then 0
 		  			 when a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
 		  					(a4.ASQPK is not null and a4.ASQTCReceiving = '1') then 0
-		  			 when a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
+		  			 when -- a1.ASQPK is null and a2.ASQPK is null and a3.ASQPK is null and 
 		  					(a4.ASQPK is null or (a4.ASQPK is not null and 
 		  						(a4.ASQTCReceiving <> '1' or a4.ASQTCReceiving is null))) then 1
 		  		else 0
