@@ -113,14 +113,20 @@ begin
 					--EDIT: Chris Papas 10/11/2013
 					--removed max(hvlevelpk) bringing in wrong pk when someone inserts a previous level (e.g. hvlevelpk is larger, but levelstart is not)
 					--, max(hvlevelpk) over (partition by pc1id ) as  'UseThisLevelPK'
-					--replaced with this line
-					,(SELECT TOP 1 hvlevelpk FROM cteHVRecords ORDER BY levelstart DESC) AS [UseThisLevelPK]
 					--END 10/11/2013 EDIT
+					
+					
+					,(select levelname
+						  from hvleveldetail hld
+						  where hld.hvcasefk = hvr.casefk
+							   and hld.StartLevelDate = hvr.levelstart
+							   ) as levelname
+							   		   
 					,sum(visitlengthminute) over (partition by pc1wrkfk ) as 'Minutes'
 					,sum(expvisitcount) over (partition by pc1wrkfk ) as expvisitcount
 					,min(startdate) over (partition by pc1wrkfk ) as 'startdate'
 					,max(enddate) over (partition by pc1wrkfk ) as 'enddate'
-					,levelname
+					--,levelname
 					,max(levelstart) over (partition by pc1wrkfk ) as 'levelstart'
 					,sum(actvisitcount) over (partition by pc1wrkfk ) as actvisitcount
 					,sum(inhomevisitcount) over (partition by pc1wrkfk ) as inhomevisitcount
@@ -148,8 +154,9 @@ begin
 					,expvisitcount
 					,startdate
 					,enddate
-					, (select levelname  from HVLevel inner join codeLevel l on l.codeLevelPK = HVLevel.LevelFK
-							where HVLevel.HVLevelPK=UseThisLevelPK) as levelname
+					,levelname
+					--, (select levelname  from HVLevel inner join codeLevel l on l.codeLevelPK = HVLevel.LevelFK
+					--		where HVLevel.HVLevelPK=UseThisLevelPK) as levelname
 					--CHRIS PAPAS - below line was bringing in duplicates (ex. AL8713016704 for July 2010 - June 2011)
 					 --, (SELECT TOP 1 levelname ORDER BY enddate) AS levelname
 					 ,levelstart

@@ -160,8 +160,11 @@ begin
 					,expvisitcount
 					,startdate
 					,enddate
-					,Row_Number() OVER (Partition By casefk ORDER BY [levelstart] DESC) as RowNum
-					,levelname
+					,(select levelname
+						  from hvleveldetail hld
+						  where hld.hvcasefk = cteSummary.casefk
+							   and hld.StartLevelDate = cteSummary.levelstart
+							   ) as levelname
 					,levelstart
 					,actvisitcount
 					,inhomevisitcount
@@ -203,7 +206,7 @@ begin
 					,TCDOB
 					,LevelChanges
 				from cteSummary
-			) a where RowNum=1
+			) a 
 	)
 	
 	
