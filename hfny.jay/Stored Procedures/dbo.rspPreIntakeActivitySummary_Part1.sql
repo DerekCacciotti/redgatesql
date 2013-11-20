@@ -59,7 +59,8 @@ PreAssessmentFSWAssignDate
 AS (
 SELECT DISTINCT a.HVCaseFK
 FROM Preassessment AS a
-WHERE a.FSWAssignDate BETWEEN @StartDt AND @EndDt
+WHERE a.KempeDate BETWEEN @StartDt AND @EndDt
+-- a.FSWAssignDate BETWEEN @StartDt AND @EndDt
 AND a.ProgramFK = @programfk
 ),
 
