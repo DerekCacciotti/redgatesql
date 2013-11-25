@@ -73,7 +73,8 @@ as
 				  from caseprogram
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
-					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+					  inner join tcid on tcid.hvcasefk = hvcasepk 
+					  --and tcid.programfk = caseprogram.programfk (11/25/2013 - Chris Papas removed, not bringing in transferred cases)
 					  --inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asq version'
 					  inner join codeduebydates on scheduledevent = 'ASQ' 
 					  --inner join codeduebydates on scheduledevent = optionValue
@@ -82,7 +83,9 @@ as
 					  inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.ProgramFK=ListItem
 					  inner join worker supervisor on supervisorfk = supervisor.workerpk
 					  inner join codelevel on codelevelpk = currentlevelfk
-					  left join asq on asq.hvcasefk = hvcasepk and asq.programfk = caseprogram.programfk and codeduebydates.interval = TCAge
+					  left join asq on asq.hvcasefk = hvcasepk 
+						--and asq.programfk = caseprogram.programfk (11/25/2013 - Chris Papas removed, not bringing in transferred cases)
+						and codeduebydates.interval = TCAge
 				  where asq.hvcasefk is NULL
 				       AND HVCase.TCDOD IS NULL
 					   and caseprogress >= 11
