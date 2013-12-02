@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[spAddcodeTopic](@TopicName char(150)=NULL,
 @SATCompareDateField nvarchar(50)=NULL,
 @SATInterval nvarchar(50)=NULL,
 @SATName nvarchar(10)=NULL,
-@SATReqBy nvarchar(50)=NULL)
+@SATReqBy nvarchar(50)=NULL,
+@DaysAfter int=NULL)
 AS
 INSERT INTO codeTopic(
 TopicName,
@@ -18,7 +19,8 @@ TopicPK_old,
 SATCompareDateField,
 SATInterval,
 SATName,
-SATReqBy
+SATReqBy,
+DaysAfter
 )
 VALUES(
 @TopicName,
@@ -27,7 +29,8 @@ VALUES(
 @SATCompareDateField,
 @SATInterval,
 @SATName,
-@SATReqBy
+@SATReqBy,
+@DaysAfter
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

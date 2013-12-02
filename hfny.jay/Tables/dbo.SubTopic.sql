@@ -11,7 +11,8 @@ CREATE TABLE [dbo].[SubTopic]
 [SubTopicEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SubTopicName] [char] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [SubTopicPK_old] [int] NULL,
-[TopicFK] [int] NOT NULL
+[TopicFK] [int] NOT NULL,
+[TrainingTickler] [nchar] (3) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_SubTopic_TopicFK] ON [dbo].[SubTopic] ([TopicFK]) ON [PRIMARY]
 

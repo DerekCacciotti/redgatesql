@@ -10,7 +10,8 @@ CREATE PROCEDURE [dbo].[spAddSubTopic](@ProgramFK int=NULL,
 @SubTopicCreator char(10)=NULL,
 @SubTopicName char(100)=NULL,
 @SubTopicPK_old int=NULL,
-@TopicFK int=NULL)
+@TopicFK int=NULL,
+@TrainingTickler nchar(3)=NULL)
 AS
 INSERT INTO SubTopic(
 ProgramFK,
@@ -20,7 +21,8 @@ SubTopicCode,
 SubTopicCreator,
 SubTopicName,
 SubTopicPK_old,
-TopicFK
+TopicFK,
+TrainingTickler
 )
 VALUES(
 @ProgramFK,
@@ -30,7 +32,8 @@ VALUES(
 @SubTopicCreator,
 @SubTopicName,
 @SubTopicPK_old,
-@TopicFK
+@TopicFK,
+@TrainingTickler
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

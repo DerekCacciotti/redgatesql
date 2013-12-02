@@ -7,7 +7,8 @@ CREATE TABLE [dbo].[codeTopic]
 [SATCompareDateField] [nvarchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SATInterval] [nvarchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SATName] [nvarchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[SATReqBy] [nvarchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[SATReqBy] [nvarchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[DaysAfter] [int] NULL
 ) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [TopicCode] ON [dbo].[codeTopic] ([TopicCode]) ON [PRIMARY]
 

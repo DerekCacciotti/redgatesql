@@ -11,7 +11,8 @@ CREATE PROCEDURE [dbo].[spEditSubTopic](@SubTopicPK int=NULL,
 @SubTopicEditor char(10)=NULL,
 @SubTopicName char(100)=NULL,
 @SubTopicPK_old int=NULL,
-@TopicFK int=NULL)
+@TopicFK int=NULL,
+@TrainingTickler nchar(3)=NULL)
 AS
 UPDATE SubTopic
 SET 
@@ -22,6 +23,7 @@ SubTopicCode = @SubTopicCode,
 SubTopicEditor = @SubTopicEditor, 
 SubTopicName = @SubTopicName, 
 SubTopicPK_old = @SubTopicPK_old, 
-TopicFK = @TopicFK
+TopicFK = @TopicFK, 
+TrainingTickler = @TrainingTickler
 WHERE SubTopicPK = @SubTopicPK
 GO
