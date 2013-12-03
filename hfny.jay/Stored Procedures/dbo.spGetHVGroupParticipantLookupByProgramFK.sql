@@ -1,10 +1,12 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 
 CREATE procedure [dbo].[spGetHVGroupParticipantLookupByProgramFK]
-	@programfk  int = null
+	@programfk  int = NULL,
+	@groupDate DATE = NULL
     
 as
 set nocount ON
@@ -21,7 +23,7 @@ JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 LEFT OUTER JOIN FatherFigure AS c ON c.HVCaseFK = a.HVCasePK AND 
 (c.DateInactive IS NULL OR c.DateInactive > getdate())
 WHERE b.ProgramFK = @programfk AND a.IntakeDate IS NOT NULL 
-AND b.DischargeDate IS NULL
+AND (b.DischargeDate IS NULL OR b.DischargeDate > isnull(@groupDate, getdate()))
 )
 
 , pc1 AS
