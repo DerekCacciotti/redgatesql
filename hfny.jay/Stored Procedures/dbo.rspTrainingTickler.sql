@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -19,6 +20,7 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
+
 		
 IF @supervisorfk = 0 SET @supervisorfk = NULL
 IF @workerfk = 0 SET @workerfk = NULL
@@ -36,10 +38,8 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 
 , cteCompleteTopicList AS(
 	SELECT * FROM cteTopicList TL
-	LEFT JOIN cteSubtopicList STL ON TL.codeTopicPK=stl.TopicFK
-	
+	LEFT JOIN cteSubtopicList STL ON TL.codeTopicPK=stl.TopicFK	
 )
-
 
 , cteEventDates AS (
 	SELECT workerpk, wrkrLName
@@ -110,7 +110,7 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 			ELSE 1
 			END = 1
 )
-		
+	
 		
 , cteReadyForRemoval AS (
 		SELECT DISTINCT workerpk, wrkrLName
@@ -149,7 +149,6 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 		FROM cteEverythingRequired ER
 		)
 		
-		
 , cteFinal AS(		
 	SELECT workerpk
 			, WorkerName
@@ -175,12 +174,19 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 			, SubTopicPK
 			, TrainingTickler
 			, TrainingDate
-			, CASE WHEN TopicCode<10.0 THEN '   Orientation (Prior to direct work with Families)'
+			--, (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=2124) AS testdate
+			, CASE WHEN TopicCode<6.0 THEN '    Orientation (Prior to direct work with Families)'
+				WHEN TopicCode<10.0 THEN '   NYS Training Requirements'
 				WHEN TopicCode<13.0 THEN '  Intensive Role Specific Training'
 				WHEN TopicCode<20.0 THEN ' Demonstrated Knowledge by 6 months Training'
 				Else 'Demonstrated Knowledge by 12 months Training'
 				END AS [theGrouping]
-			, CASE  WHEN SATCompareDateField = 'firstevent' THEN
+			, CASE  
+					WHEN topiccode	= 10.1 THEN --this training must be completed 3 months AFTER 10.0
+						CASE WHEN (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk) IS NULL THEN 'After Core'
+						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk)), 101)
+						END
+					WHEN SATCompareDateField = 'firstevent' THEN
 						CASE WHEN FirstEvent IS NULL THEN 'First Event'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, FirstEvent), 101)
 						END
@@ -219,7 +225,7 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 						CASE WHEN SupervisorInitialStart IS NULL THEN 'Remove'
 						WHEN TrainingDate IS NOT NULL THEN 'Remove' END
 			  END AS 'Removals'
-			FROM cteReadyForRemoval
+			FROM cteReadyForRemoval rfr
 			)
 		
 SELECT workerpk
@@ -239,7 +245,7 @@ SELECT workerpk
 			, [theGrouping] AS [Grouping]
 			, [DateDue]	
 FROM ctefinal 
-WHERE Removals IS NULL
+WHERE Removals IS NULL 
 ORDER BY [theGrouping], TopicCode, SubTopicCode
 
 END
