@@ -1,7 +1,4 @@
 SET IDENTITY_INSERT [dbo].[codeForm] ON
-INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (29, 'TrainingPK', 1, 'TR', 'Training', 'TrainingCreator', 'TrainingDate', 'Training')
-SET IDENTITY_INSERT [dbo].[codeForm] OFF
-SET IDENTITY_INSERT [dbo].[codeForm] ON
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (1, 'HVScreenPK', 1, 'SC', 'HVScreen', 'ScreenCreator', 'ScreenDate', 'HVScreen')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (2, 'PreassessmentPK', 1, 'PA', 'Preassessment', 'PACreator', 'PADate', 'Preassessment')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (3, 'KempePK', 1, 'KE', 'Kempe', 'KempeCreator', 'KempeDate', 'Kempe')
@@ -22,10 +19,13 @@ INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [code
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (18, 'CaseProgramPK', 1, 'DS', 'Discharge', 'CaseProgramEditor', 'DischargeDate', 'CaseProgram')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (19, 'NULL', 0, 'WE', 'Worker Exemption', 'NULL', 'NULL', 'NULL')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (20, 'NULL', 0, 'CF', 'Change Form', 'NULL', 'NULL', 'NULL')
-INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (21, 'HVLevelPK', 1, 'LV', 'Level Change ', 'HVLevelCreator', 'LevelAssignDate', 'HVLevel')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (22, 'CaseProgramPK', 0, 'CH', 'Case Home Page', 'NULL', 'FormDate', 'NULL')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (23, 'PSIPK', 1, 'PS', 'Parental Stress Index', 'PSICreator', 'PSIDateComplete', 'PSI')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (26, 'SupervisionPK', 1, 'SU', 'Supervision', 'SupervisionCreator', 'SupervisionDate', 'Supervision')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (27, 'HVGroupPK', 1, 'GR', 'Group', 'GroupCreator', 'GroupDate', 'HVGroup')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (28, 'FatherFigurePK', 1, 'FF', 'Father Figure', 'FatherFigureCreator', 'DateAcceptService', 'FatherFigure')
+INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (29, 'TrainingPK', 1, 'TR', 'Training', 'TrainingCreator', 'TrainingDate', 'Training')
+SET IDENTITY_INSERT [dbo].[codeForm] OFF
+SET IDENTITY_INSERT [dbo].[codeForm] ON
+INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (21, 'HVLevelPK', 1, 'LV', 'Level Form', 'HVLevelCreator', 'LevelAssignDate', 'HVLevel')
 SET IDENTITY_INSERT [dbo].[codeForm] OFF
