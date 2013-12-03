@@ -183,7 +183,7 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 				END AS [theGrouping]
 			, CASE  
 					WHEN topiccode	= 10.1 THEN --this training must be completed 3 months AFTER 10.0
-						CASE WHEN (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk) IS NULL THEN 'After FAQ Core'
+						CASE WHEN (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk) IS NULL THEN 'After FAW Core'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk)), 101)
 						END
 					WHEN SATCompareDateField = 'firstevent' THEN
