@@ -14,7 +14,7 @@ GO
 -- =============================================
 CREATE PROCEDURE [dbo].[rspRetentionRatesByDischargeReason]
 	-- Add the parameters for the stored procedure here
-	@ProgramFK int
+	@ProgramFK varchar(max)
 	, @StartDate datetime
 	, @EndDate datetime
 as
@@ -73,8 +73,9 @@ print @enddate
 		(select HVCasePK
 			from HVCase h 
 			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
 			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-				  and cp.ProgramFK=@ProgramFK
+				  -- and cp.ProgramFK=@ProgramFK
 		)	
 
 	--select * 
@@ -95,9 +96,10 @@ print @enddate
 		   ,count(vl.VisitStartTime) as CountOfHomeVisits
 		from HVLog vl
 		inner join hvcase c on c.HVCasePK = vl.HVCaseFK
-			where VisitType <> '0001' and 
+		inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
+		where VisitType <> '0001' and 
 					(IntakeDate is not null and IntakeDate between @startdate and @enddate)
-			  and vl.ProgramFK = @ProgramFK
+			  --and vl.ProgramFK = @ProgramFK
 		group by HVCaseFK
 	)
 	
@@ -135,12 +137,13 @@ print @enddate
 				else 0
 			end as ActiveAt24Months
 	 from HVCase c
-		 inner join cteCaseLastHomeVisit lhv on lhv.HVCaseFK = c.HVCasePK
-		 inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
+		inner join cteCaseLastHomeVisit lhv on lhv.HVCaseFK = c.HVCasePK
+		inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
+		inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
 		 left outer join dbo.codeDischarge cd on cd.DischargeCode = cp.DischargeReason and DischargeUsedWhere like '%DS%'
 	 where (IntakeDate is not null
 		  and IntakeDate between @StartDate and @EndDate)
-		  and cp.ProgramFK = @ProgramFK
+		  --and cp.ProgramFK = @ProgramFK
 	)
 
 --select *

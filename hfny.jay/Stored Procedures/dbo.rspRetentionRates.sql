@@ -13,12 +13,13 @@ GO
 -- exec rspRetentionRates 37, '20090401', '20110331'
 -- exec rspRetentionRates 17, '20090401', '20110331'
 -- exec rspRetentionRates 20, '20080401', '20110331'
+-- exec rspRetentionRates '15,16', '20091201', '20111130'
 
 -- =============================================
 -- =============================================
 CREATE PROCEDURE [dbo].[rspRetentionRates]
 	-- Add the parameters for the stored procedure here
-	@ProgramFK int
+	@ProgramFK varchar(max)
 	, @StartDate datetime
 	, @EndDate datetime
 as
@@ -165,8 +166,9 @@ SET NOCOUNT ON;
 		(select HVCasePK
 			from HVCase h 
 			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
 			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-				  and cp.ProgramFK=@ProgramFK
+				  -- and cp.ProgramFK=@ProgramFK
 		)	
 
 	--select * 
@@ -302,9 +304,10 @@ SET NOCOUNT ON;
 				  , count(vl.VisitStartTime) as CountOfHomeVisits
 			from HVLog vl
 			inner join hvcase c on c.HVCasePK = vl.HVCaseFK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
 			where VisitType <> '0001' and 
 					(IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-							 and vl.ProgramFK = @ProgramFK
+							 -- and vl.ProgramFK = @ProgramFK
 			group by HVCaseFK
 		)
 --#endregion
@@ -314,8 +317,9 @@ SET NOCOUNT ON;
 		 (select HVCaseFK, count(wa.WorkerAssignmentPK) as CountOfFSWs
 		   from dbo.WorkerAssignment wa
 			inner join hvcase c on c.HVCasePK=wa.HVCaseFK 
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = wa.ProgramFK
 			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-				and wa.ProgramFK=@ProgramFK
+				-- and wa.ProgramFK=@ProgramFK
 			group by HVCaseFK)
 --#endregion
 --#region ctePC1AgeAtIntake - get the PC1's age at intake
@@ -326,8 +330,10 @@ SET NOCOUNT ON;
 			from PC 
 			inner join PCProgram pcp on pcp.PCFK=PCPK
 			inner join HVCase c on c.PC1FK=PCPK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = pcp.ProgramFK
 			WHERE (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-				and pcp.ProgramFK=@ProgramFK)
+				--and pcp.ProgramFK=@ProgramFK
+			)
 --#endregion
 --#region ctePC1AgeAtIntake - get the PC1's age at intake
 	, cteTCInformation as
@@ -338,8 +344,9 @@ SET NOCOUNT ON;
 			from TCID t
 			inner join HVCase c on c.HVCasePK = t.HVCaseFK
 			inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
 			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-					and cp.ProgramFK=@ProgramFK
+					-- and cp.ProgramFK=@ProgramFK
 			group by t.HVCaseFK)
 --#endregion
 --#region cteMain - main select for the report sproc, gets data at intake and joins to data at discharge
@@ -463,6 +470,7 @@ SET NOCOUNT ON;
 			inner join Kempe k on k.HVCaseFK=c.HVCasePK
 			inner join PC1Issues pc1i ON pc1i.HVCaseFK=k.HVCaseFK AND pc1i.PC1IssuesPK=k.PC1IssuesFK
 			inner join codeLevel cl ON cl.codeLevelPK=CurrentLevelFK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
 			left outer join cteTCInformation tci on tci.HVCaseFK = c.HVCasePK
 			left outer join codeApp carace on carace.AppCode=Race and AppCodeGroup='Race'
 			left outer join (select MaritalStatus, PBTANF as PC1TANFAtIntake
@@ -487,7 +495,7 @@ SET NOCOUNT ON;
 							   LEFT OUTER JOIN codeApp capp ON capp.AppCode=HighestGrade and AppCodeGroup='Education'
 							  WHERE FormType='IN-PC1') pc1eduai ON pc1eduai.HVCaseFK=c.HVCasePK
 			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-				  and cp.ProgramFK=@ProgramFK
+				  -- and cp.ProgramFK=@ProgramFK
 		)
 --#endregion
 --select *
