@@ -12,13 +12,12 @@ GO
 -- Description: 
 -- exec rspFSWPreIntakeTickler 28, '20130201', null, null
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+-- Edit date: 12/09/2013 JR - remove FSWFK, SupFK and PC1ID from parameters
 -- =============================================
 CREATE procedure [dbo].[rspFSWPreIntakeTickler]
 (
-    @programfk    int    = null,
-    @rdate        datetime,
-    @supervisorfk int             = null,
-    @workerfk     int             = null
+    @programfk		int			= null,
+    @rdate			datetime	
 )
 as
 	
@@ -78,8 +77,9 @@ select c.PC1ID [pc1ID]
 		 and c.ProgramFK = @programfk
 		 and c.CurrentLevelFK in (7,8)
 		 --and caseprogress >= 11
-		 and c.currentFSWFK = isnull(@workerfk,c.currentFSWFK)
-		 and supervisorfk = isnull(@supervisorfk,supervisorfk)
+		 --and c.currentFSWFK = isnull(@workerfk,c.CurrentFSWFK)
+		 --and SupervisorFK = isnull(@supervisorfk,SupervisorFK)
+		 --and PC1ID = isnull(@pc1id, PC1ID)
 
 --where followup.hvcasefk is null
 --and CaseProgress >= 11
