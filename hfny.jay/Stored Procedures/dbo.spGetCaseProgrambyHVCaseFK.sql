@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -21,9 +22,10 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-SELECT *
+SELECT top 1 *
   FROM [dbo].[CaseProgram]
   WHERE [HVCaseFK]=@HVCaseFK and [ProgramFK]=@ProgramFK
+  order by CaseProgramCreateDate desc
 END
 
 
