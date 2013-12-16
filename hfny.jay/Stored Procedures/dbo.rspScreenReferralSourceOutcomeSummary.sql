@@ -35,13 +35,13 @@ as
 	select ReferralSourceName
 		  ,screens
 		  ,positivescreen
-		  -- ,1 as ppositivescreen -- positivescreen/(screens*1.0) 
-		  ,case
-			   when screens > 0 then
-				   positivescreen/(screens*1.0)
-			   else
-				   0
-		   end as pPositiveScreen
+		  ,1 as ppositivescreen -- positivescreen/(screens*1.0) 
+		  --,case
+			 --  when screens > 0 then
+				--   positivescreen/(screens*1.0)
+			 --  else
+				--   0
+		  -- end as pPositiveScreen
 		  ,ClosedPreassessment
 		  ,case
 			   when positivescreen > 0 then
