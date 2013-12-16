@@ -129,7 +129,8 @@ SELECT firstname + lastname AS Name
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=20) AS 'f17a'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=21) AS 'f17b'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=22) AS 'f17c'
-, (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=23) AS 'f17e' --as per FoxPro, there is no 'd'
+, (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=70) AS 'f17d'
+, (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=23) AS 'f17e' 
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=24) AS 'f18a'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=25) AS 'f18b'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=26) AS 'f18c'
@@ -428,6 +429,12 @@ SELECT distinct [Name]
 			CASE WHEN datediff(dd, [f17c], [HireDate]) < -183 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f17c_ast'
+	 , CASE [f17d] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f17d], 101) END AS [f17d]
+	 , CASE isnull([f17d], 0)
+		WHEN [f17d] THEN
+			CASE WHEN datediff(dd, [f17d], [HireDate]) < -183 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f17d_ast'
 	 , CASE [f17e] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f17e], 101) END AS [f17e] --there's no 'd' in this report
 	 , CASE isnull([f17e], 0)
 		WHEN [f17e] THEN
