@@ -3,7 +3,7 @@ CREATE TABLE [dbo].[CommonAttributes]
 [CommonAttributesPK] [int] NOT NULL IDENTITY(1, 1),
 [AvailableMonthlyBenefits] [numeric] (4, 0) NULL,
 [AvailableMonthlyBenefitsUnknown] [bit] NULL,
-[AvailableMonthlyIncome] [numeric] (4, 0) NULL,
+[AvailableMonthlyIncome] [numeric] (5, 0) NULL,
 [CommonAttributesCreateDate] [datetime] NOT NULL CONSTRAINT [DF_CommonAttributes_CommonAttributesCreateDate] DEFAULT (getdate()),
 [CommonAttributesCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [CommonAttributesEditDate] [datetime] NULL,
