@@ -96,6 +96,7 @@ as
 			--INNER JOIN dbo.SplitString(@programfk,',') ON caseprogram.programfk  = listitem
 			where workerfk = isnull(@workerpk,workerfk)
 				 and dischargedate is null
+				 --and HVCase.KempeDate is null -- This is the way it should be once fixed (don't look at kempe.kempedate) ... John and Devinder
 				 and kempe.kempedate is null
 				 and hvcase.ScreenDate is not null
 				 and casestartdate <= dateadd(dd,1,datediff(dd,0,GETDATE()))
