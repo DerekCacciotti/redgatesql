@@ -9,6 +9,7 @@ GO
 -- Create date: August 8, 2013
 -- Description:	Credentialing report for Supervisions
 
+-- rspCredentialingSupervision 1, '10/01/2013', '12/31/2013'
 -- rspCredentialingSupervision 31, '07/01/2013', '09/30/2013'
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,152,null
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,null,5
@@ -544,10 +545,48 @@ END
 
 	)	
 	
+	,cteSupervisionReasonsChecked	as 
+	(
+		SELECT SupervisionPK
+		
+		,
+		sum(
+			convert(int,ParticipantEmergency)				
+			+ convert(int,ShortWeek)
+			+ convert(int,StaffCourt)
+			+ convert(int,StaffFamilyEmergency)
+			+ convert(int,StaffForgot)
+			+ convert(int,StaffIll)
+			+ convert(int,StaffTraining)
+			+ convert(int,StaffVacation)
+			+ convert(int,StaffOutAllWeek)
+			+ convert(int,SupervisorFamilyEmergency)
+			+ convert(int,SupervisorForgot)
+			+ convert(int,SupervisorHoliday)
+			+ convert(int,SupervisorIll)
+			+ convert(int,SupervisorTraining)
+			+ convert(int,SupervisorVacation)
+			+ convert(int,ReasonOther)
+			+ convert(int,Weather)		
+		) as NumOfReasonsChecked
+			  
+			  
+			   FROM #tblWorkers w 
+				left join Supervision s on s.WorkerFK = w.WorkerPK
+				where TakePlace = 0
+				group by SupervisionPK
+
+	)		
 	
-------	--SELECT * FROM cteSupervisionReasonsNotTookPlace
 	
--------- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'		
+	-- rspCredentialingSupervision 1, '10/01/2013', '12/31/2013'
+	
+	--SELECT * FROM cteSupervisionReasonsChecked
+	
+	
+------------	--SELECT * FROM cteSupervisionReasonsNotTookPlace
+	
+-------------- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'		
 
 	,cteSupervisionDurations
 	as
@@ -600,8 +639,26 @@ END
 				as MeetsStandard
 
 			,case
-				when (TakePlace = 0) and (StaffOutAllWeek = 1)  then 'Staff out all week'  -- Form found in period and reason is “Staff out all week” Note: E = Excused
-				when (TakePlace = 0) and (StaffOutAllWeek <> 1)  then reason.ReasonNOSupervision  -- Form found in period and reason is not “Staff out all week”
+				--when (TakePlace = 0) and (StaffOutAllWeek = 1)  then 'Staff out all week'  -- Form found in period and reason is “Staff out all week” Note: E = Excused
+				
+				
+				when (TakePlace = 0) and (StaffOutAllWeek = 1) and (reasonsChecked.NumOfReasonsChecked >= 1) then
+					-- need to display more if there is more than one reasons checked
+					case when  reasonsChecked.NumOfReasonsChecked > 1 then 'Staff out all week and more' 
+						else 'Staff out all week' end
+								 
+
+		-- rspCredentialingSupervision 1, '10/01/2013', '12/31/2013'		
+				 		
+				
+				when (TakePlace = 0) and (StaffOutAllWeek <> 1) and (reasonsChecked.NumOfReasonsChecked >= 1) then
+					-- need to display more if there is more than one reasons checked
+					case when  reasonsChecked.NumOfReasonsChecked > 1 then reason.ReasonNOSupervision + ' and more' 
+						else reason.ReasonNOSupervision  -- Form found in period and reason is not “Staff out all week”
+						 end				
+
+				
+				
 				when (isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) >= 90) and (TakePlace = 1) then '' -- Form found in period and duration is 1:30 or greater 
 				when (isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) < 90) and (TakePlace = 1) then ''  -- Form found in period and duration less than 1:30
 				when (WorkerFK is null and wws.SupervisionPK is null) then 'Unknown'  -- Form not found in period
@@ -621,6 +678,7 @@ END
 		 FROM cteWorkersWithSupervisions wws
 		 left join cteSupervisors sup on wws.SupervisorFK = sup.WorkerPK  -- to fetch in supervisor's name
 		 left join  cteSupervisionReasonsNotTookPlace reason on reason.SupervisionPK = wws.SupervisionPK -- to fetch in reasons for supervision not took place
+		 left join cteSupervisionReasonsChecked reasonsChecked on reasonsChecked.SupervisionPK = reason.SupervisionPK
 		 left join cteSupervisionDurationsGroupedByWeek sdg on sdg.WorkerPK = wws.WorkerPK and sdg.WeekNumber = wws.WeekNumber
 		)
 		
@@ -781,7 +839,7 @@ SELECT WorkerName
  )
  
 		 
-		SELECT cr.WorkerName	
+		SELECT cr.WorkerName
 		  ,convert(varchar(12),startdate,101) as startdate
 		  --,enddate
 		  ,convert(varchar(12),SupervisionDate,101) as SupervisionDate
