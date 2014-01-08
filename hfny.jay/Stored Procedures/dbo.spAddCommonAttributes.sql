@@ -5,7 +5,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyBenefits numeric(4, 0)=NULL,
 @AvailableMonthlyBenefitsUnknown bit=NULL,
-@AvailableMonthlyIncome numeric(4, 0)=NULL,
+@AvailableMonthlyIncome numeric(5, 0)=NULL,
 @CommonAttributesCreator char(10)=NULL,
 @EducationalEnrollment char(1)=NULL,
 @FormDate datetime=NULL,

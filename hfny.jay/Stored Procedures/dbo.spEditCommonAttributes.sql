@@ -6,7 +6,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditCommonAttributes](@CommonAttributesPK int=NULL,
 @AvailableMonthlyBenefits numeric(4, 0)=NULL,
 @AvailableMonthlyBenefitsUnknown bit=NULL,
-@AvailableMonthlyIncome numeric(4, 0)=NULL,
+@AvailableMonthlyIncome numeric(5, 0)=NULL,
 @CommonAttributesEditor char(10)=NULL,
 @EducationalEnrollment char(1)=NULL,
 @FormDate datetime=NULL,
