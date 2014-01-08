@@ -58,9 +58,9 @@ RETURN
 		SELECT DISTINCT w.WorkerPK
 			 , w.LastName AS 'WrkrLName'
 			 , w.FirstName AS 'WrkrFName'
-			 , w.FAWInitialStart --as per Jay, we will use Initial start for FAW date
-			 , w.SupervisorInitialStart
-			 , w.FSWInitialStart
+			 , wp.FAWStartDate as FAWInitialStart --12/12/2013 No longer using IntitialStart date
+			 , wp.SupervisorStartDate as SupervisorInitialStart --12/12/2013 No longer using IntitialStart date
+			 , wp.FSWStartDate as FSWInitialStart --12/12/2013 No longer using IntitialStart date
 			 , wp.TerminationDate
 			 , wp.HireDate
 			 , CASE WHEN datediff(dd, w.SupervisorFirstEvent, ctSuper.SuperDate) < 0 THEN 
@@ -86,8 +86,8 @@ RETURN
 		LEFT OUTER JOIN ctSuper ON ctsuper.SupervisorFK=w.WorkerPK
 		GROUP BY wp.programfk, w.WorkerPK, w.LastName, w.FirstName
 		,wp.supervisorfk
-		,w.SupervisorInitialStart, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate
-		, ctHVLog.VisitStartTime, ctk.KempeDate, wp.FAWStartDate, w.FAWInitialStart, w.FSWInitialStart
+		, wp.SupervisorStartDate, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate
+		, ctHVLog.VisitStartTime, ctk.KempeDate, wp.FSWStartDate, wp.FAWStartDate
 		HAVING (wp.ProgramFK=@prgfk)
 		and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
 		and (@workerfk is null or w.WorkerPK = @workerfk) 
