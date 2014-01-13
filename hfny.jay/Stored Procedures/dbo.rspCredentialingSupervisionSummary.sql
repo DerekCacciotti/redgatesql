@@ -15,6 +15,11 @@ GO
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 --            added this code to the workerprogram join condition: AND wp.programfk = listitem
 
+-- Fix: replace the start date of the report with worker's scheduled date of supervision  ... Khalsa 01/13/2013
+-- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,2
+-- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,null
+
+
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingSupervisionSummary]
 	@ProgramFK  int           = null,
@@ -22,7 +27,9 @@ CREATE procedure [dbo].[rspCredentialingSupervisionSummary]
     @eDate  datetime      =  null,
     @supervisorfk int             = null,
     @workerfk     int             = null,
-	@sitefk		 int			 = null
+	@sitefk		 int			 = null,
+	@DayOfWeekSupScheduled  int           = null
+
     
 as
 
@@ -44,6 +51,9 @@ END
 
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end	
 	
+	-- replace the start date of the report with worker's scheduled date of supervision	
+	--Note: DayOfWeekSupScheduled and sDate are now required dates
+	set @sDate = dateadd(day,(isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate)
 
 	
 	

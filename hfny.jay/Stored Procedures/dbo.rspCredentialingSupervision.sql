@@ -14,6 +14,12 @@ GO
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,152,null
 -- rspCredentialingSupervision 1, '06/01/2013', '08/31/2013',null,null,5
 
+
+-- Fix: replace the start date of the report with worker's scheduled date of supervision  ... Khalsa 01/13/2013
+-- rspCredentialingSupervision 11, '10/01/2013', '12/31/2013',null,673,null,2
+-- rspCredentialingSupervision 11, '10/01/2013', '12/31/2013',null,673,null,null
+
+
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingSupervision]
 	@ProgramFK  int           = null,
@@ -21,7 +27,8 @@ CREATE procedure [dbo].[rspCredentialingSupervision]
     @eDate  datetime      =  null,
     @supervisorfk int             = null,
     @workerfk     int             = null,
-	@sitefk		 int			 = null
+	@sitefk		 int			 = null,
+	@DayOfWeekSupScheduled  int           = null
     
 as
 
@@ -43,7 +50,12 @@ END
 
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end	
 	
-
+	
+	-- replace the start date of the report with worker's scheduled date of supervision	
+	--Note: DayOfWeekSupScheduled and sDate are now required dates
+	set @sDate = dateadd(day,(isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate)
+	
+	--select @sDate
 	
 	
 	--Step#: 1
