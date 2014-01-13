@@ -1,8 +1,15 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[rspMedicalProviderListing](@programfk varchar(max)    = null,
+-- =============================================
+-- Author:		<jrobohn>
+-- Create date: 2011?? from famsys
+-- Description:	gets listing of current medical providers/facilities for PC1s/TCs for currently enrolled cases
+-- exec rspMedicalProviderListing '27', '20130101', '20131231', null
+-- =============================================
+CREATE procedure [dbo].[rspMedicalProviderListing](@programfk varchar(max)    = null,
                                                   @sdate     datetime,
                                                   @edate     datetime,
                                                   @workerfk  int             = null
@@ -71,7 +78,7 @@ as
 						(select CAMatchingKey=max(convert(datetime,FormDate,112)+CommonAttributesPK)
 							from CommonAttributes cainner
 							where cainner.hvcasefk=ca.hvcasefk 
-									and formtype='FU-PC1')
+									and formtype='FU')
 					and intakedate <= @edate 
 					and (dischargedate is null
 						   or dischargedate > @edate)
@@ -120,7 +127,7 @@ as
 			inner join dbo.SplitString(@programfk, ',') on caseprogram.programfk = listitem
 			left join listMedicalProvider pc1mp 
 					on pc1mp.listmedicalproviderpk = ca.pc1medicalproviderfk
-			left join listMedicalFacility pc1mf 
+			left join listMedicalFacility pc1mf  
 					on pc1mf.listmedicalfacilitypk = ca.pc1medicalfacilityfk
 			where intake.intakedate <= @edate 
 					and (dischargedate is null
