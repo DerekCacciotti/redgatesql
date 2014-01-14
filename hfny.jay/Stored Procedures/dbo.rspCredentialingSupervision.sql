@@ -55,6 +55,20 @@ END
 	--Note: DayOfWeekSupScheduled and sDate are now required dates
 	set @sDate = dateadd(day,(isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate)
 	
+	-- Get name of the day of week that user selected
+	-- Need to show it back to the user in the report
+		DECLARE @DayofWeek VARCHAR(10)
+		SELECT @DayofWeek = CASE isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate))
+		WHEN 1 THEN 'Sunday'
+		WHEN 2 THEN 'Monday'
+		WHEN 3 THEN 'Tuesday'
+		WHEN 4 THEN 'Wednesday'
+		WHEN 5 THEN 'Thursday'
+		WHEN 6 THEN 'Friday'
+		WHEN 7 THEN 'Saturday'
+		END	
+	
+	--print @rtDayofWeek
 	--select @sDate
 	
 	
@@ -891,7 +905,8 @@ SELECT WorkerName
 			  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) between 75 and 90 then 2
 			  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) < 75 then 1
 		  end as HFARating
-		 ,asn.AssignedSupervisorName 
+		 ,asn.AssignedSupervisorName
+		 ,@DayofWeek as DayNameSelectedByUser
 		  
 	FROM cteReport1 cr
 	left join cteScoreByWorker sw on sw.WorkerName = cr.WorkerName 

@@ -55,7 +55,18 @@ END
 	--Note: DayOfWeekSupScheduled and sDate are now required dates
 	set @sDate = dateadd(day,(isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate)
 
-	
+	-- Get name of the day of week that user selected
+	-- Need to show it back to the user in the report
+		DECLARE @DayofWeek VARCHAR(10)
+		SELECT @DayofWeek = CASE isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate))
+		WHEN 1 THEN 'Sunday'
+		WHEN 2 THEN 'Monday'
+		WHEN 3 THEN 'Tuesday'
+		WHEN 4 THEN 'Wednesday'
+		WHEN 5 THEN 'Thursday'
+		WHEN 6 THEN 'Friday'
+		WHEN 7 THEN 'Saturday'
+		END		
 	
 	--Step#: 1
 	-- Get list of all FAW and FSW that belong to the given program
@@ -856,7 +867,7 @@ SELECT
 )				
 				
 SELECT *  
-	  
+	  	,@DayofWeek as DayNameSelectedByUser
 	   FROM cteSubSummary
 	   inner join cteCalculateHFABPSRating cc on 1=1
 		order by workername
