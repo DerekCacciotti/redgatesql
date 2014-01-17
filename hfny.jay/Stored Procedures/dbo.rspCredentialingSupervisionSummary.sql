@@ -27,9 +27,7 @@ CREATE procedure [dbo].[rspCredentialingSupervisionSummary]
     @eDate  datetime      =  null,
     @supervisorfk int             = null,
     @workerfk     int             = null,
-	@sitefk		 int			 = null,
-	@DayOfWeekSupScheduled  int           = null
-
+	@sitefk		 int			 = null
     
 as
 
@@ -51,22 +49,9 @@ END
 
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end	
 	
-	-- replace the start date of the report with worker's scheduled date of supervision	
-	--Note: DayOfWeekSupScheduled and sDate are now required dates
-	set @sDate = dateadd(day,(isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate)
 
-	-- Get name of the day of week that user selected
-	-- Need to show it back to the user in the report
-		DECLARE @DayofWeek VARCHAR(10)
-		SELECT @DayofWeek = CASE isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate))
-		WHEN 1 THEN 'Sunday'
-		WHEN 2 THEN 'Monday'
-		WHEN 3 THEN 'Tuesday'
-		WHEN 4 THEN 'Wednesday'
-		WHEN 5 THEN 'Thursday'
-		WHEN 6 THEN 'Friday'
-		WHEN 7 THEN 'Saturday'
-		END		
+
+	
 	
 	--Step#: 1
 	-- Get list of all FAW and FSW that belong to the given program
@@ -121,6 +106,10 @@ END
 			 , FirstKempeDate datetime
 			 , FirstEvent	datetime		
 			
+			 , SupervisionScheduledDay int
+			 , ScheduledDayName VARCHAR(10)
+			 , sdate	datetime		
+			 , edate	datetime
 		
 		)	
 	
@@ -134,22 +123,45 @@ END
 			 , w.SortOrder
 			 
 			 , fn.WorkerPK
-			 , WrkrLName
-			 , FAWInitialStart
-			 , SupervisorInitialStart
-			 , FSWInitialStart
+			 , fn.WrkrLName
+			 , fn.FAWInitialStart
+			 , fn.SupervisorInitialStart
+			 , fn.FSWInitialStart
 			 , fn.TerminationDate 
 			 , fn.HireDate
-			 , SupervisorFirstEvent
+			 , fn.SupervisorFirstEvent
 			 , FirstASQDate
 			 , FirstHomeVisitDate
 			 , FirstKempeDate
 		     , fn.FirstEvent
 		  
+			 ,wrkr.SupervisionScheduledDay
+			 
+			 ,CASE isnull(SupervisionScheduledDay,DATEPART(weekday,dateadd(day,(isnull(wrkr.SupervisionScheduledDay,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate)))
+				WHEN 1 THEN 'Sunday'
+				WHEN 2 THEN 'Monday'
+				WHEN 3 THEN 'Tuesday'
+				WHEN 4 THEN 'Wednesday'
+				WHEN 5 THEN 'Thursday'
+				WHEN 6 THEN 'Friday'
+				WHEN 7 THEN 'Saturday'
+				ELSE 'Monday' -- Default value
+				END	as ScheduledDayName
+				
+			 -- let us adjust the startdate for the worker (depends on SupervisionScheduledDay)
+			 -- replace the start date of the report with worker's scheduled date of supervision	
+			 --,dateadd(day,(isnull(wrkr.SupervisionScheduledDay,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate) as sdate
+		     -- Note: given sdate = 10/01/13 (i.e. Tuesday)and DayOfWeekSupScheduled = 2 (i.e. Monday) FIND the next monday (10/07/13) which will be in the first week period
+		     --       else if DayOfWeekSupScheduled >= weekday of sDate then FIND the date of DayOfWeekSupScheduled from sDate
+			   ,case when (isnull(wrkr.SupervisionScheduledDay,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)) < 0 then dateadd(day,7,dateadd(day,(isnull(wrkr.SupervisionScheduledDay,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate))
+															else dateadd(day,(isnull(wrkr.SupervisionScheduledDay,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate)
+															end as sdate		
+			 ,@edate as edate		  
+		  
 		   FROM #tblFAWFSWWorkers w 
-		   inner join workerprogram wp on wp.workerfk = w.workerpk 
-		   --AND wp.programfk = @ProgramFK
+		   inner join workerprogram wp on wp.workerfk = w.workerpk and wp.ProgramFK = @ProgramFK
 	INNER JOIN dbo.fnGetWorkerEventDatesALL(@ProgramFK, NULL, NULL) fn ON fn.workerpk = w.workerpk
+	left join Worker wrkr on w.WorkerPK = 	wrkr.WorkerPK -- bring in SupervisionScheduledDay
 	where w.workerpk not in (SELECT workerpk FROM #tblSUPPMWorkers)
 	and
 	fn.FirstEvent <= @eDate -- exclude workers who are probably new and have not activity (visits) yet ... khalsa
@@ -176,7 +188,8 @@ END
 
 	
 	create table #tblWeekPeriods(
-			WeekNumber int			
+			 WorkerPK int
+			,WeekNumber int			
 			,StartDate datetime
 			,EndDate datetime
 		
@@ -185,13 +198,15 @@ END
 	
 	;with cteGenerateWeeksGiven2Dates as
 	(
-	  select 1 as WeekNumber,
-	    @sDate StartDate, 
-		dateadd(d,6,@sDate) EndDate
 		
+	  select WorkerPK,
+	         1 as WeekNumber,
+			 sDate as StartDate, 
+			 dateadd(d,6,sDate) EndDate
+		From #tblWorkers
 	  union all
 	  
-	  select 
+	  select WorkerPK,
 	  WeekNumber + 1 as WeekNumber,
 	   dateadd(d,7, StartDate) as StartDate,
 	   dateadd(d,7, EndDate) as EndDate
@@ -199,10 +214,10 @@ END
 	   
 	  from cteGenerateWeeksGiven2Dates
 	  
+	  where dateadd(d,6, StartDate)<  @eDate	---  @eDate date entered by the user from UI
 	  
-	  where dateadd(d,6, StartDate)<=  @eDate	  
+	)		
 	  
-	)	
 	
 	
 	
@@ -222,20 +237,6 @@ END
 		where WeekNumber = (select top 1 WeekNumber from #tblWeekPeriods order by WeekNumber desc)
 
 
-		--Note: Don't delete the following SELECT
-		--SELECT 
-		--	WeekNumber
-		--	,StartDate
-		--	,EndDate
-		--	,datediff(day, StartDate,EndDate) as DaysInTheCurrentWeek			
-		--FROM #tblWeekPeriods	
-
-	
-
---	 rspCredentialingSupervisionSummary 1, '04/01/2013', '04/30/2013'		
-		
---		SELECT * FROM #tblWorkers
---		where WorkerPK = 152  -- worker: Burdick, Catherine
 
 
 	-- Let us make sure that if a worker's firstevent date falls between @sdate and @edate then 
@@ -255,15 +256,9 @@ END
 			,StartDate
 			,EndDate		
 			,FirstEvent
-			,WorkerPK
-		 FROM #tblWeekPeriods
-		 inner join #tblWorkers w on FirstEvent < StartDate
-
-
-
-
-
-
+			,wp.WorkerPK
+		 FROM #tblWeekPeriods wp
+		 inner join #tblWorkers w on FirstEvent < StartDate and wp.workerpk = w.workerpk
 
 
 
@@ -828,7 +823,8 @@ SELECT WorkerName
 as
 (		 
 		SELECT distinct 
-				cr.WorkerName		
+				cr.workerpk 
+				,cr.WorkerName		
 				,asn.AssignedSupervisorName
 				,NumOfExpectedSessions
 				,NumOfAllowedExecuses
@@ -866,9 +862,21 @@ SELECT
 
 )				
 				
-SELECT *  
-	  	,@DayofWeek as DayNameSelectedByUser
-	   FROM cteSubSummary
+SELECT ss.workerpk
+	  ,ss.WorkerName
+	  ,ss.AssignedSupervisorName
+	  ,ss.NumOfExpectedSessions
+	  ,ss.NumOfAllowedExecuses
+	  ,ss.NumOfAdjExptdSupervisions
+	  ,ss.NumOfAcceptableSupervisions
+	  ,ss.PerctOfAccptbleSupervisions
+	  ,ss.HFARating
+	  ,cc.HFABPSRating  
+	  ,twrkr.ScheduledDayName as ScheduledDayName
+	  ,convert(varchar(12),twrkr.sDate,101) as AdjustedStartDate
+	  
+	   FROM cteSubSummary ss
+	   left join #tblWorkers twrkr on twrkr.workerpk = ss.workerpk
 	   inner join cteCalculateHFABPSRating cc on 1=1
 		order by workername
 	
@@ -876,6 +884,7 @@ SELECT *
 	-- rspCredentialingSupervisionSummary 4, '06/01/2013', '08/31/2013'					
 	-- rspCredentialingSupervisionSummary 3, '07/01/2013', '08/31/2013'		
 				
+-- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,null
 	
 	
 
