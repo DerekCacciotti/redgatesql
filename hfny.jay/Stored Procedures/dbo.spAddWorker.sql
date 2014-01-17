@@ -35,7 +35,8 @@ CREATE PROCEDURE [dbo].[spAddWorker](@Apt char(10)=NULL,
 @LoginCreated bit=NULL,
 @YearsHVExperience int=NULL,
 @YearsEarlyChildhoodExperience int=NULL,
-@YearsChildAbuseClasses int=NULL)
+@YearsChildAbuseClasses int=NULL,
+@SupervisionScheduledDay int=NULL)
 AS
 INSERT INTO Worker(
 Apt,
@@ -70,7 +71,8 @@ Zip,
 LoginCreated,
 YearsHVExperience,
 YearsEarlyChildhoodExperience,
-YearsChildAbuseClasses
+YearsChildAbuseClasses,
+SupervisionScheduledDay
 )
 VALUES(
 @Apt,
@@ -105,7 +107,8 @@ VALUES(
 @LoginCreated,
 @YearsHVExperience,
 @YearsEarlyChildhoodExperience,
-@YearsChildAbuseClasses
+@YearsChildAbuseClasses,
+@SupervisionScheduledDay
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

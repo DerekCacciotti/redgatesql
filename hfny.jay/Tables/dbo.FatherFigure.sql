@@ -22,8 +22,7 @@ CREATE TABLE [dbo].[FatherFigure]
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD
 CONSTRAINT [FK_FatherFigure_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD
-CONSTRAINT [FK_FatherFigure_FatherAdvocateFK] FOREIGN KEY ([FatherAdvocateFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+
 CREATE NONCLUSTERED INDEX [IX_FK_FatherFigure_FatherAdvocateFK] ON [dbo].[FatherFigure] ([FatherAdvocateFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_FatherFigure_HVCaseFK] ON [dbo].[FatherFigure] ([HVCaseFK]) ON [PRIMARY]

@@ -8,8 +8,7 @@ CREATE TABLE [dbo].[TrainingAttendee]
 [TrainingFK] [int] NULL,
 [WorkerFK] [int] NOT NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[TrainingAttendee] ADD
-CONSTRAINT [FK_TrainingAttendee_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+
 CREATE NONCLUSTERED INDEX [IX_TrainingFK] ON [dbo].[TrainingAttendee] ([TrainingFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_TrainingWorkerFK] ON [dbo].[TrainingAttendee] ([WorkerFK]) ON [PRIMARY]

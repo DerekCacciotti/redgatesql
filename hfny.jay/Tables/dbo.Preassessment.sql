@@ -38,8 +38,7 @@ CREATE TABLE [dbo].[Preassessment]
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD
 CONSTRAINT [FK_Preassessment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD
-CONSTRAINT [FK_Preassessment_PAFAWFK] FOREIGN KEY ([PAFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+
 CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_HVCaseFK] ON [dbo].[Preassessment] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_PAFAWFK] ON [dbo].[Preassessment] ([PAFAWFK]) ON [PRIMARY]

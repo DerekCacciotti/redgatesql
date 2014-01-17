@@ -35,12 +35,9 @@ ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_CaseProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_CaseProgram_TransferredtoProgramFK] FOREIGN KEY ([TransferredtoProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
-CONSTRAINT [FK_CaseProgram_CurrentFAFK] FOREIGN KEY ([CurrentFAFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
-CONSTRAINT [FK_CaseProgram_CurrentFAWFK] FOREIGN KEY ([CurrentFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
-CONSTRAINT [FK_CaseProgram_CurrentFSWFK] FOREIGN KEY ([CurrentFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+
+
+
 ALTER TABLE [dbo].[CaseProgram] ADD 
 CONSTRAINT [PK_CaseProgram] PRIMARY KEY CLUSTERED  ([CaseProgramPK]) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAFK] ON [dbo].[CaseProgram] ([CurrentFAFK]) ON [PRIMARY]

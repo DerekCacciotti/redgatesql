@@ -35,8 +35,7 @@ CREATE TABLE [dbo].[Preintake]
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD
 CONSTRAINT [FK_Preintake_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD
-CONSTRAINT [FK_Preintake_PIFSWFK] FOREIGN KEY ([PIFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+
 CREATE NONCLUSTERED INDEX [IX_FK_Preintake_HVCaseFK] ON [dbo].[Preintake] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Preintake_KempeFK] ON [dbo].[Preintake] ([KempeFK]) ON [PRIMARY]

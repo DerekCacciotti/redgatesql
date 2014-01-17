@@ -36,7 +36,8 @@ CREATE PROCEDURE [dbo].[spEditWorker](@WorkerPK int=NULL,
 @LoginCreated bit=NULL,
 @YearsHVExperience int=NULL,
 @YearsEarlyChildhoodExperience int=NULL,
-@YearsChildAbuseClasses int=NULL)
+@YearsChildAbuseClasses int=NULL,
+@SupervisionScheduledDay int=NULL)
 AS
 UPDATE Worker
 SET 
@@ -72,6 +73,7 @@ Zip = @Zip,
 LoginCreated = @LoginCreated, 
 YearsHVExperience = @YearsHVExperience, 
 YearsEarlyChildhoodExperience = @YearsEarlyChildhoodExperience, 
-YearsChildAbuseClasses = @YearsChildAbuseClasses
+YearsChildAbuseClasses = @YearsChildAbuseClasses, 
+SupervisionScheduledDay = @SupervisionScheduledDay
 WHERE WorkerPK = @WorkerPK
 GO

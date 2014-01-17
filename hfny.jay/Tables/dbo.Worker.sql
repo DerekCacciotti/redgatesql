@@ -36,16 +36,24 @@ CREATE TABLE [dbo].[Worker]
 [LoginCreated] [bit] NOT NULL CONSTRAINT [DF_Worker_LoginCreated] DEFAULT ((0)),
 [YearsHVExperience] [int] NULL,
 [YearsEarlyChildhoodExperience] [int] NULL,
-[YearsChildAbuseClasses] [int] NULL
+[YearsChildAbuseClasses] [int] NULL,
+[SupervisionScheduledDay] [int] NOT NULL
 ) ON [PRIMARY]
+ALTER TABLE [dbo].[Worker] ADD 
+CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_Worker_FirstName] ON [dbo].[Worker] ([FirstName]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_Worker_LastName] ON [dbo].[Worker] ([LastName]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_Worker_LastName_FirstName] ON [dbo].[Worker] ([LastName], [FirstName]) ON [PRIMARY]
 
-ALTER TABLE [dbo].[Worker] ADD 
-CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_Worker_LastName] ON [dbo].[Worker] ([LastName]) ON [PRIMARY]
+
+
+
+
+
+
+
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO
