@@ -31,13 +31,20 @@ CREATE TABLE [dbo].[CaseProgram]
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TransferredtoProgramFK] [int] NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'CaseProgram', 'COLUMN', N'CaseProgramPK'
+GO
+
 ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_CaseProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_CaseProgram_TransferredtoProgramFK] FOREIGN KEY ([TransferredtoProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
-
-
+ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_CaseProgram_CurrentFAFK] FOREIGN KEY ([CurrentFAFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_CaseProgram_CurrentFAWFK] FOREIGN KEY ([CurrentFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[CaseProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_CaseProgram_CurrentFSWFK] FOREIGN KEY ([CurrentFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 ALTER TABLE [dbo].[CaseProgram] ADD 
 CONSTRAINT [PK_CaseProgram] PRIMARY KEY CLUSTERED  ([CaseProgramPK]) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAFK] ON [dbo].[CaseProgram] ([CurrentFAFK]) ON [PRIMARY]
