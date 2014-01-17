@@ -37,7 +37,7 @@ CREATE TABLE [dbo].[Worker]
 [YearsHVExperience] [int] NULL,
 [YearsEarlyChildhoodExperience] [int] NULL,
 [YearsChildAbuseClasses] [int] NULL,
-[SupervisionScheduledDay] [int] NOT NULL
+[SupervisionScheduledDay] [int] NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[Worker] ADD 
 CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
