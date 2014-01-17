@@ -20,9 +20,14 @@ CREATE TABLE [dbo].[ServiceReferral]
 [ServiceReferralEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [StartDate] [datetime] NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'ServiceReferral', 'COLUMN', N'ServiceReferralPK'
+GO
+
 ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD
 CONSTRAINT [FK_ServiceReferral_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
+ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD
+CONSTRAINT [FK_ServiceReferral_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_FSWFK] ON [dbo].[ServiceReferral] ([FSWFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_HVCaseFK] ON [dbo].[ServiceReferral] ([HVCaseFK]) ON [PRIMARY]

@@ -36,9 +36,14 @@ CREATE TABLE [dbo].[Preassessment]
 [ProgramFK] [int] NOT NULL,
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Preassessment', 'COLUMN', N'PreassessmentPK'
+GO
+
 ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD
 CONSTRAINT [FK_Preassessment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
+ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD
+CONSTRAINT [FK_Preassessment_PAFAWFK] FOREIGN KEY ([PAFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_HVCaseFK] ON [dbo].[Preassessment] ([HVCaseFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_PAFAWFK] ON [dbo].[Preassessment] ([PAFAWFK]) ON [PRIMARY]

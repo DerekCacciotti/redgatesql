@@ -10,9 +10,14 @@ CREATE TABLE [dbo].[WorkerAssignment]
 [WorkerAssignmentEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WorkerFK] [int] NOT NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'WorkerAssignment', 'COLUMN', N'WorkerAssignmentPK'
+GO
+
 ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD
 CONSTRAINT [FK_WorkerAssignment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
+ALTER TABLE [dbo].[WorkerAssignment] WITH NOCHECK ADD
+CONSTRAINT [FK_WorkerAssignment_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssignment] ([WorkerFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_WorkerFK] ON [dbo].[WorkerAssignment] ([WorkerFK]) ON [PRIMARY]

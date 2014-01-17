@@ -20,9 +20,14 @@ CREATE TABLE [dbo].[FatherFigure]
 [RelationToTargetChild] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RelationToTargetChildOther] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'FatherFigure', 'COLUMN', N'FatherFigurePK'
+GO
+
 ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD
 CONSTRAINT [FK_FatherFigure_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
+ALTER TABLE [dbo].[FatherFigure] WITH NOCHECK ADD
+CONSTRAINT [FK_FatherFigure_FatherAdvocateFK] FOREIGN KEY ([FatherAdvocateFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_FatherFigure_FatherAdvocateFK] ON [dbo].[FatherFigure] ([FatherAdvocateFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_FatherFigure_HVCaseFK] ON [dbo].[FatherFigure] ([HVCaseFK]) ON [PRIMARY]

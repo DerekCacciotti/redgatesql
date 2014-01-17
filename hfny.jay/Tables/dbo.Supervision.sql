@@ -65,8 +65,14 @@ CREATE TABLE [dbo].[Supervision]
 [Weather] [bit] NULL,
 [WorkerFK] [int] NOT NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Supervision', 'COLUMN', N'SupervisionPK'
+GO
 
-
+ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD
+CONSTRAINT [FK_Supervision_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD
+CONSTRAINT [FK_Supervision_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Supervision_SupervisorFK] ON [dbo].[Supervision] ([SupervisorFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Supervision_WorkerFK] ON [dbo].[Supervision] ([WorkerFK]) ON [PRIMARY]

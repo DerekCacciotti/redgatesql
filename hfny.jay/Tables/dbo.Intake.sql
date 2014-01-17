@@ -16,9 +16,14 @@ CREATE TABLE [dbo].[Intake]
 [MIECHV_Race_White] [bit] NULL,
 [MIECHV_Hispanic] [nvarchar] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Intake', 'COLUMN', N'IntakePK'
+GO
+
 ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD
 CONSTRAINT [FK_Intake_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
+ALTER TABLE [dbo].[Intake] WITH NOCHECK ADD
+CONSTRAINT [FK_Intake_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Intake_FSWFK] ON [dbo].[Intake] ([FSWFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Intake_HVCaseFK] ON [dbo].[Intake] ([HVCaseFK]) ON [PRIMARY]

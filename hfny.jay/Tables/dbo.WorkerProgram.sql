@@ -33,10 +33,16 @@ CREATE TABLE [dbo].[WorkerProgram]
 [WorkerProgramEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WorkPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'WorkerProgram', 'COLUMN', N'WorkerProgramPK'
+GO
+
 ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_WorkerProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
-
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_WorkerProgram_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
+CONSTRAINT [FK_WorkerProgram_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_ProgramFK] ON [dbo].[WorkerProgram] ([ProgramFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_SiteFK] ON [dbo].[WorkerProgram] ([SiteFK]) ON [PRIMARY]

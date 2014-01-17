@@ -61,9 +61,14 @@ CREATE TABLE [dbo].[PSI]
 [PSITotalScore] [numeric] (4, 0) NULL,
 [PSITotalScoreValid] [bit] NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'PSI', 'COLUMN', N'PSIPK'
+GO
+
 ALTER TABLE [dbo].[PSI] WITH NOCHECK ADD
 CONSTRAINT [FK_PSI_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
+ALTER TABLE [dbo].[PSI] WITH NOCHECK ADD
+CONSTRAINT [FK_PSI_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_PSIInterval] ON [dbo].[PSI] ([PSIInterval]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_PSI_FSWFK] ON [dbo].[PSI] ([FSWFK]) ON [PRIMARY]

@@ -72,9 +72,14 @@ CREATE TABLE [dbo].[Kempe]
 [ProgramFK] [int] NOT NULL,
 [SupervisorObservation] [bit] NULL
 ) ON [PRIMARY]
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Kempe', 'COLUMN', N'KempePK'
+GO
+
 ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD
 CONSTRAINT [FK_Kempe_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-
+ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD
+CONSTRAINT [FK_Kempe_FAWFK] FOREIGN KEY ([FAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 CREATE NONCLUSTERED INDEX [IX_FK_Kempe_FAWFK] ON [dbo].[Kempe] ([FAWFK]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_FK_Kempe_HVCaseFK] ON [dbo].[Kempe] ([HVCaseFK]) ON [PRIMARY]
