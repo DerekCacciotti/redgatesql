@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -100,6 +101,7 @@ CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END
 , a.HVCaseFK
 )
 
+, uniqueFamily AS (
 SELECT FSWFK, PC1ID, count(*) [UniqueFamilies]
 , sum(a.CurriculumPartnersHealthyBaby) AS CurriculumPartnersHealthyBaby
 , sum(a.CurriculumPAT) AS CurriculumPAT
@@ -129,5 +131,13 @@ AND a.CurriculumOther = 0) THEN 1 ELSE 0 END) AS CurriculumNone
 
 FROM curriculumFamily01 AS a
 GROUP BY FSWFK, PC1ID
+)
 
+SELECT a.*, CASE WHEN c.WorkerPK IS NULL THEN 'All Workers' ELSE 
+rtrim(c.LastName) + ', ' + rtrim(c.FirstName) END WorkerName
+FROM uniqueFamily AS a 
+LEFT OUTER JOIN Worker AS c ON 
+CASE WHEN (@showWorkerDetail = 'N' AND @workerfk IS NOT NULL) THEN @workerfk 
+ELSE a.FSWFK END = c.WorkerPK
+ORDER BY WorkerName, a.PC1ID
 GO
