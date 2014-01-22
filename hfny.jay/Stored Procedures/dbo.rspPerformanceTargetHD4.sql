@@ -327,7 +327,8 @@ begin
 				   1
 		   end as FormMissing
 		  ,case
-			   when cach.TCHasMedicalProvider is not null and cach.FormDate > cafu.FormDate and 
+			   when cach.TCHasMedicalProvider is not null and 
+					(cafu.FormDate is null or cach.FormDate > cafu.FormDate) and 
 					cach.FormDate > '01/04/13' and cach.TCHasMedicalProvider = 1 -- latest CH first preferred
 				   then 1 -- note: preference is given to the latest CH record first, if there is one
 			   else -- note: otherwise we will use tcid record's info

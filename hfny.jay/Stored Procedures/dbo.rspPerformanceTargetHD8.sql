@@ -8,7 +8,8 @@ GO
 -- Create date: <Febu. 28, 2013>
 -- Description:	<gets you data for Performance Target report - HD8. Medical Provider for Primary CareTaker 1 >
 -- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'
--- rspPerformanceTargetReportSummary 9 ,'07/01/2013' ,'09/30/2013'
+-- rspPerformanceTargetReportSummary 15 ,'07/01/2013' ,'09/30/2013'
+-- rspPerformanceTargetReportDetails 15 ,'07/01/2013' ,'09/30/2013'
 
 -- =============================================
 CREATE procedure [dbo].[rspPerformanceTargetHD8]
@@ -290,8 +291,9 @@ begin
 				   1
 		   end as FormMissing		  
 		  , case
-			   when cach.PC1HasMedicalProvider is not null and cach.FormDate > isnull(cafu.FormDate, dateadd(dd, -1,cach.FormDate)) and 
-					cach.FormDate > '01/04/13' and cach.PC1HasMedicalProvider = 1 -- latest CH first preferred
+			   when cach.TCHasMedicalProvider is not null and 
+					(cafu.FormDate is null or cach.FormDate > cafu.FormDate) and 
+					cach.FormDate > '01/04/13' and cach.TCHasMedicalProvider = 1 -- latest CH first preferred
 				   then 1 -- note: preference is given to the latest CH record first, if there is one
 			   else -- note: otherwise we will use tcid record's info
 				   case when cafu.PC1HasMedicalProvider is not null and cafu.PC1HasMedicalProvider = 1 then 1 else 0 end
@@ -360,7 +362,8 @@ begin
 	
 	select distinct isnull(PTCode,'HD8')
 		  ,c.HVCaseFK
-		  ,c.PC1ID,c.OldID
+		  ,c.PC1ID
+		  ,c.OldID
 		  ,c.TCDOB
 		  ,c.PC1FullName
 		  ,isnull(c.CurrentWorkerFullName,c.CurrentWorkerFullName) as CurrentWorkerFullName
