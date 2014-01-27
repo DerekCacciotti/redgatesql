@@ -11,6 +11,8 @@ GO
 -- rspQAReport6 5, 'summary'	--- for summary page
 -- rspQAReport6 31			--- for main report - location = 2
 -- rspQAReport6 null			--- for main report for all locations
+
+-- Because of transfer cases, JH said that don't consider ProgramFK for medical forms ... Khalsa 1/27/2014
 -- =============================================
 
 
@@ -159,7 +161,7 @@ SET @numOfActiveIntakeCases = (
 	WHERE HVCasePK NOT IN 
 		(
 		SELECT HVCaseFK FROM TCMedical T 
-		inner join dbo.SplitString(@programfk,',') on T.programfk = listitem
+		--inner join dbo.SplitString(@programfk,',') on T.programfk = listitem  -- because of transfer cases, JH said that don't consider ProgramFK for medical forms ... Khalsa 1/27/2014
 		)
 )
 
