@@ -11,7 +11,7 @@ GO
 -- Supervision sessions that did not take place with a reason
 -- to show list of the other reasons
 
----- rspCredentialingSupervisionActivitiesSummary_PartII 11, '10/01/2013', '12/31/2013',null,152,null,2
+---- rspCredentialingSupervisionActivitiesSummary_PartII 1, '10/01/2013', '12/31/2013',null,152,null,2
 
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingSupervisionActivitiesSummary_PartII]
@@ -137,32 +137,7 @@ END
 	-- rspCredentialingSupervisionActivitiesSummary_PartII 1, '06/01/2013', '08/31/2013',15,132,null
 
 	
-	
--- getting workername and supervisorname
--- we need them for the report	
-declare @WorkerName varchar(100) = null 
-declare @SupervisorName varchar(100) = null
 
-set @WorkerName = (SELECT WorkerName FROM #tblWorkers where WorkerPK = @workerfk)
-set @SupervisorName = (select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as SupervisorName 
-		from Worker w
-		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
-		where programfk = @ProgramFK 
-				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
-	and	WorkerPK = @supervisorfk)	
-	
-	
-	create table #tblWorkerAndSupName(
-			WorkerName varchar(100)
-			,SupervisorName varchar(100)
-		
-		)
-			
-insert into #tblWorkerAndSupName	
-		SELECT  @WorkerName, @SupervisorName	
-	
-	--SELECT workerpk FROM #tblSUPPMWorkers
-	--SELECT * FROM #tblWorkers
 	
 
 	-- rspCredentialingSupervisionActivitiesSummary_PartII 1, '01/06/2013', '02/02/2013',15,152		
@@ -292,7 +267,7 @@ insert into #tblWorkerAndSupName
 				SELECT 
 
 								
-			Convert(VARCHAR(12), SupervisionDate, 101) + ' - ' + sup.WorkerName  + ' (Supervisor) - (Worker)' +  w.WorkerName + ' - ' +	ReasonOtherSpecify 	as ReasonOtherSpecify			
+			Convert(VARCHAR(12), SupervisionDate, 101) + ' - ' + sup.WorkerName  + ' (Supervisor) - (Worker) ' +  w.WorkerName + ' - ' +	ReasonOtherSpecify 	as ReasonOtherSpecify			
 				
 			  
 			   FROM #tblWeekPeriodsAdjusted wp 		
@@ -321,5 +296,4 @@ SELECT * FROM cteSupervisionsThatDidNotTakePlaceWithReasonOther
 	drop table #tblSUPPMWorkers
 	drop table #tblWorkers
 	drop table #tblWeekPeriods
-	drop table #tblWorkerAndSupName
 GO

@@ -138,38 +138,7 @@ END
 
 	
 	
--- getting workername and supervisorname
--- we need them for the report	
-declare @WorkerName varchar(100) = null 
-declare @SupervisorName varchar(100) = null
 
-set @WorkerName = (SELECT WorkerName FROM #tblWorkers where WorkerPK = @workerfk)
-set @SupervisorName = (select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as SupervisorName 
-		from Worker w
-		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
-		where programfk = @ProgramFK 
-				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
-	and	WorkerPK = @supervisorfk)	
-	
-if (@SupervisorName is null and @workerfk is not null)
-
-begin
-set @SupervisorName = (select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as SupervisorName 
-		from Worker w
-		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
-		where programfk = @ProgramFK 
-				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
-	and	WorkerPK = (select SupervisorFK from WorkerProgram where WorkerFK = @workerfk))	
-end
-		
-	create table #tblWorkerAndSupName(
-			WorkerName varchar(100)
-			,SupervisorName varchar(100)
-		
-		)
-			
-insert into #tblWorkerAndSupName	
-		SELECT  @WorkerName, @SupervisorName	
 	
 	--SELECT workerpk FROM #tblSUPPMWorkers
 	--SELECT * FROM #tblWorkers
@@ -274,7 +243,7 @@ insert into #tblWorkerAndSupName
 ----		-- Now let us develop the report. We will use the above 2 temp tables now
 		
 		;
-
+	-- get supervisor's name
 	with cteSupervisors	as 
 	(
 		select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as WorkerName
@@ -300,7 +269,7 @@ insert into #tblWorkerAndSupName
 	(
 				SELECT 
 
-			Convert(VARCHAR(12), SupervisionDate, 101) + ' - ' + sup.WorkerName  + ' (Supervisor) - (Worker)' +  w.WorkerName + ' - ' +	ActivitiesOtherSpecify 	as ActivitiesOtherSpecify			
+			Convert(VARCHAR(12), SupervisionDate, 101) + ' - ' + sup.WorkerName  + ' (Supervisor) - (Worker) ' +  w.WorkerName + ' - ' +	ActivitiesOtherSpecify 	as ActivitiesOtherSpecify			
 				
 			  
 			   FROM #tblWeekPeriodsAdjusted wp 		
@@ -330,5 +299,4 @@ SELECT * FROM cteSupervisionsThatTookPlaceActivitiesOther
 	drop table #tblSUPPMWorkers
 	drop table #tblWorkers
 	drop table #tblWeekPeriods
-	drop table #tblWorkerAndSupName
 GO
