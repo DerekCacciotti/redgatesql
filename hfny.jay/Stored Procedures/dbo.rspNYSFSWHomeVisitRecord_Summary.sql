@@ -146,6 +146,7 @@ begin
 		from cteMain
 		inner join Worker w on workerfk=w.WorkerPK
 		left outer join cteCaseCount on casecount=casecount
+		where isnull(dischargedate, getdate()) > @sdate
 		
 end
 GO

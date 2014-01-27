@@ -216,6 +216,7 @@ begin
 				   1
 		   end as ScoreForCase
 		from cteMain
+		where isnull(dischargedate, getdate()) > @sdate
 		order by WorkerName
 				,pc1id
 
