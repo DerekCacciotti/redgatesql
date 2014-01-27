@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -264,20 +265,42 @@ insert into #tblWorkerAndSupName
 		
 		;
 
+	-- get supervisor's name
+	with cteSupervisors	as 
+	(
+		select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as WorkerName
+				, TerminationDate
+				, WorkerPK
+				, 'SUP' as workertype
+		from Worker w
+		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+		where programfk = @ProgramFK 
+				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+
+		--declare @Sups table
+		--@Sups = spGetAllWorkersByProgram @ProgramFK = 1 
+		--								, @EventDate = null
+		--								, @WorkerType = 'SUP'
+		--								, @AllWorkers = 0
+	)
+
 -- Supervision sessions that did not take place with a reason
 	-- to show list of the other reasons
-	with cteSupervisionsThatDidNotTakePlaceWithReasonOther
+	,cteSupervisionsThatDidNotTakePlaceWithReasonOther
 	as
 	(
 				SELECT 
 
-					ReasonOtherSpecify			
+								
+			Convert(VARCHAR(12), SupervisionDate, 101) + ' - ' + sup.WorkerName  + ' (Supervisor) - (Worker)' +  w.WorkerName + ' - ' +	ReasonOtherSpecify 	as ReasonOtherSpecify			
 				
 			  
 			   FROM #tblWeekPeriodsAdjusted wp 		
 		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
 		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
 		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
+		inner join WorkerProgram wp1 on wp1.WorkerFK = w.workerpk
+		left join cteSupervisors sup on wp1.SupervisorFK = sup.WorkerPK		
 		where SupervisionPK is not null
 		and TakePlace = 0
 		and ReasonOther = 1

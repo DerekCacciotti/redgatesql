@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -157,6 +158,27 @@ set @SupervisorName = (select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstN
 		where programfk = @ProgramFK 
 				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 	and	WorkerPK = @supervisorfk)	
+	
+if (@SupervisorName is null and @workerfk is not null)
+
+begin
+set @SupervisorName = (select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as SupervisorName 
+		from Worker w
+		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+		where programfk = @ProgramFK 
+				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+	and	WorkerPK = (select SupervisorFK from WorkerProgram where WorkerFK = @workerfk))	
+end
+
+-- set them blank if null ( our report ui does like nulls)	
+if @SupervisorName is null 
+begin 
+	set @SupervisorName = ''	
+end
+if @WorkerName is null 
+begin 
+	set @WorkerName = ''	
+end	
 	
 	
 	create table #tblWorkerAndSupName(

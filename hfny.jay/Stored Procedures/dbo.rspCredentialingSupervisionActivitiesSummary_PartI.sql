@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -150,7 +151,17 @@ set @SupervisorName = (select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstN
 				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 	and	WorkerPK = @supervisorfk)	
 	
-	
+if (@SupervisorName is null and @workerfk is not null)
+
+begin
+set @SupervisorName = (select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as SupervisorName 
+		from Worker w
+		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+		where programfk = @ProgramFK 
+				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+	and	WorkerPK = (select SupervisorFK from WorkerProgram where WorkerFK = @workerfk))	
+end
+		
 	create table #tblWorkerAndSupName(
 			WorkerName varchar(100)
 			,SupervisorName varchar(100)
@@ -264,20 +275,40 @@ insert into #tblWorkerAndSupName
 		
 		;
 
+	with cteSupervisors	as 
+	(
+		select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as WorkerName
+				, TerminationDate
+				, WorkerPK
+				, 'SUP' as workertype
+		from Worker w
+		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+		where programfk = @ProgramFK 
+				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+
+		--declare @Sups table
+		--@Sups = spGetAllWorkersByProgram @ProgramFK = 1 
+		--								, @EventDate = null
+		--								, @WorkerType = 'SUP'
+		--								, @AllWorkers = 0
+	)
+
 -- Supervision sessions that took place with a reason
 	-- to show list of the other activities
-	with cteSupervisionsThatTookPlaceActivitiesOther
+	, cteSupervisionsThatTookPlaceActivitiesOther
 	as
 	(
 				SELECT 
 
-					ActivitiesOtherSpecify 				
+			Convert(VARCHAR(12), SupervisionDate, 101) + ' - ' + sup.WorkerName  + ' (Supervisor) - (Worker)' +  w.WorkerName + ' - ' +	ActivitiesOtherSpecify 	as ActivitiesOtherSpecify			
 				
 			  
 			   FROM #tblWeekPeriodsAdjusted wp 		
 		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
 		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
 		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
+		inner join WorkerProgram wp1 on wp1.WorkerFK = w.workerpk
+		left join cteSupervisors sup on wp1.SupervisorFK = sup.WorkerPK
 		where SupervisionPK is not null
 		and TakePlace = 1
 		and ActivitiesOther = 1
