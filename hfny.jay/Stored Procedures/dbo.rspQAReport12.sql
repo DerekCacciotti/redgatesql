@@ -11,6 +11,8 @@ GO
 -- rspQAReport12 31, 'summary'	--- for summary page
 -- rspQAReport12 31			--- for main report - location = 2
 -- rspQAReport12 null			--- for main report for all locations
+
+-- Because of transfer cases, JH said that don't consider ProgramFK for Service Referral forms ... Khalsa 1/27/2014
 -- =============================================
 
 
@@ -159,7 +161,7 @@ SELECT HVCasePK
  FROM @tbl4QAReport12Detail
 WHERE HVCasePK NOT  IN (
 SELECT HVCaseFK FROM ServiceReferral sr
-inner join dbo.SplitString(@programfk,',') on sr.programfk = listitem
+--inner join dbo.SplitString(@programfk,',') on sr.programfk = listitem -- because of transfer cases, JH said that don't consider ProgramFK for Service Referral forms ... Khalsa 1/27/2014
 )
 
 
