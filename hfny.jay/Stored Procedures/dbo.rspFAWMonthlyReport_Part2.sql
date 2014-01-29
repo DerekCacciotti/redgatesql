@@ -47,15 +47,15 @@ FROM
 (SELECT 
 isnull(a.FAWFK, b.FAWFK) [FAWFK], [AssignThisMonth], [CaseAtBeginning] 
 FROM 
-(SELECT FAWFK, count(*) [AssignThisMonth]
-FROM HVScreen
-WHERE ProgramFK = @programfk AND (ScreenDate BETWEEN @StartDt AND @EndDt)
-AND ScreenResult = '1' AND ReferralMade = '1'
-GROUP BY FAWFK) AS a
+(SELECT p2.CurrentFAWFK [FAWFK], count(*) [AssignThisMonth]
+FROM HVScreen AS p1 JOIN CaseProgram AS p2 ON p1.HVCaseFK = p2.HVCaseFK
+WHERE p1.ProgramFK = @programfk AND (p1.ScreenDate BETWEEN @StartDt AND @EndDt)
+AND p1.ScreenResult = '1' AND p1.ReferralMade = '1'
+GROUP BY p2.CurrentFAWFK) AS a
 FULL OUTER JOIN
 
 (
-SELECT FAWFK, count(*) [CaseAtBeginning]
+SELECT b.CurrentFAWFK [FAWFK], count(*) [CaseAtBeginning]
 FROM HVScreen AS a 
 JOIN CaseProgram AS b ON a.HVCaseFK = b.HVCaseFK
 JOIN HVCase AS c ON c.HVCasePK = a.HVCaseFK
@@ -63,7 +63,7 @@ WHERE b.ProgramFK = @programfk
 AND a.ScreenDate < @StartDt AND a.ScreenResult = '1' AND a.ReferralMade = '1' 
 AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
 AND (c.KempeDate IS NULL OR c.KempeDate >= @StartDt)
-GROUP BY a.FAWFK
+GROUP BY b.CurrentFAWFK --a.FAWFK
 ) AS b
 ON a.FAWFK = b.FAWFK) AS a1
 
