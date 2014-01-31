@@ -160,7 +160,7 @@ SELECT a.*
 , CASE WHEN wp.TerminationDate Between @StartDt and @EndDt THEN 1 ELSE 0 END [Terminated]
 , CASE WHEN wp.LivesTargetArea = 1 THEN 1 ELSE 0 END [LivesTargetArea]
 , CASE WHEN WorkerDOB IS NOT NULL THEN datediff(year, WorkerDOB, getdate()) ELSE NULL END [WorkerAge]
-, CASE WHEN Race = '01' THEN 1 ELSE 0 END [Female]
+, CASE WHEN Gender = '01' THEN 1 ELSE 0 END [Female]
 , CASE WHEN OtherLanguage = 1 THEN 1 ELSE 0 END [OtherLanguage]
 , CASE WHEN Children IS NULL THEN 0 ELSE Children END [Parent]
 , rtrim(FirstName) + ' ' + rtrim(LastName) [name]
