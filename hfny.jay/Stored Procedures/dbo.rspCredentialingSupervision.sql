@@ -19,6 +19,7 @@ GO
 -- rspCredentialingSupervision 11, '10/01/2013', '12/31/2013',null,673,null,2
 -- rspCredentialingSupervision 11, '10/01/2013', '12/31/2013',null,673,null,null
 
+-- max of 2 supervisions per week ... khalsa 1/29/2014
 
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingSupervision]
@@ -307,11 +308,173 @@ END
 ------		--FROM #tblWeekPeriods	
 
 		
+--			max of 2 supervisions per week ... khalsa
+			create table #tblMaxOf2SupvisionPerWeekToBeConsidered(
+			
+						WorkerPK int
+						,Duration int
+						,WeekNumber int
+						,rownum int
+				
+				)		
+		
+		
+		
 
 		-- Step#: 3
 		-- Now let us develop the report. We will use the above 2 temp tables now
 		
 		;
+		
+
+		with cteWorkersWithSupervisionsII
+		as
+		(
+		SELECT 
+		
+				 wp.WeekNumber
+				,wp.StartDate
+				,wp.EndDate		
+				,wp.FirstEvent
+				,wp.WorkerPK		
+				
+			 , WorkerName
+			 , LastName
+			 , FirstName
+			 , TerminationDate
+			 --, WorkerPK
+			 , SortOrder
+			
+			 , WorkerFKFn
+			 , WrkrLName
+			 , FAWInitialStart
+			 , SupervisorInitialStart 
+			 , FSWInitialStart 
+			 , TerminationDateFn 
+			 , HireDate 
+			 , SupervisorFirstEvent 
+			 , FirstASQDate 
+			 , FirstHomeVisitDate 
+			 , FirstKempeDate 
+			 --, FirstEvent			
+				
+				
+				
+				
+		
+			  ,SupervisionPK
+			  ,ActivitiesOther
+			  ,ActivitiesOtherSpecify
+			  ,AreasGrowth
+			  ,AssessmentIssues
+			  ,AssessmentRate
+			  ,Boundaries
+			  ,Caseload
+			  ,Coaching
+			  ,CommunityResources
+			  ,CulturalSensitivity
+			  ,Curriculum
+			  ,FamilyProgress
+			  ,HomeVisitLogActivities
+			  ,HomeVisitRate
+			  ,IFSP
+			  ,ImplementTraining
+			  ,LevelChange
+			  ,Outreach
+			  ,ParticipantEmergency
+			  ,PersonalGrowth
+			  ,ProfessionalGrowth
+			  ,ReasonOther
+			  ,ReasonOtherSpecify
+			  ,RecordDocumentation
+			  ,Referrals
+			  ,Retention
+			  ,RolePlaying
+			  ,Safety
+			  ,ShortWeek
+			  ,StaffCourt
+			  ,StaffFamilyEmergency
+			  ,StaffForgot
+			  ,StaffIll
+			  ,StaffTraining
+			  ,StaffVacation
+			  ,StaffOutAllWeek
+			  ,StrengthBasedApproach
+			  ,Strengths
+			  ,SupervisionCreateDate
+			  ,SupervisionCreator
+			  ,SupervisionDate
+			  ,SupervisionEditDate
+			  ,SupervisionEditor
+			  ,SupervisionEndTime
+			  ,SupervisionHours
+			  ,SupervisionMinutes
+			  ,SupervisionNotes
+			  ,SupervisionStartTime
+			  ,SupervisorFamilyEmergency
+			  ,SupervisorFK
+			  ,SupervisorForgot
+			  ,SupervisorHoliday
+			  ,SupervisorIll
+			  ,SupervisorObservationAssessment
+			  ,SupervisorObservationHomeVisit
+			  ,SupervisorTraining
+			  ,SupervisorVacation
+			  ,TakePlace
+			  ,TechniquesApproaches
+			  ,Tools
+			  ,TrainingNeeds
+			  ,Weather
+			  ,WorkerFK	
+			-- note: we added 1 in datediff(d, StartDate,EndDate) because substraction gives one day less. e.g. 7-1 = 6			
+			, datediff(d, StartDate,EndDate) + 1 as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
+			--,case when WorkerFK is null and SupervisionPK is null then null else datediff(d, StartDate,EndDate) end as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
+			  
+			   FROM #tblWeekPeriodsAdjusted wp 		
+		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
+		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
+		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
+		)
+
+		
+		
+
+	,cteSupervisionDurations
+	as
+	(
+		SELECT 
+			WorkerPK 
+			,isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) as Duration1
+			,WeekNumber 
+		
+		FROM cteWorkersWithSupervisionsII
+	)	
+
+	
+	,cteSupervisionsPerWorkerPerWeek
+	as
+	(
+		SELECT 
+			WorkerPK 
+			,Duration1
+			--,sum(Duration) as WeeklyDuration
+			,WeekNumber
+			,rownum = row_number() over (partition by WorkerPK,WeekNumber order by WorkerPK, WeekNumber, Duration1 desc)
+ 
+		
+		FROM cteSupervisionDurations sd	
+		
+	)				
+	
+	-- Now take the top 2 supervisions, if any
+	insert into #tblMaxOf2SupvisionPerWeekToBeConsidered		
+		select * FROM cteSupervisionsPerWorkerPerWeek
+		where rownum <= 2	
+		order by WorkerPK, WeekNumber, Duration1 desc		
+
+	--SELECT * FROM #tblMaxOf2SupvisionPerWeekToBeConsidered
+		
+	;	
 		
 		with cteWorkersWithSupervisions
 		as
@@ -433,116 +596,6 @@ END
 		
 
 
-		,cteWorkersWithSupervisionsII
-		as
-		(
-		SELECT 
-		
-				 wp.WeekNumber
-				,wp.StartDate
-				,wp.EndDate		
-				,wp.FirstEvent
-				,wp.WorkerPK		
-				
-			 , WorkerName
-			 , LastName
-			 , FirstName
-			 , TerminationDate
-			 --, WorkerPK
-			 , SortOrder
-			
-			 , WorkerFKFn
-			 , WrkrLName
-			 , FAWInitialStart
-			 , SupervisorInitialStart 
-			 , FSWInitialStart 
-			 , TerminationDateFn 
-			 , HireDate 
-			 , SupervisorFirstEvent 
-			 , FirstASQDate 
-			 , FirstHomeVisitDate 
-			 , FirstKempeDate 
-			 --, FirstEvent			
-				
-				
-				
-				
-		
-			  ,SupervisionPK
-			  ,ActivitiesOther
-			  ,ActivitiesOtherSpecify
-			  ,AreasGrowth
-			  ,AssessmentIssues
-			  ,AssessmentRate
-			  ,Boundaries
-			  ,Caseload
-			  ,Coaching
-			  ,CommunityResources
-			  ,CulturalSensitivity
-			  ,Curriculum
-			  ,FamilyProgress
-			  ,HomeVisitLogActivities
-			  ,HomeVisitRate
-			  ,IFSP
-			  ,ImplementTraining
-			  ,LevelChange
-			  ,Outreach
-			  ,ParticipantEmergency
-			  ,PersonalGrowth
-			  ,ProfessionalGrowth
-			  ,ReasonOther
-			  ,ReasonOtherSpecify
-			  ,RecordDocumentation
-			  ,Referrals
-			  ,Retention
-			  ,RolePlaying
-			  ,Safety
-			  ,ShortWeek
-			  ,StaffCourt
-			  ,StaffFamilyEmergency
-			  ,StaffForgot
-			  ,StaffIll
-			  ,StaffTraining
-			  ,StaffVacation
-			  ,StaffOutAllWeek
-			  ,StrengthBasedApproach
-			  ,Strengths
-			  ,SupervisionCreateDate
-			  ,SupervisionCreator
-			  ,SupervisionDate
-			  ,SupervisionEditDate
-			  ,SupervisionEditor
-			  ,SupervisionEndTime
-			  ,SupervisionHours
-			  ,SupervisionMinutes
-			  ,SupervisionNotes
-			  ,SupervisionStartTime
-			  ,SupervisorFamilyEmergency
-			  ,SupervisorFK
-			  ,SupervisorForgot
-			  ,SupervisorHoliday
-			  ,SupervisorIll
-			  ,SupervisorObservationAssessment
-			  ,SupervisorObservationHomeVisit
-			  ,SupervisorTraining
-			  ,SupervisorVacation
-			  ,TakePlace
-			  ,TechniquesApproaches
-			  ,Tools
-			  ,TrainingNeeds
-			  ,Weather
-			  ,WorkerFK	
-			-- note: we added 1 in datediff(d, StartDate,EndDate) because substraction gives one day less. e.g. 7-1 = 6			
-			, datediff(d, StartDate,EndDate) + 1 as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
-			--,case when WorkerFK is null and SupervisionPK is null then null else datediff(d, StartDate,EndDate) end as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
-			  
-			   FROM #tblWeekPeriodsAdjusted wp 		
-		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
-		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
-		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
-		)
-
-
 	
 	,cteSupervisors	as 
 	(
@@ -658,16 +711,14 @@ END
 	
 -------------- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'		
 
-	,cteSupervisionDurations
-	as
-	(
-		SELECT 
-			WorkerPK 
-			,isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) as Duration
-			,WeekNumber 
-		
-		FROM cteWorkersWithSupervisionsII
-	)	
+	
+	
+	--SELECT * FROM #tblMaxOf2SupvisionPerWeekToBeConsidered
+	
+
+	
+	------ rspCredentialingSupervision 1, '10/01/2013', '12/31/2013'
+
 	
 	,cteSupervisionDurationsGroupedByWeek
 	as
@@ -677,9 +728,14 @@ END
 			,sum(Duration) as WeeklyDuration
 			,WeekNumber 
 		
-		FROM cteSupervisionDurations sd		
+		FROM #tblMaxOf2SupvisionPerWeekToBeConsidered sd		
 		group by WorkerPK, WeekNumber
 	)				
+		
+	--SELECT * FROM 	cteSupervisionDurationsGroupedByWeek
+	--	order by WorkerPK, WeekNumber
+		
+		
 		
 	,cteSupervisionEvents
 	as
@@ -753,10 +809,10 @@ END
 		)
 		
 	
-	--SELECT * FROM cteSupervisionEvents
-	--order by workername,weeknumber, SupervisionDate
+	----SELECT * FROM cteSupervisionEvents
+	----order by workername,weeknumber, SupervisionDate
 	
-------	rspCredentialingSupervision 31, '07/01/2013', '09/30/2013'
+--------	rspCredentialingSupervision 31, '07/01/2013', '09/30/2013'
 
 	, cteReportDetails
 		as
@@ -973,4 +1029,5 @@ SELECT WorkerName
 	drop table #tblSUPPMWorkers
 	drop table #tblWorkers
 	drop table #tblWeekPeriods
+	drop table #tblMaxOf2SupvisionPerWeekToBeConsidered
 GO

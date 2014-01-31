@@ -9,6 +9,7 @@ GO
 -- Create date: September 16th, 2013
 -- Description:	Credentialing report for Supervisions Summary
 
+-- rspCredentialingSupervisionSummary 1, '10/01/2013', '12/31/2013'
 -- rspCredentialingSupervisionSummary 4, '06/01/2013', '08/31/2013'
 -- rspCredentialingSupervisionSummary 1, '06/01/2013', '08/31/2013',null,152,null
 -- rspCredentialingSupervisionSummary 1, '06/01/2013', '08/31/2013',null,null,5
@@ -19,6 +20,7 @@ GO
 -- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,2
 -- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,null
 
+-- max of 2 supervisions per week ... khalsa 1/29/2014
 
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingSupervisionSummary]
@@ -261,6 +263,26 @@ END
 		 inner join #tblWorkers w on FirstEvent < StartDate and wp.workerpk = w.workerpk
 
 
+-- rspCredentialingSupervision 1, '10/01/2013', '12/31/2013'
+
+------		--Note: Don't delete the following SELECT
+------		--SELECT 
+------		--	WeekNumber
+------		--	,StartDate
+------		--	,EndDate
+------		--	,datediff(day, StartDate,EndDate) as DaysInTheCurrentWeek			
+------		--FROM #tblWeekPeriods	
+
+		
+--			max of 2 supervisions per week ... khalsa
+			create table #tblMaxOf2SupvisionPerWeekToBeConsidered(
+			
+						WorkerPK int
+						,Duration int
+						,WeekNumber int
+						,rownum int
+				
+				)		
 
 
 
@@ -269,7 +291,157 @@ END
 		-- Now let us develop the report. We will use the above 2 temp tables now
 		
 		;
+
+
+		with cteWorkersWithSupervisionsII
+		as
+		(
+		SELECT 
 		
+				 wp.WeekNumber
+				,wp.StartDate
+				,wp.EndDate		
+				,wp.FirstEvent
+				,wp.WorkerPK		
+				
+			 , WorkerName
+			 , LastName
+			 , FirstName
+			 , TerminationDate
+			 --, WorkerPK
+			 , SortOrder
+			
+			 , WorkerFKFn
+			 , WrkrLName
+			 , FAWInitialStart
+			 , SupervisorInitialStart 
+			 , FSWInitialStart 
+			 , TerminationDateFn 
+			 , HireDate 
+			 , SupervisorFirstEvent 
+			 , FirstASQDate 
+			 , FirstHomeVisitDate 
+			 , FirstKempeDate 
+			 --, FirstEvent			
+				
+				
+				
+				
+		
+			  ,SupervisionPK
+			  ,ActivitiesOther
+			  ,ActivitiesOtherSpecify
+			  ,AreasGrowth
+			  ,AssessmentIssues
+			  ,AssessmentRate
+			  ,Boundaries
+			  ,Caseload
+			  ,Coaching
+			  ,CommunityResources
+			  ,CulturalSensitivity
+			  ,Curriculum
+			  ,FamilyProgress
+			  ,HomeVisitLogActivities
+			  ,HomeVisitRate
+			  ,IFSP
+			  ,ImplementTraining
+			  ,LevelChange
+			  ,Outreach
+			  ,ParticipantEmergency
+			  ,PersonalGrowth
+			  ,ProfessionalGrowth
+			  ,ReasonOther
+			  ,ReasonOtherSpecify
+			  ,RecordDocumentation
+			  ,Referrals
+			  ,Retention
+			  ,RolePlaying
+			  ,Safety
+			  ,ShortWeek
+			  ,StaffCourt
+			  ,StaffFamilyEmergency
+			  ,StaffForgot
+			  ,StaffIll
+			  ,StaffTraining
+			  ,StaffVacation
+			  ,StaffOutAllWeek
+			  ,StrengthBasedApproach
+			  ,Strengths
+			  ,SupervisionCreateDate
+			  ,SupervisionCreator
+			  ,SupervisionDate
+			  ,SupervisionEditDate
+			  ,SupervisionEditor
+			  ,SupervisionEndTime
+			  ,SupervisionHours
+			  ,SupervisionMinutes
+			  ,SupervisionNotes
+			  ,SupervisionStartTime
+			  ,SupervisorFamilyEmergency
+			  ,SupervisorFK
+			  ,SupervisorForgot
+			  ,SupervisorHoliday
+			  ,SupervisorIll
+			  ,SupervisorObservationAssessment
+			  ,SupervisorObservationHomeVisit
+			  ,SupervisorTraining
+			  ,SupervisorVacation
+			  ,TakePlace
+			  ,TechniquesApproaches
+			  ,Tools
+			  ,TrainingNeeds
+			  ,Weather
+			  ,WorkerFK	
+			-- note: we added 1 in datediff(d, StartDate,EndDate) because substraction gives one day less. e.g. 7-1 = 6			
+			, datediff(d, StartDate,EndDate) + 1 as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
+			--,case when WorkerFK is null and SupervisionPK is null then null else datediff(d, StartDate,EndDate) end as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
+			  
+			   FROM #tblWeekPeriodsAdjusted wp 		
+		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
+		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
+		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
+		)
+
+		
+		
+
+	,cteSupervisionDurations
+	as
+	(
+		SELECT 
+			WorkerPK 
+			,isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) as Duration1
+			,WeekNumber 
+		
+		FROM cteWorkersWithSupervisionsII
+	)	
+
+	
+	,cteSupervisionsPerWorkerPerWeek
+	as
+	(
+		SELECT 
+			WorkerPK 
+			,Duration1
+			--,sum(Duration) as WeeklyDuration
+			,WeekNumber
+			,rownum = row_number() over (partition by WorkerPK,WeekNumber order by WorkerPK, WeekNumber, Duration1 desc)
+ 
+		
+		FROM cteSupervisionDurations sd	
+		
+	)				
+	
+	-- Now take the top 2 supervisions, if any
+	insert into #tblMaxOf2SupvisionPerWeekToBeConsidered		
+		select * FROM cteSupervisionsPerWorkerPerWeek
+		where rownum <= 2	
+		order by WorkerPK, WeekNumber, Duration1 desc		
+
+	--SELECT * FROM #tblMaxOf2SupvisionPerWeekToBeConsidered
+		
+	;	
+			
 		
 		with cteWorkersWithSupervisions
 		as
@@ -390,119 +562,8 @@ END
 -------- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'					
 		
 
-
-		,cteWorkersWithSupervisionsII
-		as
-		(
-		SELECT 
 		
-				 wp.WeekNumber
-				,wp.StartDate
-				,wp.EndDate		
-				,wp.FirstEvent
-				,wp.WorkerPK		
-				
-			 , WorkerName
-			 , LastName
-			 , FirstName
-			 , TerminationDate
-			 --, WorkerPK
-			 , SortOrder
-			
-			 , WorkerFKFn
-			 , WrkrLName
-			 , FAWInitialStart
-			 , SupervisorInitialStart 
-			 , FSWInitialStart 
-			 , TerminationDateFn 
-			 , HireDate 
-			 , SupervisorFirstEvent 
-			 , FirstASQDate 
-			 , FirstHomeVisitDate 
-			 , FirstKempeDate 
-			 --, FirstEvent			
-				
-				
-				
-				
-		
-			  ,SupervisionPK
-			  ,ActivitiesOther
-			  ,ActivitiesOtherSpecify
-			  ,AreasGrowth
-			  ,AssessmentIssues
-			  ,AssessmentRate
-			  ,Boundaries
-			  ,Caseload
-			  ,Coaching
-			  ,CommunityResources
-			  ,CulturalSensitivity
-			  ,Curriculum
-			  ,FamilyProgress
-			  ,HomeVisitLogActivities
-			  ,HomeVisitRate
-			  ,IFSP
-			  ,ImplementTraining
-			  ,LevelChange
-			  ,Outreach
-			  ,ParticipantEmergency
-			  ,PersonalGrowth
-			  ,ProfessionalGrowth
-			  ,ReasonOther
-			  ,ReasonOtherSpecify
-			  ,RecordDocumentation
-			  ,Referrals
-			  ,Retention
-			  ,RolePlaying
-			  ,Safety
-			  ,ShortWeek
-			  ,StaffCourt
-			  ,StaffFamilyEmergency
-			  ,StaffForgot
-			  ,StaffIll
-			  ,StaffTraining
-			  ,StaffVacation
-			  ,StaffOutAllWeek
-			  ,StrengthBasedApproach
-			  ,Strengths
-			  ,SupervisionCreateDate
-			  ,SupervisionCreator
-			  ,SupervisionDate
-			  ,SupervisionEditDate
-			  ,SupervisionEditor
-			  ,SupervisionEndTime
-			  ,SupervisionHours
-			  ,SupervisionMinutes
-			  ,SupervisionNotes
-			  ,SupervisionStartTime
-			  ,SupervisorFamilyEmergency
-			  ,SupervisorFK
-			  ,SupervisorForgot
-			  ,SupervisorHoliday
-			  ,SupervisorIll
-			  ,SupervisorObservationAssessment
-			  ,SupervisorObservationHomeVisit
-			  ,SupervisorTraining
-			  ,SupervisorVacation
-			  ,TakePlace
-			  ,TechniquesApproaches
-			  ,Tools
-			  ,TrainingNeeds
-			  ,Weather
-			  ,WorkerFK	
-			-- note: we added 1 in datediff(d, StartDate,EndDate) because substraction gives one day less. e.g. 7-1 = 6			
-			, datediff(d, StartDate,EndDate) + 1 as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
-			--,case when WorkerFK is null and SupervisionPK is null then null else datediff(d, StartDate,EndDate) end as DaysInTheCurrentWeek	-- null means that there was no supervision record found for that week  ... khalsa		  
-			  
-			   FROM #tblWeekPeriodsAdjusted wp 		
-		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
-		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
-		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
-		)
-
-
-				
-		
+	
 	,cteSupervisors	as 
 	(
 		select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as SupervisorName
@@ -564,32 +625,7 @@ END
 				else
 				''
 				end as ReasonNOSupervision		
-		
-			  --,ParticipantEmergency			  
-			  --,ShortWeek
-			  --,StaffCourt
-			  --,StaffFamilyEmergency
-			  --,StaffForgot
-			  --,StaffIll
-			  --,StaffTraining
-			  --,StaffVacation
-			  
-			  --,StaffOutAllWeek
-			  
 
-			  --,SupervisorFamilyEmergency
-			 
-			  --,SupervisorForgot
-			  --,SupervisorHoliday
-			  --,SupervisorIll
-
-			  --,SupervisorTraining
-			  --,SupervisorVacation
-			  --,ReasonOther
-			  --,ReasonOtherSpecify
-			  --,Weather
-			  --,TakePlace			  
-			  --,WorkerFK		
 			  
 			  
 			   FROM #tblWorkers w 
@@ -599,20 +635,7 @@ END
 	)	
 	
 	
---	--SELECT * FROM cteSupervisionReasonsNotTookPlace
 	
----- rspCredentialingSupervisionSummary 1, '01/06/2013', '02/02/2013'		
-
-	,cteSupervisionDurations
-	as
-	(
-		SELECT 
-			WorkerPK 
-			,isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) as Duration
-			,WeekNumber 
-		
-		FROM cteWorkersWithSupervisionsII
-	)	
 	
 	,cteSupervisionDurationsGroupedByWeek
 	as
@@ -622,7 +645,7 @@ END
 			,sum(Duration) as WeeklyDuration
 			,WeekNumber 
 		
-		FROM cteSupervisionDurations sd		
+		FROM #tblMaxOf2SupvisionPerWeekToBeConsidered sd		
 		group by WorkerPK, WeekNumber
 	)				
 		
