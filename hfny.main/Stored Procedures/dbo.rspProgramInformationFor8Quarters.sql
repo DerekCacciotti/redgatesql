@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -13,8 +12,11 @@ GO
 -- exec dbo.rspProgramInformationFor8Quarters @programfk=',13,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
 -- exec dbo.rspProgramInformationFor8Quarters @programfk=',19,',@edate='2013-03-31 00:00:00',@sitefk=NULL,@casefilterspositive=NULL
 
--- exec [rspProgramInformationFor8Quarters] '3','12/31/12'
+-- exec [rspProgramInformationFor8Quarters] '39','12/31/13'
 -- exec [rspProgramInformationFor8Quarters] '19','06/30/13'
+
+-- 02/02/2013 
+-- handling when there is no data available e.g. for a new program that just joins hfny like Dominican Womens
 -- =============================================
 CREATE procedure [dbo].[rspProgramInformationFor8Quarters](@programfk    varchar(300)    = null,                                                       
                                                         @edate        DATETIME,
@@ -80,10 +82,41 @@ create table #tblQ8ReportMain(
 
 
 -- Create 8 quarters given a starting quarter end date
+-- 02/02/2013 
+-- handling when there is no data available. In order to handle, I added the following columns i.e. col1-col26
 create table #tblMake8Quarter(
 	[QuarterNumber] [int],
 	[QuarterStartDate] [date],
-	[QuarterEndDate] [date]
+	[QuarterEndDate] [date],
+	[Col1] [varchar](200) default ' ',
+	[Col2] [varchar](200) default ' ',
+	[Col3] [varchar](200) default ' ',
+	[Col4] [varchar](200) default ' ',
+	[Col5] [varchar](200) default ' ',
+	[Col6] [varchar](200) default ' ',
+	[Col7] [varchar](200) default ' ',
+	[Col8] [varchar](200) default ' ',
+	[Col9] [varchar](200) default ' ',
+	[Col10] [varchar](200) default ' ',
+	[Col11] [varchar](200) default ' ',
+	[Col12] [varchar](200) default ' ',
+	[Col13] [varchar](200) default ' ',
+	[Col14] [varchar](200) default ' ',
+	[Col15] [varchar](200) default ' ',
+	[Col16] [varchar](200) default ' ',
+	[Col17] [varchar](200) default ' ',
+	[Col18] [varchar](200) default ' ',
+	[Col19] [varchar](200) default ' ',
+	[Col20] [varchar](200) default ' ',
+	[Col21] [varchar](200) default ' ',
+	[Col22] [varchar](200) default ' ',
+	[Col23] [varchar](200) default ' ',
+	[Col24] [varchar](200) default ' ',
+	[Col25] [varchar](200) default ' ',
+	[Col26] [varchar](200) default ' '
+
+	
+	
 )
 
 INSERT INTO #tblMake8Quarter([QuarterNumber],[QuarterStartDate],[QuarterEndDate])SELECT 8, DATEADD(dd,1,DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-3,@edate) )+1,0))), @edate AS QuarterEndDate
@@ -94,6 +127,7 @@ INSERT INTO #tblMake8Quarter([QuarterNumber],[QuarterStartDate],[QuarterEndDate]
 INSERT INTO #tblMake8Quarter([QuarterNumber],[QuarterStartDate],[QuarterEndDate])SELECT 3, DATEADD(dd,1,DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-18,@edate) )+1,0))), DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-15,@edate) )+1,0)) AS QuarterEndDate
 INSERT INTO #tblMake8Quarter([QuarterNumber],[QuarterStartDate],[QuarterEndDate])SELECT 2, DATEADD(dd,1,DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-21,@edate) )+1,0))), DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-18,@edate) )+1,0)) AS QuarterEndDate
 INSERT INTO #tblMake8Quarter([QuarterNumber],[QuarterStartDate],[QuarterEndDate])SELECT 1, DATEADD(dd,1,DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-24,@edate) )+1,0))), DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0, DATEADD(mm,-21,@edate) )+1,0)) AS QuarterEndDate
+
 
 -- SELECT * FROM #tblMake8Quarter  -- equivalent to csr8q cursor
 -- exec [rspProgramInformationFor8Quarters] '5','06/30/2012'
@@ -1433,11 +1467,43 @@ INSERT INTO #tblInitial_cohort
 			,'    c. 1 year up to 2 years'
 			,'    d. 2 years and Over'			
 
+-- handling when there is no data available e.g. for a new program that just joins hfny like Dominican Womens
+-- add quarters with missing data. just add rows for those quarters with placeholders containing fake/imaginery data
+union all
+SELECT 
+	[QuarterNumber],
+	LEFT(CONVERT(VARCHAR, QuarterEndDate, 120), 10)AS QuarterEndDate, 
+	[Col1],
+	[Col2],
+	[Col3],
+	[Col4],
+	[Col5],
+	[Col6],
+	[Col7],
+	[Col8],
+	[Col9],
+	[Col10],
+	[Col11],
+	[Col12],
+	[Col13],
+	[Col14],
+	[Col15],
+	[Col16],
+	[Col17],
+	[Col18],
+	[Col19],
+	[Col20],
+	[Col21],
+	[Col22],
+	[Col23],
+	[Col24],
+	[Col25],
+	[Col26]
+	 FROM #tblMake8Quarter
+	where QuarterNumber not in (SELECT QuarterNumber FROM #tblQ8ReportMain)
 
 ---- exec [rspProgramInformationFor8Quarters] '2','06/30/2012'
 --SELECT * from #tblQ8ReportMain
-
-
 
 -- Objective: Transpose Rows into Columns - what a pain in the ...
 -- Idea: Create 9 variable tables and later join them to get our final result
@@ -1547,6 +1613,7 @@ UNPIVOT
 	value for field IN (QuarterEndDate, numberOfScreens, numberOfKempAssessments, KempPositivePercentage, KempPositiveEnrolled, KempPositivePending, KempPositiveTerminated, AvgPositiveMotherScore, EnrolledAtBeginningOfQrtr, NewEnrollmentsThisQuarter, NewEnrollmentsPrenatal, TANFServicesEligible, FamiliesDischargedThisQuarter, FamiliesCompletingProgramThisQuarter, FamiliesActiveAtEndOfThisQuarter, FamiliesActiveAtEndOfThisQuarterOnLevel1, FamiliesActiveAtEndOfThisQuarterOnLevelX, FamiliesWithNoServiceReferrals, AverageVisitsPerMonthPerCase, TotalServedInQuarterIncludesClosedCases, AverageVisitsPerFamily, TANFServicesEligibleAtEnrollment, rowBlankforItem9, LengthInProgramUnder6Months, LengthInProgramUnder6MonthsTo1Year, LengthInProgramUnder1YearTo2Year, LengthInProgramUnder2YearsAndOver)
 
 ) unpvtCol1
+
 
 -- column2
 ;
