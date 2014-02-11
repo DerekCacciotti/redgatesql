@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,6 +11,10 @@ GO
 -- Create date: <June 14, 2010>
 -- Description:	<report: Supervisor Case List>
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+
+-- rspSupervisorCaseList 1
+-- rspSupervisorCaseList 6
+-- 02/07/2014 added program capacity ... khalsa
 -- =============================================
 CREATE procedure [dbo].[rspSupervisorCaseList]
 (
@@ -34,8 +37,15 @@ begin
 							  for xml path ('')),2,8000)
 	end
 
-	set @ProgramFK = REPLACE(@ProgramFK,'"','')
+		--print @ProgramFK
 
+	set @ProgramFK = REPLACE(@ProgramFK,'"','')
+	
+	
+	;
+	with ctemain
+	as
+	(
 	select pc1id
 		  ,levelname
 		  ,caseweight
@@ -51,6 +61,8 @@ begin
 		  ,case when levelname='Level 1-SS' then 1 else 0 end as Level1SSCount
 		  ,case when levelname='Level 1-Prenatal' then 1 else 0 end as Level1PrenatalCount
 		  ,case when levelname='Level X' then 1 else 0 end as LevelXCount
+		  ,CaseProgram.ProgramFK
+		  ,ProgramCapacity
 		from
 			(select *
 				 from codeLevel
@@ -67,13 +79,101 @@ begin
 								  ,LastName as suplname
 								from worker) sw
 						   on wp.supervisorfk = sw.workerpk
+			left outer join HVProgram h on h.HVProgramPK = CaseProgram.ProgramFK			   
+						   
 		where
 			 dischargedate is null
 			 and sw.workerpk = isnull(@SupPK,sw.workerpk)
+			 
+		)	 
+	,ctemainAgain
+	as
+	(
+	select pc1id
+		  ,levelname
+		  ,caseweight
+		  ,supfname
+		  ,suplname
+		  ,worker.firstname as wfname
+		  ,worker.lastname as wlname
+		  ,case when levelname in ('Preintake','Preintake-enroll') then 1 else 0 end as PreintakeCount
+		  ,case when levelname='Level 1' then 1 else 0 end as Level1Count
+		  ,case when levelname='Level 2' then 1 else 0 end as Level2Count
+		  ,case when levelname='Level 3' then 1 else 0 end as Level3Count
+		  ,case when levelname='Level 4' then 1 else 0 end as Level4Count
+		  ,case when levelname='Level 1-SS' then 1 else 0 end as Level1SSCount
+		  ,case when levelname='Level 1-Prenatal' then 1 else 0 end as Level1PrenatalCount
+		  ,case when levelname='Level X' then 1 else 0 end as LevelXCount
+		  ,CaseProgram.ProgramFK
+		  ,ProgramCapacity
+		from
+			(select *
+				 from codeLevel
+				 where caseweight is not null) cl
+			left outer join caseprogram
+						   on caseprogram.currentLevelFK = cl.codeLevelPK
+			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+			inner join worker
+					  on caseprogram.currentFSWFK = worker.workerpk
+			inner join workerprogram wp
+					  on wp.workerfk = worker.workerpk AND wp.programfk = listitem
+			left outer join (select workerpk
+								  ,firstName as supfname
+								  ,LastName as suplname
+								from worker) sw
+						   on wp.supervisorfk = sw.workerpk
+			left outer join HVProgram h on h.HVProgramPK = CaseProgram.ProgramFK			   
+						   
+		where
+			 dischargedate is null
+			 and sw.workerpk = isnull(@SupPK,sw.workerpk)
+			 
+		)	
+		
+	,cteProgramCapacity
+	as
+	( -- calculate the program capacity
+	select 
+
+			 --ProgramCapacity,
+			 case when ProgramCapacity is null then 'Program capacity blank on Program Information Form.' 
+				  else
+					CONVERT(VARCHAR,count(PC1ID) - sum(PreintakeCount))
+					 + ' (' + CONVERT(VARCHAR, round(COALESCE(cast((count(PC1ID) - sum(PreintakeCount)) AS FLOAT) * 100/ NULLIF(ProgramCapacity,0), 0), 0))  + '%)'
+				  end 
+			  	AS PerctOfProgramCapacity
+			  
+			   FROM ctemainAgain
+			   group by ProgramFK,ProgramCapacity
+
+			 
+		)	 
+		
+		
+		SELECT PC1ID
+			  ,LevelName
+			  ,CaseWeight
+			  ,supfname
+			  ,suplname
+			  ,wfname
+			  ,wlname
+			  ,PreintakeCount
+			  ,Level1Count
+			  ,Level2Count
+			  ,Level3Count
+			  ,Level4Count
+			  ,Level1SSCount
+			  ,Level1PrenatalCount
+			  ,LevelXCount
+			  ,PerctOfProgramCapacity as ProgramCapacity
+			  			  
+			   FROM ctemain, cteProgramCapacity		
+		
 		order by suplname
 				,supfname
 				,wlname
 				,wfname
 
 end
+
 GO
