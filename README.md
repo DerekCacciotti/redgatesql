@@ -1,6 +1,5 @@
 HFNY.sql
 ========
-
 Healthy Families New York SQL Server Source Control
 
 * Test: http://hfny.chsrtest.org
