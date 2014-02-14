@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -166,6 +167,12 @@ begin
 			  ,Level1PrenatalCount
 			  ,LevelXCount
 			  ,PerctOfProgramCapacity as ProgramCapacity
+			  ,case when ProgramCapacity is null then ''
+				  else
+						  CONVERT(VARCHAR,ProgramCapacity)
+				  end 
+			  	AS ContractedCapacity
+			  
 			  			  
 			   FROM ctemain, cteProgramCapacity		
 		
