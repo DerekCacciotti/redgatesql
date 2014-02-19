@@ -19,7 +19,7 @@ as
 			 and hvcasefk = @hvcasefk
 			 and codeFormAbbreviation <> 'DS'
 			 and DATEADD(d,0,DATEDIFF(d,0,formdate)) > @eventdate
-		--AND formdate > @eventdate
+		--AND formdate > @eventdate (obviously)
 		group by
 				codeFormName
 GO
