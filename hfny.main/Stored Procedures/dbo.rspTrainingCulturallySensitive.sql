@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,24 +9,33 @@ GO
 -- Description:	Report Training Culturally Sensitive
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingCulturallySensitive]
+	
 	-- Add the parameters for the stored procedure here
 	@sdate AS DATETIME,
 	@edate AS DATETIME,
-	@progfk AS INT
+	@progfk AS int
+	
+	with recompile
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
---Get FAW's in time period
 
+--after timing out on 2/20/2014 added these new variables to deal with parameter sniffing slowdown issues
+declare @sdate2 as datetime = @sdate
+declare @edate2 as datetime = @edate
+declare @progfk2 as int = @progfk
+
+
+--Get FAW's in time period
 ;WITH  cteEventDates AS (
 	SELECT workerpk, wrkrLName
 	, '1' AS MyWrkrCount
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName
-	, HireDate FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
+	, HireDate FROM [dbo].[fnGetWorkerEventDates](@progfk2, NULL, NULL)
 	WHERE TerminationDate IS NULL
-	AND DATEDIFF(d,HireDate, @edate) > 365
+	AND DATEDIFF(d,HireDate, @edate2) > 365
 )
 
 
@@ -43,7 +53,7 @@ BEGIN
 	LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
 	LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
 	WHERE --CulturalCompetency = 1
-	TrainingDate between @sdate AND @edate
+	TrainingDate between @sdate2 AND @edate2
 	GROUP BY WorkerPK
 	, CulturalCompetency
 	, WorkerName
@@ -75,7 +85,7 @@ BEGIN
 	LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK AND cteCultSenses.CulturallySensitiveDate = t.TrainingDate
 	LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
 	WHERE --CulturalCompetency = 1
-	TrainingDate between @sdate AND @edate
+	TrainingDate between @sdate2 AND @edate2
 	GROUP BY WorkerPK
 	, WorkerName
 	, HireDate, WorkerCount
@@ -84,18 +94,7 @@ BEGIN
 )
 
 , cteFinal as (
-	SELECT WorkerPK, workername, HireDate
-		, CASE 
-				WHEN CulturalCompetency Is Null THEN NULL
-				when CulturalCompetency = 0 then NULL
-				ELSE CulturallySensitiveDate
-			END AS CulturallySensitiveDate
-		, WorkerCount
-		, CASE 
-				WHEN CulturalCompetency Is Null THEN ''
-				when CulturalCompetency = 0 then ''
-				ELSE TrainingTitle
-			END AS TrainingTitle
+	SELECT WorkerPK, workername, HireDate, CulturallySensitiveDate, WorkerCount, TrainingTitle
 		, MeetsTarget =
 			CASE 
 				WHEN CulturalCompetency Is Null THEN 'F'
