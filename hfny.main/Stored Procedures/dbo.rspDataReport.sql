@@ -11,7 +11,7 @@ GO
 -- rspDataReport 22, '03/01/2013', '05/31/2013'		
 
 -- Fix: Pre-Intake Enroll completed 03/27/13
-
+-- Added ability to run report for all the HFNY Programs  02/20/2014
 -- =============================================
 
 CREATE procedure [dbo].[rspDataReport]
@@ -87,7 +87,7 @@ begin
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN HVScreen h1 ON h1.HVCaseFK = h.HVCasePK AND h1.ProgramFK = cp.ProgramFK
 	WHERE h1.ScreenDate >= @StartDate AND h1.ScreenDate <= @EndDate
-	AND cp.ProgramFK = @ProgramFKs
+	--AND cp.ProgramFK = @ProgramFKs
 	
 	
 	DECLARE @n2a INT 
@@ -156,7 +156,7 @@ begin
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
 	WHERE p.PADate >= @StartDate AND p.PADate <= @EndDate
-	AND cp.ProgramFK = @ProgramFKs
+	--AND cp.ProgramFK = @ProgramFKs
 	AND p.CaseStatus = '03'	
 
 	DECLARE @n4 INT 
@@ -177,7 +177,7 @@ begin
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
 	WHERE p.PADate < @StartDate
-	AND cp.ProgramFK = @ProgramFKs
+	--AND cp.ProgramFK = @ProgramFKs
 	AND p.CaseStatus = '02'	
 	AND KempeResult = 1
 	AND (h.IntakeDate  >= @StartDate OR h.IntakeDate IS NULL)
@@ -203,9 +203,10 @@ begin
 	--INNER JOIN Preintake pre ON pre.HVCaseFK = h.HVCasePK
 	left join codeLevel on cp.CurrentLevelFK = codeLevel.codeLevelPK
 	WHERE 
-	cp.ProgramFK = @ProgramFKs
+	--cp.ProgramFK = @ProgramFKs
 	--AND pre.CaseStatus = '03'
-	and codeLevel.LevelName = 'Preintake-term'
+	--and 
+	codeLevel.LevelName = 'Preintake-term'
 	AND cp.CaseStartDate < @EndDate  -- handling transfer cases	
 	AND (cp.DischargeDate >= @StartDate AND cp.DischargeDate <= @EndDate AND cp.DischargeDate IS NOT NULL)
 
@@ -225,8 +226,9 @@ begin
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 
-	cp.ProgramFK = @ProgramFKs
-	AND (h.IntakeDate >= @StartDate AND h.IntakeDate <= @EndDate)
+	--cp.ProgramFK = @ProgramFKs
+	--AND 
+	(h.IntakeDate >= @StartDate AND h.IntakeDate <= @EndDate)
 	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
 	
 
@@ -247,8 +249,9 @@ begin
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 
-	cp.ProgramFK = @ProgramFKs
-	AND h.IntakeDate < @StartDate 
+	--cp.ProgramFK = @ProgramFKs
+	--AND 
+	h.IntakeDate < @StartDate 
 	AND h.IntakeDate IS NOT NULL
 	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
 	AND (cp.DischargeDate >= @StartDate OR cp.DischargeDate IS NULL)
@@ -285,8 +288,9 @@ begin
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 	
-    cp.ProgramFK = @ProgramFKs
-	AND h.IntakeDate >= @StartDate 
+ --   cp.ProgramFK = @ProgramFKs
+	--AND 
+	h.IntakeDate >= @StartDate 
 	AND h.IntakeDate <= @EndDate 	
 	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
 	
@@ -316,8 +320,9 @@ begin
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	WHERE 
-	cp.ProgramFK = @ProgramFKs
-	AND cp.DischargeDate >= @StartDate 
+	--cp.ProgramFK = @ProgramFKs
+	--and
+	 cp.DischargeDate >= @StartDate 
 	AND cp.DischargeDate <= @EndDate 	
 	AND h.IntakeDate IS NOT null
 	AND cp.CaseStartDate < @EndDate  -- handling transfer cases
@@ -352,8 +357,8 @@ begin
 	LEFT JOIN CommonAttributes ca ON ca.FormFK = i.IntakePK and ca.FormType = 'IN'  -- to get PBTANF, item 26 on the intake form
 	
 	WHERE 
-	cp.ProgramFK = @ProgramFKs
-	AND 
+	--cp.ProgramFK = @ProgramFKs
+	--AND 
 	(
 	(h.IntakeDate IS NOT NULL AND h.IntakeDate <= @EndDate)
 	AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @EndDate)
