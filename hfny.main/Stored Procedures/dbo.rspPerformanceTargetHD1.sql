@@ -53,7 +53,8 @@ begin
 		  end as lastdate
 		from @tblPTCases ptc
 			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on h.hvcasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
+			inner join CaseProgram cp on h.hvcasePK = cp.HVCaseFK 
+										and ptc.ProgramFK = cp.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
 	-- Report: HD1. Immunization at one year
@@ -99,7 +100,6 @@ begin
 				, MedicalItemTitle
 				
 	)
-	
 	,
 	cteImmunizationsDTaP
 	as
@@ -122,9 +122,6 @@ begin
 				, MedicalItemTitle
 				
 	)	
-	
-	
-	
 	,
 	cteImmunizationCounts
 	as
@@ -152,12 +149,11 @@ begin
 			, case when ((ImmunizationCountDTaP >= 3) AND (ImmunizationCountPolio >= 2)) then '' 
 					else 'Missing Shots or Not on Time' end as NotMeetingReason
 	 from cteCohort coh
-	 LEFT join cteImmunizationsPolio immPolio on immPolio.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immPolio.TCIDPK 
-	 LEFT join cteImmunizationsDTaP immDTaP on immDTaP.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immDTaP.TCIDPK 
+	 left join cteImmunizationsPolio immPolio on immPolio.HVCaseFK = coh.HVCaseFK and coh.TCIDPK = immPolio.TCIDPK 
+	 left join cteImmunizationsDTaP immDTaP on immDTaP.HVCaseFK = coh.HVCaseFK and coh.TCIDPK = immDTaP.TCIDPK 
 	)
-		
-	
-	SELECT * FROM cteImmunizationCounts 
+
+	select * from cteImmunizationCounts 
 
 end
 GO
