@@ -21,31 +21,39 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-		
 IF @supervisorfk = 0 SET @supervisorfk = NULL
 IF @workerfk = 0 SET @workerfk = NULL
 
 ; WITH cteTopicList AS (
-SELECT DISTINCT codeTopicPK, TopicName, TopicCode, SATCompareDateField
+SELECT DISTINCT codeTopicPK as TopicFK, TopicName, TopicCode, SATCompareDateField
 , SATInterval, satname, DaysAfter
+, null as SubTopicCode , null as SubTopicName, null as TrainingTickler, null as SubTopicPK
 FROM dbo.codeTopic 
 WHERE topiccode <=25.0 
 )
 
+
 , cteSubtopicList AS(
-SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo.SubTopic WHERE TrainingTickler='YES'
+SELECT TopicFK 
+, TopicName, TopicCode, SATCompareDateField, SATInterval, satname, DaysAfter
+, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK 
+FROM dbo.SubTopic 
+inner join codeTopic t on t.codeTopicPK = SubTopic.TopicFK
+WHERE TrainingTickler='YES'
 )
 
 , cteCompleteTopicList AS(
-	SELECT * FROM cteTopicList TL
-	LEFT JOIN cteSubtopicList STL ON TL.codeTopicPK=stl.TopicFK	
+	SELECT * FROM cteTopicList 
+	UNION
+	select * from cteSubtopicList 
 )
 
 , cteEventDates AS (
 	SELECT workerpk, wrkrLName
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName, hiredate
 	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent
-	, SupervisorInitialStart, FAWInitialStart, FSWInitialStart, FirstASQDate
+	, SupervisorInitialStart, FAWInitialStart, FSWInitialStart --these are NOT Intitial Start Dates, the function was modified but the name stayed the same
+	, FirstASQDate
 	, TerminationDate
 	FROM [dbo].[fnGetWorkerEventDatesAll](@progfk, NULL, NULL)
 	WHERE (TerminationDate IS NULL OR TerminationDate >=
@@ -93,7 +101,7 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 			, FSWInitialStart
 			, TerminationDate
 			, SupervisorFK
-			, codeTopicPK AS TopicFK
+			, TopicFK
 			, TopicName
 			, TopicCode
 			, SATCompareDateField
@@ -110,6 +118,7 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 			ELSE 1
 			END = 1
 )
+
 	
 		
 , cteReadyForRemoval AS (
@@ -149,6 +158,7 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 		FROM cteEverythingRequired ER
 		)
 		
+		
 , cteFinal AS(		
 	SELECT workerpk
 			, WorkerName
@@ -182,10 +192,13 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 				Else 'Demonstrated Knowledge by 12 months Training'
 				END AS [theGrouping]
 			, CASE  
-					WHEN SubTopicPK= 82 THEN --this training must be completed 3 months AFTER Topicfk 10.0.  This is the subtopic "FAW 3 month Follow-up Assessment Review"
-						CASE WHEN (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk) IS NULL THEN 'After FAW Core'
-						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk)), 101)
+					WHEN SubTopicPK = 82 then
+					--this first case determines if the initial FAW Core Training is taken, if not then it will simply add the text the training is due 3 months after, otherwise, it adds the 91 days
+						CASE WHEN (SELECT distinct min(TrainingDate) FROM cteReadyForRemoval WHERE rfr.TopicFK = 10 AND workerpk=rfr.workerpk) IS NULL THEN 'FAW 3 month Follow-up Assessment Review'
+						ELSE CONVERT(VARCHAR(10)
+						, DATEADD(dd, 91, (select min(TrainingDate) FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk)), 101)
 						END
+
 					WHEN SATCompareDateField = 'firstevent' THEN
 						CASE WHEN FirstEvent IS NULL THEN 'First Event'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, FirstEvent), 101)
@@ -227,6 +240,8 @@ SELECT TopicFK, SubTopicCode, SubTopicName, TrainingTickler, SubTopicPK FROM dbo
 			  END AS 'Removals'
 			FROM cteReadyForRemoval rfr
 			)
+			
+			
 		
 SELECT workerpk
 			, WorkerName
@@ -247,6 +262,7 @@ SELECT workerpk
 FROM ctefinal 
 WHERE Removals IS NULL 
 ORDER BY [theGrouping], TopicCode, SubTopicCode
+
 
 END
 GO
