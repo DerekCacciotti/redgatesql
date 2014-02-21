@@ -94,7 +94,18 @@ declare @progfk2 as int = @progfk
 )
 
 , cteFinal as (
-	SELECT WorkerPK, workername, HireDate, CulturallySensitiveDate, WorkerCount, TrainingTitle
+		SELECT WorkerPK, workername, HireDate
+		, CASE 
+				WHEN CulturalCompetency Is Null THEN NULL
+				when CulturalCompetency = 0 then NULL
+				ELSE CulturallySensitiveDate
+			END AS CulturallySensitiveDate
+		, WorkerCount
+		, CASE 
+				WHEN CulturalCompetency Is Null THEN ''
+				when CulturalCompetency = 0 then ''
+				ELSE TrainingTitle
+			END AS TrainingTitle
 		, MeetsTarget =
 			CASE 
 				WHEN CulturalCompetency Is Null THEN 'F'
