@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -13,6 +12,7 @@ GO
 -- rspPerformanceTargetReport4Quarters 2 ,'04/01/2012' ,'06/30/2012'
 -- rspPerformanceTargetReport4Quarters 24,'10/01/2012' ,'12/31/2012'
 -- rspPerformanceTargetReport4Quarters 9, '07/01/2013', '09/30/2013', 471
+-- rspPerformanceTargetReport4Quarters 39, '10/01/2013', '12/31/2013'
 -- mods by jrobohn 20130222 - clean up names, code and layoutset
 -- mods by jrobohn 20130223 - added PCI1 report
 -- =============================================
@@ -282,10 +282,10 @@ begin
 		group by PTCode
 		union 
 		select PerformanceTargetCode
-				, 0
-				, 0
-				, 0
-				, 0 as Qtr1PercentageMeetingTarget
+				, null
+				, null
+				, null
+				, null as Qtr1PercentageMeetingTarget
 		from codePerformanceTargetTitle ptt
 		where PerformanceTargetCode not in (select PTCode from @tblPTDetailsTemp)
 		
