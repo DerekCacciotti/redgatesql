@@ -113,9 +113,10 @@ Declare @PK int
 set @PK = (SELECT SupervisionPK from inserted)
 
 BEGIN
-	EXEC spAddFormReview_userTriggernoHVCaseFK @FormFK=@PK, @FormTypeValue='TR'
+	EXEC spAddFormReview_userTriggernoHVCaseFK @FormFK=@PK, @FormTypeValue='SU'
 END
 GO
+
 
 SET QUOTED_IDENTIFIER ON
 GO
