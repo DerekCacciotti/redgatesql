@@ -144,7 +144,7 @@ FULL JOIN Manager AS b ON a.WorkerFK = b.WorkerFK
 ),
 
 xxx AS (
-SELECT 
+SELECT a.WorkerFK,
 rtrim(FirstName) + ' ' + rtrim(LastName) [Name]
 , CASE WHEN a.FSW = 1 THEN 'FSW ' ELSE '' END +
 CASE WHEN a.FAW = 1 THEN 'FAW ' ELSE '' END +
@@ -160,7 +160,8 @@ CASE WHEN a.Manager = 1 THEN 'PM' ELSE '' END [Func]
 , LastName
 FROM fsw_faw_fadv_supervisor_manager AS a
 JOIN Worker AS w ON a.WorkerFK = w.WorkerPK
-JOIN WorkerProgram AS wp ON wp.WorkerFK = a.WorkerFK
+JOIN WorkerProgram AS wp ON wp.WorkerFK = a.WorkerFK 
+INNER JOIN dbo.SplitString(@programfk,',') on wp.ProgramFK = listitem
 LEFT OUTER JOIN codeApp AS b ON EducationLevel = b.AppCode AND b.AppCodeGroup = 'WorkerEducationLevel'
 )
 
