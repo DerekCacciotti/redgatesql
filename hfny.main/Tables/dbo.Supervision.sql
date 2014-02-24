@@ -66,6 +66,112 @@ CREATE TABLE [dbo].[Supervision]
 [WorkerFK] [int] NOT NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2014Feb24
+-- Description:	Delete FormReview row when  
+--				the Supervision row deleted
+-- =============================================
+CREATE TRIGGER [dbo].[fr_delete_Supervision]
+on [dbo].[Supervision]
+After DELETE
+AS
+Declare @PK int
+
+set @PK = (SELECT SupervisionPK from deleted)
+
+BEGIN
+	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='SU'
+END
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+
+
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2014Feb24
+-- Description:	Add FormReview row when 
+--				inserting Supervision row
+-- =============================================
+CREATE TRIGGER [dbo].[fr_Supervision]
+on [dbo].[Supervision]
+After insert
+
+AS
+
+Declare @PK int
+
+set @PK = (SELECT SupervisionPK from inserted)
+
+BEGIN
+	EXEC spAddFormReview_userTriggernoHVCaseFK @FormFK=@PK, @FormTypeValue='TR'
+END
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2014Feb24
+-- Description:	Change FormReview's formdate if 
+--				the Supervision date changed
+-- =============================================
+CREATE trigger [dbo].[fr_Supervision_Edit]
+on [dbo].[Supervision]
+after update
+
+AS
+
+declare @PK int
+declare @UpdatedFormDate datetime 
+declare @FormTypeValue varchar(2)
+
+select @PK = SupervisionPK FROM inserted
+select @UpdatedFormDate = SupervisionDate FROM inserted
+set @FormTypeValue = 'SU'
+
+begin
+	update FormReview
+	set FormDate=@UpdatedFormDate
+	where FormFK=@PK 
+			and FormType=@FormTypeValue
+
+END
+
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- create trigger TR_SupervisionEditDate ON Supervision
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2014Feb24
+-- Description:	Change FormReview's editdate if 
+--				Supervision row has been edited
+-- =============================================
+CREATE trigger [dbo].[TR_SupervisionEditDate] ON [dbo].[Supervision]
+For Update 
+AS
+Update Supervision Set Supervision.SupervisionEditDate= getdate()
+From [Supervision] INNER JOIN Inserted ON [Supervision].[SupervisionPK]= Inserted.[SupervisionPK]
+GO
+
 EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Supervision', 'COLUMN', N'SupervisionPK'
 GO
 
