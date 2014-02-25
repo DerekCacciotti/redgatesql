@@ -22,6 +22,7 @@ CREATE TABLE [dbo].[Supervision]
 [ParticipantEmergency] [bit] NULL,
 [PersonalGrowth] [bit] NULL,
 [ProfessionalGrowth] [bit] NULL,
+[ProgramFK] [int] NULL,
 [ReasonOther] [bit] NULL,
 [ReasonOtherSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RecordDocumentation] [bit] NULL,
@@ -65,6 +66,18 @@ CREATE TABLE [dbo].[Supervision]
 [Weather] [bit] NULL,
 [WorkerFK] [int] NOT NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+ALTER TABLE [dbo].[Supervision] ADD 
+CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Supervision_SupervisorFK] ON [dbo].[Supervision] ([SupervisorFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Supervision_WorkerFK] ON [dbo].[Supervision] ([WorkerFK]) ON [PRIMARY]
+
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Supervision', 'COLUMN', N'SupervisionPK'
+GO
+
+ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD
+CONSTRAINT [FK_Supervision_HVProgram] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -173,17 +186,13 @@ Update Supervision Set Supervision.SupervisionEditDate= getdate()
 From [Supervision] INNER JOIN Inserted ON [Supervision].[SupervisionPK]= Inserted.[SupervisionPK]
 GO
 
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Supervision', 'COLUMN', N'SupervisionPK'
-GO
 
 ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD
 CONSTRAINT [FK_Supervision_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD
 CONSTRAINT [FK_Supervision_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-CREATE NONCLUSTERED INDEX [IX_FK_Supervision_SupervisorFK] ON [dbo].[Supervision] ([SupervisorFK]) ON [PRIMARY]
 
-CREATE NONCLUSTERED INDEX [IX_FK_Supervision_WorkerFK] ON [dbo].[Supervision] ([WorkerFK]) ON [PRIMARY]
 
-GO
-ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
+
+
 GO
