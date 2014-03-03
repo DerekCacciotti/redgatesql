@@ -11,16 +11,20 @@ GO
 -- Create date: Oct. 5th, 2011
 -- Description:	Return all supervised events for the given worker,
 --for use in Supervision and Training
+-- spGetSupervisedEvents4Worker 152,1
+
+-- Added 'IsApproved' 02/28/2014 ... Khalsa
 -- =============================================
 
 CREATE PROCEDURE [dbo].[spGetSupervisedEvents4Worker]
-(@WorkerFK int)
+(@WorkerFK int,@ProgramFK AS int)
 
 AS
-
+--
 SET NOCOUNT ON;
 
 SELECT 
+IsApproved,
 RowNumber = ROW_NUMBER() OVER(Order by s.WorkerFK), 
 rtrim(w.LastName) + ' ' + rtrim(w.FirstName) as SupervisorName, s.SupervisionDate,s.SupervisionPK,
 
@@ -39,6 +43,7 @@ as HoursMinutes,
 
 s.WorkerFK,s.SupervisorFK FROM Worker w
 INNER JOIN Supervision s ON s.SupervisorFK = w.WorkerPK
+INNER JOIN FormReviewedTableList('SU', @ProgramFK)ON formfk = s.SupervisionPK
 WHERE s.WorkerFK = @WorkerFK
 ORDER BY SupervisionDate DESC
 GO
