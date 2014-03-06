@@ -18,7 +18,7 @@ BEGIN
 ;
 with cteLastDischargeCases as
 ( -- get the last transfer case
-SELECT max(CaseProgramEditDate) CaseProgramEditDate, HVCaseFK
+SELECT max(DischargeDate) DischargeDate, HVCaseFK
 from CaseProgram
 where TransferredToProgramFK = @programfk
 group by HVCaseFK 
@@ -29,7 +29,7 @@ group by HVCaseFK
 SELECT  cp.PC1ID, cp.DischargeDate, PC.PCDOB, PC.PCFirstName, PC.PCLastName, 
 		cp.HVCaseFK, cp.ProgramFK, cp.CaseProgramPK
 FROM    CaseProgram cp
-		inner join cteLastDischargeCases ldc on ldc.HVCaseFK = cp.HVCaseFK and cp.CaseProgramEditDate = ldc.CaseProgramEditDate 
+		inner join cteLastDischargeCases ldc on ldc.HVCaseFK = cp.HVCaseFK and cp.DischargeDate = ldc.DischargeDate 
         INNER JOIN HVCase c ON cp.HVCaseFK = c.HVCasePK 
         INNER JOIN PC ON c.PC1FK = PC.PCPK
 WHERE   (cp.DischargeReason = '37') AND 
