@@ -68,7 +68,7 @@ AS
 			inner join TCID c on c.TCIDPK = a.TCIDFK
 			inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
-			inner join worker fsw on d.CurrentFSWFK = fsw.workerpk
+			inner join worker fsw ON a.FSWFK = fsw.workerpk --d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
 			inner join
@@ -93,7 +93,8 @@ AS
 
 		where
 			 d.DischargeDate is null
-			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
+			 --and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
+			 and a.FSWFK = ISNULL(@workerfk,a.FSWFK)
 			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)
 			 --and d.programfk = @programfk
 			 and d.PC1ID = case when @pc1ID = '' then d.PC1ID else @pc1ID end
