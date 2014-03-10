@@ -468,7 +468,12 @@ WHERE PADate BETWEEN @StartDtT AND @EndDt --AND ProgramFK = @programfk
 SELECT 
   section1Q.* 
 , section2Q.*
-, section1Q.[Q1ePositiveReferred] + section2Q.[Q2PreAssessmentBeforePeriod] [Q3TotalCasesThisPerion]
+--, section1Q.[Q1ePositiveReferred] + section2Q.[Q2PreAssessmentBeforePeriod] [Q3TotalCasesThisPerion]
+
+, section4Qa.[Q4aEffortContnue] + section4Q.[Q4bCompleted] + section4Q.[Q4cTerminated] + 
+section4Qa.[Q4dNoStatus1] + section4Qb.[Q4dNoStatus2] AS [Q3TotalCasesThisPerion]
+
+
 , section4Q.*
 , section4Qa.*
 , section4Qb.*
@@ -476,7 +481,12 @@ SELECT
 , section5Q.*
 , section1T.* 
 , section2T.*
-, section1T.[T1ePositiveReferred] + section2T.[T2PreAssessmentBeforePeriod] [T3TotalCasesThisPerion]
+
+--, section1T.[T1ePositiveReferred] + section2T.[T2PreAssessmentBeforePeriod] [T3TotalCasesThisPerion]
+
+, [T4aEffortContnue] + [T4bCompleted] + [T4cTerminated] + [T4dNoStatus1] + [T4dNoStatus2] AS [T3TotalCasesThisPerion]
+
+
 , section4T.*
 , section4Ta.*
 , section4Tb.*
