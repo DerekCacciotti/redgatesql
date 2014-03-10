@@ -9,6 +9,7 @@ GO
 -- Description:	Gets a list of all forms to be reviewed that haven't been reviewed yet and
 --				fall within the range of dates for that form's review option row.
 -- exec spGetAllFormsForSupervisorReview 1,120,null
+-- added: How to handle some special url redirections - bug# HW946 ... Khalsa 3/7/2014
 -- =============================================
 CREATE procedure [dbo].[spGetAllFormsForSupervisorReview]
 	(
@@ -60,11 +61,27 @@ BEGIN
 		  ,FormReviewStartDate
 		  ,FormReviewEndDate
 		  ,'CaseHome.aspx?pc1id='+PC1ID as CaseHomeLink
-		  ,ltrim(rtrim(replace(replace(codeFormName,'-',''),' ','')))+'.aspx?pc1id='+PC1ID as FormLink
+		  ,
+				 case 
+				  -- Handling some special url redirections 
+				  when fr.FormType='DS' then 'PreDischarge.aspx?pc1id='+PC1ID	-- Note: here we use PreDischarge.aspx
+				  when fr.FormType='TM' then  'SelectTC.aspx?pc1id='+PC1ID+ '&form=TCMedical'	  -- only three forms use SelectTC.aspx
+				  when fr.FormType='AS' then 'SelectTC.aspx?pc1id='+PC1ID+ '&form=ASQSE'		  -- only three forms use SelectTC.aspx			  
+				  when fr.FormType='AQ' then 'SelectTC.aspx?pc1id='+PC1ID+ '&form=ASQ1'			  -- only three forms use SelectTC.aspx
+				  when fr.FormType='PS' then 'PSI.aspx?pc1id='+PC1ID		  -- Note: here we use PSI.aspx
+				  when fr.FormType='FU' then 'FollowUps.aspx?pc1id='+PC1ID		  -- Note: here we use FollowUps.aspx
+	  
+				  else
+					  ltrim(rtrim(replace(replace(codeFormName,'-',''),' ','')))+'.aspx?pc1id='+PC1ID+ '&papk=' + convert(varchar,FormFK)
+					  + '&FollowUPPK=' + convert(varchar,FormFK)				  
+				  end as FormLink
+				  	  
+
 		  ,isnull(FormReviewEndDate, current_timestamp) as EffectiveEndDate
 		  ,dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) as EffectiveStartDate
 		  ,ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as WorkerName
 		  ,sup.WorkerName as SupervisorName
+		  
 	from FormReview fr
 	inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = isnull(@ProgramFK,fro.ProgramFK)
 	inner join codeForm f on codeFormAbbreviation = fr.FormType
@@ -77,7 +94,8 @@ BEGIN
 			and ReviewedBy is null
 			and FormDate between FormReviewStartDate and isnull(FormReviewEndDate, current_timestamp)
 			and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
-	order by case when fr.FormType='SC' then 1 
+	order by 
+	case when fr.FormType='SC' then 1 
 				  when fr.FormType='PA' then 2
 				  when fr.FormType='KE' then 3
 				  when fr.FormType='PI' then 4
@@ -99,7 +117,8 @@ BEGIN
 				  when fr.FormType='TR' then 20
 				  when fr.FormType='GR' then 21
 			end
-			,PC1ID
+			,
+			PC1ID
 			,FormDate
 				  --when fr.FormType='AQ' then 15
 				  --when fr.FormType='AS' then 16
