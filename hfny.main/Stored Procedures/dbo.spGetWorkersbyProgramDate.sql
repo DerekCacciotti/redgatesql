@@ -31,9 +31,9 @@ INNER JOIN WorkerProgram wp ON w.WorkerPK=wp.WorkerFK
 WHERE (TerminationDate IS NULL OR TerminationDate >@thedate)
 AND ProgramFK=@progfk
 AND (
-wp.FAWStartDate <=dateadd(mm, 6, @thedate) OR wp.FSWStartDate<=dateadd(mm, 6, @thedate) 
-OR wp.SupervisorStartDate<=dateadd(mm, 6, @thedate)
-OR wp.ProgramManagerStartDate<=dateadd(mm, 6, @thedate)
+wp.FAWStartDate <=dateadd(mm, 36, @thedate) OR wp.FSWStartDate<=dateadd(mm, 36, @thedate) 
+OR wp.SupervisorStartDate<=dateadd(mm, 36, @thedate)
+OR wp.ProgramManagerStartDate<=dateadd(mm, 36, @thedate)
 )
 END
 
