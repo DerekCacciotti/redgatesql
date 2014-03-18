@@ -18,9 +18,10 @@ AS
 --DECLARE @programfk       VARCHAR(MAX)   = '1'
 --DECLARE @supervisorfk    int            = null
 --DECLARE @workerfk        int            = null
---DECLARE @UnderCutoffOnly char(1)        = 'Y'
+--DECLARE @UnderCutoffOnly char(1)        = 'N'
 --DECLARE @pc1ID           varchar(13)    = ''
---DECLARE @sitefk          int            = null
+--DECLARE @sitefk          int            = NULL
+
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 --            added this code to the workerprogram join condition: AND wp.programfk = listitem
 
@@ -35,6 +36,10 @@ AS
 	
 	declare @n int = 0
 	select @n = case when @UnderCutoffOnly = 'Y' then 1 else 0 end
+
+
+;with cteMain
+	as (
 
 	select
 		  LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
@@ -59,19 +64,65 @@ AS
 			inner join TCID c on c.TCIDPK = a.TCIDFK
 			inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
-			inner join worker fsw on a.FSWFK = fsw.workerpk --d.CurrentFSWFK = fsw.workerpk
+			inner join worker fsw on d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
 		where
 			 d.DischargeDate is NULL
 			 AND (@n = 0 OR ASQSEOverCutOff= 1)
-			 --and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
-			 and a.FSWFK = ISNULL(@workerfk,a.FSWFK)
+			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
 			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)
 			 and d.PC1ID = case when @pc1ID = '' then d.PC1ID else @pc1ID end
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-		order by supervisor
-				,worker
-				,PC1ID
-				,TCAgeCode
+		--order by supervisor
+		--		,worker
+		--		,PC1ID
+		--		,TCAgeCode
+),
+
+cteNone
+	as (
+	SELECT DISTINCT
+		  LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
+		 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
+		 ,d.PC1ID
+		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) TCName
+		 ,convert(varchar(12),c.TCDOB,101) TCDOB
+		 ,c.GestationalAge
+		 ,'[None]' TCAge
+		 ,'' DateCompleted
+		 ,0 AS [ASQSETotalScore]
+		 ,'' ASQSEOverCutOff
+		 ,'' TCReferred
+		 ,'' ReviewCDS
+		 ,'' InWindow
+		 ,'' [TCAgeCode]
+	from --ASQSE a
+			--inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
+			--inner join TCID c on c.TCIDPK = a.TCIDFK
+			CaseProgram d 
+			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
+			inner join worker fsw ON d.CurrentFSWFK = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
+			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
+			LEFT OUTER JOIN TCID c on c.HVCaseFK = d.HVCaseFK
+			LEFT OUTER JOIN ASQSE AS a ON d.HVCaseFK = a.HVCaseFK
+	where
+			 d.DischargeDate is NULL
+			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
+			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)
+			 and d.PC1ID = case when @pc1ID = '' then d.PC1ID else @pc1ID end
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)		
+	         AND a.HVCaseFK IS NULL
+)
+
+
+SELECT * FROM cteMain
+UNION all
+SELECT * FROM cteNone
+
+order by supervisor
+,worker
+,PC1ID
+,TCAgeCode
 GO
