@@ -87,7 +87,8 @@ cteNone
 		 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
 		 ,d.PC1ID
 		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) TCName
-		 ,convert(varchar(12),c.TCDOB,101) TCDOB
+		 --,convert(varchar(12),c.TCDOB,101) TCDOB
+		 ,CASE WHEN c.TCDOB IS NOT NULL THEN convert(varchar(12),c.TCDOB,101) ELSE convert(varchar(12),h.EDC,101) END TCDOB
 		 ,c.GestationalAge
 		 ,'[None]' TCAge
 		 ,'' DateCompleted
@@ -101,6 +102,7 @@ cteNone
 			--inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
 			--inner join TCID c on c.TCIDPK = a.TCIDFK
 			CaseProgram d 
+			INNER JOIN HVCase AS h ON h.HVCasePK = d.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
 			inner join worker fsw ON d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
