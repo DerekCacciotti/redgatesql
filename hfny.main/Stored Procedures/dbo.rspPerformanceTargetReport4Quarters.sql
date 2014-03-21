@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -262,24 +263,44 @@ begin
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetFLC7 @StartDate,@EndDate,@tblPTCohort 
 	
+	;
+	with cteSummaryQtr1
+	as
+	(
+	select PTCode
+			, count(PTCode) as TotalCases
+			, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 
+					then 1
+					else 0
+					end) as ValidCases
+			, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as FormMeetsTarget
+		from @tblPTDetailsTemp
+		group by PTCode
+	)
+	
 	insert into @tblPTSummary (PTCode
 								, Qtr1TotalCases
 								, Qtr1ValidCases
 								, Qtr1CasesMeetingTarget
 								, Qtr1PercentageMeetingPT)
 		select PTCode
-				, count(PTCode)
-				, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end)
-				, sum(case when FormMeetsTarget = 1 then 1 else 0 end)
-				, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
-							round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
-									(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
-					end
-					as Qtr1PercentageMeetingTarget
+				, TotalCases
+				, ValidCases
+				, FormMeetsTarget
+				, case when ValidCases = 0 then '**        '
+						when (cast(ValidCases as float)/ cast(TotalCases as float)) < .75 then '*         ' 
+						-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
+						else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
+					end as Qtr1PercentageMeetingTarget
+				--, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
+				--			round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
+				--					(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
+				--	end
+				--	as Qtr1PercentageMeetingTarget
 				--, sum(case when FormMeetsTarget = 1 then 1 else 0 end)  as Sum_FormMeetsTarget
 				--, count(PTCode) as Count_PTCode				
-		from @tblPTDetailsTemp
-		group by PTCode
+		from cteSummaryQtr1
+		-- group by PTCode
 		union 
 		select PerformanceTargetCode
 				, null
@@ -439,22 +460,34 @@ begin
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetFLC7 @StartDate,@EndDate,@tblPTCohort 
 
-
-
-;	with cteQtr2PercentageMeeting as
-		(
-			select PTCode
-					, count(PTCode) as TotalCases
-					, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) as TotalValidCases
-					, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as TotalCasesMeetingTarget
-					, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
-								round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
-										(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
-						end
-						as PercentageMeetingTarget
-			from @tblPTDetailsTemp
-			group by PTCode
-		)
+	;
+	with cteSummaryQtr2
+	as
+	(
+	select PTCode
+			, count(PTCode) as TotalCases
+			, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 
+					then 1
+					else 0
+					end) as ValidCases
+			, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as FormMeetsTarget
+		from @tblPTDetailsTemp
+		group by PTCode
+	), 
+	cteQtr2PercentageMeeting as
+	(
+	select PTCode
+			, TotalCases
+			, ValidCases as TotalValidCases
+			, FormMeetsTarget as TotalCasesMeetingTarget
+			, case when ValidCases = 0 then '**        '
+					when (cast(ValidCases as float)/ cast(TotalCases as float)) < .75 then '*         ' 
+					-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
+					else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
+				end as PercentageMeetingTarget
+	from cteSummaryQtr2
+	)
+	
 	update @tblPTSummary
 		set Qtr2PercentageMeetingPT = isnull(PercentageMeetingTarget, 0)
 			, Qtr2TotalCases = TotalCases
@@ -609,20 +642,34 @@ begin
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetFLC7 @StartDate,@EndDate,@tblPTCohort 
 
-;	with cteQtr3PercentageMeeting as
-		(
-			select PTCode
-					, count(PTCode) as TotalCases
-					, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) as TotalValidCases
-					, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as TotalCasesMeetingTarget
-					, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
-								round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
-										(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
-						end
-						as PercentageMeetingTarget
-			from @tblPTDetailsTemp
-			group by PTCode
-		)
+	;
+	with cteSummaryQtr3
+	as
+	(
+	select PTCode
+			, count(PTCode) as TotalCases
+			, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 
+					then 1
+					else 0
+					end) as ValidCases
+			, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as FormMeetsTarget
+		from @tblPTDetailsTemp
+		group by PTCode
+	), 
+	cteQtr3PercentageMeeting as
+	(
+	select PTCode
+			, TotalCases
+			, ValidCases as TotalValidCases
+			, FormMeetsTarget as TotalCasesMeetingTarget
+			, case when ValidCases = 0 then '**        '
+					when (cast(ValidCases as float)/ cast(TotalCases as float)) < .75 then '*         ' 
+					-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
+					else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
+				end as PercentageMeetingTarget
+	from cteSummaryQtr3
+	)
+	
 	update @tblPTSummary
 		set Qtr3PercentageMeetingPT = isnull(PercentageMeetingTarget, 0)
 			, Qtr3TotalCases = TotalCases
@@ -777,20 +824,34 @@ begin
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetFLC7 @StartDate,@EndDate,@tblPTCohort 
 
-;	with cteQtr4PercentageMeeting as
-		(
-			select PTCode
-					, count(PTCode) as TotalCases
-					, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) as TotalValidCases
-					, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as TotalCasesMeetingTarget
-					, case when sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) = 0 then 0 else 
-								round(sum(case when FormMeetsTarget = 1 then 1 else 0 end) / 
-										(sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 then 1 else 0 end) * 1.00), 2) 
-						end
-						as PercentageMeetingTarget
-			from @tblPTDetailsTemp
-			group by PTCode
-		)
+	;
+	with cteSummaryQtr4
+	as
+	(
+	select PTCode
+			, count(PTCode) as TotalCases
+			, sum(case when FormReviewed = 1 and FormMissing = 0 and FormOutOfWindow = 0 
+					then 1
+					else 0
+					end) as ValidCases
+			, sum(case when FormMeetsTarget = 1 then 1 else 0 end) as FormMeetsTarget
+		from @tblPTDetailsTemp
+		group by PTCode
+	), 
+	cteQtr4PercentageMeeting as
+	(
+	select PTCode
+			, TotalCases
+			, ValidCases as TotalValidCases
+			, FormMeetsTarget as TotalCasesMeetingTarget
+			, case when ValidCases = 0 then '**        '
+					when (cast(ValidCases as float)/ cast(TotalCases as float)) < .75 then '*         ' 
+					-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
+					else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
+				end as PercentageMeetingTarget
+	from cteSummaryQtr4
+	)
+	
 	update @tblPTSummary
 		set Qtr4PercentageMeetingPT = isnull(PercentageMeetingTarget, 0)
 			, Qtr4TotalCases = TotalCases
@@ -798,7 +859,7 @@ begin
 			, Qtr4CasesMeetingTarget = TotalCasesMeetingTarget
 		from cteQtr4PercentageMeeting q4
 		where q4.PTCode = [@tblPTSummary].PTCode
-		
+
 	insert into @tblPTDetails
 		select '4',* from @tblPTDetailsTemp
 		 

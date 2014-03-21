@@ -134,10 +134,10 @@ begin
 		, CurrentLevelName	varchar(30)
 		, FormName			varchar(50)
 		, FormDate			datetime
-		, FormReviewed		int
-		, FormOutOfWindow	int
-		, FormMissing		int
-		, FormMeetsTarget	int
+		, FormReviewed		float
+		, FormOutOfWindow	float
+		, FormMissing		float
+		, FormMeetsTarget	float
 		, ReasonNotMeeting	varchar(50)
 		)
 
@@ -235,6 +235,11 @@ begin
 			, ptt.PerformanceTargetDescription
 			, ptt.PerformanceTargetSection
 			, ptt.PerformanceTargetTitle
+			, case when ValidCases = 0 then '**        '
+					when (cast(ValidCases as float)/ cast(TotalCases as float)) < .75 then '*         ' 
+					-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
+					else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
+				end as PercentageMeeting
 			, ValidCases
 			, TotalCases
 			, FormMeetsTarget
@@ -252,6 +257,7 @@ begin
 			, PerformanceTargetDescription
 			, PerformanceTargetSection
 			, PerformanceTargetTitle
+			, '**' as PercentageMeeting
 			, 0 as ValidCases
 			, 0 as TotalCases
 			, 0 as FormMeetsTarget 
