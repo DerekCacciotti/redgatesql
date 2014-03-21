@@ -67,19 +67,19 @@ begin
 		, Qtr1TotalCases int
 		, Qtr1ValidCases int
 		, Qtr1CasesMeetingTarget int
-		, [Qtr1PercentageMeetingPT] decimal(5,2)
+		, [Qtr1PercentageMeetingPT] varchar(10)
 		, Qtr2TotalCases int
 		, Qtr2ValidCases int
 		, Qtr2CasesMeetingTarget int
-		, [Qtr2PercentageMeetingPT] decimal(5,2)
+		, [Qtr2PercentageMeetingPT] varchar(10)
 		, Qtr3TotalCases int
 		, Qtr3ValidCases int
 		, Qtr3CasesMeetingTarget int
-		, [Qtr3PercentageMeetingPT] decimal(5,2)
+		, [Qtr3PercentageMeetingPT] varchar(10)
 		, Qtr4TotalCases int
 		, Qtr4ValidCases int
 		, Qtr4CasesMeetingTarget int
-		, [Qtr4PercentageMeetingPT] decimal(5,2)
+		, [Qtr4PercentageMeetingPT] varchar(10)
 	)
 
 	/** For performance reasons, get the active cases that belong to the cohort now **/
