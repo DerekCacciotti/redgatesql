@@ -410,7 +410,10 @@ begin
 					, FormReviewed
 					, FormOutOfWindow
 					, isnull(FormMissing,1) as FormMissing
-					, FormMeetsTarget
+					, case when FormReviewed = 1 and FormOutOfWindow = 0 and FormMissing = 0 and FormMeetsTarget = 1
+							then 1
+							else 0
+						end as FormMeetsTarget
 					, isnull(NotMeetingReason, 'Form missing')
 	from cteCohort c
 	left outer join cteMain m on c.HVCaseFK = m.HVCaseFK
