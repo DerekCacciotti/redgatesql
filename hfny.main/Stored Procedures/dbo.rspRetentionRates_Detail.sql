@@ -14,6 +14,8 @@ GO
 -- exec rspRetentionRates_Detail 37, '20090401', '20110331'
 -- exec rspRetentionRates_Detail 13, '20090401', '20110331'
 
+-- exec rspRetentionRatesByDischargeReason 1, '03/01/10', '02/29/12'
+-- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
 -- =============================================
 CREATE PROCEDURE [dbo].[rspRetentionRates_Detail]
 	-- Add the parameters for the stored procedure here
@@ -352,23 +354,23 @@ BEGIN
                ,dd.DischargeReason
 			   ,PC1AgeAtIntake
 			   ,case 
-					when LastHomeVisit is null and CURRENT_TIMESTAMP-IntakeDate > 182.125 then 1 
-					when LastHomeVisit is not null and LastHomeVisit-IntakeDate > 182.125 then 1
+				when dischargedate is null and current_timestamp-IntakeDate > 182.125 then 1
+				when dischargedate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
 					else 0
 				end	as ActiveAt6Months
 			   ,case
-					when LastHomeVisit is null and CURRENT_TIMESTAMP-IntakeDate > 365.25 then 1
-					when LastHomeVisit is not null and LastHomeVisit-IntakeDate > 365.25 then 1
+				when dischargedate is null and current_timestamp-IntakeDate > 365.25 then 1
+				when dischargedate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
 					else 0
 				end as ActiveAt12Months
 			   ,case
-					when LastHomeVisit is null and CURRENT_TIMESTAMP-IntakeDate > 547.375 then 1
-					when LastHomeVisit is not null and LastHomeVisit-IntakeDate > 547.375 then 1
+				when dischargedate is null and current_timestamp-IntakeDate > 547.375 then 1
+				when dischargedate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
 					else 0
 				end as ActiveAt18Months
 			   ,case
-					when LastHomeVisit is null and CURRENT_TIMESTAMP-IntakeDate > 730.50 then 1
-					when LastHomeVisit is not null and LastHomeVisit-IntakeDate > 730.50 then 1
+				when dischargedate is null and current_timestamp-IntakeDate > 730.50 then 1
+				when dischargedate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
 					else 0
 				end as ActiveAt24Months
 			   ,Race
@@ -600,7 +602,12 @@ select distinct pc1id
 		, DischargeReasonCode
 		, DischargeReason
 		, LastHomeVisit
-		, datediff(mm,IntakeDate,LastHomeVisit) as RetentionMonths
+				   ,case when DischargeDate is not null then 
+						datediff(mm,IntakeDate,LastHomeVisit)
+					else
+						datediff(mm,IntakeDate,current_timestamp)
+					end as RetentionMonths
+					
 		, ActiveAt6Months
 		, ActiveAt12Months
 		, ActiveAt18Months

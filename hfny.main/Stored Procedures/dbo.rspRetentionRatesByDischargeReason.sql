@@ -8,6 +8,12 @@ GO
 -- Create date: 03/31/11
 -- Description:	Main storedproc for Retention Rate report
 -- exec rspRetentionRatesByDischargeReason 19, '04/01/09', '03/31/11'
+
+-- exec rspRetentionRatesByDischargeReason 1, '03/01/10', '02/29/12'
+-- exec rspRetentionRatesByDischargeReason 1, '10/01/12', '02/28/13'
+
+
+-- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
@@ -117,23 +123,23 @@ print @enddate
 		   ,cp.DischargeReason as DischargeReasonCode
 		   ,cd.ReportDischargeText
 		   ,case
-				when LastHomeVisit is null and current_timestamp-IntakeDate > 182.125 then 1
-				when LastHomeVisit is not null and LastHomeVisit-IntakeDate > 182.125 then 1
+				when dischargedate is null and current_timestamp-IntakeDate > 182.125 then 1
+				when dischargedate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
 				else 0
 			end as ActiveAt6Months
 		   ,case
-				when LastHomeVisit is null and current_timestamp-IntakeDate > 365.25 then 1
-				when LastHomeVisit is not null and LastHomeVisit-IntakeDate > 365.25 then 1
+				when dischargedate is null and current_timestamp-IntakeDate > 365.25 then 1
+				when dischargedate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
 				else 0
 			end as ActiveAt12Months
 		   ,case
-				when LastHomeVisit is null and current_timestamp-IntakeDate > 547.375 then 1
-				when LastHomeVisit is not null and LastHomeVisit-IntakeDate > 547.375 then 1
+				when dischargedate is null and current_timestamp-IntakeDate > 547.375 then 1
+				when dischargedate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
 				else 0
 			end as ActiveAt18Months
 		   ,case
-				when LastHomeVisit is null and current_timestamp-IntakeDate > 730.50 then 1
-				when LastHomeVisit is not null and LastHomeVisit-IntakeDate > 730.50 then 1
+				when dischargedate is null and current_timestamp-IntakeDate > 730.50 then 1
+				when dischargedate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
 				else 0
 			end as ActiveAt24Months
 	 from HVCase c
@@ -159,7 +165,12 @@ insert into @tblPC1withStats
 				   ,DischargeDate
 				   ,d.ReportDischargeText
 				   ,LastHomeVisit
-				   ,datediff(mm,IntakeDate,LastHomeVisit) as RetentionMonths
+				   ,case when DischargeDate is not null then 
+						datediff(mm,IntakeDate,LastHomeVisit)
+					else
+						datediff(mm,IntakeDate,current_timestamp)
+					end as RetentionMonths
+					
 				   ,ActiveAt6Months
 				   ,ActiveAt12Months
 				   ,ActiveAt18Months
@@ -336,39 +347,61 @@ where ActiveAt18Months = 1 and ActiveAt24Months = 0 and LastHomeVisit is not nul
 --from @tblPC1withStats
 
 select @LineGroupingLevel as LineGroupingLevel
-		, @TotalCohortCount as TotalEnrolledParticipants
-		, @RetentionRateSixMonths as RetentionRateSixMonths
-		, @RetentionRateOneYear as RetentionRateOneYear
-		, @RetentionRateEighteenMonths as RetentionRateEighteenMonths
-		, @RetentionRateTwoYears as RetentionRateTwoYears
-		, @EnrolledParticipantsSixMonths as EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear as EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths as EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears as EnrolledParticipantsTwoYears
-		, @RunningTotalDischargedSixMonths as RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear as RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths as RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears as RunningTotalDischargedTwoYears
-		, @TotalNSixMonths as TotalNSixMonths
-		, @TotalNOneYear as TotalNOneYear
-		, @TotalNEighteenMonths as TotalNEighteenMonths
-		, @TotalNTwoYears as TotalNTwoYears
-		, @SixMonthsTotal as SixMonthsTotal
-		, @TwelveMonthsTotal as TwelveMonthsTotal
-		, @EighteenMonthsTotal as EighteenMonthsTotal
-		, @TwentyFourMonthsTotal as TwentyFourMonthsTotal
-		, @SixMonthsAtDischarge as SixMonthsAtDischarge
-		, @TwelveMonthsAtDischarge as TwelveMonthsAtDischarge
-		, @EighteenMonthsAtDischarge as EighteenMonthsAtDischarge
-		, @TwentyFourMonthsAtDischarge as TwentyFourMonthsAtDischarge
+		,case when datediff(ww,@enddate,getdate()) >= 26 then @TotalCohortCount else null end as TotalEnrolledParticipants
+		
+		,case when datediff(ww,@enddate,getdate()) >= 26 then @RetentionRateSixMonths else null end as RetentionRateSixMonths
+		,case when datediff(ww,@enddate,getdate()) >= 52 then @RetentionRateOneYear else null end as RetentionRateOneYear
+		,case when datediff(ww,@enddate,getdate()) >= 78 then @RetentionRateEighteenMonths else null end as RetentionRateEighteenMonths
+		,case when datediff(ww,@enddate,getdate()) >= 104 then @RetentionRateTwoYears else null end as RetentionRateTwoYears
+		,case when datediff(ww,@enddate,getdate()) >= 26 then @EnrolledParticipantsSixMonths else null end as EnrolledParticipantsSixMonths
+		,case when datediff(ww,@enddate,getdate()) >= 52 then @EnrolledParticipantsOneYear else null end as EnrolledParticipantsOneYear
+		,case when datediff(ww,@enddate,getdate()) >= 78 then @EnrolledParticipantsEighteenMonths else null end as EnrolledParticipantsEighteenMonths
+		,case when datediff(ww,@enddate,getdate()) >= 104 then @EnrolledParticipantsTwoYears else null end as EnrolledParticipantsTwoYears
+		,case when datediff(ww,@enddate,getdate()) >= 26 then @RunningTotalDischargedSixMonths else null end as RunningTotalDischargedSixMonths
+		,case when datediff(ww,@enddate,getdate()) >= 52 then @RunningTotalDischargedOneYear else null end as RunningTotalDischargedOneYear
+		,case when datediff(ww,@enddate,getdate()) >= 78 then @RunningTotalDischargedEighteenMonths else null end as RunningTotalDischargedEighteenMonths
+		,case when datediff(ww,@enddate,getdate()) >= 104 then @RunningTotalDischargedTwoYears else null end as RunningTotalDischargedTwoYears
+		,case when datediff(ww,@enddate,getdate()) >= 26 then @TotalNSixMonths else null end as TotalNSixMonths
+		,case when datediff(ww,@enddate,getdate()) >= 52 then @TotalNOneYear else null end as TotalNOneYear
+		,case when datediff(ww,@enddate,getdate()) >= 78 then @TotalNEighteenMonths else null end as TotalNEighteenMonths
+		,case when datediff(ww,@enddate,getdate()) >= 104 then @TotalNTwoYears else null end as TotalNTwoYears
+		
+		
+		
+		,case when datediff(ww,@enddate,getdate()) >= 26 then @SixMonthsTotal else null end as SixMonthsTotal
+		,case when datediff(ww,@enddate,getdate()) >= 52 then @TwelveMonthsTotal else null end as TwelveMonthsTotal
+		,case when datediff(ww,@enddate,getdate()) >= 78 then @EighteenMonthsTotal else null end as EighteenMonthsTotal
+		,case when datediff(ww,@enddate,getdate()) >= 104 then @TwentyFourMonthsTotal else null end as TwentyFourMonthsTotal
+		,case when datediff(ww,@enddate,getdate()) >= 26 then @SixMonthsAtDischarge else null end as SixMonthsAtDischarge
+		,case when datediff(ww,@enddate,getdate()) >= 52 then @TwelveMonthsAtDischarge else null end as TwelveMonthsAtDischarge
+		,case when datediff(ww,@enddate,getdate()) >= 78 then @EighteenMonthsAtDischarge else null end as EighteenMonthsAtDischarge
+		,case when datediff(ww,@enddate,getdate()) >= 104 then @TwentyFourMonthsAtDischarge else null end as TwentyFourMonthsAtDischarge
 		, ReportDischargeText
-		, sum(case when ActiveAt6Months = 0 or ActiveAt12Months = 0 
+		
+		,
+		sum(case when ActiveAt6Months = 0 or ActiveAt12Months = 0 
 						or ActiveAt18Months = 0 or ActiveAt24Months = 0 
-					then 1 else 0 end) as SumDischargedBefore24Months
-		, sum(case when ActiveAt6Months = 0 then 1 else 0 end) as SumDischargedBefore6Months
-		, sum(case when ActiveAt6Months = 1 and ActiveAt12Months = 0 then 1 else 0 end) as SumDischargedBetween6And12Months
-		, sum(case when ActiveAt12Months = 1 and ActiveAt18Months = 0 then 1 else 0 end) as SumDischargedBetween12And18Months
-		, sum(case when ActiveAt18Months = 1 and ActiveAt24Months = 0 then 1 else 0 end) as SumDischargedBetween18And24Months
+					then 1 else 0 end)
+		 as SumDischargedBefore24Months
+					
+		
+		,case when datediff(ww,@enddate,getdate()) >= 26 then 
+			sum(case when ActiveAt6Months = 0 then 1 else 0 end) 
+		 else null end as SumDischargedBefore6Months
+			
+		
+		,case when datediff(ww,@enddate,getdate()) >= 52 then 
+			sum(case when ActiveAt6Months = 1 and ActiveAt12Months = 0 then 1 else 0 end) 
+		 else null end as SumDischargedBetween6And12Months
+		
+		,case when datediff(ww,@enddate,getdate()) >= 78 then 
+			sum(case when ActiveAt12Months = 1 and ActiveAt18Months = 0 then 1 else 0 end) 
+		else null end as SumDischargedBetween12And18Months
+		
+		,case when datediff(ww,@enddate,getdate()) >= 104 then 
+			sum(case when ActiveAt18Months = 1 and ActiveAt24Months = 0 then 1 else 0 end) 
+		else null end as SumDischargedBetween18And24Months
+		
 from @tblPC1withStats
 where ReportDischargeText is not null
 		and case when ActiveAt6Months = 0 or ActiveAt12Months = 0 
@@ -415,5 +448,4 @@ group by ReportDischargeText
 --from @tblResults
 
 END
-
 GO
