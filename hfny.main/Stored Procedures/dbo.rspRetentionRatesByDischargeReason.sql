@@ -345,7 +345,9 @@ where ActiveAt18Months = 1 and ActiveAt24Months = 0 and LastHomeVisit is not nul
 
 --select *
 --from @tblPC1withStats
-
+;
+with cteLast as
+(
 select @LineGroupingLevel as LineGroupingLevel
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @TotalCohortCount else null end as TotalEnrolledParticipants
 		
@@ -353,14 +355,18 @@ select @LineGroupingLevel as LineGroupingLevel
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @RetentionRateOneYear else null end as RetentionRateOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @RetentionRateEighteenMonths else null end as RetentionRateEighteenMonths
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @RetentionRateTwoYears else null end as RetentionRateTwoYears
+		
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @EnrolledParticipantsSixMonths else null end as EnrolledParticipantsSixMonths
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @EnrolledParticipantsOneYear else null end as EnrolledParticipantsOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @EnrolledParticipantsEighteenMonths else null end as EnrolledParticipantsEighteenMonths
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @EnrolledParticipantsTwoYears else null end as EnrolledParticipantsTwoYears
+		
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @RunningTotalDischargedSixMonths else null end as RunningTotalDischargedSixMonths
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @RunningTotalDischargedOneYear else null end as RunningTotalDischargedOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @RunningTotalDischargedEighteenMonths else null end as RunningTotalDischargedEighteenMonths
-		,@RunningTotalDischargedTwoYears as RunningTotalDischargedTwoYears
+	    ,case when datediff(ww,@enddate,getdate()) >= 104 then @RunningTotalDischargedTwoYears else null end as RunningTotalDischargedTwoYears
+		
+		
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @TotalNSixMonths else null end as TotalNSixMonths
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @TotalNOneYear else null end as TotalNOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @TotalNEighteenMonths else null end as TotalNEighteenMonths
@@ -372,11 +378,13 @@ select @LineGroupingLevel as LineGroupingLevel
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @TwelveMonthsTotal else null end as TwelveMonthsTotal
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @EighteenMonthsTotal else null end as EighteenMonthsTotal
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @TwentyFourMonthsTotal else null end as TwentyFourMonthsTotal
+		
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @SixMonthsAtDischarge else null end as SixMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @TwelveMonthsAtDischarge else null end as TwelveMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @EighteenMonthsAtDischarge else null end as EighteenMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @TwentyFourMonthsAtDischarge else null end as TwentyFourMonthsAtDischarge
 		, ReportDischargeText
+		
 		
 		,
 		sum(case when ActiveAt6Months = 0 or ActiveAt12Months = 0 
@@ -408,6 +416,42 @@ where ReportDischargeText is not null
 						or ActiveAt18Months = 0 or ActiveAt24Months = 0 
 					then 1 else 0 end > 0
 group by ReportDischargeText
+)
+
+select LineGroupingLevel
+	  ,TotalEnrolledParticipants
+	  ,RetentionRateSixMonths
+	  ,RetentionRateOneYear
+	  ,RetentionRateEighteenMonths
+	  ,RetentionRateTwoYears
+	  ,EnrolledParticipantsSixMonths
+	  ,EnrolledParticipantsOneYear
+	  ,EnrolledParticipantsEighteenMonths
+	  ,EnrolledParticipantsTwoYears
+	  ,RunningTotalDischargedSixMonths
+	  ,RunningTotalDischargedOneYear
+	  ,RunningTotalDischargedEighteenMonths
+	  ,RunningTotalDischargedTwoYears
+	  ,(isnull(TotalNSixMonths,0) + isnull(TotalNOneYear,0) + isnull(TotalNEighteenMonths,0) + isnull(TotalNTwoYears,0)) as RunningTotalDischarged
+
+	  ,TotalNSixMonths
+	  ,TotalNOneYear
+	  ,TotalNEighteenMonths
+	  ,TotalNTwoYears
+	  ,SixMonthsTotal
+	  ,TwelveMonthsTotal
+	  ,EighteenMonthsTotal
+	  ,TwentyFourMonthsTotal
+	  ,SixMonthsAtDischarge
+	  ,TwelveMonthsAtDischarge
+	  ,EighteenMonthsAtDischarge
+	  ,TwentyFourMonthsAtDischarge
+	  ,ReportDischargeText
+	  ,SumDischargedBefore24Months
+	  ,SumDischargedBefore6Months
+	  ,SumDischargedBetween6And12Months
+	  ,SumDischargedBetween12And18Months
+	  ,SumDischargedBetween18And24Months FROM cteLast
 
 --select @LineGroupingLevel as LineGroupingLevel
 --		,@TotalCohortCount as TotalEnrolledParticipants
