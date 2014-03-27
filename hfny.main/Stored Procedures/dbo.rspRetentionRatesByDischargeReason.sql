@@ -360,7 +360,7 @@ select @LineGroupingLevel as LineGroupingLevel
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @RunningTotalDischargedSixMonths else null end as RunningTotalDischargedSixMonths
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @RunningTotalDischargedOneYear else null end as RunningTotalDischargedOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @RunningTotalDischargedEighteenMonths else null end as RunningTotalDischargedEighteenMonths
-		,case when datediff(ww,@enddate,getdate()) >= 104 then @RunningTotalDischargedTwoYears else null end as RunningTotalDischargedTwoYears
+		,@RunningTotalDischargedTwoYears as RunningTotalDischargedTwoYears
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @TotalNSixMonths else null end as TotalNSixMonths
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @TotalNOneYear else null end as TotalNOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @TotalNEighteenMonths else null end as TotalNEighteenMonths
