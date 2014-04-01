@@ -22,13 +22,11 @@ CREATE procedure [dbo].[rspPreAssessEngagement]
 )
 as
 
-	
---Pre-Assessment Engagement Quartly Report --
---DECLARE @StartDtT DATE = '09/01/2012'
+--DECLARE @StartDtT DATE = '01/01/2012'
 --DECLARE @StartDt DATE = '09/01/2012'
 --DECLARE @EndDt DATE = '11/30/2012'
 --DECLARE @programfk INT = 4
---DECLARE @IncludeClosedCase BIT = 0
+--DECLARE @IncludeClosedCase BIT = 1
 
 if @programfk is null
 	begin
@@ -39,199 +37,164 @@ if @programfk is null
 set @programfk = replace(@programfk,'"','')
 
 ; WITH 
-section1QX AS
-(SELECT 
-  sum(1) [Q1Screened]
-, sum(CASE WHEN c.ScreenResult = 1 THEN 1 ELSE 0 END) [Q1aScreenResultPositive]
-, sum(CASE WHEN c.ScreenResult != 1 THEN 1 ELSE 0 END) [Q1bScreenResultNegative]
-, sum(CASE WHEN isnull(a.TCDOB, a.EDC) > a.ScreenDate THEN 1 ELSE 0 END) [Q1cPrenatal]
-, sum(CASE WHEN isnull(a.TCDOB, a.EDC) <= a.ScreenDate THEN 1 ELSE 0 END) [Q1dPostnatal]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 1  THEN 1 ELSE 0 END) [Q1ePositiveReferred]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0  THEN 1 ELSE 0 END) [Q1fPositiveNotReferred]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason IN ('05','07','35','36','06','08','33','34','99','13','25')
-THEN 1 ELSE 0 END) [Q1DischargeAll]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '05' THEN 1 ELSE 0 END) [Q1f1IncomeIneligible]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '07' THEN 1 ELSE 0 END) [Q1f2OutOfGeoTarget]
 
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '35' THEN 1 ELSE 0 END) [Q1f3NonCompliant]
-
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '36' THEN 1 ELSE 0 END) [Q1f3Refuse]
-
-
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '06' THEN 1 ELSE 0 END) [Q1f4InappropriateScreen]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '08' THEN 1 ELSE 0 END) [Q1f5CaseLoadFull]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '33' THEN 1 ELSE 0 END) [Q1f6PositiveScreen]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '34' THEN 1 ELSE 0 END) [Q1f7SubsequentBirthOnOpenCase]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '99' THEN 1 ELSE 0 END) [Q1f8Other]
-, 0 [Q1f9NoReason]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '13' THEN 1 ELSE 0 END) [Q1f10ControlCase]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '25' THEN 1 ELSE 0 END) [Q1f11Transferred]
+ScreensThisPeriod AS (
+SELECT a.HVCasePK, c.ScreenResult, isnull(a.TCDOB, a.EDC) DOB
+, a.ScreenDate, c.ReferralMade, c.DischargeReason 
 FROM HVCase AS a 
 JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 JOIN HVScreen AS c ON a.HVCasePK = c.HVCaseFK
-WHERE a.ScreenDate BETWEEN @StartDt AND @EndDt --AND b.ProgramFK = @programfk
-)
+WHERE a.ScreenDate BETWEEN @StartDt AND @EndDt
+),
 
+ScreensThisPeriod_1e AS (
+SELECT HVCasePK
+FROM ScreensThisPeriod
+WHERE ScreenResult = 1 AND ReferralMade = 1
+),
 
-, section1Q AS
+PreAssessmentCasesAtBeginningOfPeriod AS (
+SELECT distinct a.HVCasePK 
+FROM HVCase AS a 
+JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
+JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
+WHERE (a.ScreenDate < @StartDt) 
+AND (a.KempeDate >= @StartDt OR a.KempeDate IS NULL)
+AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
+),
+
+section2Q AS (
+SELECT count(*) [Q2PreAssessmentBeforePeriod]
+FROM PreAssessmentCasesAtBeginningOfPeriod
+),
+
+TotalCasesToBeAssessedThisPeriod_2_1e AS (
+SELECT DISTINCT isnull(a.HVCasePK, b.HVCasePK) [HVCasePK]
+FROM PreAssessmentCasesAtBeginningOfPeriod AS a
+FULL OUTER JOIN ScreensThisPeriod_1e AS b 
+ON a.HVCasePK = b.HVCasePK
+),
+
+PreAssessment_MaxPADate AS (
+SELECT a.HVCaseFK, max(a.PADate) [max_PADATE]
+FROM Preassessment AS a
+JOIN dbo.SplitString(@programfk,',') on a.programfk = listitem
+WHERE a.PADate BETWEEN @StartDt AND @EndDt 
+GROUP BY a.HVCaseFK
+),
+
+PreAssessment_LastOneInPeriod AS (
+SELECT a.HVCaseFK, a.CaseStatus, a.FSWAssignDate, a.KempeResult, a.PADate
+FROM Preassessment as a 
+join PreAssessment_MaxPADate as b 
+ON a.HVCaseFK = b.HVCaseFK AND a.PADate = b.max_PADATE
+),
+
+Outcomes AS (
+SELECT a.HVCasePK, b.*
+FROM TotalCasesToBeAssessedThisPeriod_2_1e AS a
+LEFT OUTER JOIN PreAssessment_LastOneInPeriod AS b
+ON a.HVCasePK = b.HVCaseFK
+),
+
+section4Q AS (
+SELECT 
+  Count(*) [Q3TotalCasesThisPerion]
+
+, sum(CASE WHEN CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [Q4bCompleted]
+, sum(CASE WHEN CaseStatus = '02' AND KempeResult = 1 AND FSWAssignDate <= @EndDt THEN 1 ELSE 0 END) [Q4b1PositiveAssignd]
+, sum(CASE WHEN  CaseStatus = '02' AND KempeResult = 1 AND FSWAssignDate > @EndDt THEN 1 ELSE 0 END) [Q4b2PositivePendingAssignd]
+, sum(CASE WHEN  CaseStatus = '04'  AND KempeResult = 1 AND FSWAssignDate IS NULL THEN 1 ELSE 0 END) [Q4b3PositiveNotAssignd]
+, sum(CASE WHEN CaseStatus = '02' AND KempeResult = 0 THEN 1 ELSE 0 END) [Q4b4Negative]
+, sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [Q4cTerminated]
+, sum(CASE WHEN CaseStatus = '01' AND datediff( d, PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [Q4aEffortContnue]
+FROM Outcomes
+),
+
+section1QX AS (
+SELECT 
+  sum(1) [Q1Screened]
+, sum(CASE WHEN ScreenResult = 1 THEN 1 ELSE 0 END) [Q1aScreenResultPositive]
+, sum(CASE WHEN ScreenResult != 1 THEN 1 ELSE 0 END) [Q1bScreenResultNegative]
+, sum(CASE WHEN DOB > ScreenDate THEN 1 ELSE 0 END) [Q1cPrenatal]
+, sum(CASE WHEN DOB <= ScreenDate THEN 1 ELSE 0 END) [Q1dPostnatal]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 1  THEN 1 ELSE 0 END) [Q1ePositiveReferred]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0  THEN 1 ELSE 0 END) [Q1fPositiveNotReferred]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason IN ('05','07','35','36','06','08','33','34','99','13','25')
+THEN 1 ELSE 0 END) [Q1DischargeAll]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '05' THEN 1 ELSE 0 END) [Q1f1IncomeIneligible]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '07' THEN 1 ELSE 0 END) [Q1f2OutOfGeoTarget]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '35' THEN 1 ELSE 0 END) [Q1f3NonCompliant]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '36' THEN 1 ELSE 0 END) [Q1f3Refuse]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '06' THEN 1 ELSE 0 END) [Q1f4InappropriateScreen]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '08' THEN 1 ELSE 0 END) [Q1f5CaseLoadFull]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '33' THEN 1 ELSE 0 END) [Q1f6PositiveScreen]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '34' THEN 1 ELSE 0 END) [Q1f7SubsequentBirthOnOpenCase]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '99' THEN 1 ELSE 0 END) [Q1f8Other]
+, 0 [Q1f9NoReason]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '13' THEN 1 ELSE 0 END) [Q1f10ControlCase]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '25' THEN 1 ELSE 0 END) [Q1f11Transferred]
+FROM ScreensThisPeriod
+),
+
+section1Q AS
 (
-SELECT a.Q1Screened
-,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1aScreenResultPositive / Q1Screened, 0) 
+SELECT Q1Screened
+,cast(cast(CASE WHEN Q1Screened > 0 THEN round(100.0 * Q1aScreenResultPositive / Q1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1aScreenResultPositive]
-,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1bScreenResultNegative / Q1Screened, 0) 
+,cast(cast(CASE WHEN Q1Screened > 0 THEN round(100.0 * Q1bScreenResultNegative / Q1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1bScreenResultNegative]
-,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1cPrenatal / Q1Screened, 0) 
+,cast(cast(CASE WHEN Q1Screened > 0 THEN round(100.0 * Q1cPrenatal / Q1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1cPrenatal]
-,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1dPostnatal / Q1Screened, 0) 
+,cast(cast(CASE WHEN Q1Screened > 0 THEN round(100.0 * Q1dPostnatal / Q1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1dPostnatal]
-
-,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1ePositiveReferred / Q1Screened, 0) 
+,cast(cast(CASE WHEN Q1Screened > 0 THEN round(100.0 * Q1ePositiveReferred / Q1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1ePositiveReferredPercent]
 , Q1ePositiveReferred
-,cast(cast(CASE WHEN a.Q1Screened > 0 THEN round(100.0 * Q1fPositiveNotReferred / Q1Screened, 0) 
+,cast(cast(CASE WHEN Q1Screened > 0 THEN round(100.0 * Q1fPositiveNotReferred / Q1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [Q1fPositiveNotReferredPercent]
 , Q1fPositiveNotReferred
-
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f1IncomeIneligible / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f1IncomeIneligible / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f1IncomeIneligible
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f2OutOfGeoTarget / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f2OutOfGeoTarget / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f2OutOfGeoTarget
-
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f3NonCompliant / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f3NonCompliant / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f3NonCompliant
-
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f3Refuse / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f3Refuse / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f3Refuse
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f4InappropriateScreen / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f4InappropriateScreen / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f4InappropriateScreen
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f5CaseLoadFull / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f5CaseLoadFull / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f5CaseLoadFull
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f6PositiveScreen / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f6PositiveScreen / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f6PositiveScreen
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f7SubsequentBirthOnOpenCase / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f7SubsequentBirthOnOpenCase / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f7SubsequentBirthOnOpenCase
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f8Other / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f8Other / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f8Other
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f9NoReason / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f9NoReason / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f9NoReason
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f10ControlCase / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f10ControlCase / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f10ControlCase
-,cast(cast(CASE WHEN a.Q1DischargeAll > 0 THEN round(100.0 * Q1f11Transferred / Q1DischargeAll, 0) 
+,cast(cast(CASE WHEN Q1DischargeAll > 0 THEN round(100.0 * Q1f11Transferred / Q1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' Q1f11Transferred
+FROM section1QX
+),
 
-FROM section1QX AS a
-
-)
-, section2Q AS 
-(
-SELECT count(*) [Q2PreAssessmentBeforePeriod]
-FROM HVCase AS a1 
-JOIN CaseProgram AS b1 ON a1.HVCasePK = b1.HVCaseFK
-JOIN dbo.SplitString(@programfk,',') on b1.programfk = listitem
-WHERE --b1.ProgramFK = @programfk AND 
-(a1.ScreenDate < @StartDt) 
-AND (a1.KempeDate >= @StartDt OR a1.KempeDate IS NULL)
-
-AND (b1.DischargeDate IS NULL OR 
---b1.DischargeDate >= @StartDt
-CASE WHEN @IncludeClosedCase = 0 THEN 
-(CASE WHEN b1.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
-ELSE (CASE WHEN b1.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
-))
-
-, section4Qa AS 
-(
-SELECT 
-sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [Q4aEffortContnue]
-, sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) > 30 THEN 1 ELSE 0 END) [Q4dNoStatus1]
-FROM Preassessment x
-JOIN (
-SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
-FROM Preassessment AS p 
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE p.PADate <= @EndDt --AND p.ProgramFK = @programfk
-GROUP BY p.HVCaseFK) AS y 
-ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
-)
-
-, section4Qb AS 
-(
-SELECT count(DISTINCT a.HVCaseFK) [Q4dNoStatus2]
-FROM HVScreen AS a
-JOIN CaseProgram AS c ON c.HVCaseFK = a.HVCaseFK
-JOIN dbo.SplitString(@programfk,',') on c.programfk = listitem
-LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
-WHERE --a.ProgramFK = @programfk AND 
-a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
-AND (
---c.DischargeDate IS NULL OR c.DischargeDate > @StartDt
-c.DischargeDate IS NULL OR
-CASE WHEN @IncludeClosedCase = 0 THEN 
-(CASE WHEN c.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
-ELSE (CASE WHEN c.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
-)
-
-AND b.HVCaseFK IS NULL
-)
-
-, section4Q AS 
-(
-SELECT 
---sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [Q4aEffortContnue]
---, sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) > 30 THEN 1 ELSE 0 END) [Q4dNoStatus1]
-sum(CASE WHEN x.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [Q4bCompleted]
-, sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate <= @EndDt THEN 1 ELSE 0 END) [Q4b1PositiveAssignd]
-, sum(CASE WHEN  x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate > @EndDt THEN 1 ELSE 0 END) [Q4b2PositivePendingAssignd]
-, sum(CASE WHEN  x.CaseStatus = '04'  AND x.KempeResult = 1 AND x.FSWAssignDate IS NULL THEN 1 ELSE 0 END) [Q4b3PositiveNotAssignd]
-, sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 0 THEN 1 ELSE 0 END) [Q4b4Negative]
-, sum(CASE WHEN x.CaseStatus = '03' THEN 1 ELSE 0 END) [Q4cTerminated]
---, 0 [Q4dNoStatus]
-FROM Preassessment x
-JOIN (
-SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
-FROM Preassessment AS p 
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE p.PADate BETWEEN @StartDt AND @EndDt --AND p.ProgramFK = @programfk
-GROUP BY p.HVCaseFK) AS y 
-ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
-)
-
---, zzz AS (
---SELECT DISTINCT x.HVCaseFK
---FROM Preassessment AS x
---JOIN (SELECT a.HVCaseFK, max(a.PADate) [maxDate]
---FROM Preassessment AS a
---WHERE a.ProgramFK = @programfk AND a.PADate < @StartDt
---GROUP BY a.HVCaseFK) AS y
---ON x.HVCaseFK = y.HVCaseFK AND x.PADate = maxDate
---WHERE x.CaseStatus = '01')
-
---, qqq AS (
---SELECT DISTINCT a.HVCaseFK
---FROM Preassessment AS a
---WHERE a.ProgramFK = @programfk AND a.PADate BETWEEN @StartDt AND @EndDt
---)
-
---, NoStatus AS (
---SELECT count(*) [Q4dNoStatus2]
---FROM zzz AS a LEFT OUTER JOIN qqq AS b ON a.HVCaseFK = b.HVCaseFK
---WHERE b.HVCaseFK IS NULL
---)
-
-, section5Q AS 
+section5Q AS 
 (
 SELECT 
   sum(PAParentLetter) [Q5aPAParentLetter]
@@ -245,209 +208,171 @@ SELECT
 , sum(PAGift) [Q5iPAGift]
 , sum(PACaseReview) [Q5jPACaseReview]
 , sum(PAOtherActivity) [Q5kPAOtherActivity]
-FROM Preassessment AS b
-JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
-WHERE PADate BETWEEN @StartDt AND @EndDt --AND ProgramFK = @programfk
-)
+FROM Preassessment
+JOIN dbo.SplitString(@programfk,',') on programfk = listitem
+WHERE PADate BETWEEN @StartDt AND @EndDt
+),
 
--- total
-,
-section1TX AS
-(SELECT 
-  sum(1) [T1Screened]
-, sum(CASE WHEN c.ScreenResult = 1 THEN 1 ELSE 0 END) [T1aScreenResultPositive]
-, sum(CASE WHEN c.ScreenResult != 1 THEN 1 ELSE 0 END) [T1bScreenResultNegative]
-, sum(CASE WHEN isnull(a.TCDOB, a.EDC) > a.ScreenDate THEN 1 ELSE 0 END) [T1cPrenatal]
-, sum(CASE WHEN isnull(a.TCDOB, a.EDC) <= a.ScreenDate THEN 1 ELSE 0 END) [T1dPostnatal]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 1  THEN 1 ELSE 0 END) [T1ePositiveReferred]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0  THEN 1 ELSE 0 END) [T1fPositiveNotReferred]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason IN ('05','07','35','36','06','08','33','34','99','13','25')
-THEN 1 ELSE 0 END) [T1DischargeAll]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '05' THEN 1 ELSE 0 END) [T1f1IncomeIneligible]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '07' THEN 1 ELSE 0 END) [T1f2OutOfGeoTarget]
---, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
---AND c.DischargeReason = '11' THEN 1 ELSE 0 END) [T1f3Refuse]
-
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '35' THEN 1 ELSE 0 END) [T1f3NonCompliant]
-
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '36' THEN 1 ELSE 0 END) [T1f3Refuse]
-
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '06' THEN 1 ELSE 0 END) [T1f4InappropriateScreen]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '08' THEN 1 ELSE 0 END) [T1f5CaseLoadFull]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '33' THEN 1 ELSE 0 END) [T1f6PositiveScreen]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '34' THEN 1 ELSE 0 END) [T1f7SubsequentBirthOnOpenCase]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '99' THEN 1 ELSE 0 END) [T1f8Other]
-, 0 [T1f9NoReason]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '13' THEN 1 ELSE 0 END) [T1f10ControlCase]
-, sum(CASE WHEN c.ScreenResult = 1 AND c.ReferralMade = 0 
-AND c.DischargeReason = '25' THEN 1 ELSE 0 END) [T1f11Transferred]
+/* total */
+ScreensThisPeriodT AS (
+SELECT a.HVCasePK, c.ScreenResult, isnull(a.TCDOB, a.EDC) DOB
+, a.ScreenDate, c.ReferralMade, c.DischargeReason 
 FROM HVCase AS a 
 JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
 JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
 JOIN HVScreen AS c ON a.HVCasePK = c.HVCaseFK
-WHERE a.ScreenDate BETWEEN @StartDtT AND @EndDt --AND b.ProgramFK = @programfk
-)
+WHERE a.ScreenDate BETWEEN @StartDtT AND @EndDt
+),
 
-, section1T AS
-(
-SELECT a.T1Screened
-,cast(cast(CASE WHEN a.T1Screened > 0 THEN round(100.0 * T1aScreenResultPositive / T1Screened, 0) 
+ScreensThisPeriod_1eT AS (
+SELECT HVCasePK
+FROM ScreensThisPeriodT
+WHERE ScreenResult = 1 AND ReferralMade = 1
+),
+
+PreAssessmentCasesAtBeginningOfPeriodT AS (
+SELECT distinct a.HVCasePK 
+FROM HVCase AS a 
+JOIN CaseProgram AS b ON a.HVCasePK = b.HVCaseFK
+JOIN dbo.SplitString(@programfk,',') on b.programfk = listitem
+WHERE (a.ScreenDate < @StartDtT) 
+AND (a.KempeDate >= @StartDtT OR a.KempeDate IS NULL)
+AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDtT)
+),
+
+section2QT AS (
+SELECT count(*) [T2PreAssessmentBeforePeriod]
+FROM PreAssessmentCasesAtBeginningOfPeriodT
+),
+
+TotalCasesToBeAssessedThisPeriod_2_1eT AS (
+SELECT DISTINCT isnull(a.HVCasePK, b.HVCasePK) [HVCasePK]
+FROM PreAssessmentCasesAtBeginningOfPeriodT AS a
+FULL OUTER JOIN ScreensThisPeriod_1eT AS b 
+ON a.HVCasePK = b.HVCasePK
+),
+
+PreAssessment_MaxPADateT AS (
+SELECT a.HVCaseFK, max(a.PADate) [max_PADATE]
+FROM Preassessment AS a
+JOIN dbo.SplitString(@programfk,',') on a.programfk = listitem
+WHERE a.PADate BETWEEN @StartDtT AND @EndDt 
+GROUP BY a.HVCaseFK
+),
+
+PreAssessment_LastOneInPeriodT AS (
+SELECT a.HVCaseFK, a.CaseStatus, a.FSWAssignDate, a.KempeResult, a.PADate
+FROM Preassessment as a 
+join PreAssessment_MaxPADateT as b 
+ON a.HVCaseFK = b.HVCaseFK AND a.PADate = b.max_PADATE
+),
+
+OutcomesT AS (
+SELECT a.HVCasePK, b.*
+FROM TotalCasesToBeAssessedThisPeriod_2_1eT AS a
+LEFT OUTER JOIN PreAssessment_LastOneInPeriodT AS b
+ON a.HVCasePK = b.HVCaseFK
+),
+
+section4QT AS (
+SELECT 
+  Count(*) [T3TotalCasesThisPerion]
+, sum(CASE WHEN CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [T4bCompleted]
+, sum(CASE WHEN CaseStatus = '02' AND KempeResult = 1 AND FSWAssignDate <= @EndDt THEN 1 ELSE 0 END) [T4b1PositiveAssignd]
+, sum(CASE WHEN  CaseStatus = '02' AND KempeResult = 1 AND FSWAssignDate > @EndDt THEN 1 ELSE 0 END) [T4b2PositivePendingAssignd]
+, sum(CASE WHEN  CaseStatus = '04'  AND KempeResult = 1 AND FSWAssignDate IS NULL THEN 1 ELSE 0 END) [T4b3PositiveNotAssignd]
+, sum(CASE WHEN CaseStatus = '02' AND KempeResult = 0 THEN 1 ELSE 0 END) [T4b4Negative]
+, sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [T4cTerminated]
+, sum(CASE WHEN CaseStatus = '01' AND datediff( d, PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [T4aEffortContnue]
+FROM OutcomesT
+),
+
+
+section1QXT AS (
+SELECT 
+  sum(1) [T1Screened]
+, sum(CASE WHEN ScreenResult = 1 THEN 1 ELSE 0 END) [T1aScreenResultPositive]
+, sum(CASE WHEN ScreenResult != 1 THEN 1 ELSE 0 END) [T1bScreenResultNegative]
+, sum(CASE WHEN DOB > ScreenDate THEN 1 ELSE 0 END) [T1cPrenatal]
+, sum(CASE WHEN DOB <= ScreenDate THEN 1 ELSE 0 END) [T1dPostnatal]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 1  THEN 1 ELSE 0 END) [T1ePositiveReferred]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0  THEN 1 ELSE 0 END) [T1fPositiveNotReferred]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason IN ('05','07','35','36','06','08','33','34','99','13','25')
+THEN 1 ELSE 0 END) [T1DischargeAll]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '05' THEN 1 ELSE 0 END) [T1f1IncomeIneligible]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '07' THEN 1 ELSE 0 END) [T1f2OutOfGeoTarget]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '35' THEN 1 ELSE 0 END) [T1f3NonCompliant]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '36' THEN 1 ELSE 0 END) [T1f3Refuse]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '06' THEN 1 ELSE 0 END) [T1f4InappropriateScreen]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '08' THEN 1 ELSE 0 END) [T1f5CaseLoadFull]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '33' THEN 1 ELSE 0 END) [T1f6PositiveScreen]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '34' THEN 1 ELSE 0 END) [T1f7SubsequentBirthOnOpenCase]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '99' THEN 1 ELSE 0 END) [T1f8Other]
+, 0 [T1f9NoReason]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '13' THEN 1 ELSE 0 END) [T1f10ControlCase]
+, sum(CASE WHEN ScreenResult = 1 AND ReferralMade = 0 
+AND DischargeReason = '25' THEN 1 ELSE 0 END) [T1f11Transferred]
+FROM ScreensThisPeriodT
+),
+
+section1QT AS (
+SELECT T1Screened
+,cast(cast(CASE WHEN T1Screened > 0 THEN round(100.0 * T1aScreenResultPositive / T1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1aScreenResultPositive]
-,cast(cast(CASE WHEN a.T1Screened > 0 THEN round(100.0 * T1bScreenResultNegative / T1Screened, 0) 
+,cast(cast(CASE WHEN T1Screened > 0 THEN round(100.0 * T1bScreenResultNegative / T1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1bScreenResultNegative]
-,cast(cast(CASE WHEN a.T1Screened > 0 THEN round(100.0 * T1cPrenatal / T1Screened, 0) 
+,cast(cast(CASE WHEN T1Screened > 0 THEN round(100.0 * T1cPrenatal / T1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1cPrenatal]
-,cast(cast(CASE WHEN a.T1Screened > 0 THEN round(100.0 * T1dPostnatal / T1Screened, 0) 
+,cast(cast(CASE WHEN T1Screened > 0 THEN round(100.0 * T1dPostnatal / T1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1dPostnatal]
 , T1ePositiveReferred
 , T1fPositiveNotReferred
 
-,cast(cast(CASE WHEN a.T1Screened > 0 THEN round(100.0 * T1ePositiveReferred / T1Screened, 0) 
+,cast(cast(CASE WHEN T1Screened > 0 THEN round(100.0 * T1ePositiveReferred / T1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1ePositiveReferredPercent]
-,cast(cast(CASE WHEN a.T1Screened > 0 THEN round(100.0 * T1fPositiveNotReferred / T1Screened, 0) 
+
+,cast(cast(CASE WHEN T1Screened > 0 THEN round(100.0 * T1fPositiveNotReferred / T1Screened, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' [T1fPositiveNotReferredPercent]
 
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f1IncomeIneligible / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f1IncomeIneligible / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f1IncomeIneligible
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f2OutOfGeoTarget / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f2OutOfGeoTarget / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f2OutOfGeoTarget
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f3NonCompliant / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f3NonCompliant / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f3NonCompliant
-
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f3Refuse / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f3Refuse / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f3Refuse
-
-
-
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f4InappropriateScreen / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f4InappropriateScreen / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f4InappropriateScreen
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f5CaseLoadFull / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f5CaseLoadFull / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f5CaseLoadFull
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f6PositiveScreen / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f6PositiveScreen / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f6PositiveScreen
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f7SubsequentBirthOnOpenCase / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f7SubsequentBirthOnOpenCase / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f7SubsequentBirthOnOpenCase
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f8Other / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f8Other / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f8Other
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f9NoReason / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f9NoReason / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f9NoReason
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f10ControlCase / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f10ControlCase / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f10ControlCase
-,cast(cast(CASE WHEN a.T1DischargeAll > 0 THEN round(100.0 * T1f11Transferred / T1DischargeAll, 0) 
+,cast(cast(CASE WHEN T1DischargeAll > 0 THEN round(100.0 * T1f11Transferred / T1DischargeAll, 0) 
 ELSE 0 END AS INT) AS VARCHAR(20)) + '%' T1f11Transferred
+FROM section1QXT
+),
 
-FROM section1TX AS a
-
-)
-, section2T AS 
-(
-SELECT count(*) [T2PreAssessmentBeforePeriod]
-FROM HVCase AS a1 
-JOIN CaseProgram AS b1 ON a1.HVCasePK = b1.HVCaseFK
-JOIN dbo.SplitString(@programfk,',') on b1.programfk = listitem
-WHERE --b1.ProgramFK = @programfk AND 
-(a1.ScreenDate < @StartDtT) 
-AND (a1.KempeDate >= @StartDtT OR a1.KempeDate IS NULL)
-AND 
---(b1.DischargeDate >= @StartDtT OR b1.DischargeDate IS NULL)
-(b1.DischargeDate IS NULL OR
-CASE WHEN @IncludeClosedCase = 0 THEN 
-(CASE WHEN b1.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
-ELSE (CASE WHEN b1.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
-)
-)
-
-, section4Ta AS 
-(
-SELECT 
-sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [T4aEffortContnue]
-, sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) > 30 THEN 1 ELSE 0 END) [T4dNoStatus1]
-FROM Preassessment x
-JOIN (
-SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
-FROM Preassessment AS p 
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE p.PADate <= @EndDt --AND p.ProgramFK = @programfk
-GROUP BY p.HVCaseFK) AS y 
-ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
-)
-
-, section4Tb AS 
-(
-SELECT count(DISTINCT a.HVCaseFK) [T4dNoStatus2]
-FROM HVScreen AS a
-JOIN CaseProgram AS c ON c.HVCaseFK = a.HVCaseFK
-JOIN dbo.SplitString(@programfk,',') on c.programfk = listitem
-LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
-WHERE --a.ProgramFK = @programfk AND 
-a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
-AND 
---(c.DischargeDate IS NULL OR c.DischargeDate > @StartDtT)
-(c.DischargeDate IS NULL OR
-CASE WHEN @IncludeClosedCase = 0 THEN 
-(CASE WHEN c.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
-ELSE (CASE WHEN c.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
-)
-
-AND b.HVCaseFK IS NULL
-)
-
-, section4T AS 
-(
-SELECT 
---sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) <= 30 THEN 1 ELSE 0 END) [T4aEffortContnue]
---, sum(CASE WHEN x.CaseStatus = '01' AND datediff( d, x.PADate, @EndDt) > 30 THEN 1 ELSE 0 END) [T4dNoStatus1]
-sum(CASE WHEN x.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) [T4bCompleted]
-, sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate <= @EndDt THEN 1 ELSE 0 END) [T4b1PositiveAssignd]
-, sum(CASE WHEN  x.CaseStatus = '02' AND x.KempeResult = 1 AND x.FSWAssignDate > @EndDt THEN 1 ELSE 0 END) [T4b2PositivePendingAssignd]
-, sum(CASE WHEN  x.CaseStatus = '04'  AND x.KempeResult = 1 AND x.FSWAssignDate IS NULL THEN 1 ELSE 0 END) [T4b3PositiveNotAssignd]
-, sum(CASE WHEN x.CaseStatus = '02' AND x.KempeResult = 0 THEN 1 ELSE 0 END) [T4b4Negative]
-, sum(CASE WHEN x.CaseStatus = '03' THEN 1 ELSE 0 END) [T4cTerminated]
-FROM Preassessment x
-JOIN (
-SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
-FROM Preassessment AS p 
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE p.PADate BETWEEN @StartDtT AND @EndDt --AND p.ProgramFK = @programfk
-GROUP BY p.HVCaseFK) AS y 
-ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
-)
-
---, zzzT AS (
---SELECT DISTINCT x.HVCaseFK
---FROM Preassessment AS x
---JOIN (SELECT a.HVCaseFK, max(a.PADate) [maxDate]
---FROM Preassessment AS a
---WHERE a.ProgramFK = @programfk AND a.PADate < @StartDtT
---GROUP BY a.HVCaseFK) AS y
---ON x.HVCaseFK = y.HVCaseFK AND x.PADate = maxDate
---WHERE x.CaseStatus = '01')
-
---, qqqT AS (
---SELECT DISTINCT a.HVCaseFK
---FROM Preassessment AS a
---WHERE a.ProgramFK = @programfk AND a.PADate BETWEEN @StartDtT AND @EndDt
---)
-
---, NoStatusT AS (
---SELECT count(*) [T4dNoStatus2]
---FROM zzzT AS a LEFT OUTER JOIN qqqT AS b ON a.HVCaseFK = b.HVCaseFK
---WHERE b.HVCaseFK IS NULL
---)
-
-, section5T AS 
-(
+section5QT AS (
 SELECT 
   sum(PAParentLetter) [T5aPAParentLetter]
 , sum(PACall2Parent) [T5bPACall2Parent]
@@ -460,73 +385,42 @@ SELECT
 , sum(PAGift) [T5iPAGift]
 , sum(PACaseReview) [T5jPACaseReview]
 , sum(PAOtherActivity) [T5kPAOtherActivity]
-FROM Preassessment AS p
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE PADate BETWEEN @StartDtT AND @EndDt --AND ProgramFK = @programfk
-)
+FROM Preassessment
+JOIN dbo.SplitString(@programfk,',') on programfk = listitem
+WHERE PADate BETWEEN @StartDtT AND @EndDt
+),
 
+xxxx AS (
 SELECT 
   section1Q.* 
 , section2Q.*
---, section1Q.[Q1ePositiveReferred] + section2Q.[Q2PreAssessmentBeforePeriod] [Q3TotalCasesThisPerion]
-
-, section4Qa.[Q4aEffortContnue] + section4Q.[Q4bCompleted] + section4Q.[Q4cTerminated] + 
-section4Qa.[Q4dNoStatus1] + section4Qb.[Q4dNoStatus2] AS [Q3TotalCasesThisPerion]
-
-
 , section4Q.*
-, section4Qa.*
-, section4Qb.*
-, [Q4dNoStatus1] + [Q4dNoStatus2] AS [Q4dNoStatus]
+, 0 [Q4dNoStatus1]
+, 0 [Q4dNoStatus2]
+, section4Q.Q3TotalCasesThisPerion - ([Q4aEffortContnue] + [Q4bCompleted] + [Q4cTerminated]) AS [Q4dNoStatus]
 , section5Q.*
-, section1T.* 
-, section2T.*
 
---, section1T.[T1ePositiveReferred] + section2T.[T2PreAssessmentBeforePeriod] [T3TotalCasesThisPerion]
-
-, [T4aEffortContnue] + [T4bCompleted] + [T4cTerminated] + [T4dNoStatus1] + [T4dNoStatus2] AS [T3TotalCasesThisPerion]
-
-
-, section4T.*
-, section4Ta.*
-, section4Tb.*
-, [T4dNoStatus1] + [T4dNoStatus2] AS [T4dNoStatus]
-, section5T.*
+, section1QT.* 
+, section2QT.*
+, section4QT.*
+, 0 [T4dNoStatus1]
+, 0 [T4dNoStatus2]
+, section4QT.T3TotalCasesThisPerion - ([T4aEffortContnue] + [T4bCompleted] + [T4cTerminated]) AS [T4dNoStatus]
+, section5QT.*
 
 FROM section1Q
 join section2Q ON 1 = 1
 join section4Q ON 1 = 1
-join section4Qa ON 1 = 1
-join section4Qb ON 1 = 1
 join section5Q ON 1 = 1
-join section1T ON 1 = 1
-join section2T ON 1 = 1
-join section4T ON 1 = 1
-join section4Ta ON 1 = 1
-join section4Tb ON 1 = 1
-join section5T ON 1 = 1
+JOIN section1QT ON 1 = 1
+join section2QT ON 1 = 1
+join section4QT ON 1 = 1
+join section5QT ON 1 = 1
 
+)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+SELECT * 
+FROM xxxx
 
 
 GO
