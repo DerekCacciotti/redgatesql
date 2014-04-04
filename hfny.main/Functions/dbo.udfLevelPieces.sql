@@ -43,7 +43,7 @@ begin
 	insert
 		into @tLevelPieces
 		select *
-			  ,(datediff(day,beginning,ending)+1)/7*maximumvisit as reqvisit
+			  , (CAST(datediff(day,beginning,ending)as decimal(10,3)) + 1)/7 * maximumvisit --CP 4/04/2014 needed CAST to create decimal because 01/01 - 03/31 was coming up as 90 days / 7 = .96 not 1.02, where level 4's were showing up without any required visits
 			from (
 				  select wad.hvcasefk
 						,case
