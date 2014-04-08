@@ -1502,9 +1502,12 @@ SELECT 	'17','2', ''
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)	
 SELECT 	'18','2', ''
 	,LevelName
-	,case when LevelName = 'Preintake-enroll' then sum(CASE when levelCount IS NOT NULL THEN 1 ELSE 0 END)
-	 else sum(levelCount)
-	 end  as NumberOfCases	 
+	-- since the null condition in LevelCount was already handled above (in cteDataReportRow14RestOfIt), 
+	-- the code below is just adding one to LevelCount when it's 0 for the count of Preintake-Enroll cases
+	--,case when LevelName = 'Preintake-enroll' then sum(CASE when levelCount IS NOT NULL THEN 1 ELSE 0 END)
+	-- else sum(levelCount)
+	-- end  as NumberOfCases	 
+	,sum(levelCount) as NumberOfCases	 
 	,''
 	,''
 	,''
