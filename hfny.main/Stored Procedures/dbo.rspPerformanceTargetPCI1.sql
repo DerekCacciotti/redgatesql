@@ -84,7 +84,7 @@ begin
 	cteExpectedForm
 	as
 		(
-		select 'PCI1' as PTCode
+		select distinct 'PCI1' as PTCode
 			  , c.HVCaseFK
 			  , PC1ID
 			  , OldID

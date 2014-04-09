@@ -75,7 +75,7 @@ begin
 	--,
 	cteMain
 	as
-		(select 'PCI2' as PTCode
+		(select distinct 'PCI2' as PTCode
 			  , coh.HVCaseFK
 			  , PC1ID
 			  , OldID
