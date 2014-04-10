@@ -44,7 +44,7 @@ begin
 						  where hvr.casefk = hld.hvcasefk
 							   and StartLevelDate <= @edate
 							   and hvr.programfk = hld.programfk) as levelstart
-					,FLOOR(reqvisit) as expvisitcount
+					,(reqvisit) as expvisitcount
 					,sum(case
 							 when visittype <> '0001' then
 								 1
@@ -157,7 +157,7 @@ begin
 					,pc1id
 					,casecount
 					,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,minutes,0) as DirectServiceTime
-					,expvisitcount
+					,FLOOR(expvisitcount) AS expvisitcount
 					,startdate
 					,enddate
 					,(select levelname
