@@ -135,7 +135,7 @@ begin
 		  ,pc1id
 		  ,CaseCount
 		  ,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,minutes,0) as DirectServiceTime
-		  ,expvisitcount
+		  ,floor(expvisitcount) as expvisitcount
 		  ,startdate
 		  ,enddate
 		  ,levelstart
