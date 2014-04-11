@@ -1,9 +1,14 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE procedure [dbo].[pr_DeleteCompleteCase]
+-- =============================================
+-- Author:		Jay Robohn
+-- Create date: old
+-- Description:	Adapted from FamSys on Feb 13, 2013
+-- exec pr_DeleteCompleteCase 217026, 7, ''
+-- =============================================
+create procedure [dbo].[pr_DeleteCompleteCase-Debug]
 (
     @hvcasefk          int,
     @programfk         int,
@@ -15,6 +20,7 @@ begin try
 	declare @pk int
 	-- delete the records from the tables that are not dependent on other records
 	--ASQ--possible multi-records
+	print 'ASQ--possible multi-records'
 	declare del_cursor cursor for
 	select asqpk
 		from ASQ
@@ -35,6 +41,7 @@ begin try
 	deallocate del_cursor;
 
 	--ASQSE
+	print 'ASQSE'
 	declare del_cursor cursor for
 	select asqsepk
 		from ASQSE
@@ -55,6 +62,7 @@ begin try
 	deallocate del_cursor;
 
 	--CaseFilter--
+	print 'CaseFilter--'
 	declare del_cursor cursor for
 	select caseFilterPK
 		from CaseFilter
@@ -75,6 +83,7 @@ begin try
 	deallocate del_cursor;
 
 	--Education
+	print 'Education'
 	declare del_cursor cursor for
 	select Educationpk
 		from Education
@@ -95,6 +104,7 @@ begin try
 	deallocate del_cursor;
 
 	--Employment
+	print 'Employment'
 	declare del_cursor cursor for
 	select Employmentpk
 		from Employment
@@ -115,6 +125,7 @@ begin try
 	deallocate del_cursor;
 
 	--HVLog
+	print 'HVLog'
 	declare del_cursor cursor for
 	select HVLOGpk
 		from HVLog
@@ -135,6 +146,7 @@ begin try
 	deallocate del_cursor;
 
 	--OtherChild
+	print 'OtherChild'
 	declare del_cursor cursor for
 	select otherchildpk
 		from OtherChild
@@ -155,6 +167,7 @@ begin try
 	deallocate del_cursor;
 
 	--PC1Medical
+	print 'PC1Medical'
 	declare del_cursor cursor for
 	select PC1Medicalpk
 		from PC1Medical
@@ -175,6 +188,7 @@ begin try
 	deallocate del_cursor;
 
 	--ServiceReferral
+	print 'ServiceReferral'
 	declare del_cursor cursor for
 	select ServiceReferralpk
 		from ServiceReferral
@@ -195,6 +209,7 @@ begin try
 	deallocate del_cursor;
 
 	--TCMEDICAL
+	print 'TCMEDICAL'
 	declare del_cursor cursor for
 	select TCMedicalpk
 		from TCMedical
@@ -216,6 +231,7 @@ begin try
 	--end
 
 	--PHQ9
+	print 'PHQ9'
 	declare del_cursor cursor for
 	select PHQ9PK
 		from PHQ9 P
@@ -236,6 +252,7 @@ begin try
 	deallocate del_cursor;
 
 	--TCID
+	print 'TCID'
 	declare del_cursor cursor for
 	select TCIDpk
 		from TCID
@@ -256,6 +273,7 @@ begin try
 	deallocate del_cursor;
 
 	--HVLEVEL
+	print 'HVLEVEL'
 	declare del_cursor cursor for
 	select HVLevelpk
 		from HVLevel
@@ -276,6 +294,7 @@ begin try
 	deallocate del_cursor;
 
 	--FollowUp
+	print 'FollowUp'
 	declare del_cursor cursor for
 	select FollowUppk
 		from FollowUp
@@ -296,6 +315,7 @@ begin try
 	deallocate del_cursor;
 
 	--CommonAttributes
+	print 'CommonAttributes'
 	declare del_cursor cursor for
 	select CommonAttributespk
 		from CommonAttributes
@@ -316,6 +336,7 @@ begin try
 	deallocate del_cursor;
 
 	--Intake
+	print 'Intake'
 	declare del_cursor cursor for
 	select Intakepk
 		from Intake
@@ -336,6 +357,7 @@ begin try
 	deallocate del_cursor;
 
 	--Preintake
+	print 'Preintake'
 	declare del_cursor cursor for
 	select Preintakepk
 		from Preintake
@@ -356,6 +378,7 @@ begin try
 	deallocate del_cursor;
 
 	--AuditC
+	print 'AuditC'
 	declare del_cursor cursor for
 	select AuditCPK
 		from AuditC
@@ -376,6 +399,7 @@ begin try
 	deallocate del_cursor;
 
 	--HITS
+	print 'HITS'
 	declare del_cursor cursor for
 	select HITSPK
 		from HITS H
@@ -396,6 +420,7 @@ begin try
 	deallocate del_cursor;
 
 	--Kempe
+	print 'Kempe'
 	declare del_cursor cursor for
 	select Kempepk
 		from Kempe
@@ -416,6 +441,7 @@ begin try
 	deallocate del_cursor;
 
 	--PC1Issues
+	print 'PC1Issues'
 	declare del_cursor cursor for
 	select PC1Issuespk
 		from PC1Issues
@@ -436,6 +462,7 @@ begin try
 	deallocate del_cursor;
 
 	--Preassessment
+	print 'Preassessment'
 	declare del_cursor cursor for
 	select Preassessmentpk
 		from Preassessment
@@ -456,6 +483,7 @@ begin try
 	deallocate del_cursor;
 
 	--PSI--possible multi-records
+	print 'PSI--possible multi-records'
 	declare del_cursor cursor for
 	select psipk
 		from PSI
@@ -475,9 +503,8 @@ begin try
 	close del_cursor;
 	deallocate del_cursor;
 
-
-
 	--WorkerAssignment
+	print 'WorkerAssignment'
 	declare del_cursor cursor for
 	select WorkerAssignmentpk
 		from WorkerAssignment
@@ -498,6 +525,7 @@ begin try
 	deallocate del_cursor;
 
 	--HVSCREEN
+	print 'HVSCREEN'
 	declare del_cursor cursor for
 	select HVScreenpk
 		from HVScreen
@@ -518,6 +546,7 @@ begin try
 	deallocate del_cursor;
 
 	--CaseProgram
+	print 'CaseProgram'
 	declare del_cursor cursor for
 	select CaseProgrampk
 		from CaseProgram
@@ -539,6 +568,7 @@ begin try
 
 	--HVCase
 	--remove the formreview records first for ID contact
+	print 'HVCase --remove the formreview records first for ID contact'
 	delete
 		from FormReview
 		where hvcasefk = @hvcasefk and
@@ -547,6 +577,7 @@ begin try
 			 FormType = 'DS')
 
 	-- only delete hvcase record if not used for other programs
+	print 'only delete hvcase record if not used for other programs'
 	delete
 		from HVCase
 		where hvcasepk = @hvcasefk and
@@ -562,10 +593,13 @@ begin try
 end try
 begin catch
 	if @@TRANCOUNT > 0
+	
 		rollback
 
 	-- DECLARE @ErrMsg nvarchar(4000), @ErrSeverity int
 	select @ok = error_message()
-
+	print @ok
+	
 end catch
+
 GO
