@@ -218,7 +218,8 @@ AS (
 -- PC1 Doctor name/phone and Facility name/phone (xx2)
 SELECT hh.HVCaseFK --, ca.PC1MedicalFacilityFK, ca.PC1MedicalProviderFK
 ,rtrim(lmf.MFName) [PC1Cllinic]
-,rtrim(lmp.MPFirstName) + ' ' + rtrim(lmp.MPLastName) [PC1DoctorName]
+--,rtrim(lmp.MPFirstName) + ' ' + rtrim(lmp.MPLastName) [PC1DoctorName]
+,rtrim(isnull(lmp.MPFirstName,'')) + ' ' + rtrim(isnull(lmp.MPLastName,'')) [PC1DoctorName]
 ,lmp.MPPhone [PC1DoctorPhone]
 FROM(
 SELECT HVCaseFK, cast(substring(maxkey, 9, 10) AS INT) CommonAttributesPK
@@ -237,8 +238,9 @@ TCDoctorClinic
 AS (
 -- TC Doctor name/phone and Facility name/phone (xx3)
 SELECT hh.HVCaseFK --ca.TCMedicalFacilityFK, ca.TCMedicalProviderFK
-,rtrim(lmf.MFName) [TCClinic],
-rtrim(lmp.MPFirstName) + ' ' + rtrim(lmp.MPLastName) [TCDoctorName]
+,rtrim(lmf.MFName) [TCClinic]
+--,rtrim(lmp.MPFirstName) + ' ' + rtrim(lmp.MPLastName) [TCDoctorName]
+,rtrim(isnull(lmp.MPFirstName,'')) + ' ' + rtrim(isnull(lmp.MPLastName,'')) [TCDoctorName]
 ,lmp.MPPhone [TCDoctorPhone]
 FROM(
 SELECT HVCaseFK, cast(substring(maxkey, 9, 10) AS INT) CommonAttributesPK
