@@ -189,9 +189,9 @@ SELECT
   ELSE CONVERT(VARCHAR(MAX), CONVERT(INT,100*(CAST(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)))))+ '%'  
   end as MeetingPercent
 ,	CASE WHEN totalmeetingcount is null then '1'
-	when cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) = 1 THEN '3' 
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) > .9 THEN '2'
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) < .9 THEN '1'
+	when cast(totalmeetingcount AS DECIMAL(10,2)) / cast(TotalWorkers AS DECIMAL(10,2)) = 1 THEN '3' 
+	WHEN cast(totalmeetingcount AS DECIMAL(10,2)) / cast(TotalWorkers AS DECIMAL(10,2)) >= .9 THEN '2'
+	WHEN cast(totalmeetingcount AS DECIMAL(10,2)) / cast(TotalWorkers AS DECIMAL(10,2)) < .9 THEN '1'
 	END AS Rating
 FROM cteMeetTarget
 LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode
