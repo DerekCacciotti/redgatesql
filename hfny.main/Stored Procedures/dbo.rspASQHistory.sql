@@ -146,7 +146,8 @@ cteNone
 			LEFT OUTER JOIN TCID c on c.HVCaseFK = d.HVCaseFK
 			LEFT OUTER JOIN ASQ AS a ON d.HVCaseFK = a.HVCaseFK
 			
-		where
+		WHERE
+		     h.CaseProgress > 8 AND
 			 d.DischargeDate is null
 			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
 			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)

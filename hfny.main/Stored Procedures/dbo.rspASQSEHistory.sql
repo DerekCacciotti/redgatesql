@@ -109,7 +109,8 @@ cteNone
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
 			LEFT OUTER JOIN TCID c on c.HVCaseFK = d.HVCaseFK
 			LEFT OUTER JOIN ASQSE AS a ON d.HVCaseFK = a.HVCaseFK
-	where
+	WHERE
+	         h.CaseProgress > 8 AND
 			 d.DischargeDate is NULL
 			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
 			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)
