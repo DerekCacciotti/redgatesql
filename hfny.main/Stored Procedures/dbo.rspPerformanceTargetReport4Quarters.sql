@@ -27,7 +27,7 @@ CREATE procedure [dbo].[rspPerformanceTargetReport4Quarters]
     @SiteFK					int             = null,
     @IncludeClosedCases		bit             = 0,
     @CaseFiltersPositive	varchar(100)    = ''
-)
+) 
 as
 begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -303,10 +303,10 @@ begin
 		-- group by PTCode
 		union 
 		select PerformanceTargetCode
-				, null
-				, null
-				, null
-				, null as Qtr1PercentageMeetingTarget
+				, 0
+				, 0
+				, 0
+				, '**        ' as Qtr1PercentageMeetingTarget
 		from codePerformanceTargetTitle ptt
 		where PerformanceTargetCode not in (select PTCode from @tblPTDetailsTemp)
 		
@@ -485,7 +485,15 @@ begin
 					-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
 					else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
 				end as PercentageMeetingTarget
-	from cteSummaryQtr2
+		from cteSummaryQtr2
+		union 
+		select PerformanceTargetCode
+				, 0
+				, 0
+				, 0
+				, '**        '
+		from codePerformanceTargetTitle ptt
+		where PerformanceTargetCode not in (select PTCode from cteSummaryQtr2)
 	)
 	
 	update @tblPTSummary
@@ -667,7 +675,15 @@ begin
 					-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
 					else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
 				end as PercentageMeetingTarget
-	from cteSummaryQtr3
+		from cteSummaryQtr3
+		union 
+		select PerformanceTargetCode
+				, 0
+				, 0
+				, 0
+				, '**        '
+		from codePerformanceTargetTitle ptt
+		where PerformanceTargetCode not in (select PTCode from cteSummaryQtr3)
 	)
 	
 	update @tblPTSummary
@@ -849,7 +865,15 @@ begin
 					-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
 					else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
 				end as PercentageMeetingTarget
-	from cteSummaryQtr4
+		from cteSummaryQtr4
+		union 
+		select PerformanceTargetCode
+				, 0
+				, 0
+				, 0
+				, '**        '
+		from codePerformanceTargetTitle ptt
+		where PerformanceTargetCode not in (select PTCode from cteSummaryQtr4)
 	)
 	
 	update @tblPTSummary
