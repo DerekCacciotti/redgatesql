@@ -11,6 +11,7 @@ GO
 -- moved from FamSys Feb 20, 2012 by jrobohn
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 --            added this code to the workerprogram join condition: AND wp.programfk = listitem
+--
 -- =============================================
 CREATE procedure [dbo].[rspFirstHomeVisit_Detail]
 (
@@ -31,7 +32,8 @@ as
 	end
 
 	set @programfk = REPLACE(@programfk,'"','')
-	set @SiteFK = isnull(@SiteFK, 0)
+	--set @SiteFK = isnull(@SiteFK, 0)
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 
 	begin
 		-- SET NOCOUNT ON added to prevent extra result sets from
@@ -41,6 +43,7 @@ as
 		select *
 			from (select IntakeDate
 						,PC1ID
+						,ProgramFK 
 						,t.hvcasepk
 						,rtrim(FirstName) as FirstName
 						,rtrim(Lastname) as Lastname
@@ -74,6 +77,7 @@ as
 										  group by hvcasepk
 												  ,tcdob
 												  ,edc) as t on CaseProgram.HVCaseFK = t.HVCasePK
+						  inner join dbo.SplitString(@programfk,',') on CaseProgram.programfk = listitem -- needed again for transfer cases					  
 						  left join HVCase on HVCase.HVCasePK = CaseProgram.HVCaseFK
 						  left join Worker on Worker.WorkerPK = CaseProgram.CurrentFSWFK) a
 			where numdays > 92
