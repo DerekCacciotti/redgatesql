@@ -3,7 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
+-- [rspASQSEHistory] 1
 CREATE procedure [dbo].[rspASQSEHistory]
 (
     @programfk       VARCHAR(MAX)   = null,
@@ -57,6 +57,8 @@ AS
 		 ,case when ASQSEReceiving = '1' then 'Yes' else 'No' end ReviewCDS
 		 ,case when ASQSEInWindow is null then 'Unknown'
 			  when ASQSEInWindow = 1 then 'In Window' else 'Out of Window' end InWindow
+		 ,case when DiscussedWithPC1 is null then ''
+			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end DiscussedWithPC1
 		 ,a.ASQSETCAge [TCAgeCode]
 		from ASQSE a
 			inner join codeApp b on a.ASQSETCAge = b.AppCode and b.AppCodeGroup = 'TCAge' 
@@ -95,6 +97,7 @@ cteNone
 		 ,0 AS [ASQSETotalScore]
 		 ,'' ASQSEOverCutOff
 		 ,'' TCReferred
+		 ,'' DiscussedWithPC1
 		 ,'' ReviewCDS
 		 ,'' InWindow
 		 ,'' [TCAgeCode]
@@ -109,8 +112,8 @@ cteNone
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
 			LEFT OUTER JOIN TCID c on c.HVCaseFK = d.HVCaseFK
 			LEFT OUTER JOIN ASQSE AS a ON d.HVCaseFK = a.HVCaseFK
-	WHERE
-	         h.CaseProgress > 8 AND
+	where
+			 h.CaseProgress > 8 AND
 			 d.DischargeDate is NULL
 			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
 			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)

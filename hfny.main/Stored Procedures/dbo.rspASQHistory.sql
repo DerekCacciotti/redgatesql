@@ -4,6 +4,8 @@ GO
 SET ANSI_NULLS ON
 GO
 
+-- rspASQHistory 1
+
 CREATE procedure [dbo].[rspASQHistory]
 (
     @programfk       VARCHAR(MAX)   = null,
@@ -63,6 +65,8 @@ AS
 		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end ReviewCDS
 		 ,case when ASQInWindow is null then 'Unknown'
 			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end InWindow
+		 ,case when DiscussedWithPC1 is null then ''
+			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end DiscussedWithPC1			  
 		 ,a.TCAge [TCAgeCode]
 
 		from ASQ a
@@ -130,6 +134,7 @@ cteNone
 		 ,ASQPersonalSocialScore
 		 ,case when UnderPersonalSocial = 1 then '*' else '' end UnderPersonalSocial
 		 ,'' TCReferred
+		 ,'' DiscussedWithPC1
 		 ,'' ReviewCDS
 		 ,'' InWindow
 		 ,'' [TCAgeCode]
@@ -146,8 +151,8 @@ cteNone
 			LEFT OUTER JOIN TCID c on c.HVCaseFK = d.HVCaseFK
 			LEFT OUTER JOIN ASQ AS a ON d.HVCaseFK = a.HVCaseFK
 			
-		WHERE
-		     h.CaseProgress > 8 AND
+		where 
+		h.CaseProgress > 8 AND
 			 d.DischargeDate is null
 			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
 			 and wp.supervisorfk = ISNULL(@supervisorfk,wp.supervisorfk)
