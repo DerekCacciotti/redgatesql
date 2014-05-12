@@ -165,5 +165,5 @@ INNER JOIN dbo.SplitString(@programfk,',') on wp.ProgramFK = listitem
 LEFT OUTER JOIN codeApp AS b ON EducationLevel = b.AppCode AND b.AppCodeGroup = 'WorkerEducationLevel'
 )
 
-SELECT * FROM xxx ORDER BY LastName
+SELECT DISTINCT * FROM xxx ORDER BY LastName
 GO
