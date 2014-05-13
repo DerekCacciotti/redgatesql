@@ -3,7 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- [rspASQSEHistory] 1
+-- [rspASQSEHistory] 24
 CREATE procedure [dbo].[rspASQSEHistory]
 (
     @programfk       VARCHAR(MAX)   = null,
@@ -57,7 +57,7 @@ AS
 		 ,case when ASQSEReceiving = '1' then 'Yes' else 'No' end ReviewCDS
 		 ,case when ASQSEInWindow is null then 'Unknown'
 			  when ASQSEInWindow = 1 then 'In Window' else 'Out of Window' end InWindow
-		 ,case when DiscussedWithPC1 is null then ''
+		 ,case when DiscussedWithPC1 is null then 'Blank'
 			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end DiscussedWithPC1
 		 ,a.ASQSETCAge [TCAgeCode]
 		from ASQSE a

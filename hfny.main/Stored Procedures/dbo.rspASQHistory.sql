@@ -65,7 +65,7 @@ AS
 		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end ReviewCDS
 		 ,case when ASQInWindow is null then 'Unknown'
 			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end InWindow
-		 ,case when DiscussedWithPC1 is null then ''
+		 ,case when DiscussedWithPC1 is null then 'Blank'
 			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end DiscussedWithPC1			  
 		 ,a.TCAge [TCAgeCode]
 
