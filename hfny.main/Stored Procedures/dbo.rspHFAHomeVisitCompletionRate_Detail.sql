@@ -7,6 +7,7 @@ GO
 -- Author:		<Jay Robohn>
 -- Create date: <Jan 4, 2012>
 -- Description:	<Converted FamSys report - Home Visit Achievement Rate - Aggregate>
+-- [rspHFAHomeVisitCompletionRate_Detail] 9
 -- =============================================
 CREATE procedure [dbo].[rspHFAHomeVisitCompletionRate_Detail](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
@@ -116,7 +117,7 @@ begin
 					--END 10/11/2013 EDIT
 					
 					
-					,(select levelname
+					,(select top 1 levelname
 						  from hvleveldetail hld
 						  where hld.hvcasefk = hvr.casefk
 							   and hld.StartLevelDate = hvr.levelstart
