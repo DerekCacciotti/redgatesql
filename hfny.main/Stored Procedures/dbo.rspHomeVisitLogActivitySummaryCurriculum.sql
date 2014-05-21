@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,6 +7,8 @@ GO
 -- Author:		Dar Chen
 -- Create date: 05/22/2010
 -- Description:	Home Visit Log Activity Summary Curriculum
+-- [rspHomeVisitLogActivitySummaryCurriculum] 1,'10/01/2013','04/30/2014',null,'','N','N',1
+-- [rspHomeVisitLogActivitySummaryCurriculum] 1,'10/01/2013','04/30/2014',null,'','N','N',0
 -- =============================================
 CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummaryCurriculum] 
 	-- Add the parameters for the stored procedure here
@@ -15,7 +18,9 @@ CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummaryCurriculum]
 	@workerfk INT = NULL,
 	@pc1id VARCHAR(13) = '',
 	@showWorkerDetail CHAR(1) = 'N',
-	@showPC1IDDetail CHAR(1) = 'N')
+	@showPC1IDDetail CHAR(1) = 'N',
+	@IncludeClosedCases		bit  = 0	
+	)
 
 --DECLARE	@programfk INT = 6
 --DECLARE @StartDt DATETIME = '01/01/2011'
@@ -117,6 +122,29 @@ AND cast(VisitStartTime AS date) between @StartDt AND @EndDt
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
 AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
 AND substring(VisitType,4,1) <> '1'
+
+-- inclusion / exclusion of closed case
+and (cp.DischargeDate is null
+	or case -- closed cases are not included
+		 when @IncludeClosedCases = 0 or @IncludeClosedCases is null then
+			 (case
+				 when cp.DischargeDate > @EndDt then
+					 1
+				 else
+					 0
+			 end)
+		 else -- include closed cases
+			 (case
+				 when cp.DischargeDate >= @StartDt then
+					 1
+				 else
+					 0
+			 end)
+	 end = 1)
+
+
+
+
 
 GROUP BY 
 CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END, 
