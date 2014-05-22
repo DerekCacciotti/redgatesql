@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -17,12 +18,14 @@ GO
 
 -- 02/02/2013 
 -- handling when there is no data available e.g. for a new program that just joins hfny like Dominican Womens
+
+-- exec [rspProgramInformationFor8Quarters] '31','2012-06-30'
 -- =============================================
 CREATE procedure [dbo].[rspProgramInformationFor8Quarters](@programfk    varchar(300)    = null,                                                       
                                                         @edate        DATETIME,
                                                         @sitefk int             = 0,
                                                         @casefilterspositive  varchar(100) = ''  
-                                                        ) 
+                                                        )
 
 as
 BEGIN
@@ -491,14 +494,37 @@ INSERT INTO #tblInitial_cohort
 	),		
 
 	-- 2b
-	cteKempAssessments_For2bCohort AS
-	( -- "    b. Average Positive Mother Score"
-	-- MomScore
-	SELECT DISTINCT q8.QuarterNumber	
-			,avg(case when k.MomScore = '' then 0 else cast(k.MomScore as DECIMAL) END) OVER(PARTITION BY [QuarterNumber]) AS 'AvgPositiveMotherScore' 
+	ctePositiveKempeScore as
+	(  -- find max score of mom/father/partner ... khalsa
+			SELECT DISTINCT q8.QuarterNumber,	
+			
+					(select max(thisValue) from 
+								(
+								select isnull(cast(k.MomScore as DECIMAL),0)  as thisValue
+								union all
+								select isnull(cast(k.DadScore as DECIMAL),0) as thisValue
+								
+								union all
+								select isnull(cast(k.PartnerScore as DECIMAL),0) as thisValue
+								
+								) as khalsaTable
+					) as KempeScore
+					
+
+ 
 			from #tblInitial_cohort h
 			LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK AND k.KempeResult = 1 -- keeping 'k.KempeResult = 1' it here (not as in where clause down), it saved 3 seconds of execution time ... Khalsa
 			INNER JOIN #tblMake8Quarter q8 ON k.KempeDate between [QuarterStartDate] and [QuarterEndDate]
+	),		
+	
+	
+	cteKempAssessments_For2bCohort AS
+	( -- "    b. Average Positive Mother Score"
+	-- MomScore
+	SELECT DISTINCT QuarterNumber	
+			,avg(KempeScore) OVER(PARTITION BY [QuarterNumber]) AS 'AvgPositiveMotherScore' 
+			from ctePositiveKempeScore
+
 	),
 
 	cteKempAssessments_For2b AS
@@ -1442,7 +1468,7 @@ INSERT INTO #tblInitial_cohort
 			,'        3. % Positive Terminated'
 
 
-			,'    b. Average Positive Mother Score'
+			,'    b. Average Positive Score'
 			,'3. Families Enrolled at Beginning of quarter'
 			,'4. New Enrollments this quarter'
 
