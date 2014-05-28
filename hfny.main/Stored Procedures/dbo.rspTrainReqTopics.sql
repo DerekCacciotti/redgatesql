@@ -103,7 +103,10 @@ SELECT firstname + lastname AS Name
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='9.0') as 'f9'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='9.1') as 'f9.1'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='10.0') AS 'f10'
-, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=82) AS 'f10a'
+	
+	--HW997 Training Tickler and Required Topics - Remove Subtopic 82
+--, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=82) AS 'f10a'
+	--END HW997	
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='11.0') as 'f11'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='12.0') as 'f12'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='13.0') as 'f13'
@@ -273,12 +276,16 @@ SELECT distinct [Name]
 		ELSE 
 			CASE WHEN datediff(dd, [f10], [FAWInitialStart]) < -183 THEN '*' END
 		END AS 'f10_ast'
-	 , convert(VARCHAR(12), [f10a], 101) AS [f10a]
-	 , CASE isnull(FAWInitialStart,0)
-		WHEN 0 THEN '' --do nothing as 9.0 is only for FAW's
-		ELSE 
-			CASE WHEN datediff(dd, [f10a], [FAWInitialStart]) < -183 THEN '*' END
-		END AS 'f10a_ast'
+	
+	--HW997 Training Tickler and Required Topics - Remove Subtopic 82
+	 --, convert(VARCHAR(12), [f10a], 101) AS [f10a]
+	 --, CASE isnull(FAWInitialStart,0)
+		--WHEN 0 THEN '' --do nothing as 9.0 is only for FAW's
+		--ELSE 
+		--	CASE WHEN datediff(dd, [f10a], [FAWInitialStart]) < -183 THEN '*' END
+		--END AS 'f10a_ast'
+	--END HW997	
+		
 	 , convert(VARCHAR(12), [f11], 101) AS [f11]
 	 , CASE isnull(FSWInitialStart,0)
 		WHEN 0 THEN '' --do nothing as 9.0 is only for FSW's

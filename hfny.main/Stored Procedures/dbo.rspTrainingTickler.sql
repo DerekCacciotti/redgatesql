@@ -192,13 +192,14 @@ WHERE TrainingTickler='YES'
 				Else 'Demonstrated Knowledge by 12 months Training'
 				END AS [theGrouping]
 			, CASE  
-					WHEN SubTopicPK = 82 then
-					--this first case determines if the initial FAW Core Training is taken, if not then it will simply add the text the training is due 3 months after, otherwise, it adds the 91 days
-						CASE WHEN (SELECT distinct min(TrainingDate) FROM cteReadyForRemoval WHERE rfr.TopicFK = 10 AND workerpk=rfr.workerpk) IS NULL THEN 'FAW 3 month Follow-up Assessment Review'
-						ELSE CONVERT(VARCHAR(10)
-						, DATEADD(dd, 91, (select min(TrainingDate) FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk)), 101)
-						END
-
+					--HW997 Training Tickler and Required Topics - Remove Subtopic 82
+					--WHEN SubTopicPK = 82 then
+					----this first case determines if the initial FAW Core Training is taken, if not then it will simply add the text the training is due 3 months after, otherwise, it adds the 91 days
+					--	CASE WHEN (SELECT distinct min(TrainingDate) FROM cteReadyForRemoval WHERE rfr.TopicFK = 10 AND workerpk=rfr.workerpk) IS NULL THEN 'FAW 3 month Follow-up Assessment Review'
+					--	ELSE CONVERT(VARCHAR(10)
+					--	, DATEADD(dd, 91, (select min(TrainingDate) FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk)), 101)
+					--	END
+					--END HW997
 					WHEN SATCompareDateField = 'firstevent' THEN
 						CASE WHEN FirstEvent IS NULL THEN 'First Event'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, FirstEvent), 101)
