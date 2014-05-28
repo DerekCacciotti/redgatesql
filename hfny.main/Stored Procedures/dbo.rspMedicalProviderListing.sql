@@ -7,6 +7,7 @@ GO
 -- Author:		<jrobohn>
 -- Create date: 2011?? from famsys
 -- Description:	gets listing of current medical providers/facilities for PC1s/TCs for currently enrolled cases
+-- Edited on 05/28/2014 - HW936, put in ISNULL around medical provider names to fix issue where only a first/last name is entered
 -- exec rspMedicalProviderListing '27', '20130101', '20131231', null
 -- =============================================
 CREATE procedure [dbo].[rspMedicalProviderListing](@programfk varchar(max)    = null,
@@ -31,8 +32,8 @@ as
 		(select pc1id
 				, ca.HVCaseFK
 				, FormDate
-				, pc1mp.mpfirstname + ' ' + pc1mp.mplastname as PC1MedicalProvider
-				, tcmp.mpfirstname + ' ' + tcmp.mplastname as TCMedicalProvider
+				, isnull(pc1mp.mpfirstname, '') + ' ' + isnull(pc1mp.mplastname, '') as PC1MedicalProvider
+				, isnull(tcmp.mpfirstname, '') + ' ' + isnull(tcmp.mplastname, '') as TCMedicalProvider
 				, pc1mf.mfname as PC1MedicalFacility
 				, tcmf.mfname as TCMedicalFacility
 			from CommonAttributes ca
@@ -90,7 +91,7 @@ as
 				, FormInterval
 				, FormDate
 				, tchasmedicalprovider
-				, tcmp.mpfirstname + ' ' + tcmp.mplastname as TCMedicalProvider
+				, isnull(tcmp.mpfirstname, '') + ' ' + isnull(tcmp.mplastname,'') as TCMedicalProvider
 				, tcmf.mfname as TCMedicalFacility
 			from commonattributes ca
 			inner join caseprogram cp on cp.hvcasefk = ca.hvcasefk
@@ -127,7 +128,7 @@ as
 			inner join dbo.SplitString(@programfk, ',') on caseprogram.programfk = listitem
 			left join listMedicalProvider pc1mp 
 					on pc1mp.listmedicalproviderpk = ca.pc1medicalproviderfk
-			left join listMedicalFacility pc1mf  
+			left join listMedicalFacility pc1mf 
 					on pc1mf.listmedicalfacilitypk = ca.pc1medicalfacilityfk
 			where intake.intakedate <= @edate 
 					and (dischargedate is null
@@ -139,7 +140,7 @@ as
 				, ca.HVCaseFK
 				, FormDate
 				, tchasmedicalprovider
-				, tcmp.mpfirstname + ' ' + tcmp.mplastname as TCMedicalProvider
+				, isnull(tcmp.mpfirstname, '') + ' ' + isnull(tcmp.mplastname, '') as TCMedicalProvider
 				, tcmf.mfname as TCMedicalFacility
 			from commonattributes ca
 			inner join tcid on tcidpk = formfk
@@ -232,5 +233,4 @@ where IntakeDate <= @edate
 			or dischargedate > @edate)
 		and currentfswfk = isnull(@workerfk, currentfswfk)
 order by cp.pc1id
-
 GO
