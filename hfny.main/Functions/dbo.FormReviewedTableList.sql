@@ -48,7 +48,7 @@ CREATE FUNCTION [dbo].[FormReviewedTableList]
 				BEGIN
 				insert @results (FormFK, IsApproved)
 					SELECT DISTINCT FormFK 
-						,fr.ReviewedBy AS 'IsApproved'
+						,1 as 'IsApproved'
 					FROM FormReview fr 
 					WHERE fr.ProgramFK = @ProgFK
 					AND fr.FormType=@FormType
