@@ -12,6 +12,9 @@ GO
 
 -- Fix: Pre-Intake Enroll completed 03/27/13
 -- Added ability to run report for all the HFNY Programs  02/20/2014
+
+-- exec [rspDataReport] ',8,','10/01/2013' , '12/31/2013'
+
 -- =============================================
 
 CREATE procedure [dbo].[rspDataReport]
@@ -138,7 +141,7 @@ begin
 	SET @n3 = (SELECT count(HVCasePK) FROM @tbl4DataReportRow3)
 	
 	DECLARE @n3a INT 
-	SET @n3a = (SELECT count(HVCasePK) FROM @tbl4DataReportRow3 WHERE CaseStatus = '02' AND KempeResult = 1)
+	SET @n3a = (SELECT count(HVCasePK) FROM @tbl4DataReportRow3 WHERE  KempeResult = 1)
 
 
 	-- Start -----4 @ Screens Terminated this month  ----------
@@ -176,8 +179,7 @@ begin
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
-	WHERE p.PADate < @StartDate
-	--AND cp.ProgramFK = @ProgramFKs
+	WHERE p.FSWAssignDate <= @StartDate
 	AND p.CaseStatus = '02'	
 	AND KempeResult = 1
 	AND (h.IntakeDate  >= @StartDate OR h.IntakeDate IS NULL)

@@ -15,7 +15,7 @@ GO
 
 
 -- exec [rspPreIntakeEngagement] ',14,','10/01/2013' , '12/31/2013',null,0
--- exec [rspPreIntakeEngagement] ',2,','01/01/2014' , '03/31/2014',null,0
+-- exec [rspPreIntakeEngagement] ',8,','10/01/2013' , '12/31/2013',null,0
 
 -- =============================================
 CREATE procedure [dbo].[rspPreIntakeEngagement](@programfk    varchar(max)    = null,
@@ -33,7 +33,6 @@ BEGIN
 	-- we will be receiving the value of @bDontShowContractPeriod from UI. 
 	-- so time being, let us do the following
 	--SET @bDontShowContractPeriod = 0
-	--
 
 
 
@@ -66,7 +65,8 @@ DECLARE @tblInitRequiredData TABLE(
 	[CaseStartDate] [datetime],	
 	[MomScore] INT,
 	[DadScore] INT,				
-	[SiteFK] [int]
+	[SiteFK] [int],
+	[ProgramFK][int]
 
 )
 
@@ -82,8 +82,8 @@ DECLARE @tblInitRequiredDataTemp TABLE(
 	[CaseStartDate] [datetime],	
 	[MomScore] INT,
 	[DadScore] INT,	
-	[SiteFK] [int]
-
+	[SiteFK] [int],
+	[ProgramFK][int]
 )
 
 -- Fill this table i.e. @tblInitRequiredData as below
@@ -98,7 +98,8 @@ INSERT INTO @tblInitRequiredDataTemp(
 	[CaseStartDate],
 	[MomScore],
 	[DadScore],			
-	[SiteFK]
+	[SiteFK],
+	[ProgramFK]
 )
 SELECT 
 h.HVCasePK,h.IntakeDate,
@@ -113,6 +114,7 @@ end as tcdob
 ,case when MomScore = 'U' then 0 else cast(MomScore as int) end as MomScore
 ,case when DadScore = 'U' then 0 else cast(DadScore as int) end as DadScore
 ,CASE WHEN wp.SiteFK IS NULL THEN 0 ELSE wp.SiteFK END AS SiteFK
+,cp.programfk
 FROM HVCase h 
 INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
 INNER JOIN CaseProgram cp ON h.HVCasePK = cp.HVCaseFK 
@@ -133,7 +135,8 @@ INSERT INTO @tblInitRequiredData(
 	[CaseStartDate],
 	[MomScore],
 	[DadScore],						
-	[SiteFK])
+	[SiteFK],
+	[ProgramFK])
 SELECT * FROM @tblInitRequiredDataTemp
 WHERE SiteFK = isnull(@sitefk,SiteFK)
 
@@ -150,7 +153,7 @@ SET @TotalNumberOfPreIntakeCasesQuarterly =
 (
 SELECT count(DISTINCT irq.HVCasePK)
 FROM @tblInitRequiredData irq
-INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK 
+INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK AND p.ProgramFK = irq.ProgramFK 
 WHERE 
 CaseStartDate <= @edate
 AND p.FSWAssignDate <= @sdate 
@@ -169,7 +172,7 @@ IF (@CustomQuarterlyDates = 0)
 		(
 		SELECT count(DISTINCT irq.HVCasePK)
 		FROM @tblInitRequiredData irq
-		INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK 
+		INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK AND p.ProgramFK = irq.ProgramFK
 		WHERE 
 		CaseStartDate <= @edate
 		AND p.FSWAssignDate <= @ContractStartDate 
@@ -234,7 +237,7 @@ SET @nQ2b =
 	INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
-	AND p.CaseStatus in ('02','04')
+	AND p.CaseStatus = '02'
 	AND	(p.FSWAssignDate IS NULL)	
 	AND irq.KempeResult = '1'
 
@@ -247,7 +250,7 @@ SET @nQ2c =
 	INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
-	AND p.CaseStatus = '02'
+	AND p.CaseStatus in ('02','04')
 	AND	(p.FSWAssignDate IS NULL Or p.FSWAssignDate > @eDate)		
 	AND irq.KempeResult = '1'
 
@@ -408,7 +411,7 @@ IF (@CustomQuarterlyDates = 0)
 			INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 			WHERE 
 			irq.KempeDate BETWEEN @ContractStartDate AND @edate
-			AND p.CaseStatus = '02'
+			AND p.CaseStatus in ('02','04')
 			AND	(p.FSWAssignDate IS NULL Or p.FSWAssignDate > @eDate)		
 			AND irq.KempeResult = '1'
 
@@ -599,7 +602,18 @@ SET @nQ5c =
 			AND p.CaseStatus = '03'
 )
 
-SET @nQ5d =(@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ3) - (@nQ5a + @nQ5b + @nQ5c) 
+-- Original
+-- SET @nQ5d =(@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ3) - (@nQ5a + @nQ5b + @nQ5c) 
+
+-- Note: added @nQ2c -  Positive Pending Assignment to FSW
+ SET @nQ5d =(@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a +      @nQ2c      + @nQ3) - (@nQ5a + @nQ5b + @nQ5c) 
+
+-- Note: Taken out @nQ5a - because Data report considers only Enrolled and Terminated
+--SET @nQ5d =(@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ2c + @nQ3) - ( @nQ5b + @nQ5c) 
+--select @TotalNumberOfPreIntakeCasesQuarterly
+
+-- exec [rspPreIntakeEngagement] ',8,','10/01/2013' , '12/31/2013',null,0
+
 
 
 -- #5 Outcomes -- Contract Period
@@ -662,7 +676,7 @@ IF (@CustomQuarterlyDates = 0)
 						AND p.CaseStatus = '03'
 			)
 
-			SET @nQ5CPd =(@TotalNumberOfPreIntakeCasesContractPeriod + @nQ2CPa + @nQCP3) - (@nQ5CPa + @nQ5CPb + @nQ5CPc) 
+			SET @nQ5CPd =(@TotalNumberOfPreIntakeCasesContractPeriod + @nQ2CPa + @nQ2CPc + @nQCP3) - (@nQ5CPa + @nQ5CPb + @nQ5CPc) 
 
 
 
