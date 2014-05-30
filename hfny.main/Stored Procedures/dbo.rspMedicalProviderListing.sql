@@ -116,7 +116,7 @@ as
 				, ca.HVCaseFK
 				, FormDate
 				, pc1hasmedicalprovider
-				, pc1mp.mpfirstname + ' ' + pc1mp.mplastname as PC1MedicalProvider
+				, isnull(pc1mp.mpfirstname, '') + ' ' + isnull(pc1mp.mplastname, '') as PC1MedicalProvider
 				, pc1mf.mfname as PC1MedicalFacility
 			from commonattributes ca
 			inner join intake on intakepk = formfk
