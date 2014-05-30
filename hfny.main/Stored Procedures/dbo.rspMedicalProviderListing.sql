@@ -53,7 +53,7 @@ as
 						from CommonAttributes cainner
 						where cainner.hvcasefk=ca.hvcasefk 
 								and formtype='CH' 
-								and (CommonAttributesCreator <> 'FamSysConv' or CommonAttributesEditor is not null))
+								and (CommonAttributesCreator <> 'HFNYConv' or CommonAttributesEditor is not null))
 					and intakedate <= @edate 
 					and (dischargedate is null
 						   or dischargedate > @edate)

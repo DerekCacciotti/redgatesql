@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -47,7 +48,7 @@ RETURN
 						from CommonAttributes cainner
 						where cainner.hvcasefk=ca.hvcasefk 
 								and formtype='CH' 
-								and (CommonAttributesCreator <> 'FamSysConv' OR CommonAttributesEditor IS Not Null ))
+								and (CommonAttributesCreator <> 'HFNYConv' OR CommonAttributesEditor IS Not Null ))
 					and intakedate <= @edate 
 					and (dischargedate is null
 						   or dischargedate > @edate)
