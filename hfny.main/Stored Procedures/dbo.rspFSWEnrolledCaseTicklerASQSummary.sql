@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,7 +11,7 @@ GO
 -- exec rspFSWEnrolledCaseTicklerLastASQ 5 ,'01/01/2012' ,'03/31/2012'
 
 -- =============================================
-Create procedure [dbo].[rspFSWEnrolledCaseTicklerASQSummary]
+CREATE procedure [dbo].[rspFSWEnrolledCaseTicklerASQSummary]
 (
     @StartDate  datetime,
     @EndDate    datetime,
@@ -51,7 +52,8 @@ begin
 			 ,h.IntakeDate
 			from @tblPTCases ptc
 				inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-				inner join CaseProgram cp on h.hvcasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
+				inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+				-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
 	cteCohort

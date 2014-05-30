@@ -53,7 +53,8 @@ begin
 		  end as lastdate
 		from @tblPTCases ptc
 			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on h.hvcasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
+			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
 	-- Report: HD1. Immunization at one year

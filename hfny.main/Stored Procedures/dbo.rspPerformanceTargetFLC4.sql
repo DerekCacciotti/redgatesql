@@ -25,32 +25,33 @@ begin
   with cteTotalCases
   as
   (
-  select distinct
-      ptc.HVCaseFK
-     , ptc.PC1ID
-     , ptc.OldID
-     , ptc.PC1FullName
-     , ptc.CurrentWorkerFK
-     , ptc.CurrentWorkerFullName
-     , ptc.CurrentLevelName
-     , ptc.ProgramFK
-     , ptc.TCDOB
-     , DischargeDate
-     , case
-        when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-          datediff(day,ptc.tcdob,DischargeDate)
-        else
-          datediff(day,ptc.tcdob,@EndDate)
-      end as tcAgeDays
-     , case
-        when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-          DischargeDate
-        else
-          @EndDate
-      end as lastdate
-    from @tblPTCases ptc
-      inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-      inner join CaseProgram cp on h.HVCasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
+	select distinct
+			ptc.HVCaseFK
+			, ptc.PC1ID
+			, ptc.OldID
+			, ptc.PC1FullName
+			, ptc.CurrentWorkerFK
+			, ptc.CurrentWorkerFullName
+			, ptc.CurrentLevelName
+			, ptc.ProgramFK
+			, ptc.TCDOB
+			, DischargeDate
+			, case
+			when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
+			  datediff(day,ptc.tcdob,DischargeDate)
+			else
+			  datediff(day,ptc.tcdob,@EndDate)
+			end as tcAgeDays
+			, case
+			when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
+			  DischargeDate
+			else
+			  @EndDate
+			end as lastdate
+		from @tblPTCases ptc
+			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
+			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
   )
   ,
   cteCohort

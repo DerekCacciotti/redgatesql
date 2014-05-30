@@ -56,8 +56,9 @@ begin
 				, PC2FK
 				, OBPFK
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on h.HVCasePK = cp.HVCaseFK -- AND cp.DischargeDate IS NULL
+			inner join HVCase h on ptc.HVCaseFK = h.HVCasePK
+			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
 	cteCohort

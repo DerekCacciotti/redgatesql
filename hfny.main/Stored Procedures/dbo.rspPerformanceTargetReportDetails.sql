@@ -37,6 +37,7 @@ begin
 
 	/* Add data to the table variable. */
 	insert into @tblPTCohort (HVCaseFK
+							 , CaseProgramPK
  							 , PC1ID
 							 , OldID
 							 , PC1FullName
@@ -49,6 +50,7 @@ begin
 							)
 		select
 			  HVCasePK
+			 , CaseProgramPK
 			 , PC1ID
 			 , OldID
 			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName

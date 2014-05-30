@@ -88,6 +88,7 @@ begin
 
 	/* Add data to the table variable for quarter 1*/
 	insert into @tblPTCohort (HVCaseFK
+							 , CaseProgramPK
  							 , PC1ID
 							 , OldID
 							 , PC1FullName
@@ -100,6 +101,7 @@ begin
 							)
 		select
 			  HVCasePK
+			 , CaseProgramPK
 			 , PC1ID
 			 , OldID
 			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName
@@ -325,6 +327,7 @@ begin
 	print 'Quarter 2; ' + convert(varchar(10), @StartDate) + ' - ' + convert(varchar(10), @EndDate)
 	/* Add data to the table variable for quarter 1*/
 	insert into @tblPTCohort (HVCaseFK
+							 , CaseProgramPK
  							 , PC1ID
 							 , OldID
 							 , PC1FullName
@@ -337,6 +340,7 @@ begin
 							)
 		select
 			  HVCasePK
+			 , CaseProgramPK
 			 , PC1ID
 			 , OldID
 			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName
@@ -516,6 +520,7 @@ begin
 
 	/* Add data to the table variable for quarter 1*/
 	insert into @tblPTCohort (HVCaseFK
+							 , CaseProgramPK
  							 , PC1ID
 							 , OldID
 							 , PC1FullName
@@ -528,6 +533,7 @@ begin
 							)
 		select
 			  HVCasePK
+			 , CaseProgramPK
 			 , PC1ID
 			 , OldID
 			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName
@@ -705,6 +711,7 @@ begin
 	print 'Quarter 4; ' + convert(varchar(10), @StartDate) + ' - ' + convert(varchar(10), @EndDate)
 	/* Add data to the table variable for quarter 1*/
 	insert into @tblPTCohort (HVCaseFK
+							 , CaseProgramPK
  							 , PC1ID
 							 , OldID
 							 , PC1FullName
@@ -717,6 +724,7 @@ begin
 							)
 		select
 			  HVCasePK
+			 , CaseProgramPK
 			 , PC1ID
 			 , OldID
 			 , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName

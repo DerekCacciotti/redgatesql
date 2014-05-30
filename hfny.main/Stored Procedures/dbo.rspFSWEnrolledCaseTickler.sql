@@ -77,6 +77,7 @@ END
 	
 	create table #tblCommonCohort(
 				[HVCasePK] [int],
+				[CaseProgramPK] [int],
 				[TCIDPK] [int],
 				[tcname]  [varchar](200) NULL,								
 				[ProgramFK] [int] NULL,	
@@ -103,6 +104,7 @@ END
 	INSERT INTO #tblCommonCohort
 	select distinct
 		h.HVCasePK,
+		CaseProgramPK,
 		t.TCIDPK, 
 		T.TCFirstName + ' ' + t.TCLastName as tcname,
 		cp.programfk,
@@ -232,6 +234,7 @@ SELECT
 
 	/* Add data to the table variable. */
 	insert into @tblPTCohort (HVCaseFK
+							 , CaseProgramPK
  							 , PC1ID
 							 , OldID
 							 , PC1FullName
@@ -243,6 +246,7 @@ SELECT
 							 , TCDOB
 							)
 						SELECT HVCasePK
+					    ,CaseProgramPK
 						,PC1ID
 						,OldID
 						,PCName
@@ -254,11 +258,6 @@ SELECT
 						, TCDOB
 							 FROM #tblCommonCohort cc
 						
-
-
-
-
-
 	insert into #tblPTDetails
 			exec rspFSWEnrolledCaseTicklerASQSummary null,@eDate,@tblPTCohort
 
