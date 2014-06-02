@@ -14,7 +14,7 @@ GO
 -- Added ability to run report for all the HFNY Programs  02/20/2014
 
 -- exec [rspDataReport] ',8,','10/01/2013' , '12/31/2013'
-
+-- exec [rspDataReport] ',16,','09/01/2013' , '5/31/2014'
 -- =============================================
 
 CREATE procedure [dbo].[rspDataReport]
@@ -175,7 +175,7 @@ begin
 	(
 		HVCasePK
 	)
-	SELECT h.HVCasePK FROM HVCase h
+	SELECT distinct h.HVCasePK FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
 	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
