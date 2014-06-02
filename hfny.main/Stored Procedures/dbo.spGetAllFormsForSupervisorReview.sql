@@ -108,8 +108,16 @@ BEGIN
 				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
 		union all 
 		select FormReviewPK
-			  ,left(TrainingTitle,12)+'…' as PC1ID
-			  ,codeFormName
+			  ,case when TrainingTitle = 'Training Exemption'
+					then null --'TrainingExemption.aspx'
+				when len(rtrim(TrainingTitle)) <= 16 
+					then TrainingTitle
+				else left(TrainingTitle,16)+'…' 
+				end as PC1ID
+			  ,case when TrainingTitle = 'Training Exemption'
+					then TrainingTitle
+					else 'Training'
+				end as codeFormName
 			  ,convert(varchar(10),FormDate,101) as FormDate
 			  ,FormFK
 			  ,FormReviewCreateDate
@@ -117,21 +125,27 @@ BEGIN
 			  ,FormReviewEditDate
 			  ,FormReviewEditor
 			  ,fr.FormType
-			  ,null
+			  ,null as HVCaseFK
 			  ,fr.ProgramFK
 			  ,ReviewDateTime
 			  ,ReviewedBy
 			  ,FormReviewStartDate
 			  ,FormReviewEndDate
-			  ,null as CaseHomeLink
-			  ,'Training.aspx?TrainingPK='+rtrim(cast(TrainingPK as varchar(12))) as FormLink
+			  ,case when TrainingTitle = 'Training Exemption'
+					then 'TrainingExemption.aspx'
+					else 'Training.aspx?TrainingPK='+rtrim(cast(TrainingPK as varchar(12)))
+				end as CaseHomeLink
+			  ,case when TrainingTitle = 'Training Exemption'
+					then 'TrainingExemption.aspx'
+					else 'Training.aspx?TrainingPK='+rtrim(cast(TrainingPK as varchar(12))) 
+				end as FormLink
 			  ,isnull(FormReviewEndDate, current_timestamp) as EffectiveEndDate
 			  ,dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) as EffectiveStartDate
 			  ,null as WorkerName
 			  ,null as SupervisorName
 		from FormReview fr
 		inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = isnull(@ProgramFK,fro.ProgramFK)
-		inner join codeForm f on codeFormAbbreviation = fr.FormType
+		--inner join codeForm f on codeFormAbbreviation = fr.FormType
 		inner join Training t on TrainingPK = FormFK and fr.FormType = 'TR' 
 		where fr.ProgramFK = isnull(@ProgramFK, fr.ProgramFK)	
 				and ReviewedBy is null
@@ -148,13 +162,15 @@ BEGIN
 			  ,FormReviewEditDate
 			  ,FormReviewEditor
 			  ,fr.FormType
-			  ,null
+			  ,null as HVCaseFK
 			  ,fr.ProgramFK
 			  ,ReviewDateTime
 			  ,ReviewedBy
 			  ,FormReviewStartDate
 			  ,FormReviewEndDate
-			  ,null as CaseHomeLink
+			  ,'Supervision.aspx?AddSupervision=0&SupervisionPK=' + rtrim(cast(SupervisionPK as varchar(12))) + 
+				'&WorkerFK=' + rtrim(cast(s.WorkerFK as varchar(12))) + 
+				'&SupervisorFK=' + rtrim(cast(s.SupervisorFK as varchar(12))) as CaseHomeLink
 			  ,'Supervision.aspx?AddSupervision=0&SupervisionPK=' + rtrim(cast(SupervisionPK as varchar(12))) + 
 				'&WorkerFK=' + rtrim(cast(s.WorkerFK as varchar(12))) + 
 				'&SupervisorFK=' + rtrim(cast(s.SupervisorFK as varchar(12))) as FormLink
@@ -199,6 +215,7 @@ BEGIN
 				  when FormType='TR' then 20
 				  when FormType='GR' then 21
 			end
+			, convert(date,FormDate)
 			--,
 			--PC1ID
 			--,FormDate
