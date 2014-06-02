@@ -108,16 +108,11 @@ BEGIN
 				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
 		union all 
 		select FormReviewPK
-			  ,case when TrainingTitle = 'Training Exemption'
-					then null --'TrainingExemption.aspx'
-				when len(rtrim(TrainingTitle)) <= 16 
+			  ,case when len(rtrim(TrainingTitle)) <= 16 
 					then TrainingTitle
 				else left(TrainingTitle,16)+'…' 
 				end as PC1ID
-			  ,case when TrainingTitle = 'Training Exemption'
-					then TrainingTitle
-					else 'Training'
-				end as codeFormName
+			  ,'Training' as codeFormName
 			  ,convert(varchar(10),FormDate,101) as FormDate
 			  ,FormFK
 			  ,FormReviewCreateDate
@@ -131,14 +126,8 @@ BEGIN
 			  ,ReviewedBy
 			  ,FormReviewStartDate
 			  ,FormReviewEndDate
-			  ,case when TrainingTitle = 'Training Exemption'
-					then 'TrainingExemption.aspx'
-					else 'Training.aspx?TrainingPK='+rtrim(cast(TrainingPK as varchar(12)))
-				end as CaseHomeLink
-			  ,case when TrainingTitle = 'Training Exemption'
-					then 'TrainingExemption.aspx'
-					else 'Training.aspx?TrainingPK='+rtrim(cast(TrainingPK as varchar(12))) 
-				end as FormLink
+			  ,'Training.aspx?TrainingPK='+rtrim(cast(TrainingPK as varchar(12))) as CaseHomeLink
+			  ,'Training.aspx?TrainingPK='+rtrim(cast(TrainingPK as varchar(12))) as FormLink
 			  ,isnull(FormReviewEndDate, current_timestamp) as EffectiveEndDate
 			  ,dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) as EffectiveStartDate
 			  ,null as WorkerName
@@ -151,6 +140,7 @@ BEGIN
 				and ReviewedBy is null
 				and FormDate between FormReviewStartDate and isnull(FormReviewEndDate, current_timestamp)
 				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
+				and IsExempt = 0
 		union all 
 		select FormReviewPK
 			  ,null as PC1ID
