@@ -11,7 +11,6 @@ GO
 -- rspPerformanceTargetReportDetails 5 ,'10/01/2012' ,'12/31/2012'
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
-
 CREATE procedure [dbo].[rspPerformanceTargetReportDetails]
 (
     @ProgramFKs				varchar(max)    = null,
@@ -48,7 +47,7 @@ begin
 							 , TCIDPK
 							 , TCDOB
 							)
-		select
+		select distinct
 			  HVCasePK
 			 , CaseProgramPK
 			 , PC1ID
