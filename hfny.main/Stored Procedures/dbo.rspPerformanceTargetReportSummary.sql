@@ -53,7 +53,7 @@ begin
 							 , TCIDPK
 							 , TCDOB
 							)
-		select
+		select distinct
 			  HVCasePK
 			 , CaseProgramPK
 			 , PC1ID

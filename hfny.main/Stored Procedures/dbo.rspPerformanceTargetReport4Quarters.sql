@@ -99,7 +99,7 @@ begin
 							 , TCIDPK
 							 , TCDOB
 							)
-		select
+		select distinct
 			  HVCasePK
 			 , CaseProgramPK
 			 , PC1ID
@@ -338,7 +338,7 @@ begin
 							 , TCIDPK
 							 , TCDOB
 							)
-		select
+		select distinct
 			  HVCasePK
 			 , CaseProgramPK
 			 , PC1ID
@@ -531,7 +531,7 @@ begin
 							 , TCIDPK
 							 , TCDOB
 							)
-		select
+		select distinct
 			  HVCasePK
 			 , CaseProgramPK
 			 , PC1ID
@@ -722,7 +722,7 @@ begin
 							 , TCIDPK
 							 , TCDOB
 							)
-		select
+		select distinct
 			  HVCasePK
 			 , CaseProgramPK
 			 , PC1ID
