@@ -110,15 +110,19 @@ begin
 		KempeResult,
 		CaseStatus
 	)
-	SELECT h.HVCasePK,p.KempeResult, p.CaseStatus FROM HVCase h		  
-	inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK	
-	inner join dbo.SplitString(@ProgramFKs,',') on cp.programfk = listitem
-	INNER JOIN Preassessment p ON p.HVCaseFK = h.HVCasePK AND p.ProgramFK = cp.ProgramFK
-	LEFT JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
-	WHERE k.KempeDate BETWEEN @StartDate AND @EndDate	
-	and p.KempeResult is not null
-	AND cp.CaseStartDate <= @EndDate	
-	AND p.CaseStatus IN ('02','04')	
+	select	h.HVCasePK ,
+			p.KempeResult ,
+			p.CaseStatus
+	from	HVCase h
+			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+			inner join dbo.SplitString(@ProgramFKs, ',') on cp.programfk = listitem
+			inner join Preassessment p on p.HVCaseFK = h.HVCasePK
+										  and p.ProgramFK = cp.ProgramFK
+			left join Kempe k on k.HVCaseFK = h.HVCasePK
+	where	k.KempeDate between @StartDate and @EndDate
+			and p.KempeResult is not null
+			and cp.CaseStartDate <= @EndDate
+			and p.CaseStatus in ( '02', '04' )	
 
 
 
@@ -141,7 +145,7 @@ begin
 	SET @n3 = (SELECT count(HVCasePK) FROM @tbl4DataReportRow3)
 	
 	DECLARE @n3a INT 
-	SET @n3a = (SELECT count(HVCasePK) FROM @tbl4DataReportRow3 WHERE  KempeResult = 1)
+	SET @n3a = (SELECT count(HVCasePK) FROM @tbl4DataReportRow3 WHERE CaseStatus = '02' and KempeResult = 1)
 
 
 	-- Start -----4 @ Screens Terminated this month  ----------
