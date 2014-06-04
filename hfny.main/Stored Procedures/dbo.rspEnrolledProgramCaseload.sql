@@ -9,7 +9,7 @@ GO
 -- Description:	<gets you data for Enrolled Program Caseload Quarterly and Contract Period>
 -- exec [rspEnrolledProgramCaseload] ',19,','07/01/2012','09/30/2012',null,0, null,1
 -- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2011',null,0, null,0
--- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2010',null,1
+-- exec [rspEnrolledProgramCaseload] ',1,','06/01/2012','08/31/2012',null,0,1,1
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 --            added this code to the workerprogram join condition: AND wp.programfk = listitem
 -- =============================================
@@ -119,24 +119,24 @@ INSERT INTO @tblInitRequiredData(
 	[SiteFK])
 SELECT * FROM @tblInitRequiredDataTemp
 WHERE SiteFK = isnull(@sitefk,SiteFK)
----- inclusion / exclusion of closed case
---				and (DischargeDate is null
---					or case -- closed cases are not included
---						 when @IncludeClosedCases = 0 or @IncludeClosedCases is null then
---							 (case
---								 when DischargeDate > @eDate then
---									 1
---								 else
---									 0
---							 end)
---						 else -- include closed cases
---							 (case
---								 when DischargeDate >= @sDate then
---									 1
---								 else
---									 0
---							 end)
---					 end = 1)
+-- inclusion / exclusion of closed case
+				and (DischargeDate is null
+					or case -- closed cases are not included
+						 when @IncludeClosedCases = 0 or @IncludeClosedCases is null then
+							 (case
+								 when DischargeDate > @eDate then
+									 1
+								 else
+									 0
+							 end)
+						 else -- include closed cases
+							 (case
+								 when DischargeDate >= @sDate then
+									 1
+								 else
+									 0
+							 end)
+					 end = 1)
 
 ---------------------------------------------
 

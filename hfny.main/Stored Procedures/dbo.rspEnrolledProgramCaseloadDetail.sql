@@ -18,7 +18,9 @@ CREATE procedure [dbo].[rspEnrolledProgramCaseloadDetail]
     @sdate               datetime,
     @edate               datetime,
     @sitefk              int             = null,
-    @casefilterspositive varchar(200)
+    @casefilterspositive varchar(200),
+    @IncludeClosedCases		bit             = 0                                                        
+                                                        
 )
 
 as
@@ -111,6 +113,25 @@ begin
 				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = listitem
 				left join cteLevelChange lc on lc.hvcasefk = cp.HVCaseFK
 			where (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+			
+				---- inclusion / exclusion of closed case
+				and (DischargeDate is null
+					or case -- closed cases are not included
+						 when @IncludeClosedCases = 0 or @IncludeClosedCases is null then
+							 (case
+								 when DischargeDate > @eDate then
+									 1
+								 else
+									 0
+							 end)
+						 else -- include closed cases
+							 (case
+								 when DischargeDate >= @sDate then
+									 1
+								 else
+									 0
+							 end)
+					 end = 1)			
 
 	insert into @tblInitRequiredData (
 			   [HVCasePK]
@@ -126,6 +147,7 @@ begin
 			   )
 		select *
 			from @tblInitRequiredDataTemp
+			
 
 	---------------------------------------------
 	---------------------------------------------
