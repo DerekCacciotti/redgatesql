@@ -160,7 +160,7 @@ begin
 					,FLOOR(expvisitcount) AS expvisitcount
 					,startdate
 					,enddate
-					,(select levelname
+					,(select distinct levelname
 						  from hvleveldetail hld
 						  where hld.hvcasefk = cteSummary.casefk
 							   and hld.StartLevelDate = cteSummary.levelstart
