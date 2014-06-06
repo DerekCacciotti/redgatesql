@@ -258,6 +258,11 @@ SELECT
 						, TCDOB
 							 FROM #tblCommonCohort cc
 						
+
+
+
+
+
 	insert into #tblPTDetails
 			exec rspFSWEnrolledCaseTicklerASQSummary null,@eDate,@tblPTCohort
 
@@ -1937,10 +1942,11 @@ SELECT distinct cc.HVCasePK
 		 
 		  ,case when  lasqse.ASQSETCAge >= casqse.Interval then ''
 				when casqse.ASQSEReceiving = 1 then ' Child receiving EIP '
-				when casqse.Interval is null then ''				
-				else cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
-				--else cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,tcdob), 101)
-				end as ASQSEDue   		 
+				when casqse.Interval is null then ''
+				-- as per JH, dont use dev_date. Use tcdob .... khalsa 06/05/2014				
+				--else  cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
+				else cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,cc.tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,cc.tcdob), 101)
+				end as ASQSEDue  		 
 		 
 		 
 		 , case 
