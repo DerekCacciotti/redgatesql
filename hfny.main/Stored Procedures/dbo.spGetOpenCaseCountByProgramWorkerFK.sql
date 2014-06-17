@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,9 +13,10 @@ BEGIN
 
 	SELECT count(*) [n]
 	FROM dbo.CaseProgram
-	WHERE (CurrentFAWFK = @WorkerFK OR CurrentFSWFK = @WorkerFK) AND 
+	WHERE isnull(currentfswfk, currentfawfk) = @WorkerFK AND 
 	DischargeDate IS NULL AND ProgramFK = @ProgramFK
 
 END
+
 
 GO
