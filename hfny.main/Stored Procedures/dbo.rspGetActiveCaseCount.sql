@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,7 +8,6 @@ GO
 -- Author:		Chris Papas
 -- Create date: 06/18/2014
 -- Description:	Get everyone who's Active
--- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- =============================================
 CREATE procedure [dbo].[rspGetActiveCaseCount]
 (
