@@ -34,11 +34,15 @@ CREATE TABLE [dbo].[HVProgram]
 [ProgramPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramStreet] [char] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramZip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RegionFK] [int] NULL,
 [TargetZip] [nvarchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[HVProgram] ADD 
 CONSTRAINT [PK__HVProgra__1C343B0217036CC0] PRIMARY KEY CLUSTERED  ([HVProgramPK]) ON [PRIMARY]
 CREATE NONCLUSTERED INDEX [IX_FK_HVProgram_CountyFK] ON [dbo].[HVProgram] ([CountyFK]) ON [PRIMARY]
+
+
+
 
 ALTER TABLE [dbo].[HVProgram] WITH NOCHECK ADD
 CONSTRAINT [FK_HVProgram_CountyFK] FOREIGN KEY ([CountyFK]) REFERENCES [dbo].[codeCounty] ([codeCountyPK])
