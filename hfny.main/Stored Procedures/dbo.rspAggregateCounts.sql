@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -385,67 +386,66 @@ begin
 		  where convert(date, VisitStartTime) between @StartDate and @EndDate and
 				(OBPParticipated = 1 or FatherFigureParticipated = 1)
 		)
-
-	--,
-	--/* 
-	--	count of target children born since beginning of program
-	--*/  
-	--cteTargetChildrenBornSinceBeginning
-	--as
-	--	(select count(TCIDPK) as countOfTargetChildrenBornSinceBeginning 
-	--	  from HVCase
-	--	  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
-	--	  inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
-	--	  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
-	--	  where IntakeDate <= @EndDate 
-	--			and T.TCDOB <= @EndDate
-	--	)
-	--,
-	--/* 
-	--	count of target children born in reporting period
-	--*/  
-	--cteTargetChildrenBornInPeriod
-	--as
-	--	(select count(TCIDPK) as countOfTargetChildrenBornInPeriod 
-	--	  from HVCase
-	--	  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
-	--	  inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
-	--	  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
-	--	  where IntakeDate <= @EndDate 
-	--			and T.TCDOB between @StartDate and @EndDate
-	--	)
-	--,
-	--/* 
-	--	count of other children served since beginning of program
-	--*/  
-	--cteOtherChildrenServedSinceBeginning
-	--as
-	--	(select count(OtherChildPK) as countOfOtherChildrenServedSinceBeginning
-	--	  from HVCase
-	--	  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
-	--	  --inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
-	--	  inner join OtherChild oc on oc.HVCaseFK = HVCase.HVCasePK
-	--	  where IntakeDate <= @EndDate 
-	--			-- and (DischargeDate is null or DischargeDate >= @StartDate)
-	--	  --and T.TCDOB<='09/30/13'
-	--	  and oc.LivingArrangement='01'
-	--	)
-	--,
-	--/* 
-	--	count of other children served in reporting period
-	--*/  
-	--cteOtherChildrenServedInPeriod
-	--as
-	--	(select count(OtherChildPK) as countOfOtherChildrenServedInPeriod
-	--	  from HVCase
-	--	  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
-	--	  --inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
-	--	  inner join OtherChild oc on oc.HVCaseFK = HVCase.HVCasePK
-	--	  where IntakeDate <= @EndDate 
-	--			and (DischargeDate is null or DischargeDate >= @StartDate)
-	--	  --and T.TCDOB<='09/30/13'
-	--	  and oc.LivingArrangement='01'
-	--	)
+	,
+	/* 
+		count of target children born since beginning of program
+	*/  
+	cteTargetChildrenBornSinceBeginning
+	as
+		(select count(TCIDPK) as countOfTargetChildrenBornSinceBeginning 
+		  from HVCase
+		  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
+		  inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
+		  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
+		  where IntakeDate <= @EndDate 
+				and T.TCDOB <= @EndDate
+		)
+	,
+	/* 
+		count of target children born in reporting period
+	*/  
+	cteTargetChildrenBornInPeriod
+	as
+		(select count(TCIDPK) as countOfTargetChildrenBornInPeriod 
+		  from HVCase
+		  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
+		  inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
+		  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
+		  where IntakeDate <= @EndDate 
+				and T.TCDOB between @StartDate and @EndDate
+		)
+	,
+	/* 
+		count of other children served since beginning of program
+	*/  
+	cteOtherChildrenServedSinceBeginning
+	as
+		(select count(OtherChildPK) as countOfOtherChildrenServedSinceBeginning
+		  from HVCase
+		  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
+		  --inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
+		  inner join OtherChild oc on oc.HVCaseFK = HVCase.HVCasePK
+		  where IntakeDate <= @EndDate 
+				-- and (DischargeDate is null or DischargeDate >= @StartDate)
+		  --and T.TCDOB<='09/30/13'
+		  and oc.LivingArrangement='01'
+		)
+	,
+	/* 
+		count of other children served in reporting period
+	*/  
+	cteOtherChildrenServedInPeriod
+	as
+		(select count(OtherChildPK) as countOfOtherChildrenServedInPeriod
+		  from HVCase
+		  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
+		  --inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
+		  inner join OtherChild oc on oc.HVCaseFK = HVCase.HVCasePK
+		  where IntakeDate <= @EndDate 
+				and (DischargeDate is null or DischargeDate >= @StartDate)
+		  --and T.TCDOB<='09/30/13'
+		  and oc.LivingArrangement='01'
+		)
 
 	select replace(convert(varchar(20), (cast(countOfScreensCompletedSinceBeginning as money)), 1), '.00', '') as countOfScreensCompletedSinceBeginning
 			, '(100%)' as pctOfScreensCompletedSinceBeginning
@@ -523,48 +523,43 @@ begin
 			/* Home Visit Logs*/
 			/* Since Beginning */
 			, replace(convert(varchar(20), (cast(countOfHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfHomeVisitLogsSinceBeginning
-			, '(100%)' as pctOfHomeVisitLogsSinceBeginning
+			, '' as pctOfHomeVisitLogsSinceBeginning
 			/* Completed */
 			, replace(convert(varchar(20), (cast(countOfCompletedHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfCompletedHomeVisitLogsSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfCompletedHomeVisitLogsSinceBeginning / 
-															(countOfHomeVisitLogsSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfCompletedHomeVisitLogsSinceBeginning
+			, '' as pctOfCompletedHomeVisitLogsSinceBeginning
 			/* Attempted */
 			, replace(convert(varchar(20), (cast(countOfAttemptedHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfAttemptedHomeVisitLogsSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfAttemptedHomeVisitLogsSinceBeginning / 
-															(countOfHomeVisitLogsSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfAttemptedHomeVisitLogsSinceBeginning
+			, '' as pctOfAttemptedHomeVisitLogsSinceBeginning
 			/* In Period */
 			, replace(convert(varchar(20), (cast(countOfHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfHomeVisitLogsInPeriod
-			, '(100%)' as pctOfHomeVisitLogsInPeriod
+			, '' as pctOfHomeVisitLogsInPeriod
 			/* Completed */
 			, replace(convert(varchar(20), (cast(countOfCompletedHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfCompletedHomeVisitLogsInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfCompletedHomeVisitLogsInPeriod / 
-															(countOfHomeVisitLogsInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfCompletedHomeVisitLogsInPeriod
+			, '' as pctOfCompletedHomeVisitLogsInPeriod
 			/* Attempted */
 			, replace(convert(varchar(20), (cast(countOfAttemptedHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfAttemptedHomeVisitLogsInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfAttemptedHomeVisitLogsInPeriod / 
-															(countOfHomeVisitLogsInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfAttemptedHomeVisitLogsInPeriod
+			, '' as pctOfAttemptedHomeVisitLogsInPeriod
+			
 			/* Families with at least one */
 			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
-			, '(100%)' as pctOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
+			, '' as pctOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
 			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitInPeriod as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitInPeriod
-			, '(100%)' as pctOfFamiliesWithAtLeastOneHomeVisitInPeriod
-			/* At least one with OBP  or father/father figure */
+			, '' as pctOfFamiliesWithAtLeastOneHomeVisitInPeriod
+			/* At least one with OBP or father/father figure */
 			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning / 
+			, '' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
+			/* ('+replace(convert(varchar(20), cast(round(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning / 
 															(countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
+													as money)), '.00', '') + '%)' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning */
 			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod / 
+			, '' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
+			/* ('+replace(convert(varchar(20), cast(round(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod / 
 															(countOfFamiliesWithAtLeastOneHomeVisitInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
-			--, replace(convert(varchar(20), (cast(countOfTargetChildrenBornSinceBeginning as money)), 1), '.00', '') as countOfTargetChildrenBornSinceBeginning
-			--, replace(convert(varchar(20), (cast(countOfTargetChildrenBornInPeriod as money)), 1), '.00', '') as countOfTargetChildrenBornInPeriod
-			--, replace(convert(varchar(20), (cast(countOfOtherChildrenServedSinceBeginning as money)), 1), '.00', '') as countOfOtherChildrenServedSinceBeginning
-			--, replace(convert(varchar(20), (cast(countOfOtherChildrenServedInPeriod as money)), 1), '.00', '') as countOfOtherChildrenServedInPeriod
+													as money)), '.00', '') + '%)' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod */
+			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornSinceBeginning as money)), 1), '.00', '') as countOfTargetChildrenBornSinceBeginning
+			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornInPeriod as money)), 1), '.00', '') as countOfTargetChildrenBornInPeriod
+			, replace(convert(varchar(20), (cast(countOfOtherChildrenServedSinceBeginning as money)), 1), '.00', '') as countOfOtherChildrenServedSinceBeginning
+			, replace(convert(varchar(20), (cast(countOfOtherChildrenServedInPeriod as money)), 1), '.00', '') as countOfOtherChildrenServedInPeriod
 			--	countOfScreensCompletedSinceBeginning
 			--, countOfScreensCompletedInPeriod
 			--, countOfPositiveScreensSinceBeginning
@@ -631,10 +626,10 @@ begin
 	inner join cteFamiliesWithAtLeastOneHomeVisitInPeriod on 1=1
 	inner join cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning on 1=1
 	inner join cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod on 1=1
-	--inner join cteTargetChildrenBornSinceBeginning on 1=1
-	--inner join cteTargetChildrenBornInPeriod on 1=1
-	--inner join cteOtherChildrenServedSinceBeginning on 1=1
-	--inner join cteOtherChildrenServedInPeriod on 1=1
+	inner join cteTargetChildrenBornSinceBeginning on 1=1
+	inner join cteTargetChildrenBornInPeriod on 1=1
+	inner join cteOtherChildrenServedSinceBeginning on 1=1
+	inner join cteOtherChildrenServedInPeriod on 1=1
 
 end
 
