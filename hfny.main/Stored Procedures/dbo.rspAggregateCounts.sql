@@ -425,6 +425,7 @@ begin
 		  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
 		  --inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
 		  inner join OtherChild oc on oc.HVCaseFK = HVCase.HVCasePK
+		  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
 		  where IntakeDate <= @EndDate 
 				-- and (DischargeDate is null or DischargeDate >= @StartDate)
 		  --and T.TCDOB<='09/30/13'
@@ -441,6 +442,7 @@ begin
 		  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
 		  --inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
 		  inner join OtherChild oc on oc.HVCaseFK = HVCase.HVCasePK
+		  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
 		  where IntakeDate <= @EndDate 
 				and (DischargeDate is null or DischargeDate >= @StartDate)
 		  --and T.TCDOB<='09/30/13'
@@ -523,23 +525,31 @@ begin
 			/* Home Visit Logs*/
 			/* Since Beginning */
 			, replace(convert(varchar(20), (cast(countOfHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfHomeVisitLogsSinceBeginning
-			, '' as pctOfHomeVisitLogsSinceBeginning
+			, '(100%)' as pctOfHomeVisitLogsSinceBeginning
 			/* Completed */
 			, replace(convert(varchar(20), (cast(countOfCompletedHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfCompletedHomeVisitLogsSinceBeginning
-			, '' as pctOfCompletedHomeVisitLogsSinceBeginning
+			, '('+replace(convert(varchar(20), cast(round(countOfCompletedHomeVisitLogsSinceBeginning / 
+															(countOfHomeVisitLogsSinceBeginning * 1.0000) * 100, 0) 
+													as money)), '.00', '') + '%)' as pctOfCompletedHomeVisitLogsSinceBeginning
 			/* Attempted */
 			, replace(convert(varchar(20), (cast(countOfAttemptedHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfAttemptedHomeVisitLogsSinceBeginning
-			, '' as pctOfAttemptedHomeVisitLogsSinceBeginning
+			, '('+replace(convert(varchar(20), cast(round(countOfAttemptedHomeVisitLogsSinceBeginning / 
+															(countOfHomeVisitLogsSinceBeginning * 1.0000) * 100, 0) 
+													as money)), '.00', '') + '%)' as pctOfAttemptedHomeVisitLogsSinceBeginning
 			/* In Period */
 			, replace(convert(varchar(20), (cast(countOfHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfHomeVisitLogsInPeriod
-			, '' as pctOfHomeVisitLogsInPeriod
+			, '(100%)' as pctOfHomeVisitLogsInPeriod
 			/* Completed */
 			, replace(convert(varchar(20), (cast(countOfCompletedHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfCompletedHomeVisitLogsInPeriod
-			, '' as pctOfCompletedHomeVisitLogsInPeriod
+			, '('+replace(convert(varchar(20), cast(round(countOfCompletedHomeVisitLogsInPeriod / 
+															(countOfHomeVisitLogsInPeriod * 1.0000) * 100, 0) 
+													as money)), '.00', '') + '%)' as pctOfCompletedHomeVisitLogsInPeriod
 			/* Attempted */
 			, replace(convert(varchar(20), (cast(countOfAttemptedHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfAttemptedHomeVisitLogsInPeriod
-			, '' as pctOfAttemptedHomeVisitLogsInPeriod
-			
+			, '('+replace(convert(varchar(20), cast(round(countOfAttemptedHomeVisitLogsInPeriod / 
+															(countOfHomeVisitLogsInPeriod * 1.0000) * 100, 0) 
+													as money)), '.00', '') + '%)' as pctOfAttemptedHomeVisitLogsInPeriod
+
 			/* Families with at least one */
 			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
 			, '' as pctOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
