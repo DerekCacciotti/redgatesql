@@ -14,8 +14,7 @@ CREATE procedure [dbo].[rspPreAssessEngagement_Part3]
     @programfk    VARCHAR(MAX) = null,
     @StartDtT     DATETIME = NULL,
     @StartDt      DATETIME = null,
-    @EndDt        DATETIME = null,
-    @IncludeClosedCase BIT = 0
+    @EndDt        DATETIME = null
 )
 as
 
@@ -69,13 +68,6 @@ JOIN dbo.SplitString(@programfk,',') on c.programfk = listitem
 LEFT OUTER JOIN Preassessment AS b ON b.HVCaseFK = a.HVCaseFK AND b.PADate <= @EndDt
 WHERE --a.ProgramFK = @programfk AND 
 a.ScreenDate <= @EndDt AND a.ScreenResult = '1' AND a.ReferralMade = '1'
-AND 
---(c.DischargeDate IS NULL OR c.DischargeDate > @StartDt)
-(c.DischargeDate IS NULL OR
-CASE WHEN @IncludeClosedCase = 0 THEN 
-(CASE WHEN c.DischargeDate > @EndDt THEN 1 ELSE 0 END) 
-ELSE (CASE WHEN c.DischargeDate >= @StartDt THEN 1 ELSE 0 END) END = 1
-)
 AND b.HVCaseFK IS NULL
 )
 ,

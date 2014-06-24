@@ -17,8 +17,7 @@ CREATE procedure [dbo].[rspPreAssessEngagement]
     @programfk    VARCHAR(MAX) = null,
     @StartDtT     DATETIME = NULL,
     @StartDt      DATETIME = null,
-    @EndDt        DATETIME = null,
-    @IncludeClosedCase BIT = 0
+    @EndDt        DATETIME = null
 )
 as
 
@@ -26,7 +25,6 @@ as
 --DECLARE @StartDt DATE = '09/01/2012'
 --DECLARE @EndDt DATE = '11/30/2012'
 --DECLARE @programfk INT = 4
---DECLARE @IncludeClosedCase BIT = 1
 
 if @programfk is null
 	begin

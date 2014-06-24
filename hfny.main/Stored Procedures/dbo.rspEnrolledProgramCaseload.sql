@@ -18,8 +18,7 @@ CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)  
                                                         @edate        datetime,                                                        
                                                         @sitefk int             = NULL,
                                                         @CustomQuarterlyDates BIT,
-                                                        @casefilterspositive varchar(200),
-                                                        @IncludeClosedCases		bit             = 0                                                         
+                                                        @casefilterspositive varchar(200)                                                       
                                                         )
 
 as
@@ -119,24 +118,7 @@ INSERT INTO @tblInitRequiredData(
 	[SiteFK])
 SELECT * FROM @tblInitRequiredDataTemp
 WHERE SiteFK = isnull(@sitefk,SiteFK)
--- inclusion / exclusion of closed case
-				and (DischargeDate is null
-					or case -- closed cases are not included
-						 when @IncludeClosedCases = 0 or @IncludeClosedCases is null then
-							 (case
-								 when DischargeDate > @eDate then
-									 1
-								 else
-									 0
-							 end)
-						 else -- include closed cases
-							 (case
-								 when DischargeDate >= @sDate then
-									 1
-								 else
-									 0
-							 end)
-					 end = 1)
+
 
 ---------------------------------------------
 
