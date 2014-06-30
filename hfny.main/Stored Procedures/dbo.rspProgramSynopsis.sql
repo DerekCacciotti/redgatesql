@@ -1062,7 +1062,8 @@ INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0,
 				FROM cteASQ m
 				left join ASQ A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.TCAge
 				where A.ASQPK is null
-				and A.TCReferred <> 1 -- exclude if case is referred for EIP service
+				and	  isnull(A.TCReferred,'0')  <> '1' -- exclude i.e A.TCReferred = '1' if case is referred for EIP service
+				-- and (A.TCReferred  is null or A.TCReferred = '0') <-- Another way --  exclude i.e A.TCReferred = '1' if case is referred for EIP service
 				order by workername, PC1ID  
 
 
