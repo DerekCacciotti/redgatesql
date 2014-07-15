@@ -74,8 +74,8 @@ begin
 		  , tcAgeDays
 		  , lastdate
 		from cteTotalCases
-		where dateadd(dd,365.25*2.25,TCDOB)  < lastdate -- 27 months 
-		and dateadd(dd,365.25*2.75,TCDOB) > @StartDate  -- 33 months
+		where dateadd(month,27,TCDOB)  < lastdate -- 27 months 
+		and dateadd(month,33,TCDOB) > @StartDate  -- 33 months
 		
 	)	
 
@@ -94,7 +94,7 @@ begin
 		from cteCohort coh
 			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
-		where TCItemDate between dateadd(dd,458,TCDOB) and dateadd(dd,828,TCDOB)
+		where TCItemDate between dateadd(month,15,TCDOB) and dateadd(month,27,TCDOB)
 				and MedicalItemTitle = 'WBV'
 		group by coh.HVCaseFK
 				, coh.TCIDPK
@@ -102,8 +102,6 @@ begin
 				
 	)
 
-
-	
 	,
 	cteWellBabyVisitCounts
 	as
