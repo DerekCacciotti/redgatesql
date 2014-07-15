@@ -11,6 +11,8 @@ AS
 BEGIN
 	SET NOCOUNT ON;
 
+--DECLARE @WorkerFK INT = 466;
+--DECLARE @ProgramFK INT	= 8;
 	SELECT count(*) [n]
 	FROM dbo.CaseProgram
 	WHERE isnull(currentfswfk, currentfawfk) = @WorkerFK AND 
