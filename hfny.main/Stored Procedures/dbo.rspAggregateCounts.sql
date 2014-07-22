@@ -3,7 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		jrobohn
 -- Create date: <June 17, 2014>
@@ -13,7 +12,6 @@ GO
 -- exec [rspAggregateCounts] ',16,','09/01/2013' , '5/31/2014'
 -- exec [rspAggregateCounts] '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39','09/01/2013' , '5/31/2014'
 -- =============================================
-
 CREATE procedure [dbo].[rspAggregateCounts]
 (
     @ProgramFKs				varchar(max)    = null,
@@ -282,112 +280,6 @@ begin
 		)
 	,
 	/* 
-		count of home visit logs since beginning of program
-	*/ 
-	cteHomeVisitLogsSinceBeginning
-	as
-		(select count(HVLogPK) as countOfHomeVisitLogsSinceBeginning
-		  from HVLog
-		  where convert(date, VisitStartTime) <= @EndDate
-		)
-	,
-	/* 
-		count of completed home visit logs since beginning of program
-	*/ 
-	cteCompletedHomeVisitLogsSinceBeginning
-	as
-		(select count(HVLogPK) as countOfCompletedHomeVisitLogsSinceBeginning
-		  from HVLog
-		  where convert(date, VisitStartTime) <= @EndDate
-				and VisitType <> '0001'
-		)
-	,
-	/* 
-		count of attempted home visit logs since beginning of program
-	*/ 
-	cteAttemptedHomeVisitLogsSinceBeginning
-	as
-		(select count(HVLogPK) as countOfAttemptedHomeVisitLogsSinceBeginning
-		  from HVLog
-		  where convert(date, VisitStartTime) <= @EndDate
-				and VisitType = '0001'
-		)
-	,
-	/* 
-		count of home visit logs in reporting period
-	*/ 
-	cteHomeVisitLogsInPeriod
-	as
-		(select count(HVLogPK) as countOfHomeVisitLogsInPeriod
-		  from HVLog
-		  where convert(date, VisitStartTime) between @StartDate and @EndDate
-		)
-	,
-	/* 
-		count of completed home visit logs in reporting period
-	*/ 
-	cteCompletedHomeVisitLogsInPeriod
-	as
-		(select count(HVLogPK) as countOfCompletedHomeVisitLogsInPeriod
-		  from HVLog
-		  where convert(date, VisitStartTime) between @StartDate and @EndDate
-				and VisitType <> '0001'
-		)
-	,
-	/* 
-		count of attempted home visit logs in reporting period
-	*/ 
-	cteAttemptedHomeVisitLogsInPeriod
-	as
-		(select count(HVLogPK) as countOfAttemptedHomeVisitLogsInPeriod
-		  from HVLog
-		  where convert(date, VisitStartTime) between @StartDate and @EndDate and 
-				VisitType = '0001'
-		)
-	,
-	/* 
-		count of families with at least one home visit log since beginning of program
-	*/ 
-	cteFamiliesWithAtLeastOneHomeVisitSinceBeginning
-	as
-		(select count(distinct HVCaseFK) as countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
-		  from HVLog
-		  where convert(date, VisitStartTime) <= @EndDate
-		)
-	,
-	/* 
-		count of families with at least one home visit log in reporting period
-	*/ 
-	cteFamiliesWithAtLeastOneHomeVisitInPeriod
-	as
-		(select count(distinct HVCaseFK) as countOfFamiliesWithAtLeastOneHomeVisitInPeriod
-		  from HVLog
-		  where convert(date, VisitStartTime) between @StartDate and @EndDate
-		)
-	,
-	/* 
-		count of families with at least one home visit log since beginning of program
-	*/ 
-	cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
-	as
-		(select count(distinct HVCaseFK) as countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
-		  from HVLog
-		  where convert(date, VisitStartTime) <= @EndDate and
-				(OBPParticipated = 1 or FatherFigureParticipated = 1)
-		)
-	,
-	/* 
-		count of families with at least one home visit log in reporting period
-	*/ 
-	cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
-	as
-		(select count(distinct HVCaseFK) as countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
-		  from HVLog
-		  where convert(date, VisitStartTime) between @StartDate and @EndDate and
-				(OBPParticipated = 1 or FatherFigureParticipated = 1)
-		)
-	,
-	/* 
 		count of target children born since beginning of program
 	*/  
 	cteTargetChildrenBornSinceBeginning
@@ -413,6 +305,35 @@ begin
 		  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
 		  where IntakeDate <= @EndDate 
 				and T.TCDOB between @StartDate and @EndDate
+		)
+	--,
+	--/* 
+	--	count of other target children served since beginning of program
+	--*/  
+	--cteOtherTargetChildrenServedSinceBeginning
+	--as
+	--	(select count(TCIDPK) as countOfOtherTargetChildrenServedSinceBeginning
+	--	  from HVCase
+	--	  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
+	--	  inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
+	--	  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
+	--	  where IntakeDate <= @EndDate 
+	--			and T.TCDOB < @StartDate
+	--	)
+	,
+	/* 
+		count of other target children served since beginning of program
+	*/  
+	cteOtherTargetChildrenServedInPeriod
+	as
+		(select count(TCIDPK) as countOfOtherTargetChildrenServedInPeriod 
+		  from HVCase
+		  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
+		  inner join TCID T on T.HVCaseFK = HVCase.HVCasePK
+		  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = cp.ProgramFK
+		  where IntakeDate <= @EndDate 
+				and (DischargeDate is null or DischargeDate >= @StartDate)
+				and T.TCDOB < @StartDate
 		)
 	,
 	/* 
@@ -447,6 +368,122 @@ begin
 				and (DischargeDate is null or DischargeDate >= @StartDate)
 		  --and T.TCDOB<='09/30/13'
 		  and oc.LivingArrangement='01'
+		)
+	,
+	/* 
+		count of home visit logs since beginning of program
+	*/ 
+	cteHomeVisitLogsSinceBeginning
+	as
+		(select count(HVLogPK) as countOfHomeVisitLogsSinceBeginning
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) <= @EndDate
+		)
+	,
+	/* 
+		count of completed home visit logs since beginning of program
+	*/ 
+	cteCompletedHomeVisitLogsSinceBeginning
+	as
+		(select count(HVLogPK) as countOfCompletedHomeVisitLogsSinceBeginning
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) <= @EndDate
+				and VisitType <> '0001'
+		)
+	,
+	/* 
+		count of attempted home visit logs since beginning of program
+	*/ 
+	cteAttemptedHomeVisitLogsSinceBeginning
+	as
+		(select count(HVLogPK) as countOfAttemptedHomeVisitLogsSinceBeginning
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) <= @EndDate
+				and VisitType = '0001'
+		)
+	,
+	/* 
+		count of home visit logs in reporting period
+	*/ 
+	cteHomeVisitLogsInPeriod
+	as
+		(select count(HVLogPK) as countOfHomeVisitLogsInPeriod
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) between @StartDate and @EndDate
+		)
+	,
+	/* 
+		count of completed home visit logs in reporting period
+	*/ 
+	cteCompletedHomeVisitLogsInPeriod
+	as
+		(select count(HVLogPK) as countOfCompletedHomeVisitLogsInPeriod
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) between @StartDate and @EndDate
+				and VisitType <> '0001'
+		)
+	,
+	/* 
+		count of attempted home visit logs in reporting period
+	*/ 
+	cteAttemptedHomeVisitLogsInPeriod
+	as
+		(select count(HVLogPK) as countOfAttemptedHomeVisitLogsInPeriod
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) between @StartDate and @EndDate and 
+				VisitType = '0001'
+		)
+	,
+	/* 
+		count of families with at least one home visit log since beginning of program
+	*/ 
+	cteFamiliesWithAtLeastOneHomeVisitSinceBeginning
+	as
+		(select count(distinct HVCaseFK) as countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) <= @EndDate
+		)
+	,
+	/* 
+		count of families with at least one home visit log in reporting period
+	*/ 
+	cteFamiliesWithAtLeastOneHomeVisitInPeriod
+	as
+		(select count(distinct HVCaseFK) as countOfFamiliesWithAtLeastOneHomeVisitInPeriod
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) between @StartDate and @EndDate
+		)
+	,
+	/* 
+		count of families with at least one home visit log since beginning of program
+	*/ 
+	cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
+	as
+		(select count(distinct HVCaseFK) as countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) <= @EndDate and
+				(OBPParticipated = 1 or FatherFigureParticipated = 1)
+		)
+	,
+	/* 
+		count of families with at least one home visit log in reporting period
+	*/ 
+	cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
+	as
+		(select count(distinct HVCaseFK) as countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
+		  from HVLog
+		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where convert(date, VisitStartTime) between @StartDate and @EndDate and
+				(OBPParticipated = 1 or FatherFigureParticipated = 1)
 		)
 
 	select replace(convert(varchar(20), (cast(countOfScreensCompletedSinceBeginning as money)), 1), '.00', '') as countOfScreensCompletedSinceBeginning
@@ -521,6 +558,16 @@ begin
 			, replace(convert(varchar(20), (cast(countOfFamiliesServedSinceBeginning as money)), 1), '.00', '') as countOfFamiliesServedSinceBeginning
 			, replace(convert(varchar(20), (cast(countOfFamiliesServedInPeriod as money)), 1), '.00', '') as countOfFamiliesServedInPeriod
 			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledAtEndOfPeriod as money)), 1), '.00', '') as countOfFamiliesEnrolledAtEndOfPeriod
+	
+			/* Target Children born and served */
+			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornSinceBeginning as money)), 1), '.00', '') as countOfTargetChildrenBornSinceBeginning
+			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornInPeriod as money)), 1), '.00', '') as countOfTargetChildrenBornInPeriod
+			, '0' as countOfOtherTargetChildrenServedSinceBeginning
+			--, replace(convert(varchar(20), (cast(countOfOtherTargetChildrenServedSinceBeginning as money)), 1), '.00', '') as countOfOtherTargetChildrenServedSinceBeginning
+			, replace(convert(varchar(20), (cast(countOfOtherTargetChildrenServedInPeriod as money)), 1), '.00', '') as countOfOtherTargetChildrenServedInPeriod
+			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornInPeriod as money)), 1), '.00', '') as countOfTargetChildrenBornInPeriod
+			, replace(convert(varchar(20), (cast(countOfOtherChildrenServedSinceBeginning as money)), 1), '.00', '') as countOfOtherChildrenServedSinceBeginning
+			, replace(convert(varchar(20), (cast(countOfOtherChildrenServedInPeriod as money)), 1), '.00', '') as countOfOtherChildrenServedInPeriod
 
 			/* Home Visit Logs*/
 			/* Since Beginning */
@@ -566,10 +613,6 @@ begin
 			/* ('+replace(convert(varchar(20), cast(round(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod / 
 															(countOfFamiliesWithAtLeastOneHomeVisitInPeriod * 1.0000) * 100, 0) 
 													as money)), '.00', '') + '%)' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod */
-			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornSinceBeginning as money)), 1), '.00', '') as countOfTargetChildrenBornSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornInPeriod as money)), 1), '.00', '') as countOfTargetChildrenBornInPeriod
-			, replace(convert(varchar(20), (cast(countOfOtherChildrenServedSinceBeginning as money)), 1), '.00', '') as countOfOtherChildrenServedSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfOtherChildrenServedInPeriod as money)), 1), '.00', '') as countOfOtherChildrenServedInPeriod
 			--	countOfScreensCompletedSinceBeginning
 			--, countOfScreensCompletedInPeriod
 			--, countOfPositiveScreensSinceBeginning
@@ -626,6 +669,12 @@ begin
 	inner join cteFamiliesServedSinceBeginning on 1=1
 	inner join cteFamiliesServedInPeriod on 1=1
 	inner join cteFamiliesEnrolledAtEndOfPeriod on 1=1
+	inner join cteTargetChildrenBornSinceBeginning on 1=1
+	inner join cteTargetChildrenBornInPeriod on 1=1
+	--inner join cteOtherTargetChildrenServedSinceBeginning on 1=1
+	inner join cteOtherTargetChildrenServedInPeriod on 1=1
+	inner join cteOtherChildrenServedSinceBeginning on 1=1
+	inner join cteOtherChildrenServedInPeriod on 1=1
 	inner join cteHomeVisitLogsSinceBeginning on 1=1
 	inner join cteCompletedHomeVisitLogsSinceBeginning on 1=1
 	inner join cteAttemptedHomeVisitLogsSinceBeginning on 1=1
@@ -636,10 +685,6 @@ begin
 	inner join cteFamiliesWithAtLeastOneHomeVisitInPeriod on 1=1
 	inner join cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning on 1=1
 	inner join cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod on 1=1
-	inner join cteTargetChildrenBornSinceBeginning on 1=1
-	inner join cteTargetChildrenBornInPeriod on 1=1
-	inner join cteOtherChildrenServedSinceBeginning on 1=1
-	inner join cteOtherChildrenServedInPeriod on 1=1
 
 end
 
