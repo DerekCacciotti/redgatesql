@@ -13,6 +13,8 @@ GO
 -- exec dbo.rspCombinedTicklerSummary @programfk='1',@rdate='2013-03-01 00:00:00',@supervisorfk=NULL,@workerfk=79
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 --            added this code to the workerprogram join condition: AND wp.programfk = listitem
+
+-- added tcdob - missing from the combined FUP report ... Khalsa
 -- =============================================
 CREATE procedure [dbo].[rspCombinedTicklerSummary]
 (
@@ -53,7 +55,14 @@ as
 					,LevelName
 					,pc1id
 					,rtrim(pc1.pcfirstname)+' '+rtrim(pc1.pclastname) pc1name
-					,hvcase.tcdob
+					--,hvcase.tcdob
+					,case
+					   when hvcase.tcdob is not null then
+						   hvcase.tcdob
+					   else
+						   hvcase.edc
+					end as tcdob
+					
 					,gestationalage
 					,eventDescription
 					,case
@@ -150,7 +159,7 @@ as
 					   LevelName
 					 , PC1ID
 					 , pc1name
-					 , cc.HVCasePK
+					 , cc.tcdob
 					 , GestationalAge
 					 
 					 , CASE WHEN asqq.ASQTCReceiving = 1 THEN 'Please contact EI program for update'
@@ -183,7 +192,14 @@ as
 			  select LevelName
 					,pc1id
 					,rtrim(pc1.pcfirstname)+' '+rtrim(pc1.pclastname) pc1name
-					,hvcase.tcdob
+					--,hvcase.tcdob
+					,case
+					   when hvcase.tcdob is not null then
+						   hvcase.tcdob
+					   else
+						   hvcase.edc
+					end as tcdob
+					
 					,gestationalage
 					,eventDescription
 					,dateadd(dd,dueby,hvcase.tcdob) DueDate
@@ -222,7 +238,14 @@ as
 			  select LevelName
 					,pc1id
 					,rtrim(pc1.pcfirstname)+' '+rtrim(pc1.pclastname) pc1name
-					,hvcase.tcdob
+					--,hvcase.tcdob
+					,case
+					   when hvcase.tcdob is not null then
+						   hvcase.tcdob
+					   else
+						   hvcase.edc
+					end as tcdob
+					
 					,gestationalage
 					,eventDescription
 					,dateadd(dd,dueby,hvcase.tcdob) DueDate
@@ -261,7 +284,13 @@ as
 			  select LevelName
 					,pc1id
 					,rtrim(pc1.pcfirstname)+' '+rtrim(pc1.pclastname) pc1name
-					,hvcase.tcdob
+					--,hvcase.tcdob
+					,case
+					   when hvcase.tcdob is not null then
+						   hvcase.tcdob
+					   else
+						   hvcase.edc
+					end as tcdob
 					,gestationalage
 					,eventDescription
 					,dateadd(dd,dueby,hvcase.tcdob) DueDate
