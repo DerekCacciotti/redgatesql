@@ -7,61 +7,121 @@ GO
 -- Author:    <Jay Robohn> <john & dar made some modification on Sep/24/2013>
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
+-- exec rspZIPCode '18', '09/01/2012', '08/31/2013'
 -- =============================================
 CREATE procedure [dbo].[rspZipCode]
 (
-    @programfk varchar(max)    = null,
-    @sdate     datetime,
-    @edate     datetime
+    @ProgramFK	varchar(max)    = null,
+    @StartDate	datetime,
+    @EndDate	datetime
 )
 as
-
-
-
---DECLARE @programfk varchar(max)    = '18'
---DECLARE @sdate     DATETIME = '09/01/2012'
---DECLARE @edate     DATETIME = '08/31/2013'
-
-
-	if @programfk is null
+begin
+	if @ProgramFK is null
 	begin
-		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+		select @ProgramFK = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
 										   from HVProgram
 										   for xml path ('')),2,8000)
 	end
 
-	set @programfk = REPLACE(@programfk,'"','');
+	set @ProgramFK = REPLACE(@ProgramFK,'"','');
 
-	with cteAllZips (ProgramFK,zipcode,screenedzip,servedzip)
-	as (select ProgramFK
-			  ,case
-				   when PCZip IS NULL OR len(PCZip) = 0 then       --hvcase.initialzip is null or len(hvcase.initialzip) = 0 then
+	with cteScreens
+	as
+	(
+		select ProgramFK
+				, case 
+					when InitialZip is null or len(InitialZip) = 0 
+						then 'Missing/UNK'
+					else
+						left(InitialZip, 5)
+					end as ZIPCode
+				, count(InitialZip) as CountOfScreens
+			from HVCase hc
+			inner join CaseProgram cp on HVCasePK = HVCaseFK
+			inner join PC on PC1FK = PC.PCPK
+			inner join dbo.SplitString(@programfk,',') on cp.ProgramFK = listitem
+			where ScreenDate between @StartDate and @EndDate
+			group by ProgramFK
+						, case 
+							when InitialZip is null or len(InitialZip) = 0 
+								then 'Missing/UNK'
+							else
+								left(InitialZip, 5)
+							end
+	)
+	, 
+	cteServed 
+	as
+	(
+		select ProgramFK
+				, case
+					when PCZip IS NULL OR len(PCZip) = 0 then       --hvcase.initialzip is null or len(hvcase.initialzip) = 0 then
 					   'Missing/UNK'
-				   else
+					else
 					   left(PCZip,5) --left(hvcase.initialzip,5)
-			   end zipcode
-			  ,(case
-					when screendate between @sdate and @edate then
-						1
-					else
-						0
-				end) screenedzip
-			  ,(case
-					when intakedate <= @edate and (dischargedate is null or dischargedate >= @sdate) then
-						1
-					else
-						0
-				end) servedzip
-			from hvcase
-				inner join caseprogram on hvcasepk = hvcasefk
-				inner join pc pc1 on pc1fk = pc1.pcpk)
-	--select * from cteAllZips
-	select zipcode
-		  ,sum(screenedzip) as ScreenedZip
-		  ,sum(servedzip) as ServedZip
-		from cteAllZips
-			inner join dbo.SplitString(@programfk,',') on cteAllZips.ProgramFK = listitem
-		WHERE NOT (screenedzip = 0 AND servedzip = 0)
-		group by zipcode
-		order by zipcode
+					end as ZIPCode
+			   ,  count(PCZIP) as CountOfServed
+			from HVCase hc
+			inner join CaseProgram cp on HVCasePK = HVCaseFK
+			inner join PC on PC1FK = PC.PCPK
+			inner join dbo.SplitString(@programfk,',') on cp.ProgramFK = listitem
+			where IntakeDate is not null and IntakeDate <= @EndDate and
+					(DischargeDate is null or DischargeDate >= @StartDate)
+			group by ProgramFK	
+						, case
+							when PCZip IS NULL OR len(PCZip) = 0 then       --hvcase.initialzip is null or len(hvcase.initialzip) = 0 then
+							   'Missing/UNK'
+							else
+							   left(PCZip,5) --left(hvcase.initialzip,5)
+							end
+			   
+	)
+	select sc.ProgramFK
+			, sc.ZIPCode
+			, CountOfScreens
+			, CountOfServed
+	from cteScreens sc
+	inner join cteServed sv on sv.ZIPCode = sc.ZIPCode
+	union all
+	select ProgramFK
+			, ZIPCode
+			, 0 as CountOfScreens
+			, CountOfServed
+	from cteServed 
+		where ZIPCode not in (select ZIPCode from cteScreens)
+	
+	--with cteAllZips (ProgramFK,zipcode,screenedzip,servedzip)
+	--as (select ProgramFK
+	--		  ,case
+	--			   when PCZip IS NULL OR len(PCZip) = 0 then       --hvcase.initialzip is null or len(hvcase.initialzip) = 0 then
+	--				   'Missing/UNK'
+	--			   else
+	--				   left(PCZip,5) --left(hvcase.initialzip,5)
+	--		   end zipcode
+	--		  ,(case
+	--				when screendate between @sdate and @edate then
+	--					1
+	--				else
+	--					0
+	--			end) screenedzip
+	--		  ,(case
+	--				when intakedate <= @edate and (dischargedate is null or dischargedate >= @sdate) then
+	--					1
+	--				else
+	--					0
+	--			end) servedzip
+	--		from hvcase
+	--			inner join caseprogram on hvcasepk = hvcasefk
+	--			inner join pc pc1 on pc1fk = pc1.pcpk)
+	----select * from cteAllZips
+	--select zipcode
+	--	  ,sum(screenedzip) as ScreenedZip
+	--	  ,sum(servedzip) as ServedZip
+	--	from cteAllZips
+	--		inner join dbo.SplitString(@programfk,',') on cteAllZips.ProgramFK = listitem
+	--	WHERE NOT (screenedzip = 0 AND servedzip = 0)
+	--	group by zipcode
+	--	order by zipcode
+end
 GO
