@@ -7,8 +7,8 @@ GO
 -- Author:		Dar Chen
 -- Create date: 05/22/2010
 -- Description:	Home Visit Log Activity Summary Curriculum
--- [rspHomeVisitLogActivitySummaryCurriculum] 1,'10/01/2013','04/30/2014',null,'','N','N',1
--- [rspHomeVisitLogActivitySummaryCurriculum] 1,'10/01/2013','04/30/2014',null,'','N','N',0
+-- [rspHomeVisitLogActivitySummaryCurriculum] 1,'10/01/2013','04/30/2014',null,'','N','N'
+-- [rspHomeVisitLogActivitySummaryCurriculum] 1,'10/01/2013','04/30/2014',null,'','N','N'
 -- =============================================
 CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummaryCurriculum] 
 	-- Add the parameters for the stored procedure here
@@ -18,8 +18,7 @@ CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummaryCurriculum]
 	@workerfk INT = NULL,
 	@pc1id VARCHAR(13) = '',
 	@showWorkerDetail CHAR(1) = 'N',
-	@showPC1IDDetail CHAR(1) = 'N',
-	@IncludeClosedCases		bit  = 0	
+	@showPC1IDDetail CHAR(1) = 'N'
 	)
 
 --DECLARE	@programfk INT = 6
@@ -124,23 +123,8 @@ AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
 AND substring(VisitType,4,1) <> '1'
 
 -- inclusion / exclusion of closed case
-and (cp.DischargeDate is null
-	or case -- closed cases are not included
-		 when @IncludeClosedCases = 0 or @IncludeClosedCases is null then
-			 (case
-				 when cp.DischargeDate > @EndDt then
-					 1
-				 else
-					 0
-			 end)
-		 else -- include closed cases
-			 (case
-				 when cp.DischargeDate >= @StartDt then
-					 1
-				 else
-					 0
-			 end)
-	 end = 1)
+and cp.DischargeDate is null
+
 
 
 

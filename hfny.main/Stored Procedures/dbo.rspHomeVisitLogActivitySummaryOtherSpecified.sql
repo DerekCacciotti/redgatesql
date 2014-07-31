@@ -16,8 +16,7 @@ CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummaryOtherSpecified]
 	@workerfk INT = NULL,
 	@pc1id VARCHAR(13) = '',
 	@showWorkerDetail CHAR(1) = 'N',
-	@showPC1IDDetail CHAR(1) = 'N',
-	@IncludeClosedCases		bit  = 0	
+	@showPC1IDDetail CHAR(1) = 'N'
 	)
 AS
 
@@ -55,26 +54,7 @@ AND (CurriculumOtherSpecify IS NOT NULL AND
 len(rtrim(CurriculumOtherSpecify)) > 0)
 
 -- inclusion / exclusion of closed case
-and (cp.DischargeDate is null
-	or case -- closed cases are not included
-		 when @IncludeClosedCases = 0 or @IncludeClosedCases is null then
-			 (case
-				 when cp.DischargeDate > @EndDt then
-					 1
-				 else
-					 0
-			 end)
-		 else -- include closed cases
-			 (case
-				 when cp.DischargeDate >= @StartDt then
-					 1
-				 else
-					 0
-			 end)
-	 end = 1)
-
-
-
+and cp.DischargeDate is null
 
 
 
