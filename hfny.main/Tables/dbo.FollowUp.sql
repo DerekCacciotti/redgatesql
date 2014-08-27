@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[FollowUp]
 [BCPill] [bit] NULL,
 [BCShot] [bit] NULL,
 [BCSpermicide] [bit] NULL,
-[BCSterization] [bit] NULL,
+[BCSterilization] [bit] NULL,
 [BCVaginalRing] [bit] NULL,
 [BCVasectomy] [bit] NULL,
 [BCWithdrawal] [bit] NULL,
