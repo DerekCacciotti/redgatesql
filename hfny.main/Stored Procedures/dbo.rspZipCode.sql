@@ -7,7 +7,7 @@ GO
 -- Author:    <Jay Robohn> <john & dar made some modification on Sep/24/2013>
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
--- exec rspZIPCode '18', '09/01/2012', '08/31/2013'
+-- exec rspZIPCode '1', '09/01/2013', '08/31/2014'
 -- =============================================
 CREATE procedure [dbo].[rspZipCode]
 (
@@ -90,6 +90,7 @@ begin
 			, CountOfServed
 	from cteServed 
 		where ZIPCode not in (select ZIPCode from cteScreens)
+	order by ZIPCode
 	
 	--with cteAllZips (ProgramFK,zipcode,screenedzip,servedzip)
 	--as (select ProgramFK
