@@ -121,15 +121,6 @@ AND cast(VisitStartTime AS date) between @StartDt AND @EndDt
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
 AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
 AND substring(VisitType,4,1) <> '1'
-
--- inclusion / exclusion of closed case
-and cp.DischargeDate is null
-
-
-
-
-
-
 GROUP BY 
 CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END, 
 CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END
