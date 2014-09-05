@@ -115,8 +115,6 @@ as
 				   'Engagement Continue'
 			   when x.CaseStatus = '01' and datediff(d,x.PADate,@EndDt) > 30 then
 				   'No Status'
-			   when x.CaseStatus = '02' then
-				   'Positive, Assigned'
 			   when x.CaseStatus = '02'
 					and KempeResult = 1
 					and FSWAssignDate > @EndDt then 
@@ -124,6 +122,8 @@ as
 			   when x.CaseStatus = '02'
 					and KempeResult = 0 then 
 					'Negative'
+			   when x.CaseStatus = '02' then
+				   'Positive, Assigned'
 			   when x.CaseStatus = '03' then
 				   'Terminated'
 			   when x.CaseStatus = '04' then
@@ -138,7 +138,7 @@ as
 			join CaseProgram as b on b.HVCaseFK = x.HVCaseFK
 			join Worker as w on w.WorkerPK = b.CurrentFAWFK
 
-		order by CaseStatusText, [WorkName]
+		order by [WorkName]
 				,b.PC1ID
 
 GO
