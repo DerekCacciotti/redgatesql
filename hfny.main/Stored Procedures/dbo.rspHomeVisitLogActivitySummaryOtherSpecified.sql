@@ -8,19 +8,17 @@ GO
 -- Create date: 05/22/2010
 -- Description:	Home Visit Log Activity Summary Other Specified
 -- =============================================
-CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummaryOtherSpecified] 
+CREATE procedure [dbo].[rspHomeVisitLogActivitySummaryOtherSpecified] 
 	-- Add the parameters for the stored procedure here
-	(@programfk INT = NULL, 
-	@StartDt datetime,
-	@EndDt DATETIME,
-	@workerfk INT = NULL,
-	@pc1id VARCHAR(13) = '',
-	@showWorkerDetail CHAR(1) = 'N',
-	@showPC1IDDetail CHAR(1) = 'N'
+	(@programfk int = null
+   , @StartDt datetime
+   , @EndDt datetime
+   , @workerfk int = null
+   , @pc1id varchar(13) = ''
+   , @showWorkerDetail char(1) = 'N'
+   , @showPC1IDDetail char(1) = 'N'
 	)
-AS
-
---DECLARE	@programfk INT = 1
+as --DECLARE	@programfk INT = 1
 --DECLARE @StartDt DATETIME = '04/01/2012'
 --DECLARE @EndDt DATETIME = '09/30/2013'
 --DECLARE @workerfk INT = NULL
@@ -29,35 +27,35 @@ AS
 --DECLARE @showPC1IDDetail CHAR(1) = 'N'
 
 
-SELECT --DISTINCT
-CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
-, CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END PC1ID
+	select --DISTINCT
+			case when @showWorkerDetail = 'N' then 0
+				 else a.FSWFK
+			end FSWFK
+		  , case when @showPC1IDDetail = 'N' then ''
+				 else cp.PC1ID
+			end PC1ID
 --, CurriculumOtherSpecify
-, CASE WHEN count(*) > 1 THEN rtrim(CurriculumOtherSpecify) + ' (' + 
-convert(VARCHAR(5), count(*)) + ')'
-ELSE rtrim(CurriculumOtherSpecify) END CurriculumOtherSpecify
-    
-FROM HVLog AS a
-INNER JOIN worker fsw
-ON a.FSWFK = fsw.workerpk
-INNER JOIN CaseProgram cp
-ON cp.HVCaseFK = a.HVCaseFK
-INNER JOIN HVCase AS h
-ON h.HVCasePK = a.HVCaseFK
-WHERE 
-a.ProgramFK = @programfk 
-AND cast(VisitStartTime AS date) between @StartDt AND @EndDt 
-AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
-AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
-AND substring(VisitType,4,1) <> '1'
-AND (CurriculumOtherSpecify IS NOT NULL AND 
-len(rtrim(CurriculumOtherSpecify)) > 0)
-
--- inclusion / exclusion of closed case
-and cp.DischargeDate is null
-
-
-
-GROUP BY FSWFK, PC1ID, rtrim(CurriculumOtherSpecify)
-ORDER BY FSWFK, PC1ID, CurriculumOtherSpecify
+		  , case when count(*) > 1 then rtrim(CurriculumOtherSpecify) + ' (' + convert(varchar(5), count(*)) + ')'
+				 else rtrim(CurriculumOtherSpecify)
+			end CurriculumOtherSpecify
+	from	HVLog as a
+	inner join worker fsw on a.FSWFK = fsw.workerpk
+	inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK
+	inner join HVCase as h on h.HVCasePK = a.HVCaseFK
+	where	a.ProgramFK = @programfk
+			and cast(VisitStartTime as date) between @StartDt and @EndDt
+			and a.FSWFK = isnull(@workerfk, a.FSWFK)
+			and cp.PC1ID = case	when @pc1ID = '' then cp.PC1ID
+								else @pc1ID
+						   end
+			and substring(VisitType, 4, 1) <> '1'
+			and (CurriculumOtherSpecify is not null
+				 and len(rtrim(CurriculumOtherSpecify)) > 0
+				)
+	group by FSWFK
+		  , PC1ID
+		  , rtrim(CurriculumOtherSpecify)
+	order by FSWFK
+		  , PC1ID
+		  , CurriculumOtherSpecify
 GO

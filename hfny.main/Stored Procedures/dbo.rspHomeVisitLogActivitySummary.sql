@@ -10,15 +10,15 @@ GO
 -- [rspHomeVisitLogActivitySummary] 1,'10/01/2013','04/30/2014',null,'','N','N'
 -- [rspHomeVisitLogActivitySummary] 1,'10/01/2013','04/30/2014',null,'','N','N'
 -- =============================================
-CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummary] 
+CREATE procedure [dbo].[rspHomeVisitLogActivitySummary] 
 	-- Add the parameters for the stored procedure here
-	(@programfk INT = NULL, 
-	@StartDt datetime,
-	@EndDt DATETIME,
-	@workerfk INT = NULL,
-	@pc1id VARCHAR(13) = '',
-	@showWorkerDetail CHAR(1) = 'N',
-	@showPC1IDDetail CHAR(1) = 'N'
+	(@programfk int = null
+   , @StartDt datetime
+   , @EndDt datetime
+   , @workerfk int = null
+   , @pc1id varchar(13) = ''
+   , @showWorkerDetail char(1) = 'N'
+   , @showPC1IDDetail char(1) = 'N'
 	)
 
 --DECLARE	@programfk INT = 6
@@ -28,9 +28,7 @@ CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummary]
 --DECLARE @pc1id VARCHAR(13) = NULL
 --DECLARE @showWorkerDetail CHAR(1) = 'Y'
 --DECLARE @showPC1IDDetail CHAR(1) = 'N'
-AS
-
---DECLARE	@programfk INT = 1
+as --DECLARE	@programfk INT = 1
 --DECLARE @StartDt DATETIME = '04/01/2012'
 --DECLARE @EndDt DATETIME = '09/30/2012'
 --DECLARE @workerfk INT = NULL
@@ -38,578 +36,881 @@ AS
 --DECLARE @showWorkerDetail CHAR(1) = 'N'
 --DECLARE @showPC1IDDetail CHAR(1) = 'N'
 
-;WITH base1 AS (
-SELECT 
-CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
-,CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END PC1ID
-,x = sum(CASE substring(VisitType,4,1) WHEN '1' THEN 0 ELSE 1 END) 
-FROM HVLog AS a
-INNER JOIN worker fsw
-ON a.FSWFK = fsw.workerpk
-INNER JOIN CaseProgram cp
-ON cp.HVCaseFK = a.HVCaseFK
-WHERE 
-a.ProgramFK = @programfk 
-AND cast(VisitStartTime AS date) between @StartDt AND @EndDt 
-AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
-AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID end
-
--- inclusion / exclusion of closed case
-and cp.DischargeDate is null
-
-
-
-
-
-GROUP BY 
-CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END, 
-CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END
-)
-
-, base11 AS (
-SELECT FSWFK, PC1ID, CASE WHEN x = 0 THEN 1 ELSE x END x FROM base1
-)
-
-, base2 AS (
-SELECT 
-CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
-,CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END PC1ID
+;
+	with	base1
+			  as (select	case when @showWorkerDetail = 'N' then 0
+								 else a.FSWFK
+							end FSWFK
+						  , case when @showPC1IDDetail = 'N' then ''
+								 else cp.PC1ID
+							end PC1ID
+						  , x = sum(case substring(VisitType, 4, 1)
+									  when '1' then 0
+									  else 1
+									end)
+				  from		HVLog as a
+				  inner join worker fsw on a.FSWFK = fsw.workerpk
+				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK
+				  where		a.ProgramFK = @programfk
+							and cast(VisitStartTime as date) between @StartDt and @EndDt
+							and a.FSWFK = isnull(@workerfk, a.FSWFK)
+							and cp.PC1ID = case	when @pc1ID = '' then cp.PC1ID
+												else @pc1ID
+										   end
+				  group by	case when @showWorkerDetail = 'N' then 0
+								 else a.FSWFK
+							end
+						  , case when @showPC1IDDetail = 'N' then ''
+								 else cp.PC1ID
+							end
+				 ) ,
+			base11
+			  as (select	FSWFK
+						  , PC1ID
+						  , case when x = 0 then 1
+								 else x
+							end x
+				  from		base1
+				 ) ,
+			base2
+			  as (select	case when @showWorkerDetail = 'N' then 0
+								 else a.FSWFK
+							end FSWFK
+						  , case when @showPC1IDDetail = 'N' then ''
+								 else cp.PC1ID
+							end PC1ID
 --,count(DISTINCT a.HVCaseFK) [UniqueFamilies],
-
-,count(DISTINCT (CASE WHEN substring(VisitType,4,1) != '1' THEN a.HVCaseFK ELSE NULL END)) [UniqueFamilies],
-sum(CASE substring(VisitType,4,1) WHEN '1' THEN 1 ELSE 0 END) [Attempted] , 
-sum(CASE substring(VisitType,4,1) WHEN '1' THEN 0 ELSE 1 END) [CompletedVisit],
-
-sum(CASE WHEN substring(VisitType,4,1) != '1' AND isnull(h.TCDOB, h.EDC) > a.VisitStartTime THEN 1 ELSE 0 END) [CompletedPenatalVisit],
-
-sum(CASE WHEN substring(VisitType,1,3) IN ('100', '110', '010')  THEN 1 ELSE 0 END) [InHome],
-sum(CASE WHEN substring(VisitType,1,3) = '001' THEN 1 ELSE 0 END) [OutOfHome],
-sum(CASE WHEN substring(VisitType,1,3) IN ('101', '111', '011')  THEN 1 ELSE 0 END) [BothInAndOutHome],
-sum(VisitLengthHour * 60 + VisitLengthMinute)  [AvgMinuteForCompletedVisit],
-
-sum(CASE WHEN PC1Participated = 1 THEN 1 ELSE 0 END) * 100  [PC1Participated],
-sum(CASE WHEN PC2Participated  = 1 THEN 1 ELSE 0 END) * 100  [PC2Participated],
-sum(CASE WHEN OBPParticipated  = 1 THEN 1 ELSE 0 END) * 100  [OBPParticipated],
-sum(CASE WHEN FatherFigureParticipated  = 1 THEN 1 ELSE 0 END) * 100  [FatherFigureParticipated], 
-sum(CASE WHEN FatherAdvocateParticipated  > 0 THEN 1 ELSE 0 END) [FatherAdvocateParticipated],
-sum(CASE WHEN TCParticipated  = 1 THEN 1 ELSE 0 END) * 100  [TCParticipated],
-sum(CASE WHEN GrandParentParticipated  = 1 THEN 1 ELSE 0 END) * 100  [GrandParentParticipated],
-sum(CASE WHEN SiblingParticipated  = 1 THEN 1 ELSE 0 END) * 100  [SiblingParticipated],
-sum(CASE WHEN NonPrimaryFSWParticipated  = 1 THEN 1 ELSE 0 END) * 100  [NonPrimaryFSWParticipated],
-sum(CASE WHEN HVSupervisorParticipated  = 1 THEN 1 ELSE 0 END) * 100  [HVSupervisorParticipated],
-sum(CASE WHEN SupervisorObservation  = 1 THEN 1 ELSE 0 END) * 100  [SupervisorObservation],
-sum(CASE WHEN OtherParticipated  = 1 THEN 1 ELSE 0 END) * 100  [OtherParticipated],
-
--- child development
-sum(CASE WHEN substring(CDChildDevelopment,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CDChildDevelopment],
-sum(CASE WHEN substring(CDChildDevelopment,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CDChildDevelopmentNon],
-sum(CASE WHEN substring(CDToys,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CDToys],
-sum(CASE WHEN substring(CDToys,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CDToysNon],
-sum(CASE WHEN substring(CDOther,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CDOther],
-sum(CASE WHEN substring(CDOther,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CDOtherNon],
-sum(CASE WHEN substring(CDChildDevelopment,1,1) = '1'
-OR substring(CDToys,1,1) = '1'
-OR substring(CDOther,1,1) = '1'
-THEN 1 ELSE 0 END) * 100  [CD1],
-sum(CASE WHEN substring(CDChildDevelopment,2,1) = '1'
-OR  substring(CDToys,2,1) = '1'
-OR  substring(CDOther,2,1) = '1'
-THEN 1 ELSE 0 END) * 100  [CD2],
-
--- parent/child interaction
-sum(CASE WHEN substring(PCChildInteraction,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PCChildInteraction],
-sum(CASE WHEN substring(PCChildInteraction,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PCChildInteractionNon],
-sum(CASE WHEN substring(PCChildManagement,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PCChildManagement],
-sum(CASE WHEN substring(PCChildManagement,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PCChildManagementNon],
-sum(CASE WHEN substring(PCFeelings,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PCFeelings],
-sum(CASE WHEN substring(PCFeelings,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PCFeelingsNon],
-sum(CASE WHEN substring(PCStress,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PCStress],
-sum(CASE WHEN substring(PCStress,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PCStressNon],
-sum(CASE WHEN substring(PCBasicNeeds,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PCBasicNeeds],
-sum(CASE WHEN substring(PCBasicNeeds,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PCBasicNeedsNon],
-sum(CASE WHEN substring(PCShakenBaby,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PCShakenBaby],
-sum(CASE WHEN substring(PCShakenBaby,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PCShakenBabyNon],
-sum(CASE WHEN substring(PCShakenBabyVideo,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PCShakenBabyVideo],
-sum(CASE WHEN substring(PCShakenBabyVideo,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PCShakenBabyVideoNon],
-sum(CASE WHEN substring(PCOther,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PCOther],
-sum(CASE WHEN substring(PCOther,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PCOtherNon],
-
-sum(CASE WHEN substring(PCChildInteraction,1,1) = '1' 
-OR substring(PCChildManagement,1,1) = '1'
-OR substring(PCFeelings,1,1) = '1'
-OR substring(PCStress,1,1) = '1'
-OR substring(PCBasicNeeds,1,1) = '1'
-OR substring(PCShakenBaby,1,1) = '1'
-OR substring(PCShakenBabyVideo,1,1) = '1'
-OR substring(PCOther,1,1) = '1'
-THEN 1 ELSE 0 END) * 100  [PC1],
-sum(CASE WHEN substring(PCChildInteraction,2,1) = '1' 
-OR substring(PCChildManagement,2,1) = '1'
-OR substring(PCFeelings,2,1) = '1'
-OR substring(PCStress,2,1) = '1'
-OR substring(PCBasicNeeds,2,1) = '1'
-OR substring(PCShakenBaby,2,1) = '1'
-OR substring(PCShakenBabyVideo,2,1) = '1'
-OR substring(PCOther,2,1) = '1'
-THEN 1 ELSE 0 END) * 100  [PC2],
-
--- Health care
-sum(CASE WHEN substring(HCGeneral,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCGeneral],
-sum(CASE WHEN substring(HCGeneral,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCGeneralNon],
-sum(CASE WHEN substring(HCChild,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCChild],
-sum(CASE WHEN substring(HCChild,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCChildNon],
-sum(CASE WHEN substring(HCDental,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCDental],
-sum(CASE WHEN substring(HCDental,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCDentalNon],
-sum(CASE WHEN substring(HCFeeding,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCFeeding],
-sum(CASE WHEN substring(HCFeeding,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCFeedingNon],
-sum(CASE WHEN substring(HCBreastFeeding,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCBreastFeeding],
-sum(CASE WHEN substring(HCBreastFeeding,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCBreastFeedingNon],
-sum(CASE WHEN substring(HCNutrition,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCNutrition],
-sum(CASE WHEN substring(HCNutrition,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCNutritionNon],
-sum(CASE WHEN substring(HCFamilyPlanning,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCFamilyPlanning],
-sum(CASE WHEN substring(HCFamilyPlanning,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCFamilyPlanningNon],
-sum(CASE WHEN substring(HCProviders,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCProviders],
-sum(CASE WHEN substring(HCProviders,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCProvidersNon],
-sum(CASE WHEN substring(HCFASD,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCFASD],
-sum(CASE WHEN substring(HCFASD,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCFASDNon],
-sum(CASE WHEN substring(HCSexEducation,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCSexEducation],
-sum(CASE WHEN substring(HCSexEducation,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCSexEducationNon],
-sum(CASE WHEN substring(HCPrenatalCare,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCPrenatalCare],
-sum(CASE WHEN substring(HCPrenatalCare,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCPrenatalCareNon],
-sum(CASE WHEN substring(HCMedicalAdvocacy,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCMedicalAdvocacy],
-sum(CASE WHEN substring(HCMedicalAdvocacy,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCMedicalAdvocacyNon],
-sum(CASE WHEN substring(HCSafety,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCSafety],
-sum(CASE WHEN substring(HCSafety,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCSafetyNon],
-sum(CASE WHEN substring(HCSmoking,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCSmoking],
-sum(CASE WHEN substring(HCSmoking,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCSmokingNon],
-sum(CASE WHEN substring(HCSIDS,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCSIDS],
-sum(CASE WHEN substring(HCSIDS,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCSIDSNon],
-sum(CASE WHEN substring(HCOther,1,1) = '1' THEN 1 ELSE 0 END) * 100  [HCOther],
-sum(CASE WHEN substring(HCOther,2,1) = '1' THEN 1 ELSE 0 END) * 100  [HCOtherNon],
-
-sum(CASE WHEN substring(HCGeneral,1,1) = '1' 
-OR substring(HCChild,1,1) = '1'
-OR substring(HCDental,1,1) = '1'
-OR substring(HCFeeding,1,1) = '1'
-OR substring(HCBreastFeeding,1,1) = '1'
-OR substring(HCNutrition,1,1) = '1'
-OR substring(HCFamilyPlanning,1,1) = '1'
-OR substring(HCProviders,1,1) = '1'
-OR substring(HCFASD,1,1) = '1'
-OR substring(HCSexEducation,1,1) = '1'
-OR substring(HCPrenatalCare,1,1) = '1'
-OR substring(HCMedicalAdvocacy,1,1) = '1'
-OR substring(HCSafety,1,1) = '1'
-OR substring(HCSmoking,1,1) = '1'
-OR substring(HCSIDS,1,1) = '1'
-OR substring(HCOther,1,1) = '1'
-THEN 1 ELSE 0 END) * 100  [HC1],
-sum(CASE WHEN substring(HCGeneral,2,1) = '1' 
-OR substring(HCChild,2,1) = '1'
-OR substring(HCDental,2,1) = '1'
-OR substring(HCFeeding,2,1) = '1'
-OR substring(HCBreastFeeding,2,1) = '1'
-OR substring(HCNutrition,2,1) = '1'
-OR substring(HCFamilyPlanning,2,1) = '1'
-OR substring(HCProviders,2,1) = '1'
-OR substring(HCFASD,2,1) = '1'
-OR substring(HCSexEducation,2,1) = '1'
-OR substring(HCPrenatalCare,2,1) = '1'
-OR substring(HCMedicalAdvocacy,2,1) = '1'
-OR substring(HCSafety,2,1) = '1'
-OR substring(HCSmoking,2,1) = '1'
-OR substring(HCSIDS,2,1) = '1'
-OR substring(HCOther,2,1) = '1'
-THEN 1 ELSE 0 END) * 100  [HC2],
-
--- family functioning
-sum(CASE WHEN substring(FFDomesticViolence,1,1) = '1' THEN 1 ELSE 0 END) * 100  [FFDomesticViolence],
-sum(CASE WHEN substring(FFDomesticViolence,2,1) = '1' THEN 1 ELSE 0 END) * 100  [FFDomesticViolenceNon],
-sum(CASE WHEN substring(FFFamilyRelations,1,1) = '1' THEN 1 ELSE 0 END) * 100  [FFFamilyRelations],
-sum(CASE WHEN substring(FFFamilyRelations,2,1) = '1' THEN 1 ELSE 0 END) * 100  [FFFamilyRelationsNon],
-sum(CASE WHEN substring(FFSubstanceAbuse,1,1) = '1' THEN 1 ELSE 0 END) * 100  [FFSubstanceAbuse],
-sum(CASE WHEN substring(FFSubstanceAbuse,2,1) = '1' THEN 1 ELSE 0 END) * 100  [FFSubstanceAbuseNon],
-sum(CASE WHEN substring(FFMentalHealth,1,1) = '1' THEN 1 ELSE 0 END) * 100  [FFMentalHealth],
-sum(CASE WHEN substring(FFMentalHealth,2,1) = '1' THEN 1 ELSE 0 END) * 100  [FFMentalHealthNon],
-sum(CASE WHEN substring(FFCommunication,1,1) = '1' THEN 1 ELSE 0 END) * 100  [FFCommunication],
-sum(CASE WHEN substring(FFCommunication,2,1) = '1' THEN 1 ELSE 0 END) * 100  [FFCommunicationNon],
-sum(CASE WHEN substring(FFOther,1,1) = '1' THEN 1 ELSE 0 END) * 100  [FFOther],
-sum(CASE WHEN substring(FFOther,2,1) = '1' THEN 1 ELSE 0 END) * 100  [FFOtherNon],
-
-sum(CASE WHEN substring(FFDomesticViolence,1,1) = '1' 
-OR substring(FFFamilyRelations,1,1) = '1'
-OR substring(FFSubstanceAbuse,1,1) = '1'
-OR substring(FFMentalHealth,1,1) = '1'
-OR substring(FFCommunication,1,1) = '1'
-OR substring(FFOther,1,1) = '1'
-THEN 1 ELSE 0 END) * 100  [FF1],
-
-sum(CASE WHEN substring(FFDomesticViolence,2,1) = '1' 
-OR substring(FFFamilyRelations,2,1) = '1'
-OR substring(FFSubstanceAbuse,2,1) = '1'
-OR substring(FFMentalHealth,2,1) = '1'
-OR substring(FFCommunication,2,1) = '1'
-OR substring(FFOther,2,1) = '1'
-THEN 1 ELSE 0 END) * 100  [FF2],
-
--- self sufficiency
-sum(CASE WHEN substring(SSCalendar,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSCalendar],
-sum(CASE WHEN substring(SSCalendar,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSCalendarNon],
-sum(CASE WHEN substring(SSHousekeeping,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSHousekeeping],
-sum(CASE WHEN substring(SSHousekeeping,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSHousekeepingNon],
-sum(CASE WHEN substring(SSTransportation,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSTransportation],
-sum(CASE WHEN substring(SSTransportation,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSTransportationNon],
-sum(CASE WHEN substring(SSEmployment,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSEmployment],
-sum(CASE WHEN substring(SSEmployment,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSEmploymentNon],
-sum(CASE WHEN substring(SSMoneyManagement,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSMoneyManagement],
-sum(CASE WHEN substring(SSMoneyManagement,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSMoneyManagementNon],
-sum(CASE WHEN substring(SSChildCare,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSChildCare],
-sum(CASE WHEN substring(SSChildCare,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSChildCareNon],
-sum(CASE WHEN substring(SSProblemSolving,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSProblemSolving],
-sum(CASE WHEN substring(SSProblemSolving,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSProblemSolvingNon],
-sum(CASE WHEN substring(SSEducation,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSEducation],
-sum(CASE WHEN substring(SSEducation,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSEducationNon],
-sum(CASE WHEN substring(SSJob,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSJob],
-sum(CASE WHEN substring(SSJob,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSJobNon],
-sum(CASE WHEN substring(SSOther,1,1) = '1' THEN 1 ELSE 0 END) * 100  [SSOther],
-sum(CASE WHEN substring(SSOther,2,1) = '1' THEN 1 ELSE 0 END) * 100  [SSOtherNon],
-
-sum(CASE WHEN substring(SSCalendar,1,1) = '1' 
-OR substring(SSHousekeeping,1,1) = '1'
-OR substring(SSTransportation,1,1) = '1'
-OR substring(SSEmployment,1,1) = '1'
-OR substring(SSMoneyManagement,1,1) = '1'
-OR substring(SSChildCare,1,1) = '1'
-OR substring(SSProblemSolving,1,1) = '1'
-OR substring(SSEducation,1,1) = '1'
-OR substring(SSJob,1,1) = '1'
-OR substring(SSOther,1,1) = '1'
-THEN 1 ELSE 0 END) * 100  [SS1],
-
-sum(CASE WHEN substring(SSCalendar,2,1) = '1' 
-OR substring(SSHousekeeping,2,1) = '1'
-OR substring(SSTransportation,2,1) = '1'
-OR substring(SSEmployment,2,1) = '1'
-OR substring(SSMoneyManagement,2,1) = '1'
-OR substring(SSChildCare,2,1) = '1'
-OR substring(SSProblemSolving,2,1) = '1'
-OR substring(SSEducation,2,1) = '1'
-OR substring(SSJob,2,1) = '1'
-OR substring(SSOther,2,1) = '1'
-THEN 1 ELSE 0 END) * 100  [SS2],
-
--- crisis intervention
-sum(CASE WHEN substring(CIProblems,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CIProblems],
-sum(CASE WHEN substring(CIProblems,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CIProblemsNon],
-sum(CASE WHEN substring(CIOther,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CIOther],
-sum(CASE WHEN substring(CIOther,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CIOtherNon],
-
-sum(CASE WHEN substring(CIProblems,1,1) = '1' 
-OR substring(CIOther,1,1) = '1' 
-THEN 1 ELSE 0 END) * 100  [CI1],
-
-sum(CASE WHEN substring(CIProblems,2,1) = '1' 
-OR substring(CIOther,2,1) = '1' 
-THEN 1 ELSE 0 END) * 100  [CI2],
-
--- program activities
-sum(CASE WHEN substring(PAForms,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PAForms],
-sum(CASE WHEN substring(PAForms,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PAFormsNon],
-sum(CASE WHEN substring(PAVideo,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PAVideo],
-sum(CASE WHEN substring(PAVideo,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PAVideoNon],
-sum(CASE WHEN substring(PAGroups,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PAGroups],
-sum(CASE WHEN substring(PAGroups,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PAGroupsNon],
-sum(CASE WHEN substring(PAIFSP,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PAIFSP],
-sum(CASE WHEN substring(PAIFSP,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PAIFSPNon],
-sum(CASE WHEN substring(PARecreation,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PARecreation],
-sum(CASE WHEN substring(PARecreation,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PARecreationNon],
-sum(CASE WHEN substring(PAOther,1,1) = '1' THEN 1 ELSE 0 END) * 100  [PAOther],
-sum(CASE WHEN substring(PAOther,2,1) = '1' THEN 1 ELSE 0 END) * 100  [PAOtherNon],
-
-sum(CASE WHEN substring(PAForms,1,1) = '1' 
-OR substring(PAVideo,1,1) = '1'
-OR substring(PAGroups,1,1) = '1'
-OR substring(PAIFSP,1,1) = '1'
-OR substring(PARecreation,1,1) = '1'
-OR substring(PAOther,1,1) = '1'
-THEN 1 ELSE 0 END) * 100  [PA1],
-
-sum(CASE WHEN substring(PAForms,2,1) = '1' 
-OR substring(PAVideo,2,1) = '1'
-OR substring(PAGroups,2,1) = '1'
-OR substring(PAIFSP,2,1) = '1'
-OR substring(PARecreation,2,1) = '1'
-OR substring(PAOther,2,1) = '1'
-THEN 1 ELSE 0 END) * 100  [PA2],
-
--- concrete activities
-sum(CASE WHEN substring(CATransportation,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CATransportation],
-sum(CASE WHEN substring(CATransportation,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CATransportationNon],
-sum(CASE WHEN substring(CAGoods,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CAGoods],
-sum(CASE WHEN substring(CAGoods,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CAGoodsNon],
-sum(CASE WHEN substring(CALegal,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CALegal],
-sum(CASE WHEN substring(CALegal,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CALegalNon],
-sum(CASE WHEN substring(CAHousing,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CAHousing],
-sum(CASE WHEN substring(CAHousing,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CAHousingNon],
-sum(CASE WHEN substring(CAAdvocacy,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CAAdvocacy],
-sum(CASE WHEN substring(CAAdvocacy,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CAAdvocacyNon],
-sum(CASE WHEN substring(CATranslation,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CATranslation],
-sum(CASE WHEN substring(CATranslation,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CATranslationNon],
-sum(CASE WHEN substring(CALaborSupport,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CALaborSupport],
-sum(CASE WHEN substring(CALaborSupport,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CALaborSupportNon],
-sum(CASE WHEN substring(CAChildSupport,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CAChildSupport],
-sum(CASE WHEN substring(CAChildSupport,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CAChildSupportNon],
-sum(CASE WHEN substring(CAParentRights,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CAParentRights],
-sum(CASE WHEN substring(CAParentRights,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CAParentRightsNon],
-sum(CASE WHEN substring(CAVisitation,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CAVisitation],
-sum(CASE WHEN substring(CAVisitation,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CAVisitationNon],
-sum(CASE WHEN substring(CAOther,1,1) = '1' THEN 1 ELSE 0 END) * 100  [CAOther],
-sum(CASE WHEN substring(CAOther,2,1) = '1' THEN 1 ELSE 0 END) * 100  [CAOtherNon],
-
-sum(CASE WHEN substring(CATransportation,1,1) = '1' 
-OR substring(CAGoods,1,1) = '1'
-OR substring(CALegal,1,1) = '1'
-OR substring(CALegal,1,1) = '1'
-OR substring(CAHousing,1,1) = '1'
-OR substring(CAAdvocacy,1,1) = '1'
-OR substring(CATranslation,1,1) = '1'
-OR substring(CALaborSupport,1,1) = '1'
-OR substring(CAChildSupport,1,1) = '1'
-OR substring(CAVisitation,1,1) = '1'
-OR substring(CAOther,1,1) = '1'
-THEN 1 ELSE 0 END) * 100  [CA1],
-
-sum(CASE WHEN substring(CATransportation,2,1) = '1' 
-OR substring(CAGoods,2,1) = '1'
-OR substring(CALegal,2,1) = '1'
-OR substring(CALegal,2,1) = '1'
-OR substring(CAHousing,2,1) = '1'
-OR substring(CAAdvocacy,2,1) = '1'
-OR substring(CATranslation,2,1) = '1'
-OR substring(CALaborSupport,2,1) = '1'
-OR substring(CAChildSupport,2,1) = '1'
-OR substring(CAVisitation,2,1) = '1'
-OR substring(CAOther,2,1) = '1'
-THEN 1 ELSE 0 END) * 100  [CA2],
-
-count(*) [Total]
-
-FROM HVLog AS a
-INNER JOIN worker fsw
-ON a.FSWFK = fsw.workerpk
-INNER JOIN CaseProgram cp
-ON cp.HVCaseFK = a.HVCaseFK
-INNER JOIN HVCase AS h
-ON h.HVCasePK = a.HVCaseFK
-WHERE 
-a.ProgramFK = @programfk 
-AND cast(VisitStartTime AS date) between @StartDt AND @EndDt 
-AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
-AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID end
-
--- inclusion / exclusion of closed case
-and cp.DischargeDate is null
-
-
-
-
-
-GROUP BY 
-CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END, 
-CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END
-)
-
-SELECT a.*, 
-
-[UniqueFamilies], [Attempted], [CompletedVisit], [CompletedPenatalVisit], [InHome], [OutOfHome], [BothInAndOutHome], 
-([AvgMinuteForCompletedVisit] / x) [AvgMinuteForCompletedVisit],
-
-[PC1Participated] / x [PC1Participated],
-[PC2Participated] / x [PC2Participated],
-[OBPParticipated] / x [OBPParticipated],
-[FatherFigureParticipated] / x [FatherFigureParticipated], 
-[FatherAdvocateParticipated] / x [FatherAdvocateParticipated], 
-[TCParticipated] / x [TCParticipated],
-[GrandParentParticipated] / x [GrandParentParticipated],
-[SiblingParticipated] / x [SiblingParticipated],
-[NonPrimaryFSWParticipated] / x [NonPrimaryFSWParticipated],
-[HVSupervisorParticipated] / x [HVSupervisorParticipated],
-[SupervisorObservation] / x [SupervisorObservation],
-[OtherParticipated] / x [OtherParticipated],
+						  , count(distinct (case when substring(VisitType, 4, 1) != '1' then a.HVCaseFK
+												 else null
+											end)) [UniqueFamilies]
+						  , sum(case substring(VisitType, 4, 1)
+								  when '1' then 1
+								  else 0
+								end) [Attempted]
+						  , sum(case substring(VisitType, 4, 1)
+								  when '1' then 0
+								  else 1
+								end) [CompletedVisit]
+						  , sum(case when substring(VisitType, 4, 1) != '1'
+										  and isnull(h.TCDOB, h.EDC) > a.VisitStartTime then 1
+									 else 0
+								end) [CompletedPenatalVisit]
+						  , sum(case when substring(VisitType, 1, 3) in ('100', '110', '010') then 1
+									 else 0
+								end) [InHome]
+						  , sum(case when substring(VisitType, 1, 3) = '001' then 1
+									 else 0
+								end) [OutOfHome]
+						  , sum(case when substring(VisitType, 1, 3) in ('101', '111', '011') then 1
+									 else 0
+								end) [BothInAndOutHome]
+						  , sum(VisitLengthHour * 60 + VisitLengthMinute) [AvgMinuteForCompletedVisit]
+						  , sum(case when PC1Participated = 1 then 1
+									 else 0
+								end) * 100 [PC1Participated]
+						  , sum(case when PC2Participated = 1 then 1
+									 else 0
+								end) * 100 [PC2Participated]
+						  , sum(case when OBPParticipated = 1 then 1
+									 else 0
+								end) * 100 [OBPParticipated]
+						  , sum(case when FatherFigureParticipated = 1 then 1
+									 else 0
+								end) * 100 [FatherFigureParticipated]
+						  , sum(case when FatherAdvocateParticipated > 0 then 1
+									 else 0
+								end) [FatherAdvocateParticipated]
+						  , sum(case when TCParticipated = 1 then 1
+									 else 0
+								end) * 100 [TCParticipated]
+						  , sum(case when GrandParentParticipated = 1 then 1
+									 else 0
+								end) * 100 [GrandParentParticipated]
+						  , sum(case when SiblingParticipated = 1 then 1
+									 else 0
+								end) * 100 [SiblingParticipated]
+						  , sum(case when NonPrimaryFSWParticipated = 1 then 1
+									 else 0
+								end) * 100 [NonPrimaryFSWParticipated]
+						  , sum(case when HVSupervisorParticipated = 1 then 1
+									 else 0
+								end) * 100 [HVSupervisorParticipated]
+						  , sum(case when SupervisorObservation = 1 then 1
+									 else 0
+								end) * 100 [SupervisorObservation]
+						  , sum(case when OtherParticipated = 1 then 1
+									 else 0
+								end) * 100 [OtherParticipated]
+						  ,
 
 -- child development
-[CDChildDevelopment] / x [CDChildDevelopment],
-[CDChildDevelopmentNon] / x [CDChildDevelopmentNon],
-[CDToys] / x [CDToys],
-[CDToysNon] / x [CDToysNon],
-[CDOther] / x [CDOther],
-[CDOtherNon] / x [CDOtherNon],
-[CD1] / x [CD1],
-[CD2] / x [CD2],
+							sum(case when substring(CDChildDevelopment, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CDChildDevelopment]
+						  , sum(case when substring(CDChildDevelopment, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CDChildDevelopmentNon]
+						  , sum(case when substring(CDToys, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CDToys]
+						  , sum(case when substring(CDToys, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CDToysNon]
+						  , sum(case when substring(CDOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CDOther]
+						  , sum(case when substring(CDOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CDOtherNon]
+						  , sum(case when substring(CDChildDevelopment, 1, 1) = '1'
+										  or substring(CDToys, 1, 1) = '1'
+										  or substring(CDOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CD1]
+						  , sum(case when substring(CDChildDevelopment, 2, 1) = '1'
+										  or substring(CDToys, 2, 1) = '1'
+										  or substring(CDOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CD2]
+						  ,
 
 -- parent/child interaction
-[PCChildInteraction] / x [PCChildInteraction],
-[PCChildInteractionNon] / x [PCChildInteractionNon],
-[PCChildManagement] / x [PCChildManagement],
-[PCChildManagementNon] / x [PCChildManagementNon],
-[PCFeelings] / x [PCFeelings],
-[PCFeelingsNon] / x [PCFeelingsNon],
-[PCStress] / x [PCStress],
-[PCStressNon] / x [PCStressNon],
-[PCBasicNeeds] / x [PCBasicNeeds],
-[PCBasicNeedsNon] / x [PCBasicNeedsNon],
-[PCShakenBaby] / x [PCShakenBaby],
-[PCShakenBabyNon] / x [PCShakenBabyNon],
-[PCShakenBabyVideo] / x [PCShakenBabyVideo],
-[PCShakenBabyVideoNon] / x [PCShakenBabyVideoNon],
-[PCOther] / x [PCOther],
-[PCOtherNon] / x [PCOtherNon],
-
-[PC1] / x [PC1],
-[PC2] / x [PC2],
+							sum(case when substring(PCChildInteraction, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCChildInteraction]
+						  , sum(case when substring(PCChildInteraction, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCChildInteractionNon]
+						  , sum(case when substring(PCChildManagement, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCChildManagement]
+						  , sum(case when substring(PCChildManagement, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCChildManagementNon]
+						  , sum(case when substring(PCFeelings, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCFeelings]
+						  , sum(case when substring(PCFeelings, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCFeelingsNon]
+						  , sum(case when substring(PCStress, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCStress]
+						  , sum(case when substring(PCStress, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCStressNon]
+						  , sum(case when substring(PCBasicNeeds, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCBasicNeeds]
+						  , sum(case when substring(PCBasicNeeds, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCBasicNeedsNon]
+						  , sum(case when substring(PCShakenBaby, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCShakenBaby]
+						  , sum(case when substring(PCShakenBaby, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCShakenBabyNon]
+						  , sum(case when substring(PCShakenBabyVideo, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCShakenBabyVideo]
+						  , sum(case when substring(PCShakenBabyVideo, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCShakenBabyVideoNon]
+						  , sum(case when substring(PCOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCOther]
+						  , sum(case when substring(PCOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PCOtherNon]
+						  , sum(case when substring(PCChildInteraction, 1, 1) = '1'
+										  or substring(PCChildManagement, 1, 1) = '1'
+										  or substring(PCFeelings, 1, 1) = '1'
+										  or substring(PCStress, 1, 1) = '1'
+										  or substring(PCBasicNeeds, 1, 1) = '1'
+										  or substring(PCShakenBaby, 1, 1) = '1'
+										  or substring(PCShakenBabyVideo, 1, 1) = '1'
+										  or substring(PCOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PC1]
+						  , sum(case when substring(PCChildInteraction, 2, 1) = '1'
+										  or substring(PCChildManagement, 2, 1) = '1'
+										  or substring(PCFeelings, 2, 1) = '1'
+										  or substring(PCStress, 2, 1) = '1'
+										  or substring(PCBasicNeeds, 2, 1) = '1'
+										  or substring(PCShakenBaby, 2, 1) = '1'
+										  or substring(PCShakenBabyVideo, 2, 1) = '1'
+										  or substring(PCOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PC2]
+						  ,
 
 -- Health care
-[HCGeneral] / x [HCGeneral],
-[HCGeneralNon] / x [HCGeneralNon],
-[HCChild] / x [HCChild],
-[HCChildNon] / x [HCChildNon],
-[HCDental] / x [HCDental],
-[HCDentalNon] / x [HCDentalNon],
-[HCFeeding] / x [HCFeeding],
-[HCFeedingNon] / x [HCFeedingNon],
-[HCBreastFeeding] / x [HCBreastFeeding],
-[HCBreastFeedingNon] / x [HCBreastFeedingNon],
-[HCNutrition] / x [HCNutrition],
-[HCNutritionNon] / x [HCNutritionNon],
-[HCFamilyPlanning] / x [HCFamilyPlanning],
-[HCFamilyPlanningNon] / x [HCFamilyPlanningNon],
-[HCProviders] / x [HCProviders],
-[HCProvidersNon] / x [HCProvidersNon],
-[HCFASD] / x [HCFASD],
-[HCFASDNon] / x [HCFASDNon],
-[HCSexEducation] / x [HCSexEducation],
-[HCSexEducationNon] / x [HCSexEducationNon],
-[HCPrenatalCare] / x [HCPrenatalCare],
-[HCPrenatalCareNon] / x [HCPrenatalCareNon],
-[HCMedicalAdvocacy] / x [HCMedicalAdvocacy],
-[HCMedicalAdvocacyNon] / x [HCMedicalAdvocacyNon],
-[HCSafety] / x [HCSafety],
-[HCSafetyNon] / x [HCSafetyNon],
-[HCSmoking] / x [HCSmoking],
-[HCSmokingNon] / x [HCSmokingNon],
-[HCSIDS] / x [HCSIDS],
-[HCSIDSNon] / x [HCSIDSNon],
-[HCOther] / x [HCOther],
-[HCOther] / x [HCOther],
-[HCOtherNon] / x [HCOtherNon],
-
-[HC1] / x [HC1],
-[HC2] / x [HC2],
+							sum(case when substring(HCGeneral, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCGeneral]
+						  , sum(case when substring(HCGeneral, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCGeneralNon]
+						  , sum(case when substring(HCChild, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCChild]
+						  , sum(case when substring(HCChild, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCChildNon]
+						  , sum(case when substring(HCDental, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCDental]
+						  , sum(case when substring(HCDental, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCDentalNon]
+						  , sum(case when substring(HCFeeding, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCFeeding]
+						  , sum(case when substring(HCFeeding, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCFeedingNon]
+						  , sum(case when substring(HCBreastFeeding, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCBreastFeeding]
+						  , sum(case when substring(HCBreastFeeding, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCBreastFeedingNon]
+						  , sum(case when substring(HCNutrition, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCNutrition]
+						  , sum(case when substring(HCNutrition, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCNutritionNon]
+						  , sum(case when substring(HCFamilyPlanning, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCFamilyPlanning]
+						  , sum(case when substring(HCFamilyPlanning, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCFamilyPlanningNon]
+						  , sum(case when substring(HCProviders, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCProviders]
+						  , sum(case when substring(HCProviders, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCProvidersNon]
+						  , sum(case when substring(HCFASD, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCFASD]
+						  , sum(case when substring(HCFASD, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCFASDNon]
+						  , sum(case when substring(HCSexEducation, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCSexEducation]
+						  , sum(case when substring(HCSexEducation, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCSexEducationNon]
+						  , sum(case when substring(HCPrenatalCare, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCPrenatalCare]
+						  , sum(case when substring(HCPrenatalCare, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCPrenatalCareNon]
+						  , sum(case when substring(HCMedicalAdvocacy, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCMedicalAdvocacy]
+						  , sum(case when substring(HCMedicalAdvocacy, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCMedicalAdvocacyNon]
+						  , sum(case when substring(HCSafety, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCSafety]
+						  , sum(case when substring(HCSafety, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCSafetyNon]
+						  , sum(case when substring(HCSmoking, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCSmoking]
+						  , sum(case when substring(HCSmoking, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCSmokingNon]
+						  , sum(case when substring(HCSIDS, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCSIDS]
+						  , sum(case when substring(HCSIDS, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCSIDSNon]
+						  , sum(case when substring(HCOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCOther]
+						  , sum(case when substring(HCOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HCOtherNon]
+						  , sum(case when substring(HCGeneral, 1, 1) = '1'
+										  or substring(HCChild, 1, 1) = '1'
+										  or substring(HCDental, 1, 1) = '1'
+										  or substring(HCFeeding, 1, 1) = '1'
+										  or substring(HCBreastFeeding, 1, 1) = '1'
+										  or substring(HCNutrition, 1, 1) = '1'
+										  or substring(HCFamilyPlanning, 1, 1) = '1'
+										  or substring(HCProviders, 1, 1) = '1'
+										  or substring(HCFASD, 1, 1) = '1'
+										  or substring(HCSexEducation, 1, 1) = '1'
+										  or substring(HCPrenatalCare, 1, 1) = '1'
+										  or substring(HCMedicalAdvocacy, 1, 1) = '1'
+										  or substring(HCSafety, 1, 1) = '1'
+										  or substring(HCSmoking, 1, 1) = '1'
+										  or substring(HCSIDS, 1, 1) = '1'
+										  or substring(HCOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [HC1]
+						  , sum(case when substring(HCGeneral, 2, 1) = '1'
+										  or substring(HCChild, 2, 1) = '1'
+										  or substring(HCDental, 2, 1) = '1'
+										  or substring(HCFeeding, 2, 1) = '1'
+										  or substring(HCBreastFeeding, 2, 1) = '1'
+										  or substring(HCNutrition, 2, 1) = '1'
+										  or substring(HCFamilyPlanning, 2, 1) = '1'
+										  or substring(HCProviders, 2, 1) = '1'
+										  or substring(HCFASD, 2, 1) = '1'
+										  or substring(HCSexEducation, 2, 1) = '1'
+										  or substring(HCPrenatalCare, 2, 1) = '1'
+										  or substring(HCMedicalAdvocacy, 2, 1) = '1'
+										  or substring(HCSafety, 2, 1) = '1'
+										  or substring(HCSmoking, 2, 1) = '1'
+										  or substring(HCSIDS, 2, 1) = '1'
+										  or substring(HCOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [HC2]
+						  ,
 
 -- family functioning
-[FFDomesticViolence] / x [FFDomesticViolence],
-[FFDomesticViolenceNon] / x [FFDomesticViolenceNon],
-[FFFamilyRelations] / x [FFFamilyRelations],
-[FFFamilyRelationsNon] / x [FFFamilyRelationsNon],
-[FFSubstanceAbuse] / x [FFSubstanceAbuse],
-[FFSubstanceAbuseNon] / x [FFSubstanceAbuseNon],
-[FFMentalHealth] / x [FFMentalHealth],
-[FFMentalHealthNon] / x [FFMentalHealthNon],
-[FFCommunication] / x [FFCommunication],
-[FFCommunicationNon] / x [FFCommunicationNon],
-[FFOther] / x [FFOther],
-[FFOtherNon] / x [FFOtherNon],
-
-[FF1] / x [FF1],
-[FF2] / x [FF2],
+							sum(case when substring(FFDomesticViolence, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFDomesticViolence]
+						  , sum(case when substring(FFDomesticViolence, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFDomesticViolenceNon]
+						  , sum(case when substring(FFFamilyRelations, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFFamilyRelations]
+						  , sum(case when substring(FFFamilyRelations, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFFamilyRelationsNon]
+						  , sum(case when substring(FFSubstanceAbuse, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFSubstanceAbuse]
+						  , sum(case when substring(FFSubstanceAbuse, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFSubstanceAbuseNon]
+						  , sum(case when substring(FFMentalHealth, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFMentalHealth]
+						  , sum(case when substring(FFMentalHealth, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFMentalHealthNon]
+						  , sum(case when substring(FFCommunication, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFCommunication]
+						  , sum(case when substring(FFCommunication, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFCommunicationNon]
+						  , sum(case when substring(FFOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFOther]
+						  , sum(case when substring(FFOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [FFOtherNon]
+						  , sum(case when substring(FFDomesticViolence, 1, 1) = '1'
+										  or substring(FFFamilyRelations, 1, 1) = '1'
+										  or substring(FFSubstanceAbuse, 1, 1) = '1'
+										  or substring(FFMentalHealth, 1, 1) = '1'
+										  or substring(FFCommunication, 1, 1) = '1'
+										  or substring(FFOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [FF1]
+						  , sum(case when substring(FFDomesticViolence, 2, 1) = '1'
+										  or substring(FFFamilyRelations, 2, 1) = '1'
+										  or substring(FFSubstanceAbuse, 2, 1) = '1'
+										  or substring(FFMentalHealth, 2, 1) = '1'
+										  or substring(FFCommunication, 2, 1) = '1'
+										  or substring(FFOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [FF2]
+						  ,
 
 -- self sufficiency
-[SSCalendar] / x [SSCalendar],
-[SSCalendarNon] / x [SSCalendarNon],
-[SSHousekeeping] / x [SSHousekeeping],
-[SSHousekeepingNon] / x [SSHousekeepingNon],
-[SSTransportation] / x [SSTransportation],
-[SSTransportationNon] / x [SSTransportationNon],
-[SSEmployment] / x [SSEmployment],
-[SSEmploymentNon] / x [SSEmploymentNon],
-[SSMoneyManagement] / x [SSMoneyManagement],
-[SSMoneyManagementNon] / x [SSMoneyManagementNon],
-[SSChildCare] / x [SSChildCare],
-[SSChildCareNon] / x [SSChildCareNon],
-[SSProblemSolving] / x [SSProblemSolving],
-[SSProblemSolvingNon] / x [SSProblemSolvingNon],
-[SSEducation] / x [SSEducation],
-[SSEducationNon] / x [SSEducationNon],
-[SSJob] / x [SSJob],
-[SSJobNon] / x [SSJobNon],
-[SSOther] / x [SSOther],
-[SSOtherNon] / x [SSOtherNon],
-
-[SS1] / x [SS1],
-[SS2] / x [SS2],
+							sum(case when substring(SSCalendar, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSCalendar]
+						  , sum(case when substring(SSCalendar, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSCalendarNon]
+						  , sum(case when substring(SSHousekeeping, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSHousekeeping]
+						  , sum(case when substring(SSHousekeeping, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSHousekeepingNon]
+						  , sum(case when substring(SSTransportation, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSTransportation]
+						  , sum(case when substring(SSTransportation, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSTransportationNon]
+						  , sum(case when substring(SSEmployment, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSEmployment]
+						  , sum(case when substring(SSEmployment, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSEmploymentNon]
+						  , sum(case when substring(SSMoneyManagement, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSMoneyManagement]
+						  , sum(case when substring(SSMoneyManagement, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSMoneyManagementNon]
+						  , sum(case when substring(SSChildCare, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSChildCare]
+						  , sum(case when substring(SSChildCare, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSChildCareNon]
+						  , sum(case when substring(SSProblemSolving, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSProblemSolving]
+						  , sum(case when substring(SSProblemSolving, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSProblemSolvingNon]
+						  , sum(case when substring(SSEducation, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSEducation]
+						  , sum(case when substring(SSEducation, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSEducationNon]
+						  , sum(case when substring(SSJob, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSJob]
+						  , sum(case when substring(SSJob, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSJobNon]
+						  , sum(case when substring(SSOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSOther]
+						  , sum(case when substring(SSOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SSOtherNon]
+						  , sum(case when substring(SSCalendar, 1, 1) = '1'
+										  or substring(SSHousekeeping, 1, 1) = '1'
+										  or substring(SSTransportation, 1, 1) = '1'
+										  or substring(SSEmployment, 1, 1) = '1'
+										  or substring(SSMoneyManagement, 1, 1) = '1'
+										  or substring(SSChildCare, 1, 1) = '1'
+										  or substring(SSProblemSolving, 1, 1) = '1'
+										  or substring(SSEducation, 1, 1) = '1'
+										  or substring(SSJob, 1, 1) = '1'
+										  or substring(SSOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [SS1]
+						  , sum(case when substring(SSCalendar, 2, 1) = '1'
+										  or substring(SSHousekeeping, 2, 1) = '1'
+										  or substring(SSTransportation, 2, 1) = '1'
+										  or substring(SSEmployment, 2, 1) = '1'
+										  or substring(SSMoneyManagement, 2, 1) = '1'
+										  or substring(SSChildCare, 2, 1) = '1'
+										  or substring(SSProblemSolving, 2, 1) = '1'
+										  or substring(SSEducation, 2, 1) = '1'
+										  or substring(SSJob, 2, 1) = '1'
+										  or substring(SSOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [SS2]
+						  ,
 
 -- crisis intervention
-[CIProblems] / x [CIProblems],
-[CIProblemsNon] / x [CIProblemsNon],
-[CIOther] / x [CIOther],
-[CIOtherNon] / x [CIOtherNon],
-
-[CI1] / x [CI1],
-[CI2] / x [CI2],
+							sum(case when substring(CIProblems, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CIProblems]
+						  , sum(case when substring(CIProblems, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CIProblemsNon]
+						  , sum(case when substring(CIOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CIOther]
+						  , sum(case when substring(CIOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CIOtherNon]
+						  , sum(case when substring(CIProblems, 1, 1) = '1'
+										  or substring(CIOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CI1]
+						  , sum(case when substring(CIProblems, 2, 1) = '1'
+										  or substring(CIOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CI2]
+						  ,
 
 -- program activities
-[PAForms] / x [PAForms],
-[PAFormsNon] / x [PAFormsNon],
-[PAVideo] / x [PAVideo],
-[PAVideoNon] / x [PAVideoNon],
-[PAGroups] / x [PAGroups],
-[PAGroupsNon] / x [PAGroupsNon],
-[PAIFSP] / x [PAIFSP],
-[PAIFSPNon] / x [PAIFSPNon],
-[PARecreation] / x [PARecreation],
-[PARecreationNon] / x [PARecreationNon],
-[PAOther] / x [PAOther],
-[PAOtherNon] / x [PAOtherNon],
-
-[PA1] / x [PA1],
-[PA2] / x [PA2],
+							sum(case when substring(PAForms, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAForms]
+						  , sum(case when substring(PAForms, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAFormsNon]
+						  , sum(case when substring(PAVideo, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAVideo]
+						  , sum(case when substring(PAVideo, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAVideoNon]
+						  , sum(case when substring(PAGroups, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAGroups]
+						  , sum(case when substring(PAGroups, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAGroupsNon]
+						  , sum(case when substring(PAIFSP, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAIFSP]
+						  , sum(case when substring(PAIFSP, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAIFSPNon]
+						  , sum(case when substring(PARecreation, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PARecreation]
+						  , sum(case when substring(PARecreation, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PARecreationNon]
+						  , sum(case when substring(PAOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAOther]
+						  , sum(case when substring(PAOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PAOtherNon]
+						  , sum(case when substring(PAForms, 1, 1) = '1'
+										  or substring(PAVideo, 1, 1) = '1'
+										  or substring(PAGroups, 1, 1) = '1'
+										  or substring(PAIFSP, 1, 1) = '1'
+										  or substring(PARecreation, 1, 1) = '1'
+										  or substring(PAOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [PA1]
+						  , sum(case when substring(PAForms, 2, 1) = '1'
+										  or substring(PAVideo, 2, 1) = '1'
+										  or substring(PAGroups, 2, 1) = '1'
+										  or substring(PAIFSP, 2, 1) = '1'
+										  or substring(PARecreation, 2, 1) = '1'
+										  or substring(PAOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [PA2]
+						  ,
 
 -- concrete activities
-[CATransportation] / x [CATransportation],
-[CATransportationNon] / x [CATransportationNon],
-[CAGoods] / x [CAGoods],
-[CAGoodsNon] / x [CAGoodsNon],
-[CALegal] / x [CALegal],
-[CALegalNon] / x [CALegalNon],
-[CAHousing] / x [CAHousing],
-[CAHousingNon] / x [CAHousingNon],
-[CAAdvocacy] / x [CAAdvocacy],
-[CAAdvocacyNon] / x [CAAdvocacyNon],
-[CATranslation] / x [CATranslation],
-[CATranslationNon] / x [CATranslationNon],
-[CALaborSupport] / x [CALaborSupport],
-[CALaborSupportNon] / x [CALaborSupportNon],
-[CAChildSupport] / x [CAChildSupport],
-[CAChildSupportNon] / x [CAChildSupportNon],
-[CAParentRights] / x [CAParentRights],
-[CAParentRightsNon] / x [CAParentRightsNon],
-[CAVisitation] / x [CAVisitation],
-[CAVisitationNon] / x [CAVisitationNon],
-[CAOther] / x [CAOther],
-[CAOtherNon] / x [CAOtherNon],
+							sum(case when substring(CATransportation, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CATransportation]
+						  , sum(case when substring(CATransportation, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CATransportationNon]
+						  , sum(case when substring(CAGoods, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAGoods]
+						  , sum(case when substring(CAGoods, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAGoodsNon]
+						  , sum(case when substring(CALegal, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CALegal]
+						  , sum(case when substring(CALegal, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CALegalNon]
+						  , sum(case when substring(CAHousing, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAHousing]
+						  , sum(case when substring(CAHousing, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAHousingNon]
+						  , sum(case when substring(CAAdvocacy, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAAdvocacy]
+						  , sum(case when substring(CAAdvocacy, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAAdvocacyNon]
+						  , sum(case when substring(CATranslation, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CATranslation]
+						  , sum(case when substring(CATranslation, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CATranslationNon]
+						  , sum(case when substring(CALaborSupport, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CALaborSupport]
+						  , sum(case when substring(CALaborSupport, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CALaborSupportNon]
+						  , sum(case when substring(CAChildSupport, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAChildSupport]
+						  , sum(case when substring(CAChildSupport, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAChildSupportNon]
+						  , sum(case when substring(CAParentRights, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAParentRights]
+						  , sum(case when substring(CAParentRights, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAParentRightsNon]
+						  , sum(case when substring(CAVisitation, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAVisitation]
+						  , sum(case when substring(CAVisitation, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAVisitationNon]
+						  , sum(case when substring(CAOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAOther]
+						  , sum(case when substring(CAOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CAOtherNon]
+						  , sum(case when substring(CATransportation, 1, 1) = '1'
+										  or substring(CAGoods, 1, 1) = '1'
+										  or substring(CALegal, 1, 1) = '1'
+										  or substring(CALegal, 1, 1) = '1'
+										  or substring(CAHousing, 1, 1) = '1'
+										  or substring(CAAdvocacy, 1, 1) = '1'
+										  or substring(CATranslation, 1, 1) = '1'
+										  or substring(CALaborSupport, 1, 1) = '1'
+										  or substring(CAChildSupport, 1, 1) = '1'
+										  or substring(CAVisitation, 1, 1) = '1'
+										  or substring(CAOther, 1, 1) = '1' then 1
+									 else 0
+								end) * 100 [CA1]
+						  , sum(case when substring(CATransportation, 2, 1) = '1'
+										  or substring(CAGoods, 2, 1) = '1'
+										  or substring(CALegal, 2, 1) = '1'
+										  or substring(CALegal, 2, 1) = '1'
+										  or substring(CAHousing, 2, 1) = '1'
+										  or substring(CAAdvocacy, 2, 1) = '1'
+										  or substring(CATranslation, 2, 1) = '1'
+										  or substring(CALaborSupport, 2, 1) = '1'
+										  or substring(CAChildSupport, 2, 1) = '1'
+										  or substring(CAVisitation, 2, 1) = '1'
+										  or substring(CAOther, 2, 1) = '1' then 1
+									 else 0
+								end) * 100 [CA2]
+						  , count(*) [Total]
+				  from		HVLog as a
+				  inner join worker fsw on a.FSWFK = fsw.workerpk
+				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK
+				  inner join HVCase as h on h.HVCasePK = a.HVCaseFK
+				  where		a.ProgramFK = @programfk
+							and cast(VisitStartTime as date) between @StartDt and @EndDt
+							and a.FSWFK = isnull(@workerfk, a.FSWFK)
+							and cp.PC1ID = case	when @pc1ID = '' then cp.PC1ID
+												else @pc1ID
+										   end
+				  group by	case when @showWorkerDetail = 'N' then 0
+								 else a.FSWFK
+							end
+						  , case when @showPC1IDDetail = 'N' then ''
+								 else cp.PC1ID
+							end
+				 )
+		select	a.*
+			  , [UniqueFamilies]
+			  , [Attempted]
+			  , [CompletedVisit]
+			  , [CompletedPenatalVisit]
+			  , [InHome]
+			  , [OutOfHome]
+			  , [BothInAndOutHome]
+			  , ([AvgMinuteForCompletedVisit] / x) [AvgMinuteForCompletedVisit]
+			  , [PC1Participated] / x [PC1Participated]
+			  , [PC2Participated] / x [PC2Participated]
+			  , [OBPParticipated] / x [OBPParticipated]
+			  , [FatherFigureParticipated] / x [FatherFigureParticipated]
+			  , [FatherAdvocateParticipated] / x [FatherAdvocateParticipated]
+			  , [TCParticipated] / x [TCParticipated]
+			  , [GrandParentParticipated] / x [GrandParentParticipated]
+			  , [SiblingParticipated] / x [SiblingParticipated]
+			  , [NonPrimaryFSWParticipated] / x [NonPrimaryFSWParticipated]
+			  , [HVSupervisorParticipated] / x [HVSupervisorParticipated]
+			  , [SupervisorObservation] / x [SupervisorObservation]
+			  , [OtherParticipated] / x [OtherParticipated]
+			  ,
 
-[CA1] / x [CA1],
-[CA2] / x [CA2],
-[Total],
+-- child development
+				[CDChildDevelopment] / x [CDChildDevelopment]
+			  , [CDChildDevelopmentNon] / x [CDChildDevelopmentNon]
+			  , [CDToys] / x [CDToys]
+			  , [CDToysNon] / x [CDToysNon]
+			  , [CDOther] / x [CDOther]
+			  , [CDOtherNon] / x [CDOtherNon]
+			  , [CD1] / x [CD1]
+			  , [CD2] / x [CD2]
+			  ,
 
-CASE WHEN c.WorkerPK IS NULL THEN 'All Workers' ELSE 
-rtrim(c.LastName) + ', ' + rtrim(c.FirstName) END WorkerName
+-- parent/child interaction
+				[PCChildInteraction] / x [PCChildInteraction]
+			  , [PCChildInteractionNon] / x [PCChildInteractionNon]
+			  , [PCChildManagement] / x [PCChildManagement]
+			  , [PCChildManagementNon] / x [PCChildManagementNon]
+			  , [PCFeelings] / x [PCFeelings]
+			  , [PCFeelingsNon] / x [PCFeelingsNon]
+			  , [PCStress] / x [PCStress]
+			  , [PCStressNon] / x [PCStressNon]
+			  , [PCBasicNeeds] / x [PCBasicNeeds]
+			  , [PCBasicNeedsNon] / x [PCBasicNeedsNon]
+			  , [PCShakenBaby] / x [PCShakenBaby]
+			  , [PCShakenBabyNon] / x [PCShakenBabyNon]
+			  , [PCShakenBabyVideo] / x [PCShakenBabyVideo]
+			  , [PCShakenBabyVideoNon] / x [PCShakenBabyVideoNon]
+			  , [PCOther] / x [PCOther]
+			  , [PCOtherNon] / x [PCOtherNon]
+			  , [PC1] / x [PC1]
+			  , [PC2] / x [PC2]
+			  ,
 
-FROM base11 AS a JOIN base2 AS b ON a.FSWFK = b.FSWFK AND a.PC1ID = b.PC1ID
-LEFT OUTER JOIN Worker AS c ON 
-CASE WHEN (@showWorkerDetail = 'N' AND @workerfk IS NOT NULL) THEN @workerfk 
-ELSE a.FSWFK END = c.WorkerPK
-ORDER BY WorkerName, a.PC1ID
+-- Health care
+				[HCGeneral] / x [HCGeneral]
+			  , [HCGeneralNon] / x [HCGeneralNon]
+			  , [HCChild] / x [HCChild]
+			  , [HCChildNon] / x [HCChildNon]
+			  , [HCDental] / x [HCDental]
+			  , [HCDentalNon] / x [HCDentalNon]
+			  , [HCFeeding] / x [HCFeeding]
+			  , [HCFeedingNon] / x [HCFeedingNon]
+			  , [HCBreastFeeding] / x [HCBreastFeeding]
+			  , [HCBreastFeedingNon] / x [HCBreastFeedingNon]
+			  , [HCNutrition] / x [HCNutrition]
+			  , [HCNutritionNon] / x [HCNutritionNon]
+			  , [HCFamilyPlanning] / x [HCFamilyPlanning]
+			  , [HCFamilyPlanningNon] / x [HCFamilyPlanningNon]
+			  , [HCProviders] / x [HCProviders]
+			  , [HCProvidersNon] / x [HCProvidersNon]
+			  , [HCFASD] / x [HCFASD]
+			  , [HCFASDNon] / x [HCFASDNon]
+			  , [HCSexEducation] / x [HCSexEducation]
+			  , [HCSexEducationNon] / x [HCSexEducationNon]
+			  , [HCPrenatalCare] / x [HCPrenatalCare]
+			  , [HCPrenatalCareNon] / x [HCPrenatalCareNon]
+			  , [HCMedicalAdvocacy] / x [HCMedicalAdvocacy]
+			  , [HCMedicalAdvocacyNon] / x [HCMedicalAdvocacyNon]
+			  , [HCSafety] / x [HCSafety]
+			  , [HCSafetyNon] / x [HCSafetyNon]
+			  , [HCSmoking] / x [HCSmoking]
+			  , [HCSmokingNon] / x [HCSmokingNon]
+			  , [HCSIDS] / x [HCSIDS]
+			  , [HCSIDSNon] / x [HCSIDSNon]
+			  , [HCOther] / x [HCOther]
+			  , [HCOther] / x [HCOther]
+			  , [HCOtherNon] / x [HCOtherNon]
+			  , [HC1] / x [HC1]
+			  , [HC2] / x [HC2]
+			  ,
+
+-- family functioning
+				[FFDomesticViolence] / x [FFDomesticViolence]
+			  , [FFDomesticViolenceNon] / x [FFDomesticViolenceNon]
+			  , [FFFamilyRelations] / x [FFFamilyRelations]
+			  , [FFFamilyRelationsNon] / x [FFFamilyRelationsNon]
+			  , [FFSubstanceAbuse] / x [FFSubstanceAbuse]
+			  , [FFSubstanceAbuseNon] / x [FFSubstanceAbuseNon]
+			  , [FFMentalHealth] / x [FFMentalHealth]
+			  , [FFMentalHealthNon] / x [FFMentalHealthNon]
+			  , [FFCommunication] / x [FFCommunication]
+			  , [FFCommunicationNon] / x [FFCommunicationNon]
+			  , [FFOther] / x [FFOther]
+			  , [FFOtherNon] / x [FFOtherNon]
+			  , [FF1] / x [FF1]
+			  , [FF2] / x [FF2]
+			  ,
+
+-- self sufficiency
+				[SSCalendar] / x [SSCalendar]
+			  , [SSCalendarNon] / x [SSCalendarNon]
+			  , [SSHousekeeping] / x [SSHousekeeping]
+			  , [SSHousekeepingNon] / x [SSHousekeepingNon]
+			  , [SSTransportation] / x [SSTransportation]
+			  , [SSTransportationNon] / x [SSTransportationNon]
+			  , [SSEmployment] / x [SSEmployment]
+			  , [SSEmploymentNon] / x [SSEmploymentNon]
+			  , [SSMoneyManagement] / x [SSMoneyManagement]
+			  , [SSMoneyManagementNon] / x [SSMoneyManagementNon]
+			  , [SSChildCare] / x [SSChildCare]
+			  , [SSChildCareNon] / x [SSChildCareNon]
+			  , [SSProblemSolving] / x [SSProblemSolving]
+			  , [SSProblemSolvingNon] / x [SSProblemSolvingNon]
+			  , [SSEducation] / x [SSEducation]
+			  , [SSEducationNon] / x [SSEducationNon]
+			  , [SSJob] / x [SSJob]
+			  , [SSJobNon] / x [SSJobNon]
+			  , [SSOther] / x [SSOther]
+			  , [SSOtherNon] / x [SSOtherNon]
+			  , [SS1] / x [SS1]
+			  , [SS2] / x [SS2]
+			  ,
+
+-- crisis intervention
+				[CIProblems] / x [CIProblems]
+			  , [CIProblemsNon] / x [CIProblemsNon]
+			  , [CIOther] / x [CIOther]
+			  , [CIOtherNon] / x [CIOtherNon]
+			  , [CI1] / x [CI1]
+			  , [CI2] / x [CI2]
+			  ,
+
+-- program activities
+				[PAForms] / x [PAForms]
+			  , [PAFormsNon] / x [PAFormsNon]
+			  , [PAVideo] / x [PAVideo]
+			  , [PAVideoNon] / x [PAVideoNon]
+			  , [PAGroups] / x [PAGroups]
+			  , [PAGroupsNon] / x [PAGroupsNon]
+			  , [PAIFSP] / x [PAIFSP]
+			  , [PAIFSPNon] / x [PAIFSPNon]
+			  , [PARecreation] / x [PARecreation]
+			  , [PARecreationNon] / x [PARecreationNon]
+			  , [PAOther] / x [PAOther]
+			  , [PAOtherNon] / x [PAOtherNon]
+			  , [PA1] / x [PA1]
+			  , [PA2] / x [PA2]
+			  ,
+
+-- concrete activities
+				[CATransportation] / x [CATransportation]
+			  , [CATransportationNon] / x [CATransportationNon]
+			  , [CAGoods] / x [CAGoods]
+			  , [CAGoodsNon] / x [CAGoodsNon]
+			  , [CALegal] / x [CALegal]
+			  , [CALegalNon] / x [CALegalNon]
+			  , [CAHousing] / x [CAHousing]
+			  , [CAHousingNon] / x [CAHousingNon]
+			  , [CAAdvocacy] / x [CAAdvocacy]
+			  , [CAAdvocacyNon] / x [CAAdvocacyNon]
+			  , [CATranslation] / x [CATranslation]
+			  , [CATranslationNon] / x [CATranslationNon]
+			  , [CALaborSupport] / x [CALaborSupport]
+			  , [CALaborSupportNon] / x [CALaborSupportNon]
+			  , [CAChildSupport] / x [CAChildSupport]
+			  , [CAChildSupportNon] / x [CAChildSupportNon]
+			  , [CAParentRights] / x [CAParentRights]
+			  , [CAParentRightsNon] / x [CAParentRightsNon]
+			  , [CAVisitation] / x [CAVisitation]
+			  , [CAVisitationNon] / x [CAVisitationNon]
+			  , [CAOther] / x [CAOther]
+			  , [CAOtherNon] / x [CAOtherNon]
+			  , [CA1] / x [CA1]
+			  , [CA2] / x [CA2]
+			  , [Total]
+			  , case when c.WorkerPK is null then 'All Workers'
+					 else rtrim(c.LastName) + ', ' + rtrim(c.FirstName)
+				end WorkerName
+		from	base11 as a
+		join	base2 as b on a.FSWFK = b.FSWFK
+							  and a.PC1ID = b.PC1ID
+		left outer join Worker as c on case	when (@showWorkerDetail = 'N'
+												  and @workerfk is not null
+												 ) then @workerfk
+											else a.FSWFK
+									   end = c.WorkerPK
+		order by WorkerName
+			  , a.PC1ID
 
 
 
