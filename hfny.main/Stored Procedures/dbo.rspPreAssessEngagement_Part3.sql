@@ -36,6 +36,8 @@ as
 	as (select x.HVCaseFK
 			  ,x.PADate
 			  ,'xx' [CaseStatus]
+			  , KempeResult
+			  , FSWAssignDate
 			from Preassessment as x
 				join (select a.HVCaseFK
 							,max(a.PADate) [maxDate]
@@ -53,8 +55,12 @@ as
 				 a.PADate between @StartDt and @EndDt
 	),
 	NoStatus
-	as (select a.*
+	as (select a.HVCaseFK
+		      , a.PADate
+			  , a.CaseStatus
 			  ,'1' [NoStatus]
+			  , a.KempeResult
+			  , a.FSWAssignDate
 			from zzz as a
 				left outer join qqq as b on a.HVCaseFK = b.HVCaseFK
 			where b.HVCaseFK is null
@@ -64,6 +70,8 @@ as
 			  ,null [PADate]
 			  ,'xx' [CaseStatus]
 			  ,'1' [NoStatus]
+			  , KempeResult
+			  , FSWAssignDate
 			from HVScreen as a
 				join CaseProgram as c on c.HVCaseFK = a.HVCaseFK
 				join dbo.SplitString(@programfk,',') on c.programfk = listitem
@@ -80,6 +88,8 @@ as
 			  ,x.PADate
 			  ,x.CaseStatus
 			  ,'0' [NoStatus]
+			  , KempeResult
+			  , FSWAssignDate
 			from Preassessment as x
 				join (select p.HVCaseFK
 							,max(p.PADate) [max_PADATE]
@@ -107,6 +117,13 @@ as
 				   'No Status'
 			   when x.CaseStatus = '02' then
 				   'Positive, Assigned'
+			   when x.CaseStatus = '02'
+					and KempeResult = 1
+					and FSWAssignDate > @EndDt then 
+					'Positive, Pending'
+			   when x.CaseStatus = '02'
+					and KempeResult = 0 then 
+					'Negative'
 			   when x.CaseStatus = '03' then
 				   'Terminated'
 			   when x.CaseStatus = '04' then
@@ -121,7 +138,7 @@ as
 			join CaseProgram as b on b.HVCaseFK = x.HVCaseFK
 			join Worker as w on w.WorkerPK = b.CurrentFAWFK
 
-		order by [WorkName]
+		order by CaseStatusText, [WorkName]
 				,b.PC1ID
 
 GO
