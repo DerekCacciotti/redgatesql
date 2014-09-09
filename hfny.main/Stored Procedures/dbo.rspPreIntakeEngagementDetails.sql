@@ -346,17 +346,18 @@ as
 		where	lp.PIDate = pre.PIDate
 		union all
 		select	cp.PC1ID
-			  , null as FSWAssignDate
-			  , null as PreIntakeDays
+			  , case when FSWAssignDate > @EndDate then null else FSWAssignDate end as FSWAssignDate
+			  , case when FSWAssignDate > @EndDate then null else datediff(day,FSWAssignDate, @EndDate) end as PreIntakeDays
 			  , rtrim(FirstName) + ' ' + rtrim(LastName) as FSWWorkerName
 			  , null as PIDate
 			  , 'No Status' Status
 		from	CaseProgram cp
 		inner join @tblLastPa3 lp3 on lp3.HVCasePK = cp.HVCaseFK
 		inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
-		where HVCaseFK not in (select HVCasePK from @tblLastPa1 tlp 
-								union all 
-								select HVCasePK from @tblLastPa2 tlp2)
+		inner join Preassessment p on p.HVCaseFK = cp.HVCaseFK and CaseStatus = '02' and FSWAssignDate is not null
+		where cp.HVCaseFK not in (select HVCasePK from @tblLastPa1 tlp 
+									union all 
+									select HVCasePK from @tblLastPa2 tlp2)
 		order by FSWWorkerName
 
 	end
