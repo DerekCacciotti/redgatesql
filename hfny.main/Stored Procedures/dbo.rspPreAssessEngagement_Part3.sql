@@ -112,7 +112,7 @@ as
 			   when x.NoStatus = '1' then
 				   'No Status'
 			   when x.CaseStatus = '01' and datediff(d,x.PADate,@EndDt) <= 30 then
-				   'Engagement Continue'
+				   'Engagement Continues'
 			   when x.CaseStatus = '01' and datediff(d,x.PADate,@EndDt) > 30 then
 				   'No Status'
 			   when x.CaseStatus = '02'
