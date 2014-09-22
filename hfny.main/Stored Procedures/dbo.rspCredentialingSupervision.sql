@@ -757,8 +757,14 @@ END
 				when (TakePlace = 0) and (StaffOutAllWeek = 1)  then 'E'  -- Form found in period and reason is “Staff out all week” Note: E = Excused
 				when (TakePlace = 0) and (StaffOutAllWeek <> 1) and (sdg.WeeklyDuration = 0)  then 'N'  -- Form found in period and reason is not “Staff out all week”				
 
-				when (sdg.WeeklyDuration >= 90) then 'Y' -- Form found in period and duration is 1:30 or greater 
-				when (sdg.WeeklyDuration < 90) and (TakePlace = 1) then 'N'  -- Form found in period and duration less than 1:30
+				when (sdg.WeeklyDuration >= 
+				(CASE WHEN w.FTEFullTime = NULL THEN 90 WHEN w.FTEFullTime = 1 THEN 90 ELSE 60 END)
+				--90
+				) then 'Y' -- Form found in period and duration is 1:30 or greater 
+				when (sdg.WeeklyDuration < 
+				(CASE WHEN w.FTEFullTime = NULL THEN 90 WHEN w.FTEFullTime = 1 THEN 90 ELSE 60 END)
+				--90
+				) and (TakePlace = 1) then 'N'  -- Form found in period and duration less than 1:30
 				
 				when (WorkerFK is null and wws.SupervisionPK is null) then 'N'  -- Form not found in period
 				end
@@ -785,8 +791,16 @@ END
 
 				
 				
-				when (isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) >= 90) and (TakePlace = 1) then '' -- Form found in period and duration is 1:30 or greater 
-				when (isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) < 90) and (TakePlace = 1) then ''  -- Form found in period and duration less than 1:30
+				when (isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) >= 
+				
+				(CASE WHEN w.FTEFullTime = NULL THEN 90 WHEN w.FTEFullTime = 1 THEN 90 ELSE 60 END)
+				-- 90
+				) and (TakePlace = 1) then '' -- Form found in period and duration is 1:30 or greater 
+				when (isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) < 
+				
+				(CASE WHEN w.FTEFullTime = NULL THEN 90 WHEN w.FTEFullTime = 1 THEN 90 ELSE 60 END)
+				-- 90
+				) and (TakePlace = 1) then ''  -- Form found in period and duration less than 1:30
 				when (WorkerFK is null and wws.SupervisionPK is null) then 'Unknown'  -- Form not found in period
 				end
 				as ReasonSupeVisionNotHeld
@@ -806,6 +820,9 @@ END
 		 left join  cteSupervisionReasonsNotTookPlace reason on reason.SupervisionPK = wws.SupervisionPK -- to fetch in reasons for supervision not took place
 		 left join cteSupervisionReasonsChecked reasonsChecked on reasonsChecked.SupervisionPK = reason.SupervisionPK
 		 left join cteSupervisionDurationsGroupedByWeek sdg on sdg.WorkerPK = wws.WorkerPK and sdg.WeekNumber = wws.WeekNumber
+		 
+		 LEFT JOIN Worker w on wws.SupervisorFK = w.WorkerPK 
+		 
 		)
 		
 	
@@ -1012,7 +1029,8 @@ SELECT WorkerName
 		 ,twrkr.ScheduledDayName as ScheduledDayName
 		 ,convert(varchar(12),twrkr.sDate,101) as AdjustedStartDate
 		 ----,@DayofWeek as DayNameSelectedByUser
-		  
+		 , w.FTEFullTime AS FTEFullTime
+		 , CASE WHEN w.FTEFullTime = 1 THEN 'Full time' ELSE 'Part time' END FTEText
 	FROM cteReport1 cr
 	left join cteScoreByWorker sw on sw.WorkerName = cr.WorkerName 
 	left join Worker w on w.WorkerPK = cr.WorkerPK
