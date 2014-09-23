@@ -900,14 +900,18 @@ SELECT ss.workerpk
 	  ,twrkr.ScheduledDayName as ScheduledDayName
 	  ,convert(varchar(12),twrkr.sDate,101) as AdjustedStartDate
 	  
+	  , w.FTEFullTime AS FTEFullTime
+	  , CASE WHEN w.FTEFullTime = 1 THEN 'Full time' ELSE 'Part time' END FTEText
+	  
 	   FROM cteSubSummary ss
 	   left join #tblWorkers twrkr on twrkr.workerpk = ss.workerpk
+	   left join Worker w on w.WorkerPK = ss.workerpk
 	   inner join cteCalculateHFABPSRating cc on 1=1
 		order by workername
 	
 		
 	-- rspCredentialingSupervisionSummary 4, '06/01/2013', '08/31/2013'					
-	-- rspCredentialingSupervisionSummary 3, '07/01/2013', '08/31/2013'		
+	-- rspCredentialingSupervisionSummary 1, '07/01/2013', '08/31/2013'		
 				
 -- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,null
 	
