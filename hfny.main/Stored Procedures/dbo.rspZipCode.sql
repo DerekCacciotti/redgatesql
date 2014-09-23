@@ -84,6 +84,13 @@ begin
 	from cteScreens sc
 	inner join cteServed sv on sv.ZIPCode = sc.ZIPCode
 	union all
+	select sc.ProgramFK
+			, sc.ZIPCode
+			, CountOfScreens
+			, 0 as CountOfServed
+	from cteScreens sc
+	where ZIPCode not in (select ZIPCode from cteServed)
+	union all
 	select ProgramFK
 			, ZIPCode
 			, 0 as CountOfScreens
