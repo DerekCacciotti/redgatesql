@@ -12,6 +12,7 @@ CREATE TABLE [dbo].[Worker]
 [FirstName] [char] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [FSWCoreDate] [datetime] NULL,
 [FSWInitialStart] [datetime] NULL,
+[FTEFullTime] [bit] NULL,
 [Gender] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HomePhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LanguageSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -46,6 +47,13 @@ CREATE NONCLUSTERED INDEX [IX_Worker_FirstName] ON [dbo].[Worker] ([FirstName]) 
 CREATE NONCLUSTERED INDEX [IX_Worker_LastName_FirstName] ON [dbo].[Worker] ([LastName], [FirstName]) ON [PRIMARY]
 
 CREATE NONCLUSTERED INDEX [IX_Worker_LastName] ON [dbo].[Worker] ([LastName]) ON [PRIMARY]
+
+
+
+
+
+
+
 
 
 

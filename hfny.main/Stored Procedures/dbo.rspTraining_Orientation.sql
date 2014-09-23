@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,11 +11,13 @@ GO
 -- Edit date: 10/11/2013 CP - the bit values in workerprogram table (FSW, FAW, Supervisor, FatherAdvocate, Program Manager)
 --				are no longer being populated based on the latest workerform changes by Dar, so I've modified this report.
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTraining_10_2_Orientation]
+CREATE PROCEDURE [dbo].[rspTraining_Orientation]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
 	@sdate AS date
 AS
+
+
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
@@ -39,12 +40,8 @@ BEGIN
 	OR (wp.SupervisorStartDate  > @sdate AND wp.SupervisorEndDate IS NULL))
 	AND wp.TerminationDate IS NULL
 	AND wp.HireDate > @sdate
-	
-	
-	
-	
-	
 )
+
  
 --Now we get the trainings (or lack thereof) for topic code 1.0
 , cte10_2a AS (
@@ -66,7 +63,7 @@ BEGIN
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			RIGHT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode BETWEEN 1.0 AND 5.0
+	WHERE (t1.TopicCode BETWEEN 1.0 AND 5.0) OR (t1.TopicCode = 23.0 AND td.SubTopicFK=48)
 	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
 	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
 			, t1.TopicCode
@@ -93,7 +90,7 @@ BEGIN
 	, FirstKempeDate
 	, SupervisorFirstEvent
 	FROM cteMain, codetopic
-	WHERE codetopic.TopicCode BETWEEN 1.0 AND 5.0
+	WHERE (codetopic.TopicCode BETWEEN 1.0 AND 5.0) OR codetopic.TopicCode=23.0
 )
 
 
@@ -102,6 +99,30 @@ BEGIN
 
 	--if a worker has NO trainings, they won't appear at all, so add them back
 
+	SELECT case when RowNumber is null then 1 else RowNumber end as RowNumber
+		, b.TopicCode
+		, b.WorkerPK
+		, t.topicname
+		, TrainingDate
+		, b.FirstHomeVisitDate
+		, b.FirstKempeDate
+		, b.SupervisorFirstEvent
+		, b.FirstEvent
+		, b.WorkerName
+		, b.Supervisor
+		, b.FSW
+		, b.FAW
+	FROM cte10_2a t
+	RIGHT JOIN cteAddMissingWorkers_cte10_2a b
+	ON b.WorkerPK = t.WorkerPK
+	AND b.TopicCode = t.TopicCode
+
+
+)
+
+--Now we get the trainings (or lack thereof) for topic code 23 (Staff Related Issues)
+, cte10_23 AS (
+	--if a worker has NO trainings, they won't appear at all, so add them back
 	SELECT case when RowNumber is null then 1 else RowNumber end as RowNumber
 		, b.TopicCode
 		, b.WorkerPK
@@ -172,11 +193,12 @@ SELECT
 , FAW
 , cteMeetTarget.topiccode
 , cteCountMeeting.TopicCode
-, CASE WHEN cteMeetTarget.topiccode = 1.0 THEN '10-2a. Staff (assessment workers, home visitors and supervisors) are oriented to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting/family support prior to direct work with children and families' 
-	WHEN cteMeetTarget.topiccode = 2.0 THEN '10-2b. Staff (assessment workers, home visitors and supervisors) are oriented to the programs relationship with other community resources prior to direct work with children and families'  
-	WHEN cteMeetTarget.topiccode = 3.0 THEN '10-2c. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
-	WHEN cteMeetTarget.topiccode = 4.0 THEN '10-2d. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
-	WHEN cteMeetTarget.topiccode = 5.0 THEN '10-2e. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
+, CASE WHEN cteMeetTarget.topiccode = 1.0 THEN '10-1a. Staff (assessment workers, home visitors and supervisors) are oriented to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting/family support prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 2.0 THEN '10-1b. Staff (assessment workers, home visitors and supervisors) are oriented to the programs relationship with other community resources prior to direct work with children and families'  
+	WHEN cteMeetTarget.topiccode = 3.0 THEN '10-1c. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 4.0 THEN '10-1d. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 5.0 THEN '10-1e. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 23.0 THEN '10-1f. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to the personal safety of staff' 
 	END AS TopicName
 , TrainingDate
 , FirstHomeVisitDate
