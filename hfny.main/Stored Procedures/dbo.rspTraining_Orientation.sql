@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -21,7 +22,9 @@ AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
-	SET NOCOUNT ON;
+	
+	SET NOCOUNT ON
+	
 ;WITH  cteMain AS (
 	SELECT g.WorkerPK, g.WrkrLName, g.FirstHomeVisitDate
 	, g.FirstKempeDate, g.SupervisorFirstEvent
@@ -158,7 +161,8 @@ BEGIN
 	, FirstKempeDate
 	, cte10_2b.SupervisorFirstEvent
 	, FirstEvent
-	, CASE WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' ELSE 'F' END AS 'Meets Target'
+	, CASE WHEN FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 'T'
+		WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' ELSE 'F' END AS 'Meets Target'
 	FROM cte10_2b
 	GROUP BY cte10_2b.WorkerPK
 	, WorkerName
@@ -174,6 +178,7 @@ BEGIN
 	, FirstEvent
 	, rownumber
 )
+
 
 --Now calculate the number meeting count, by currentrole
 , cteCountMeeting AS (
@@ -218,6 +223,7 @@ SELECT
 FROM cteMeetTarget
 LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode
 ORDER BY cteMeetTarget.topiccode
+
 
 END
 GO
