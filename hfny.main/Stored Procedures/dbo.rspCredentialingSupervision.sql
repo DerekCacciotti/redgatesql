@@ -821,7 +821,7 @@ END
 		 left join cteSupervisionReasonsChecked reasonsChecked on reasonsChecked.SupervisionPK = reason.SupervisionPK
 		 left join cteSupervisionDurationsGroupedByWeek sdg on sdg.WorkerPK = wws.WorkerPK and sdg.WeekNumber = wws.WeekNumber
 		 
-		 LEFT JOIN Worker w on wws.SupervisorFK = w.WorkerPK 
+		 LEFT JOIN Worker w on wws.WorkerFK = w.WorkerPK 
 		 
 		)
 		
