@@ -195,6 +195,16 @@ begin
 end	
 
 	
+-- for display in the same field, @SupervisorName and @WorkerName are Mutually Exclusive
+if @SupervisorName = '' AND  @WorkerName <> ''
+begin 
+	set @SupervisorName = @WorkerName
+	set @WorkerName = ''
+end
+	
+	
+	
+	
 	
 	create table #tblWorkerAndSupName(
 			WorkerName varchar(100)
