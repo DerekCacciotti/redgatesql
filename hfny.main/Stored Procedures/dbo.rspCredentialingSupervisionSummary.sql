@@ -219,27 +219,26 @@ END
 	  where dateadd(d,6, StartDate)<  @eDate	---  @eDate date entered by the user from UI
 	  
 	)		
-	  
-	
-	
 	
 	insert into #tblWeekPeriods	
 		select *
 		from cteGenerateWeeksGiven2Dates
-	
-
 	
 	------ We are only interested in each week's start date
 	------ These are all the weeks between given two dates but at the end we added user given @eDate ... khalsa
 		
 	
 	-- insert user's enddate at the end for the last period
-		update #tblWeekPeriods
-		set EndDate = @eDate
-		where WeekNumber = (select top 1 WeekNumber from #tblWeekPeriods order by WeekNumber desc)
-
-
-
+	--update #tblWeekPeriods
+	--set EndDate = @eDate
+	--where WeekNumber = (select top 1 WeekNumber from #tblWeekPeriods order by WeekNumber desc)
+	-- fix jr 2014-10-02 the above update only updated all groups for the highest WeekNumber across all groups
+	--					 it needs to grab the highest WeekNumber by worker, which is what this now does
+	update #tblWeekPeriods
+	set EndDate = @eDate
+	from #tblWeekPeriods wp
+	inner join (select WorkerPK, max(WeekNumber) as LatestWeek from #tblWeekPeriods group by WorkerPK) wp2
+				on wp2.WorkerPK = wp.WorkerPK and wp.WeekNumber = wp2.LatestWeek
 
 	-- Let us make sure that if a worker's firstevent date falls between @sdate and @edate then 
 	-- adjust number of weeks for that worker. It will be less because he did not do anything till firstevent

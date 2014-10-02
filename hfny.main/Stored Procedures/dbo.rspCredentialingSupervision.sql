@@ -32,12 +32,12 @@ CREATE procedure [dbo].[rspCredentialingSupervision]
     
 as
 
+begin
+	set nocount on
 
-set nocount on
-
-IF 1=0 BEGIN
-    SET FMTONLY OFF
-END
+	IF 1=0 BEGIN
+		SET FMTONLY OFF
+	END
 
 	
 	--if @programfk is null
@@ -191,20 +191,13 @@ END
     and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
     --and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
     and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)	
-	
-	
 	order by w.workername	
 	
 	
 --SELECT * FROM 	#tblWorkers
-
-	
-	
 --	----- RESET the startdate if firstevent date falls between @sdate and @edate
 --	--declare @FirstEventDate	datetime	
 --	--set @FirstEventDate = (select * from #tblWorkers)
-	
-	
 
 --	-- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'		
 --	-- rspCredentialingSupervision 1, '03/01/2013', '03/31/2013'		
@@ -220,9 +213,7 @@ END
 			,WeekNumber int			
 			,StartDate datetime
 			,EndDate datetime
-		
 		)	
-	
 	
 	;with cteGenerateWeeksGiven2Dates as
 	(
@@ -255,18 +246,21 @@ END
 	insert into #tblWeekPeriods	
 		select *
 		from cteGenerateWeeksGiven2Dates
-	
 
-	
 	------ We are only interested in each week's start date
 	------ These are all the weeks between given two dates but at the end we added user given @eDate ... khalsa
-		
 	
 	-- insert user's enddate at the end for the last period
-		update #tblWeekPeriods
-		set EndDate = @eDate
-		where WeekNumber = (select top 1 WeekNumber from #tblWeekPeriods order by WeekNumber desc)
-
+	--update #tblWeekPeriods
+	--set EndDate = @eDate
+	--where WeekNumber = (select top 1 WeekNumber from #tblWeekPeriods order by WeekNumber desc)
+	-- fix jr 2014-10-02 the above update only updated all groups for the highest WeekNumber across all groups
+	--					 it needs to grab the highest WeekNumber by worker, which is what this now does
+	update #tblWeekPeriods
+	set EndDate = @eDate
+	from #tblWeekPeriods wp
+	inner join (select WorkerPK, max(WeekNumber) as LatestWeek from #tblWeekPeriods group by WorkerPK) wp2
+				on wp2.WorkerPK = wp.WorkerPK and wp.WeekNumber = wp2.LatestWeek
 
 --SELECT * FROM #tblWeekPeriods
 --where workerpk = 152
@@ -282,7 +276,6 @@ END
 			,WorkerPK int	
 		)	
 	
-
 	insert into #tblWeekPeriodsAdjusted	
 		SELECT 
 			WeekNumber
@@ -306,45 +299,33 @@ END
 ------		--	,EndDate
 ------		--	,datediff(day, StartDate,EndDate) as DaysInTheCurrentWeek			
 ------		--FROM #tblWeekPeriods	
-
 		
 --			max of 2 supervisions per week ... khalsa
 			create table #tblMaxOf2SupvisionPerWeekToBeConsidered(
-			
 						WorkerPK int
 						,Duration int
 						,WeekNumber int
 						,rownum int
-				
 				)		
-		
-		
-		
 
 		-- Step#: 3
 		-- Now let us develop the report. We will use the above 2 temp tables now
 		
 		;
-		
-
 		with cteWorkersWithSupervisionsII
 		as
 		(
-		SELECT 
-		
-				 wp.WeekNumber
+		SELECT wp.WeekNumber
 				,wp.StartDate
 				,wp.EndDate		
 				,wp.FirstEvent
 				,wp.WorkerPK		
-				
 			 , WorkerName
 			 , LastName
 			 , FirstName
 			 , TerminationDate
 			 --, WorkerPK
 			 , SortOrder
-			
 			 , WorkerFKFn
 			 , WrkrLName
 			 , FAWInitialStart
@@ -357,11 +338,6 @@ END
 			 , FirstHomeVisitDate 
 			 , FirstKempeDate 
 			 --, FirstEvent			
-				
-				
-				
-				
-		
 			  ,SupervisionPK
 			  ,ActivitiesOther
 			  ,ActivitiesOtherSpecify
@@ -436,9 +412,6 @@ END
 		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
 		)
 
-		
-		
-
 	,cteSupervisionDurations
 	as
 	(
@@ -449,21 +422,16 @@ END
 		
 		FROM cteWorkersWithSupervisionsII
 	)	
-
-	
 	,cteSupervisionsPerWorkerPerWeek
 	as
 	(
-		SELECT 
+		select 
 			WorkerPK 
 			,Duration1
 			--,sum(Duration) as WeeklyDuration
 			,WeekNumber
 			,rownum = row_number() over (partition by WorkerPK,WeekNumber order by WorkerPK, WeekNumber, Duration1 desc)
- 
-		
-		FROM cteSupervisionDurations sd	
-		
+		from cteSupervisionDurations sd	
 	)				
 	
 	-- Now take the top 2 supervisions, if any
@@ -475,25 +443,20 @@ END
 	--SELECT * FROM #tblMaxOf2SupvisionPerWeekToBeConsidered
 		
 	;	
-		
-		with cteWorkersWithSupervisions
+	with cteWorkersWithSupervisions
 		as
 		(
-		SELECT 
-		
-				 wp.WeekNumber
+		select wp.WeekNumber
 				,wp.StartDate
 				,wp.EndDate		
 				,wp.FirstEvent
 				,wp.WorkerPK		
-				
 			 , WorkerName
 			 , LastName
 			 , FirstName
 			 , TerminationDate
 			 --, WorkerPK
 			 , SortOrder
-			
 			 , WorkerFKFn
 			 , WrkrLName
 			 , FAWInitialStart
@@ -506,11 +469,6 @@ END
 			 , FirstHomeVisitDate 
 			 , FirstKempeDate 
 			 --, FirstEvent			
-				
-				
-				
-				
-		
 			  ,SupervisionPK
 			  ,ActivitiesOther
 			  ,ActivitiesOtherSpecify
@@ -594,9 +552,6 @@ END
 -------- rspCredentialingSupervision 31, '07/01/2013', '09/30/2013'		
 -------- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'					
 		
-
-
-	
 	,cteSupervisors	as 
 	(
 		select ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as SupervisorName
@@ -659,9 +614,6 @@ END
 				else
 				''
 				end as ReasonNOSupervision		
-		
-			  
-			  
 			   FROM #tblWorkers w 
 				left join Supervision s on s.WorkerFK = w.WorkerPK
 				where TakePlace = 0
@@ -671,41 +623,35 @@ END
 	,cteSupervisionReasonsChecked	as 
 	(
 		SELECT SupervisionPK
-		
-		,
-		sum(
-			convert(int,ParticipantEmergency)				
-			+ convert(int,ShortWeek)
-			+ convert(int,StaffCourt)
-			+ convert(int,StaffFamilyEmergency)
-			+ convert(int,StaffForgot)
-			+ convert(int,StaffIll)
-			+ convert(int,StaffTraining)
-			+ convert(int,StaffVacation)
-			+ convert(int,StaffOutAllWeek)
-			+ convert(int,SupervisorFamilyEmergency)
-			+ convert(int,SupervisorForgot)
-			+ convert(int,SupervisorHoliday)
-			+ convert(int,SupervisorIll)
-			+ convert(int,SupervisorTraining)
-			+ convert(int,SupervisorVacation)
-			+ convert(int,ReasonOther)
-			+ convert(int,Weather)		
-		) as NumOfReasonsChecked
-			  
-			  
+				,
+				sum(
+					convert(int,ParticipantEmergency)				
+					+ convert(int,ShortWeek)
+					+ convert(int,StaffCourt)
+					+ convert(int,StaffFamilyEmergency)
+					+ convert(int,StaffForgot)
+					+ convert(int,StaffIll)
+					+ convert(int,StaffTraining)
+					+ convert(int,StaffVacation)
+					+ convert(int,StaffOutAllWeek)
+					+ convert(int,SupervisorFamilyEmergency)
+					+ convert(int,SupervisorForgot)
+					+ convert(int,SupervisorHoliday)
+					+ convert(int,SupervisorIll)
+					+ convert(int,SupervisorTraining)
+					+ convert(int,SupervisorVacation)
+					+ convert(int,ReasonOther)
+					+ convert(int,Weather)		
+				) as NumOfReasonsChecked
 			   FROM #tblWorkers w 
 				left join Supervision s on s.WorkerFK = w.WorkerPK
 				where TakePlace = 0
 				group by SupervisionPK
-
 	)		
-	
 	
 	-- rspCredentialingSupervision 1, '10/01/2013', '12/31/2013'
 	
 	--SELECT * FROM cteSupervisionReasonsChecked
-	
 	
 ------------	--SELECT * FROM cteSupervisionReasonsNotTookPlace
 	
@@ -925,27 +871,20 @@ as
 				  ,MeetsStandard
 				  --ToDo: firstevent date is in the period, but not in the current week then MeetsStandard should be blank
 				  , case when (firstevent between @sdate and @edate) then
-				  
 				  -- Need JH Help
 						case when (firstevent <= enddate) then MeetsStandard
 							else ''
 							end
-						
-						
 						else
-						
 							MeetsStandard
 						end	
-						
 						as MeetsStandard1
-						
 				  ,SupervisorName
 				  ,ReasonSupeVisionNotHeld
 				  ,DaysInTheCurrentWeek
 				  ,weeknumber
 				  ,firstevent
 				  ,workerpk
-				  
 			 FROM cteReportDetails	
 )			 
 
@@ -954,8 +893,6 @@ as
 
 ------ rspCredentialingSupervision 1, '03/01/2013', '03/31/2013'	
 
-
-	
 	,cteUniqueMeetsStandard
 	as
 	(
@@ -1039,7 +976,6 @@ SELECT WorkerName
 	--where MeetsStandard <> 'N/A'
 	order by cr.workername,cr.weeknumber, cr.SupervisionDate
 	
-				
 -- rspCredentialingSupervision 31, '07/01/2013', '09/30/2013'	
 -- rspCredentialingSupervision 1, '01/06/2013', '02/02/2013'			
 -- rspCredentialingSupervision 1, '04/01/2013', '04/30/2013'		
@@ -1050,4 +986,6 @@ SELECT WorkerName
 	drop table #tblWorkers
 	drop table #tblWeekPeriods
 	drop table #tblMaxOf2SupvisionPerWeekToBeConsidered
+end
+
 GO
