@@ -22,9 +22,7 @@ AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
-	
-	SET NOCOUNT ON
-	
+	SET NOCOUNT ON;
 ;WITH  cteMain AS (
 	SELECT g.WorkerPK, g.WrkrLName, g.FirstHomeVisitDate
 	, g.FirstKempeDate, g.SupervisorFirstEvent
@@ -147,8 +145,9 @@ BEGIN
 
 )
 
-, cteMeetTarget AS (
-	SELECT MAX(RowNumber) OVER(PARTITION BY TopicCode) as TotalWorkers
+
+, cteMeetTarget1 AS (
+	SELECT RowNumber
 	, cte10_2b.WorkerPK
 	, WorkerName
 	, Supervisor
@@ -162,8 +161,10 @@ BEGIN
 	, cte10_2b.SupervisorFirstEvent
 	, FirstEvent
 	, CASE WHEN FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 'T'
-		WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' ELSE 'F' END AS 'Meets Target'
+		WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' 
+		else 'F' END AS 'Meets Target'
 	FROM cte10_2b
+	where not (cte10_2b.FirstEvent< '07/01/2014' and cte10_2b.TrainingDate is null and cte10_2b.TopicCode='23.0')
 	GROUP BY cte10_2b.WorkerPK
 	, WorkerName
 	, Supervisor
@@ -179,6 +180,24 @@ BEGIN
 	, rownumber
 )
 
+, cteMeetTarget AS (
+	SELECT COUNT(RowNumber) over (PARTITION BY TopicCode) as TotalWorkers
+	, WorkerPK
+	, WorkerName
+	, Supervisor
+	, FSW
+	, FAW
+	, TopicCode
+	, TopicName
+	, TrainingDate
+	, FirstHomeVisitDate
+	, FirstKempeDate
+	, SupervisorFirstEvent
+	, FirstEvent
+	, [Meets Target]
+	FROM cteMeetTarget1	
+
+)
 
 --Now calculate the number meeting count, by currentrole
 , cteCountMeeting AS (
@@ -223,7 +242,6 @@ SELECT
 FROM cteMeetTarget
 LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode
 ORDER BY cteMeetTarget.topiccode
-
 
 END
 GO
