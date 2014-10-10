@@ -362,45 +362,53 @@ values(4,2,'',
 -- Lead Assessment make it part of FollowUp  ... per JH
 
 -- ASQ
-
 DECLARE @tblASQCohort TABLE(	
 	[HVCasePK] [int],
 	[TCIDPK] int,
 	[Interval]	char(2)
 )		
 
+;with cteASQsReceivingEIP as
+( 
+	select max(HVCaseFK) as HVCaseFK
+	from ASQ a
+	where HVCaseFK in (select tcc.HVCasePK from @tblCommonCohort tcc)
+			and ASQTCReceiving = 1
+	group by a.HVCaseFK
+)
+
 insert into @tblASQCohort
 	select  
 
-		  hvcase.HVCasePK
-		  ,TCID.TCIDPK 
+		  hc.HVCasePK
+		  ,t.TCIDPK 
 		  ,Interval 		   
 
-		from caseprogram
-			inner join hvcase on hvcasepk = caseprogram.hvcasefk
-			inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk AND TCID.TCDOD IS NULL
-			inner join codeduebydates on scheduledevent = 'ASQ' --optionValue
-			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+		from CaseProgram cp
+			inner join HVCase hc on hc.HVCasePK = cp.HVCaseFK
+			inner join TCID t on t.HVCaseFK = hc.HVCasePK and t.ProgramFK = cp.ProgramFK AND t.TCDOD IS NULL
+			inner join codeDueByDates cdbd on scheduledevent = 'ASQ' --optionValue
+			inner join dbo.SplitString(@programfk,',') on cp.ProgramFK = listitem
 
 		where 
-		     HVCase.TCDOD IS NULL
-			 and caseprogress >= 11
-			 and (dischargedate is null or dischargedate > @edate)
+		     hc.TCDOD IS NULL
+			 and hc.CaseProgress >= 11
+			 and (cp.DischargeDate is null or cp.DischargeDate > @edate)
 
 			 and year(case
-						  when interval < 24 then
-							  dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
+						  when cdbd.Interval < 24 then
+							  dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+hc.TCDOB))
 						  else
-							  dateadd(dd,dueby,hvcase.tcdob)
+							  dateadd(dd,cdbd.DueBy,hc.TCDOB)
 					  end) between year(@sdate) and year(@edate)
 			 and month(case
-						   when interval < 24 then
-							   dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
+						   when cdbd.Interval < 24 then
+							   dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+hc.TCDOB))
 						   else
-							   dateadd(dd,dueby,hvcase.tcdob)
+							   dateadd(dd,cdbd.DueBy,hc.TCDOB)
 					   end) between month(@sdate) and month(@edate)
 			and EventDescription not like '%optional%'  -- optionals are not required so take them out		
-
+			and cp.HVCaseFK not in (select HVCaseFK from cteASQsReceivingEIP)
 
 declare @ASQcol1 varchar(10)
 declare @ASQcol2 varchar(10)
@@ -532,7 +540,7 @@ set @ASQSEcol4 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQSECohort m
 -- Referred to EIP		
 set @ASQSEcol5 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQSECohort m
 				left join ASQSE A on m.HVCasePK = A.HVCaseFK and m.TCIDPK = A.TCIDFK and m.Interval = A.ASQSETCAge
-				where A.ASQSEReceiving = 1
+				where A.ASQSEReferred = 1
 				) 	
 
 
@@ -858,7 +866,7 @@ VALUES(4,3,'', '', '', '', '', '', '', '','')
 
 -- ASQ Data
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(5,1,'ASQ', 'Number Due in Period', 'Number Completed', 'In Windows', 'Under Cut Off', 'Referred to EIP', '', '','')
+VALUES(5,1,'ASQ', 'Number Due in Period', 'Number Completed', 'In Window', 'Under Cut Off', 'Referred to EIP', '', '','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -867,7 +875,7 @@ VALUES(5,3,'', '', '', '', '', '', '', '','')
 
 -- ASQSE Data
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(6,1,'ASQSE', 'Number Due in Period', 'Number Completed', 'In Windows', 'Under Cut Off', 'Referred to EIP', '', '','')
+VALUES(6,1,'ASQSE', 'Number Due in Period', 'Number Completed', 'In Window', 'Under Cut Off', 'Referred to EIP', '', '','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -875,7 +883,7 @@ VALUES(6,3,'', '', '', '', '', '', '', '','')
 
 -- FollowUp Data
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(7,1,'Follow Up / Lead Assessment', 'Number Due in Period', 'Number Completed', 'In Windows', '', '', '', '','')
+VALUES(7,1,'Follow Up / Lead Assessment', 'Number Due in Period', 'Number Completed', 'In Window', '', '', '', '','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -883,7 +891,7 @@ VALUES(7,3,'', '', '', '', '', '', '', '','')
 
 -- FollowUp Data
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(8,1,'PSI', 'Number Due in Period', 'Number Completed', 'In Windows', 'Valid PSI Score', '', '', '','')
+VALUES(8,1,'PSI', 'Number Due in Period', 'Number Completed', 'In Window', 'Valid PSI Score', '', '', '','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -992,68 +1000,60 @@ VALUES(18,1,'Caseload Summary', 'Level', '# of Cases', '', '', '', '','','')
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
 VALUES(18,3,'', '', '', '', '', '', '', '','')
 
-
-
 -- rspProgramSynopsis 19, '04/01/2011', '04/30/2011'
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 --- ASQ DATA ---
 ;
-with cteASQ as
-(
-	SELECT 
-	PC1ID, TCFirstName + ' ' + TCLastName as TCName, cc.TCDOB_EDC as TCDOB, cc.HVCasePK,TCID.TCIDPK,Interval, EventDescription 
-	,case
-	  when interval < 24 then
-		  dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
-	  else
-		  dateadd(dd,dueby,cc.TCDOB_EDC)
-    end as ASQDueDate
-	,WorkerName
+;with cteASQsReceivingEIPDetail as
+( 
+	select max(HVCaseFK) as HVCaseFK
+	from ASQ a
+	where HVCaseFK in (select tcc.HVCasePK from @tblCommonCohort tcc)
+			and ASQTCReceiving = 1
+	group by a.HVCaseFK
+)
 
+, cteASQ as
+(
+	SELECT PC1ID
+			, TCFirstName + ' ' + TCLastName as TCName
+			, cc.TCDOB_EDC as TCDOB
+			, cc.HVCasePK
+			, t.TCIDPK
+			, Interval
+			, EventDescription 
+			, case
+			  when Interval < 24 then
+				  dateadd(dd,DueBy,(((40-GestationalAge)*7)+ cc.TCDOB_EDC))
+			  else
+				  dateadd(dd,DueBy,cc.TCDOB_EDC)
+			  end as ASQDueDate
+			, WorkerName
 	FROM @tblCommonCohort cc
-	inner join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.programfk AND TCID.TCDOD IS NULL
-	inner join codeduebydates on scheduledevent = 'ASQ' --optionValue
+	inner join TCID t on t.HVCaseFK = cc.HVCasePK and t.ProgramFK = cc.ProgramFK AND t.TCDOD IS NULL
+	inner join codeDueByDates cdbd on scheduledevent = 'ASQ' --optionValue
 
 		where 
 		     cc.TCDOD IS NULL
-			 and cc.caseprogress >= 11
-			 and (cc.dischargedate is null or cc.dischargedate > @edate)
+			 and cc.CaseProgress >= 11
+			 and (cc.DischargeDate is null or cc.DischargeDate > @edate)
 
 			 and year(case
-						  when interval < 24 then
-							  dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
+						  when cdbd.Interval < 24 then
+							  dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+ cc.TCDOB_EDC))
 						  else
-							  dateadd(dd,dueby,cc.TCDOB_EDC)
+							  dateadd(dd,cdbd.DueBy,cc.TCDOB_EDC)
 					  end) between year(@sdate) and year(@edate)
 			 and month(case
-						   when interval < 24 then
-							   dateadd(dd,dueby,(((40-gestationalage)*7)+cc.TCDOB_EDC))
+						   when cdbd.Interval < 24 then
+							   dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+cc.TCDOB_EDC))
 						   else
-							   dateadd(dd,dueby,cc.TCDOB_EDC)
+							   dateadd(dd,cdbd.DueBy,cc.TCDOB_EDC)
 					   end) between month(@sdate) and month(@edate)
 			and EventDescription not like '%optional%'  -- optionals are not required so take them out	
-
+			and cc.HVCasePK not in (select HVCaseFK from cteASQsReceivingEIPDetail)
 )
 
-
-
-
 -- rspProgramSynopsis 1, '04/01/2013', '04/30/2013'	
-
 
 -- INSERT ASQ DATA
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -1118,10 +1118,6 @@ INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0,
 				where A.ASQSEPK is null
 				order by workername, PC1ID  
 
-
-
-
-
 --- FOLLOW UP DATA ---
 ;
 with cteFollowUp as
@@ -1150,7 +1146,6 @@ with cteFollowUp as
 			 --and (IntakeDate is not null or IntakeDate <= @edate)
 			 and year(dateadd(dd,dueby,cc.TCDOB_EDC)) between year(@sdate) and year(@edate)
 			 and month(dateadd(dd,dueby,cc.TCDOB_EDC)) between month(@sdate) and month(@edate)
-
 )
 
 
@@ -1297,11 +1292,6 @@ SELECT 	'15','2', '',
 		AND cc.CaseStartDate < @edate  -- handling transfer cases	
 		AND (cc.DischargeDate >= @sdate AND cc.DischargeDate <= @edate AND cc.DischargeDate IS NOT NULL)
 		and FSWAssignDate is not null
-
-
-
-
-
 
 -- Discharges after Enrollment Average Length of Service: 424 days
 
