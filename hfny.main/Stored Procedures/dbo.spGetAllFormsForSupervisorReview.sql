@@ -20,8 +20,8 @@ CREATE procedure [dbo].[spGetAllFormsForSupervisorReview]
 	, @SupervisorFK int=null
 	)
 	
-AS
-BEGIN
+as
+begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
@@ -35,7 +35,7 @@ BEGIN
 		from Worker w
 		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 		where programfk = @ProgramFK 
-				and current_timestamp between SupervisorStartDate AND isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+				and current_timestamp between SupervisorStartDate and isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
 
 		--declare @Sups table
 		--@Sups = spGetAllWorkersByProgram @ProgramFK = 1 
@@ -81,27 +81,27 @@ BEGIN
 				else
 					ltrim(rtrim(replace(replace(codeFormName,'-',''),' ','')))+'.aspx?pc1id='+PC1ID
 				end as FormLink
-
 			  ,isnull(FormReviewEndDate, current_timestamp) as EffectiveEndDate
 			  ,dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) as EffectiveStartDate
-			  ,ltrim(rtrim(LastName)) + ', ' + ltrim(rtrim(FirstName)) as WorkerName
-			  ,sup.WorkerName as SupervisorName
-			  
+			  ,case when cp.CurrentFSWFK is not null then ltrim(rtrim(wfsw.LastName)) + ', ' + ltrim(rtrim(wfsw.FirstName)) 
+					when cp.CurrentFAWFK is not null then ltrim(rtrim(wfaw.LastName)) + ', ' + ltrim(rtrim(wfaw.FirstName)) 
+					else '*Unassigned*'
+				end as WorkerName
+			  ,case when cp.CurrentFSWFK is not null then supfsw.WorkerName
+					when cp.CurrentFAWFK is not null then supfaw.WorkerName
+					else '*Unassigned*'
+				end as SupervisorName
 		from FormReview fr
 		inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = isnull(@ProgramFK,fro.ProgramFK)
 		inner join codeForm f on codeFormAbbreviation = fr.FormType
 		inner join CaseProgram cp on cp.HVCaseFK = fr.HVCaseFK
 									and cp.ProgramFK = fr.ProgramFK
-
-	--inner join HVScreen hv on hv.HVCaseFK = fr.HVCaseFK
-	--inner join Kempe k on k.HVCaseFK = fr.HVCaseFK	
-	--left join cteLastPreIntake p on p.HVCaseFK = fr.HVCaseFK  -- must use Left join. For sure PreIntake forms, if any, will have hvcasefk
-	--left join cteLastServiceReferral sr on sr.HVCaseFK = fr.HVCaseFK  -- must use Left join. For sure ServiceReferral forms, if any, will have hvcasefk
-
-
-		inner join WorkerProgram wp on wp.WorkerFK = cp.CurrentFSWFK
-		inner join Worker w on w.WorkerPK = wp.WorkerFK
-		inner join cteSupervisors sup on wp.SupervisorFK = sup.WorkerPK
+		left outer join WorkerProgram wpfsw on wpfsw.WorkerFK = cp.CurrentFSWFK
+		left outer join WorkerProgram wpfaw on wpfaw.WorkerFK = cp.CurrentFAWFK
+		left outer join Worker wfsw on wfsw.WorkerPK = wpfsw.WorkerFK
+		left outer join Worker wfaw on wfaw.WorkerPK = wpfaw.WorkerFK
+		left outer join cteSupervisors supfsw on wpfsw.SupervisorFK = supfsw.WorkerPK
+		left outer join cteSupervisors supfaw on wpfaw.SupervisorFK = supfaw.WorkerPK
 		where fr.ProgramFK = isnull(@ProgramFK, fr.ProgramFK)	
 				and ReviewedBy is null
 				and FormDate between FormReviewStartDate and isnull(FormReviewEndDate, current_timestamp)
