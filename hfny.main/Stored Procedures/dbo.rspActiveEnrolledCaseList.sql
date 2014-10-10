@@ -129,7 +129,7 @@ as
 
 			left outer join TCID T on T.HVCaseFK = b.HVCasePK and T.TCDOD is null
 
-		where b.IntakeDate < @EndDt
+		where b.IntakeDate <= @EndDt
 			 and (a.DischargeDate is null
 			 or a.DischargeDate > @StartDt)
 			 --AND a.ProgramFK = @programfk
