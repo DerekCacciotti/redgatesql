@@ -19,95 +19,95 @@ begin
 	-- interfering with SELECT statements.
 	set nocount on;
 
-	with cteHVCaseFK as 
-		(
-		  select HVCaseFK 
-		  from CaseProgram cp
-	 	  where PC1ID = @PC1ID
-		)
-	, ctePreAssessmentCount 
+	declare @HVCaseFK int
+	set @HVCaseFK = (select HVCaseFK 
+						from CaseProgram cp
+	 					where PC1ID = @PC1ID
+					);
+					
+	with ctePreAssessmentCount 
 	as
 		(
 		  select count(PreassessmentPK) as CountOfPreassessments
-		  from Preassessment pa
-		  inner join cteHVCaseFK fk on fk.HVCaseFK = pa.HVCaseFK
+			  from Preassessment pa
+			  where HVCaseFK = @HVCaseFK
 		)
 	, ctePreIntakeCount
 	as
 		(
 		select count(PreintakePK) as CountOfPreintakes
 			from Preintake pi
-			inner join cteHVCaseFK fk on fk.HVCaseFK = pi.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, cteServiceReferralCount
 	as
 		(
 		select count(ServiceReferralPK) as CountOfServiceReferrals
 			from ServiceReferral sr
-			inner join cteHVCaseFK fk on fk.HVCaseFK = sr.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, cteHomeVisitLogCount
 	as
 		(
 		select count(HVLogPK) as CountOfHomeVisitLogs
 			from HVLog hl
-			inner join cteHVCaseFK fk on fk.HVCaseFK = hl.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, ctePC1MedicalCount
 	as
 		(
 		select count(PC1MedicalPK) as CountOfPC1MedicalForms
 			from PC1Medical pm
-			inner join cteHVCaseFK fk on fk.HVCaseFK = pm.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, cteFatherFigureCount
 	as
 		(
 		select count(FatherFigurePK) as CountOfFatherFigures
 			from FatherFigure ff
-			inner join cteHVCaseFK fk on fk.HVCaseFK = ff.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, cteTCIDCount
 	as
 		(
 		select count(TCIDPK) as CountOfTCIDs
 			from TCID t
-			inner join cteHVCaseFK fk on fk.HVCaseFK = t.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, cteTCMedicalCount
 	as
 		(
 		select count(TCMedicalPK) as CountOfTCMedicalForms
 			from TCMedical tm
-			inner join cteHVCaseFK fk on fk.HVCaseFK = tm.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, ctePSICount
 	as
 		(
 		select count(PSIPK) as CountOfPSIs
 			from PSI p
-			inner join cteHVCaseFK fk on fk.HVCaseFK = p.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, cteASQCount
 	as
 		(
 		select count(ASQPK) as CountOfASQs
 			from ASQ a
-			inner join cteHVCaseFK fk on fk.HVCaseFK = a.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, cteASQSECount
 	as
 		(
 		select count(ASQSEPK) as CountOfASQSEs
 			from ASQSE ase
-			inner join cteHVCaseFK fk on fk.HVCaseFK = ase.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	, cteFollowUpCount
 	as
 		(
 		select count(FollowUpPK) as CountOfFollowUps
 			from FollowUp fu
-			inner join cteHVCaseFK fk on fk.HVCaseFK = fu.HVCaseFK
+			where HVCaseFK = @HVCaseFK
 		)
 	-- the following 5 CTEs get the medical provider/facility information
 	, cteMPFUP
@@ -120,8 +120,8 @@ begin
 				  , ca.HVCaseFK as HVCaseFK
 				  , CommonAttributesPK
 		  from		CommonAttributes ca
-		  inner join cteHVCaseFK fk on fk.HVCaseFK = ca.HVCaseFK
-		  where		FormType like 'FU'
+		  where	HVCaseFK = @HVCaseFK
+				and FormType like 'FU'
 		  order by	FormDate desc
 				  , CommonAttributesPK desc
 		) 
@@ -137,8 +137,8 @@ begin
 				  , ca.HVCaseFK as HVCaseFK
 				  , CommonAttributesPK
 		  from		CommonAttributes ca
-		  inner join cteHVCaseFK fk on fk.HVCaseFK = ca.HVCaseFK
-		  where		FormType in ('CH', 'IN')
+		  where	HVCaseFK = @HVCaseFK
+				and FormType in ('CH', 'IN')
 		  order by	FormDate desc
 				  , CommonAttributesPK desc
 		) 
@@ -150,8 +150,8 @@ begin
 				  , ca.HVCaseFK as HVCaseFK
 				  , CommonAttributesPK
 		  from		CommonAttributes ca
-		  inner join cteHVCaseFK fk on fk.HVCaseFK = ca.HVCaseFK
-		  where		FormType = 'FU'
+		  where	HVCaseFK = @HVCaseFK
+				and FormType = 'FU'
 		  order by	FormDate desc
 				  , CommonAttributesPK desc
 		) 
@@ -167,8 +167,8 @@ begin
 				  , ca.HVCaseFK as HVCaseFK
 				  , CommonAttributesPK
 		  from		CommonAttributes ca
-		  inner join cteHVCaseFK fk on fk.HVCaseFK = ca.HVCaseFK
-		  where		FormType in ('CH', 'IN', 'TC')
+		  where	HVCaseFK = @HVCaseFK
+				and FormType in ('CH', 'IN', 'TC')
 		  order by	FormDate desc
 				  , CommonAttributesPK desc
 		)
@@ -203,12 +203,12 @@ begin
 			left outer join listMedicalFacility lmfpc1 on lmfpc1.listMedicalFacilityPK = mppc.PC1MedicalFacilityFK
 			left outer join listMedicalFacility lmftc on lmftc.listMedicalFacilityPK = mptc.TCMedicalFacilityFK
 		)
-	--, cteFormReview
-	--as
-	--	(-- get all the data we need to render FormReview info
-	--	select * 
-	--	from  FormReviewFormList(select HVCaseFK from cteHVCaseFK)
-	--	)
+	, cteFormReview
+	as
+		(-- get all the data we need to render FormReview info
+		select * 
+		from  FormReviewFormList(@HVCaseFK)
+		)
 	select HVCasePK
 			, PC1ID
 			, hc.ScreenDate
