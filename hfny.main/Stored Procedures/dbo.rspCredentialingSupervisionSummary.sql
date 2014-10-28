@@ -18,7 +18,7 @@ GO
 
 -- Fix: replace the start date of the report with worker's scheduled date of supervision  ... Khalsa 01/13/2013
 -- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,2
--- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,null
+-- rspCredentialingSupervisionSummary 19, '07/01/2014', '09/30/2014',null,null,null
 
 -- max of 2 supervisions per week ... khalsa 1/29/2014
 
@@ -668,8 +668,11 @@ END
 				when (TakePlace = 0) and (StaffOutAllWeek = 1)  then 'E'  -- Form found in period and reason is “Staff out all week” Note: E = Excused
 				when (TakePlace = 0) and (StaffOutAllWeek <> 1) and (sdg.WeeklyDuration = 0)  then 'N'  -- Form found in period and reason is not “Staff out all week”				
 
-				when (sdg.WeeklyDuration >= 90) then 'Y' -- Form found in period and duration is 1:30 or greater 
-				when (sdg.WeeklyDuration < 90) and (TakePlace = 1) then 'N'  -- Form found in period and duration less than 1:30
+				when (sdg.WeeklyDuration >= (case when w.FTEFullTime = null then 90 when w.FTEFullTime = 1 then 90 else 60 end)) 
+					then 'Y' -- Form found in period and duration is 1:30 or greater 
+
+				when (sdg.WeeklyDuration < (case when w.FTEFullTime = NULL then 90 when w.FTEFullTime = 1 then 90 else 60 end)) 
+						and (TakePlace = 1) then 'N'  -- Form found in period and duration less than 1:30
 				
 				when (WorkerFK is null and wws.SupervisionPK is null) then 'N'  -- Form not found in period
 				end
@@ -698,6 +701,7 @@ END
 		 left join cteSupervisors sup on wws.SupervisorFK = sup.WorkerPK  -- to fetch in supervisor's name
 		 left join  cteSupervisionReasonsNotTookPlace reason on reason.SupervisionPK = wws.SupervisionPK -- to fetch in reasons for supervision not took place
 		 left join cteSupervisionDurationsGroupedByWeek sdg on sdg.WorkerPK = wws.WorkerPK and sdg.WeekNumber = wws.WeekNumber
+		 left join Worker w on wws.WorkerFK = w.WorkerPK 
 		)
 		
 	
@@ -739,7 +743,6 @@ END
 ,cteReportDetailsModified
 as
 (
-
 			SELECT WorkerName
 				  ,startdate
 				  ,enddate
@@ -755,15 +758,10 @@ as
 						case when (firstevent <= enddate) then MeetsStandard
 							else ''
 							end
-						
-						
 						else
-						
 							MeetsStandard
 						end	
-						
 						as MeetsStandard1
-						
 				  ,SupervisorName
 				  ,ReasonSupeVisionNotHeld
 				  ,DaysInTheCurrentWeek
@@ -777,7 +775,6 @@ as
 ,cteReport1
 as
 (
-
 			SELECT WorkerName
 				  ,startdate
 				  ,enddate
@@ -794,13 +791,9 @@ as
 						case when (firstevent <= enddate) then MeetsStandard
 							else ''
 							end
-						
-						
 						else
-						
 							MeetsStandard
 						end	
-						
 						as MeetsStandard1
 						
 				  ,SupervisorName
@@ -812,10 +805,6 @@ as
 				  
 			 FROM cteReportDetails	
 )			 
-
-
-
-	
 	,cteUniqueMeetsStandard
 	as
 	(
@@ -861,9 +850,6 @@ as
 					  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) between 75 and 90 then 2
 					  when CONVERT(VARCHAR, round(COALESCE(cast(NumOfMeetStandardYes AS FLOAT) * 100/ NULLIF((NumOfExpectedSessions - NumOfAllowedExecuses),0), 0), 0)) < 75 then 1
 				  end as HFARating		
-
-
-		  
 	FROM cteReport1 cr
 	left join cteScoreByWorker sw on sw.WorkerName = cr.WorkerName 
 	left join Worker w on w.WorkerPK = cr.WorkerPK
@@ -882,8 +868,6 @@ SELECT
 			end
 			as HFABPSRating	 	  
 	   FROM cteSubSummary
-
-
 )				
 				
 SELECT ss.workerpk
@@ -913,9 +897,6 @@ SELECT ss.workerpk
 	-- rspCredentialingSupervisionSummary 1, '07/01/2013', '08/31/2013'		
 				
 -- rspCredentialingSupervisionSummary 11, '10/01/2013', '12/31/2013',null,673,null,null
-	
-	
-
 	drop table #tblFAWFSWWorkers
 	drop table #tblSUPPMWorkers
 	drop table #tblWorkers
