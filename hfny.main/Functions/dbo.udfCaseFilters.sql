@@ -12,13 +12,13 @@ CREATE function [dbo].[udfCaseFilters]
 (-- Add the parameters for the function here
     @positiveClause varchar(200)    = null,
     @negativeClause	varchar(200)    = null,
-    @ProgramFKs		varchar(100)
-)
+    @ProgramFKs		varchar(200)
+) 
 returns
 @tblCases table
 (
 	HVCaseFK int
-)
+) 
 as
 begin
 	declare @HVCasefk int
