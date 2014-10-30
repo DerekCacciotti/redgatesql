@@ -206,9 +206,77 @@ begin
 	, cteFormReview
 	as
 		(-- get all the data we need to render FormReview info
-		select * 
-		from  FormReviewFormList(@HVCaseFK)
+		select frfl.FormType
+			 , frfl.FormFK
+			 , frfl.IsReviewRequired
+			 , frfl.IsFormReviewed
+			 , frfl.IsApproved
+		from  FormReviewFormList(@HVCaseFK) frfl
 		)
+
+--select * from cteFormReview
+
+	, cteRawFormApprovals
+	as
+		(
+			select distinct cf.codeFormAbbreviation as FormType
+					, replace(replace(codeFormName, ' ', ''), '-', '') as FormName
+					, coalesce(max(IsReviewRequired) over (partition by cf.codeFormAbbreviation), 0) as ReviewOn
+					, coalesce(min(IsFormReviewed)  over (partition by cf.codeFormAbbreviation), 1) as FormsReviewed
+			from cteFormReview fr
+			right outer join codeForm cf on cf.codeFormAbbreviation = fr.FormType
+			group by cf.codeFormAbbreviation, replace(replace(codeFormName, ' ', ''), '-', ''), IsReviewRequired, IsFormReviewed
+			--select distinct cf.codeFormName
+			--		, max(IsReviewRequired) over (partition by cf.codeFormName) as ReviewOn
+			--		, min(IsFormReviewed) over (partition by cf.codeFormName) as FormsReviewed
+			--from cteFormReview fr
+			--inner join codeForm cf on cf.codeFormAbbreviation = fr.FormType
+			--group by cf.codeFormName, IsReviewRequired, IsFormReviewed
+		)
+
+	--select * from cteRawFormApprovals
+	
+	, cteFormApprovals
+	as
+		(
+			select HVScreen_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'SC')
+				, HVScreen_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'SC')
+				, Preassessment_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PA')
+				, Preassessment_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PA')
+				, Kempe_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'KE')
+				, Kempe_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'KE')
+				, Preintake_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PI')
+				, Preintake_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PI')
+				, IDContact_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'ID')
+				, IDContact_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'ID')
+				, TCID_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'TC')
+				, TCID_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'TC')
+				, Intake_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'IN')
+				, Intake_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'IN')
+				, TCMedical_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'TM')
+				, TCMedical_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'TM')
+				, HomeVisitLog_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'VL')
+				, HomeVisitLog_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'VL')
+				, ServiceReferral_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'SR')
+				, ServiceReferral_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'SR')
+				, ASQ_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'AQ')
+				, ASQ_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'AQ')
+				, ASQSE_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'AS')
+				, ASQSE_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'AS')
+				, FollowUp_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'FU')
+				, FollowUp_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'FU')
+				, PC1Medical_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PM')
+				, PC1Medical_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PM')
+				, Discharge_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'DS')
+				, Discharge_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'DS')
+				, LevelForm_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'LV')
+				, LevelForm_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'LV')
+				, ParentalStressIndex_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PS')
+				, ParentalStressIndex_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PS')
+				, FatherFigure_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'FF')
+				, FatherFigure_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'FF')
+		)
+	
 	select HVCasePK
 			, PC1ID
 			, hc.ScreenDate
@@ -238,6 +306,47 @@ begin
 			, CountOfFollowUps
 			, mpf.PC1MedicalProviderName
 			, mpf.PC1MedicalFacilityName
+			--, cfr.FormType
+			--, cfr.FormFK
+			--, cfr.IsReviewRequired
+			--, cfr.IsFormReviewed
+			--, cfr.IsApproved
+			, cfa.HVScreen_ReviewOn
+			, cfa.HVScreen_FormsReviewed
+			, cfa.Preassessment_ReviewOn
+			, cfa.Preassessment_FormsReviewed
+			, cfa.Kempe_ReviewOn
+			, cfa.Kempe_FormsReviewed
+			, cfa.Preintake_ReviewOn
+			, cfa.Preintake_FormsReviewed
+			, cfa.IDContact_ReviewOn
+			, cfa.IDContact_FormsReviewed
+			, cfa.TCID_ReviewOn
+			, cfa.TCID_FormsReviewed
+			, cfa.Intake_ReviewOn
+			, cfa.Intake_FormsReviewed
+			, cfa.TCMedical_ReviewOn
+			, cfa.TCMedical_FormsReviewed
+			, cfa.HomeVisitLog_ReviewOn
+			, cfa.HomeVisitLog_FormsReviewed
+			, cfa.ServiceReferral_ReviewOn
+			, cfa.ServiceReferral_FormsReviewed
+			, cfa.ASQ_ReviewOn
+			, cfa.ASQ_FormsReviewed
+			, cfa.ASQSE_ReviewOn
+			, cfa.ASQSE_FormsReviewed
+			, cfa.FollowUp_ReviewOn
+			, cfa.FollowUp_FormsReviewed
+			, cfa.PC1Medical_ReviewOn
+			, cfa.PC1Medical_FormsReviewed
+			, cfa.Discharge_ReviewOn
+			, cfa.Discharge_FormsReviewed
+			, cfa.LevelForm_ReviewOn
+			, cfa.LevelForm_FormsReviewed
+			, cfa.ParentalStressIndex_ReviewOn
+			, cfa.ParentalStressIndex_FormsReviewed
+			, cfa.FatherFigure_ReviewOn
+			, cfa.FatherFigure_FormsReviewed
 		from HVCase hc
 		inner join CaseProgram cp on cp.HVCaseFK = hc.HVCasePK 
 		inner join PC pc on pc.PCPK = hc.PC1FK
@@ -265,6 +374,9 @@ begin
 		inner join cteASQCount on 1 = 1
 		inner join cteASQSECount on 1 = 1
 		inner join cteFollowUpCount on 1 = 1
+		--inner join cteFormReview cfr on 1 = 1
+		--inner join FormReview fr on fr.FormFK = cfr.FormFK and fr.FormType = cfr.FormType
+		inner join cteFormApprovals cfa on 1=1
 		--left outer join ctePC on ctePC.HVCaseFK = hc.HVCasePK
 		--left outer join cteTC on cteTC.HVCaseFK = hc.HVCasePK
 		--left outer join cteTCFU on cteTCFU.HVCaseFK = hc.HVCasePK

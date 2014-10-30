@@ -1,8 +1,11 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- select * from FormReviewedTableList('SC', 1) frtl
+-- select * from FormReviewFormList() frtl
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 08/09/12
@@ -10,18 +13,22 @@ GO
 --				This was created because the utility to check formreview goes item by item, and in a large
 --				table (like the 1000+ in TrainingHome) it was taking 5 minutes or more to go through the whole list
 -- =============================================
-create function [dbo].[FormReviewFormList] (@HVCaseFK int)
+CREATE function [dbo].[FormReviewFormList] (@HVCaseFK int)
 
 returns @results table (FormType char(2)
 						, FormFK int
+						, IsReviewRequired int
+						, IsFormReviewed int
 						, IsApproved varchar(1)
 					   )
 as
 	begin
 		insert @results
-				(FormType, FormFK, IsApproved)
+				(FormType, FormFK, IsReviewRequired, IsFormReviewed, IsApproved)
 			select	fr.FormType
 					  , FormFK
+					  , dbo.IsFormReviewTurnedOn(fr.FormDate, fr.FormType, fr.FormFK) as IsReviewRequired
+					  , dbo.IsFormReviewed(fr.FormDate, fr.FormType, fr.FormFK) as IsFormReviewed
 					  , case when fr.ReviewedBy is null
 						 then case when fro.FormReviewStartDate <= fr.FormDate
 								   then case when fro.FormReviewEndDate is null then '0' --reviews have started for training
@@ -38,7 +45,7 @@ as
 							  end --approved but somehow reviewing training NOT set
 					end as 'IsApproved'
 				from FormReview fr
-				inner join FormReviewOptions fro on fro.ProgramFK = fr.ProgramFK
+				inner join FormReviewOptions fro on fro.ProgramFK = fr.ProgramFK and fro.FormType = fr.FormType
 				where fr.HVCaseFK = @HVCaseFK
 		return
 	end

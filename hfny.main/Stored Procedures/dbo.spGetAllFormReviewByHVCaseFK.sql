@@ -1,13 +1,15 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- =============================================
--- Author:		<Author,,Name>
--- Create date: <Create Date,,>
--- Description:	<Description,,>
--- =============================================
-create procedure [dbo].[spGetAllFormReviewByHVCaseFK] (@HVCaseFK int)
+-- ==============================================================
+-- Author:		jrobohn
+-- Create date: 20141023
+-- Description:	Gets all FormReview rows for a specific CaseFK
+-- exec spGetAllFormReviewByHVCaseFK 
+-- ===========================================================
+CREATE procedure [dbo].[spGetAllFormReviewByHVCaseFK] (@HVCaseFK int)
 as
 	begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -17,6 +19,8 @@ as
     -- Insert statements for procedure here
 		select	fr.FormType
 			  , FormFK
+			  , dbo.IsFormReviewTurnedOn(fr.FormDate, fr.FormType, fr.FormFK) as IsReviewRequired
+			  , dbo.IsFormReviewed(fr.FormDate, fr.FormType, fr.FormFK) as IsFormReviewed
 			  , case when fr.ReviewedBy is null
 				 then case when fro.FormReviewStartDate <= fr.FormDate
 						   then case when fro.FormReviewEndDate is null then '0' --reviews have started for training
