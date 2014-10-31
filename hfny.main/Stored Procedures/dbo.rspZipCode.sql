@@ -78,25 +78,31 @@ begin
 			   
 	)
 	select sc.ProgramFK
+			, p.TargetZip
 			, sc.ZIPCode
 			, CountOfScreens
 			, CountOfServed
 	from cteScreens sc
 	inner join cteServed sv on sv.ZIPCode = sc.ZIPCode
+	inner join HVProgram p on p.HVProgramPK = sc.ProgramFK
 	union all
 	select sc.ProgramFK
+			, p.TargetZip
 			, sc.ZIPCode
 			, CountOfScreens
 			, 0 as CountOfServed
 	from cteScreens sc
+	inner join HVProgram p on p.HVProgramPK = sc.ProgramFK
 	where ZIPCode not in (select ZIPCode from cteServed)
 	union all
 	select ProgramFK
+			, p.TargetZip
 			, ZIPCode
 			, 0 as CountOfScreens
 			, CountOfServed
-	from cteServed 
-		where ZIPCode not in (select ZIPCode from cteScreens)
+	from cteServed se
+	inner join HVProgram p on p.HVProgramPK = se.ProgramFK
+	where ZIPCode not in (select ZIPCode from cteScreens)
 	order by ZIPCode
 	
 	--with cteAllZips (ProgramFK,zipcode,screenedzip,servedzip)
