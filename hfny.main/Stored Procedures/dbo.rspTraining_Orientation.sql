@@ -23,6 +23,7 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
+
 ;WITH  cteMain AS (
 	SELECT g.WorkerPK, g.WrkrLName, g.FirstHomeVisitDate
 	, g.FirstKempeDate, g.SupervisorFirstEvent
@@ -64,7 +65,7 @@ BEGIN
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			RIGHT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE (t1.TopicCode BETWEEN 1.0 AND 5.0) OR (t1.TopicCode = 23.0 AND td.SubTopicFK=48)
+	WHERE (t1.TopicCode BETWEEN 1.0 AND 5.5)
 	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
 	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
 			, t1.TopicCode
@@ -91,7 +92,7 @@ BEGIN
 	, FirstKempeDate
 	, SupervisorFirstEvent
 	FROM cteMain, codetopic
-	WHERE (codetopic.TopicCode BETWEEN 1.0 AND 5.0) OR codetopic.TopicCode=23.0
+	WHERE (codetopic.TopicCode BETWEEN 1.0 AND 5.5)
 )
 
 
@@ -162,9 +163,10 @@ BEGIN
 	, FirstEvent
 	, CASE WHEN FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 'T'
 		WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' 
+		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN 'T'
 		else 'F' END AS 'Meets Target'
 	FROM cte10_2b
-	where not (cte10_2b.FirstEvent< '07/01/2014' and cte10_2b.TrainingDate is null and cte10_2b.TopicCode='23.0')
+	--WHERE not (cte10_2b.FirstEvent< '07/01/2014' and cte10_2b.TrainingDate is null and cte10_2b.TopicCode='5.5')
 	GROUP BY cte10_2b.WorkerPK
 	, WorkerName
 	, Supervisor
@@ -222,7 +224,7 @@ SELECT
 	WHEN cteMeetTarget.topiccode = 3.0 THEN '10-1c. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
 	WHEN cteMeetTarget.topiccode = 4.0 THEN '10-1d. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
 	WHEN cteMeetTarget.topiccode = 5.0 THEN '10-1e. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
-	WHEN cteMeetTarget.topiccode = 23.0 THEN '10-1f. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to the personal safety of staff' 
+	WHEN ctemeettarget.topiccode = 5.5 THEN '10-1f. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to the personal safety of staff' 
 	END AS TopicName
 , TrainingDate
 , FirstHomeVisitDate
@@ -242,6 +244,5 @@ SELECT
 FROM cteMeetTarget
 LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode
 ORDER BY cteMeetTarget.topiccode
-
 END
 GO

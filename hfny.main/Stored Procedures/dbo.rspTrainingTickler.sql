@@ -224,7 +224,9 @@ WHERE TrainingTickler='YES'
 						END
 			  END AS [DateDue]
 			, CASE  WHEN SATCompareDateField = 'firstevent' THEN
-						CASE WHEN TrainingDate IS NOT NULL THEN 'Remove' END
+						CASE WHEN TrainingDate IS NOT NULL THEN 'Remove' 
+						WHEN hiredate < '07/01/2014' AND topiccode = '5.5' THEN 'Remove' 
+						END
 					WHEN SATCompareDateField = 'firstASQ' THEN
 						CASE WHEN TrainingDate IS NOT NULL THEN 'Remove' END
 					WHEN SATCompareDateField = 'date_hired' THEN

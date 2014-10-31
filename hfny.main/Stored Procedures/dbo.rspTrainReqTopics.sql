@@ -97,6 +97,7 @@ SELECT firstname + lastname AS Name
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='3.0') AS 'f3'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='4.0') AS 'f4'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='5.0') AS 'f5'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='5.5') AS 'f5.5'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='6.0') AS 'f6'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='7.0') AS 'f7'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='8.0') AS 'f8'
@@ -240,6 +241,12 @@ SELECT distinct [Name]
 			CASE WHEN datediff(dd, [f5], [FirstEvent]) < 0 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f5_ast'
+	 , convert(VARCHAR(12), [f5.5], 101) AS [f5.5]
+	 , CASE isnull([f5.5], 0)
+		WHEN [f5.5] THEN
+			CASE WHEN datediff(dd, [f5.5], [FirstEvent]) < 0 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f5.5_ast'
 	 , convert(VARCHAR(12), [f6], 101) AS [f6]
 	 , CASE isnull([f6], 0)
 		WHEN [f6] THEN
