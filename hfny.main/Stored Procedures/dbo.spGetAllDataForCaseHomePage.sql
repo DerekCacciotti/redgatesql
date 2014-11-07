@@ -8,6 +8,9 @@ GO
 -- Create date: 2014-07-28
 -- Description:	Gets all the data needed to display the Case Home Page
 -- exec spGetAllDataForCaseHomePage 'DS90010007908'
+-- exec spGetAllDataForCaseHomePage 'AB77050250139'
+-- exec spGetAllDataForCaseHomePage 'MC79140216559'
+-- exec spGetAllDataForCaseHomePage 'JC79010253576'
 -- =============================================
 CREATE procedure [dbo].[spGetAllDataForCaseHomePage]
 (
@@ -74,32 +77,11 @@ begin
 			from TCID t
 			where HVCaseFK = @HVCaseFK
 		)
-	, cteTCMedicalCount
-	as
-		(
-		select count(TCMedicalPK) as CountOfTCMedicalForms
-			from TCMedical tm
-			where HVCaseFK = @HVCaseFK
-		)
 	, ctePSICount
 	as
 		(
 		select count(PSIPK) as CountOfPSIs
 			from PSI p
-			where HVCaseFK = @HVCaseFK
-		)
-	, cteASQCount
-	as
-		(
-		select count(ASQPK) as CountOfASQs
-			from ASQ a
-			where HVCaseFK = @HVCaseFK
-		)
-	, cteASQSECount
-	as
-		(
-		select count(ASQSEPK) as CountOfASQSEs
-			from ASQSE ase
 			where HVCaseFK = @HVCaseFK
 		)
 	, cteFollowUpCount
@@ -108,6 +90,77 @@ begin
 		select count(FollowUpPK) as CountOfFollowUps
 			from FollowUp fu
 			where HVCaseFK = @HVCaseFK
+		)
+	, cteTargetChildren
+	as
+		(
+		select TCIDPK, t.HVCaseFK, t.TCFirstName, t.TCLastName, t.TCDOB, t.TCIDFormCompleteDate
+		from TCID t
+		where t.HVCaseFK = @HVCaseFK
+		)
+	, cteTargetChildren_Flattened
+	as
+		(
+		select TargetChildName = substring((select ', ' + TCFirstName + ' ' + TCLastName
+												from cteTargetChildren tc
+												where tc.HVCaseFK = @HVCaseFK
+												for xml path ('')), 3, 1000)
+
+		)
+	, cteTargetChildFormCompleteDate
+	as
+		(
+		select max(TCIDFormCompleteDate) as TCIDFormCompleteDate
+		from TCID t
+		where t.HVCaseFK = @HVCaseFK
+		)
+	, cteASQs
+	as
+		(
+		select TCIDFK, left(t.TCFirstName, 1) + rtrim(ltrim(cast(count(TCIDFK) as char(4)))) as ASQCount
+		from ASQ a
+		inner join TCID t on t.TCIDPK = a.TCIDFK
+		where a.HVCaseFK = @HVCaseFK and t.TCDOD is null
+		group by a.TCIDFK, left(t.TCFirstName, 1) 
+		)
+	, cteASQCount
+	as
+		(
+		select CountOfASQs = substring((select '/' + a.ASQCount
+												from cteASQs a
+												for xml path ('')), 2, 1000)
+		)
+	, cteASQSEs
+	as
+		(
+		select TCIDFK, left(t.TCFirstName, 1) + rtrim(ltrim(cast(count(TCIDFK) as char(4)))) as ASQSECount
+		from ASQSE ase
+		inner join TCID t on t.TCIDPK = ase.TCIDFK
+		where ase.HVCaseFK = @HVCaseFK and t.TCDOD is null
+		group by ase.TCIDFK, left(t.TCFirstName, 1) 
+		)
+	, cteASQSECount
+	as
+		(
+		select CountOfASQSEs = substring((select '/' + ase.ASQSECount
+												from cteASQSEs ase
+												for xml path ('')), 2, 1000)
+		)
+	, cteTCMedicals
+	as
+		(
+		select TCIDFK, left(t.TCFirstName, 1) + rtrim(ltrim(cast(count(TCIDFK) as char(4)))) as TCMedicalCount
+		from TCMedical tm
+		inner join TCID t on t.TCIDPK = tm.TCIDFK
+		where tm.HVCaseFK = @HVCaseFK and t.TCDOD is null
+		group by tm.TCIDFK, left(t.TCFirstName, 1) 
+		)
+	, cteTCMedicalCount
+	as
+		(
+		select CountOfTCMedicalForms = substring((select '/' + tm.TCMedicalCount
+												from cteTCMedicals tm
+												for xml path ('')), 2, 1000)
 		)
 	-- the following 5 CTEs get the medical provider/facility information
 	, cteMPFUP
@@ -146,7 +199,9 @@ begin
 	as 
 		(--Step 3 : Get TC Has medical provider
 		  select top 1
-					TCHasMedicalProvider
+					FormDate as FUDate
+				  , FormInterval as FUFormInterval
+				  ,	TCHasMedicalProvider
 				  , ca.HVCaseFK as HVCaseFK
 				  , CommonAttributesPK
 		  from		CommonAttributes ca
@@ -175,7 +230,7 @@ begin
 	, cteMedicalProviders_Facilities
 	as
 		(-- now bring together all the medical provider/facility info to determine what to display
-			select case when FUDate is not null and PCDate is not null and FUDate >= PCDate 
+			select case when mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate >= PCDate 
 						then 
 							case when PC1HasMedicalProvider is not null and PC1MedicalProviderFK is not null 
 								and PC1HasMedicalProvider = '1' and PC1MedicalProviderFK > 0
@@ -184,8 +239,12 @@ begin
 						else 'None'
 						end 
 					as PC1MedicalProviderName
-					
-					, case when FUDate is not null and PCDate is not null and FUDate < PCDate 
+					, lmppc1.MPAddress as PC1MedicalProviderAddress
+					, lmppc1.MPCity as PC1MedicalProviderCity
+					, lmppc1.MPState as PC1MedicalProviderState
+					, lmppc1.MPZip as PC1MedicalProviderZIP
+					, lmppc1.MPPhone as PC1MedicalProviderPhone
+					, case when mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate < PCDate 
 						then 
 							case when PC1MedicalProviderFK is not null and PC1MedicalProviderFK > 0
 							then lmppc1.MPLastName + ', ' + lmppc1.MPLastName 
@@ -193,7 +252,38 @@ begin
 						else 'None'
 						end 
 					as PC1MedicalFacilityName
-			
+					, lmfpc1.MFAddress as PC1MedicalFacilityAddress
+					, lmfpc1.MFCity as PC1MedicalFacilityCity
+					, lmfpc1.MFState as PC1MedicalFacilityState
+					, lmfpc1.MFZip as PC1MedicalFacilityZIP
+					, lmfpc1.MFPhone as PC1MedicalFacilityPhone
+					, case when mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate >= TCDate 
+						then 
+							case when TCHasMedicalProvider is not null and TCMedicalProviderFK is not null 
+								and TCHasMedicalProvider = '1' and TCMedicalProviderFK > 0
+							then lmptc.MPLastName + ', ' + lmptc.MPLastName 
+							end
+						else 'None'
+						end 
+					as TCMedicalProviderName
+					, lmptc.MPAddress as TCMedicalProviderAddress
+					, lmptc.MPCity as TCMedicalProviderCity
+					, lmptc.MPState as TCMedicalProviderState
+					, lmptc.MPZip as TCMedicalProviderZIP
+					, lmptc.MPPhone as TCMedicalProviderPhone
+					, case when mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate < TCDate 
+						then 
+							case when TCMedicalProviderFK is not null and TCMedicalProviderFK > 0
+							then lmptc.MPLastName + ', ' + lmptc.MPLastName 
+							end
+						else 'None'
+						end 
+					as TCMedicalFacilityName
+					, lmftc.MFAddress as TCMedicalFacilityAddress
+					, lmftc.MFCity as TCMedicalFacilityCity
+					, lmftc.MFState as TCMedicalFacilityState
+					, lmftc.MFZip as TCMedicalFacilityZIP
+					, lmftc.MFPhone as TCMedicalFacilityPhone
 			from cteMPPC mppc
 			left outer join cteMPTC mptc on mptc.HVCaseFK = mppc.HVCaseFK
 			left outer join cteMPTCFU mptcfu on mptcfu.HVCaseFK = mppc.HVCaseFK
@@ -210,7 +300,6 @@ begin
 			 , frfl.FormFK
 			 , frfl.IsReviewRequired
 			 , frfl.IsFormReviewed
-			 , frfl.IsApproved
 		from  FormReviewFormList(@HVCaseFK) frfl
 		)
 
@@ -271,41 +360,88 @@ begin
 				, Discharge_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'DS')
 				, LevelForm_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'LV')
 				, LevelForm_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'LV')
-				, ParentalStressIndex_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PS')
-				, ParentalStressIndex_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PS')
+				, PSI_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PS')
+				, PSI_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PS')
 				, FatherFigure_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'FF')
 				, FatherFigure_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'FF')
 		)
 	
 	select HVCasePK
+			, cp.ProgramFK
 			, PC1ID
+			, hc.CaseProgress
 			, hc.ScreenDate
+			, hc.EDC
 			, hc.TCDOB
 			, rtrim(pc.PCFirstName) + ' ' + rtrim(pc.PCLastName) as PC1Name
+			, pc.Gender as PC1Gender
 			, rtrim(ec.PCFirstName) + ' ' + rtrim(ec.PCLastName) as EmergencyContactName
-			, LevelName as CurrentLevelname
+			, LevelName as CurrentLevelName
 			, hc.KempeDate
 			, DischargeDate
 			, rtrim(obp.PCFirstName) + ' ' + rtrim(obp.PCLastName) as OBPName
-			, rtrim(t.TCFirstName) + ' ' + rtrim(t.TCLastName) as TargetChildName
-			, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) as CurrentWorkerName
+			, hc.TCNumber
+			--, rtrim(t.TCFirstName) + ' ' + rtrim(t.TCLastName) as TargetChildName
+			, TargetChildName
+			, rtrim(faw.FirstName) + ' ' + rtrim(faw.LastName) as CurrentFAWName
+			, rtrim(fsw.FirstName) + ' ' + rtrim(fsw.LastName) as CurrentFSWName
 			, hc.IntakeDate
 			, rtrim(pc2.PCFirstName) + ' ' + rtrim(pc2.PCLastName) as PC2Name
+			, s.HVScreenPK
+			, k.KempePK
+			, i.IntakePK
+			, OldID
+			, HVCaseFK_old
+			, CaseStartDate
+			, DateOBPAdded
+			, HVCaseCreateDate
+			, HVCaseCreator
+			, HVCaseEditDate
+			, HVCaseEditor
 			, cfca.FormDate as ChangeFormCommonAttributesFormDate
-			, CountOfPreassessments
-			, CountOfPreintakes
-			, CountOfServiceReferrals
-			, CountOfHomeVisitLogs
-			, CountOfPC1MedicalForms
-			, CountOfFatherFigures
-			, CountOfTCIDs
-			, CountOfTCMedicalForms
-			, CountOfPSIs
-			, CountOfASQs
-			, CountOfASQSEs
-			, CountOfFollowUps
-			, mpf.PC1MedicalProviderName
-			, mpf.PC1MedicalFacilityName
+			, TCIDFormCompleteDate
+			, isnull(CountOfPreassessments, 0) as CountOfPreassessments
+			, isnull(CountOfPreintakes, 0) as CountOfPreintakes
+			, isnull(CountOfServiceReferrals, 0) as CountOfServiceReferrals
+			, isnull(CountOfHomeVisitLogs, 0) as CountOfHomeVisitLogs
+			, isnull(CountOfPC1MedicalForms, 0) as CountOfPC1MedicalForms
+			, isnull(CountOfFatherFigures, 0) as CountOfFatherFigures
+			, isnull(CountOfTCIDs, 0) as CountOfTCIDs
+			, isnull(CountOfPSIs, 0) as CountOfPSIs
+			, isnull(CountOfFollowUps, 0) as CountOfFollowUps
+			, isnull(case when charindex('/', CountOfASQs) > 0 
+						then CountOfASQs 
+						else substring(CountOfASQs, 2, 10) end, 0) as CountOfASQs
+			, isnull(case when charindex('/', CountOfASQSEs) > 0 
+						then CountOfASQSEs 
+						else substring(CountOfASQSEs, 2, 10) end, 0) as CountOfASQSEs
+			, isnull(case when charindex('/', CountOfTCMedicalForms) > 0 
+						then CountOfTCMedicalForms 
+						else substring(CountOfTCMedicalForms, 2, 10) end, 0) as CountOfTCMedicalForms
+			, isnull(mpf.PC1MedicalProviderName, 'None') as PC1MedicalProviderName
+			, mpf.PC1MedicalProviderAddress
+			, mpf.PC1MedicalProviderCity
+			, mpf.PC1MedicalProviderState
+			, mpf.PC1MedicalProviderZIP
+			, mpf.PC1MedicalProviderPhone
+			, isnull(mpf.PC1MedicalFacilityName, 'None') as PC1MedicalFacilityName
+			, mpf.PC1MedicalFacilityAddress
+			, mpf.PC1MedicalFacilityCity
+			, mpf.PC1MedicalFacilityState
+			, mpf.PC1MedicalFacilityZIP
+			, mpf.PC1MedicalFacilityPhone
+			, isnull(mpf.TCMedicalProviderName, 'None') as TCMedicalProviderName
+			, mpf.TCMedicalProviderAddress
+			, mpf.TCMedicalProviderCity
+			, mpf.TCMedicalProviderState
+			, mpf.TCMedicalProviderZIP
+			, mpf.TCMedicalProviderPhone
+			, isnull(mpf.TCMedicalFacilityName, 'None') as TCMedicalFacilityName
+			, mpf.TCMedicalFacilityAddress
+			, mpf.TCMedicalFacilityCity
+			, mpf.TCMedicalFacilityState
+			, mpf.TCMedicalFacilityZIP
+			, mpf.TCMedicalFacilityPhone
 			--, cfr.FormType
 			--, cfr.FormFK
 			--, cfr.IsReviewRequired
@@ -343,8 +479,8 @@ begin
 			, cfa.Discharge_FormsReviewed
 			, cfa.LevelForm_ReviewOn
 			, cfa.LevelForm_FormsReviewed
-			, cfa.ParentalStressIndex_ReviewOn
-			, cfa.ParentalStressIndex_FormsReviewed
+			, cfa.PSI_ReviewOn
+			, cfa.PSI_FormsReviewed
 			, cfa.FatherFigure_ReviewOn
 			, cfa.FatherFigure_FormsReviewed
 		from HVCase hc
@@ -354,14 +490,16 @@ begin
 		left outer join PC obp on obp.PCPK = hc.OBPFK
 		left outer join PC pc2 on pc2.PCPK = hc.PC2FK
 		inner join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
-		inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
-		--inner join HVScreen s on s.HVCaseFK = hc.HVCasePK
-		inner join TCID t on t.HVCaseFK = hc.HVCasePK
-		inner join Intake i on i.HVCaseFK = hc.HVCasePK
+		left outer join Worker fsw on fsw.WorkerPK = cp.CurrentFSWFK
+		left outer join Worker faw on faw.WorkerPK = cp.CurrentFAWFK
+		inner join HVScreen s on s.HVCaseFK = hc.HVCasePK
+		left outer join Kempe k on k.HVCaseFK = hc.HVCasePK
+		-- left outer join TCID t on t.HVCaseFK = hc.HVCasePK
+		left outer join Intake i on i.HVCaseFK = hc.HVCasePK
 		left outer join CommonAttributes cfca on cfca.HVCaseFK = hc.HVCasePK and cfca.FormFK = cp.CaseProgramPK and cfca.FormType = 'CH'
-		left outer join CommonAttributes pc1ca on pc1ca.HVCaseFK = hc.HVCasePK and pc1ca.FormFK = i.IntakePK and pc1ca.FormType = 'IN'
-		left outer join CommonAttributes tcca on tcca.HVCaseFK = hc.HVCasePK and tcca.FormFK = t.TCIDPK and tcca.FormType = 'TC'
-		inner join cteMedicalProviders_Facilities mpf on 1 = 1
+		--left outer join CommonAttributes pc1ca on pc1ca.HVCaseFK = hc.HVCasePK and pc1ca.FormFK = i.IntakePK and pc1ca.FormType = 'IN'
+		--left outer join CommonAttributes tcca on tcca.HVCaseFK = hc.HVCasePK and tcca.FormFK = t.TCIDPK and tcca.FormType = 'TC'
+		left outer join cteMedicalProviders_Facilities mpf on 1 = 1
 		inner join ctePreAssessmentCount on 1 = 1
 		inner join ctePreIntakeCount on 1 = 1
 		inner join cteServiceReferralCount on 1 = 1
@@ -369,11 +507,13 @@ begin
 		inner join ctePC1MedicalCount on 1 = 1
 		inner join cteFatherFigureCount on 1 = 1
 		inner join cteTCIDCount on 1 = 1
-		inner join cteTCMedicalCount on 1 = 1
 		inner join ctePSICount on 1 = 1
+		inner join cteFollowUpCount on 1 = 1
+		inner join cteTargetChildFormCompleteDate on 1=1
+		inner join cteTargetChildren_Flattened on 1=1
 		inner join cteASQCount on 1 = 1
 		inner join cteASQSECount on 1 = 1
-		inner join cteFollowUpCount on 1 = 1
+		inner join cteTCMedicalCount on 1 = 1
 		--inner join cteFormReview cfr on 1 = 1
 		--inner join FormReview fr on fr.FormFK = cfr.FormFK and fr.FormType = cfr.FormType
 		inner join cteFormApprovals cfa on 1=1
