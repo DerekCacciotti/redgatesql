@@ -8,40 +8,35 @@ GO
 -- Create date: 11/05/2012
 -- Description:	Got it from FamSys
 -- =============================================
-CREATE FUNCTION [dbo].[IsFormReviewed]
-(
-	@DateCheck as DateTime, --the date of the form in question
-	@FType as CHAR(2), --the Form Type in question
-	@FormFK as INT  --the specific FormFK in question
-)
-RETURNS bit
-AS
-BEGIN
-
-	DECLARE @IsReviewed as bit
-
-	SET @IsReviewed = 1
-
-	-- Declare the return variable here
+CREATE function [dbo].[IsFormReviewed] (@DateCheck as datetime --the date of the form in question
+										, @FType as char(2)	--the Form Type in question
+										, @FormFK as int  --the specific FormFK in question
+									  )
+returns bit
+as
+	begin
+		-- Declare the return variable here
+		declare	@IsReviewed as bit
+		set @IsReviewed = 1
 	
-		IF dbo.IsFormReviewTurnedOn(@DateCheck,@FType,@FormFK) > 0 
-			BEGIN 
+		declare @ProgramFK int
+		set @ProgramFK = (select ProgramFK 
+							from FormReview fr
+							where fr.FormFK = @FormFK
+									and fr.FormType = @FType
+									and fr.FormDate = @DateCheck
+						 )
+									
+		if dbo.IsFormReviewTurnedOn(@DateCheck, @FType, @ProgramFK) > 0
+			begin 
 			
-				SELECT @IsReviewed = CASE WHEN FormReviewOptionsPK IS NULL THEN 1
-				WHEN FormReviewOptions.FormType IS NULL THEN 1
-				WHEN @DateCheck < FormReviewStartDate THEN 1 
-				WHEN @DateCheck > FormReviewENDDate THEN 1
-				WHEN ReviewedBy IS NOT NULL THEN 1
-				ELSE 0
-				END
-				FROM formreview 
-				LEFT JOIN formreviewoptions
-				ON FormReview.ProgramFK=FormReviewOptions.Programfk AND FormReviewOptions.FormType=@Ftype
-				where formreview.FormFK=@FormFK 
-				 and formreview.FormType=@FType 
-				 and formreview.formdate=@DateCheck
-			END 
+				select	@IsReviewed = case when ReviewedBy is not null then 1 else 0 end
+				from	FormReview fr
+				where	fr.FormFK = @FormFK
+						and fr.FormType = @FType
+						and fr.FormDate = @DateCheck
+			end 
 	
-	RETURN @IsReviewed
-END
+		return @IsReviewed
+	end
 GO
