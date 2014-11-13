@@ -8,6 +8,7 @@ GO
 -- Create date: 2014-07-28
 -- Description:	Gets all the data needed to display the Case Home Page
 -- exec spGetAllDataForCaseHomePage 'EG81010218386' 'DS90010007908'
+
 -- exec spGetAllDataForCaseHomePage 'AB77050250139'
 -- exec spGetAllDataForCaseHomePage 'MC79140216559'
 -- exec spGetAllDataForCaseHomePage 'JC79010253576'
@@ -247,7 +248,8 @@ begin
 								end
 							else 'None'
 							end
-						when mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate < PCDate
+						when (mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate < PCDate)
+								or  (mpfup.FUDate is null and PCDate is not null)
 						-- there is either no follow-up, or the change form / intake date is later so use that data
 						then
 							case when PCPC1HasMedicalProvider is not null and PC1MedicalProviderFK is not null
