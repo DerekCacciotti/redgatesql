@@ -7,11 +7,7 @@ GO
 -- Author:		jrobohn
 -- Create date: 2014-07-28
 -- Description:	Gets all the data needed to display the Case Home Page
--- exec spGetAllDataForCaseHomePage 'EG81010218386' 'DS90010007908'
-
--- exec spGetAllDataForCaseHomePage 'AB77050250139'
--- exec spGetAllDataForCaseHomePage 'MC79140216559'
--- exec spGetAllDataForCaseHomePage 'JC79010253576'
+-- exec spGetAllDataForCaseHomePage 'CD97050257617' 'VB84010244287' 'EG81010218386' 'DS90010007908' 'AB77050250139' 'MC79140216559' 'JC79010253576'
 -- =============================================
 CREATE procedure [dbo].[spGetAllDataForCaseHomePage]
 (
@@ -219,6 +215,7 @@ begin
 					FormDate as TCDate
 				  , FormType as TCFormType
 				  , FormInterval as TCFormInterval
+				  , ca.TCHasMedicalProvider
 				  , TCMedicalProviderFK
 				  , TCMedicalFacilityFK
 				  , ca.HVCaseFK as HVCaseFK
@@ -235,14 +232,14 @@ begin
 			select case when mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate >= PCDate
 						-- follow-up form date is greater than change form / intake date
 						then 
-							case when FUPC1HasMedicalProvider is not null and PC1MedicalProviderFK is not null
-								and FUPC1HasMedicalProvider = '1' and PC1MedicalProviderFK > 0
+							case when FUPC1HasMedicalProvider is not null and FUPC1HasMedicalProvider = '1' 
+										and PC1MedicalProviderFK is not null and PC1MedicalProviderFK > 0
 							then case when (lmppc1.MPLastName is null or lmppc1.MPLastName = '')
 											and (lmppc1.MPFirstName is null or lmppc1.MPFirstName = '') 
 										then 'Name not specified'
-										else lmppc1.MPLastName + 
+										else rtrim(lmppc1.MPLastName) + 
 												case when lmppc1.MPFirstName is not null and lmppc1.MPFirstName <> ''
-													then ', ' + lmppc1.MPFirstName
+													then ', ' + rtrim(lmppc1.MPFirstName)
 													else ''
 												end
 								end
@@ -252,12 +249,21 @@ begin
 								or  (mpfup.FUDate is null and PCDate is not null)
 						-- there is either no follow-up, or the change form / intake date is later so use that data
 						then
-							case when PCPC1HasMedicalProvider is not null and PC1MedicalProviderFK is not null
-								and PCPC1HasMedicalProvider = '1' and PC1MedicalProviderFK > 0
-							then lmppc1.MPLastName + 
-								case when lmppc1.MPFirstName is not null and lmppc1.MPFirstName <> ''
-									then ', ' + lmppc1.MPFirstName
-									else ''
+							case when PCPC1HasMedicalProvider is not null and PCPC1HasMedicalProvider = '1' 
+										and PC1MedicalProviderFK is not null and PC1MedicalProviderFK > 0
+							then 
+								case when lmppc1.MPLastName is not null and lmppc1.MPLastName > ''
+										then rtrim(lmppc1.MPLastName) + 
+											case when lmppc1.MPFirstName is not null and lmppc1.MPFirstName <> ''
+											then ', ' + rtrim(lmppc1.MPFirstName)
+											else ''
+											end
+									when lmppc1.MPLastName is null or lmppc1.MPLastName = ''
+										then 
+											case when lmppc1.MPAddress is not null and lmppc1.MPAddress > ''
+													then rtrim(lmppc1.MPAddress) + ', '
+											end
+										+ rtrim(lmppc1.MPCity)
 								end
 							else 'None'
 							end
@@ -270,19 +276,20 @@ begin
 					, case when mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate >= PCDate
 						-- follow-up form date is greater than change form / intake date
 						then 
-							case when FUPC1HasMedicalProvider is not null and PC1MedicalFacilityFK is not null
-								and FUPC1HasMedicalProvider = '1' and PC1MedicalFacilityFK > 0
-							then case when lmfpc1.MFName is not null and lmfpc1.MFName <> ''
-										then lmfpc1.MFName
-										else 'Name not specified'
-									end
+							case when FUPC1HasMedicalProvider is not null and FUPC1HasMedicalProvider = '1' 
+										and PC1MedicalFacilityFK is not null and PC1MedicalFacilityFK > 0
+								then case when lmfpc1.MFName is not null and lmfpc1.MFName <> ''
+											then lmfpc1.MFName
+											else 'Name not specified'
+										end
 							else 'None'
 							end
-						when mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate < PCDate
+						when (mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate < PCDate)
+								or  (mpfup.FUDate is null and PCDate is not null)
 						-- there is either no follow-up, or the change form / intake date is later so use that data
 						then
-							case when PCPC1HasMedicalProvider is not null and PC1MedicalFacilityFK is not null
-								and PCPC1HasMedicalProvider = '1' and PC1MedicalFacilityFK > 0
+							case when PCPC1HasMedicalProvider is not null and PCPC1HasMedicalProvider = '1' 
+										and PC1MedicalFacilityFK is not null and PC1MedicalFacilityFK > 0
 							then lmfpc1.MFName
 							else 'None'
 							end
@@ -294,43 +301,44 @@ begin
 					, lmfpc1.MFZip as PC1MedicalFacilityZIP
 					, lmfpc1.MFPhone as PC1MedicalFacilityPhone
 					, case when mpfup.FUDate is not null and PCDate is not null and mpfup.FUDate >= PCDate
-							-- follow-up form date is greater than change form / intake date
-							then case when FUPC1HasMedicalProvider is not null and PC1MedicalProviderFK is not null
-											and FUPC1HasMedicalProvider = '1' and PC1MedicalProviderFK > 0
+							-- follow-up form date is greater than change form / tcid date
+							then case when FUPC1HasMedicalProvider is not null and FUPC1HasMedicalProvider = '1' 
+											and PC1MedicalProviderFK is not null and PC1MedicalProviderFK > 0
 										then 'FollowUp-' + mpfup.FUFormInterval
 										else 'No Provider/Facility: FU-' + mpfup.FUFormInterval
 							end
 						else
 							case when PC1MedicalProviderFK is not null or PC1MedicalFacilityFK is not null
-										then 'From: ' + mppc.PCFormType + '-' + convert(varchar(8),mppc.PCDate,1)
-										else 'No Provider/Facility: ' + mppc.PCFormType + '-' + convert(varchar(8),mppc.PCDate,1)
+										then 'From: ' + rtrim(mppc.PCFormType) + '-' + convert(varchar(8),mppc.PCDate,1)
+										else 'No Provider/Facility: ' + rtrim(mppc.PCFormType) + '-' + convert(varchar(8),mppc.PCDate,1)
 							end
 						end as PC1MedicalInfoForm
 					, case when mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate >= TCDate
 						then
-							case when TCHasMedicalProvider is not null and TCMedicalProviderFK is not null
-										and TCHasMedicalProvider = '1' and TCMedicalProviderFK > 0
+							case when mptcfu.TCHasMedicalProvider is not null and mptcfu.TCHasMedicalProvider = '1' 
+										and TCMedicalProviderFK is not null and TCMedicalProviderFK > 0
 								then case when (lmptc.MPLastName is null or lmptc.MPLastName = '')
 												and (lmptc.MPFirstName is null or lmptc.MPFirstName = '') 
 										then 'Name not specified'
-										else lmptc.MPLastName + 
+										else rtrim(lmptc.MPLastName) + 
 											case when lmptc.MPFirstName is not null and lmptc.MPFirstName <> ''
-												then ', ' + lmppc1.MPFirstName
+												then ', ' + rtrim(lmppc1.MPFirstName)
 												else ''
 											end
 									end
 							end
-						when mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate < TCDate
-							-- there is either no follow-up, or the change form / intake date is later so use that data
+						when (mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate < TCDate)
+								or  (mptcfu.FUDate is null and TCDate is not null)
+							-- there is either no follow-up, or the change form / tcid date is later so use that data
 							then 
-							case when TCHasMedicalProvider is not null and TCMedicalProviderFK is not null
-										and TCHasMedicalProvider = '1' and TCMedicalProviderFK > 0
+							case when mptc.TCHasMedicalProvider is not null and mptc.TCHasMedicalProvider = '1' 
+										and TCMedicalProviderFK is not null and TCMedicalProviderFK > 0
 								then case when (lmptc.MPLastName is null or lmptc.MPLastName = '')
 												and (lmptc.MPFirstName is null or lmptc.MPFirstName = '') 
 										then 'Name not specified'
-										else lmptc.MPLastName + 
+										else rtrim(lmptc.MPLastName) + 
 											case when lmptc.MPFirstName is not null and lmptc.MPFirstName <> ''
-												then ', ' + lmppc1.MPFirstName
+												then ', ' + rtrim(lmptc.MPFirstName)
 												else ''
 											end
 									end
@@ -345,21 +353,25 @@ begin
 					, lmptc.MPPhone as TCMedicalProviderPhone
 					, case when mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate >= TCDate
 						then
-							case when TCHasMedicalProvider is not null and TCMedicalFacilityFK is not null
-										and TCHasMedicalProvider = '1' and TCMedicalFacilityFK > 0
+							case when mptcfu.TCHasMedicalProvider is not null and mptcfu.TCHasMedicalProvider = '1' 
+										and TCMedicalFacilityFK is not null and TCMedicalFacilityFK > 0
 								then case when (lmftc.MFName is null or lmftc.MFName = '')
 										then 'Name not specified'
 										else lmftc.MFName
 									end
-							else 'Name not specified'
+							else 'None'
 							end
-						when mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate < TCDate
-							-- there is either no follow-up, or the change form / intake date is later so use that data
+						when (mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate < TCDate)
+								or  (mptcfu.FUDate is null and TCDate is not null)
+							-- there is either no follow-up, or the change form / tcid date is later so use that data
 							then
-								case when TCHasMedicalProvider is not null and TCMedicalFacilityFK is not null
-									and TCHasMedicalProvider = '1' and TCMedicalFacilityFK > 0
-								then lmfpc1.MFName
-								else 'Name not specified'
+								case when mptc.TCHasMedicalProvider is not null and mptc.TCHasMedicalProvider = '1' 
+										and TCMedicalFacilityFK is not null and TCMedicalFacilityFK > 0
+								then case when (lmftc.MFName is null or lmftc.MFName = '')
+										then 'Name not specified'
+										else lmftc.MFName
+									end
+								else 'None'
 								end
 						else 'None'
 						end
@@ -370,15 +382,15 @@ begin
 					, lmftc.MFZip as TCMedicalFacilityZIP
 					, lmftc.MFPhone as TCMedicalFacilityPhone
 					, case when mptcfu.FUDate is not null and TCDate is not null and mptcfu.FUDate >= TCDate
-							then case when TCHasMedicalProvider is not null and TCMedicalProviderFK is not null 
-											and TCHasMedicalProvider = '1' and TCMedicalProviderFK > 0
+							then case when mptcfu.TCHasMedicalProvider is not null and mptcfu.TCHasMedicalProvider = '1' 
+											and TCMedicalProviderFK is not null and TCMedicalProviderFK > 0
 										then 'FollowUp-' + mptcfu.FUFormInterval
 										else 'No Provider/Facility: FU-' + mptcfu.FUFormInterval
 							end
 						else
 							case when TCMedicalProviderFK is not null or TCMedicalFacilityFK is not null
-										then 'From: ' + mptc.TCFormType + '-' + convert(varchar(8),mptc.TCDate,1)
-										else 'No Provider/Facility: ' + mptc.TCFormType + '-' + convert(varchar(8),mptc.TCDate,1)
+										then 'From: ' + rtrim(mptc.TCFormType) + '-' + convert(varchar(8),mptc.TCDate,1)
+										else 'No Provider/Facility: ' + rtrim(mptc.TCFormType) + '-' + convert(varchar(8),mptc.TCDate,1)
 							end
 						end as TCMedicalInfoForm
 			from cteMPPC mppc
