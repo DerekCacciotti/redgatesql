@@ -12,7 +12,6 @@ GO
 CREATE procedure [dbo].[rspPreAssessEngagement_Part3]
 (
     @programfk varchar(max)    = null,
-    @StartDtT  datetime        = null,
     @StartDt   datetime        = null,
     @EndDt     datetime        = null
 )

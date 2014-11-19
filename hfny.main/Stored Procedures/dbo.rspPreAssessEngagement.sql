@@ -10,13 +10,13 @@ GO
 -- Description: 
 -- exec rspPreAssessEngagement 19, '07/01/2012', '07/01/2012', '09/30/2012'
 -- exec rspPreAssessEngagement 5, '07/01/2012', '07/01/2012', '09/30/2012'
-
+-- exec rspPreAssessEngagement 1, 1, '07/01/2014', '09/30/2014'
 -- =============================================
 CREATE procedure [dbo].[rspPreAssessEngagement] (@programfk varchar(max) = null
-											  , @StartDtT datetime = null
-											  , @StartDt datetime = null
-											  , @EndDt datetime = null
-											   )
+										, @CustomQuarterlyDates bit
+										, @StartDt datetime = null
+										, @EndDt datetime = null
+										)
 as 
 
 --DECLARE @StartDtT DATE = '01/01/2012'
@@ -24,6 +24,26 @@ as
 --DECLARE @EndDt DATE = '11/30/2012'
 --DECLARE @programfk INT = 4
 
+	-- if user select a custom date range (not a specific quarter) then don't show ContractPeriod Column
+	
+	declare	@ContractStartDate date
+	declare	@ContractEndDate date
+
+	if ((@programfk is not null)
+		and (@CustomQuarterlyDates = 0)
+	   )
+		begin 
+			set @programfk = replace(@programfk, ',', '') -- remove comma's
+			set @ContractStartDate = (select	ContractStartDate
+									  from		HVProgram P
+									  where		HVProgramPK = @programfk
+									 )
+			set @ContractEndDate = (select	ContractEndDate
+									from	HVProgram P
+									where	HVProgramPK = @programfk
+								   )		
+		end 
+	
 	if @programfk is null
 		begin
 			select	@programfk = substring((select	',' + ltrim(rtrim(str(HVProgramPK)))
@@ -33,6 +53,7 @@ as
 										   ), 2, 8000)
 		end
 	set @programfk = replace(@programfk, '"', '');
+	
 	with ScreensThisPeriod
 			  as (select	a.HVCasePK
 						  , c.ScreenResult
@@ -319,7 +340,7 @@ as
 				  join		CaseProgram as b on a.HVCasePK = b.HVCaseFK
 				  join		dbo.SplitString(@programfk, ',') on b.programfk = listitem
 				  join		HVScreen as c on a.HVCasePK = c.HVCaseFK
-				  where		a.ScreenDate between @StartDtT and @EndDt
+				  where		a.ScreenDate between @ContractStartDate and @ContractEndDate
 				 ) ,
 			ScreensThisPeriod_1eT
 			  as (select	HVCasePK
@@ -333,12 +354,12 @@ as
 				  from		HVCase as a
 				  join		CaseProgram as b on a.HVCasePK = b.HVCaseFK
 				  join		dbo.SplitString(@programfk, ',') on b.programfk = listitem
-				  where		(a.ScreenDate < @StartDtT)
-							and (a.KempeDate >= @StartDtT
+				  where		(a.ScreenDate < @ContractStartDate)
+							and (a.KempeDate >= @ContractStartDate
 								 or a.KempeDate is null
 								)
 							and (b.DischargeDate is null
-								 or b.DischargeDate >= @StartDtT
+								 or b.DischargeDate >= @ContractStartDate
 								)
 				 ) ,
 			section2QT
@@ -356,7 +377,7 @@ as
 						  , max(a.PADate) [max_PADATE]
 				  from		Preassessment as a
 				  join		dbo.SplitString(@programfk, ',') on a.programfk = listitem
-				  where		a.PADate between @StartDtT and @EndDt
+				  where		a.PADate between @ContractStartDate and @ContractEndDate
 				  group by	a.HVCaseFK
 				 ) ,
 			PreAssessment_LastOneInPeriodT
@@ -580,23 +601,66 @@ as
 						  , sum(PAOtherActivity) [T5kPAOtherActivity]
 				  from		Preassessment
 				  join		dbo.SplitString(@programfk, ',') on programfk = listitem
-				  where		PADate between @StartDtT and @EndDt
+				  where		PADate between @ContractStartDate and @ContractEndDate
 				 ) ,
 			xxxx
 			  as (select	section1Q.*
-						  , section2Q.*
-						  , section4Q.*
-						  , 0 [Q4dNoStatus1]
-						  , 0 [Q4dNoStatus2]
-						  , section4Q.Q3TotalCasesThisPerion - ([Q4aEffortContnue] + [Q4bCompleted] + [Q4cTerminated]) as [Q4dNoStatus]
-						  , section5Q.*
-						  , section1QT.*
-						  , section2QT.*
-						  , section4QT.*
-						  , 0 [T4dNoStatus1]
-						  , 0 [T4dNoStatus2]
-						  , section4QT.T3TotalCasesThisPerion - ([T4aEffortContnue] + [T4bCompleted] + [T4cTerminated]) as [T4dNoStatus]
-						  , section5QT.*
+							, section2Q.*
+							, section4Q.*
+							, 0 [Q4dNoStatus1]
+							, 0 [Q4dNoStatus2]
+							, section4Q.Q3TotalCasesThisPerion - ([Q4aEffortContnue] + [Q4bCompleted] + [Q4cTerminated]) as [Q4dNoStatus]
+							, section5Q.*
+							, case when @CustomQuarterlyDates = 1 then null else T1Screened end as T1Screened
+							, case when @CustomQuarterlyDates = 1 then null else T1aScreenResultPositive end as T1aScreenResultPositive
+							, case when @CustomQuarterlyDates = 1 then null else T1bScreenResultNegative end as T1bScreenResultNegative
+							, case when @CustomQuarterlyDates = 1 then null else T1cPrenatal end as T1cPrenatal
+							, case when @CustomQuarterlyDates = 1 then null else T1dPostnatal end as T1dPostnatal
+							, case when @CustomQuarterlyDates = 1 then null else T1ePositiveReferred end as T1ePositiveReferred
+							, case when @CustomQuarterlyDates = 1 then null else T1fPositiveNotReferred end as T1fPositiveNotReferred
+							, case when @CustomQuarterlyDates = 1 then null else T1ePositiveReferredPercent end as T1ePositiveReferredPercent
+							, case when @CustomQuarterlyDates = 1 then null else T1fPositiveNotReferredPercent end as T1fPositiveNotReferredPercent
+							, case when @CustomQuarterlyDates = 1 then null else T1f1IncomeIneligible end as T1f1IncomeIneligible
+							, case when @CustomQuarterlyDates = 1 then null else T1f2OutOfGeoTarget end as T1f2OutOfGeoTarget
+							, case when @CustomQuarterlyDates = 1 then null else T1f3NonCompliant end as T1f3NonCompliant
+							, case when @CustomQuarterlyDates = 1 then null else T1f3Refuse end as T1f3Refuse
+							, case when @CustomQuarterlyDates = 1 then null else T1f4InappropriateScreen end as T1f4InappropriateScreen
+							, case when @CustomQuarterlyDates = 1 then null else T1f5CaseLoadFull end as T1f5CaseLoadFull
+							, case when @CustomQuarterlyDates = 1 then null else T1f6PositiveScreen end as T1f6PositiveScreen
+							, case when @CustomQuarterlyDates = 1 then null else T1f7SubsequentBirthOnOpenCase end as T1f7SubsequentBirthOnOpenCase
+							, case when @CustomQuarterlyDates = 1 then null else T1f8Other end as T1f8Other
+							, case when @CustomQuarterlyDates = 1 then null else T1f9NoReason end as T1f9NoReason
+							, case when @CustomQuarterlyDates = 1 then null else T1f10ControlCase end as T1f10ControlCase
+							, case when @CustomQuarterlyDates = 1 then null else T1f11Transferred end as T1f11Transferred
+							, case when @CustomQuarterlyDates = 1 then null else T2PreAssessmentBeforePeriod end as T2PreAssessmentBeforePeriod
+							, case when @CustomQuarterlyDates = 1 then null else T3TotalCasesThisPerion end as T3TotalCasesThisPerion
+							, case when @CustomQuarterlyDates = 1 then null else T4bCompleted end as T4bCompleted
+							, case when @CustomQuarterlyDates = 1 then null else T4b1PositiveAssignd end as T4b1PositiveAssignd
+							, case when @CustomQuarterlyDates = 1 then null else T4b2PositivePendingAssignd end as T4b2PositivePendingAssignd
+							, case when @CustomQuarterlyDates = 1 then null else T4b3PositiveNotAssignd end as T4b3PositiveNotAssignd
+							, case when @CustomQuarterlyDates = 1 then null else T4b4Negative end as T4b4Negative
+							, case when @CustomQuarterlyDates = 1 then null else T4cTerminated end as T4cTerminated
+							, case when @CustomQuarterlyDates = 1 then null else T4aEffortContnue end as T4aEffortContnue
+							, 0 as T4dNoStatus1
+							, 0 as T4dNoStatus2
+							, section4QT.T3TotalCasesThisPerion - ([T4aEffortContnue] + [T4bCompleted] + [T4cTerminated]) as [T4dNoStatus]
+							, case when @CustomQuarterlyDates = 1 then null else T5aPAParentLetter end as T5aPAParentLetter
+							, case when @CustomQuarterlyDates = 1 then null else T5bPACall2Parent end as T5bPACall2Parent
+							, case when @CustomQuarterlyDates = 1 then null else T5cPACallFromParent end as T5cPACallFromParent
+							, case when @CustomQuarterlyDates = 1 then null else T5dPAVisitAttempt end as T5dPAVisitAttempt
+							, case when @CustomQuarterlyDates = 1 then null else T5ePAVisitMade end as T5ePAVisitMade
+							, case when @CustomQuarterlyDates = 1 then null else T5fPAOtherHVProgram end as T5fPAOtherHVProgram
+							, case when @CustomQuarterlyDates = 1 then null else T5gPAParent2Office end as T5gPAParent2Office
+							, case when @CustomQuarterlyDates = 1 then null else T5hPAProgramMaterial end as T5hPAProgramMaterial
+							, case when @CustomQuarterlyDates = 1 then null else T5iPAGift end as T5iPAGift
+							, case when @CustomQuarterlyDates = 1 then null else T5jPACaseReview end as T5jPACaseReview
+							, case when @CustomQuarterlyDates = 1 then null else T5kPAOtherActivity end as T5kPAOtherActivity							--, section1QT.*
+							--, section2QT.*
+							--, section4QT.*
+							--, 0 [T4dNoStatus1]
+							--, 0 [T4dNoStatus2]
+							--, section4QT.T3TotalCasesThisPerion - ([T4aEffortContnue] + [T4bCompleted] + [T4cTerminated]) as [T4dNoStatus]
+							--, section5QT.*
 				  from		section1Q
 				  join		section2Q on 1 = 1
 				  join		section4Q on 1 = 1

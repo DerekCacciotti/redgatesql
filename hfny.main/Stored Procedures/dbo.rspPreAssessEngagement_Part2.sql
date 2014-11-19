@@ -9,147 +9,166 @@ GO
 -- Create date: <Aug 13, 2012>
 -- Description: 
 -- =============================================
-CREATE procedure [dbo].[rspPreAssessEngagement_Part2]
-(
-    @programfk    VARCHAR(MAX) = null,
-    @StartDtT     DATETIME = NULL,
-    @StartDt      DATETIME = null,
-    @EndDt        DATETIME = null
-)
+CREATE procedure [dbo].[rspPreAssessEngagement_Part2] (@programfk varchar(max) = null
+													, @CustomQuarterlyDates bit = 1
+													, @StartDt datetime = null
+													, @EndDt datetime = null
+													 )
 as
-
-
-if @programfk is null
-	begin
-		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
-										   from HVProgram
-										   for xml path ('')),2,8000)
-	end
-set @programfk = replace(@programfk,'"','')
+	if @programfk is null
+		begin
+			select	@programfk = substring((select	',' + ltrim(rtrim(str(HVProgramPK)))
+											from	HVProgram
+										   for
+											xml	path('')
+										   ), 2, 8000)
+		end
+	set @programfk = replace(@programfk, '"', '')
 	
+	declare @ContractStartDate date
+	declare @ContractEndDate date
+
+	if ((@ProgramFK is not null) and (@CustomQuarterlyDates = 0))
+	begin
+		set @ProgramFK = replace(@ProgramFK, ',', '') -- remove comma's
+		set @ContractStartDate = (select ContractStartDate
+									  from HVProgram P
+									  where HVProgramPK = @ProgramFK)
+		set @ContractEndDate = (select ContractEndDate
+									from HVProgram P
+									where HVProgramPK = @ProgramFK)
+	end
+
 -- Pre-Assessment Engagement Quartly Report --
---DECLARE @StartDtT DATE = '01/01/2011'
+--DECLARE @ContractStartDate DATE = '01/01/2011'
 --DECLARE @StartDt DATE = '08/01/2011'
 --DECLARE @EndDt DATE = '12/31/2011'
 --DECLARE @programfk INT = 6
 
-;WITH base1 AS (
-SELECT d.DischargeCode, d.DischargeReason
-, CASE WHEN xx.TerminatedNotAssigned IS NULL THEN 0 ELSE xx.TerminatedNotAssigned END [t1]
-, CASE WHEN xxx.SSTerminatedNotAssigned IS NULL THEN 0 ELSE xxx.SSTerminatedNotAssigned END [t2]
-, CASE WHEN yy.PositiveNotAssigned IS NULL THEN 0 ELSE yy.PositiveNotAssigned END [t3]
-, CASE WHEN yyy.SSPositiveNotAssigned IS NULL THEN 0 ELSE yyy.SSPositiveNotAssigned END [t4]
-
-FROM codeDischarge AS d
-LEFT OUTER JOIN
-(SELECT x.DischargeReason, count(*) [TerminatedNotAssigned]
-FROM Preassessment x JOIN (
-SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
-FROM Preassessment AS p 
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE p.PADate BETWEEN @StartDt AND @EndDt --AND p.ProgramFK = @programfk
-AND p.CaseStatus = '03'
-GROUP BY p.HVCaseFK) AS y 
-ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
-GROUP BY x.DischargeReason) AS xx
-ON xx.DischargeReason = d.DischargeCode
+;
+	with	base1
+			  as (select	d.DischargeCode
+						  , d.DischargeReason
+						  , case when @CustomQuarterlyDates = 1 then null 
+								 when xx.TerminatedNotAssigned is null then 0
+								 else xx.TerminatedNotAssigned
+							end [t1]
+						  , case when @CustomQuarterlyDates = 1 then null 
+								 when xxx.SSTerminatedNotAssigned is null then 0
+								 else xxx.SSTerminatedNotAssigned
+							end [t2]
+						  , case when @CustomQuarterlyDates = 1 then null 
+								 when yy.PositiveNotAssigned is null then 0
+								 else yy.PositiveNotAssigned
+							end [t3]
+						  , case when @CustomQuarterlyDates = 1 then null 
+								 when yyy.SSPositiveNotAssigned is null then 0
+								 else yyy.SSPositiveNotAssigned
+							end [t4]
+				  from		codeDischarge as d
+				  left outer join (select	x.DischargeReason
+										  , count(*) [TerminatedNotAssigned]
+								   from		Preassessment x
+								   join		(select	p.HVCaseFK
+												  , max(p.PADate) [max_PADATE]
+											 from	Preassessment as p
+											 join	dbo.SplitString(@programfk, ',') on p.ProgramFK = ListItem
+											 where	p.PADate between @StartDt and @EndDt --AND p.ProgramFK = @programfk
+													and p.CaseStatus = '03'
+											 group by p.HVCaseFK
+											) as y on x.HVCaseFK = y.HVCaseFK
+													  and x.PADate = y.max_PADATE
+								   group by	x.DischargeReason
+								  ) as xx on xx.DischargeReason = d.DischargeCode
 --
-LEFT OUTER JOIN
-(SELECT x.DischargeReason, count(*) [PositiveNotAssigned]
-FROM Preassessment x
-JOIN (
-SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
-FROM Preassessment AS p 
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE p.PADate BETWEEN @StartDt AND @EndDt --AND p.ProgramFK = @programfk
-AND p.CaseStatus = '04'
-GROUP BY p.HVCaseFK) AS y 
-ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
-GROUP BY x.DischargeReason) AS yy
-ON yy.DischargeReason = d.DischargeCode
+				  left outer join (select	x.DischargeReason
+										  , count(*) [PositiveNotAssigned]
+								   from		Preassessment x
+								   join		(select	p.HVCaseFK
+												  , max(p.PADate) [max_PADATE]
+											 from	Preassessment as p
+											 join	dbo.SplitString(@programfk, ',') on p.ProgramFK = ListItem
+											 where	p.PADate between @StartDt and @EndDt --AND p.ProgramFK = @programfk
+													and p.CaseStatus = '04'
+											 group by p.HVCaseFK
+											) as y on x.HVCaseFK = y.HVCaseFK
+													  and x.PADate = y.max_PADATE
+								   group by	x.DischargeReason
+								  ) as yy on yy.DischargeReason = d.DischargeCode
 --
-LEFT OUTER JOIN
-(SELECT x.DischargeReason, count(*) [SSTerminatedNotAssigned]
-FROM Preassessment x
-JOIN (
-SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
-FROM Preassessment AS p 
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE p.PADate BETWEEN @StartDtT AND @EndDt --AND p.ProgramFK = @programfk
-AND p.CaseStatus = '03'
-GROUP BY p.HVCaseFK) AS y 
-ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
-GROUP BY x.DischargeReason) AS xxx
-ON xxx.DischargeReason = d.DischargeCode
+				  left outer join (select	x.DischargeReason
+										  , count(*) [SSTerminatedNotAssigned]
+								   from		Preassessment x
+								   join		(select	p.HVCaseFK
+												  , max(p.PADate) [max_PADATE]
+											 from	Preassessment as p
+											 join	dbo.SplitString(@programfk, ',') on p.ProgramFK = ListItem
+											 where	p.PADate between @ContractStartDate and @ContractEndDate --AND p.ProgramFK = @programfk
+													and p.CaseStatus = '03'
+											 group by p.HVCaseFK
+											) as y on x.HVCaseFK = y.HVCaseFK
+													  and x.PADate = y.max_PADATE
+								   group by	x.DischargeReason
+								  ) as xxx on xxx.DischargeReason = d.DischargeCode
 --
-LEFT OUTER JOIN
-(SELECT x.DischargeReason, count(*) [SSPositiveNotAssigned]
-FROM Preassessment x
-JOIN (
-SELECT p.HVCaseFK, max(p.PADate) [max_PADATE]
-FROM Preassessment AS p 
-JOIN dbo.SplitString(@programfk,',') on p.programfk = listitem
-WHERE p.PADate BETWEEN @StartDtT AND @EndDt --AND p.ProgramFK = @programfk
-AND p.CaseStatus = '04'
-GROUP BY p.HVCaseFK) AS y 
-ON x.HVCaseFK = y.HVCaseFK AND x.PADate = y.max_PADATE
-GROUP BY x.DischargeReason) AS yyy
-ON yyy.DischargeReason = d.DischargeCode
-WHERE d.DischargeUsedWhere LIKE '%PA%'
-)
-
-, base2 AS (
-SELECT 
-  CASE WHEN b.s1 = 0 THEN 1 ELSE b.s1 END s1
-, CASE WHEN b.s2 = 0 THEN 1 ELSE b.s2 END s2
-, CASE WHEN b.s3 = 0 THEN 1 ELSE b.s3 END s3
-, CASE WHEN b.s4 = 0 THEN 1 ELSE b.s4 END s4
-FROM (
-SELECT sum(a.t1) [s1]
-, sum(a.t2) [s2]
-, sum(a.t3) [s3]
-, sum(a.t4) [s4]
-FROM base1 AS a
-) AS b
-)
-
-SELECT a.DischargeReason
-, a.t1
-, cast(cast(CASE WHEN b.s1 > 0 THEN round(100.0 * a.t1 / b.s1, 0) 
-ELSE 0 END AS INT) AS VARCHAR(20)) + '%' p1
-, a.t2
-, cast(cast(CASE WHEN b.s2 > 0 THEN round(100.0 * a.t2 / b.s2, 0) 
-ELSE 0 END AS INT) AS VARCHAR(20)) + '%' p2
-, a.t3
-, cast(cast(CASE WHEN b.s3 > 0 THEN round(100.0 * a.t3 / b.s3, 0) 
-ELSE 0 END AS INT) AS VARCHAR(20)) + '%' p3
-, a.t4
-, cast(cast(CASE WHEN b.s4 > 0 THEN round(100.0 * a.t4 / b.s4, 0) 
-ELSE 0 END AS INT) AS VARCHAR(20)) + '%' p4
-, s1,s2,s3,s4
-FROM base1 AS a
-CROSS JOIN base2 AS b
-ORDER BY a.DischargeCode
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+				  left outer join (select	x.DischargeReason
+										  , count(*) [SSPositiveNotAssigned]
+								   from		Preassessment x
+								   join		(select	p.HVCaseFK
+												  , max(p.PADate) [max_PADATE]
+											 from	Preassessment as p
+											 join	dbo.SplitString(@programfk, ',') on p.ProgramFK = ListItem
+											 where	p.PADate between @ContractStartDate and @ContractEndDate --AND p.ProgramFK = @programfk
+													and p.CaseStatus = '04'
+											 group by p.HVCaseFK
+											) as y on x.HVCaseFK = y.HVCaseFK
+													  and x.PADate = y.max_PADATE
+								   group by	x.DischargeReason
+								  ) as yyy on yyy.DischargeReason = d.DischargeCode
+				  where		d.DischargeUsedWhere like '%PA%'
+				 ) ,
+			base2
+			  as (select	case when b.s1 = 0 then 1
+								 else b.s1
+							end s1
+						  , case when b.s2 = 0 then 1
+								 else b.s2
+							end s2
+						  , case when b.s3 = 0 then 1
+								 else b.s3
+							end s3
+						  , case when b.s4 = 0 then 1
+								 else b.s4
+							end s4
+				  from		(select	sum(a.t1) [s1]
+								  , sum(a.t2) [s2]
+								  , sum(a.t3) [s3]
+								  , sum(a.t4) [s4]
+							 from	base1 as a
+							) as b
+				 )
+		select	a.DischargeReason
+			  , a.t1
+			  , cast(cast(case when b.s1 > 0 then round(100.0 * a.t1 / b.s1, 0)
+							   else 0
+						  end as int) as varchar(20)) + '%' p1
+			  , a.t2
+			  , cast(cast(case when b.s2 > 0 then round(100.0 * a.t2 / b.s2, 0)
+							   else 0
+						  end as int) as varchar(20)) + '%' p2
+			  , a.t3
+			  , cast(cast(case when b.s3 > 0 then round(100.0 * a.t3 / b.s3, 0)
+							   else 0
+						  end as int) as varchar(20)) + '%' p3
+			  , a.t4
+			  , cast(cast(case when b.s4 > 0 then round(100.0 * a.t4 / b.s4, 0)
+							   else 0
+						  end as int) as varchar(20)) + '%' p4
+			  , s1
+			  , s2
+			  , s3
+			  , s4
+		from	base1 as a
+		cross join base2 as b
+		order by a.DischargeCode
 GO
