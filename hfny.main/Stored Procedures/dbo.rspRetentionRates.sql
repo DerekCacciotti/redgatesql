@@ -14,7 +14,6 @@ GO
 -- exec rspRetentionRates 17, '20090401', '20110331'
 -- exec rspRetentionRates 20, '20080401', '20110331'
 -- exec rspRetentionRates '15,16', '20091201', '20111130'
-
 -- exec rspRetentionRates 1, '03/01/10', '02/29/12'
 -- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
 -- =============================================
@@ -365,23 +364,23 @@ SET NOCOUNT ON;
                ,dd.DischargeReason
 			   ,PC1AgeAtIntake
 			   ,case 
-				when dischargedate is null and current_timestamp-IntakeDate > 182.125 then 1
-				when dischargedate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
+				when DischargeDate is null and current_timestamp-IntakeDate > 182.125 then 1
+				when DischargeDate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
 					else 0
 				end	as ActiveAt6Months
 			   ,case
-				when dischargedate is null and current_timestamp-IntakeDate > 365.25 then 1
-				when dischargedate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
+				when DischargeDate is null and current_timestamp-IntakeDate > 365.25 then 1
+				when DischargeDate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
 					else 0
 				end as ActiveAt12Months
 			   ,case
-				when dischargedate is null and current_timestamp-IntakeDate > 547.375 then 1
-				when dischargedate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
+				when DischargeDate is null and current_timestamp-IntakeDate > 547.375 then 1
+				when DischargeDate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
 					else 0
 				end as ActiveAt18Months
 			   ,case
-				when dischargedate is null and current_timestamp-IntakeDate > 730.50 then 1
-				when dischargedate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
+				when DischargeDate is null and current_timestamp-IntakeDate > 730.50 then 1
+				when DischargeDate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
 					else 0
 				end as ActiveAt24Months
 			   ,Race
@@ -787,19 +786,19 @@ set @RetentionRateTwoYears = case when @TotalCohortCount = 0 then 0.0000 else ro
 --#region Enrolled Participants
 select @EnrolledParticipantsSixMonths = count(*)
 from @tblPC1withStats
-where ActiveAt6Months = 1 and (LastHomeVisit is NULL or LastHomeVisit >= dateadd(day, 6*30.44, IntakeDate)) -- and dateadd(day, 12*30.44, IntakeDate)
+where ActiveAt6Months = 1 and (DischargeDate is null or LastHomeVisit >= dateadd(day, 6*30.44, IntakeDate)) -- and dateadd(day, 12*30.44, IntakeDate)
 
 select @EnrolledParticipantsOneYear = count(*)
 from @tblPC1withStats
-where ActiveAt12Months = 1 and (LastHomeVisit is NULL or LastHomeVisit > dateadd(day, 12*30.44, IntakeDate)) -- and dateadd(day, 18*30.44, IntakeDate)
+where ActiveAt12Months = 1 and (DischargeDate is NULL or LastHomeVisit > dateadd(day, 12*30.44, IntakeDate)) -- and dateadd(day, 18*30.44, IntakeDate)
 
 select @EnrolledParticipantsEighteenMonths = count(*)
 from @tblPC1withStats
-where ActiveAt18Months = 1 and (LastHomeVisit is NULL or LastHomeVisit > dateadd(day, 18*30.44, IntakeDate)) -- and dateadd(day, 24*30.44, IntakeDate)
+where ActiveAt18Months = 1 and (DischargeDate is NULL or LastHomeVisit > dateadd(day, 18*30.44, IntakeDate)) -- and dateadd(day, 24*30.44, IntakeDate)
 
 select @EnrolledParticipantsTwoYears = count(*)
 from @tblPC1withStats
-where ActiveAt24Months = 1 and (LastHomeVisit is NULL or LastHomeVisit > dateadd(day, 24*30.44, IntakeDate))
+where ActiveAt24Months = 1 and (DischargeDate is NULL or LastHomeVisit > dateadd(day, 24*30.44, IntakeDate))
 --#endregion
 --#region Running Total Discharged
 select @RunningTotalDischargedSixMonths = count(*)
