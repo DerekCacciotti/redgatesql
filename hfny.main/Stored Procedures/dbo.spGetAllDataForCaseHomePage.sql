@@ -498,6 +498,7 @@ begin
 			, rtrim(pc2.PCFirstName) + ' ' + rtrim(pc2.PCLastName) as PC2Name
 			, s.HVScreenPK
 			, k.KempePK
+			, a.AttachmentPK
 			, i.IntakePK
 			, OldID
 			, HVCaseFK_old
@@ -605,6 +606,7 @@ begin
 		left outer join Worker faw on faw.WorkerPK = cp.CurrentFAWFK
 		inner join HVScreen s on s.HVCaseFK = hc.HVCasePK
 		left outer join Kempe k on k.HVCaseFK = hc.HVCasePK
+		left outer join Attachment a on a.HVCaseFK = cp.HVCaseFK and k.KempePK = a.FormFK and a.FormType = 'KE'
 		-- left outer join TCID t on t.HVCaseFK = hc.HVCasePK
 		left outer join Intake i on i.HVCaseFK = hc.HVCasePK
 		left outer join CommonAttributes cfca on cfca.HVCaseFK = hc.HVCasePK and cfca.FormFK = cp.CaseProgramPK and cfca.FormType = 'CH'
