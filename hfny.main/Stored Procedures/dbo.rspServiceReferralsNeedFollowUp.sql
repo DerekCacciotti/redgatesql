@@ -50,7 +50,7 @@ as
 			inner join HVCase c on cp.HVCaseFK = HVCasePK
 			inner join PC on c.PC1FK = PCPK
 			inner join worker fsw on CurrentFSWFK = fsw.workerpk
-			inner join workerprogram wp on wp.workerfk = fsw.workerpk
+			inner join workerprogram wp on wp.workerfk = fsw.workerpk and wp.ProgramFK = cp.ProgramFK
 			inner join worker supervisor on supervisorfk = supervisor.workerpk
 			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			inner join dbo.udfCaseFilters(@casefilterspositive, @negclause, @programfk) cf on cf.HVCaseFK = c.HVCasePK
