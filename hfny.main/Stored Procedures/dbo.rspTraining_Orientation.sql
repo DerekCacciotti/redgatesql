@@ -162,7 +162,8 @@ BEGIN
 	, cte10_2b.SupervisorFirstEvent
 	, FirstEvent
 	, CASE WHEN FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 'T'
-		WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' 
+		-- OLD CODE Orientation MUST HAPPEN PRIOR TO FIRSTEVENT , NOT SURE WHY 6 month given: WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' 
+		WHEN TrainingDate < FirstEvent THEN 'T' 
 		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN 'T'
 		else 'F' END AS 'Meets Target'
 	FROM cte10_2b
