@@ -395,18 +395,12 @@ insert into @tblASQCohort
 			 and hc.CaseProgress >= 11
 			 and (cp.DischargeDate is null or cp.DischargeDate > @edate)
 
-			 and year(case
-						  when cdbd.Interval < 24 then
-							  dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+hc.TCDOB))
-						  else
-							  dateadd(dd,cdbd.DueBy,hc.TCDOB)
-					  end) between year(@sdate) and year(@edate)
-			 and month(case
-						   when cdbd.Interval < 24 then
-							   dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+hc.TCDOB))
-						   else
-							   dateadd(dd,cdbd.DueBy,hc.TCDOB)
-					   end) between month(@sdate) and month(@edate)
+			 and case
+				  when cdbd.Interval < 24 then
+					  dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+hc.TCDOB))
+				  else
+					  dateadd(dd,cdbd.DueBy,hc.TCDOB)
+				end between @sdate and @edate
 			and EventDescription not like '%optional%'  -- optionals are not required so take them out		
 			and cp.HVCaseFK not in (select HVCaseFK from cteASQsReceivingEIP)
 
