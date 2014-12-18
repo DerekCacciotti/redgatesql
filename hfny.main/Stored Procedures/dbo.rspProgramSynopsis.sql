@@ -482,24 +482,13 @@ insert into @tblASQSECohort
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 
 		where 
-		     HVCase.TCDOD IS NULL
-			 and caseprogress >= 11
-			 and (dischargedate is null or dischargedate > @edate)	
-
-			 and year(case
-						  when interval < 24 then
-							  dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
-						  else
-							  dateadd(dd,dueby,hvcase.tcdob)
-					  end) between year(@sdate) and year(@edate)
-			 and month(case
-						   when interval < 24 then
-							   dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
-						   else
-							   dateadd(dd,dueby,hvcase.tcdob)
-					   end) between month(@sdate) and month(@edate)
-
-
+		    HVCase.TCDOD IS NULL
+			and caseprogress >= 11
+			and (dischargedate is null or dischargedate > @edate)	
+			and case when Interval < 24
+					  then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + HVCase.TCDOB))
+					  else dateadd(dd, DueBy, HVCase.TCDOB)
+				 end between @sdate and @edate
 
 declare @ASQSEcol1 varchar(10)
 declare @ASQSEcol2 varchar(10)
@@ -1027,22 +1016,14 @@ VALUES(18,3,'', '', '', '', '', '', '', '','')
 	inner join codeDueByDates cdbd on scheduledevent = 'ASQ' --optionValue
 
 		where 
-		     cc.TCDOD IS NULL
-			 and cc.CaseProgress >= 11
-			 and (cc.DischargeDate is null or cc.DischargeDate > @edate)
+		    cc.TCDOD IS NULL
+			and cc.CaseProgress >= 11
+			and (cc.DischargeDate is null or cc.DischargeDate > @edate)
+			and case when Interval < 24
+					  then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + cc.TCDOB_EDC))
+					  else dateadd(dd, DueBy, cc.TCDOB_EDC)
+				 end between @sdate and @edate
 
-			 and year(case
-						  when cdbd.Interval < 24 then
-							  dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+ cc.TCDOB_EDC))
-						  else
-							  dateadd(dd,cdbd.DueBy,cc.TCDOB_EDC)
-					  end) between year(@sdate) and year(@edate)
-			 and month(case
-						   when cdbd.Interval < 24 then
-							   dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+cc.TCDOB_EDC))
-						   else
-							   dateadd(dd,cdbd.DueBy,cc.TCDOB_EDC)
-					   end) between month(@sdate) and month(@edate)
 			and EventDescription not like '%optional%'  -- optionals are not required so take them out	
 			and cc.HVCasePK not in (select HVCaseFK from cteASQsReceivingEIPDetail)
 )
@@ -1080,25 +1061,14 @@ with cteASQSE as
 	inner join codeduebydates on scheduledevent = 'ASQSE-1' --optionValue
 
 		where 
-		     cc.TCDOD IS NULL
-			 and caseprogress >= 11
-			 and (dischargedate is null or dischargedate > @edate)	
-
-			 and year(case
-						  when interval < 24 then
-							  dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
-						  else
-							  dateadd(dd,dueby,cc.TCDOB_EDC)
-					  end) between year(@sdate) and year(@edate)
-			 and month(case
-						   when interval < 24 then
-							   dateadd(dd,dueby,(((40-gestationalage)*7)+ cc.TCDOB_EDC))
-						   else
-							   dateadd(dd,dueby,cc.TCDOB_EDC)
-					   end) between month(@sdate) and month(@edate)
+		    cc.TCDOD IS NULL
+			and caseprogress >= 11
+			and (dischargedate is null or dischargedate > @edate)	
+			and case when Interval < 24
+					  then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + cc.TCDOB_EDC))
+					  else dateadd(dd, DueBy, cc.TCDOB_EDC)
+				 end between @sdate and @edate
 )
-
-
 
 -- rspProgramSynopsis 1, '04/01/2013', '04/30/2013'	
 
