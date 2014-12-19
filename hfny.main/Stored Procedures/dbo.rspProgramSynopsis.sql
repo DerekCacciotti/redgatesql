@@ -379,11 +379,16 @@ DECLARE @tblASQCohort TABLE(
 
 insert into @tblASQCohort
 	select  
-
+		
 		  hc.HVCasePK
 		  ,t.TCIDPK 
 		  ,Interval 		   
-
+      --, DueBy        
+      --, dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+hc.TCDOB)) as GestLessThan24Age
+      --, year(dateadd(dd,cdbd.DueBy,(((40-t.GestationalAge)*7)+hc.TCDOB))) as YearGestLessThan24Age
+      --, dateadd(dd,cdbd.DueBy,hc.TCDOB) as Gest24OrGreaterAge
+      --, year(dateadd(dd,cdbd.DueBy,hc.TCDOB)) as YearGest24OrGreaterAge
+      --, cdbd.EventDescription
 		from CaseProgram cp
 			inner join HVCase hc on hc.HVCasePK = cp.HVCaseFK
 			inner join TCID t on t.HVCaseFK = hc.HVCasePK and t.ProgramFK = cp.ProgramFK AND t.TCDOD IS NULL
@@ -403,6 +408,7 @@ insert into @tblASQCohort
 				end between @sdate and @edate
 			and EventDescription not like '%optional%'  -- optionals are not required so take them out		
 			and cp.HVCaseFK not in (select HVCaseFK from cteASQsReceivingEIP)
+--order by Gest24OrGreaterAge
 
 declare @ASQcol1 varchar(10)
 declare @ASQcol2 varchar(10)
@@ -443,6 +449,8 @@ set @ASQcol5 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQCohort m
 				where A.TCReferred = 1
 				) 	
 
+--select *
+--from @tblASQCohort tac
 
 --SELECT @ASQcol1, @ASQcol2, @ASQcol3, @ASQcol4, @ASQcol5
 
@@ -486,9 +494,9 @@ insert into @tblASQSECohort
 			and caseprogress >= 11
 			and (dischargedate is null or dischargedate > @edate)	
 			and case when Interval < 24
-					  then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + HVCase.TCDOB))
-					  else dateadd(dd, DueBy, HVCase.TCDOB)
-				 end between @sdate and @edate
+				then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + HVCase.TCDOB))
+				else dateadd(dd, DueBy, HVCase.TCDOB)
+			 end between @sdate and @edate
 
 declare @ASQSEcol1 varchar(10)
 declare @ASQSEcol2 varchar(10)
@@ -600,10 +608,7 @@ insert into @tblFUCohort
 			 and caseprogress >= 11
 			 and (dischargedate is null or dischargedate > @edate)
 			 --and (IntakeDate is not null or IntakeDate <= @edate)
-			 and year(dateadd(dd,dueby,cc.TCDOB_EDC)) between year(@sdate) and year(@edate)
-			 and month(dateadd(dd,dueby,cc.TCDOB_EDC)) between month(@sdate) and month(@edate)
-
-
+       and dateadd(dd,dueby,cc.TCDOB_EDC) between @sdate and @edate
 
 --select * from @tblFUMinimumInterval
 --select * from @tblFUCohort
@@ -628,7 +633,7 @@ set @FUcol2 =	(SELECT count(HVCasePK) as totalDone FROM @tblFUCohort m
 
 
 -- In Window		
-set @FUcol3 =	(SELECT count(HVCasePK) as totalDone FROM @tblASQSECohort m
+set @FUcol3 = (SELECT count(HVCasePK) as totalDone FROM @tblFUCohort m
 				left join FollowUp fu ON fu.HVCaseFK = m.HVCasePK AND fu.FollowUpInterval = m.Interval
 				where fu.FupInWindow = 1
 				) 
@@ -1016,13 +1021,13 @@ VALUES(18,3,'', '', '', '', '', '', '', '','')
 	inner join codeDueByDates cdbd on scheduledevent = 'ASQ' --optionValue
 
 		where 
-		    cc.TCDOD IS NULL
+			cc.TCDOD IS NULL
 			and cc.CaseProgress >= 11
 			and (cc.DischargeDate is null or cc.DischargeDate > @edate)
 			and case when Interval < 24
-					  then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + cc.TCDOB_EDC))
-					  else dateadd(dd, DueBy, cc.TCDOB_EDC)
-				 end between @sdate and @edate
+					then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + cc.TCDOB_EDC))
+					else dateadd(dd, DueBy, cc.TCDOB_EDC)
+				end between @sdate and @edate
 
 			and EventDescription not like '%optional%'  -- optionals are not required so take them out	
 			and cc.HVCasePK not in (select HVCaseFK from cteASQsReceivingEIPDetail)
@@ -1061,14 +1066,16 @@ with cteASQSE as
 	inner join codeduebydates on scheduledevent = 'ASQSE-1' --optionValue
 
 		where 
-		    cc.TCDOD IS NULL
+			cc.TCDOD IS NULL
 			and caseprogress >= 11
 			and (dischargedate is null or dischargedate > @edate)	
 			and case when Interval < 24
-					  then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + cc.TCDOB_EDC))
-					  else dateadd(dd, DueBy, cc.TCDOB_EDC)
-				 end between @sdate and @edate
+					then dateadd(dd, DueBy, (((40 - GestationalAge) * 7) + cc.TCDOB_EDC))
+					else dateadd(dd, DueBy, cc.TCDOB_EDC)
+				end between @sdate and @edate
 )
+
+
 
 -- rspProgramSynopsis 1, '04/01/2013', '04/30/2013'	
 
@@ -1108,8 +1115,7 @@ with cteFollowUp as
 			 and caseprogress >= 11
 			 and (dischargedate is null or dischargedate > @edate)
 			 --and (IntakeDate is not null or IntakeDate <= @edate)
-			 and year(dateadd(dd,dueby,cc.TCDOB_EDC)) between year(@sdate) and year(@edate)
-			 and month(dateadd(dd,dueby,cc.TCDOB_EDC)) between month(@sdate) and month(@edate)
+       and dateadd(dd,dueby,cc.TCDOB_EDC) between @sdate and @edate
 )
 
 
