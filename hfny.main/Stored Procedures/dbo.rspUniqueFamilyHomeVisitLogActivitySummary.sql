@@ -40,7 +40,7 @@ ON a.FSWFK = fsw.workerpk
 INNER JOIN CaseProgram cp
 ON cp.HVCaseFK = a.HVCaseFK
 WHERE 
-a.ProgramFK = @programfk 
+cp.ProgramFK = @programfk 
 AND cast(VisitStartTime AS date) between @StartDt AND @EndDt
 AND substring(a.VisitType,4,1) <> '1'
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
@@ -69,7 +69,7 @@ ON a.FSWFK = fsw.workerpk
 INNER JOIN CaseProgram cp
 ON cp.HVCaseFK = a.HVCaseFK
 WHERE 
-a.ProgramFK = @programfk 
+cp.ProgramFK = @programfk 
 AND cast(VisitStartTime AS date) between @StartDt AND @EndDt
 AND substring(a.VisitType,4,1) = '1'
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
@@ -544,7 +544,7 @@ FROM HVLog AS a
 INNER JOIN worker fsw ON a.FSWFK = fsw.workerpk
 INNER JOIN CaseProgram cp ON cp.HVCaseFK = a.HVCaseFK
 WHERE 
-a.ProgramFK = @programfk 
+cp.ProgramFK = @programfk 
 AND substring(a.VisitType,4,1) <> '1'
 AND cast(a.VisitStartTime AS date) between @StartDt AND @EndDt 
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
