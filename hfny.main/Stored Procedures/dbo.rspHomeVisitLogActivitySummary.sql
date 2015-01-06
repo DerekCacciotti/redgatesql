@@ -51,7 +51,7 @@ as --DECLARE	@programfk INT = 1
 				  from		HVLog as a
 				  inner join worker fsw on a.FSWFK = fsw.workerpk
 				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK
-				  where		a.ProgramFK = @programfk
+				  where		cp.ProgramFK = @programfk
 							and cast(VisitStartTime as date) between @StartDt and @EndDt
 							and a.FSWFK = isnull(@workerfk, a.FSWFK)
 							and cp.PC1ID = case	when @pc1ID = '' then cp.PC1ID
@@ -698,7 +698,7 @@ as --DECLARE	@programfk INT = 1
 				  inner join worker fsw on a.FSWFK = fsw.workerpk
 				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK
 				  inner join HVCase as h on h.HVCasePK = a.HVCaseFK
-				  where		a.ProgramFK = @programfk
+				  where		cp.ProgramFK = @programfk
 							and cast(VisitStartTime as date) between @StartDt and @EndDt
 							and a.FSWFK = isnull(@workerfk, a.FSWFK)
 							and cp.PC1ID = case	when @pc1ID = '' then cp.PC1ID
