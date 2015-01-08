@@ -49,14 +49,15 @@ as --DECLARE	@programfk INT = 1
 									  else 1
 									end)
 				  from		HVLog as a
-				  inner join worker fsw on a.FSWFK = fsw.workerpk
-				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK
-				  where		cp.ProgramFK = @programfk
-							and cast(VisitStartTime as date) between @StartDt and @EndDt
+				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK and cp.ProgramFK = @programfk
+				  inner join Worker fsw on a.FSWFK = fsw.workerpk
+				  inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = cp.ProgramFK
+				  where		cast(VisitStartTime as date) between @StartDt and @EndDt
 							and a.FSWFK = isnull(@workerfk, a.FSWFK)
 							and cp.PC1ID = case	when @pc1ID = '' then cp.PC1ID
 												else @pc1ID
 										   end
+							-- and cp.ProgramFK = @programfk
 				  group by	case when @showWorkerDetail = 'N' then 0
 								 else a.FSWFK
 							end
@@ -695,15 +696,17 @@ as --DECLARE	@programfk INT = 1
 								end) * 100 [CA2]
 						  , count(*) [Total]
 				  from		HVLog as a
-				  inner join worker fsw on a.FSWFK = fsw.workerpk
-				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK
+				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK and cp.ProgramFK = @programfk
+				  inner join Worker fsw on a.FSWFK = fsw.workerpk
+				  inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = cp.ProgramFK
 				  inner join HVCase as h on h.HVCasePK = a.HVCaseFK
-				  where		cp.ProgramFK = @programfk
-							and cast(VisitStartTime as date) between @StartDt and @EndDt
+				  where		
+							cast(VisitStartTime as date) between @StartDt and @EndDt
 							and a.FSWFK = isnull(@workerfk, a.FSWFK)
 							and cp.PC1ID = case	when @pc1ID = '' then cp.PC1ID
 												else @pc1ID
 										   end
+							-- and cp.ProgramFK = @programfk
 				  group by	case when @showWorkerDetail = 'N' then 0
 								 else a.FSWFK
 							end
@@ -911,18 +914,4 @@ as --DECLARE	@programfk INT = 1
 									   end = c.WorkerPK
 		order by WorkerName
 			  , a.PC1ID
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 GO
