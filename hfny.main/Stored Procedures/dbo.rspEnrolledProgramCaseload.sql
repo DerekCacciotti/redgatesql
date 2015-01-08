@@ -5,13 +5,14 @@ SET ANSI_NULLS ON
 GO
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
--- Create date: <Jyly 16th, 2012>
+-- Create date: <July 16th, 2012>
 -- Description:	<gets you data for Enrolled Program Caseload Quarterly and Contract Period>
 -- exec [rspEnrolledProgramCaseload] ',19,','07/01/2012','09/30/2012',null,0, null,1
 -- exec [rspEnrolledProgramCaseload] ',1,','06/01/2010','08/31/2011',null,0, null,0
 -- exec [rspEnrolledProgramCaseload] ',1,','06/01/2012','08/31/2012',null,0,1,1
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 --            added this code to the workerprogram join condition: AND wp.programfk = listitem
+--			  01/07/15 jr - remove double tabs in output strings and replace with single tabs
 -- =============================================
 CREATE procedure [dbo].[rspEnrolledProgramCaseload](@programfk    varchar(max)    = null,
                                                         @sdate        datetime,
@@ -608,19 +609,19 @@ IF (@CustomQuarterlyDates = 0)
 	BEGIN 
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('1. Families Active at the beginning of period', @TotalNumberOfFamiliesEnrolledQuarterly, @NumberOfFamiliesEnrolled4ContractPeriod)
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		a. Target Children', @TotalTCNumberQuarterly, @TCNumber4ContractPeriod)
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	a. Target Children', @TotalTCNumberQuarterly, @TCNumber4ContractPeriod)
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('','', '') --insert empty row
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('2. New Families enrolled in the Home Visiting program this period', @TotalNumOfFamiliesEnrolledThisPeriodQuarterly, @TotalNumOfFamiliesEnrolledThisPeriodContractPeriod)
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		a. Prenatal at intake', @TotalPrenatalFamiliesQuarterlyPCT, @TotalPrenatalFamiliesContractPeriodPCT)
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		b. Postnatal at intake', @TotalPostnatalFamiliesQuarterlyPCT, @TotalPostnatalFamiliesContractPeriodPCT)
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	a. Prenatal at intake', @TotalPrenatalFamiliesQuarterlyPCT, @TotalPrenatalFamiliesContractPeriodPCT)
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	b. Postnatal at intake', @TotalPostnatalFamiliesQuarterlyPCT, @TotalPostnatalFamiliesContractPeriodPCT)
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('','', '') --insert empty row
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('3. Families Discharged this period', @TotalNumOfFamiliesDischargedThisPeriodQuarterly, @TotalNumOfFamiliesDischargedContractPeriod)
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		a. Completed Program', @TotalFamiliesCompletedProgramQuarterlyPCT, @TotalFamiliesCompletedProgramContractPeriodPCT)
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		b. Did not Complete Program', @TotalFamiliesNOTCompletedProgramQuarterlyPCT, @TotalFamiliesNOTCompletedProgramContractPeriodPCT)
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	a. Completed Program', @TotalFamiliesCompletedProgramQuarterlyPCT, @TotalFamiliesCompletedProgramContractPeriodPCT)
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	b. Did not Complete Program', @TotalFamiliesNOTCompletedProgramQuarterlyPCT, @TotalFamiliesNOTCompletedProgramContractPeriodPCT)
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('','', '') --insert empty row
 
@@ -640,19 +641,19 @@ IF (@CustomQuarterlyDates = 0)
 	ELSE 
 	BEGIN 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('1. Families Active at the beginning of period', @TotalNumberOfFamiliesEnrolledQuarterly, '')
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		a. Target Children', @TotalTCNumberQuarterly, '')
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	a. Target Children', @TotalTCNumberQuarterly, '')
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('','', '') --insert empty row
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('2. New Families enrolled in the Home Visiting program this period', @TotalNumOfFamiliesEnrolledThisPeriodQuarterly,  '')
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		a. Prenatal at intake', @TotalPrenatalFamiliesQuarterlyPCT,  '')
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		b. Postnatal at intake', @TotalPostnatalFamiliesQuarterlyPCT,  '')
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	a. Prenatal at intake', @TotalPrenatalFamiliesQuarterlyPCT,  '')
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	b. Postnatal at intake', @TotalPostnatalFamiliesQuarterlyPCT,  '')
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('','', '') --insert empty row
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('3. Families Discharged this period', @TotalNumOfFamiliesDischargedThisPeriodQuarterly,  '')
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		a. Completed Program', @TotalFamiliesCompletedProgramQuarterlyPCT,  '')
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('		b. Did not Complete Program', @TotalFamiliesNOTCompletedProgramQuarterlyPCT,  '')
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	a. Completed Program', @TotalFamiliesCompletedProgramQuarterlyPCT,  '')
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('	b. Did not Complete Program', @TotalFamiliesNOTCompletedProgramQuarterlyPCT,  '')
 
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('','', '') --insert empty row
 
