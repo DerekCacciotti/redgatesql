@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -6,13 +5,11 @@ GO
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 08/08/2013
--- Description:	Training [NYS 4] Knowledge Training by 6 Months
--- EXEC rspTraining_10_2_Orientation @progfk = 30, @sdate = '07/01/2008'
--- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
--- Edit date: 10/11/2013 CP - the bit values in workerprogram table (FSW, FAW, Supervisor, FatherAdvocate, Program Manager)
---				are no longer being populated based on the latest workerform changes by Dar, so I've modified this report.
+-- Description:	Training 11-2 WrapAround Training for All Staff by 3 Months of Hire
+-- EXEMPT WORKERS HIRED PRIOR TO 07/01/2014 (they must have completed trainings, but date does not matter)
+-- EXEC rspTraining_11_2_WrapAround @progfk = 30, @sdate = '07/01/2008'
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTraining_10_4_Knowledge]
+CREATE PROCEDURE [dbo].[rspTraining_11_2_WrapAround]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
 	@sdate AS date
@@ -36,7 +33,7 @@ BEGIN
 	FROM Worker w 
 	INNER JOIN WorkerProgram wp ON w.WorkerPK = wp.WorkerFK	and wp.ProgramFK = @progfk
 	WHERE (wp.HireDate >=  @sdate and 
-	cast(wp.HireDate as date) < DATEADD(d, -181, CAST(GETDATE() AS DATE))
+	cast(wp.HireDate as date) < DATEADD(d, -91, CAST(GETDATE() AS DATE))
 	)
 	AND ((wp.FAWStartDate > @sdate AND wp.FAWEndDate IS NULL)
 	OR (wp.FSWStartDate > @sdate AND wp.FSWEndDate IS NULL)
@@ -63,7 +60,7 @@ SELECT [TopicName]
       ,[TopicFK]
   FROM codeTopic
   INNER JOIN subtopic on subtopic.topicfk=codetopic.codetopicPK
-  where topiccode between 14.0 and 19.0 AND requiredby='HFA'
+  where topiccode between 14.0 and 16.0 AND requiredby='HFA'
   )
   
 , cteWorkersTopics AS (
@@ -148,8 +145,9 @@ SELECT [TopicName]
 	, subtopiccode
 	, TrainingDate
 	, CASE WHEN TrainingDate IS NOT NULL THEN 1 END AS ContentCompleted
-	, CASE WHEN TrainingDate <= dateadd(day, 183, HireDate) THEN 1 
-		when IsExempt='1' then '1'
+	, CASE WHEN TrainingDate <= dateadd(day, 91, HireDate) THEN 1 
+			WHEN IsExempt='1' then '1'
+			WHEN TrainingDate IS NOT NULL AND HireDate < '07/01/2014' THEN 1 --Those hired prior to 7/1/2014 must only complete training since this best practice went into effect on 7/1/2014
 			ELSE 0 END AS 'Meets Target'
 	FROM cteAddMissingWorkers
 	GROUP BY WorkerPK
@@ -190,12 +188,9 @@ SELECT [TopicName]
 		, cteMeetTarget.subtopiccode
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
-		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '10-4a. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Infant Care within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 15.0 THEN '10-4b. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Child Health and Safety within six months of the date of hire'  
-			WHEN cteMeetTarget.TopicCode = 16.0 THEN '10-4c. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Maternal and Family Health within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 17.0 THEN '10-4d. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Infant and Child Development within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 18.0 THEN '10-4e. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Role of Culture in Parenting within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 19.0 THEN '10-4f. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Supporting the Parent-Child Relationship within six months of the date of hire' 
+		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '11-2a. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Infant Care within three months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 15.0 THEN '11-2b. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Child Health and Safety within three months of the date of hire'  
+			WHEN cteMeetTarget.TopicCode = 16.0 THEN '11-3c. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Maternal and Family Health within three months of the date of hire' 
 			END AS TopicName
 		, TrainingDate
 		, HireDate
