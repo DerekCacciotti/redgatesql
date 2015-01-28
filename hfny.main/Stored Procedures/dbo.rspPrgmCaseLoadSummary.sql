@@ -113,11 +113,11 @@ as
 				  inner join codeLevel l on codeLevelPK = 8
 				  inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			  where (IntakeDate is not null
-						or IntakeDate <= @rpdate)
+						and IntakeDate <= @rpdate)
 						and (DischargeDate is null
-						or DischargeDate > @rpdate)
+							or DischargeDate > @rpdate)
 						and (FSWAssignDate is not null
-						and FSWAssignDate < @rpdate)
+							and FSWAssignDate < @rpdate)
 						and hl.HVLevelPK is null
 		), 
 		cteMain as
