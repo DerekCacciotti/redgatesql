@@ -3,7 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Feb 5, 2012>
@@ -36,7 +35,7 @@ as
 
 	select @ClosedOnXLess3NoMove = count(distinct case
 			  when datediff(day,e4.LevelAssignDate,dischargedate) < 91 and CurrentLevelFK = 23 -- level X-term
-				  and (dischargedate is not null or dischargedate < @edate) and DischargeCode not in (7,36) then
+				  and (dischargedate is not null or dischargedate < @edate) and DischargeCode not in (7, 36, 37) then
 				  PC1ID
 		  end)
 		from hvcase
@@ -88,7 +87,7 @@ as
 			 and CurrentLevelFK = 23 -- level X-term
 			 and (dischargedate is not null
 			 or dischargedate < @edate)
-			 and DischargeCode not in (7,36)
+			 and DischargeCode not in (7, 36, 37)
 			 and CaseProgram.DischargeDate > @sdate
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		order by PC1ID

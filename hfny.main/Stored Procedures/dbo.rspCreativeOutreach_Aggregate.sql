@@ -3,7 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Feb 5, 2012>
@@ -56,7 +55,7 @@ as
 					 PC1ID end)*1.0
 			,ClosedOnXLess3 = count(distinct case
 					 when datediff(day,e4.LevelAssignDate,dischargedate) < 91 and CurrentLevelFK = 23 -- level X-term
-					 and (dischargedate is not null or dischargedate <= @edate) and DischargeCode in (7,36) then
+					 and (dischargedate is not null or dischargedate <= @edate) and DischargeCode in (7, 36, 37) then
 					 PC1ID end)*1.0
 			,ClosedOnXGreater3 = count(distinct case
 	                 when datediff(day,e4.LevelAssignDate,dischargedate) >= 91 and CurrentLevelFK = 23 -- level X-term
@@ -64,7 +63,7 @@ as
 					 PC1ID end)*1.0
 			,ClosedOnXLess3NoMove = count(distinct case
 				     when datediff(day,e4.LevelAssignDate,dischargedate) < 91 and CurrentLevelFK = 23 -- level X-term
-					 and (dischargedate is not null and dischargedate <= @edate) and DischargeCode not in (7,36) then
+					 and (dischargedate is not null and dischargedate <= @edate) and DischargeCode not in (7, 36, 37) then
 					 PC1ID end)*1.0
 			,ReXOpen = count(distinct case
 				     when (dischargedate is null or DischargeDate > @edate) and CaseProgram.CurrentLevelDate > e4.LevelAssignDate 
