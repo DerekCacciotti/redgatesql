@@ -15,7 +15,8 @@ CREATE procedure [dbo].[rspProgramDemographics]
     @programfk varchar(max)    = null,
     @StartDt   datetime,
     @EndDt     datetime,
-    @SiteFK    int = 0
+    @SiteFK    int = 0, 
+    @CaseFiltersPositive varchar(100) = ''
 as
 
 	--DECLARE @programfk INT = 6 
@@ -29,6 +30,9 @@ as
 	end
 	set @programfk = replace(@programfk,'"','')
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 
 	with MotherWithOtherChildren
 	as (select count(distinct a.HVCasePK) [PD08MotherWithOtherChild]
@@ -41,6 +45,7 @@ as
 				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
 				inner join workerprogram wp on wp.workerfk = fsw.workerpk
 				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
+				inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 			where
 				 (b.DischargeDate is null
 				 or b.DischargeDate >= @StartDt)
@@ -64,6 +69,7 @@ as
 				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
 				inner join workerprogram wp on wp.workerfk = fsw.workerpk
 				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
+				inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 			where
 				 (b.DischargeDate is null
 				 or b.DischargeDate >= @StartDt)
@@ -145,7 +151,7 @@ as
 									 group by
 											 HVCaseFK) as t
 							   on t.HVCaseFK = a.HVCasePK
-			
+				inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = a.HVCasePK
 			where
 				 (b.DischargeDate is null
 				 or b.DischargeDate >= @StartDt)
