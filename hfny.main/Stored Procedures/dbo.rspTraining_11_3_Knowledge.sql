@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -62,9 +63,12 @@ SELECT [TopicName]
       ,[TopicFK]
   FROM codeTopic
   INNER JOIN subtopic on subtopic.topicfk=codetopic.codetopicPK
-  where topiccode between 14.0 and 19.0 AND requiredby='HFA'
+	WHERE TopicCode IN (17.0, 19.0, 23.0, 25.0) AND requiredby='HFA'
   )
   
+  
+  
+    
 , cteWorkersTopics AS (
 	 Select workerpk
 		, WorkerName
@@ -99,7 +103,7 @@ SELECT [TopicName]
 			INNER JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
 			INNER JOIN Subtopic s ON s.TopicFK=t1.codeTopicPK AND s.SubTopicPK=td.SubTopicFK
 			INNER JOIN cteMain on cteMain.WorkerPK = ta.workerfk
-	WHERE t1.TopicCode between 14.0 and 19.0 AND requiredby='HFA'
+	WHERE t1.TopicCode IN (17.0, 19.0, 23.0, 25.0) AND requiredby='HFA'
 	GROUP BY  workerfk
 			, t1.TopicCode
 			, t1.topicname
@@ -189,33 +193,26 @@ SELECT [TopicName]
 		, cteMeetTarget.subtopiccode
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
-		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '10-4a. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Infant Care within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 15.0 THEN '10-4b. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Child Health and Safety within six months of the date of hire'  
-			WHEN cteMeetTarget.TopicCode = 16.0 THEN '10-4c. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Maternal and Family Health within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 17.0 THEN '10-4d. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Infant and Child Development within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 18.0 THEN '10-4e. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Role of Culture in Parenting within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 19.0 THEN '10-4f. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Supporting the Parent-Child Relationship within six months of the date of hire' 
+		, CASE WHEN cteMeetTarget.TopicCode = 17.0 THEN '11-3a. Staff (assessment workers, home visitors and supervisors) receives training in Infant and Child Development within six months of hire'  
+			WHEN cteMeetTarget.TopicCode = 19.0 THEN '11-3b. Staff (assessment workers, home visitors and supervisors) receives training in Supporting the Parent-Child Relationship within six months of hire' 
+			WHEN cteMeetTarget.TopicCode = 23.0 THEN '11-3c. Staff (assessment workers, home visitors and supervisors) receives training in Staff Related Issues within twelve months of hire' 
+			WHEN cteMeetTarget.TopicCode = 25.0 THEN '11-3d. Staff (assessment workers, home visitors and supervisors) receives training in Mental Health within twelve months of hire' 
 			END AS TopicName
 		, TrainingDate
 		, HireDate
 		, [Meets Target]
-		, sum(TotalMeetingCount) as TotalMeetingCount
+		, sum(TotalMeetingCount) as TotalMeetingCount		
 		, CASE WHEN 
 				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 				= 1 THEN 1
-			END AS MeetsTargetForAll
-		, CASE WHEN 
-				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
-					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
-				BETWEEN .5 AND .99 THEN 1
-			END AS MeetsTargetForMajority
+			END AS CompletedAllOnTime
 		, CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT) AS TotalContentAreasByTopicAndWorker
 		, CASE WHEN 
 				CAST(SUM([ContentCompleted]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT)
 				= 1 then 1
-				END AS TotalCompletedToDate
+				END AS CompletedALL
 		FROM cteMeetTarget
 		LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode AND ctecountmeeting.subtopiccode=cteMeetTarget.subtopiccode AND ctecountmeeting.workerpk=cteMeetTarget.workerpk
 		GROUP BY TotalWorkers
@@ -237,7 +234,7 @@ SELECT [TopicName]
 
 
 		
-	SELECT DISTINCT TotalWorkers
+		SELECT DISTINCT TotalWorkers
 		, WorkerPK
 		, WorkerName
 		, Supervisor
@@ -253,20 +250,19 @@ SELECT [TopicName]
 		, HireDate
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
 		,	CASE WHEN CAMeetingTarget = TotalContentAreasByTopicAndWorker THEN '3' 
-			WHEN CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) >= .5 THEN '2'
+			WHEN CAST(ContentCompleted AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) = 1 THEN '2'
 			ELSE '1'
 			END AS TopicRatingByWorker
-		,	CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
-			WHEN (SUM(isnull(MeetsTargetForAll, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker) + (SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker) = TotalWorkers THEN '2'
-			ELSE '1'
+		, topiccode, TotalContentAreasByTopicAndWorker
+		,	CASE WHEN SUM(cteAlmostFinal.CompletedAllOnTime) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
+			WHEN SUM(isnull(cteAlmostFinal.CompletedALL, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '2' 
+				ELSE '1'
 			END AS TopicRatingBySite
-		, CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
-		  ELSE 0
-		  END AS TotalMeetsTargetForAll
-		, CASE WHEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
-		  ELSE 0
-		  END AS TotalMeetsTargetForMajority
-		, SUM(TotalCompletedToDate) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalCompletedToDate
+		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
+		, CASE WHEN SUM(CompletedAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > 0
+			   THEN SUM(CompletedAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker 
+	      ELSE 0
+	      END AS TotalCompletedToDate
 		FROM cteAlmostFinal
 END
 GO
