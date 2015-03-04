@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -108,6 +109,7 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 		NULLIF(sum(CASE WHEN a.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END),0), 0), 0))  + '%'
 		AS PercentKempe
 		FROM Preassessment AS a
+		JOIN Kempe AS b ON a.HVCaseFK = b.HVCaseFK  -- new
 		inner join dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
 		WHERE a.KempeDate BETWEEN @startDT AND @endDT
 	)
