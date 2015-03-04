@@ -11,7 +11,8 @@ CREATE procedure [dbo].[rspASQSEHistory]
     @workerfk        int            = null,
     @UnderCutoffOnly char(1)        = 'N',
     @pc1ID           varchar(13)    = '',
-    @sitefk          int            = null
+    @sitefk          int            = null,
+    @CaseFiltersPositive varchar(100) = ''
 )
 AS
 
@@ -33,10 +34,12 @@ AS
 	end
 	set @programfk = replace(@programfk,'"','')
 	set @SiteFK = isnull(@SiteFK, 0)
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 	
 	declare @n int = 0
 	select @n = case when @UnderCutoffOnly = 'Y' then 1 else 0 end
-
 
 ;with cteMain
 	as (
@@ -66,6 +69,7 @@ AS
 			inner join TCID c on c.TCIDPK = a.TCIDFK
 			inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
+			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = a.HVCaseFK
 			inner join worker fsw on d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
@@ -105,13 +109,14 @@ cteNone
 			--inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
 			--inner join TCID c on c.TCIDPK = a.TCIDFK
 			CaseProgram d 
-			INNER JOIN HVCase AS h ON h.HVCasePK = d.HVCaseFK
+			inner join HVCase AS h ON h.HVCasePK = d.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
+			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
 			inner join worker fsw ON d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
-			LEFT OUTER JOIN TCID c on c.HVCaseFK = d.HVCaseFK
-			LEFT OUTER JOIN ASQSE AS a ON d.HVCaseFK = a.HVCaseFK
+			left outer join TCID c on c.HVCaseFK = d.HVCaseFK
+			left outer join ASQSE AS a ON d.HVCaseFK = a.HVCaseFK
 	where
 			 h.CaseProgress > 8 AND
 			 d.DischargeDate is NULL

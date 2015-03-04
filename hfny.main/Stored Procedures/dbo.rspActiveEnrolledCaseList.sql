@@ -10,26 +10,29 @@ GO
 -- mod 2013Jun24 jrobohn reformat and add case filter criteria
 -- =============================================
 CREATE procedure [dbo].[rspActiveEnrolledCaseList]-- Add the parameters for the stored procedure here
-    @programfk           varchar(max)    = null,
+    @ProgramFK           varchar(max)    = null,
     @StartDt             datetime,
     @EndDt               datetime,
     @SiteFK              int             = 0,
-    @casefilterspositive varchar(200)
+    @CaseFiltersPositive varchar(200)
 as
 
 	--DECLARE @StartDt DATE = '01/01/2011'
 	--DECLARE @EndDt DATE = '05/31/2011'
-	--DECLARE @programfk VARCHAR(MAX) = '1'
+	--DECLARE @ProgramFK VARCHAR(MAX) = '1'
 	--DECLARE @SiteFK INT = -1
 
-	if @programfk is null
+	if @ProgramFK is null
 	begin
-		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+		select @ProgramFK = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
 										   from HVProgram
 										   for xml path ('')),2,8000)
 	end
-	set @programfk = replace(@programfk,'"','')
+	set @ProgramFK = replace(@ProgramFK,'"','')
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 
 	select rtrim(PC.PCLastName)+cast(PC.PCPK as varchar(10)) [key01]
 		  ,a.PC1ID
@@ -85,8 +88,8 @@ as
 
 		from CaseProgram as a
 			join HVCase as b on a.HVCaseFK = b.HVCasePK
-			inner join dbo.SplitString(@programfk,',') on a.programfk = listitem
-			inner join dbo.udfCaseFilters(@casefilterspositive,'', @programfk) cf on cf.HVCaseFK = a.HVCaseFK
+			inner join dbo.SplitString(@ProgramFK,',') on a.ProgramFK = listitem
+			inner join dbo.udfCaseFilters(@CaseFiltersPositive,'', @ProgramFK) cf on cf.HVCaseFK = a.HVCaseFK
 			-- pc1 name, dob, and SS# = b.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB, PC.SSNo
 			join PC on PC.PCPK = b.PC1FK
 			-- screen date = a.HVCaseFK <-> Kempe.HVCaseFK -> Kempe.KempeDate
@@ -97,7 +100,7 @@ as
 			--
 			-- FSW & site = a.CurrentFSWFK <-> Worker.WorkerPK -> Worker.LastName + Worker.FirstName ?? site ??
 			left outer join Worker on Worker.WorkerPK = a.CurrentFSWFK
-			join Workerprogram as wp on wp.WorkerFK = Worker.WorkerPK and wp.ProgramFK = @programfk
+			join Workerprogram as wp on wp.WorkerFK = Worker.WorkerPK and wp.ProgramFK = @ProgramFK
 			left outer join listSite as ls on wp.SiteFK = ls.listSitePK
 			--
 			-- intake date & age at intake = a.HVCaseFK <-> Intake.HVCaseFK -> Intake.IntakeDate -> (PCDOB - IntakeDate)
@@ -132,7 +135,7 @@ as
 		where b.IntakeDate <= @EndDt
 			 and (a.DischargeDate is null
 			 or a.DischargeDate > @StartDt)
-			 --AND a.ProgramFK = @programfk
+			 --AND a.ProgramFK = @ProgramFK
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		--AND (@SiteFK = -1 OR (ISNULL(wp.SiteFK, -1) = @SiteFK))
 		order by [key01]

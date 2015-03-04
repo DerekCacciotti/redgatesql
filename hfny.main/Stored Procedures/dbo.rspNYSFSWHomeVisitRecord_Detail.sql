@@ -10,14 +10,17 @@ GO
 -- Description:	<Converted FamSys report - Home Visit Achievement Rate - Aggregate>
 --				04/29 Changed to NYS FSW Home Visit Record
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
--- exe 
+--			  02/24/2015 jr - add support for Site and Case Filter criteria
 -- =============================================
-CREATE procedure [dbo].[rspNYSFSWHomeVisitRecord_Detail](@programfk    varchar(max)    = null,
-                                                        @sdate        datetime,
-                                                        @edate        datetime,
-                                                        @supervisorfk int             = null,
-                                                        @workerfk     int             = null
-                                                        )
+CREATE procedure [dbo].[rspNYSFSWHomeVisitRecord_Detail]
+				(@programfk    varchar(max)    = null
+					, @sdate        datetime
+					, @edate        datetime
+					, @supervisorfk int             = null
+					, @workerfk     int             = null
+					, @SiteFK int = null
+					, @CaseFiltersPositive varchar(100) = ''
+				)
 
 as
 begin
@@ -28,7 +31,15 @@ begin
 			   substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
 							  from HVProgram
 							  for xml path ('')),2,8000)
-	end;
+	end
+	set @programfk = REPLACE(@programfk,'"','');
+
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0
+					   else @SiteFK
+				  end
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 
 	with cteHVRecords
 	as
@@ -70,12 +81,17 @@ begin
 					,pc1id+convert(char(10),hvr.workerfk) as pc1wrkfk --use for a distinct unique field for the OVER(PARTITION BY) above	
 					 ,hvr.casefk
 		 from [dbo].[udfHVRecords](@programfk,@sdate,@edate) hvr
-			 inner join worker on workerpk = hvr.workerfk
-			 inner join workerprogram wp on wp.workerfk = workerpk
-			 inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
-		 where workerpk = isnull(@workerfk,workerpk)
-			  and supervisorfk = isnull(@supervisorfk,supervisorfk)
-			  and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
+			inner join worker on workerpk = hvr.workerfk
+			inner join workerprogram wp on wp.workerfk = workerpk
+			inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
+			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = hvr.casefk
+			where case when @SiteFK = 0 then 1
+							 when wp.SiteFK = @SiteFK then 1
+							 else 0
+						end = 1
+					and workerpk = isnull(@workerfk,workerpk)
+					and supervisorfk = isnull(@supervisorfk,supervisorfk)
+					and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
 		 group by firstname
 				 ,lastname
 				 ,hvr.workerfk

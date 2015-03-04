@@ -16,7 +16,8 @@ CREATE procedure [dbo].[rspClosedEnrolledCaseList]-- Add the parameters for the 
     @programfk VARCHAR(MAX) = null,
     @StartDt   datetime,
     @EndDt     datetime,
-    @SiteFK    int = 0
+    @SiteFK    int = 0,
+    @CaseFiltersPositive varchar(100) = ''
 AS
 
 if @programfk is null
@@ -32,6 +33,9 @@ set @programfk = REPLACE(@programfk,'"','')
 	--DECLARE @EndDt DATE = '05/31/2011'
 	--DECLARE @programfk INT = 17
 	set @SiteFK = isnull(@SiteFK, 0)
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 	
 	select rtrim(PC.PCLastName)+cast(PC.PCPK as varchar(10)) [key01]
 	      , cp.PC1ID
@@ -62,6 +66,7 @@ set @programfk = REPLACE(@programfk,'"','')
 				from HVLog
 				inner join CaseProgram cp1 on cp1.HVCaseFK = HVLog.HVCaseFK
 				join dbo.SplitString(@programfk,',') on cp1.programfk = listitem
+				inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = cp1.HVCaseFK
 				inner join WorkerProgram wp1 on wp1.WorkerFK = cp1.CurrentFSWFK AND wp1.programfk = listitem
 				where VisitType <> '0001'
 					 and cast(VisitStartTime AS DATE) <= @EndDt
@@ -122,6 +127,7 @@ set @programfk = REPLACE(@programfk,'"','')
 			-- VisitType <> '0001', VisitStartTime < @EndDt and VisitStartTime >=  c.IntakeDate
 
 			left outer join TCID T on T.HVCaseFK = c.HVCasePK
+			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = c.HVCasePK
 
 		where cp.DischargeDate between @StartDt and @EndDt
 			 --and cp.ProgramFK = @programfk

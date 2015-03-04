@@ -23,6 +23,9 @@ CREATE PROCEDURE [dbo].[rspRetentionRatesByDischargeReason]
 	@ProgramFK varchar(max)
 	, @StartDate datetime
 	, @EndDate datetime
+    , @WorkerFK int = null
+	, @SiteFK int = null
+	, @CaseFiltersPositive varchar(100) = ''
 as
 begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -32,6 +35,13 @@ begin
 print @programfk
 print @startdate
 print @enddate
+
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0
+					   else @SiteFK
+				  end
+	set @casefilterspositive = case	when @casefilterspositive = '' then null
+									else @casefilterspositive
+							   end
 
 	declare @tblResults table (
 		LineDescription varchar(50)
@@ -80,8 +90,16 @@ print @enddate
 			from HVCase h 
 			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
 			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
-			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-				  -- and cp.ProgramFK=@ProgramFK
+			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
+			left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
+			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = cp.ProgramFK
+			where case when @SiteFK = 0 then 1
+							 when wp.SiteFK = @SiteFK then 1
+							 else 0
+						end = 1
+				and (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				and  w.WorkerPK = isnull(@WorkerFK, w.WorkerPK)
+				-- and cp.ProgramFK=@ProgramFK
 		)	
 
 	--select * 
@@ -95,19 +113,20 @@ print @enddate
 	
 --#endregion
 --#region cteCaseLastHomeVisit - get the last home visit for each case in the cohort 
-	, cteCaseLastHomeVisit as
+	, cteCaseLastHomeVisit AS 
 	-----------------------------
-	(select HVCaseFK
-		   ,max(vl.VisitStartTime) as LastHomeVisit
-		   ,count(vl.VisitStartTime) as CountOfHomeVisits
-		from HVLog vl
-		inner join hvcase c on c.HVCasePK = vl.HVCaseFK
-		inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
-		where VisitType <> '0001' and 
-					(IntakeDate is not null and IntakeDate between @startdate and @enddate)
-			  --and vl.ProgramFK = @ProgramFK
-		group by HVCaseFK
-	)
+		(select HVCaseFK
+				  , max(vl.VisitStartTime) as LastHomeVisit
+				  , count(vl.VisitStartTime) as CountOfHomeVisits
+			from HVLog vl
+			inner join HVCase c on c.HVCasePK = vl.HVCaseFK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
+			inner join cteCohort co on co.HVCasePK = c.HVCasePK
+			where VisitType <> '0001' and 
+					(IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+							 -- and vl.ProgramFK = @ProgramFK
+			group by HVCaseFK
+		)
 	
 --select * 
 --from cteCaseLastHomeVisit
