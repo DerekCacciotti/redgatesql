@@ -8,12 +8,14 @@ GO
 
 CREATE procedure [dbo].[rspASQHistory]
 (
-    @programfk       VARCHAR(MAX)   = null,
-    @supervisorfk    int            = null,
-    @workerfk        int            = null,
+    @ProgramFK       VARCHAR(MAX)   = null,
+    @SupervisorFK    int            = null,
+    @WorkerFK        int            = null,
     @UnderCutoffOnly char(1)        = 'N',
-    @pc1ID           varchar(13)    = '',
-    @sitefk          int            = null
+    @PC1ID           varchar(13)    = '',
+    @SiteFK          int            = null, 
+    @CaseFiltersPositive varchar(100) = ''
+    
 )
 AS
 
@@ -34,7 +36,10 @@ AS
 	end
 	set @programfk = replace(@programfk,'"','')
 	set @SiteFK = isnull(@SiteFK, 0)
-	
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+								else @CaseFiltersPositive
+						   end;
+
 	declare @n int = 0
 	select @n = case when @UnderCutoffOnly = 'Y' then 1 else 0 end
 
@@ -74,6 +79,7 @@ AS
 			inner join TCID c on c.TCIDPK = a.TCIDFK
 			inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
+			inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = a.HVCaseFK
 			inner join worker fsw ON d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
@@ -145,6 +151,7 @@ cteNone
 			CaseProgram d 
 			INNER JOIN HVCase AS h ON h.HVCasePK = d.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
+			inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = h.HVCasePK
 			inner join worker fsw ON d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk

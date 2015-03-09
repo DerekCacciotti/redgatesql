@@ -11,6 +11,7 @@ GO
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- Edit date: 10/11/2013 CP - the bit values in workerprogram table (FSW, FAW, Supervisor, FatherAdvocate, Program Manager)
 --				are no longer being populated based on the latest workerform changes by Dar, so I've modified this report.
+-- EDIT DATE: 01/30/2015 CP - Report is now called 11-4
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTraining_10_5_Knowledge]
 	-- Add the parameters for the stored procedure here
@@ -64,7 +65,7 @@ SELECT [TopicName]
       ,[TopicFK]
   FROM codeTopic
   INNER JOIN subtopic on subtopic.topicfk=codetopic.codetopicPK
-  where topiccode between 20.0 and 25.0 AND requiredby='HFA'
+  WHERE ((TopicCode= 18.0) OR (TopicCode=20.0) OR (TopicCode=21.0)OR (TopicCode=22.0)OR (TopicCode=24.0)) AND requiredby='HFA'
   )
   
 , cteWorkersTopics AS (
@@ -101,7 +102,7 @@ SELECT [TopicName]
 			INNER JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
 			INNER JOIN Subtopic s ON s.TopicFK=t1.codeTopicPK AND s.SubTopicPK=td.SubTopicFK
 			INNER JOIN cteMain on cteMain.WorkerPK = ta.workerfk
-	WHERE t1.TopicCode between 20.0 and 25.0 AND requiredby='HFA'
+	WHERE ((t1.TopicCode= 18.0) OR (t1.TopicCode=20.0) OR (t1.TopicCode=21.0)OR (t1.TopicCode=22.0)OR (t1.TopicCode=24.0)) AND requiredby='HFA'
 	GROUP BY  workerfk
 			, t1.TopicCode
 			, t1.topicname
@@ -191,13 +192,18 @@ SELECT [TopicName]
 		, cteMeetTarget.subtopiccode
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
-		, CASE WHEN cteMeetTarget.TopicCode = 20.0 THEN '10-5a. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Child Abuse & Negelct within twelve months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 21.0 THEN '10-5b. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Family Violence within twelve months of the date of hire'  
-			WHEN cteMeetTarget.TopicCode = 22.0 THEN '10-5c. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Substance Abuse within twelve months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 23.0 THEN '10-5d. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Staff Related Issues within twelve months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 24.0 THEN '10-5e. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Family Issues within twelve months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 25.0 THEN '10-5f. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Mental Health within twelve months of the date of hire' 
+		, CASE WHEN cteMeetTarget.TopicCode = 20.0 THEN '11-4a. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Child Abuse & Negelct within twelve months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 21.0 THEN '11-4b. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Family Violence within twelve months of the date of hire'  
+			WHEN cteMeetTarget.TopicCode = 22.0 THEN '11-4c. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Substance Abuse within twelve months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 24.0 THEN '11-4d. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Family Issues within twelve months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 18.0 THEN '11-4e. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Role of Culture in Parenting within twelve months of the date of hire' 
 			END AS TopicName
+		, CASE WHEN cteMeetTarget.TopicCode = 20.0 THEN 1
+			WHEN cteMeetTarget.TopicCode = 21.0 THEN 2
+			WHEN cteMeetTarget.TopicCode = 22.0 THEN 3 
+			WHEN cteMeetTarget.TopicCode = 24.0 THEN 4
+			WHEN cteMeetTarget.TopicCode = 18.0 THEN 5
+			END AS OrderCategory --used to order the topic codes for the report layout
 		, TrainingDate
 		, HireDate
 		, [Meets Target]
@@ -269,6 +275,8 @@ SELECT [TopicName]
 		  ELSE 0
 		  END AS TotalMeetsTargetForMajority
 		, SUM(TotalCompletedToDate) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalCompletedToDate
+		, cteAlmostFinal.OrderCategory
 		FROM cteAlmostFinal
+		Order BY cteAlmostFinal.OrderCategory
 END
 GO
