@@ -31,7 +31,7 @@ CREATE TABLE [dbo].[Worker]
 [WorkerDOB] [datetime] NULL,
 [WorkerEditDate] [datetime] NULL,
 [WorkerEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[WorkerPK_old] [int] NOT NULL,
+[WorkerPK_old] [int] NULL,
 [YoungestChild] [int] NULL,
 [Zip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LoginCreated] [bit] NOT NULL CONSTRAINT [DF_Worker_LoginCreated] DEFAULT ((0)),
