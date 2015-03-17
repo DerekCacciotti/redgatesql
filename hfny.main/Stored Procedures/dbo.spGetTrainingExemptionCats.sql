@@ -21,7 +21,7 @@ BEGIN
       ,[TrainingCodeDescription]
       ,[TrainingCodeGroup]
       ,[TrainingCodeUsedWhere]
-  FROM [HFNY].[dbo].[codeTraining]
+  FROM [dbo].[codeTraining]
   WHERE TrainingCodeGroup='Exemption'
 END
 GO

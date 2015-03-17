@@ -243,7 +243,7 @@ SELECT [TopicName]
 		, ProgramManager
 		, FatherAdvocate
 		, topiccode
-		, ContentCompleted AS IndivContentCompleted
+		, ISNULL(ContentCompleted, 0) AS IndivContentCompleted
 		, CAMeetingTarget AS IndivContentMeeting
 		, CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) AS IndivPercByTopic
 		, TopicName
