@@ -125,6 +125,7 @@ cteNone
 			 and d.PC1ID = case when @pc1ID = '' then d.PC1ID else @pc1ID end
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)		
 	         AND a.HVCaseFK IS NULL
+	         AND c.TCDOB IS NOT NULL 
 )
 
 

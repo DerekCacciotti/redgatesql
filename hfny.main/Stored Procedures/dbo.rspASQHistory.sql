@@ -24,7 +24,8 @@ AS
 --DECLARE @workerfk        int            = null
 --DECLARE @UnderCutoffOnly char(1)        = 'N'
 --DECLARE @pc1ID           varchar(13)    = ''
---DECLARE @sitefk          int            = null
+--DECLARE @sitefk          int            = NULL
+--DECLARE @CaseFiltersPositive varchar(100) = ''
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 
 
@@ -168,6 +169,7 @@ cteNone
 			 --and SiteFK = isnull(@sitefk,SiteFK)
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 			 AND a.HVCaseFK IS NULL
+			 AND c.TCDOB IS NOT NULL 
 		--order by supervisor
 		--		,worker
 		--		,PC1ID
