@@ -15,7 +15,9 @@ GO
 CREATE PROCEDURE [dbo].[rspTraining_Orientation]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
-	@sdate AS date
+	@sdate AS DATE
+	
+	WITH RECOMPILE
 AS
 
 

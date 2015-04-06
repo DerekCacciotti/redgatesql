@@ -192,11 +192,11 @@ SELECT [TopicName]
 		, cteMeetTarget.subtopiccode
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
-		, CASE WHEN cteMeetTarget.TopicCode = 20.0 THEN '11-4a. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Child Abuse & Negelct within twelve months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 21.0 THEN '11-4b. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Family Violence within twelve months of the date of hire'  
-			WHEN cteMeetTarget.TopicCode = 22.0 THEN '11-4c. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Substance Abuse within twelve months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 24.0 THEN '11-4d. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Family Issues within twelve months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 18.0 THEN '11-4e. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Role of Culture in Parenting within twelve months of the date of hire' 
+		, CASE WHEN cteMeetTarget.TopicCode = 20.0 THEN '11-4a. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Child Abuse & Neglect within twelve months of hire' 
+			WHEN cteMeetTarget.TopicCode = 21.0 THEN	'11-4b. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Family Violence within twelve months of hire'  
+			WHEN cteMeetTarget.TopicCode = 22.0 THEN	'11-4c. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Substance Abuse within twelve months of hire' 
+			WHEN cteMeetTarget.TopicCode = 24.0 THEN	'11-4d. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Family Issues within twelve months of hire' 
+			WHEN cteMeetTarget.TopicCode = 18.0 THEN	'11-4e. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Role of Culture in Parenting within twelve months of hire' 
 			END AS TopicName
 		, CASE WHEN cteMeetTarget.TopicCode = 20.0 THEN 1
 			WHEN cteMeetTarget.TopicCode = 21.0 THEN 2
@@ -269,10 +269,10 @@ SELECT [TopicName]
 			ELSE '1'
 			END AS TopicRatingBySite
 		, CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
-		  ELSE 0
+		  ELSE '0'
 		  END AS TotalMeetsTargetForAll
 		, CASE WHEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
-		  ELSE 0
+		  ELSE '0'
 		  END AS TotalMeetsTargetForMajority
 		, SUM(TotalCompletedToDate) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalCompletedToDate
 		, cteAlmostFinal.OrderCategory

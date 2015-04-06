@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -186,9 +187,9 @@ SELECT [TopicName]
 		, cteMeetTarget.subtopiccode
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
-		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '11-2a. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Infant Care within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 15.0 THEN '11-2b. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Child Health and Safety within six months of the date of hire'  
-			WHEN cteMeetTarget.TopicCode = 16.0 THEN '11-2c. Staff (assessment workers, home visitors and supervisors) demonstrate knowledge of Maternal and Family Health within six months of the date of hire' 
+		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '11-2a. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Infant Care within six months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 15.0 THEN '11-2b. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Child Health and Safety within six months of the date of hire'  
+			WHEN cteMeetTarget.TopicCode = 16.0 THEN '11-2c. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Maternal and Family Health within six months of the date of hire' 
 			END AS TopicName
 		, TrainingDate
 		, HireDate
