@@ -17,6 +17,8 @@ CREATE procedure [dbo].[rspHomeVisitLogActivitySummaryOtherSpecified]
    , @pc1id varchar(13) = ''
    , @showWorkerDetail char(1) = 'N'
    , @showPC1IDDetail char(1) = 'N'
+   , @SiteFK int = null
+   , @CaseFiltersPositive varchar(200) = null
 	)
 as --DECLARE	@programfk INT = 1
 --DECLARE @StartDt DATETIME = '04/01/2012'
@@ -26,6 +28,12 @@ as --DECLARE	@programfk INT = 1
 --DECLARE @showWorkerDetail CHAR(1) = 'N'
 --DECLARE @showPC1IDDetail CHAR(1) = 'N'
 
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0
+						else @SiteFK
+					end
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 
 	select --DISTINCT
 			case when @showWorkerDetail = 'N' then 0
@@ -42,6 +50,8 @@ as --DECLARE	@programfk INT = 1
 	inner join worker fsw on a.FSWFK = fsw.workerpk
 	inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK
 	inner join HVCase as h on h.HVCasePK = a.HVCaseFK
+	inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = cp.ProgramFK
+	inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = cp.HVCaseFK
 	where	a.ProgramFK = @programfk
 			and cast(VisitStartTime as date) between @StartDt and @EndDt
 			and a.FSWFK = isnull(@workerfk, a.FSWFK)
@@ -52,6 +62,10 @@ as --DECLARE	@programfk INT = 1
 			and (CurriculumOtherSpecify is not null
 				 and len(rtrim(CurriculumOtherSpecify)) > 0
 				)
+			and case when @SiteFK = 0 then 1
+					 when wp.SiteFK = @SiteFK then 1
+					 else 0
+				end = 1
 	group by FSWFK
 		  , PC1ID
 		  , rtrim(CurriculumOtherSpecify)

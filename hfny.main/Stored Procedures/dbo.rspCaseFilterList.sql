@@ -12,18 +12,21 @@ GO
 -- exec dbo.rspCaseFilterList @programfks='1',@casefilterspositive=NULL
 -- =============================================
 CREATE procedure [dbo].[rspCaseFilterList] (@ProgramFKs varchar(max) = null
-											 , @StartDate datetime
-											 , @EndDate datetime
-											 , @CaseFiltersPositive varchar(200) = null                                                  
+											, @StartDate datetime
+											, @EndDate datetime
+											, @SiteFK int = null
+											, @CaseFiltersPositive varchar(200) = null
 										  )
 as
 	begin
 
-	
+		set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0
+							else @SiteFK
+						end
 		set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
 										else @CaseFiltersPositive
 								   end;
-		with	cteMain
+		with cteMain
 				  as (select	HVCasePK
 							  , rtrim(P.PCFirstName) + ' ' + rtrim(P.PCLastName) as PC1FullName
 							  , PC1ID
@@ -56,23 +59,30 @@ as
 					  inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFKs) cf on cf.HVCaseFK = cp.HVCaseFK
 					  inner join CaseFilter cf2 on cf2.HVCaseFK = cp.HVCaseFK
 					  inner join listCaseFilterName lcf on lcf.listCaseFilterNamePK = cf2.CaseFilterNameFK
-					  where		h.ScreenDate between @StartDate and @EndDate
+					  left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
+					  left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = cp.ProgramFK
+					  where case when @SiteFK = 0 then 1
+										 when wp.SiteFK = @SiteFK then 1
+										 else 0
+									end = 1
+							and h.ScreenDate between @StartDate and @EndDate
 					 ) ,
-				cteFilterOptions
+			cteFilterOptions
 				  as -- merge rows i.e. put all filters in one row given an hvcasepk / pc1id
-(select	HVCasePK
-	  , FilterOption = replace((select	cast(FieldTitle + ':' + FilterOption as varchar(50)) as [data()]
-								from	cteMain m1
-								where	m1.HVCasePK = m2.HVCasePK
-								order by HVCasePK
-							   for
-								xml	path('')
-							   ), ' ', ',')
-		  
-		  --,FilterOption 
- from	cteMain m2
- group by HVCasePK
-) ,				cteFAWFSWNames
+					(select	HVCasePK
+						  , FilterOption = replace((select	cast(FieldTitle + ':' + FilterOption as varchar(50)) as [data()]
+													from	cteMain m1
+													where	m1.HVCasePK = m2.HVCasePK
+													order by HVCasePK
+												   for
+													xml	path('')
+												   ), ' ', ',')
+							  
+							  --,FilterOption 
+					 from	cteMain m2
+					 group by HVCasePK
+					) ,				
+			cteFAWFSWNames
 				  as (select distinct
 								HVCasePK
 							  , case when m3.CurrentFAWFK is null then 'NO FAW Assigned'
@@ -85,7 +95,7 @@ as
 					  inner join Worker w on w.WorkerPK = m3.CurrentFAWFK
 					  inner join Worker fsw on fsw.WorkerPK = m3.CurrentFSWFK
 					 ) ,
-				cteUniqueFilterCases
+			cteUniqueFilterCases
 				  as (select distinct
 								HVCasePK
 							  , PC1FullName

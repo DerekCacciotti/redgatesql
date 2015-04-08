@@ -13,10 +13,7 @@ GO
 CREATE procedure [dbo].[rspHomeVisitObservationBySupervisor]
 (
     @programfk varchar(max)    = null,
-    @sitefk		 int		   = null,
-    @posclause	 varchar(200), 
-    @negclause	 varchar(200)
-
+    @sitefk		 int		   = null
 )
 as
 	if @programfk is null
@@ -26,9 +23,8 @@ as
 										   for xml path ('')),2,8000)
 	end
 
-	set @programfk = REPLACE(@programfk,'"','');
-	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
-	set @posclause = case when @posclause = '' then null else @posclause end;
+	set @programfk = REPLACE(@programfk,'"','')
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
 
 	with WorkerCohort
 	as (select distinct FSWFK
@@ -90,7 +86,6 @@ as
 			inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = ListItem
 			inner join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
 			--inner join dbo.SplitString(@programfk,',') on wp.programfk = listitem
-			inner join dbo.udfCaseFilters(@posclause, @negclause, @programfk) cf on cf.HVCaseFK = hvcasepk
 		where w.WorkerPK in (select FSWFK
 									  from WorkerCohort)
 			 and wp.TerminationDate is null

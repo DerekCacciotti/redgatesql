@@ -19,6 +19,8 @@ CREATE PROCEDURE [dbo].[rspHomeVisitLogActivitySummaryCurriculum]
 	@pc1id VARCHAR(13) = '',
 	@showWorkerDetail CHAR(1) = 'N',
 	@showPC1IDDetail CHAR(1) = 'N'
+   , @SiteFK int = null
+   , @CaseFiltersPositive varchar(200) = null
 	)
 
 --DECLARE	@programfk INT = 6
@@ -38,8 +40,14 @@ AS
 --DECLARE @showWorkerDetail CHAR(1) = 'N'
 --DECLARE @showPC1IDDetail CHAR(1) = 'N'
 
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0
+						else @SiteFK
+					end
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 
-; WITH curriculum01 AS (
+ WITH curriculum01 AS (
 SELECT 
 CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
 ,CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END PC1ID
@@ -115,12 +123,18 @@ INNER JOIN CaseProgram cp
 ON cp.HVCaseFK = a.HVCaseFK
 INNER JOIN HVCase AS h
 ON h.HVCasePK = a.HVCaseFK
+inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = cp.ProgramFK
+inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = cp.HVCaseFK
 WHERE 
 a.ProgramFK = @programfk 
 AND cast(VisitStartTime AS date) between @StartDt AND @EndDt 
 AND a.FSWFK = ISNULL(@workerfk, a.FSWFK)
 AND cp.PC1ID = CASE WHEN @pc1ID = '' THEN cp.PC1ID ELSE @pc1ID END
 AND substring(VisitType,4,1) <> '1'
+and case when @SiteFK = 0 then 1
+		 when wp.SiteFK = @SiteFK then 1
+		 else 0
+	end = 1
 GROUP BY 
 CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END, 
 CASE WHEN @showPC1IDDetail = 'N' THEN '' ELSE cp.PC1ID END
