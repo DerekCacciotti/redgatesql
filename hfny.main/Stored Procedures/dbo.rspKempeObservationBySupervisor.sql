@@ -56,6 +56,9 @@ as
 		  ,(select min(KempeDate) KempeDate
 				from Kempe
 				where FAWFK = w.WorkerPK) KempeDate_min
+		  ,(select max(KempeDate) KempeDate
+				from Kempe
+				where FAWFK = w.WorkerPK) KempeDate_max
 		  ,RTRIM(w.FirstName)+' '+RTRIM(w.LastName) FAW
 		  ,RTRIM(supervisor.FirstName)+' '+RTRIM(supervisor.LastName) supervisor
 		from (select KempeDate
