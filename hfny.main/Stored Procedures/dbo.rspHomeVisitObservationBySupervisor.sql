@@ -59,6 +59,10 @@ as
 				from hvlog
 				where FSWFK = w.WorkerPK
 				group by fswfk) hvdate_min
+		  ,(select max(VisitStartTime) VisitStartTime
+				from hvlog
+				where FSWFK = w.WorkerPK
+				group by fswfk) hvdate_max
 		  ,RTRIM(w.FirstName)+' '+RTRIM(w.LastName) fsw
 		  ,RTRIM(supervisor.FirstName)+' '+RTRIM(supervisor.LastName) supervisor
 		  ,case
@@ -74,7 +78,7 @@ as
 					,visitType
 					,FSWFK
 				  from q
-				  where RowNumber <= 5
+				  where RowNumber <= 7
 				  group by FSWFK
 						  ,hvcasepk
 						  ,VisitStartTime
