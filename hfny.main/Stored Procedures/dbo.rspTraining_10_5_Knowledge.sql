@@ -212,13 +212,23 @@ SELECT [TopicName]
 				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 				= 1 THEN 1
+			END AS CompletedAllOnTime
+		, CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT) AS TotalContentAreasByTopicAndWorker
+		, CASE WHEN 
+				CAST(SUM([ContentCompleted]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
+					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT)
+				= 1 then 1
+				END AS CompletedALL		
+		, CASE WHEN 
+				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
+					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
+				= 1 THEN 1
 			END AS MeetsTargetForAll
 		, CASE WHEN 
 				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 				BETWEEN .5 AND .99 THEN 1
 			END AS MeetsTargetForMajority
-		, CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT) AS TotalContentAreasByTopicAndWorker
 		, CASE WHEN 
 				CAST(SUM([ContentCompleted]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT)
@@ -260,21 +270,29 @@ SELECT [TopicName]
 		, TopicName
 		, HireDate
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
+		
+		
+		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
 		,	CASE WHEN CAMeetingTarget = TotalContentAreasByTopicAndWorker THEN '3' 
-			WHEN CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) >= .5 THEN '2'
+			WHEN CAST(ContentCompleted AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) = 1 THEN '2'
 			ELSE '1'
 			END AS TopicRatingByWorker
-		,	CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
-			WHEN (SUM(isnull(MeetsTargetForAll, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker) + (SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker) = TotalWorkers THEN '2'
-			ELSE '1'
+		, topiccode, TotalContentAreasByTopicAndWorker
+		,	CASE WHEN SUM(CompletedAllOnTime) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
+			WHEN SUM(isnull(cteAlmostFinal.CompletedALL, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '2' 
+				ELSE '1'
 			END AS TopicRatingBySite
+		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
+		, CASE WHEN SUM(CompletedAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > 0
+			   THEN SUM(CompletedAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker 
+	      ELSE 0
+	      END AS TotalCompletedToDate		
 		, CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
 		  ELSE '0'
 		  END AS TotalMeetsTargetForAll
 		, CASE WHEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
 		  ELSE '0'
 		  END AS TotalMeetsTargetForMajority
-		, SUM(TotalCompletedToDate) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalCompletedToDate
 		, cteAlmostFinal.OrderCategory
 		FROM cteAlmostFinal
 		Order BY cteAlmostFinal.OrderCategory
