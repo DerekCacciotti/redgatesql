@@ -16,7 +16,9 @@ CREATE PROCEDURE [dbo].[rspUniqueFamilyHomeVisitLogActivitySummaryCurriculum]
 	@workerfk INT = NULL,
 	@pc1id VARCHAR(13) = '',
 	@showWorkerDetail CHAR(1) = 'N',
-	@showPC1IDDetail CHAR(1) = 'N')
+	@showPC1IDDetail CHAR(1) = 'N'
+   , @SiteFK int = null
+   , @CaseFiltersPositive varchar(200) = null)
 
 AS
 
@@ -28,6 +30,12 @@ AS
 --DECLARE @showWorkerDetail CHAR(1) = 'N'
 --DECLARE @showPC1IDDetail CHAR(1) = 'N'
 
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0
+						else @SiteFK
+					end
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 ; WITH curriculumFamily01 AS (
 
 SELECT 
@@ -89,6 +97,7 @@ INNER JOIN worker fsw
 ON a.FSWFK = fsw.workerpk
 INNER JOIN CaseProgram cp
 ON cp.HVCaseFK = a.HVCaseFK
+inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = cp.HVCaseFK
 WHERE 
 a.ProgramFK = @programfk 
 AND cast(VisitStartTime AS date) between @StartDt AND @EndDt
@@ -139,5 +148,11 @@ FROM uniqueFamily AS a
 LEFT OUTER JOIN Worker AS c ON 
 CASE WHEN (@showWorkerDetail = 'N' AND @workerfk IS NOT NULL) THEN @workerfk 
 ELSE a.FSWFK END = c.WorkerPK
+left outer join WorkerProgram wp on wp.WorkerFK = c.WorkerPK
+where case when @SiteFK = 0 then 1
+			 when wp.SiteFK = @SiteFK then 1
+			 else 0
+		end = 1
+
 ORDER BY WorkerName, a.PC1ID
 GO

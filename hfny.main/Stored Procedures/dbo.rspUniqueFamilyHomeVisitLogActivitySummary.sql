@@ -17,6 +17,8 @@ CREATE procedure [dbo].[rspUniqueFamilyHomeVisitLogActivitySummary]
    , @pc1id varchar(13) = ''
    , @showWorkerDetail char(1) = 'N'
    , @showPC1IDDetail char(1) = 'N'
+   , @SiteFK int = null
+   , @CaseFiltersPositive varchar(200) = null
 	)
 as --DECLARE	@programfk INT = 1
 --DECLARE @StartDt DATETIME = '04/01/2012'
@@ -26,6 +28,12 @@ as --DECLARE	@programfk INT = 1
 --DECLARE @showWorkerDetail CHAR(1) = 'N'
 --DECLARE @showPC1IDDetail CHAR(1) = 'N'
 
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0
+						else @SiteFK
+					end
+	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+									else @CaseFiltersPositive
+							   end;
 ;
 	with	base1
 			  as (select	case when @showWorkerDetail = 'N' then 0
@@ -40,12 +48,17 @@ as --DECLARE	@programfk INT = 1
 				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK and cp.ProgramFK = @programfk
 				  inner join Worker fsw on a.FSWFK = fsw.workerpk
 				  inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = cp.ProgramFK
+				  inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = cp.HVCaseFK
 				  where		cast(VisitStartTime as date) between @StartDt and @EndDt
 							and substring(a.VisitType, 4, 1) <> '1'
 							and a.FSWFK = isnull(@workerfk, a.FSWFK)
 							and cp.PC1ID = case	when @pc1id = '' then cp.PC1ID
 												else @pc1id
 										   end
+							and case when @SiteFK = 0 then 1
+									 when wp.SiteFK = @SiteFK then 1
+									 else 0
+								end = 1
 				  group by	case when @showWorkerDetail = 'N' then 0
 								 else a.FSWFK
 							end
@@ -76,12 +89,17 @@ as --DECLARE	@programfk INT = 1
 				  inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK and cp.ProgramFK = @programfk
 				  inner join Worker fsw on a.FSWFK = fsw.workerpk
 				  inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = cp.ProgramFK
+				  inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = cp.HVCaseFK
 				  where		cast(VisitStartTime as date) between @StartDt and @EndDt
 							and substring(a.VisitType, 4, 1) = '1'
 							and a.FSWFK = isnull(@workerfk, a.FSWFK)
 							and cp.PC1ID = case	when @pc1id = '' then cp.PC1ID
 												else @pc1id
 										   end
+							and case when @SiteFK = 0 then 1
+									 when wp.SiteFK = @SiteFK then 1
+									 else 0
+								end = 1
 				  group by	case when @showWorkerDetail = 'N' then 0
 								 else a.FSWFK
 							end
@@ -1163,12 +1181,17 @@ as --DECLARE	@programfk INT = 1
 							 inner join CaseProgram cp on cp.HVCaseFK = a.HVCaseFK and cp.ProgramFK = @programfk
 							 inner join Worker fsw on a.FSWFK = fsw.workerpk
 							 inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = cp.ProgramFK
+							 inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = cp.HVCaseFK
 							 where	substring(a.VisitType, 4, 1) <> '1'
 									and cast(a.VisitStartTime as date) between @StartDt and @EndDt
 									and a.FSWFK = isnull(@workerfk, a.FSWFK)
 									and cp.PC1ID = case	when @pc1id = '' then cp.PC1ID
 														else @pc1id
 												   end
+									and case when @SiteFK = 0 then 1
+											 when wp.SiteFK = @SiteFK then 1
+											 else 0
+										end = 1
 							 group by a.HVCaseFK
 								  , case when @showWorkerDetail = 'N' then 0
 										 else a.FSWFK
