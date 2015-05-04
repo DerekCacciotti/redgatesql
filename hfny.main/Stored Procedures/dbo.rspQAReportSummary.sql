@@ -34,6 +34,9 @@ DECLARE @tbl4QAReportSummary TABLE(
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport1 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport2 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport3 @programfk, 'summary'	--- for summary page
+
+INSERT INTO @tbl4QAReportSummary EXEC rspQAReport17 @programfk, 'summary'	--- for summary page
+
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport4 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport5 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport6 @programfk, 'summary'	--- for summary page
@@ -43,6 +46,8 @@ INSERT INTO @tbl4QAReportSummary EXEC rspQAReport13 @programfk, 'summary'	--- fo
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport14 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport15 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport16 @programfk, 'summary'	--- for summary page
+
+
 
 
 
