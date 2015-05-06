@@ -746,7 +746,9 @@ as --DECLARE	@programfk INT = 1
 			  , [OBPParticipated] / x [OBPParticipated]
 			  , [FatherFigureParticipated] / x [FatherFigureParticipated]
 			  , [FatherAdvocateParticipated] / x [FatherAdvocateParticipated]
-			  , [TCParticipated] / (x - [CompletedPenatalVisit]) [TCParticipated]
+			  , case when (x - [CompletedPenatalVisit]) > 0
+						then [TCParticipated] / (x - [CompletedPenatalVisit]) 
+						else 0 end as [TCParticipated]
 			  , [GrandParentParticipated] / x [GrandParentParticipated]
 			  , [SiblingParticipated] / x [SiblingParticipated]
 			  , [NonPrimaryFSWParticipated] / x [NonPrimaryFSWParticipated]
