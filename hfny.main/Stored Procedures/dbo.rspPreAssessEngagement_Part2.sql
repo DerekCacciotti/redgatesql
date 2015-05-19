@@ -49,19 +49,19 @@ as
 	with	base1
 			  as (select	d.DischargeCode
 						  , d.DischargeReason
-						  , case when @CustomQuarterlyDates = 1 then null 
+						  , case --when @CustomQuarterlyDates = 1 then null 
 								 when xx.TerminatedNotAssigned is null then 0
 								 else xx.TerminatedNotAssigned
 							end [t1]
-						  , case when @CustomQuarterlyDates = 1 then null 
+						  , case --when @CustomQuarterlyDates = 1 then null 
 								 when xxx.SSTerminatedNotAssigned is null then 0
 								 else xxx.SSTerminatedNotAssigned
 							end [t2]
-						  , case when @CustomQuarterlyDates = 1 then null 
+						  , case --when @CustomQuarterlyDates = 1 then null 
 								 when yy.PositiveNotAssigned is null then 0
 								 else yy.PositiveNotAssigned
 							end [t3]
-						  , case when @CustomQuarterlyDates = 1 then null 
+						  , case --when @CustomQuarterlyDates = 1 then null 
 								 when yyy.SSPositiveNotAssigned is null then 0
 								 else yyy.SSPositiveNotAssigned
 							end [t4]
