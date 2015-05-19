@@ -170,18 +170,17 @@ cteNone
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 			 AND a.HVCaseFK IS NULL
 			 AND c.TCDOB IS NOT NULL 
+			 AND (CASE WHEN @UnderCutoffOnly = 'Y' THEN 1 ELSE 0 END = 0)
 		--order by supervisor
 		--		,worker
 		--		,PC1ID
 		--		,TCAgeCode
 )
 
-SELECT * FROM cteMain
-UNION all
-SELECT * FROM cteNone
-
-order by supervisor
-,worker
-,PC1ID
-,TCAgeCode
+	  SELECT * FROM cteMain
+	  UNION all
+	  SELECT * FROM cteNone 
+	  order by supervisor, worker, PC1ID, TCAgeCode
+	
+	
 GO
