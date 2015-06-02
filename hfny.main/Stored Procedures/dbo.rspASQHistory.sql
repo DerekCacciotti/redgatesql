@@ -180,7 +180,7 @@ cteNone
 	  SELECT * FROM cteMain
 	  UNION all
 	  SELECT * FROM cteNone 
-	  order by supervisor, worker, PC1ID, TCAgeCode
+	  order by worker, PC1ID, TCAgeCode
 	
 	
 GO

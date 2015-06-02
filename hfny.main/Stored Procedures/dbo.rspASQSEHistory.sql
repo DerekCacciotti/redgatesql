@@ -19,10 +19,10 @@ AS
 --DECLARE @programfk       VARCHAR(MAX)   = '1'
 --DECLARE @supervisorfk    int            = null
 --DECLARE @workerfk        int            = null
---DECLARE @UnderCutoffOnly char(1)        = 'N'
+--DECLARE @UnderCutoffOnly char(1)        = 'Y'
 --DECLARE @pc1ID           varchar(13)    = ''
 --DECLARE @sitefk          int            = NULL
-
+--DECLARE @CaseFiltersPositive varchar(100) = ''
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 --            added this code to the workerprogram join condition: AND wp.programfk = listitem
 
@@ -134,8 +134,8 @@ SELECT * FROM cteMain
 UNION all
 SELECT * FROM cteNone
 
-order by supervisor
-,worker
+order by --supervisor
+worker
 ,PC1ID
 ,TCAgeCode
 GO
