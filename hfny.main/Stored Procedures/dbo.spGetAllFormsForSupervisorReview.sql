@@ -96,8 +96,8 @@ begin
 		inner join codeForm f on codeFormAbbreviation = fr.FormType
 		inner join CaseProgram cp on cp.HVCaseFK = fr.HVCaseFK
 									and cp.ProgramFK = fr.ProgramFK
-		left outer join WorkerProgram wpfsw on wpfsw.WorkerFK = cp.CurrentFSWFK
-		left outer join WorkerProgram wpfaw on wpfaw.WorkerFK = cp.CurrentFAWFK
+		left outer join WorkerProgram wpfsw on wpfsw.WorkerFK = cp.CurrentFSWFK and wpfsw.ProgramFK = @ProgramFK
+		left outer join WorkerProgram wpfaw on wpfaw.WorkerFK = cp.CurrentFAWFK and wpfaw.ProgramFK = @ProgramFK
 		left outer join Worker wfsw on wfsw.WorkerPK = wpfsw.WorkerFK
 		left outer join Worker wfaw on wfaw.WorkerPK = wpfaw.WorkerFK
 		left outer join cteSupervisors supfsw on wpfsw.SupervisorFK = supfsw.WorkerPK
@@ -172,7 +172,7 @@ begin
 		inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = isnull(@ProgramFK,fro.ProgramFK)
 		inner join codeForm f on codeFormAbbreviation = fr.FormType
 		inner join Supervision s on SupervisionPK = FormFK and fr.FormType = 'SU'
-		inner join WorkerProgram wp on wp.WorkerFK = s.WorkerFK
+		inner join WorkerProgram wp on wp.WorkerFK = s.WorkerFK and wp.ProgramFK = @ProgramFK
 		inner join Worker w on w.WorkerPK = s.WorkerFK
 		inner join Worker sups on sups.WorkerPK = s.SupervisorFK
 		where fr.ProgramFK = isnull(@ProgramFK, fr.ProgramFK)	
