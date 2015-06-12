@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,11 +8,12 @@ GO
 -- =============================================
 -- Author:		Ray Burkitt
 -- Create date: July 20, 2010
--- Description:	Get all Sites
+-- Description:	Get all Referral Sources
+-- mod jr (check the commit date yo) add IsMICHC
 -- =============================================
-create procedure [dbo].[spGetAllListReferralSource]
+CREATE procedure [dbo].[spGetAllListReferralSource]
 (
-    @programfk int
+    @ProgramFK int
 )
 -- Add the parameters for the stored procedure here
 as
@@ -20,6 +22,7 @@ as
 		  ,ReferralSourceName
 		  ,RSIsActive
 		  ,listReferralSourcePK_old
+		  ,IsMICHC
 		from dbo.listReferralSource rs
 		where programfk = isnull(@ProgramFK,ProgramFK)
 		order by ReferralSourceName

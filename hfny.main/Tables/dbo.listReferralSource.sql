@@ -4,7 +4,8 @@ CREATE TABLE [dbo].[listReferralSource]
 [ProgramFK] [int] NOT NULL,
 [ReferralSourceName] [char] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [RSIsActive] [bit] NOT NULL,
-[listReferralSourcePK_old] [int] NOT NULL
+[listReferralSourcePK_old] [int] NOT NULL,
+[IsMICHC] [bit] NULL CONSTRAINT [DF_listReferralSource_IsMICHC] DEFAULT ((0))
 ) ON [PRIMARY]
 ALTER TABLE [dbo].[listReferralSource] WITH NOCHECK ADD
 CONSTRAINT [FK_listReferralSource_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
