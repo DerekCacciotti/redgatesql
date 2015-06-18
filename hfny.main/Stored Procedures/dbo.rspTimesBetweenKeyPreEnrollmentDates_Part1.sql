@@ -31,7 +31,7 @@ as
 	--DECLARE @EndDt DATE = '01/31/2011'
 	--DECLARE @programfk INT = 17
 
-	select e.PC1ID
+	SELECT DISTINCT e.PC1ID
 		 , rtrim(faw.LastName) + ', ' + rtrim(faw.FirstName) [faw]
 		 , b.ScreenDate
 		 , d.KempeDate
