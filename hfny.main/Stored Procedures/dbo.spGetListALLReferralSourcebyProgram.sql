@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -17,10 +18,16 @@ BEGIN
 	SET NOCOUNT ON;
 
     -- Insert statements for procedure here
-	SELECT * FROM 
+	select listReferralSourcePK
+		 , ProgramFK
+		 , ReferralSourceName + case when IsMICHC = 1 then ' (MICHC)' else '' end as ReferralSourceName
+		 , RSIsActive
+		 , listReferralSourcePK_old
+		 , IsMICHC
+	from 
 	listReferralSource
-	WHERE ProgramFK = @ProgramPK
-	ORDER BY ReferralSourceName
+	where ProgramFK = @ProgramPK
+	order by ReferralSourceName
 END
 
 GO
