@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,7 +8,9 @@ CREATE PROCEDURE [dbo].[spAddAttachment](@FormDate datetime=NULL,
 @FormType char(2)=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL,
-@Attachment varbinary(max)=NULL)
+@Attachment varbinary(max)=NULL,
+@AttachmentCreateDate datetime=null,
+@AttachmentCreator char(10)=NULL)
 AS
 INSERT INTO Attachment(
 FormDate,
@@ -15,7 +18,9 @@ FormFK,
 FormType,
 HVCaseFK,
 ProgramFK,
-Attachment
+Attachment,
+AttachmentCreateDate,
+AttachmentCreator
 )
 VALUES(
 @FormDate,
@@ -23,8 +28,11 @@ VALUES(
 @FormType,
 @HVCaseFK,
 @ProgramFK,
-@Attachment
+@Attachment,
+@AttachmentCreateDate,
+@AttachmentCreator
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO
+

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +9,9 @@ CREATE PROCEDURE [dbo].[spEditAttachment](@AttachmentPK int=NULL,
 @FormType char(2)=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL,
-@Attachment varbinary(max)=NULL)
+@Attachment varbinary(max)=null,
+@AttachmentCreateDate datetime=null,
+@AttachmentCreator char(10)=null)
 AS
 UPDATE Attachment
 SET 
@@ -17,6 +20,9 @@ FormFK = @FormFK,
 FormType = @FormType, 
 HVCaseFK = @HVCaseFK, 
 ProgramFK = @ProgramFK, 
-Attachment = @Attachment
+Attachment = @Attachment,
+AttachmentCreateDate = @AttachmentCreateDate,
+AttachmentCreator = @AttachmentCreator
 WHERE AttachmentPK = @AttachmentPK
 GO
+
