@@ -7,7 +7,7 @@ GO
 -- Author:		Chris Papas
 -- Create date: 11/15/2013
 -- Description:	Training Tickler
--- EXEC rspTrainingTickler @progfk = 1, @workerfk = 154, @supervisorfk = 0
+-- EXEC rspTrainingTickler @progfk = 1, @workerfk = 54, @supervisorfk = 0
 -- exec dbo.rspTrainingTickler @progfk=1,@workerfk=0,@supervisorfk=0
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingTickler]
@@ -29,7 +29,7 @@ SELECT DISTINCT codeTopicPK as TopicFK, TopicName, TopicCode, SATCompareDateFiel
 , SATInterval, satname, DaysAfter
 , null as SubTopicCode , null as SubTopicName, null as TrainingTickler, null as SubTopicPK
 FROM dbo.codeTopic 
-WHERE topiccode <=25.0 
+WHERE (topiccode <=25.0) OR (TopicCode=39.0) OR (TopicCode=40.0) OR (TopicCode=41.0) OR (TopicCode=42.0) OR (TopicCode=43.0)
 )
 
 
@@ -47,6 +47,7 @@ WHERE TrainingTickler='YES'
 	UNION
 	select * from cteSubtopicList 
 )
+
 
 , cteEventDates AS (
 	SELECT workerpk, wrkrLName
@@ -161,7 +162,21 @@ WHERE TrainingTickler='YES'
 		
 , cteFinal AS(		
 	SELECT workerpk
-			, WorkerName
+			, CASE 
+				WHEN [TopicCode] = '14.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '15.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '16.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '17.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '19.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '23.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '25.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '18.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '20.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '21.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '24.0' AND [SubTopicCode] IS NULL THEN NULL
+				ELSE
+				WorkerName
+				END AS WorkerName
 			, hiredate
 			, FirstKempeDate
 			, FirstHomeVisitDate
@@ -177,7 +192,21 @@ WHERE TrainingTickler='YES'
 			, TopicCode
 			, SATCompareDateField
 			, SATInterval
-			, satname, DaysAfter
+			, CASE 
+				WHEN [TopicCode] = '14.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '15.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '16.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '17.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '19.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '23.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '25.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '18.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '20.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '21.0' AND [SubTopicCode] IS NULL THEN NULL
+				WHEN [TopicCode] = '24.0' AND [SubTopicCode] IS NULL THEN NULL
+				ELSE satname
+				END AS satname
+			, DaysAfter
 			, TopicFK
 			, SubTopicCode
 			, SubTopicName
@@ -185,11 +214,20 @@ WHERE TrainingTickler='YES'
 			, TrainingTickler
 			, TrainingDate
 			--, (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=2124) AS testdate
-			, CASE WHEN TopicCode<6.0 THEN '    Orientation (Prior to direct work with Families)'
-				WHEN TopicCode<10.0 THEN '   NYS Training Requirements'
-				WHEN TopicCode<13.0 THEN '  Intensive Role Specific Training'
-				WHEN TopicCode<20.0 THEN ' Demonstrated Knowledge by 6 months Training'
-				Else 'Demonstrated Knowledge by 12 months Training'
+			, CASE WHEN TopicCode<6.0 THEN '      Orientation (Prior to direct work with Families)'
+				WHEN TopicCode<10.0 THEN '    Other HFA and State Requirements'
+				WHEN TopicCode=13.0 THEN '    Other HFA and State Requirements'
+				WHEN TopicCode=39.0 THEN '    Other HFA and State Requirements'
+				WHEN TopicCode=40.0 THEN '    Other HFA and State Requirements'
+				WHEN TopicCode=41.0 THEN '    Other HFA and State Requirements'
+				WHEN TopicCode=43.0 THEN '    Other HFA and State Requirements'
+				WHEN TopicCode<13.0 THEN '     Intensive Role Specific Training'
+				WHEN TopicCode<17.0 THEN '   Wraparound Trainings by 3 months of hire'
+				WHEN TopicCode=17.0 THEN '  Wraparound Trainings by 6 months of hire'
+				WHEN TopicCode=19.0 THEN '  Wraparound Trainings by 6 months of hire'
+				WHEN TopicCode=23.0 THEN '  Wraparound Trainings by 6 months of hire'
+				WHEN TopicCode=25.0 THEN '  Wraparound Trainings by 6 months of hire'
+				Else ' Wraparound Trainings by 12 months of hire'
 				END AS [theGrouping]
 			, CASE  
 					--HW997 Training Tickler and Required Topics - Remove Subtopic 82
@@ -200,6 +238,17 @@ WHERE TrainingTickler='YES'
 					--	, DATEADD(dd, 91, (select min(TrainingDate) FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk)), 101)
 					--	END
 					--END HW997
+					WHEN [TopicCode] = '14.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '15.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '16.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '17.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '19.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '23.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '25.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '18.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '20.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '21.0' AND [SubTopicCode] IS NULL THEN NULL
+					WHEN [TopicCode] = '24.0' AND [SubTopicCode] IS NULL THEN NULL
 					WHEN SATCompareDateField = 'firstevent' THEN
 						CASE WHEN FirstEvent IS NULL THEN 'First Event'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, FirstEvent), 101)
@@ -223,7 +272,8 @@ WHERE TrainingTickler='YES'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, SupervisorInitialStart), 101)
 						END
 			  END AS [DateDue]
-			, CASE  WHEN SATCompareDateField = 'firstevent' THEN
+			, CASE  
+					WHEN SATCompareDateField = 'firstevent' THEN
 						CASE WHEN TrainingDate IS NOT NULL THEN 'Remove' 
 						WHEN hiredate < '07/01/2014' AND topiccode = '5.5' THEN 'Remove' 
 						END
@@ -265,7 +315,5 @@ SELECT workerpk
 FROM ctefinal 
 WHERE Removals IS NULL 
 ORDER BY [theGrouping], TopicCode, SubTopicCode
-
-
 END
 GO

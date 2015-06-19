@@ -10,6 +10,7 @@ GO
 -- Description:	Report: Training Required Topics
 -- EXEC rspTrainReqTopics 1, NULL, NULL
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
+-- Edit date: 6/12/2015 CP - Changes for new HFA standards
 -- =============================================
 
 --exec dbo.rspTrainReqTopics @prgfk=1,@super=NULL,@worker=15
@@ -100,6 +101,7 @@ SELECT firstname + lastname AS Name
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='5.5') AS 'f5.5'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='6.0') AS 'f6'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='7.0') AS 'f7'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='7.1') AS 'f7a'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='8.0') AS 'f8'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='9.0') as 'f9'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='9.1') as 'f9.1'
@@ -178,6 +180,13 @@ SELECT firstname + lastname AS Name
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=60) AS 'f25c'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=61) AS 'f25d'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=62) AS 'f25e'
+--CP 6/12/2015 Adding New HFA Required topics-----------------
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='39.0') AS 'f39'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='40.0') AS 'f40'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='41.0') AS 'f41'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='42.0') AS 'f42'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='43.0') AS 'f43'
+-------END CP 6/12/2015 Adding New HFA Required topics ---------------
 FROM Worker w
 INNER JOIN dbo.fnGetWorkerEventDates(@prgfk, @super, @worker) fn ON fn.workerpk = w.workerpk
 )
@@ -259,6 +268,12 @@ SELECT distinct [Name]
 			CASE WHEN datediff(dd, [f7], [HireDate]) < -91 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f7_ast'
+	 , convert(VARCHAR(12), [f7a], 101) AS [f7a]
+	 , CASE isnull([f7a], 0)
+		WHEN [f7a] THEN
+			CASE WHEN datediff(dd, [f7a], [HireDate]) < -91 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f7.1_ast'
 	 , convert(VARCHAR(12), [f8], 101) AS [f8]
 	 , CASE isnull(FSWInitialStart,0)
 		WHEN 0 THEN '' --do nothing as 8.0 is only for FSW's
@@ -311,6 +326,51 @@ SELECT distinct [Name]
 		ELSE 
 			CASE WHEN datediff(dd, [f13], [firstasqdate]) < 0 THEN '*' END
 		END AS 'f13_ast'
+	
+ , convert(VARCHAR(12), [f39], 101) AS [f39]
+	 , CASE isnull([f39], 0)
+		WHEN [f39] THEN
+			CASE WHEN datediff(dd, [f39], [HireDate]) < -91 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f39_ast'
+
+ , convert(VARCHAR(12), [f40], 101) AS [f40]
+	 , CASE isnull([f40], 0)
+		WHEN [f40] THEN
+			CASE WHEN datediff(dd, [f40], [HireDate]) < -91 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f40_ast'
+
+ , convert(VARCHAR(12), [f41], 101) AS [f41]
+	 , CASE isnull([f41], 0)
+		WHEN [f41] THEN
+			CASE WHEN datediff(dd, [f41], [HireDate]) < -91 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f41_ast'
+	
+ , convert(VARCHAR(12), [f42], 101) AS [f42]
+	 , CASE isnull([f42], 0)
+		WHEN [f42] THEN
+			CASE WHEN datediff(dd, [f42], GETDATE()) < -365 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f42_ast'
+			
+ , convert(VARCHAR(12), [f43], 101) AS [f43]
+	 , CASE isnull([f43], 0)
+		WHEN [f43] THEN
+			CASE WHEN datediff(dd, [f43], [HireDate]) < -91 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f43_ast'	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	 , CASE [f14a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f14a], 101) END AS [f14a]
 	 , CASE isnull([f14a], 0)
 		WHEN [f14a] THEN
