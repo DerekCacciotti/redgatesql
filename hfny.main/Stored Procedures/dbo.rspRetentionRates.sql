@@ -6047,19 +6047,19 @@ select @AllEnrolledParticipants = count(*)
 from @tblPC1withStats
 where CountOfFSWs>1
 
-select @SixMonthsAtDischarge = avg(CountOfHomeVisits)
+select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and CountOfFSWs>1
 
-select @TwelveMonthsAtDischarge = avg(CountOfHomeVisits)
+select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and CountOfFSWs>1
 
-select @EighteenMonthsAtDischarge = avg(CountOfHomeVisits)
+select @EighteenMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt12Months = 1 and ActiveAt18Months = 0 and CountOfFSWs>1
 
-select @TwentyFourMonthsAtDischarge = avg(CountOfHomeVisits)
+select @TwentyFourMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt18Months = 1 and ActiveAt24Months = 0 and CountOfFSWs>1
 
