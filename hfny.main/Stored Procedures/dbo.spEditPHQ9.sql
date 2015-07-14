@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,6 +8,8 @@ CREATE PROCEDURE [dbo].[spEditPHQ9](@PHQ9PK int=NULL,
 @BadSelf char(2)=NULL,
 @BetterOffDead char(2)=NULL,
 @Concentration char(2)=NULL,
+@DateAdministered datetime=NULL,
+@DepressionReferralMade bit=NULL,
 @Difficulty char(2)=NULL,
 @Down char(2)=NULL,
 @FormFK int=NULL,
@@ -29,6 +32,8 @@ Appetite = @Appetite,
 BadSelf = @BadSelf, 
 BetterOffDead = @BetterOffDead, 
 Concentration = @Concentration, 
+DateAdministered = @DateAdministered, 
+DepressionReferralMade = @DepressionReferralMade, 
 Difficulty = @Difficulty, 
 Down = @Down, 
 FormFK = @FormFK, 
