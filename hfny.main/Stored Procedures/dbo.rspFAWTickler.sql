@@ -58,8 +58,8 @@ as
 								   when PCApt is null or PCApt = '' then
 									   ''
 								   else
-									   ' (Apt. '+rtrim(PCApt)+')'
-							   end+', '+rtrim(pccity)+', NY  '+rtrim(pczip) as PCAddress
+									   ' (Apt. ' + rtrim(PCApt) + ')'
+							   end + ', ' + rtrim(PCCity) + ', ' + PCState + '  ' + rtrim(PCZip) as PCAddress
 			  ,pc.pcphone + CASE when pc.PCEmergencyPhone is not null and pc.PCEmergencyPhone <> '' then
 							+ CHAR(13) + 'Emr: ' + pc.PCEmergencyPhone ELSE '' END
 				    	   + CASE when pc.PCCellPhone is not null and pc.PCCellPhone <> '' then
