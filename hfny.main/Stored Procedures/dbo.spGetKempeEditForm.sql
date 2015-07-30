@@ -3,14 +3,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Dorothy Baum>
 -- Create date: <July 24, 2009>
 -- Modified: <Sept 3, 2009> changed to use KempePK as parameter
 -- Description:	<Multi-call to get all the data for the Kempe Form for EDITING>
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetKempeEditForm] @myKempePK int
+CREATE procedure [dbo].[spGetKempeEditForm] @myKempePK int
 	
 AS
 BEGIN
@@ -42,19 +41,9 @@ exec spGetPCbyPK @lPC1PK
 exec spGetCommonAttributesbyForm @myKempePK, 'KE'
 exec spGetAuditCbyForm @myKempePK, 'KE'
 exec spGetHITSbyForm @myKempePK, 'KE'
+exec spGetPHQ9ByForm @myKempePK, 'KE'
+
 exec spGetPC1IssuesbyPK @lPC1IssuesFK
 
 END
-
-
-
-
-
-
-
-
-
-
-
-
 GO
