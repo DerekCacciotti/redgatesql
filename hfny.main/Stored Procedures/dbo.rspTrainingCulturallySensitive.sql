@@ -139,7 +139,7 @@ declare @progfk2 as int = @progfk
 		FROM cteFinal
 		INNER JOIN cteWorkerCount wc ON wc.WorkerPK = cteFinal.WorkerPK
 		WHERE MeetsTarget='T'
-		GROUP BY WorkerCount
+		GROUP BY ALL WorkerCount
 )
 
  SELECT cteFinal.workername, HireDate, CulturallySensitiveDate, MeetsTarget, cteCountMeeting.workercount, totalmeetingcount, TrainingTitle
