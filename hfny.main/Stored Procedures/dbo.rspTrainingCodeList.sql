@@ -9,7 +9,7 @@ GO
 -- Description:	Report: Training Topics by Program
 -- EXEC rspTrainingCodeList 1
 -- =============================================
-CREATE PROCEDURE [dbo].rspTrainingCodeList
+CREATE PROCEDURE [dbo].[rspTrainingCodeList]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT
 AS
@@ -28,7 +28,7 @@ BEGIN
 , cteSubTopics AS (
 	SELECT '2' AS NewOrder,  TopicFK AS codetopicpk, TopicCode, '' AS TopicName, '' AS SATName
 	, '' AS SATReqBy,  st.subtopiccode, SubTopicName
-	, CASE WHEN RequiredBy = 'SITE' THEN '10-6     (' + RequiredBy + ')'
+	, CASE WHEN RequiredBy = 'SITE' THEN '11-5a     (' + RequiredBy + ')'
 	ELSE t.SATName + '   (' + RequiredBy + ')'
 	END AS RequiredBy 
 	FROM SubTopic st 

@@ -90,6 +90,7 @@ SELECT firstname + lastname AS Name
 , fn.FirstKempeDate
 , fn.FirstEvent
 , fn.SupervisorFirstEvent
+, fn.FirstPSIDate
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='1.0') AS 'f1'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='2.0' AND ctA.SubTopicFK IS Null) AS 'f2'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=65) AS 'f2a'
@@ -202,7 +203,8 @@ SELECT distinct [Name]
 	 , convert(VARCHAR(12), [FirstHomeVisitDate], 101) AS [FirstHomeVisitDate]
 	 , convert(VARCHAR(12), [FirstKempeDate], 101) AS [FirstKempeDate]
 	 , convert(VARCHAR(12), [FirstEvent], 101) AS [FirstEvent]
-	 , convert(VARCHAR(12), [f1], 101) AS [f1]
+	 , convert(VARCHAR(12), [FirstEvent], 101) AS [FirstEvent]
+	 , convert(VARCHAR(12), [FirstPSIDate], 101) AS [FirstPSIDate]
 	 , CASE isnull([f1], 0)
 		WHEN [f1] THEN
 			CASE WHEN datediff(dd, [f1], [FirstEvent]) < 0 THEN '*' 

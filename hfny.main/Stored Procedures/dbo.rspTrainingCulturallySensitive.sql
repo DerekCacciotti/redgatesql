@@ -38,6 +38,12 @@ declare @progfk2 as int = @progfk
 	AND DATEDIFF(d,HireDate, @edate2) > 365
 )
 
+, cteWorkerCount AS (
+	SELECT workerpk
+	, COUNT(workerpk) OVER (PARTITION BY MyWrkrCount) AS WorkerCount
+	FROM cteEventDates
+	)
+
 
 , cteCultureSensitive AS (
 	select WorkerPK
@@ -72,11 +78,11 @@ declare @progfk2 as int = @progfk
 )
 
 
-, cteCultSense AS (
-	select WorkerPK
+
+, cteCultSense2 AS (
+	select cteCultSenses.WorkerPK
 	, WorkerName
 	, HireDate
-	, WorkerCount
 	, CulturallySensitiveDate
 	, MIN(TrainingTitle) AS TrainingTitle
 	, cteCultSenses.CulturalCompetency
@@ -86,11 +92,23 @@ declare @progfk2 as int = @progfk
 	LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
 	WHERE --CulturalCompetency = 1
 	TrainingDate between @sdate2 AND @edate2
-	GROUP BY WorkerPK
+	GROUP BY cteCultSenses.WorkerPK
 	, WorkerName
-	, HireDate, WorkerCount
+	, HireDate
 	, CulturallySensitiveDate
 	, cteCultSenses.CulturalCompetency
+)
+
+, cteCultSense AS (
+  
+	select cteEventDates.WorkerPK
+	, cteEventDates.WorkerName
+	, cteEventDates.HireDate
+	, CulturallySensitiveDate
+	, TrainingTitle
+	, CulturalCompetency
+	from cteEventDates
+	LEFT JOIN  cteCultSense2 ON cteEventDates.WorkerPK = cteCultSense2.WorkerPK	
 )
 
 , cteFinal as (
@@ -100,7 +118,6 @@ declare @progfk2 as int = @progfk
 				when CulturalCompetency = 0 then NULL
 				ELSE CulturallySensitiveDate
 			END AS CulturallySensitiveDate
-		, WorkerCount
 		, CASE 
 				WHEN CulturalCompetency Is Null THEN ''
 				when CulturalCompetency = 0 then ''
@@ -114,25 +131,27 @@ declare @progfk2 as int = @progfk
 			END
 	From cteCultSense
  )
+  
  
  --Now calculate the number meeting count, by currentrole
 , cteCountMeeting AS (
 		SELECT WorkerCount, count(*) AS totalmeetingcount
 		FROM cteFinal
+		INNER JOIN cteWorkerCount wc ON wc.WorkerPK = cteFinal.WorkerPK
 		WHERE MeetsTarget='T'
 		GROUP BY WorkerCount
 )
 
- SELECT cteFinal.workername, HireDate, CulturallySensitiveDate, MeetsTarget, cteFinal.workercount, totalmeetingcount, TrainingTitle
- ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) = 1 THEN '3' 
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) < .9 THEN '1'
+ SELECT cteFinal.workername, HireDate, CulturallySensitiveDate, MeetsTarget, cteCountMeeting.workercount, totalmeetingcount, TrainingTitle
+ ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteCountMeeting.workercount AS DECIMAL) = 1 THEN '3' 
+	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteCountMeeting.workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
+	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteCountMeeting.workercount AS DECIMAL) < .9 THEN '1'
 	END AS Rating
-,	'NYS4. Those who visit families will have core training before visiting a family.' AS CSST
-, cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) AS PercentMeeting
-FROM cteFinal
-INNER JOIN cteCountMeeting ON cteCountMeeting.WorkerCount = cteFinal.WorkerCount
-ORDER BY cteFinal.workername
+,	'5.3 - All Staff receive training related to the unique characteristics of the service population at least annually.' AS CSST
+, cast(totalmeetingcount AS DECIMAL) / cast(cteCountMeeting.workercount AS DECIMAL) AS PercentMeeting
+FROM cteFinal, cteCountMeeting
+--LEFT JOIN cteCountMeeting ON cteCountMeeting.WorkerCount = cteFinal.WorkerCount
+
 
 END
 GO
