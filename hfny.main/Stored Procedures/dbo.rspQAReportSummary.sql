@@ -3,7 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 1st, 2012>
@@ -13,7 +12,7 @@ GO
 
 -- =============================================
 
-CREATE PROCEDURE [dbo].[rspQAReportSummary](
+CREATE procedure [dbo].[rspQAReportSummary](
 @programfk    varchar(max)    = NULL
 )with recompile
 
@@ -30,7 +29,6 @@ DECLARE @tbl4QAReportSummary TABLE(
 	[SummaryTotal] [varchar](100)
 )
 
-
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport1 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport2 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport3 @programfk, 'summary'	--- for summary page
@@ -46,12 +44,9 @@ INSERT INTO @tbl4QAReportSummary EXEC rspQAReport13 @programfk, 'summary'	--- fo
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport14 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport15 @programfk, 'summary'	--- for summary page
 INSERT INTO @tbl4QAReportSummary EXEC rspQAReport16 @programfk, 'summary'	--- for summary page
+INSERT INTO @tbl4QAReportSummary EXEC rspQAReport18 @programfk, 'summary'	--- for summary page
+INSERT INTO @tbl4QAReportSummary EXEC rspQAReport19 @programfk, 'summary'	--- for summary page
 
-
-
-
-
-
-SELECT * FROM @tbl4QAReportSummary
+select * FROM @tbl4QAReportSummary
 END
 GO
