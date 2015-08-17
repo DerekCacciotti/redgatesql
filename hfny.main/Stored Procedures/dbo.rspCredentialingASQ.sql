@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -166,7 +167,17 @@ cteNone
 	ELSE -1 END AS AgeAtDateCompleted
 	
 	, CASE WHEN DateCompleted <> '' 
-	THEN datediff (month, AdjTCDOB, DateCompleted)
+	THEN 
+	
+		CASE 
+			WHEN DATEPART(DAY, AdjTCDOB) > DATEPART(DAY, DateCompleted)
+			THEN datediff (month, AdjTCDOB, DateCompleted) - 1
+			ELSE datediff (month, AdjTCDOB, DateCompleted)
+		END
+
+	--datediff (month, AdjTCDOB, DateCompleted)
+	
+	
 	ELSE -1 END AS AgeAtDateCompletedMonth
 	
 	
