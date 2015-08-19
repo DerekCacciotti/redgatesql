@@ -9,4 +9,6 @@ CREATE TABLE [dbo].[ProgressNotes]
 [ProgressNotesEditDate] [datetime] NULL,
 [ProgressNotesEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+ALTER TABLE [dbo].[ProgressNotes] ADD 
+CONSTRAINT [PK_ProgressNotes] PRIMARY KEY CLUSTERED  ([ProgressNotesPK]) ON [PRIMARY]
 GO
