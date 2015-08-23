@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -29,27 +30,30 @@ if @programfk is null
 Declare @LastDayofPreviousMonth DateTime 
 Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
 
-DECLARE @tbl4QAReportMissingAttachHV TABLE(
-	[PC1ID] char(13),
+DECLARE @tbl4QAReportCohort TABLE(
+	HVCaseFK int,
+	HVLogPK int,
+	PC1ID char(13),
 	VisitStartTime datetime,
 	CurrentLevel varchar(20)
 )
 
-insert into @tbl4QAReportMissingAttachHV
-        ( PC1ID ,
+insert into @tbl4QAReportCohort
+        ( HVCaseFK ,
+		  HVLogPK ,
+          PC1ID ,
           VisitStartTime ,
           CurrentLevel
         )
-select PC1ID
+select hv.HVCaseFK
+		, hv.HVLogPK
+		, PC1ID
 		, VisitStartTime
 		, CurrentLevel = cl.LevelName
 		from dbo.HVLog hv 
-		left outer join dbo.Attachment a on hv.HVCaseFK = a.HVCaseFK and a.FormType = 'VL'
 		inner join dbo.CaseProgram cp on cp.HVCaseFK = hv.HVCaseFK
 		left join codeLevel cl on cp.CurrentLevelFK = cl.codeLevelPK
-		
 		where hv.ProgramFK = @ProgramFK 
-				and AttachmentPK is null
 				and hv.VisitType <> '0001'
 				and VisitStartTime >= @CutOffDate
 				and (cp.DischargeDate IS NULL  --- case not closed
@@ -57,9 +61,16 @@ select PC1ID
 						
 if @ReportType = 'summary'
 	begin
-		declare @count int=0
-		set @count= (select count(PC1ID) from @tbl4QAReportMissingAttachHV)		
+
+		declare @cohortCount int=0
+		set @cohortCount= (select count(PC1ID) from @tbl4QAReportCohort)
 		
+		declare @missingAttachCount int=0
+		set @missingAttachCount = (select count(PC1ID) from @tbl4QAReportCohort qarc
+									 left outer join Attachment a on a.HVCaseFK = qarc.HVCaseFK and a.FormType = 'VL' and a.FormFK = HVLogPK
+									 where a.AttachmentPK is null)
+		
+
 		DECLARE @tbl4QAReportMissingAttachHVSummary TABLE(
 			[SummaryId] INT,
 			[SummaryText] [varchar](200),
@@ -70,9 +81,10 @@ if @ReportType = 'summary'
 		          SummaryText ,
 		          SummaryTotal
 		        )
-		values  ( 14 , -- SummaryId - int
-		          'Number of HV Log forms without attachment' , -- SummaryText - varchar(200)
-		          CONVERT(varchar,@count)  -- SummaryTotal - varchar(100)
+		values  ( 19 , -- SummaryId - int
+		          'Number of HV Log forms without attachment (N=' + CONVERT(varchar,@cohortCount) + ')', -- SummaryText - varchar(200)
+		          CONVERT(varchar,@missingAttachCount) + ' (' + 
+		          convert(varchar,round(coalesce(cast(@missingAttachCount as float) * 100 / nullif(@cohortCount,0),0),0)) + '%)' -- SummaryTotal - varchar(100)
 		        )
 		
 		select * from @tbl4QAReportMissingAttachHVSummary
@@ -84,10 +96,8 @@ else
 		select PC1ID ,
                VisitStartTime , 
                CurrentLevel
-		from @tbl4QAReportMissingAttachHV
-	end
+		from @tbl4QAReportCohort qarc
+		left outer join Attachment a on a.HVCaseFK = qarc.HVCaseFK and a.FormType = 'VL' and a.FormFK = HVLogPK
+		where a.AttachmentPK is null	end
 	
-	
-	
-
 GO

@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -31,39 +32,45 @@ set @CutOffDate = '2015-05-01'
 Declare @LastDayofPreviousMonth DateTime 
 Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
 
-DECLARE @tbl4QAReportMissingAttach TABLE(
-	[PC1ID] char(13),
+DECLARE @tbl4QAReportCohort TABLE(
+	HVCaseFK int,
+	PC1ID char(13),
 	KempeDate datetime,
 	CurrentWorkerName varchar(200),
 	CurrentLevel varchar(20)
 )
 
-insert into @tbl4QAReportMissingAttach
-        ( PC1ID ,
+insert into @tbl4QAReportCohort
+        ( HVCaseFK ,
+		  PC1ID ,
           KempeDate ,
           CurrentWorkerName ,
           CurrentLevel
         )
-        
-select PC1ID
+     
+select cp.HVCaseFK
+		, PC1ID
 		, KempeDate
 		, ltrim(rtrim(w.firstname))+' '+ltrim(rtrim(w.lastname)) as CurrentWorkerName
 		, CurrentLevel = cl.LevelName
 from dbo.Kempe k 
-left outer join dbo.Attachment a on k.HVCaseFK = a.HVCaseFK and a.FormType = 'KE'
 inner join dbo.CaseProgram cp on cp.HVCaseFK = k.HVCaseFK
 left join codeLevel cl on cp.CurrentLevelFK = cl.codeLevelPK
 inner join Worker w ON w.WorkerPK = k.FAWFK
 where k.ProgramFK = @ProgramFK 
-		and AttachmentPK is null
 		and KempeDate >= @CutOffDate
 		and (cp.DischargeDate IS NULL  --- case not closed
 				or cp.DischargeDate > @LastDayofPreviousMonth)
 				
 if @ReportType = 'summary'
 	begin
-		declare @count int=0
-		set @count= (select count(PC1ID) from @tbl4QAReportMissingAttach)		
+		declare @cohortCount int=0
+		set @cohortCount= (select count(PC1ID) from @tbl4QAReportCohort)
+		
+		declare @missingAttachCount int=0
+		set @missingAttachCount = (select count(PC1ID) from @tbl4QAReportCohort qarc
+									 left outer join Attachment a on a.HVCaseFK = qarc.HVCaseFK and a.FormType = 'KE'
+									 where a.AttachmentPK is null)
 		
 		DECLARE @tbl4QAReportMissingAttachSummary TABLE(
 			[SummaryId] INT,
@@ -75,9 +82,10 @@ if @ReportType = 'summary'
 		          SummaryText ,
 		          SummaryTotal
 		        )
-		values  ( 13 , -- SummaryId - int
-		          'Number of Kempe forms without attachment' , -- SummaryText - varchar(200)
-		          CONVERT(varchar,@count)  -- SummaryTotal - varchar(100)
+		values  ( 18 , -- SummaryId - int
+		          'Number of Kempe forms without attachment (N=' + CONVERT(varchar,@cohortCount) + ')', -- SummaryText - varchar(200)
+		          CONVERT(varchar,@missingAttachCount) + ' (' + 
+		          convert(varchar,round(coalesce(cast(@missingAttachCount as float) * 100 / nullif(@cohortCount,0),0),0)) + '%)' -- SummaryTotal - varchar(100)
 		        )
 		
 		select * from @tbl4QAReportMissingAttachSummary
@@ -90,7 +98,9 @@ else
                convert(varchar(10), KempeDate, 101) as [Kempe Date] ,
                CurrentWorkerName as [FAW Name],
                CurrentLevel
-		from @tbl4QAReportMissingAttach
+		from @tbl4QAReportCohort qarc
+	    left outer join Attachment a on a.HVCaseFK = qarc.HVCaseFK and a.FormType = 'KE'
+		where a.AttachmentPK is null
 	end
 	
 	
