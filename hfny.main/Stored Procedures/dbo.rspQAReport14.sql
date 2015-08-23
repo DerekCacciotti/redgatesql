@@ -247,7 +247,7 @@ DECLARE @tbl4QAReport14Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport14Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(10 ,'No Home Visits since ' + convert(VARCHAR(12),@Back2MonthsFromAnalysisPoint, 101) + ' for Active Cases Excludes Level X and Level 4 Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(14 ,'No Home Visits since ' + convert(VARCHAR(12),@Back2MonthsFromAnalysisPoint, 101) + ' for Active Cases Excludes Level X and Level 4 Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfActiveIntakeCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfActiveIntakeCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 

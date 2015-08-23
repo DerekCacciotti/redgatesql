@@ -192,7 +192,7 @@ DECLARE @tbl4QAReport12Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport12Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(8 ,'No Service Referrals for Active Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(12 ,'No Service Referrals for Active Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfActiveIntakeCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfActiveIntakeCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 

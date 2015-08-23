@@ -196,7 +196,7 @@ as
 		insert into @tbl4QAReport16Summary ([SummaryId]
 										   ,[SummaryText]
 										   ,[SummaryTotal])
-			values (12,'Cases with Forms to be reviewed (N='+convert(varchar,@numOfALLScreens)+')',convert(varchar,@numOfCasesOnLevelX)+' ('+convert(varchar,round(coalesce(cast(@numOfCasesOnLevelX as float)*100/nullif(@numOfALLScreens,0),0),0))+'%)')
+			values (16,'Cases with Forms to be reviewed (N='+convert(varchar,@numOfALLScreens)+')',convert(varchar,@numOfCasesOnLevelX)+' ('+convert(varchar,round(coalesce(cast(@numOfCasesOnLevelX as float)*100/nullif(@numOfALLScreens,0),0),0))+'%)')
 
 		select *
 			from @tbl4QAReport16Summary

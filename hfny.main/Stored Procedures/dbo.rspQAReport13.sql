@@ -200,7 +200,7 @@ DECLARE @tbl4QAReport13Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport13Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(9 ,'Service Referrals Needing Follow-Up for Active Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(13 ,'Service Referrals Needing Follow-Up for Active Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfActiveIntakeCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfActiveIntakeCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 
