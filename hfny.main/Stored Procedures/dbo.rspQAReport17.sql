@@ -1,8 +1,8 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa/Dar Chen>
 -- Create date: <Apr/28/2015>
@@ -13,123 +13,124 @@ GO
 -- =============================================
 
 
-CREATE procedure [dbo].[rspQAReport17](
-@programfk    varchar(max)    = NULL,
-@ReportType char(7) = NULL 
+CREATE procedure [dbo].[rspQAReport17] (@programfk varchar(max) = null
+								 , @ReportType char(7) = null 
 
-)
-AS
+								  )
+as
 	if @programfk is null
-	begin
-		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
-										   from HVProgram
-										   for xml path ('')),2,8000)
-	end
+		begin
+			select	@programfk = substring((select	',' + ltrim(rtrim(str(HVProgramPK)))
+											from	HVProgram
+										   for
+											xml	path('')
+										   ), 2, 8000);
+		end;
 
-	set @programfk = REPLACE(@programfk,'"','')
+	set @programfk = replace(@programfk, '"', '');
 
--- Last Day of Previous Month 
-Declare @LastDayofPreviousMonth DateTime 
-Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
+	-- Last Day of Previous Month 
+	declare	@LastDayofPreviousMonth datetime; 
+	set @LastDayofPreviousMonth = dateadd(s, -1, dateadd(mm, datediff(m, 0, getdate()), 0)); -- analysis point
 
--- give them 30 days for grace period
-Set @LastDayofPreviousMonth = DATEADD(day, -15, @LastDayofPreviousMonth) -- analysis point - 30 days
+	-- table variable for holding Init Required Data
+	declare	@tbl4QAReport17Detail table (HVCaseFK int
+									   , [PC1ID] [char](13)
+									   , KempeDate [datetime]
+									   , PADate [datetime]
+									   , CurrentFAW [varchar](200)
+										);
 
--- table variable for holding Init Required Data
-DECLARE @tbl4QAReport17Detail TABLE(
-	[PC1ID] [char](13),
-	KempeDate [datetime],
-	PADate [datetime],
-	CurrentFAW [varchar](200)
-)
-
-INSERT INTO @tbl4QAReport17Detail(
-	PC1ID,
-	KempeDate,
-	PADate,
-	CurrentFAW
-)
-select DISTINCT
-	cp.PC1ID,
-	h.KempeDate,
-	p.PADate,
-	LTRIM(RTRIM(faw.firstname))+' '+LTRIM(RTRIM(faw.lastname)) as CurrentFAW			
-	
-	from dbo.CaseProgram cp
-	inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
-	inner join dbo.HVCase h ON cp.HVCaseFK = h.HVCasePK	
-	
-	LEFT OUTER JOIN dbo.Kempe AS k ON k.HVCaseFK = cp.HVCaseFK
-	
-	INNER JOIN Preassessment AS p ON p.HVCaseFK = cp.HVCaseFK AND p.KempeDate IS NOT NULL
-	INNER JOIN Worker faw ON faw.WorkerPK = cp.CurrentFAWFK		
-	
-	where
-		k.HVCaseFK IS NULL  -- no kempe form
-		AND h.KempeDate <= @LastDayofPreviousMonth
-		AND cp.DischargeDate IS NULL  --- case not closed
+	insert	into @tbl4QAReport17Detail
+			(HVCaseFK
+		   , PC1ID
+		   , KempeDate
+		   , PADate
+		   , CurrentFAW
+			)
+			select cp.HVCaseFK
+				  , cp.PC1ID
+				  , h.KempeDate
+				  , p.PADate
+				  , ltrim(rtrim(faw.FirstName)) + ' ' + ltrim(rtrim(faw.LastName)) as CurrentFAW
+			from	dbo.CaseProgram cp
+			inner join dbo.SplitString(@programfk, ',') on cp.ProgramFK = ListItem
+			inner join dbo.HVCase h on cp.HVCaseFK = h.HVCasePK
+			inner join Preassessment as p on p.HVCaseFK = cp.HVCaseFK
+											 and p.KempeDate is not null
+			inner join Worker faw on faw.WorkerPK = cp.CurrentFAWFK
+			where	h.KempeDate between dateadd(day, 1, dateadd(month, -3, @LastDayofPreviousMonth)) and @LastDayofPreviousMonth 
+					-- and cp.DischargeDate is null;  --- case not closed
 		
---- rspQAReport17 2 ,'summary'
+	--- rspQAReport17 2 ,'summary'
+	if @ReportType = 'summary'
+		begin 
 
-if @ReportType='summary'
-BEGIN 
-
-DECLARE @numOfALLScreens INT = 0
-SET @numOfALLScreens = (SELECT count(PC1ID) FROM @tbl4QAReport17Detail)
-
-
-DECLARE @numOfScreensNoPAThisMonth INT = 0
-SET @numOfScreensNoPAThisMonth = @numOfALLScreens
+			declare	@numOfAllKempes int = 0;
+			set @numOfAllKempes = (select	count(PC1ID)
+									from	@tbl4QAReport17Detail
+								   );
 
 
--- leave the following here
-if @numOfALLScreens is null
-SET @numOfALLScreens = 0
+			declare	@numOfKempesNotEntered int = 0;
+			set @numOfKempesNotEntered = (select count(PC1ID)
+												from @tbl4QAReport17Detail
+												where HVCaseFK not in (select HVCaseFK
+																	 	 from Kempe k
+																	    inner join dbo.SplitString(@programfk, ',') on k.ProgramFK = ListItem
+																	    where KempeDate between dateadd(day, 1, dateadd(month, -3, @LastDayofPreviousMonth)) and @LastDayofPreviousMonth 
+																	  )
+											);
 
-if @numOfScreensNoPAThisMonth is null
-SET @numOfScreensNoPAThisMonth = 0
+			-- leave the following here
+			if @numOfAllKempes is null
+				set @numOfAllKempes = 0;
 
-
-DECLARE @tbl4QAReport17Summary TABLE(
-	[SummaryId] INT,
-	[SummaryText] [varchar](200),
-	[SummaryTotal] [varchar](100)
-)
-
-INSERT INTO @tbl4QAReport17Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(17 ,'Kempe assessment completed but not data entered within 15 days (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')'
-,CONVERT(VARCHAR,@numOfScreensNoPAThisMonth) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfScreensNoPAThisMonth AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
-)
-
-SELECT * FROM @tbl4QAReport17Summary	
-
-END
-ELSE
-BEGIN
+			if @numOfKempesNotEntered is null
+				set @numOfKempesNotEntered = 0;
 
 
-SELECT PC1ID,
-		case
-		   when KempeDate is not null then
-			   convert(varchar(10),KempeDate,101)
-		   else
-			   ''
-		end as KempeDate,
+			declare	@tbl4QAReport17Summary table ([SummaryId] int
+												, [SummaryText] [varchar](200)
+												, [SummaryTotal] [varchar](100)
+												 );
 
-		case
-		   when PADate is not null then
-			   convert(varchar(10),PADate,101)
-		   else
-			   ''
-		end as PreassessmentFormDate,
+			insert	into @tbl4QAReport17Summary
+					([SummaryId]
+				   , [SummaryText]
+				   , [SummaryTotal]
+					)
+			values	(17
+				   , 'Kempe assessment completed in last three months but not data entered (N='
+					 + convert(varchar, @numOfAllKempes) + ')'
+				   , convert(varchar, @numOfKempesNotEntered) + ' ('
+					 + convert(varchar, round(coalesce(cast(@numOfKempesNotEntered as float) * 100
+													   / nullif(@numOfAllKempes, 0), 0), 0)) + '%)'
+					);
 
-		
-	 CurrentFAW
-	
- FROM @tbl4QAReport17Detail	
+			select	*
+			from	@tbl4QAReport17Summary;	
 
-ORDER BY CurrentFAW,PC1ID 		
+		end;
+	else
+		begin
 
 
-END
+			select	PC1ID
+				  , case when KempeDate is not null then convert(varchar(10), KempeDate, 101)
+						 else ''
+					end as KempeDate
+				  , case when PADate is not null then convert(varchar(10), PADate, 101)
+						 else ''
+					end as PreassessmentFormDate
+				  , CurrentFAW
+			from	@tbl4QAReport17Detail
+				where HVCaseFK not in (select HVCaseFK
+									 	 from Kempe k
+									    inner join dbo.SplitString(@programfk, ',') on k.ProgramFK = ListItem
+									    where KempeDate between dateadd(day, 1, dateadd(month, -3, @LastDayofPreviousMonth)) and @LastDayofPreviousMonth)
+			order by CurrentFAW
+				  , PC1ID; 		
+
+		end;
 GO
