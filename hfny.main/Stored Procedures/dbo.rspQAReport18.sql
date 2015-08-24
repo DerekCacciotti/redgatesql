@@ -83,7 +83,7 @@ if @ReportType = 'summary'
 		          SummaryTotal
 		        )
 		values  ( 18 , -- SummaryId - int
-		          'Number of Kempe forms without attachment (N=' + CONVERT(varchar,@cohortCount) + ')', -- SummaryText - varchar(200)
+		          'Number of Kempe forms since 05/01/15 without an attachment (N=' + CONVERT(varchar,@cohortCount) + ')', -- SummaryText - varchar(200)
 		          CONVERT(varchar,@missingAttachCount) + ' (' + 
 		          convert(varchar,round(coalesce(cast(@missingAttachCount as float) * 100 / nullif(@cohortCount,0),0),0)) + '%)' -- SummaryTotal - varchar(100)
 		        )
@@ -101,6 +101,7 @@ else
 		from @tbl4QAReportCohort qarc
 	    left outer join Attachment a on a.HVCaseFK = qarc.HVCaseFK and a.FormType = 'KE'
 		where a.AttachmentPK is null
+		order by qarc.PC1ID
 	end
 	
 	
