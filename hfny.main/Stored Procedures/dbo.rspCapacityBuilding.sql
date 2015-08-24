@@ -16,9 +16,9 @@ CREATE procedure [dbo].[rspCapacityBuilding]
 )
 as
 
---DECLARE @startDT DATE = '02/25/2015'
---DECLARE @endDT DATE
---DECLARE @ProgramFK varchar(max) = '1'
+--DECLARE @startDT DATE = '02/25/2014'
+--DECLARE @endDT DATE = '08/25/2014'
+--DECLARE @ProgramFK varchar(max) = '1,2,3,4,5,6,7'
 
 DECLARE @defaultDT DATE = CONVERT(DATE,DATEADD(MS, -3, DATEADD(MM, DATEDIFF(MM, 0, @startDT) , 0)))
 
@@ -73,18 +73,29 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 		)	
 	,
 	
-	cteProgramCapacity
+	cteProgramCapacityX
 	as
 	( 
-		select ProgramCapacity,
-			count(PC1ID) - sum(PreintakeCount) AS CurrentCapacity,
-			case when ProgramCapacity is null then 'Program capacity blank on Program Information Form.' 
-			ELSE CONVERT(VARCHAR, round(COALESCE(cast((count(PC1ID) - sum(PreintakeCount)) AS FLOAT) * 100 / 
-			NULLIF(ProgramCapacity,0), 0), 0))  + '%' end AS PerctOfProgramCapacity
+		select ProgramCapacity, ProgramFK,
+			count(PC1ID) - sum(PreintakeCount) AS CurrentCapacity
+			--,case when ProgramCapacity is null then 'Program capacity blank on Program Information Form.' 
+			--ELSE CONVERT(VARCHAR, round(COALESCE(cast((count(PC1ID) - sum(PreintakeCount)) AS FLOAT) * 100 / 
+			--NULLIF(ProgramCapacity,0), 0), 0))  + '%' end AS PerctOfProgramCapacity
 		FROM ctemainAgain
-		group by ProgramFK,ProgramCapacity
+		group by ProgramCapacity, ProgramFK
 	)	 
 	
+	,
+	cteProgramCapacity
+	AS (
+	
+	select  sum(ProgramCapacity) AS ProgramCapacity,
+			sum(CurrentCapacity) AS CurrentCapacity,
+			case when sum(ProgramCapacity) is null then 'Program capacity blank on Program Information Form.' 
+			ELSE CONVERT(VARCHAR, round(COALESCE(cast(sum(CurrentCapacity) AS FLOAT) * 100 / 
+			NULLIF(sum(ProgramCapacity),0), 0), 0))  + '%' end AS PerctOfProgramCapacity
+		FROM cteProgramCapacityX
+	)
 	
 	-- C and D
 	, cteScreen as
