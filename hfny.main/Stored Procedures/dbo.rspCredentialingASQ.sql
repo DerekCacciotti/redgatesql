@@ -207,6 +207,6 @@ DateCompleted, InWindow, [TCAgeCode], AdjTCDOB, Age, AgeMonth,
 CASE WHEN AgeAtDateCompleted = -1 THEN 0 ELSE AgeAtDateCompleted END AgeAtDateCompleted, 
 nASQ, Meets, AgeAtDateCompletedMonth
 FROM cteYYY
-WHERE Age <= 5
+WHERE Age > 0 AND Age <= 5
 order by Age DESC, worker, PC1ID, TCAgeCode
 GO
