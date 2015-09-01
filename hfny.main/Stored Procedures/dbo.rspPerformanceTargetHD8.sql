@@ -3,6 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 28, 2013>
@@ -367,7 +368,7 @@ begin
 		  ,c.OldID
 		  ,c.TCDOB
 		  ,c.PC1FullName
-		  ,isnull(c.CurrentWorkerFullName,c.CurrentWorkerFullName) as CurrentWorkerFullName
+		  ,isnull(c.CurrentWorkerFullName,m.CurrentWorkerFullName) as CurrentWorkerFullName
 		  ,isnull(c.CurrentLevelName,m.CurrentLevelName) as CurrentLevelName
 		  ,isnull(FormName,isnull(rtrim(cast(i.Interval as int)) + ' month Follow Up', 'Intake')) as FormName
 		  ,FormDate
