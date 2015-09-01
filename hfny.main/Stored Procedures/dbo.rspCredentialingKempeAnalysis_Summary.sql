@@ -681,7 +681,7 @@ UNION
 
 	  FROM @tblCohort
 	  WHERE IntakeDate  IS NOT NULL   
-	  AND MaritalStatus = '06' OR MaritalStatus IS NULL OR MaritalStatus NOT IN ('01', '02', '03', '04', '05')
+	  AND MaritalStatus = '06' OR MaritalStatus IS NULL
 )
 ,
  cteMaritalStatusNotEnrolled AS
@@ -778,7 +778,7 @@ UNION
 
 	  FROM @tblCohort
 	  WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
-	  AND MaritalStatus = '06' OR MaritalStatus IS NULL OR MaritalStatus NOT IN ('01', '02', '03', '04', '05')
+	  AND MaritalStatus = '06' OR MaritalStatus IS NULL
 
 )
 ,
