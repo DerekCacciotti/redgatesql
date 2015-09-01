@@ -110,7 +110,7 @@ as
 			inner join dbo.HVCase h on cp.HVCaseFK = h.HVCasePK
 			inner join Worker fsw on cp.CurrentFSWFK = fsw.WorkerPK
 			-- JOIN TO TCID to get each child for the case
-			inner join TCID T on T.HVCaseFK = h.HVCasePK
+			left join TCID T on T.HVCaseFK = h.HVCasePK
 			where	((h.IntakeDate <= dateadd(M, -1, @LastDayofPreviousMonth))
 					 and (h.IntakeDate is not null)
 					)
@@ -153,13 +153,13 @@ as
 
 			declare	@numOfALLScreens int = 0;
 
--- Note: We using sum on TCNumber to get correct number of cases, as there may be twins etc.
-			set @numOfALLScreens = (select	count(TCIDPK)
+			-- Note: We using sum on TCNumber to get correct number of cases, as there may be twins etc.
+			set @numOfALLScreens = (select	count(HVCasePK)
 									from	@tbl4QAReport6Detail
 								   );  
 
 			declare	@numOfActiveIntakeCases int = 0;
-			set @numOfActiveIntakeCases = (select	count(TCIDPK)
+			set @numOfActiveIntakeCases = (select	count(HVCasePK)
 										   from		@tbl4QAReport6Detail
 										   where	HVCasePK not in (select	HVCaseFK
 																	 from TCMedical T
@@ -168,7 +168,7 @@ as
 																	 )
 										  );
 
--- leave the following here
+			-- leave the following here
 			if @numOfALLScreens is null
 				set @numOfALLScreens = 0;
 
