@@ -3,7 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 1st, 2012>
@@ -148,7 +147,7 @@ as
 												(
 												 select HVCaseFK
 													 from TCID T
-														 --inner join dbo.SplitString(@programfk, ',') on T.programfk = listitem
+													 -- inner join dbo.SplitString(@programfk, ',') on T.programfk = listitem
 												)
 									  )
 
@@ -193,7 +192,7 @@ as
 				  select HVCaseFK
 					  from @tbl4QAReport5Detail qa
 						  inner join TCID T on T.HVCaseFK = qa.HVCasePK
-						  inner join dbo.SplitString(@programfk, ',') on T.programfk = listitem
+						  -- inner join dbo.SplitString(@programfk, ',') on T.programfk = listitem
 				 )
 
 			order by Worker
