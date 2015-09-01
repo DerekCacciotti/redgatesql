@@ -8,6 +8,8 @@ GO
 -- Create date: 2015-07-28
 -- Description:	Adds an additional report to the QA report for Kempes
 --				missing attachments
+-- exec rspQAReport18 1, 'summary'
+-- exec rspQAReport18 1, 'detail'
 -- =============================================
 CREATE procedure [dbo].[rspQAReport18](
 @programfk    varchar(max)    = NULL,
@@ -35,6 +37,7 @@ Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0
 DECLARE @tbl4QAReportCohort TABLE(
 	HVCaseFK int,
 	PC1ID char(13),
+	KempePK int,
 	KempeDate datetime,
 	CurrentWorkerName varchar(200),
 	CurrentLevel varchar(20)
@@ -43,6 +46,7 @@ DECLARE @tbl4QAReportCohort TABLE(
 insert into @tbl4QAReportCohort
         ( HVCaseFK ,
 		  PC1ID ,
+		  KempePK, 
           KempeDate ,
           CurrentWorkerName ,
           CurrentLevel
@@ -50,11 +54,12 @@ insert into @tbl4QAReportCohort
      
 select cp.HVCaseFK
 		, PC1ID
-		, KempeDate
+		, k.KempePK
+		, k.KempeDate
 		, ltrim(rtrim(w.firstname))+' '+ltrim(rtrim(w.lastname)) as CurrentWorkerName
 		, CurrentLevel = cl.LevelName
-from dbo.Kempe k 
-inner join dbo.CaseProgram cp on cp.HVCaseFK = k.HVCaseFK
+from Kempe k 
+inner join CaseProgram cp on cp.HVCaseFK = k.HVCaseFK
 left join codeLevel cl on cp.CurrentLevelFK = cl.codeLevelPK
 inner join Worker w ON w.WorkerPK = k.FAWFK
 where k.ProgramFK = @ProgramFK 
@@ -97,7 +102,8 @@ else
 		select PC1ID ,
                convert(varchar(10), KempeDate, 101) as [Kempe Date] ,
                CurrentWorkerName as [FAW Name],
-               CurrentLevel
+               CurrentLevel, 
+               Link = '<a href="/Pages/Kempe.aspx?pc1id=' + PC1ID + '&kempepk=' + rtrim(convert(varchar(12), qarc.KempePK)) + '" target="_blank" alt="Kempe form">'
 		from @tbl4QAReportCohort qarc
 	    left outer join Attachment a on a.HVCaseFK = qarc.HVCaseFK and a.FormType = 'KE'
 		where a.AttachmentPK is null

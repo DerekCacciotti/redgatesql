@@ -8,6 +8,8 @@ GO
 -- Create date: 2015-08-04
 -- Description:	Adds an additional report to the QA report for Home 
 --				Visit Logs missing attachments
+-- exec rspQAReport19 1, 'summary'
+-- exec rspQAReport19 1, 'detail'
 -- =============================================
 CREATE procedure [dbo].[rspQAReport19](
 @programfk    varchar(max)    = NULL,
@@ -35,7 +37,8 @@ DECLARE @tbl4QAReportCohort TABLE(
 	HVLogPK int,
 	PC1ID char(13),
 	VisitStartTime datetime,
-	CurrentLevel varchar(20)
+	CurrentLevel varchar(20), 
+	CurrentWorker varchar(40)
 )
 
 insert into @tbl4QAReportCohort
@@ -43,16 +46,19 @@ insert into @tbl4QAReportCohort
 		  HVLogPK ,
           PC1ID ,
           VisitStartTime ,
-          CurrentLevel
+          CurrentLevel ,
+          CurrentWorker 
         )
 select hv.HVCaseFK
 		, hv.HVLogPK
 		, PC1ID
 		, VisitStartTime
 		, CurrentLevel = cl.LevelName
-		from dbo.HVLog hv 
-		inner join dbo.CaseProgram cp on cp.HVCaseFK = hv.HVCaseFK
+		, CurrentWorker = rtrim(w.FirstName) + ' ' + rtrim(w.LastName)
+		from HVLog hv 
+		inner join CaseProgram cp on cp.HVCaseFK = hv.HVCaseFK
 		left join codeLevel cl on cp.CurrentLevelFK = cl.codeLevelPK
+		inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
 		where hv.ProgramFK = @ProgramFK 
 				and hv.VisitType <> '0001'
 				and VisitStartTime >= @CutOffDate
@@ -95,7 +101,9 @@ else
 	begin
 		select PC1ID ,
                VisitStartTime , 
-               CurrentLevel
+               CurrentLevel ,
+               CurrentWorker ,
+               Link = '<a href="/Pages/HomeVisitLog.aspx?pc1id=' + PC1ID + '&hvlogpk=' + rtrim(convert(varchar(12), qarc.HVLogPK)) + '" target="_blank" alt="Home Visit Log">'
 		from @tbl4QAReportCohort qarc
 		left outer join Attachment a on a.HVCaseFK = qarc.HVCaseFK and a.FormType = 'VL' and a.FormFK = HVLogPK
 		where a.AttachmentPK is null
