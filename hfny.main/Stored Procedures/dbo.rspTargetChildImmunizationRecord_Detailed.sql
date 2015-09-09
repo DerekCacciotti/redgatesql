@@ -2,18 +2,17 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
 -- =============================================
-create procedure [dbo].[rspTargetChildImmunizationRecord_Detailed]
+CREATE procedure [dbo].[rspTargetChildImmunizationRecord_Detailed]
 (
     @programfk    varchar(max)    = null,
     @supervisorfk int             = null,
     @workerfk     int             = null,
-    @pc1id        varchar(12)     = null,
+    @pc1id        varchar(13)     = null,
     @rdate        datetime
 )
 as
