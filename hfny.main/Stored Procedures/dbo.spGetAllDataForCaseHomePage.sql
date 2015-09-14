@@ -486,6 +486,7 @@ begin
 			, pc.Gender as PC1Gender
 			, rtrim(ec.PCFirstName) + ' ' + rtrim(ec.PCLastName) as EmergencyContactName
 			, LevelName as CurrentLevelName
+			, CurrentLevelDate
 			, hc.KempeDate
 			, DischargeDate
 			, rtrim(obp.PCFirstName) + ' ' + rtrim(obp.PCLastName) as OBPName
