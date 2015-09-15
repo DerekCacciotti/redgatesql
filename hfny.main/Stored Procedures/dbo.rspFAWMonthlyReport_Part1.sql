@@ -47,6 +47,7 @@ SELECT
 , sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [PATerminated]
 , sum(CASE WHEN CaseStatus = '01' THEN 1 ELSE 0 END) [PAContinue]
 , sum(CASE WHEN p.CaseStatus IS NULL OR p.CaseStatus NOT IN ('01', '02', '03', '04') THEN 1 ELSE 0 END) [PANone]
+
 FROM HVScreen AS a 
 JOIN CaseProgram AS b ON a.HVCaseFK = b.HVCaseFK
 JOIN HVCase AS c ON c.HVCasePK = a.HVCaseFK
@@ -57,7 +58,7 @@ AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
 AND (c.KempeDate IS NULL OR c.KempeDate >= @StartDt)
 )
 
-SELECT * 
+SELECT *, 'form for (' + (convert(VARCHAR(8), @StartDt, 1) + '-' + convert(VARCHAR(8), @EndDt, 1)) + ')' timeperiod
 FROM section1 
 JOIN section2 ON 1 = 1
 JOIN section3 ON 1 = 1
