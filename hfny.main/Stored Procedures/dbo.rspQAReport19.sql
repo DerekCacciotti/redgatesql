@@ -37,7 +37,7 @@ DECLARE @tbl4QAReportCohort TABLE(
 	HVLogPK int,
 	PC1ID char(13),
 	VisitStartTime datetime,
-	CurrentLevel varchar(20), 
+	CurrentLevel varchar(30), 
 	CurrentWorker varchar(40)
 )
 

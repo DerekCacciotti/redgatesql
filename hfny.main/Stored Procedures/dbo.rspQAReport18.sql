@@ -40,7 +40,7 @@ DECLARE @tbl4QAReportCohort TABLE(
 	KempePK int,
 	KempeDate datetime,
 	CurrentWorkerName varchar(200),
-	CurrentLevel varchar(20)
+	CurrentLevel varchar(30)
 )
 
 insert into @tbl4QAReportCohort

@@ -3,6 +3,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 1st, 2012>
@@ -11,7 +12,6 @@ GO
 -- rspQAReport5 31			--- for main report - location = 2
 -- rspQAReport5 null			--- for main report for all locations
 -- =============================================
-
 
 CREATE procedure [dbo].[rspQAReport5]
 (
@@ -109,13 +109,13 @@ as
 				inner join worker fsw on cp.CurrentFSWFK = fsw.workerpk
 
 			where ((h.IntakeDate <= dateadd(M, -1, @LastDayofPreviousMonth))
-				 and (h.IntakeDate is not null))
+						and (h.IntakeDate is not null))
 				 and (cp.DischargeDate is null
-				 or cp.DischargeDate > @LastDayofPreviousMonth)
+						or cp.DischargeDate > @LastDayofPreviousMonth)
 				 and (((@LastDayofPreviousMonth >= dateadd(M, 1, h.edc))
-				 and (h.tcdob is null))
+						and (h.tcdob is null))
 				 or ((@LastDayofPreviousMonth >= dateadd(M, 1, h.tcdob))
-				 and (h.edc is null)))
+						and (h.edc is null)))
 			order by cp.OldID -- h.IntakeDate 
 
 	-- to get accurate count of case
@@ -133,14 +133,14 @@ as
 	if @ReportType = 'summary'
 	begin
 
-		declare @numOfALLScreens int = 0
+		declare @numOfActiveIntakeCases int = 0
 
 		-- Note: We using sum on TCNumber to get correct number of cases, as there may be twins etc.
-		set @numOfALLScreens = (select sum(TCNumber)
+		set @numOfActiveIntakeCases = (select count(HVCasePK) -- count(*) -- sum(TCNumber)
 									from @tbl4QAReport5Detail)
 
-		declare @numOfActiveIntakeCases int = 0
-		set @numOfActiveIntakeCases = (
+		declare @numOfAllCasesWithTCID int = 0
+		set @numOfAllCasesWithTCID = (
 									   select count(HVCasePK)
 										   from @tbl4QAReport5Detail
 										   where HVCasePK not in
@@ -152,11 +152,11 @@ as
 									  )
 
 		-- leave the following here
-		if @numOfALLScreens is null
-			set @numOfALLScreens = 0
-
 		if @numOfActiveIntakeCases is null
 			set @numOfActiveIntakeCases = 0
+
+		if @numOfAllCasesWithTCID is null
+			set @numOfAllCasesWithTCID = 0
 
 		declare @tbl4QAReport5Summary table(
 			[SummaryId] int,
@@ -167,9 +167,9 @@ as
 		insert into @tbl4QAReport5Summary ([SummaryId]
 										 , [SummaryText]
 										 , [SummaryTotal])
-			values (5, 'Target Child IDs for Active Cases (N=' + convert(varchar, @numOfALLScreens) + ')'
-				   , convert(varchar, @numOfActiveIntakeCases) + ' (' + convert(varchar, round(coalesce(cast(
-					   @numOfActiveIntakeCases as float) * 100 / nullif(@numOfALLScreens, 0), 0), 0)) + '%)'
+			values (5, 'Target Child IDs for Active Cases (N=' + convert(varchar, @numOfActiveIntakeCases) + ')'
+				   , convert(varchar, @numOfAllCasesWithTCID) + ' (' + convert(varchar, round(coalesce(cast(
+					   @numOfAllCasesWithTCID as float) * 100 / nullif(@numOfActiveIntakeCases, 0), 0), 0)) + '%)'
 				   )
 
 		select *
