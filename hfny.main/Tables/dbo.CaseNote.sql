@@ -10,5 +10,19 @@ CREATE TABLE [dbo].[CaseNote]
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- create trigger TR_CaseNoteEditDate ON CaseNote
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+create TRIGGER [dbo].[TR_CaseNoteEditDate] ON [dbo].[CaseNote]
+For Update 
+AS
+Update CaseNote set CaseNote.CaseNoteEditDate= getdate()
+From [CaseNote] INNER JOIN Inserted ON [CaseNote].[CaseNotePK]= Inserted.[CaseNotePK]
+GO
+
 ALTER TABLE [dbo].[CaseNote] ADD CONSTRAINT [PK_CaseNotes] PRIMARY KEY CLUSTERED  ([CaseNotePK]) ON [PRIMARY]
 GO
