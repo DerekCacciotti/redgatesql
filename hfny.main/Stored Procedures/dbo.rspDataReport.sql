@@ -126,12 +126,12 @@ as
 				inner join Preassessment p on p.HVCaseFK = h.HVCasePK
 											  and p.ProgramFK = cp.ProgramFK
 				left join Kempe k on k.HVCaseFK = h.HVCasePK
-				where	k.KempeDate between @StartDate and @EndDate
+				where	h.KempeDate between @StartDate and @EndDate  -- k.KempeDate between @StartDate and @EndDate
 						and p.KempeResult is not null
 						and cp.CaseStartDate <= @EndDate
 						and p.CaseStatus in ('02', '04')	
 
-
+-- k.KempeDate between @StartDate and @EndDate
 
 	-- Old code for your fyi
 	--INSERT INTO @tbl4DataReportRow3
