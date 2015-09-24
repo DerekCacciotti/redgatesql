@@ -48,7 +48,7 @@ BEGIN
 									LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
 									LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
 									LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
-									where (TopicCode = 7.0 and ta.WorkerFK=cteEventDates.WorkerPK)
+									where ((TopicCode = 7.0 OR TopicCode = 7.1) and ta.WorkerFK=cteEventDates.WorkerPK)
 									)
 			AS FirstIFSPDate
 		 from cteEventDates
