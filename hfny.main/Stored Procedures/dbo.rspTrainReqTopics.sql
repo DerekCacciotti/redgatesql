@@ -13,7 +13,7 @@ GO
 -- Edit date: 6/12/2015 CP - Changes for new HFA standards
 -- =============================================
 
---exec dbo.rspTrainReqTopics @prgfk=1,@super=NULL,@worker=15
+--exec dbo.rspTrainReqTopics @prgfk=1,@super=NULL,@worker=151
 
 
 CREATE PROCEDURE [dbo].[rspTrainReqTopics]
@@ -133,6 +133,7 @@ SELECT firstname + lastname AS Name
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=17) AS 'f16d'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=18) AS 'f16e'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=19) AS 'f16f'
+, (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=3289) AS 'f16g'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=20) AS 'f17a'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=21) AS 'f17b'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc  FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=22) AS 'f17c'
@@ -205,6 +206,7 @@ SELECT distinct [Name]
 	 , convert(VARCHAR(12), [FirstEvent], 101) AS [FirstEvent]
 	 , convert(VARCHAR(12), [FirstEvent], 101) AS [FirstEvent]
 	 , convert(VARCHAR(12), [FirstPSIDate], 101) AS [FirstPSIDate]
+	 , convert(VARCHAR(12), [f1], 101) AS [f1]
 	 , CASE isnull([f1], 0)
 		WHEN [f1] THEN
 			CASE WHEN datediff(dd, [f1], [FirstEvent]) < 0 THEN '*' 
@@ -487,6 +489,12 @@ SELECT distinct [Name]
 			CASE WHEN datediff(dd, [f16f], [HireDate]) < -183 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f16f_ast'
+	 , CASE [f16g] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f16g], 101) END AS [f16g]
+	 , CASE isnull([f16g], 0)
+		WHEN [f16g] THEN
+			CASE WHEN datediff(dd, [f16g], [HireDate]) < -183 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f16g_ast'
 	 , CASE [f17a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f17a], 101) END AS [f17a]
 	 , CASE isnull([f17a], 0)
 		WHEN [f17a] THEN

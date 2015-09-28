@@ -195,8 +195,8 @@ SELECT [TopicName]
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
 		, CASE WHEN cteMeetTarget.TopicCode = 17.0 THEN '11-3a. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Infant and Child Development within six months of hire'  
 			WHEN cteMeetTarget.TopicCode = 19.0 THEN '11-3b. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Supporting the Parent-Child Relationship within six months of hire' 
-			WHEN cteMeetTarget.TopicCode = 23.0 THEN '11-3c. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Staff Related Issues within twelve months of hire' 
-			WHEN cteMeetTarget.TopicCode = 25.0 THEN '11-3d. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Mental Health within twelve months of hire' 
+			WHEN cteMeetTarget.TopicCode = 23.0 THEN '11-3c. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Staff Related Issues within six months of hire' 
+			WHEN cteMeetTarget.TopicCode = 25.0 THEN '11-3d. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Mental Health within six months of hire' 
 			END AS TopicName
 		, TrainingDate
 		, HireDate
