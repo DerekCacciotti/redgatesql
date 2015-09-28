@@ -95,8 +95,14 @@ SET NOCOUNT ON;
 		, RaceUnknownMissing int
 		, MarriedAtIntake int
 		, MarriedAtDischarge int
-		, NotMarriedAtIntake int
-		, NotMarriedAtDischarge int
+		, NeverMarriedAtIntake int
+		, NeverMarriedAtDischarge int
+		, SeparatedAtIntake int
+		, SeparatedAtDischarge int
+		, DivorcedAtIntake int
+		, DivorcedAtDischarge int
+		, WidowedAtIntake int
+		, WidowedAtDischarge int
 		, MarriedUnknownMissingAtIntake int
 		, MarriedUnknownMissingAtDischarge int
 		, OtherChildrenInHouseholdAtIntake int
@@ -266,10 +272,11 @@ SET NOCOUNT ON;
 				,PC1EmploymentAtDischarge
 				,EducationalEnrollmentAtDischarge
 			   	,case
+
 					when cp.HVCaseFK IN (SELECT oc.HVCaseFK FROM OtherChild oc WHERE oc.HVCaseFK=cp.HVCaseFK and 
 																						((oc.FormType = 'IN' and oc.LivingArrangement = '01')
 																							or oc.FormType = 'FU'))
-						then 1
+ 						then 1
 					else 0
 				end as OtherChildrenInHouseholdAtDischarge
 				,case 
@@ -435,7 +442,7 @@ SET NOCOUNT ON;
 				,case
 					when cp.HVCaseFK IN (SELECT oc.HVCaseFK FROM OtherChild oc WHERE oc.HVCaseFK=cp.HVCaseFK AND 
 																						oc.FormType='IN' and oc.LivingArrangement = '01') 
-						then 1
+ 						then 1
 					else 0
 				end as OtherChildrenInHouseholdAtIntake
 				,case 
@@ -502,7 +509,11 @@ SET NOCOUNT ON;
 			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
 			left outer join cteTCInformation tci on tci.HVCaseFK = c.HVCasePK
 			left outer join codeApp carace on carace.AppCode=Race and AppCodeGroup='Race'
-			left outer join (select MaritalStatus, PBTANF as PC1TANFAtIntake
+			left outer join (select PBTANF as PC1TANFAtIntake
+									,HVCaseFK 
+							   from CommonAttributes ca
+							  where FormType='IN') inca ON inca.HVCaseFK=c.HVCasePK
+			left outer join (select MaritalStatus
 									,AppCodeText as MaritalStatusAtIntake
 									,IsCurrentlyEmployed AS PC1EmploymentAtIntake
 									,EducationalEnrollment
@@ -557,8 +568,14 @@ insert into @tblPC1withStats
 		, RaceUnknownMissing
 		, MarriedAtIntake
 		, MarriedAtDischarge
-		, NotMarriedAtIntake
-		, NotMarriedAtDischarge
+		, NeverMarriedAtIntake
+		, NeverMarriedAtDischarge
+		, SeparatedAtIntake
+		, SeparatedAtDischarge
+		, DivorcedAtIntake
+		, DivorcedAtDischarge
+		, WidowedAtIntake
+		, WidowedAtDischarge
 		, MarriedUnknownMissingAtIntake
 		, MarriedUnknownMissingAtDischarge
 		, OtherChildrenInHouseholdAtIntake
@@ -659,10 +676,16 @@ select distinct pc1id
 		, case when RaceText is null or RaceText='' then 1 else 0 end as RaceUnknownMissing
 		, case when MaritalStatusAtIntake = 'Married' then 1 else 0 end as MarriedAtIntake
 		, case when MaritalStatusAtDischarge = 'Married' then 1 else 0 end as MarriedAtDischarge
-		, case when MaritalStatusAtIntake = 'Not married' then 1 else 0 end as NotMarriedAtIntake
-		, case when MaritalStatusAtIntake = 'Not married' then 1 else 0 end as NotMarriedAtDischarge
-		, case when MaritalStatusAtIntake is null or MaritalStatusAtIntake='' then 1 else 0 end as MarriedUnknownMissingAtIntake
-		, case when MaritalStatusAtDischarge is null or MaritalStatusAtDischarge='' then 1 else 0 end as MarriedUnknownMissingAtDischarge
+		, case when MaritalStatusAtIntake = 'Never married' then 1 else 0 end as NeverMarriedAtIntake
+		, case when MaritalStatusAtIntake = 'Never married' then 1 else 0 end as NeverMarriedAtDischarge
+		, case when MaritalStatusAtIntake = 'Separated' then 1 else 0 end as SeparatedAtIntake
+		, case when MaritalStatusAtIntake = 'Separated' then 1 else 0 end as SeparatedAtDischarge
+		, case when MaritalStatusAtIntake = 'Divorced' then 1 else 0 end as DivorcedAtIntake
+		, case when MaritalStatusAtIntake = 'Divorced' then 1 else 0 end as DivorcedAtDischarge
+		, case when MaritalStatusAtIntake = 'Widowed' then 1 else 0 end as WidowedAtIntake
+		, case when MaritalStatusAtIntake = 'Widowed' then 1 else 0 end as WidowedAtDischarge
+		, case when MaritalStatusAtIntake is null or MaritalStatusAtIntake='' or left(MaritalStatusAtIntake,7) = 'Unknown' then 1 else 0 end as MarriedUnknownMissingAtIntake
+		, case when MaritalStatusAtDischarge is null or MaritalStatusAtDischarge='' or left(MaritalStatusAtDischarge,7) = 'Unknown' then 1 else 0 end as MarriedUnknownMissingAtDischarge
 		, case when OtherChildrenInHouseholdAtIntake > 0 then 1 else 0 end as OtherChildrenInHouseholdAtIntake
 		, case when OtherChildrenInHouseholdAtDischarge > 0 then 1 else 0 end as OtherChildrenInHouseholdAtDischarge
 		, case when OtherChildrenInHouseholdAtIntake = 0 or OtherChildrenInHouseholdAtIntake is null then 1 else 0 end as NoOtherChildrenInHouseholdAtIntake
@@ -677,21 +700,21 @@ select distinct pc1id
 		, case when PC1EducationAtIntake in ('Less than 8','8-11') then 1 else 0 end as PC1EducationAtIntakeLessThan12
 		, case when PC1EducationAtDischarge in ('Less than 8','8-11') then 1 else 0 end as PC1EducationAtDischargeLessThan12
 		, case when PC1EducationAtIntake in ('High school grad','GED') then 1 else 0 end as PC1EducationAtIntakeHSGED
-		, case when PC1EducationAtDischarge in ('Less than 8','8-11') then 1 else 0 end as PC1EducationAtDischargeHSGED
+		, case when PC1EducationAtDischarge in ('High school grad','GED') then 1 else 0 end as PC1EducationAtDischargeHSGED
 		, case when PC1EducationAtIntake in ('Vocational school after HS','Some college','Associates Degree','Bachelors degree or higher') then 1 else 0 end as PC1EducationAtIntakeMoreThan12
 		, case when PC1EducationAtDischarge in ('Vocational school after HS','Some college','Associates Degree','Bachelors degree or higher') then 1 else 0 end as PC1EducationAtDischargeMoreThan12
 		, case when PC1EducationAtIntake is null or PC1EducationAtIntake = '' then 1 else 0 end as PC1EducationAtIntakeUnknownMissing
 		, case when PC1EducationAtDischarge is null or PC1EducationAtDischarge = '' then 1 else 0 end as PC1EducationAtDischargeUnknownMissing
-		, case when EducationalEnrollmentAtIntake = 1 then 1 else 0 end as PC1EducationalEnrollmentAtIntakeYes
-		, case when EducationalEnrollmentAtDischarge = 1 then 1 else 0 end as PC1EducationalEnrollmentAtDischargeYes
-		, case when EducationalEnrollmentAtIntake = 0 then 1 else 0 end as PC1EducationalEnrollmentAtIntakeNo
-		, case when EducationalEnrollmentAtDischarge = 0 then 1 else 0 end as PC1EducationalEnrollmentAtDischargeNo
+		, case when EducationalEnrollmentAtIntake = '1' then 1 else 0 end as PC1EducationalEnrollmentAtIntakeYes
+		, case when EducationalEnrollmentAtDischarge = '1' then 1 else 0 end as PC1EducationalEnrollmentAtDischargeYes
+		, case when EducationalEnrollmentAtIntake = '0' then 1 else 0 end as PC1EducationalEnrollmentAtIntakeNo
+		, case when EducationalEnrollmentAtDischarge = '0' then 1 else 0 end as PC1EducationalEnrollmentAtDischargeNo
 		, case when EducationalEnrollmentAtIntake is null or EducationalEnrollmentAtIntake = '' then 1 else 0 end as PC1EducationalEnrollmentAtIntakeUnknownMissing
 		, case when EducationalEnrollmentAtDischarge is null or EducationalEnrollmentAtDischarge = '' then 1 else 0 end as PC1EducationalEnrollmentAtDischargeUnknownMissing
-		, case when PC1EmploymentAtIntake = 1 then 1 else 0 end as PC1EmploymentAtIntakeYes
-		, case when PC1EmploymentAtDischarge = 1 then 1 else 0 end as PC1EmploymentAtDischargeYes
-		, case when PC1EmploymentAtIntake = 0 then 1 else 0 end as PC1EmploymentAtIntakeNo
-		, case when PC1EmploymentAtDischarge = 0 then 1 else 0 end as PC1EmploymentAtDischargeNo
+		, case when PC1EmploymentAtIntake = '1' then 1 else 0 end as PC1EmploymentAtIntakeYes
+		, case when PC1EmploymentAtDischarge = '1' then 1 else 0 end as PC1EmploymentAtDischargeYes
+		, case when PC1EmploymentAtIntake = '0' then 1 else 0 end as PC1EmploymentAtIntakeNo
+		, case when PC1EmploymentAtDischarge = '0' then 1 else 0 end as PC1EmploymentAtDischargeNo
 		, case when PC1EmploymentAtIntake is null or PC1EmploymentAtIntake = '' then 1 else 0 end as PC1EmploymentAtIntakeUnknownMissing
 		, case when PC1EmploymentAtDischarge is null or PC1EmploymentAtDischarge = '' then 1 else 0 end as PC1EmploymentAtDischargeUnknownMissing
 		, case when OBPInHomeAtIntake = 1 then 1 else 0 end as OBPInHouseholdAtIntake
@@ -714,10 +737,10 @@ select distinct pc1id
 		, case when PC2inHomeAtDischarge = 0 then 1 else 0 end as PC2EmploymentAtDischargeNoPC2
 		, case when PC2InHomeAtIntake = 1 and (PC2EmploymentAtIntake is null or PC2EmploymentAtIntake = '') then 1 else 0 end as PC2EmploymentAtIntakeUnknownMissing
 		, case when PC2InHomeAtDischarge = 1 and (PC2EmploymentAtDischarge is null or PC2EmploymentAtDischarge = '') then 1 else 0 end as PC2EmploymentAtDischargeUnknownMissing
-		, case when PC1EmploymentAtIntake = 1 or PC2EmploymentAtIntake = 1 or OBPEmploymentAtIntake = 1 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtIntakeYes
-		, case when PC1EmploymentAtDischarge = 1 or PC2EmploymentAtDischarge = 1 or OBPEmploymentAtDischarge = 1 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtDischargeYes
-		, case when PC1EmploymentAtIntake = 0 and PC2EmploymentAtIntake = 0 and OBPEmploymentAtIntake = 0 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtIntakeNo
-		, case when PC1EmploymentAtDischarge = 0 and PC2EmploymentAtDischarge = 0 and OBPEmploymentAtDischarge = 0 then 1 else 0 end as PC1OrPC2OrOBPEmployedAtDischargeNo
+		, case when PC1EmploymentAtIntake = '1' or PC2EmploymentAtIntake = '1' or OBPEmploymentAtIntake = '1' then 1 else 0 end as PC1OrPC2OrOBPEmployedAtIntakeYes
+		, case when PC1EmploymentAtDischarge = '1' or PC2EmploymentAtDischarge = '1' or OBPEmploymentAtDischarge = '1' then 1 else 0 end as PC1OrPC2OrOBPEmployedAtDischargeYes
+		, case when PC1EmploymentAtIntake = '0' and PC2EmploymentAtIntake = '0' and OBPEmploymentAtIntake = '0' then 1 else 0 end as PC1OrPC2OrOBPEmployedAtIntakeNo
+		, case when PC1EmploymentAtDischarge = '0' and PC2EmploymentAtDischarge = '0' and OBPEmploymentAtDischarge = '0' then 1 else 0 end as PC1OrPC2OrOBPEmployedAtDischargeNo
 		, case when (PC1EmploymentAtIntake is null or PC1EmploymentAtIntake = '') 
 					and (PC2InHomeAtIntake = 1 and (PC2EmploymentAtIntake is null or PC2EmploymentAtIntake = '')) 
 					and (OBPInHomeAtIntake = 1 and (OBPEmploymentAtIntake is NULL or OBPEmploymentAtIntake = '')) then 1 else 0 end as PC1OrPC2OrOBPEmployedAtIntakeUnknownMissing
@@ -1757,39 +1780,39 @@ values ('    Married'
 
 select @AllEnrolledParticipants = count(*)
 from @tblPC1withStats
-where NotMarriedAtIntake = 1
+where NeverMarriedAtIntake = 1
 
 select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt6Months = 0 and NotMarriedAtIntake = 1
+where ActiveAt6Months = 0 and NeverMarriedAtIntake = 1
 
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
-where ActiveAt6Months = 0 and NotMarriedAtDischarge = 1
+where ActiveAt6Months = 0 and NeverMarriedAtDischarge = 1
 
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and NotMarriedAtIntake = 1
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and NeverMarriedAtIntake = 1
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and NotMarriedAtDischarge = 1
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and NeverMarriedAtDischarge = 1
 
 select @EighteenMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and NotMarriedAtIntake = 1
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and NeverMarriedAtIntake = 1
 
 select @EighteenMonthsAtDischarge = count(*)
 from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and NotMarriedAtDischarge = 1
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and NeverMarriedAtDischarge = 1
 
 select @TwentyFourMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and NotMarriedAtIntake = 1
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and NeverMarriedAtIntake = 1
 
 select @TwentyFourMonthsAtDischarge = count(*)
 from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and NotMarriedAtDischarge = 1
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and NeverMarriedAtDischarge = 1
 
 insert into @tblResults (LineDescription
 						, LineGroupingLevel
@@ -1820,7 +1843,294 @@ insert into @tblResults (LineDescription
 						, EighteenMonthsDischarge
 						, TwoYearsIntake
 						, TwoYearsDischarge)
-values ('    Not Married'
+values ('    Never Married'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @AllEnrolledParticipants
+		, @SixMonthsAtIntake
+		, @SixMonthsAtDischarge
+		, @TwelveMonthsAtIntake
+		, @TwelveMonthsAtDischarge
+		, @EighteenMonthsAtIntake
+		, @EighteenMonthsAtDischarge
+		, @TwentyFourMonthsAtIntake
+		, @TwentyFourMonthsAtDischarge)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where SeparatedAtIntake = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 0 and SeparatedAtIntake = 1
+
+select @SixMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 0 and SeparatedAtDischarge = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and SeparatedAtIntake = 1
+
+select @TwelveMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and SeparatedAtDischarge = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and SeparatedAtIntake = 1
+
+select @EighteenMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and SeparatedAtDischarge = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and SeparatedAtIntake = 1
+
+select @TwentyFourMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and SeparatedAtDischarge = 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, AllParticipants
+						, SixMonthsIntake
+						, SixMonthsDischarge
+						, OneYearIntake
+						, OneYearDischarge
+						, EighteenMonthsIntake
+						, EighteenMonthsDischarge
+						, TwoYearsIntake
+						, TwoYearsDischarge)
+values ('    Separated'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @AllEnrolledParticipants
+		, @SixMonthsAtIntake
+		, @SixMonthsAtDischarge
+		, @TwelveMonthsAtIntake
+		, @TwelveMonthsAtDischarge
+		, @EighteenMonthsAtIntake
+		, @EighteenMonthsAtDischarge
+		, @TwentyFourMonthsAtIntake
+		, @TwentyFourMonthsAtDischarge)
+
+
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where DivorcedAtIntake = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 0 and DivorcedAtIntake = 1
+
+select @SixMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 0 and DivorcedAtDischarge = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and DivorcedAtIntake = 1
+
+select @TwelveMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and DivorcedAtDischarge = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and DivorcedAtIntake = 1
+
+select @EighteenMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and DivorcedAtDischarge = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and DivorcedAtIntake = 1
+
+select @TwentyFourMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and DivorcedAtDischarge = 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, AllParticipants
+						, SixMonthsIntake
+						, SixMonthsDischarge
+						, OneYearIntake
+						, OneYearDischarge
+						, EighteenMonthsIntake
+						, EighteenMonthsDischarge
+						, TwoYearsIntake
+						, TwoYearsDischarge)
+values ('    Divorced'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @AllEnrolledParticipants
+		, @SixMonthsAtIntake
+		, @SixMonthsAtDischarge
+		, @TwelveMonthsAtIntake
+		, @TwelveMonthsAtDischarge
+		, @EighteenMonthsAtIntake
+		, @EighteenMonthsAtDischarge
+		, @TwentyFourMonthsAtIntake
+		, @TwentyFourMonthsAtDischarge)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where WidowedAtIntake = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 0 and WidowedAtIntake = 1
+
+select @SixMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 0 and WidowedAtDischarge = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and WidowedAtIntake = 1
+
+select @TwelveMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and WidowedAtDischarge = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and WidowedAtIntake = 1
+
+select @EighteenMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and WidowedAtDischarge = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and WidowedAtIntake = 1
+
+select @TwentyFourMonthsAtDischarge = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and WidowedAtDischarge = 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, AllParticipants
+						, SixMonthsIntake
+						, SixMonthsDischarge
+						, OneYearIntake
+						, OneYearDischarge
+						, EighteenMonthsIntake
+						, EighteenMonthsDischarge
+						, TwoYearsIntake
+						, TwoYearsDischarge)
+values ('    Widowed'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount
