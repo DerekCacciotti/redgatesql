@@ -3,7 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <June 6th, 2013>
@@ -1510,7 +1509,8 @@ SELECT distinct cc.HVCasePK
 	        case when IntakeDate < dev_bdate then 
 					convert(varchar(20), dev_bdate, 101) else convert(varchar(20), IntakeDate, 101) end
 					
-			else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
+			when casq.Interval < '24' then cdasq.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
+			else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd, cdasq.MinimumDue, cc.tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd, cdasq.MaximumDue, cc.tcdob), 101)
 			--else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,tcdob), 101)
 			end as ASQDue   
      
