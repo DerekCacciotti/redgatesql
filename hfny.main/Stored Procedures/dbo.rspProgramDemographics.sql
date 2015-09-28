@@ -109,6 +109,7 @@ as
 					   ,ca.PC1ReceivingMedicaid [pc1Medicaid]
 					   ,ca.PBFoodStamps [FoodStamps]
 					   ,ca.PBTANF [TANF]
+					   ,ca.PBWIC [WIC]
 					   ,ca1.MaritalStatus [pc1MaritalStatus]
 					   ,caOBP.CommonAttributesPK [OBPInHoushold]
 					   ,ca2.CommonAttributesPK [PC2InHoushold]
@@ -288,6 +289,12 @@ as
 					   0
 			   end) [PD05TANF]
 			  ,sum(case
+				   when x.WIC = 1 then
+					   1
+				   else
+					   0
+			   end) [PD05WIC]
+			  ,sum(case
 				   when x.FoodStamps = 1 then
 					   1
 				   else
@@ -395,6 +402,7 @@ as
 		  ,str([PD04PC2TrainingProgram],5)+' ('+str(round((100.0*[PD04PC2TrainingProgram]/[m]),0),3)+'%)' [PD04PC2TrainingProgram]
 		  ,str([PD05PC1Medicaid],5)+' ('+str(round((100.0*[PD05PC1Medicaid]/[m]),0),3)+'%)' [PD05PC1Medicaid]
 		  ,str([PD05TANF],5)+' ('+str(round((100.0*[PD05TANF]/[m]),0),3)+'%)' [PD05TANF]
+		  ,str([PD05WIC],5)+' ('+str(round((100.0*[PD05WIC]/[m]),0),3)+'%)' [PD05WIC]
 		  ,str([PD05FoodStamps],5)+' ('+str(round((100.0*[PD05FoodStamps]/[m]),0),3)+'%)' [PD05FoodStamps]
 		  ,str([PD06Married],5)+' ('+str(round((100.0*[PD06Married]/[m]),0),3)+'%)' [PD06Married]
 		  ,str([PD07OBPInHousehold],5)+' ('+str(round((100.0*[PD07OBPInHousehold]/[m]),0),3)+'%)' [PD07OBPInHousehold]
