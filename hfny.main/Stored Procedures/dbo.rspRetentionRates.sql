@@ -21,7 +21,7 @@ GO
 -- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
 -- =============================================
 -- =============================================
-CREATE PROCEDURE [dbo].[rspRetentionRates]
+CREATE procedure [dbo].[rspRetentionRates]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @StartDate datetime
@@ -266,7 +266,9 @@ SET NOCOUNT ON;
 				,PC1EmploymentAtDischarge
 				,EducationalEnrollmentAtDischarge
 			   	,case
-					when cp.HVCaseFK IN (SELECT oc.HVCaseFK FROM OtherChild oc WHERE oc.HVCaseFK=cp.HVCaseFK AND oc.FormType='FU') 
+					when cp.HVCaseFK IN (SELECT oc.HVCaseFK FROM OtherChild oc WHERE oc.HVCaseFK=cp.HVCaseFK and 
+																						((oc.FormType = 'IN' and oc.LivingArrangement = '01')
+																							or oc.FormType = 'FU'))
 						then 1
 					else 0
 				end as OtherChildrenInHouseholdAtDischarge
@@ -305,7 +307,7 @@ SET NOCOUNT ON;
 		inner join codeLevel cl ON cl.codeLevelPK=CurrentLevelFK
 		inner join codeDischarge cd on cd.DischargeCode=cp.DischargeReason 
 		inner join cteCohort c on h.HVCasePK = c.HVCasePK
-		inner join cteLastFollowUp lfu on lfu.HVCaseFK = c.HVCasePK
+		left outer join cteLastFollowUp lfu on lfu.HVCaseFK = c.HVCasePK
 		left outer join FollowUp fu ON fu.FollowUpPK = lfu.FollowUpPK
 		left outer join PC1Issues pc1is ON pc1is.PC1IssuesPK=fu.PC1IssuesFK
 		left outer join cteFollowUpPC1 pc1fuca ON pc1fuca.HVCaseFK=c.HVCasePK
@@ -431,7 +433,8 @@ SET NOCOUNT ON;
 				end
 				as PrenatalEnrollment
 				,case
-					when cp.HVCaseFK IN (SELECT oc.HVCaseFK FROM OtherChild oc WHERE oc.HVCaseFK=cp.HVCaseFK AND oc.FormType='IN') 
+					when cp.HVCaseFK IN (SELECT oc.HVCaseFK FROM OtherChild oc WHERE oc.HVCaseFK=cp.HVCaseFK AND 
+																						oc.FormType='IN' and oc.LivingArrangement = '01') 
 						then 1
 					else 0
 				end as OtherChildrenInHouseholdAtIntake
