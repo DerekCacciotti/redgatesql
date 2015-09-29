@@ -76,7 +76,8 @@ as
 				join dbo.SplitString(@programfk,',') on c.programfk = listitem
 				left outer join Preassessment as b on b.HVCaseFK = a.HVCaseFK and b.PADate <= @EndDt
 			where --a.ProgramFK = @programfk AND 
-				 a.ScreenDate <= @EndDt
+				 --a.ScreenDate <= @EndDt
+				 a.ScreenDate between @StartDt and @EndDt
 				 and (c.DischargeDate IS NULL OR c.DischargeDate > @StartDt)
 				 and a.ScreenResult = '1'
 				 and a.ReferralMade = '1'
