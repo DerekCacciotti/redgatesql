@@ -1,0 +1,6 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE VIEW [dbo].[vPHQ9] AS SELECT PHQ9PK, FormFK, FormType, phq.HVCaseFK, phq.ProgramFK, DateAdministered, FSWFK AS workerfk FROM dbo.TCID INNER JOIN ( SELECT PHQ9PK, FormFK, FormType, HVCaseFK, ProgramFK, DateAdministered FROM dbo.PHQ9 WHERE DateAdministered IS NOT NULL AND FormType='TC' ) phq ON phq.FormFK =TCIDPK UNION SELECT PHQ9PK, FormFK, FormType, phq.HVCaseFK, phq.ProgramFK, DateAdministered, FSWFK AS workerfk FROM dbo.FollowUp fu INNER JOIN ( SELECT PHQ9PK, FormFK, FormType, HVCaseFK, ProgramFK, DateAdministered FROM dbo.PHQ9 WHERE DateAdministered IS NOT NULL AND FormType='FU' ) phq ON phq.FormFK =fu.FollowUpPK UNION SELECT PHQ9PK, FormFK, FormType, phq.HVCaseFK, phq.ProgramFK, DateAdministered, k.FAWFK AS workerfk FROM dbo.Kempe k INNER JOIN ( SELECT PHQ9PK, FormFK, FormType, HVCaseFK, ProgramFK, DateAdministered FROM dbo.PHQ9 WHERE DateAdministered IS NOT NULL AND FormType='KE' ) phq ON phq.FormFK =k.KempePK UNION SELECT PHQ9PK, FormFK, FormType, phq.HVCaseFK, phq.ProgramFK, DateAdministered, FSWFK AS workerfk FROM dbo.Intake i INNER JOIN ( SELECT PHQ9PK, FormFK, FormType, HVCaseFK, ProgramFK, DateAdministered FROM dbo.PHQ9 WHERE DateAdministered IS NOT NULL AND FormType='IN' ) phq ON phq.FormFK = i.IntakePK
+GO

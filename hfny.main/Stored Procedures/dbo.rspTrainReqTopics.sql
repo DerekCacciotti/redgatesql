@@ -91,6 +91,7 @@ SELECT firstname + lastname AS Name
 , fn.FirstEvent
 , fn.SupervisorFirstEvent
 , fn.FirstPSIDate
+, fn.FirstPHQDate
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='1.0') AS 'f1'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='2.0' AND ctA.SubTopicFK IS Null) AS 'f2'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=65) AS 'f2a'
@@ -206,6 +207,7 @@ SELECT distinct [Name]
 	 , convert(VARCHAR(12), [FirstEvent], 101) AS [FirstEvent]
 	 , convert(VARCHAR(12), [FirstEvent], 101) AS [FirstEvent]
 	 , convert(VARCHAR(12), [FirstPSIDate], 101) AS [FirstPSIDate]
+	 , convert(VARCHAR(12), [FirstPHQDate], 101) AS [FirstPHQDate]
 	 , convert(VARCHAR(12), [f1], 101) AS [f1]
 	 , CASE isnull([f1], 0)
 		WHEN [f1] THEN
@@ -334,7 +336,7 @@ SELECT distinct [Name]
  , convert(VARCHAR(12), [f39], 101) AS [f39]
 	 , CASE isnull([f39], 0)
 		WHEN [f39] THEN
-			CASE WHEN datediff(dd, [f39], [HireDate]) < -91 THEN '*' 
+			CASE WHEN datediff(dd, [f39], [FirstPHQDate]) < -1 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f39_ast'
 

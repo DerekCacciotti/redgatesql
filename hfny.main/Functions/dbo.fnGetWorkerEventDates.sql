@@ -60,6 +60,12 @@ RETURN
 		GROUP BY FSWFK
 		)
 		
+		,ctPHQ AS
+		(SELECT DISTINCT workerfk as FSWFK, min(DateAdministered) AS PHQDate 
+		FROM dbo.vPHQ9
+		GROUP BY workerfk
+		)
+
 		SELECT DISTINCT w.WorkerPK
 			 , w.LastName AS 'WrkrLName'
 			 , w.FirstName AS 'WrkrFName'
@@ -83,6 +89,7 @@ RETURN
 					ELSE ctk.KempeDate END		
 				END AS 'FirstEvent'
 			, MIN(ctPSI.PSIDate) AS 'FirstPSIDate'
+			, MIN(ctphq.PHQDate) AS 'FirstPHQDate'
 		FROM Worker w
 		INNER JOIN workerprogram wp ON wp.WorkerFK= w.workerpk
 		INNER JOIN worker supervisor on supervisorfk = supervisor.workerpk
@@ -91,6 +98,7 @@ RETURN
 		LEFT OUTER JOIN ctKempe ctk ON ctk.FAWFK = w.workerpk
 		LEFT OUTER JOIN ctSuper ON ctsuper.SupervisorFK=w.WorkerPK
 		LEFT OUTER JOIN ctPSI ON ctpsi.fswfk = w.WorkerPK
+		LEFT OUTER JOIN ctPHQ ON ctPHQ.FSWFK = w.WorkerPK
 		GROUP BY wp.programfk, w.WorkerPK, w.LastName, w.FirstName
 		,wp.supervisorfk
 		, wp.SupervisorStartDate, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate
