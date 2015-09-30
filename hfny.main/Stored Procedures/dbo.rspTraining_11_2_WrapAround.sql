@@ -7,6 +7,8 @@ GO
 -- Author:		Chris Papas
 -- Create date: 08/08/2013
 -- Description:	Training 11-2 WrapAround Training for All Staff by 3 Months of Hire
+-- Edited by:   Chris Papas
+-- Edit date:   09/30/2015
 -- EXEMPT WORKERS HIRED PRIOR TO 07/01/2014 (they must have completed trainings, but date does not matter)
 -- EXEC rspTraining_11_2_WrapAround @progfk = 30, @sdate = '07/01/2008'
 -- =============================================
@@ -187,6 +189,7 @@ SELECT [TopicName]
 		, FatherAdvocate
 		, cteMeetTarget.topiccode
 		, cteMeetTarget.subtopiccode
+		, cteMeetTarget.ContentCompleted AS ContentCompletedforPartition
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
 		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '11-2a. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Infant Care within three months of hire' 
@@ -250,7 +253,7 @@ SELECT [TopicName]
 			END AS TopicRatingByWorker
 		, topiccode, TotalContentAreasByTopicAndWorker
 		,	CASE WHEN SUM(cteAlmostFinal.CompletedAllOnTime) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
-			WHEN SUM(isnull(cteAlmostFinal.ContentCompleted, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '2' 
+			WHEN SUM(isnull(cteAlmostFinal.ContentCompletedforPartition, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '2' 
 				ELSE '1'
 			END AS TopicRatingBySite
 		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
