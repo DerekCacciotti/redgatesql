@@ -8,7 +8,7 @@ GO
 -- Create date: 11/15/2013
 -- Description:	Training Tickler
 -- EXEC rspTrainingTickler @progfk = 1, @workerfk = 54, @supervisorfk = 0
--- exec dbo.rspTrainingTickler @progfk=1,@workerfk=0,@supervisorfk=0
+-- exec dbo.rspTrainingTickler @progfk=1,@workerfk=85,@supervisorfk=0
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingTickler]
 	-- Add the parameters for the stored procedure here
@@ -271,6 +271,7 @@ WHERE TrainingTickler='YES'
 						CASE WHEN SupervisorInitialStart IS NULL THEN 'Supervisor Start'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, SupervisorInitialStart), 101)
 						END
+					WHEN SATCompareDateField = 'firstPHQ9' THEN 'First PHQ'
 			  END AS [DateDue]
 			, CASE  
 					WHEN SATCompareDateField = 'firstevent' THEN
@@ -290,6 +291,8 @@ WHERE TrainingTickler='YES'
 					WHEN SATCompareDateField = 'suporig' THEN
 						CASE WHEN SupervisorInitialStart IS NULL THEN 'Remove'
 						WHEN TrainingDate IS NOT NULL THEN 'Remove' END
+					WHEN SATCompareDateField = 'firstPHQ9' THEN
+						CASE WHEN TrainingDate IS NOT NULL THEN 'Remove' END
 			  END AS 'Removals'
 			FROM cteReadyForRemoval rfr
 			)
