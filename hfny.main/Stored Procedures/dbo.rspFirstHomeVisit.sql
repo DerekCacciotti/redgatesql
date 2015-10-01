@@ -81,7 +81,10 @@ as
 					  from hvlog
 						  left join HVCase on HVCase.HVCasePK = hvlog.hvcasefk
 						  inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
-						  inner join dbo.SplitString(@programfk,',') on hvlog.programfk = listitem
+						  
+						  -- hvlog not limit to current programfk (for transfer cases)
+						  inner join dbo.SplitString(@programfk,',') on 1 = 1 --hvlog.programfk = listitem
+						  
 						  inner join WorkerProgram wp on WorkerFK = CurrentFSWFK AND wp.programfk = listitem
 					  where CaseProgress >= 9
 						   and IntakeDate between @STDate and @EndDate
