@@ -5,29 +5,31 @@ SET ANSI_NULLS ON
 GO
 CREATE VIEW [dbo].[vPHQ9]
 AS
-SELECT        PHQ9PK, FormFK, FormType, phq.HVCaseFK, phq.ProgramFK, DateAdministered, FSWFK AS workerfk
-FROM            dbo.TCID INNER JOIN
-                             (SELECT        PHQ9PK, FormFK, FormType, HVCaseFK, ProgramFK, DateAdministered
-                               FROM            dbo.PHQ9
-                               WHERE        DateAdministered IS NOT NULL AND FormType = 'TC') phq ON phq.FormFK = TCIDPK
-UNION ALL
-SELECT        PHQ9PK, FormFK, FormType, phq.HVCaseFK, phq.ProgramFK, DateAdministered, FSWFK AS workerfk
-FROM            dbo.FollowUp fu INNER JOIN
-                             (SELECT        PHQ9PK, FormFK, FormType, HVCaseFK, ProgramFK, DateAdministered
-                               FROM            dbo.PHQ9
-                               WHERE        DateAdministered IS NOT NULL AND FormType = 'FU') phq ON phq.FormFK = fu.FollowUpPK
-UNION ALL
-SELECT        PHQ9PK, FormFK, FormType, phq.HVCaseFK, phq.ProgramFK, DateAdministered, k.FAWFK AS workerfk
-FROM            dbo.Kempe k INNER JOIN
-                             (SELECT        PHQ9PK, FormFK, FormType, HVCaseFK, ProgramFK, DateAdministered
-                               FROM            dbo.PHQ9
-                               WHERE        DateAdministered IS NOT NULL AND FormType = 'KE') phq ON phq.FormFK = k.KempePK
-UNION ALL
-SELECT        PHQ9PK, FormFK, FormType, phq.HVCaseFK, phq.ProgramFK, DateAdministered, FSWFK AS workerfk
-FROM            dbo.Intake i INNER JOIN
-                             (SELECT        PHQ9PK, FormFK, FormType, HVCaseFK, ProgramFK, DateAdministered
-                               FROM            dbo.PHQ9
-                               WHERE        DateAdministered IS NOT NULL AND FormType = 'IN') phq ON phq.FormFK = i.IntakePK
+SELECT     p.PHQ9PK, p.FormFK, p.FormType, p.HVCaseFK, p.ProgramFK, p.DateAdministered, 
+                      CASE WHEN p.FormType = 'TC' THEN t .FSWFK WHEN p.FormType = 'FU' THEN fu.FSWFK WHEN p.FormType = 'KE' THEN k.FAWFK WHEN p.FormType = 'IN' THEN i.FSWFK
+                       END AS workerfk
+FROM         dbo.PHQ9 AS p LEFT OUTER JOIN
+                      dbo.TCID AS t ON t.HVCaseFK = p.HVCaseFK AND t.TCIDPK = p.FormFK AND p.FormType = 'TC' LEFT OUTER JOIN
+                      dbo.FollowUp AS fu ON fu.HVCaseFK = p.HVCaseFK AND fu.FollowUpPK = p.FormFK AND p.FormType = 'FU' LEFT OUTER JOIN
+                      dbo.Kempe AS k ON k.HVCaseFK = p.HVCaseFK AND k.KempePK = p.FormFK AND p.FormType = 'KE' LEFT OUTER JOIN
+                      dbo.Intake AS i ON i.HVCaseFK = p.HVCaseFK AND i.IntakePK = p.FormFK AND p.FormType = 'IN'
+WHERE     (p.DateAdministered IS NOT NULL) AND (p.FormFK IS NOT NULL) AND (p.FormFK > 0)
+GO
+
+EXEC sp_addextendedproperty N'MS_DiagramPane2', N'= 720
+         Append = 1400
+         NewValue = 1170
+         SortType = 1350
+         SortOrder = 1410
+         GroupBy = 1350
+         Filter = 1350
+         Or = 1350
+         Or = 1350
+         Or = 1350
+      End
+   End
+End
+', 'SCHEMA', N'dbo', 'VIEW', N'vPHQ9', NULL, NULL
 GO
 
 EXEC sp_addextendedproperty N'MS_DiagramPane1', N'[0E232FF0-B466-11cf-A24F-00AA00A3EFFF, 1.00]
@@ -35,7 +37,7 @@ Begin DesignProperties =
    Begin PaneConfigurations = 
       Begin PaneConfiguration = 0
          NumPanes = 4
-         Configuration = "(H (1[40] 4[20] 2[20] 3) )"
+         Configuration = "(H (1[17] 4[21] 2[43] 3) )"
       End
       Begin PaneConfiguration = 1
          NumPanes = 3
@@ -101,6 +103,56 @@ Begin DesignProperties =
          Left = 0
       End
       Begin Tables = 
+         Begin Table = "p"
+            Begin Extent = 
+               Top = 6
+               Left = 38
+               Bottom = 125
+               Right = 245
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "t"
+            Begin Extent = 
+               Top = 6
+               Left = 283
+               Bottom = 125
+               Right = 520
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "fu"
+            Begin Extent = 
+               Top = 6
+               Left = 558
+               Bottom = 125
+               Right = 781
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "k"
+            Begin Extent = 
+               Top = 6
+               Left = 819
+               Bottom = 125
+               Right = 1024
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
+         Begin Table = "i"
+            Begin Extent = 
+               Top = 6
+               Left = 1062
+               Bottom = 125
+               Right = 1299
+            End
+            DisplayFlags = 280
+            TopColumn = 0
+         End
       End
    End
    Begin SQLPane = 
@@ -125,23 +177,10 @@ Begin DesignProperties =
          Column = 1440
          Alias = 900
          Table = 1170
-         Output = 720
-         Append = 1400
-         NewValue = 1170
-         SortType = 1350
-         SortOrder = 1410
-         GroupBy = 1350
-         Filter = 1350
-         Or = 1350
-         Or = 1350
-         Or = 1350
-      End
-   End
-End
-', 'SCHEMA', N'dbo', 'VIEW', N'vPHQ9', NULL, NULL
+         Output ', 'SCHEMA', N'dbo', 'VIEW', N'vPHQ9', NULL, NULL
 GO
 
 DECLARE @xp int
-SELECT @xp=1
+SELECT @xp=2
 EXEC sp_addextendedproperty N'MS_DiagramPaneCount', @xp, 'SCHEMA', N'dbo', 'VIEW', N'vPHQ9', NULL, NULL
 GO
