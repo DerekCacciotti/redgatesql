@@ -15,9 +15,9 @@ CREATE PROCEDURE [dbo].[rspFAWMonthlyReport_Part1]
 	@EndDt datetime
 AS
 
---DECLARE @StartDt DATE = '01/01/2011'
---DECLARE @EndDt DATE = '01/31/2011'
---DECLARE @programfk INT = 17
+--DECLARE @StartDt DATE = '08/01/2015'
+--DECLARE @EndDt DATE = '08/31/2015'
+--DECLARE @programfk INT = 1
 
 ;WITH section2 AS (
 SELECT count(*) [PreAssessmentCaseLoad]
@@ -42,9 +42,9 @@ WHERE ProgramFK = @programfk AND a.ScreenDate BETWEEN @StartDt AND @EndDt
 
 , section3 AS (
 SELECT 
-  sum(Case when CaseStatus = '02' THEN 1 ELSE 0 END) [PAAssessed]
-, sum(Case when CaseStatus = '04' THEN 1 ELSE 0 END) [PAAssessedNotAssigned]
-, sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [PATerminated]
+--  sum(Case when CaseStatus = '02' THEN 1 ELSE 0 END) [PAAssessed]
+-- sum(Case when CaseStatus = '04' THEN 1 ELSE 0 END) [PAAssessedNotAssigned]
+ sum(CASE WHEN CaseStatus = '03' THEN 1 ELSE 0 END) [PATerminated]
 , sum(CASE WHEN CaseStatus = '01' THEN 1 ELSE 0 END) [PAContinue]
 , sum(CASE WHEN p.CaseStatus IS NULL OR p.CaseStatus NOT IN ('01', '02', '03', '04') THEN 1 ELSE 0 END) [PANone]
 
@@ -58,10 +58,28 @@ AND (b.DischargeDate IS NULL OR b.DischargeDate >= @StartDt)
 AND (c.KempeDate IS NULL OR c.KempeDate >= @StartDt)
 )
 
-SELECT *, 'form for (' + (convert(VARCHAR(8), @StartDt, 1) + '-' + convert(VARCHAR(8), @EndDt, 1)) + ')' timeperiod
+, section3X AS (
+
+SELECT 
+sum(CASE WHEN a.KempeResult <> 1 THEN 1 ELSE 0 END) AS [PAAssignedNegative]
+,sum(CASE WHEN (a.KempeResult = 1 AND fsw.WorkerPK IS NOT NULL) THEN 1 ELSE 0 END) [PAAssessed]
+,sum(CASE WHEN (a.KempeResult = 1 AND fsw.WorkerPK IS NULL) THEN 1 ELSE 0 END) [PAAssessedNotAssigned]
+FROM Kempe AS a
+JOIN HVCase AS c ON a.HVCaseFK = c.HVCasePK
+JOIN PC d ON d.PCPK = c.PC1FK
+LEFT OUTER JOIN Preassessment AS b ON a.HVCaseFK = b.HVCaseFK AND b.CaseStatus in ('02', '04')
+LEFT OUTER JOIN Worker faw ON a.FAWFK = faw.WorkerPK
+LEFT OUTER JOIN Worker fsw ON b.PAFSWFK = fsw.WorkerPK
+
+WHERE a.ProgramFK = @programfk AND (a.KempeDate BETWEEN @StartDt AND @EndDt)
+--ORDER BY a.KempeDate asc
+)
+
+SELECT * 
 FROM section1 
 JOIN section2 ON 1 = 1
 JOIN section3 ON 1 = 1
+JOIN section3X ON 1 = 1
 
 
 
