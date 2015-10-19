@@ -3,7 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 28, 2013>
@@ -375,7 +374,7 @@ begin
 		  ,FormReviewed
 		  ,FormOutOfWindow
 		  ,isnull(FormMissing,1) as FormMissing
-		  ,FormMeetsTarget
+		  ,case when FormReviewed = 1 and FormOutOfWindow = 0 and (FormMissing is null or FormMissing = 0) and FormMeetsTarget = 1 then 1 else 0 end as FormMeetsTarget
 		  ,isnull(NotMeetingReason, 'Form missing') as NotMeetingReason
 	from cteCohort c
 	left outer join cteMain m on c.HVCaseFK = m.HVCaseFK
