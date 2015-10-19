@@ -138,7 +138,7 @@ begin
 		)
 
 		select distinct 'FLC7' as PTCode
-				, r.HVCaseFK
+				, c.HVCaseFK
 				, PC1ID
 				, OldID
 				, TCDOB
@@ -150,14 +150,14 @@ begin
 				, case when sr.FormReviewed = RefCount then 1 else 0 end as FormReviewed
 				, sr.FormOutOfWindow
 				, sr.FormMissing
-				, case when RefCount = GoodRefs then 1 else 0 end as FormMeetsTarget
+				, case when RefCount >= GoodRefs then 1 else 0 end as FormMeetsTarget
 				, case when sr.FormMissing = 1 then 'Form(s) missing'
 						when sr.FormOutOfWindow = 1 then 'Form(s) out of window'
 						when sr.FormReviewed <> RefCount then 'Form(s) not reviewed by supervisor'
-						when RefCount <> GoodRefs then 'Missing required referrals'
+						when RefCount < GoodRefs then 'Missing required referrals'
 						else '' end as ReasonNotMeeting
-			from cteReferrals r
-			inner join cteSummarizedReferrals sr on sr.HVCaseFK = r.HVCaseFK
+			from cteCohort c
+			left outer join cteSummarizedReferrals sr on sr.HVCaseFK = c.HVCaseFK
 			-- order by OldID
 
 	--select * from cteTotalCases
