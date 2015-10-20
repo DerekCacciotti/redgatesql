@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +7,8 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 18, 2012>
 -- Description:	<This QA report gets you '14. No Home Visits since <xdate-60> for Active Cases Excludes Level X and Level 4 Cases '>
--- rspQAReport14 31, 'summary'	--- for summary page
+-- Modified: <10-20-15 Fix calc DOB cdc>
+-- rspQAReport1-4 31, 'summary'	--- for summary page
 -- rspQAReport14 31			--- for main report - location = 2
 -- rspQAReport14 null			--- for main report for all locations
 -- =============================================
