@@ -145,7 +145,8 @@ select
 	
 	where   ((h.IntakeDate <= dateadd(M, -1, @LastDayofPreviousMonth)) AND (h.IntakeDate IS NOT NULL))	 		  
 			AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @LastDayofPreviousMonth)
-			AND codeLevel.LevelName NOT IN ('Level 4', 'Level X')			
+			AND codeLevel.LevelName NOT IN ('Level 4', 'Level X')
+			AND cp.CaseStartDate <= @Back2MonthsFromAnalysisPoint  -- new 			
 			order by h.HVCasePK -- h.IntakeDate 
 
 --SELECT * FROM @tbl4QAReport14Detail
