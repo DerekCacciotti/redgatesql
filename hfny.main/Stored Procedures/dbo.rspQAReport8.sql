@@ -289,7 +289,7 @@ DECLARE @tbl4QAReport8Expected TABLE(
 	TCName [varchar](200),
 	FormDueDate [datetime],
 	GestationalAge INT,
-	CalcDOB [datetime],
+	--CalcDOB [datetime],
 	TCIDPK INT,
 	ASQSETCAge [char](2) NOT NULL,
 	cteInterval [char](2) NOT NULL
@@ -321,7 +321,7 @@ INSERT INTO @tbl4QAReport8Expected(
 	TCName,
 	FormDueDate,
 	GestationalAge,
-	CalcDOB,
+	--CalcDOB,
 	TCIDPK,
 	ASQSETCAge,
 	cteInterval
@@ -348,18 +348,18 @@ INSERT INTO @tbl4QAReport8Expected(
 	  , ASQSEDateCompleted  AS FormDate
 	  , CASE WHEN dbo.IsFormReviewed(ASQSEDateCompleted, 'AS', ASQSEPK)=1 THEN 0 ELSE 1 END AS FormNotReviewed  -- AQ = ASQSE-1 FORM
 	  , qa1.TCName
-	  , CASE WHEN (XDateAge/30.44) < 24  
+	  , CASE WHEN 1 = 0 -- (XDateAge/30.44) < 24  do not adjust gestational age
 	  THEN   dateadd(d, ((40 - qa1.GestationalAge) * 7) + cd.[DueBy], TCDOB) 	  
 	  ELSE   dateadd(d, cd.[DueBy], TCDOB)
 	  END AS FormDueDate
 	  , qa1.GestationalAge
-	  , CASE WHEN (XDateAge/30.44) < 24  
-		  Then
-		 dateadd(d, ((40 - qa1.GestationalAge) * 7), TCDOB)
-		 ELSE
-		 TCDOB
-		 END
-		  AS CalcDOB
+	  --, CASE WHEN (XDateAge/30.44) < 24  
+		 -- Then
+		 --dateadd(d, ((40 - qa1.GestationalAge) * 7), TCDOB)
+		 --ELSE
+		 --TCDOB
+		 --END
+		 -- AS CalcDOB
 	  , qa1.TCIDPK
 	  ,	Q.ASQSETCAge
 	  , cteIn.Interval  
@@ -469,7 +469,7 @@ INSERT INTO @tbl4QAReport8Intervals4AllASQSE1sInOurCohort
 	FormNotReviewed BIT,
 	TCName [varchar](200),
 	GestationalAge INT,
-	CalcDOB [datetime],
+	--CalcDOB [datetime],
 	ASQSEReceiving [char](1),
 	TCIDPK INT,
 	IntervalExpected [char](2) NULL,
@@ -499,7 +499,7 @@ INSERT INTO @tbl4QAReport8NotExpected(
 	FormNotReviewed,
 	TCName,
 	GestationalAge,
-	CalcDOB,
+	--CalcDOB,
 	ASQSEReceiving,
 	TCIDPK,
 	IntervalExpected,
@@ -524,13 +524,13 @@ INSERT INTO @tbl4QAReport8NotExpected(
 	  , NULL AS FormNotReviewed
 	  , qa2.TCName
 	  , qa2.GestationalAge
-	  , CASE WHEN (qa2.XDateAge/30.44) < 24  
-		  Then
-		 dateadd(d, ((40 - qa2.GestationalAge) * 7), qa2.TCDOB)
-		 ELSE
-		 qa2.TCDOB
-		 END
-		  AS CalcDOB
+	  --, CASE WHEN (qa2.XDateAge/30.44) < 24  
+		 -- Then
+		 --dateadd(d, ((40 - qa2.GestationalAge) * 7), qa2.TCDOB)
+		 --ELSE
+		 --qa2.TCDOB
+		 --END
+		 -- AS CalcDOB
 	  , qa4.ASQSEReceiving
 	  , qa2.TCIDPK	  
 	  ,	cteInExpected.Interval
@@ -578,7 +578,7 @@ easq.hvcasepk IS NULL
 	TCName [varchar](200),
 	FormDueDate [datetime],
 	GestationalAge INT,
-	CalcDOB [datetime],
+	--CalcDOB [datetime],
 	ASQSEReceiving [char](1),
 	TCIDPK INT,
 	IntervalExpected [char](2) NULL,
@@ -667,7 +667,7 @@ SELECT HVCasePK
 	 , FormNotReviewed
 	 , TCName
 	 , GestationalAge
-	 , CalcDOB
+	 --, CalcDOB
 	 , qa04.ASQSEReceiving
 	 , TCIDPK
 	 , IntervalExpected
@@ -700,7 +700,7 @@ INSERT INTO @tbl4QAReport8NotExpectedModified(
 	FormNotReviewed,
 	TCName,
 	GestationalAge,
-	CalcDOB,
+	--CalcDOB,
 	ASQSEReceiving,
 	TCIDPK,
 	IntervalExpected,
@@ -726,7 +726,7 @@ SELECT DISTINCT
 	 , FormNotReviewed
 	 , TCName
 	 , GestationalAge
-	 , CalcDOB
+	 --, CalcDOB
 	 , ASQSEReceiving
 	 , TCIDPK
 	 ,
@@ -788,7 +788,7 @@ ORDER BY Worker
 	TCName [varchar](200),	
 	FormDueDate [datetime],	
 	GestationalAge INT,
-	CalcDOB [datetime],
+	--CalcDOB [datetime],
 	ASQSEReceiving [char](1),
 	TCIDPK INT,
 	IntervalExpected [char](2) NULL,
@@ -817,7 +817,7 @@ INSERT INTO @tbl4QAReport8NotExpectedMain(
 	TCName,
 	FormDueDate,
 	GestationalAge,
-	CalcDOB,
+	--CalcDOB,
 	ASQSEReceiving,
 	TCIDPK,
 	IntervalExpected,
@@ -842,12 +842,12 @@ SELECT
 	 , FormDate
 	 , FormNotReviewed
 	 , TCName
-	 , CASE WHEN (qa5.XDateAge/30.44) < 24  
+	 , CASE WHEN 1 = 0 -- (qa5.XDateAge/30.44) < 24  do not adjust gestational age
 	  THEN   dateadd(d, ((40 - qa5.GestationalAge) * 7) + cd.[DueBy], qa5.TCDOB) 	  
 	  ELSE   dateadd(d, cd.[DueBy], qa5.TCDOB)
 	  END AS FormDueDate
 	 , GestationalAge
-	 , CalcDOB
+	 --, CalcDOB
 	 , ASQSEReceiving
 	 , TCIDPK
 	 , IntervalExpected
@@ -907,7 +907,7 @@ ELSE
 		convert(varchar(10),FormDueDate,101) AS FormDueDate,
 		convert(varchar(10),FormDate,101) AS FormDate,
 		convert(varchar(10),TCDOB,101) AS TCDOB,
-		convert(varchar(10),CalcDOB,101) AS CalcDOB,
+		--convert(varchar(10),CalcDOB,101) AS CalcDOB,
 		TCName,
 		Worker,		
 		GestationalAge,
@@ -928,7 +928,7 @@ UNION
 		convert(varchar(10),FormDueDate,101) AS FormDueDate,
 		convert(varchar(10),FormDate,101) AS FormDate,
 		convert(varchar(10),TCDOB,101) AS TCDOB,
-		convert(varchar(10),CalcDOB,101) AS CalcDOB,
+		--convert(varchar(10),CalcDOB,101) AS CalcDOB,
 		TCName,
 		Worker,		
 		GestationalAge,
