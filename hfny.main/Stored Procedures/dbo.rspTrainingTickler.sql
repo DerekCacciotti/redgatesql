@@ -24,6 +24,7 @@ BEGIN
 IF @supervisorfk = 0 SET @supervisorfk = NULL
 IF @workerfk = 0 SET @workerfk = NULL
 
+
 ; WITH cteTopicList AS (
 SELECT DISTINCT codeTopicPK as TopicFK, TopicName, TopicCode, SATCompareDateField
 , SATInterval, satname, DaysAfter
@@ -55,6 +56,7 @@ WHERE TrainingTickler='YES'
 	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent
 	, SupervisorInitialStart, FAWInitialStart, FSWInitialStart --these are NOT Intitial Start Dates, the function was modified but the name stayed the same
 	, FirstASQDate
+	, FirstPSIDate
 	, TerminationDate
 	FROM [dbo].[fnGetWorkerEventDatesAll](@progfk, NULL, NULL)
 	WHERE (TerminationDate IS NULL OR TerminationDate >=
@@ -159,7 +161,7 @@ WHERE TrainingTickler='YES'
 		FROM cteEverythingRequired ER
 		)
 		
-		
+	
 , cteRemovals AS(		
 	SELECT workerpk
 			, CASE 
@@ -272,6 +274,7 @@ WHERE TrainingTickler='YES'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, SupervisorInitialStart), 101)
 						END
 					WHEN SATCompareDateField = 'firstPHQ9' THEN 'First PHQ'
+					WHEN SATCompareDateField = 'firstPSI' THEN 'First PSI'
 			  END AS [DateDue]
 			, CASE  
 					WHEN SATCompareDateField = 'firstevent' THEN
@@ -293,10 +296,12 @@ WHERE TrainingTickler='YES'
 						WHEN TrainingDate IS NOT NULL THEN 'Remove' END
 					WHEN SATCompareDateField = 'firstPHQ9' THEN
 						CASE WHEN TrainingDate IS NOT NULL THEN 'Remove' END
+					WHEN SATCompareDateField = 'firstPSI' THEN
+						CASE WHEN TrainingDate IS NOT NULL THEN 'Remove' END
 			  END AS 'Removals'
 			FROM cteReadyForRemoval rfr
 			)
-			
+	
 			
 , cteAlmostFinal AS (		
 SELECT workerpk
@@ -367,6 +372,7 @@ SELECT workerpk
 FROM cteFinal 
 WHERE TopicCode <> '98'
 ORDER BY Workerpk, TopicCode, SubTopicCode
+
 
 END
 GO
