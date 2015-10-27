@@ -210,7 +210,7 @@ END
 ELSE
 BEGIN
 
--- to calculate "Number of Referarals needing Follow Up"
+-- to calculate "Number of Referrals needing Follow Up"
 ;
 WITH cteCaseCount AS
 (
@@ -227,7 +227,7 @@ FROM ServiceReferral sr
 
 SELECT 
 	   PC1ID
-	 , casecount AS NumberOfReferaralsNeedingFollowUp
+	 , casecount AS NumberOfReferralsNeedingFollowUp
 	 , Worker
 	 , currentLevel	 
 
