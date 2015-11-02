@@ -4,7 +4,14 @@ GO
 SET ANSI_NULLS ON
 GO
 
+
+-- =============================================
+-- Author:		<cchen2>
+-- Create date: <June 3, 2010>
+-- Description:	<report: Credentialing 6-6.B ASQ>
+-- Edit date: 
 -- rspASQHistory 1
+-- =============================================
 
 CREATE procedure [dbo].[rspCredentialingASQ]
 (
