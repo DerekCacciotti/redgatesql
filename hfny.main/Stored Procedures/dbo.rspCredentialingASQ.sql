@@ -64,7 +64,7 @@ AS
 		 ,case when ASQInWindow is null then 'Unknown'
 			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end InWindow
 		 ,a.TCAge [TCAgeCode]
-
+		 ,ISNULL(a.[ASQTCReceiving],0) ASQTCReceiving
 		from ASQ a
 			inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
 			inner join TCID c on c.TCIDPK = a.TCIDFK
@@ -116,7 +116,7 @@ cteNone
 		 ,'' DateCompleted
 		 ,'' InWindow
 		 ,'' [TCAgeCode]
-		 
+		 ,0 [ASQTCReceiving]
 		from 
 			CaseProgram d 
 			INNER JOIN HVCase AS h ON h.HVCasePK = d.HVCaseFK
@@ -207,13 +207,23 @@ cteNone
 	  END AS Meets
 	FROM cteFinal AS a JOIN cteXXX AS b ON a.PC1ID = b.PC1ID
 )
-	
+
+, cteASQTCReceiving AS (
+	SELECT d.PC1ID, SUM(CASE WHEN  a.ASQTCReceiving = 1 then 1 ELSE 0 END) AS EI
+	FROM ASQ AS a
+	inner join CaseProgram d on d.HVCaseFK = a.HVCaseFK
+	inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
+	GROUP BY d.PC1ID
+)
+
+-- Meets,
 SELECT 
-supervisor, worker, PC1ID, TCName, TCDOB, GestationalAge, TCAge, 
+supervisor, worker, a.PC1ID, TCName, TCDOB, GestationalAge, TCAge, 
 DateCompleted, InWindow, [TCAgeCode], AdjTCDOB, Age, AgeMonth,
 CASE WHEN AgeAtDateCompleted = -1 THEN 0 ELSE AgeAtDateCompleted END AgeAtDateCompleted, 
-nASQ, Meets, AgeAtDateCompletedMonth
-FROM cteYYY
+nASQ, AgeAtDateCompletedMonth, b.EI, CASE WHEN b.EI > 0 THEN 'EI' ELSE
+a.Meets END AS Meets, CASE WHEN a.[ASQTCReceiving] = 1 THEN 'Yes' ELSE 'No' END AS TCReceivingEI
+FROM cteYYY AS a JOIN cteASQTCReceiving AS b ON a.PC1ID = b.PC1ID
 WHERE Age > 0 AND Age <= 5
 order by Age DESC, worker, PC1ID, TCAgeCode
 GO
