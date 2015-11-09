@@ -7,7 +7,7 @@ GO
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 18, 2012>
--- Description:	<This QA report gets you '13. Service Referrals Needing Follow-Up for Active Cases '>
+-- Description:	<This QA report gets you '13. Service Referrals Older Than 30 Days Needing Follow-Up for Active Cases '>
 -- rspQAReport13 31, 'summary'	--- for summary page
 -- rspQAReport13 31			--- for main report - location = 2
 -- rspQAReport13 null			--- for main report for all locations
@@ -146,7 +146,7 @@ WITH cteMissingFollowUp AS
 	SELECT HVCaseFK FROM ServiceReferral sr 
 	inner join dbo.SplitString(@programfk,',') on sr.programfk = listitem
 	WHERE 
-	datediff(dd, @LastDayofPreviousMonth, ReferralDate) < 0	
+	datediff(dd, @LastDayofPreviousMonth, ReferralDate) <= -30
 	AND (ReasonNoService = '' OR ReasonNoService IS NULL)
 	AND StartDate IS NULL
 )
@@ -200,7 +200,7 @@ DECLARE @tbl4QAReport13Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport13Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(13 ,'Service Referrals Needing Follow-Up for Active Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(13 ,'Service Referrals Older Than 30 Days Needing Follow-Up for Active Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfActiveIntakeCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfActiveIntakeCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 
@@ -218,7 +218,7 @@ SELECT HVCaseFK, count(HVCaseFK) AS casecount
 FROM ServiceReferral sr 
 	inner join dbo.SplitString(@programfk,',') on sr.programfk = listitem
 	WHERE 
-	datediff(dd, @LastDayofPreviousMonth, ReferralDate) < 0	
+	datediff(dd, @LastDayofPreviousMonth, ReferralDate) <= -30
 	AND (ReasonNoService = '' OR ReasonNoService IS NULL)
 	AND StartDate IS NULL
  GROUP BY HVCaseFK 
