@@ -16,7 +16,7 @@ CREATE procedure [dbo].[rspAggregateCounts]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartDate				datetime,
-    @EndDate				datetime
+    @EndDate				DATETIME 
 )
 as
 begin
@@ -51,6 +51,44 @@ begin
 		  where ScreenDate between @StartDate and @EndDate 
 		)
 	,
+
+	/* ---------------------------------------------- */
+
+	/* 
+		all preintake home visit counts in this report
+	*/  
+	cteAllPreintakeHomeVisit
+	as
+		(select a.PreintakePK, PIDate, ISNULL(PIVisitMade,0) VisitMode, 
+		CASE WHEN (CaseStatus = '02' AND ISNULL(PIVisitMade, 0) > 0) THEN 1 ELSE 0 END Enrolled
+		  from Preintake AS a
+		  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
+		  where PIDate <= @EndDate 
+		)
+	,	  
+	/*
+		count of preintake home visit since beginning of program
+	*/  
+	ctePreintakeHomeVisitSinceBeginning
+	as	
+		(select (SUM(VisitMode) - SUM(Enrolled)) as countOfPreintakeHomeVisitSinceBeginning
+		  from cteAllPreintakeHomeVisit
+		)
+	,
+	/* 
+		count of preintake home visit in reporting period
+	*/  
+	ctePreintakeHomeVisitInPeriod
+	as
+		(select (SUM(VisitMode) - SUM(Enrolled)) countOfPreintakeHomeVisitInPeriod
+		  from cteAllPreintakeHomeVisit
+		  where PIDate between @StartDate and @EndDate 
+		)
+	,
+
+	/* ---------------------------------------------- */
+
+
 	/* 
 		count of positive screens since beginning of program
 	*/  
@@ -98,7 +136,7 @@ begin
 	*/  
 	cteAllKempes
 	as	
-		(select KempePK, KempeDate, KempeResult
+		(select KempePK, KempeDate, KempeResult, FOBPresent
 		  from Kempe k
 		  inner join dbo.SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
 		  where KempeDate <= @EndDate 
@@ -143,6 +181,19 @@ begin
 		  where KempeResult = 0
 		)
 	,
+
+	/* 
+		count of FOB present Kempes since beginning of program
+	*/  
+	cteFOBPresentKempesSinceBeginning
+	as
+		(select count(KempePK) as countOfFOBPresentKempesSinceBeginning
+		  from cteAllKempes
+		  where FOBPresent = 1
+		)
+	,
+
+
 	/* 
 		count of positive Kempes completed in reporting period
 	*/  
@@ -165,6 +216,19 @@ begin
 				KempeResult = 0
 		)
 	,
+
+	/* 
+		count of FOB present Kempes completed in reporting period
+	*/  
+	cteFOBPresentKempesInPeriod
+	as
+		(select count(KempePK) as countOfFOBPresentKempesInPeriod
+		  from cteAllKempes
+		  where KempeDate between @StartDate and @EndDate and
+				FOBPresent = 1
+		)
+	,
+
 	/* 
 		count of familes enrolled since beginning of program
 	*/  
@@ -518,6 +582,14 @@ begin
 			, '('+replace(convert(varchar(20), cast(round(countOfNegativeKempesSinceBeginning / 
 															(countOfKempesCompletedSinceBeginning * 1.0000) * 100, 0) 
 													as money)), '.00', '') + '%)' as pctOfNegativeKempesSinceBeginning
+			
+			
+			, replace(convert(varchar(20), (cast(countOfFOBPresentKempesSinceBeginning as money)), 1), '.00', '') as countOfFOBPresentKempesSinceBeginning
+			, '('+replace(convert(varchar(20), cast(round(countOfFOBPresentKempesSinceBeginning / 
+															(countOfKempesCompletedSinceBeginning * 1.0000) * 100, 0) 
+													as money)), '.00', '') + '%)' as pctOfFOBPresentKempesSinceBeginning
+			
+			
 			, replace(convert(varchar(20), (cast(countOfPositiveKempesInPeriod as money)), 1), '.00', '') as countOfPositiveKempesInPeriod
 			, '('+replace(convert(varchar(20), cast(round(countOfPositiveKempesInPeriod / 
 															(countOfKempesCompletedInPeriod * 1.0000) * 100, 0) 
@@ -526,6 +598,18 @@ begin
 			, '('+replace(convert(varchar(20), cast(round(countOfNegativeKempesInPeriod / 
 															(countOfKempesCompletedInPeriod * 1.0000) * 100, 0) 
 													as money)), '.00', '') + '%)' as pctOfNegativeKempesInPeriod
+
+
+			, replace(convert(varchar(20), (cast(countOfFOBPresentKempesInPeriod as money)), 1), '.00', '') as countOfFOBPresentKempesInPeriod
+			, '('+replace(convert(varchar(20), cast(round(countOfFOBPresentKempesInPeriod / 
+															(countOfKempesCompletedInPeriod * 1.0000) * 100, 0) 
+													as money)), '.00', '') + '%)' as pctOfFOBPresentKempesInPeriod
+
+
+			, replace(convert(varchar(20), (cast(countOfPreintakeHomeVisitInPeriod as money)), 1), '.00', '') as countOfPreintakeHomeVisitInPeriod
+			, replace(convert(varchar(20), (cast(countOfPreintakeHomeVisitSinceBeginning as money)), 1), '.00', '') as countOfPreintakeHomeVisitSinceBeginning
+
+
 			/* Enrolled Families */
 			/* Since Beginning */
 			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledSinceBeginning as money)), 1), '.00', '') as countOfFamiliesEnrolledSinceBeginning
@@ -656,10 +740,18 @@ begin
 	inner join cteNegativeScreensInPeriod on 1=1
 	inner join cteKempesCompletedSinceBeginning on 1=1
 	inner join cteKempesCompletedInPeriod on 1=1
+
+	inner join ctePreintakeHomeVisitInPeriod on 1=1
+	inner join ctePreintakeHomeVisitSinceBeginning on 1=1
+
 	inner join ctePositiveKempesSinceBeginning on 1=1
 	inner join cteNegativeKempesSinceBeginning on 1=1
+	inner join cteFOBPresentKempesSinceBeginning on 1=1
+
 	inner join ctePositiveKempesInPeriod on 1=1
 	inner join cteNegativeKempesInPeriod on 1=1
+	inner join cteFOBPresentKempesInPeriod on 1=1
+
 	inner join cteFamiliesEnrolledSinceBeginning on 1=1
 	inner join cteFamiliesEnrolledPrenatallySinceBeginning on 1=1
 	inner join cteFamiliesEnrolledPostnatallySinceBeginning on 1=1
