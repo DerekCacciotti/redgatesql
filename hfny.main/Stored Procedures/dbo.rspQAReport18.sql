@@ -34,6 +34,8 @@ set @CutOffDate = '2015-05-01'
 Declare @LastDayofPreviousMonth DateTime 
 Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
 
+set @CutOffDate = DATEADD(m, -3,  @LastDayofPreviousMonth) + 1
+
 DECLARE @tbl4QAReportCohort TABLE(
 	HVCaseFK int,
 	PC1ID char(13),
@@ -88,7 +90,7 @@ if @ReportType = 'summary'
 		          SummaryTotal
 		        )
 		values  ( 18 , -- SummaryId - int
-		          'Number of Kempe forms since 05/01/15 without an attachment (N=' + CONVERT(varchar,@cohortCount) + ')', -- SummaryText - varchar(200)
+		          'Number of Kempe forms since ' + CONVERT(VARCHAR(8), @CutOffDate, 1) + ' without an attachment (N=' + CONVERT(varchar,@cohortCount) + ')', -- SummaryText - varchar(200)
 		          CONVERT(varchar,@missingAttachCount) + ' (' + 
 		          convert(varchar,round(coalesce(cast(@missingAttachCount as float) * 100 / nullif(@cohortCount,0),0),0)) + '%)' -- SummaryTotal - varchar(100)
 		        )
