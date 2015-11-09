@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -125,9 +124,9 @@ begin
 		(
 		select HVCaseFK
 				, count(HVCaseFK) as RefCount
-				, sum(case when DomesticViolence = '1' and ServiceCode = '51' then 1
-							when (Depression = '1' or MentalIllness = '1') and (ServiceCode = '49' or ServiceCode = '50') then 1
-							when (AlcoholAbuse = '1' or SubstanceAbuse = '1') and ServiceCode = '52' then 1
+				, sum(case when DomesticViolence = '1' and ServiceCode = '51' and FormReviewed = 1 then 1
+							when (Depression = '1' or MentalIllness = '1') and (ServiceCode = '49' or ServiceCode = '50') and FormReviewed = 1 then 1
+							when (AlcoholAbuse = '1' or SubstanceAbuse = '1') and ServiceCode = '52' and FormReviewed = 1 then 1
 							else 0
 						end) as GoodRefs
 				, sum(FormReviewed) as FormReviewed
@@ -147,14 +146,14 @@ begin
 				, CurrentLevelName
 				, 'Service Referrals' as FormName
 				, null as FormDate -- ReferralDate as FormDate
-				, case when sr.FormReviewed = RefCount then 1 else 0 end as FormReviewed
+				, case when RefCount is null then null when sr.FormReviewed = RefCount then 1 else 0 end as FormReviewed
 				, sr.FormOutOfWindow
 				, sr.FormMissing
-				, case when RefCount >= GoodRefs then 1 else 0 end as FormMeetsTarget
+				, case when GoodRefs >= RefCount then 1 else 0 end as FormMeetsTarget
 				, case when sr.FormMissing = 1 then 'Form(s) missing'
 						when sr.FormOutOfWindow = 1 then 'Form(s) out of window'
 						when sr.FormReviewed <> RefCount then 'Form(s) not reviewed by supervisor'
-						when RefCount < GoodRefs then 'Missing required referrals'
+						when GoodRefs < RefCount or GoodRefs is null or RefCount is null then 'Missing required referrals'
 						else '' end as ReasonNotMeeting
 			from cteCohort c
 			left outer join cteSummarizedReferrals sr on sr.HVCaseFK = c.HVCaseFK
