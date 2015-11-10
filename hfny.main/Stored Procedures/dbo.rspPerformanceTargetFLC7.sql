@@ -148,8 +148,8 @@ begin
 				, 'Service Referrals' as FormName
 				, null as FormDate -- ReferralDate as FormDate
 				, isnull(case when RefCount is null then null when sr.FormReviewed = RefCount then 1 else 0 end, 1) as FormReviewed
-				, isnull(sr.FormOutOfWindow, 0)
-				, isnull(sr.FormMissing, 0)
+				, isnull(sr.FormOutOfWindow, 0) as FormOutOfWindow
+				, isnull(sr.FormMissing, 0) as FormMissing
 				, case when GoodRefs >= RefCount then 1 else 0 end as FormMeetsTarget
 				, case when sr.FormMissing = 1 then 'Form(s) missing'
 						when sr.FormOutOfWindow = 1 then 'Form(s) out of window'
