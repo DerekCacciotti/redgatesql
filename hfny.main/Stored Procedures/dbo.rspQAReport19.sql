@@ -65,8 +65,8 @@ select hv.HVCaseFK
 		where hv.ProgramFK = @ProgramFK 
 				and hv.VisitType <> '0001'
 				and VisitStartTime >= @CutOffDate
-				and (cp.DischargeDate IS NULL  --- case not closed
-						or cp.DischargeDate > @LastDayofPreviousMonth)
+				--and (cp.DischargeDate IS NULL  
+				--		or cp.DischargeDate > @LastDayofPreviousMonth)
 						
 if @ReportType = 'summary'
 	begin
