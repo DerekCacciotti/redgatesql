@@ -31,6 +31,7 @@ as
 		 , HVCaseFK
 		 , Interest
 		 , Invalid
+		 , ParticipantRefused
 		 , PHQ9CreateDate
 		 , PHQ9Creator
 		 , PHQ9EditDate
