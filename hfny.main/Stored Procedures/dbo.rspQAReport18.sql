@@ -66,8 +66,8 @@ left join codeLevel cl on cp.CurrentLevelFK = cl.codeLevelPK
 inner join Worker w ON w.WorkerPK = k.FAWFK
 where k.ProgramFK = @ProgramFK 
 		and KempeDate >= @CutOffDate
-		and (cp.DischargeDate IS NULL  --- case not closed
-				or cp.DischargeDate > @LastDayofPreviousMonth)
+		--and (cp.DischargeDate IS NULL  
+		--		or cp.DischargeDate > @LastDayofPreviousMonth)
 				
 if @ReportType = 'summary'
 	begin
