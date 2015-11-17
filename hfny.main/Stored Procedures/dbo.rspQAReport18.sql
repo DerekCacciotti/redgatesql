@@ -36,6 +36,9 @@ Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0
 
 set @CutOffDate = DATEADD(m, -3,  @LastDayofPreviousMonth) + 1
 
+DECLARE @endDt AS DATE 
+SET @endDt = DATEADD(dd, DATEDIFF(dd, 0, @LastDayofPreviousMonth), 0)
+
 DECLARE @tbl4QAReportCohort TABLE(
 	HVCaseFK int,
 	PC1ID char(13),
@@ -64,8 +67,8 @@ from Kempe k
 inner join CaseProgram cp on cp.HVCaseFK = k.HVCaseFK
 left join codeLevel cl on cp.CurrentLevelFK = cl.codeLevelPK
 inner join Worker w ON w.WorkerPK = k.FAWFK
-where k.ProgramFK = @ProgramFK 
-		and KempeDate >= @CutOffDate
+where cp.ProgramFK = @ProgramFK 
+		and KempeDate >= @CutOffDate AND KempeDate <=  @endDt
 		--and (cp.DischargeDate IS NULL  
 		--		or cp.DischargeDate > @LastDayofPreviousMonth)
 				
