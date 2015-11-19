@@ -16,6 +16,7 @@ CREATE procedure [dbo].[rspClosedEnrolledCaseList]-- Add the parameters for the 
     @programfk VARCHAR(MAX) = null,
     @StartDt   datetime,
     @EndDt     datetime,
+	@WorkerFK  int = NULL,
     @SiteFK    int = 0,
     @CaseFiltersPositive varchar(100) = ''
 AS
@@ -99,7 +100,7 @@ set @programfk = REPLACE(@programfk,'"','')
 			-- kempe date = cp.HVCaseFK <-> HVScreen.HVCaseFK -> HVScreen.ScreenDate
 			join HVScreen on HVScreen.HVCaseFK = c.HVCasePK
 			-- FSW & site = cp.CurrentFSWFK <-> Worker.WorkerPK -> Worker.LastName + Worker.FirstName ?? site ??
-			left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
+			left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK and w.WorkerPK = isnull(@WorkerFK, w.WorkerPK)
 			join Workerprogram as wp on wp.WorkerFK = w.WorkerPK AND wp.programfk = @programfk
 			-- intake date & age at intake = cp.HVCaseFK <-> Intake.HVCaseFK -> Intake.IntakeDate -> (PCDOB - IntakeDate)
 			join Intake on Intake.HVCaseFK = c.HVCasePK

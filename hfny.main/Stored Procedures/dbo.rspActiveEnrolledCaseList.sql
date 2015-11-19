@@ -13,15 +13,18 @@ CREATE procedure [dbo].[rspActiveEnrolledCaseList]-- Add the parameters for the 
     @ProgramFK           varchar(max)    = null,
     @StartDt             datetime,
     @EndDt               datetime,
-    @SiteFK              int             = 0,
+	@WorkerFK            int = NULL,
+    @SiteFK              int = 0,
     @CaseFiltersPositive varchar(200)
 as
 
-	--DECLARE @StartDt DATE = '01/01/2011'
-	--DECLARE @EndDt DATE = '05/31/2011'
+	--DECLARE @StartDt DATE = '01/01/2014'
+	--DECLARE @EndDt DATE = '05/31/2015'
 	--DECLARE @ProgramFK VARCHAR(MAX) = '1'
-	--DECLARE @SiteFK INT = -1
-
+	--DECLARE @SiteFK INT = 0
+	--DECLARE @CaseFiltersPositive varchar(200) = ''
+	--DECLARE @WorkerFK int = NULL
+    
 	if @ProgramFK is null
 	begin
 		select @ProgramFK = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
@@ -99,7 +102,7 @@ as
 			join HVScreen on HVScreen.HVCaseFK = b.HVCasePK
 			--
 			-- FSW & site = a.CurrentFSWFK <-> Worker.WorkerPK -> Worker.LastName + Worker.FirstName ?? site ??
-			left outer join Worker on Worker.WorkerPK = a.CurrentFSWFK
+			left outer join Worker on Worker.WorkerPK = a.CurrentFSWFK and  Worker.WorkerPK = isnull(@WorkerFK, Worker.WorkerPK)
 			join Workerprogram as wp on wp.WorkerFK = Worker.WorkerPK and wp.ProgramFK = @ProgramFK
 			left outer join listSite as ls on wp.SiteFK = ls.listSitePK
 			--
@@ -137,6 +140,7 @@ as
 			 or a.DischargeDate > @StartDt)
 			 --AND a.ProgramFK = @ProgramFK
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+			 --and  Worker.WorkerPK = isnull(@WorkerFK, Worker.WorkerPK)
 		--AND (@SiteFK = -1 OR (ISNULL(wp.SiteFK, -1) = @SiteFK))
 		order by [key01]
 GO
