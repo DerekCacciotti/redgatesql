@@ -10,7 +10,8 @@ GO
 -- Create date: <Feb 5, 2012>
 -- Description:	<report: Address list>
 --				Moved from FamSys - 02/05/12 jrobohn
--- exec rspAddressList 1,1,0,0
+-- exec rspAddressList 1,1,0,0 
+--
 -- =============================================
 CREATE procedure [dbo].[rspAddressList]
 (@programfk     varchar(max)    = null,
