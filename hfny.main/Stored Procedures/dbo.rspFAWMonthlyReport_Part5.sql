@@ -133,7 +133,10 @@ SELECT c.PC1ID [Participant]
 , CASE WHEN a.PADate < @StartDt THEN 'No Status'
   WHEN a.CaseStatus = '03' THEN rtrim(x.ReportDischargeText) + ' ' + convert(VARCHAR(12), a.PADate, 101) 
   WHEN a.CaseStatus = '01' THEN 'Continue ' + convert(VARCHAR(12), @EndDt, 101) 
-  WHEN a.CaseStatus = '02' THEN 'Assessment Completed ' + convert(VARCHAR(12), b.KempeDate, 101)
+
+  WHEN (a.CaseStatus = '02' AND KempeResult <> 1)  THEN 'Assessment Completed ' + convert(VARCHAR(12), b.KempeDate, 101) + ' (Negative)'
+  WHEN (a.CaseStatus = '02' AND (KempeResult = 1 OR KempeResult IS NULL)) THEN 'Assessment Completed ' + convert(VARCHAR(12), b.KempeDate, 101) + ' (Assigned)'
+
   WHEN a.CaseStatus = '04' THEN 'Assessment Completed, Not Assigned ' + rtrim(x.ReportDischargeText) + ' ' + convert(VARCHAR(12), a.PADate, 101) 
   WHEN a.CaseStatus = '99' THEN 'No Preassessments'
   ELSE '' END [CurrentStatus]
