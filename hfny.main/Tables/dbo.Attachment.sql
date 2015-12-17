@@ -10,6 +10,12 @@ CREATE TABLE [dbo].[Attachment]
 [AttachmentCreateDate] [datetime] NULL CONSTRAINT [DF_Attachment_AttachmentCreateDate] DEFAULT (getdate()),
 [AttachmentCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_Attachment_FormFK] ON [dbo].[Attachment] ([FormFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Attachment_HVCaseFK] ON [dbo].[Attachment] ([HVCaseFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_FK_Attachment_ProgramFK] ON [dbo].[Attachment] ([ProgramFK]) ON [PRIMARY]
+
 GO
 ALTER TABLE [dbo].[Attachment] ADD CONSTRAINT [PK_Attachment] PRIMARY KEY CLUSTERED  ([AttachmentPK]) ON [PRIMARY]
 GO

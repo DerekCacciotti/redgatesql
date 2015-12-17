@@ -119,6 +119,12 @@ CREATE TABLE [dbo].[HVLog]
 [VisitStartTime] [datetime] NOT NULL,
 [VisitType] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [HVCase_ProgramFK] ON [dbo].[HVLog] ([HVCaseFK], [ProgramFK]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_HVLog_VisitStartTime] ON [dbo].[HVLog] ([VisitStartTime]) ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_HVLog_VisitType] ON [dbo].[HVLog] ([VisitType]) ON [PRIMARY]
+
 GO
 EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'HVLog', 'COLUMN', N'HVLogPK'
 GO
