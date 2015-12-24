@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -292,7 +293,10 @@ WHERE Age > 0 AND Age <= 5)
 ,
 cte2 AS (
 SELECT *
-, CAST( cast(round( meets * 100.0 / ISNULL(NULLIF((total - ei), 0),1), 0) AS DECIMAL(18)) as varchar(100)) + ' %'  [MeetPercent]
+
+, CASE WHEN (total - ei) = 0 THEN 'N/A' ELSE
+  CAST( cast(round( meets * 100.0 / ISNULL(NULLIF((total - ei), 0),1), 0) AS DECIMAL(18)) as varchar(100)) + ' %' END
+  [MeetPercent]
 FROM cte1All
 )
 
