@@ -68,7 +68,7 @@ begin
 					when fr.FormType='PI' then 'PreIntake.aspx?pc1id='+PC1ID+ '&pipk=' + convert(varchar,FormFK)		  -- Note: here we use PreIntakes.aspx
 					when fr.FormType='SR' then 'ServiceReferral.aspx?pc1id='+PC1ID+ '&srpk=' + convert(varchar,FormFK)		  -- Note: here we use ServiceReferral.aspx
 					when fr.FormType='VL' then 'HomeVisitLog.aspx?pc1id='+PC1ID+ '&hvlogpk=' + convert(varchar,FormFK)		  -- Note: here we use HomeVisitLogs.aspx
-					when fr.FormType='ID' then 'IdContactInformation?pc1id='+PC1ID		  -- Note: here we use IdContactInformation.aspx
+					when fr.FormType='ID' then 'IdContactInformation.aspx?pc1id='+PC1ID		  -- Note: here we use IdContactInformation.aspx
 					when fr.FormType='IN' then 'Intake.aspx?pc1id='+PC1ID+ '&ipk=' + convert(varchar,FormFK)		  -- Note: here we use Intake.aspx
 					when fr.FormType='DS' then 'PreDischarge.aspx?pc1id='+PC1ID	-- Note: here we use PreDischarge.aspx
 					when fr.FormType='TM' then 'SelectTC.aspx?pc1id='+PC1ID+ '&form=TCMedical'	  -- only three forms use SelectTC.aspx
