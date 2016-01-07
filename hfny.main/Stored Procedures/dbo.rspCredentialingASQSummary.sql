@@ -302,5 +302,8 @@ FROM cte1All
 
 SELECT *
 FROM cte2
+
+WHERE (@WorkerFK IS NOT NULL AND worker <> 'Program Total') OR (@WorkerFK IS NULL)
+
 ORDER BY orderkey, worker, age
 GO
