@@ -3,7 +3,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Sep. 14, 2015>
@@ -34,7 +33,7 @@ begin
 		 , cp.PC1ID
 		 , 'CaseNote.aspx?pc1id=' + PC1ID + '&notepk=' + rtrim(convert(varchar(10), CaseNotePK)) as EditLink
 	from CaseNote cn
-	inner join CaseProgram cp on cp.HVCaseFK = cn.HVCaseFK
+	inner join CaseProgram cp on cp.HVCaseFK = cn.HVCaseFK and cp.ProgramFK = cn.ProgramFK
 	where cn.ProgramFK = @ProgramFK
 			and cn.HVCaseFK = @HVCaseFK
 	
