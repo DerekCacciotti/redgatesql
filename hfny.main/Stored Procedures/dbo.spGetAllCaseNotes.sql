@@ -12,7 +12,7 @@ GO
 CREATE procedure [dbo].[spGetAllCaseNotes]
 (
     @ProgramFK int = null,
-    @HVCaseFK int  = null
+    @PC1ID char(13) = null
 )
 as
 begin
@@ -32,10 +32,10 @@ begin
 		 , cn.ProgramFK
 		 , cp.PC1ID
 		 , 'CaseNote.aspx?pc1id=' + PC1ID + '&notepk=' + rtrim(convert(varchar(10), CaseNotePK)) as EditLink
-	from CaseNote cn
-	inner join CaseProgram cp on cp.HVCaseFK = cn.HVCaseFK and cp.ProgramFK = cn.ProgramFK
+	from CaseProgram cp 
+	inner join CaseNote cn on cp.HVCaseFK = cn.HVCaseFK and cp.ProgramFK = cn.ProgramFK
 	where cn.ProgramFK = @ProgramFK
-			and cn.HVCaseFK = @HVCaseFK
+			and cp.PC1ID = @PC1ID
 	
 END
 GO
