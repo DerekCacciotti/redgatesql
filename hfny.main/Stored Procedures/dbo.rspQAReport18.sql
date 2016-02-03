@@ -64,7 +64,7 @@ select cp.HVCaseFK
 		, ltrim(rtrim(w.firstname))+' '+ltrim(rtrim(w.lastname)) as CurrentWorkerName
 		, CurrentLevel = cl.LevelName
 from Kempe k 
-inner join CaseProgram cp on cp.HVCaseFK = k.HVCaseFK
+inner join CaseProgram cp on cp.HVCaseFK = k.HVCaseFK and cp.ProgramFK = k.ProgramFK
 left join codeLevel cl on cp.CurrentLevelFK = cl.codeLevelPK
 inner join Worker w ON w.WorkerPK = k.FAWFK
 where cp.ProgramFK = @ProgramFK 
@@ -114,9 +114,4 @@ else
 		where a.AttachmentPK is null
 		order by qarc.PC1ID
 	end
-	
-	
-	
-
-	
 GO

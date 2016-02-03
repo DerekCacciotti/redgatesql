@@ -63,7 +63,7 @@ select hv.HVCaseFK
 		, CurrentLevel = cl.LevelName
 		, CurrentWorker = rtrim(w.FirstName) + ' ' + rtrim(w.LastName)
 		from HVLog hv 
-		inner join CaseProgram cp on cp.HVCaseFK = hv.HVCaseFK
+		inner join CaseProgram cp on cp.HVCaseFK = hv.HVCaseFK and cp.ProgramFK = hv.ProgramFK
 		left join codeLevel cl on cp.CurrentLevelFK = cl.codeLevelPK
 		inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
 		where cp.ProgramFK = @ProgramFK 
