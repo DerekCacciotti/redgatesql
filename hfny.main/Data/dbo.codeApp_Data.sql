@@ -1,4 +1,9 @@
 SET IDENTITY_INSERT [dbo].[codeApp] ON
+INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (270, '01', 'FTE                           ', 'Full Time (.75 to 1.0)                                                                              ', 'WK')
+INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (271, '02', 'FTE                           ', 'Part Time (.25 thru .74)                                                                            ', 'WK')
+INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (272, '03', 'FTE                           ', 'Part Time (less than .25)                                                                           ', 'WK')
+SET IDENTITY_INSERT [dbo].[codeApp] OFF
+SET IDENTITY_INSERT [dbo].[codeApp] ON
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (1, '01', 'ASQVersion                    ', 'First Edition 1995                                                                                  ', 'ASQ,SS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (2, '02', 'ASQVersion                    ', 'Second Edition 1995                                                                                 ', 'ASQ,SS')
 INSERT INTO [dbo].[codeApp] ([codeAppPK], [AppCode], [AppCodeGroup], [AppCodeText], [AppCodeUsedWhere]) VALUES (3, '03', 'ASQVersion                    ', 'Third Edition 2009                                                                                  ', 'ASQ,SS')
