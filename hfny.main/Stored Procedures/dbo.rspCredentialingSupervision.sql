@@ -698,23 +698,32 @@ begin
 			,isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) as Duration
 			,sdg.WeeklyDuration
 			,TakePlace
+
 			,case
 			
 				when (TakePlace = 0) and (StaffOutAllWeek = 1)  then 'E'  -- Form found in period and reason is “Staff out all week” Note: E = Excused
 				when (TakePlace = 0) and (StaffOutAllWeek <> 1) and (sdg.WeeklyDuration = 0)  then 'N'  -- Form found in period and reason is not “Staff out all week”				
 
 				when (sdg.WeeklyDuration >= 
-				(CASE WHEN w.FTEFullTime = NULL THEN 90 WHEN w.FTEFullTime = 1 THEN 90 ELSE 60 END)
+				(CASE WHEN w.FTE = '01' THEN 90 
+					  WHEN w.FTE = '02' THEN 60
+					  WHEN w.FTE = '03' THEN 0
+					  ELSE 90 END)
 				--90
 				) then 'Y' -- Form found in period and duration is 1:30 or greater 
 				when (sdg.WeeklyDuration < 
-				(CASE WHEN w.FTEFullTime = NULL THEN 90 WHEN w.FTEFullTime = 1 THEN 90 ELSE 60 END)
+				(CASE WHEN w.FTE = '01' THEN 90 
+				      WHEN w.FTE = '02' THEN 60
+					  WHEN w.FTE = '03' THEN 0
+					  ELSE 90 END)
 				--90
 				) and (TakePlace = 1) then 'N'  -- Form found in period and duration less than 1:30
 				
 				when (WorkerFK is null and wws.SupervisionPK is null) then 'N'  -- Form not found in period
 				end
 				as MeetsStandard
+
+
 
 			,case
 				--when (TakePlace = 0) and (StaffOutAllWeek = 1)  then 'Staff out all week'  -- Form found in period and reason is “Staff out all week” Note: E = Excused
@@ -739,12 +748,20 @@ begin
 				
 				when (isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) >= 
 				
-				(CASE WHEN w.FTEFullTime = NULL THEN 90 WHEN w.FTEFullTime = 1 THEN 90 ELSE 60 END)
+				(CASE WHEN w.FTE = '01' THEN 90 
+				      WHEN w.FTE = '02' THEN 60 
+					  WHEN w.FTE = '03' THEN 0
+					  ELSE 90
+					  END)
 				-- 90
 				) and (TakePlace = 1) then '' -- Form found in period and duration is 1:30 or greater 
 				when (isnull(SupervisionHours * 60,0) + isnull(SupervisionMinutes,0) < 
-				
-				(CASE WHEN w.FTEFullTime = NULL THEN 90 WHEN w.FTEFullTime = 1 THEN 90 ELSE 60 END)
+				(CASE WHEN w.FTE = '01' THEN 90 
+				      WHEN w.FTE = '02' THEN 60 
+					  WHEN w.FTE = '03' THEN 0
+					  ELSE 90
+					  END)
+
 				-- 90
 				) and (TakePlace = 1) then ''  -- Form found in period and duration less than 1:30
 				when (WorkerFK is null and wws.SupervisionPK is null) then 'Unknown'  -- Form not found in period
@@ -966,8 +983,12 @@ SELECT WorkerName
 		 ,twrkr.ScheduledDayName as ScheduledDayName
 		 ,convert(varchar(12),twrkr.sDate,101) as AdjustedStartDate
 		 ----,@DayofWeek as DayNameSelectedByUser
-		 , w.FTEFullTime AS FTEFullTime
-		 , CASE WHEN w.FTEFullTime = 1 THEN 'Full time' ELSE 'Part time' END FTEText
+		 --, w.FTEFullTime AS FTEFullTime
+		 , w.FTE AS FTE
+		 , CASE WHEN w.FTE = '01' THEN 'Full time' 
+		        WHEN w.FTE = '02' THEN 'Part Time (.25 thru .75)'
+				WHEN w.FTE = '03' THEN 'Part Time (less than .25)'
+				ELSE 'Unknown' END FTEText
 	FROM cteReport1 cr
 	left join cteScoreByWorker sw on sw.WorkerName = cr.WorkerName 
 	left join Worker w on w.WorkerPK = cr.WorkerPK

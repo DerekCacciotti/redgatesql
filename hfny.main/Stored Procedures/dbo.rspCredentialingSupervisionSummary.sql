@@ -661,11 +661,21 @@ END
 				when (TakePlace = 0) and (StaffOutAllWeek = 1)  then 'E'  -- Form found in period and reason is “Staff out all week” Note: E = Excused
 				when (TakePlace = 0) and (StaffOutAllWeek <> 1) and (sdg.WeeklyDuration = 0)  then 'N'  -- Form found in period and reason is not “Staff out all week”				
 
-				when (sdg.WeeklyDuration >= (case when w.FTEFullTime = null then 90 when w.FTEFullTime = 1 then 90 else 60 end)) 
-					then 'Y' -- Form found in period and duration is 1:30 or greater 
+				when (sdg.WeeklyDuration >= 
+				(CASE WHEN w.FTE = '01' THEN 90 
+					  WHEN w.FTE = '02' THEN 60
+					  WHEN w.FTE = '03' THEN 0
+					  ELSE 90 END)
+				--(case when w.FTEFullTime = null then 90 when w.FTEFullTime = 1 then 90 else 60 end)
+				) then 'Y' -- Form found in period and duration is 1:30 or greater 
 
-				when (sdg.WeeklyDuration < (case when w.FTEFullTime = NULL then 90 when w.FTEFullTime = 1 then 90 else 60 end)) 
-						and (TakePlace = 1) then 'N'  -- Form found in period and duration less than 1:30
+				when (sdg.WeeklyDuration < 
+				(CASE WHEN w.FTE = '01' THEN 90 
+					  WHEN w.FTE = '02' THEN 60
+					  WHEN w.FTE = '03' THEN 0
+					  ELSE 90 END)
+				--(case when w.FTEFullTime = NULL then 90 when w.FTEFullTime = 1 then 90 else 60 end)
+				) and (TakePlace = 1) then 'N'  -- Form found in period and duration less than 1:30
 				
 				when (WorkerFK is null and wws.SupervisionPK is null) then 'N'  -- Form not found in period
 				end
@@ -876,8 +886,21 @@ SELECT ss.workerpk
 	  ,twrkr.ScheduledDayName as ScheduledDayName
 	  ,convert(varchar(12),twrkr.sDate,101) as AdjustedStartDate
 	  
-	  , w.FTEFullTime AS FTEFullTime
-	  , CASE WHEN w.FTEFullTime = 1 THEN 'Full time' ELSE 'Part time' END FTEText
+	  --, w.FTEFullTime AS FTEFullTime
+	  --, CASE WHEN w.FTEFullTime = 1 THEN 'Full time' ELSE 'Part time' END FTEText
+
+	  , w.FTE AS FTE
+	  , CASE WHEN w.FTE = '01' THEN 'Full time' 
+	   WHEN w.FTE = '02' THEN 'Part time (0.25 thru .75)' 
+	   ELSE 'Part time (less than .25)' END FTEText
+
+	   --, w.FTE AS FTE
+		--, CASE WHEN w.FTE = '01' THEN 'Full time' 
+		--	WHEN w.FTE = '02' THEN 'Part Time (.25 thru .75)'
+		--	WHEN w.FTE = '03' THEN 'Part Time (less than .25)'
+		--	ELSE 'Unknown' END FTEText
+
+	  
 	  
 	   FROM cteSubSummary ss
 	   left join #tblWorkers twrkr on twrkr.workerpk = ss.workerpk
