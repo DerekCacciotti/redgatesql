@@ -418,13 +418,16 @@ SELECT m.HVCasePK, m.TCIDPK
 			--end as PSIDue				
 			 ,case when psim.Interval is null and PSIPK is null then 
 		  
-						case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(20),  convert(varchar(12), dateadd(dd,30, tcdob), 101))  -- there is a baby
+						case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(12), dateadd(dd,30, tcdob), 101)  -- there is a baby
 						else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
 						end
 			WHEN m.IntakeDate >= m.tcdob AND psim.Interval = '00' THEN
               CASE WHEN PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue , m.IntakeDate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue , m.IntakeDate), 101)
 				ELSE '' end
-			when  PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
+			when  PSIPK is null then cd.EventDescription + ' Due  between ' 
+										+ convert(varchar(20), dateadd(dd, cd.MinimumDue, case when Childdob < IntakeDate then IntakeDate else Childdob end), 101)
+										+ ' and ' 
+										+ convert(varchar(20), dateadd(dd, cd.MaximumDue, case when Childdob < IntakeDate then IntakeDate else Childdob end), 101)
 			else ''
 			end as PSIDue		
 	 
