@@ -31,9 +31,9 @@ as
 
 	---- PSI
 	select distinct pc1id
-				   ,hvcase.tcdob
+				   ,ISNULL(hvcase.tcdob, hvcase.edc) tcdob
 				   ,eventDescription
-				   ,dateadd(dd,dueby,hvcase.tcdob) DueDate
+				   ,dateadd(dd,dueby,ISNULL(hvcase.tcdob, hvcase.edc)) DueDate
 				   ,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 								   from tcid
 								   where hvcase.hvcasepk = tcid.hvcasefk
@@ -59,8 +59,8 @@ as
 			 and CurrentFSWFK = isnull(@workerfk,CurrentFSWFK)
 			 and SupervisorFK = isnull(@supervisorfk,SupervisorFK)
 			 and (DischargeDate is null)
-			 and year(dateadd(dd,dueby,hvcase.tcdob)) = year(@rdate)
-			 and month(dateadd(dd,dueby,hvcase.tcdob)) = month(@rdate)
+			 and year(dateadd(dd,dueby,ISNULL(hvcase.tcdob, hvcase.edc))) = year(@rdate)
+			 and month(dateadd(dd,dueby,ISNULL(hvcase.tcdob, hvcase.edc))) = month(@rdate)
 		order by fswname
 				,DueDate
 

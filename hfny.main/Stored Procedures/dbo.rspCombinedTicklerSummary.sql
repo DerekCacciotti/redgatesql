@@ -350,7 +350,7 @@ as
 					end as tcdob
 					,gestationalage
 					,eventDescription
-					,dateadd(dd,dueby,hvcase.tcdob) DueDate
+					,dateadd(dd,dueby,ISNULL(hvcase.tcdob, hvcase.edc)) DueDate
 					,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 									from tcid
 									where hvcase.hvcasepk = tcid.hvcasefk
@@ -377,8 +377,8 @@ as
 					   and currentFSWFK = isnull(@workerfk,currentFSWFK)
 					   and supervisorfk = isnull(@supervisorfk,supervisorfk)
 					   and (dischargedate is null)
-					   and year(dateadd(dd,dueby,hvcase.tcdob)) = year(@rdate)
-					   and month(dateadd(dd,dueby,hvcase.tcdob)) = month(@rdate)
+					   and year(dateadd(dd,dueby,ISNULL(hvcase.tcdob, hvcase.edc))) = year(@rdate)
+					   and month(dateadd(dd,dueby,ISNULL(hvcase.tcdob, hvcase.edc))) = month(@rdate)
 					   
 					   		   
 					   ) t
