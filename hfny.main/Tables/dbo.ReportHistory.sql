@@ -10,6 +10,8 @@ CREATE TABLE [dbo].[ReportHistory]
 [UserFK] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ReportFK_old] [int] NULL
 ) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_ReportHistory_TimeRun] ON [dbo].[ReportHistory] ([TimeRun]) ON [PRIMARY]
+
 
 
 
