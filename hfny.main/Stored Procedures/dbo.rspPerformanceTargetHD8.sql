@@ -211,8 +211,8 @@ begin
 	cteLatestCHForm4TC6MonthsOrOlder -- latest CH form for the TC
 	as
 	(
-	select c.HVCaseFK
-		  --, cach.PC1HasMedicalProvider
+	select top 1 c.HVCaseFK
+		  , cach.PC1HasMedicalProvider
 		  , 'Change Form' as FormName
 		  , max(FormDate) as FormDate -- get the latest CH
 		from cteCohort c
@@ -220,7 +220,8 @@ begin
 		where c.tcAgeDays >= 183
 			 and FormDate <= @EndDate
 		group by c.HVCaseFK
-				--,cach.PC1HasMedicalProvider
+				,cach.PC1HasMedicalProvider
+		order by FormDate desc
 	)
 	,
 	cteExpectedForm4TC6MonthsOrOlder

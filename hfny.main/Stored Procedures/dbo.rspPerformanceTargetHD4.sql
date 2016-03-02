@@ -223,7 +223,7 @@ begin
 	as
 	(
 
-	select c.HVCaseFK
+	select top 1 c.HVCaseFK
 		  ,cach.TCHasMedicalProvider
 		  ,'Change Form' as FormName
 		  ,max(FormDate) as FormDate -- get the latest CH
@@ -232,7 +232,8 @@ begin
 		where c.tcAgeDays >= 183
 			 and FormDate <= @EndDate
 		group by c.HVCaseFK
-				,cach.TCHasMedicalProvider
+				, cach.TCHasMedicalProvider
+		order by FormDate desc
 	)
 
 	-- the following are not used. left it here for future look up
