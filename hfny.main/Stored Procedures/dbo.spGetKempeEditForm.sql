@@ -37,6 +37,7 @@ where HVCasefk=@lHVCaseFK
 
 exec spGetHVCasebyPK @lHVCaseFK
 exec spGetKempebyHVCaseFK @lHVCaseFK
+exec spGetPreassessmentAssessmentCompletedbyHVCaseFK @lHVCaseFK,null
 exec spGetPCbyPK @lPC1PK
 exec spGetCommonAttributesbyForm @myKempePK, 'KE'
 exec spGetAuditCbyForm @myKempePK, 'KE'
