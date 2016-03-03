@@ -66,7 +66,6 @@ INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescripti
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (65, 152, '4 month Polio', '04', 122, 122, 'Polio', 2)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (66, 213, '6-18 month Polio', '06', 548, 183, 'Polio', 3)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (67, 1491, '4-6 year Polio', '48', 2192, 1461, 'Polio', 4)
-INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (68, 30, 'Birth / Intake PSI', '00', 30, 1, 'PSI', 1)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (69, 183, '6 months PSI', '01', 213, 153, 'PSI', 2)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (70, 365, '1 year PSI', '02', 395, 335, 'PSI', 3)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (71, 731, '2 year PSI', '03', 761, 701, 'PSI', 4)
@@ -93,8 +92,6 @@ INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescripti
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (92, 1856, '5 year Well baby Visit', '60', 1826, 1826, 'WBV', 13)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (114, 45, 'Initial FGP/IFSP', '01', 45, 45, 'IFSP/FGP', 1)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (115, 228, '6 Month FGP/IFSP or Post Target Child Review', '02', 225, 225, 'IFSP/FGP', 2)
-SET IDENTITY_INSERT [dbo].[codeDueByDates] OFF
-SET IDENTITY_INSERT [dbo].[codeDueByDates] ON
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (116, 411, '12 Month FGP/IFSP or Post Target Child Review', '03', 408, 408, 'IFSP/FGP', 3)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (117, 594, '18 Month FGP/IFSP Review', '04', 591, 591, 'IFSP/FGP', 4)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (118, 777, '24 Month FGP/IFSP Review', '05', 774, 774, 'IFSP/FGP', 5)
@@ -102,4 +99,7 @@ INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescripti
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (120, 1143, '36 Month FGP/IFSP Review', '07', 1150, 1150, 'IFSP/FGP', 7)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (121, 1326, '42 Month FGP/IFSP Review', '08', 1326, 1326, 'IFSP/FGP', 8)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (122, 1509, '48 Month FGP/IFSP Review', '09', 1509, 1509, 'IFSP/FGP', 9)
+SET IDENTITY_INSERT [dbo].[codeDueByDates] OFF
+SET IDENTITY_INSERT [dbo].[codeDueByDates] ON
+INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency]) VALUES (68, 0, 'Birth / Intake PSI', '00', 30, 1, 'PSI', 1)
 SET IDENTITY_INSERT [dbo].[codeDueByDates] OFF
