@@ -308,7 +308,8 @@ as
 									for xml path ('')),3,1000) TargetChild
 					,rtrim(fsw.firstname)+' '+rtrim(fsw.lastname) fswname
 					,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) supervisor
-					,rtrim(tcfirstname)+' '+rtrim(tclastname) ForWhom
+					--,rtrim(tcfirstname)+' '+rtrim(tclastname) ForWhom
+					,'' ForWhom
 					
 				  from caseprogram
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk

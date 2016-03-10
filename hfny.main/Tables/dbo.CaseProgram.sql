@@ -29,7 +29,8 @@ CREATE TABLE [dbo].[CaseProgram]
 [PC1ID] [char] (13) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL,
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TransferredtoProgramFK] [int] NULL
+[TransferredtoProgramFK] [int] NULL,
+[TransferredStatus] [int] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

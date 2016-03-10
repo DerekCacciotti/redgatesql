@@ -28,7 +28,8 @@ CREATE PROCEDURE [dbo].[spAddCaseProgram](@CaseProgramCreator char(10)=NULL,
 @PC1ID char(13)=NULL,
 @ProgramFK int=NULL,
 @TransferredtoProgram varchar(50)=NULL,
-@TransferredtoProgramFK int=NULL)
+@TransferredtoProgramFK int=NULL,
+@TransferredStatus int=NULL)
 AS
 INSERT INTO CaseProgram(
 CaseProgramCreator,
@@ -56,7 +57,8 @@ OldID,
 PC1ID,
 ProgramFK,
 TransferredtoProgram,
-TransferredtoProgramFK
+TransferredtoProgramFK,
+TransferredStatus
 )
 VALUES(
 @CaseProgramCreator,
@@ -84,7 +86,8 @@ VALUES(
 @PC1ID,
 @ProgramFK,
 @TransferredtoProgram,
-@TransferredtoProgramFK
+@TransferredtoProgramFK,
+@TransferredStatus
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

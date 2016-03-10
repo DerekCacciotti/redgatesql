@@ -27,7 +27,11 @@ group by HVCaseFK
 
 
 SELECT  cp.PC1ID, cp.DischargeDate, PC.PCDOB, PC.PCFirstName, PC.PCLastName, 
-		cp.HVCaseFK, cp.ProgramFK, cp.CaseProgramPK
+		cp.HVCaseFK, cp.ProgramFK, cp.CaseProgramPK,
+		CASE WHEN cp.TransferredStatus = 1 THEN 'Pending'
+		WHEN cp.TransferredStatus = 2 THEN 'Enrolled'
+		WHEN cp.TransferredStatus = 3 THEN 'Not Enrolled'
+		ELSE '' END TransferredStatus
 FROM    CaseProgram cp
 		inner join cteLastDischargeCases ldc on ldc.HVCaseFK = cp.HVCaseFK and cp.DischargeDate = ldc.DischargeDate 
         INNER JOIN HVCase c ON cp.HVCaseFK = c.HVCasePK 
