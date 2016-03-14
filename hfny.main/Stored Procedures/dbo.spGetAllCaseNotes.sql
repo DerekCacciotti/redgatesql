@@ -27,6 +27,7 @@ begin
 		 , CaseNoteCreateDate
 		 , CaseNoteCreator
 		 , CaseNoteEditDate
+		 , CONVERT(VARCHAR(10),CaseNoteDate,101) CaseNoteDate
 		 , CaseNoteEditor
 		 , cn.HVCaseFK
 		 , cn.ProgramFK
