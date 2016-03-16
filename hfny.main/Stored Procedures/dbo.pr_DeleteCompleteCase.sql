@@ -475,6 +475,25 @@ begin try
 	close del_cursor;
 	deallocate del_cursor;
 
+	--FatherFigure
+	declare del_cursor cursor for
+	select FatherFigurePK
+		from FatherFigure ff
+		where hvcasefk = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		exec spDelFatherFigure @FatherFigurePK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
 
 
 	--WorkerAssignment
