@@ -50,7 +50,8 @@ begin
 			  ,codeFormName
 			  ,convert(varchar(10),FormDate,101) as FormDate
 			  ,FormFK
-			  ,FormReviewCreateDate
+			  --,FormReviewCreateDate
+			  ,convert(varchar(10),FormReviewCreateDate,101) as FormReviewCreateDate
 			  ,FormReviewCreator
 			  ,FormReviewEditDate
 			  ,FormReviewEditor
@@ -116,7 +117,8 @@ begin
 			  ,'Training' as codeFormName
 			  ,convert(varchar(10),FormDate,101) as FormDate
 			  ,FormFK
-			  ,FormReviewCreateDate
+			  --,FormReviewCreateDate
+			  ,convert(varchar(10),FormReviewCreateDate,101) as FormReviewCreateDate
 			  ,FormReviewCreator
 			  ,FormReviewEditDate
 			  ,FormReviewEditor
@@ -148,7 +150,8 @@ begin
 			  ,codeFormName
 			  ,convert(varchar(10),FormDate,101) as FormDate
 			  ,FormFK
-			  ,FormReviewCreateDate
+			  --,FormReviewCreateDate
+			  ,convert(varchar(10),FormReviewCreateDate,101) as FormReviewCreateDate
 			  ,FormReviewCreator
 			  ,FormReviewEditDate
 			  ,FormReviewEditor
