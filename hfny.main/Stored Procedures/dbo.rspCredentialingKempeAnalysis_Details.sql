@@ -19,7 +19,7 @@ CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Details](
 	@StartDate DATETIME,
 	@EndDate DATETIME
 
-)
+)WITH RECOMPILE
 AS
 	if @programfk is null
 	begin
@@ -78,13 +78,18 @@ as
 		  ,MOBPartnerPresent as MOBPartner 
 		  ,FOBPartnerPresent as FOBPartner
 		  ,GrandParentPresent as MOBGrandmother
-	
+	,PIVisitMade
 
 	 FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 	inner join dbo.SplitString(@ProgramFK,',') on cp.programfk = listitem
 	INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
 	INNER JOIN PC P ON P.PCPK = h.PC1FK
+	LEFT OUTER JOIN 
+	(SELECT KempeFK, sum(CASE WHEN PIVisitMade > 0 THEN 1 ELSE 0 END) PIVisitMade
+		FROM Preintake
+		WHERE ProgramFK = @programfk
+		GROUP BY kempeFK) AS x ON x.KempeFK = k.KempePK
 	LEFT JOIN CommonAttributes ca ON ca.hvcasefk = h.hvcasepk AND ca.formtype = 'KE'
 
 	WHERE (h.IntakeDate IS NOT NULL OR cp.DischargeDate IS NOT NULL) -- only include kempes that are positive and where there is a clos_date or an intake date.
@@ -106,7 +111,15 @@ as
 	left join codeDischarge cd on h.DischargeReason = cd.DischargeCode
 
 	 
-	 WHERE DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
+	 WHERE --DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
+
+	 (CASE WHEN IntakeDate IS NOT NULL THEN  '1' --'AcceptedFirstVisitEnrolled' 
+	WHEN KempeResult = 1 AND IntakeDate IS NULL AND DischargeDate IS NOT NULL 
+	AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL) THEN '2' -- 'AcceptedFirstVisitNotEnrolled'
+	ELSE '3' -- 'Refused' 
+	END) = '3'
+
+
 	 ORDER BY ReportDischargeText, PC1ID
 
 -- rspCredentialingKempeAnalysis_Details 2, '01/01/2011', '12/31/2011'
