@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[Employment]
 [FormType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [HVCaseFK] [int] NOT NULL,
 [Interval] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[EmploymentMonthlyWages] [numeric] (8, 2) NULL,
+[EmploymentMonthlyWages] [numeric] (6, 0) NULL,
 [PCType] [char] (3) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL,
 [StillWorking] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
