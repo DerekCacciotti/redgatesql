@@ -39,7 +39,6 @@ SET @programfkX = @programfk
 SET @StartDateX = @StartDate
 SET @EndDateX = @EndDate
 
-
 ; WITH main AS
 (
 	SELECT HVCasePK
@@ -167,19 +166,23 @@ SELECT
  , CONVERT(VARCHAR, totalG1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( totalG1 AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, totalG2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( totalG2 AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, totalG3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( totalG3 AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM total1
 )
 
 , total3 AS (
 SELECT 
- 'Acceptance Rate'  AS [title]
- , CONVERT(VARCHAR, totalG1 + totalG2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( (totalG1 + totalG2) AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%)' AS col1
+ 'Acceptance Rate - ' + 
+ CONVERT(VARCHAR, round(COALESCE(cast( (totalG1 + totalG2) AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%' AS [title]
+ , '' AS col1
  , '' AS col2
  , '' AS col3
+ , '1' AS col4
 FROM total1
 
-UNION
+UNION ALL	
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+, '1' AS col4
 )
 
 , age1 AS (
@@ -213,39 +216,47 @@ SELECT
 
 , age2 AS (
 SELECT 'Age' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '1' AS col4
+UNION ALL
 
 SELECT
  '  Under 18' AS [title]
  , CONVERT(VARCHAR, age18G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age18G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, age18G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age18G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, age18G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age18G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM age1
 
-UNION
+UNION ALL
 SELECT 
  '  18 up to 20' AS [title]
  , CONVERT(VARCHAR, age20G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age20G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, age20G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age20G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, age20G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age20G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM age1
-UNION
+
+UNION ALL
 SELECT 
  '  20 up to 30' AS [title]
  , CONVERT(VARCHAR, age30G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age30G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, age30G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age30G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, age30G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age30G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM age1
-UNION
+
+UNION ALL
 SELECT 
  '  30 and over' AS [title]
  , CONVERT(VARCHAR, age40G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age40G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, age40G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age40G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, age40G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age40G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM age1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '1' AS col4
 )
 
 , race1 AS (
@@ -299,72 +310,82 @@ SELECT
 
 , race2 AS (
 SELECT 'Race' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '1' AS col4
+UNION ALL
 SELECT 
  '  White, non-Hispanic' AS [title]
  , CONVERT(VARCHAR, race01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, race01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, race01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM race1
 
-UNION
+UNION ALL
 SELECT
  '  Black, non-Hispanic' AS [title]
  , CONVERT(VARCHAR, race02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, race02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, race02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM race1
 
-UNION
+UNION ALL
 SELECT
  '  Hispanic/Latina/Latino' AS [title]
  , CONVERT(VARCHAR, race03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, race03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, race03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM race1
 
-UNION
+UNION ALL
 SELECT
  '  Asian' AS [title]
  , CONVERT(VARCHAR, race04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, race04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, race04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM race1
 
-UNION
+UNION ALL
 SELECT
  '  Native American' AS [title]
  , CONVERT(VARCHAR, race05G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race05G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, race05G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race05G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, race05G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race05G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM race1
 
-UNION
+UNION ALL
 SELECT
  '  Multiracial' AS [title]
  , CONVERT(VARCHAR, race06G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race06G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, race06G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race06G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, race06G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race06G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM race1
 
-UNION
+UNION ALL
 SELECT
  '  Other' AS [title]
  , CONVERT(VARCHAR, race07G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race07G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, race07G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race07G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, race07G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race07G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM race1
 
-UNION
+UNION ALL
 SELECT
  '  Missing' AS [title]
  , CONVERT(VARCHAR, race08G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race08G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, race08G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race08G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, race08G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race08G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM race1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '1' AS col4
 )
 
 , martial1 AS (
@@ -409,56 +430,65 @@ SELECT
 
 , martial2 AS (
 SELECT 'Martial Status' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '1' AS col4
+
+UNION ALL
 SELECT 
  '  Married' AS [title]
  , CONVERT(VARCHAR, MaritalStatus01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, MaritalStatus01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, MaritalStatus01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM martial1
 
-UNION
+UNION ALL
 SELECT
  '  Not Married' AS [title]
  , CONVERT(VARCHAR, MaritalStatus02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, MaritalStatus02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, MaritalStatus02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM martial1
 
-UNION
+UNION ALL
 SELECT
  '  Separated' AS [title]
  , CONVERT(VARCHAR, MaritalStatus03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, MaritalStatus03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, MaritalStatus03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM martial1
 
-UNION
+UNION ALL
 SELECT
  '  Divorced' AS [title]
  , CONVERT(VARCHAR, MaritalStatus04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, MaritalStatus04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, MaritalStatus04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM martial1
 
-UNION
+UNION ALL
 SELECT
  '  Widowed' AS [title]
  , CONVERT(VARCHAR, MaritalStatus05G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus05G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, MaritalStatus05G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus05G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, MaritalStatus05G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus05G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM martial1
 
-UNION
+UNION ALL
 SELECT
  '  Unknown' AS [title]
  , CONVERT(VARCHAR, MaritalStatus06G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus06G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, MaritalStatus06G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus06G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, MaritalStatus06G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus06G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '1' AS col4
 FROM martial1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '1' AS col4
 )
 
 , edu1 AS (
@@ -492,40 +522,47 @@ SELECT
 
 , edu2 AS (
 SELECT 'Education' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '2' AS col4
+
+UNION ALL
 SELECT 
  '  Less than 12' AS [title]
  , CONVERT(VARCHAR, HighestGrade01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, HighestGrade01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, HighestGrade01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM edu1
 
-UNION
+UNION ALL
 SELECT
  '  HS/GED' AS [title]
  , CONVERT(VARCHAR, HighestGrade02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, HighestGrade02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, HighestGrade02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM edu1
 
-UNION
+UNION ALL
 SELECT
  '  More than 12' AS [title]
  , CONVERT(VARCHAR, HighestGrade03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, HighestGrade03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, HighestGrade03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM edu1
 
-UNION
+UNION ALL
 SELECT
  '  Unknown' AS [title]
  , CONVERT(VARCHAR, HighestGrade04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, HighestGrade04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, HighestGrade04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM edu1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '2' AS col4
 )
 
 , employed1 AS (
@@ -549,24 +586,29 @@ SELECT
 
 , employed2 AS (
 SELECT 'Employed' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '2' AS col4
+
+UNION ALL
 SELECT 
  '  Yes' AS [title]
  , CONVERT(VARCHAR, Employed01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, Employed01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, Employed01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM employed1
 
-UNION
+UNION ALL
 SELECT
  '  No' AS [title]
  , CONVERT(VARCHAR, Employed02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, Employed02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, Employed02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM employed1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '2' AS col4
 )
  
 , inHome1 AS (
@@ -595,32 +637,37 @@ SELECT
 
 , inHome2 AS (
 SELECT 'Bio Father in Home' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '2' AS col4
+UNION ALL
 SELECT 
  '  Yes' AS [title]
  , CONVERT(VARCHAR, InHome01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, InHome01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, InHome01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM inHome1
 
-UNION
+UNION ALL
 SELECT
  '  No' AS [title]
  , CONVERT(VARCHAR, InHome02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, InHome02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, InHome02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM inHome1
 
-UNION
+UNION ALL
 SELECT
  '  Unknown' AS [title]
  , CONVERT(VARCHAR, InHome03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, InHome03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, InHome03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM inHome1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '2' AS col4
 )
 
 , score1 AS (
@@ -650,32 +697,37 @@ SELECT
 
 , score2 AS (
 SELECT 'Whose Score Qualifies' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '2' AS col4
+UNION ALL
 SELECT 
  '  Mother' AS [title]
  , CONVERT(VARCHAR, Score01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, Score01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, Score01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM score1
 
-UNION
+UNION ALL
 SELECT
  '  Father' AS [title]
  , CONVERT(VARCHAR, Score02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, Score02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, Score02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM score1
 
-UNION
+UNION ALL
 SELECT
  '  Mother & Father' AS [title]
  , CONVERT(VARCHAR, Score03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, Score03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, Score03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM score1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '2' AS col4
 )
 
 , kempescore1 AS (
@@ -705,33 +757,38 @@ SELECT
 
 , kempescore2 AS (
 SELECT 'Kempe Score' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '2' AS col4
+UNION ALL
 SELECT 
  '  25-49' AS [title]
  , CONVERT(VARCHAR, KempeScore01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, KempeScore01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, KempeScore01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM kempescore1
 
-UNION
+UNION ALL
 SELECT
  '  50-74' AS [title]
  , CONVERT(VARCHAR, KempeScore02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, KempeScore02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, KempeScore02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM kempescore1
 
 
-UNION
+UNION ALL
 SELECT
  '  75+' AS [title]
  , CONVERT(VARCHAR, KempeScore03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, KempeScore03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, KempeScore03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '2' AS col4
 FROM kempescore1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '2' AS col4
 )
 
 , issues1 AS (
@@ -760,32 +817,37 @@ SELECT
 
 , issues2 AS (
 SELECT 'PC1 Issues' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '3' AS col4
+UNION ALL
 SELECT 
  '  DV' AS [title]
  , CONVERT(VARCHAR, issues01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, issues01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, issues01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM issues1
 
-UNION
+UNION ALL
 SELECT
  '  MH' AS [title]
  , CONVERT(VARCHAR, issues02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, issues02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, issues02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM issues1
 
-UNION
+UNION ALL
 SELECT
  '  SA' AS [title]
  , CONVERT(VARCHAR, issues03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, issues03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, issues03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM issues1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '3' AS col4
 )
 
 , trimester1 AS (
@@ -819,40 +881,46 @@ SELECT
 
 , trimester2 AS (
 SELECT 'Trimester (at time of Enrollment/Discharge)' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '3' AS col4
+UNION ALL
 SELECT 
  '  1st' AS [title]
  , CONVERT(VARCHAR, trimester01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, trimester01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, trimester01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM trimester1
 
-UNION
+UNION ALL
 SELECT
  '  2nd' AS [title]
  , CONVERT(VARCHAR, trimester02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, trimester02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, trimester02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM trimester1
 
-UNION
+UNION ALL
 SELECT
  '  3rd' AS [title]
  , CONVERT(VARCHAR, trimester03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, trimester03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, trimester03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM trimester1
 
-UNION
+UNION ALL
 SELECT
  '  Postnatal' AS [title]
  , CONVERT(VARCHAR, trimester04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, trimester04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, trimester04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM trimester1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '3' AS col4
 )
 
 , assessment1 AS (
@@ -886,40 +954,46 @@ SELECT
 
 , assessment2 AS (
 SELECT 'Present at Assessment' AS [title], '' AS col1, '' AS col2, '' AS col3
-UNION
+ , '3' AS col4
+UNION ALL
 SELECT 
  '  MOB only' AS [title]
  , CONVERT(VARCHAR, assessment01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, assessment01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, assessment01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM assessment1
 
-UNION
+UNION ALL
 SELECT
  '  FOB Only' AS [title]
  , CONVERT(VARCHAR, assessment02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, assessment02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, assessment02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM assessment1
 
-UNION
+UNION ALL
 SELECT
  '  Both Parents' AS [title]
  , CONVERT(VARCHAR, assessment03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, assessment03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, assessment03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM assessment1
 
-UNION
+UNION ALL
 SELECT
  '  Parent and Other' AS [title]
  , CONVERT(VARCHAR, assessment04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, assessment04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, assessment04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM assessment1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '3' AS col4
 )
 
 , refused1 AS (
@@ -940,51 +1014,58 @@ WHERE a.Status = '3'
 refused2 AS (
 
 SELECT 'Reason for Refused' AS [title], '' AS col1, '' AS col2, '' AS col3
-
-UNION
+ , '3' AS col4
+UNION ALL
 SELECT
  '  Refused' AS [title]
- , '', ''
+ , '' AS col1, '' AS col2
  , CONVERT(VARCHAR, Refused) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Refused AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM refused1
 
-UNION
+UNION ALL
 SELECT
  '  Unable To Locate' AS [title]
- , '', ''
+ , '' AS col1, '' AS col2
  , CONVERT(VARCHAR, UnableToLocate) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( UnableToLocate AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM refused1
 
-UNION
+UNION ALL
 SELECT
  '  TC Aged Out' AS [title]
- , '', ''
+ , '' AS col1, '' AS col2
  , CONVERT(VARCHAR, TCAgedOut) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( TCAgedOut AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM refused1
 
-UNION
+UNION ALL
 SELECT
  '  Out of Target Area' AS [title]
- , '', ''
+ , '' AS col1, '' AS col2
  , CONVERT(VARCHAR, OutOfTargetArea) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( OutOfTargetArea AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM refused1
 
-UNION
+UNION ALL
 SELECT
  '  Transfered' AS [title]
- , '', ''
+ , '' AS col1, '' AS col2
  , CONVERT(VARCHAR, Transfered) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Transfered AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM refused1
 
-UNION
+UNION ALL
 SELECT
  '  All Others' AS [title]
- , '', ''
+ , '' AS col1, '' AS col2
  , CONVERT(VARCHAR, AllOthers) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( AllOthers AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
 FROM refused1
 
-UNION
+UNION ALL
 SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
+ , '3' AS col4
 ),
 
 rpt1 AS (
@@ -1026,5 +1107,6 @@ SELECT title AS [Title]
 , col1 AS [AcceptedFirstVisitEnrolled]
 , col2 AS [AcceptedFirstVisitNotEnrolled]
 , col3 AS [Refused]
+, col4 AS [groupID]
 FROM rpt1
 GO

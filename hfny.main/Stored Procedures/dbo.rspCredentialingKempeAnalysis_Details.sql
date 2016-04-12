@@ -105,6 +105,13 @@ as
 			,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) as FSW
 			,convert(varchar(10),h.DischargeDate,101)  as DischargeDate
 			,cd.ReportDischargeText
+			, CASE WHEN h.DischargeReason = '36' THEN 1
+			WHEN h.DischargeReason = '12' THEN 2
+			WHEN h.DischargeReason = '19' THEN 3
+			WHEN h.DischargeReason = '07' THEN 4
+			WHEN h.DischargeReason = '25' THEN 5
+			ELSE 6 END AS DischargeSortCode
+            
 	 FROM cteCohert h
 	left  join worker faw on CurrentFAWFK = faw.workerpk  -- faw
 	left  join worker fsw on CurrentFSWFK = fsw.workerpk   -- fsw	 
@@ -120,7 +127,7 @@ as
 	END) = '3'
 
 
-	 ORDER BY ReportDischargeText, PC1ID
+	 ORDER BY DischargeSortCode, PC1ID -- ReportDischargeText, PC1ID
 
 -- rspCredentialingKempeAnalysis_Details 2, '01/01/2011', '12/31/2011'
 
