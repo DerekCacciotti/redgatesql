@@ -11,7 +11,7 @@ GO
 -- Edited By:	Chris Papas
 -- Edit:		10/23/2013 - only FSW and Supervisors on this report. And use there respective start dates NOT hire date
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTraining_NYS3IFSP]
+CREATE procedure [dbo].[rspTraining_NYS3IFSP]
 	-- Add the parameters for the stored procedure here
 	@sdate AS DATETIME,
 	@progfk AS INT
@@ -79,7 +79,7 @@ BEGIN
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) < .9 THEN '1'
 	END AS Rating
-,	'NYS3. Staff (Supervisors and Home Visitors) receive IFSP training within three months of hire to a HFNY position.' AS CSST
+,	'NYS3. Staff (Supervisors and Home Visitors) receive FGP/IFSP training within three months of hire to a HFNY position.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) AS PercentMeeting
 FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.GenericColumn = cteFinal.GenericColumn
