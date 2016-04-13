@@ -55,7 +55,7 @@ BEGIN
 , cteSupMain AS (
 
 	SELECT DISTINCT wp.workerfk
-	, SupervisorInitialStart AS StartDate
+	, wp.SupervisorStartDate AS StartDate
 	, 'Supervisor' AS CurrentRole
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) AS WorkerName
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
@@ -65,7 +65,7 @@ BEGIN
 	AND (SupervisorEndDate IS NULL OR SupervisorEndDate > dateadd(day, 180, SupervisorStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
 	AND wp.ProgramFK = @progfk
-	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorInitialStart
+	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorStartDate
 )
 
 --Now we get the trainings (or lack thereof)
