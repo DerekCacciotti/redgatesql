@@ -18,7 +18,7 @@ as
 
 --DECLARE @startDT DATE = '02/25/2014'
 --DECLARE @endDT DATE = '08/25/2014'
---DECLARE @ProgramFK varchar(max) = '1,2,3,4,5,6,7'
+--DECLARE @ProgramFK varchar(max) = '1'
 
 DECLARE @defaultDT DATE = CONVERT(DATE,DATEADD(MS, -3, DATEADD(MM, DATEDIFF(MM, 0, @startDT) , 0)))
 
@@ -142,14 +142,35 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	)
 
 	, cteAcceptanceRate AS 
-	(SELECT
-	    count(*) AS Totals
-		, sum(Case WHEN IntakeDate IS NOT NULL THEN 1 ELSE 0 END) TotalEnrolled
-		--, sum(Case WHEN DischargeDate IS NOT NULL AND IntakeDate IS NULL THEN 1 ELSE 0 END) TotalNotEnrolled
-		,CONVERT(VARCHAR, CONVERT(VARCHAR, round(COALESCE(cast(sum(Case WHEN IntakeDate IS NOT NULL THEN 1 ELSE 0 END) AS FLOAT) 
-		* 100/ NULLIF(count(*),0), 0), 0))  + '%') AS AcceptanceRate	 
-	 FROM cteAcceptanceRateX
+	(SELECT 
+	 CONVERT(VARCHAR, CONVERT(VARCHAR, round(COALESCE(cast(sum(Case WHEN IntakeDate IS NOT NULL 
+    OR (KempeResult = 1 AND IntakeDate IS NULL AND DischargeDate IS NOT NULL 
+	AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL)) THEN 1 ELSE 0 END) AS FLOAT) 
+	* 100/ NULLIF(count(*),0), 0), 0))  + '%') AS AcceptanceRate	
+
+	FROM HVCase h
+	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
+	inner join dbo.SplitString(@ProgramFK, ',') on cp.programfk = listitem
+	INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
+	INNER JOIN PC P ON P.PCPK = h.PC1FK
+	LEFT OUTER JOIN 
+	(SELECT KempeFK, sum(CASE WHEN PIVisitMade > 0 THEN 1 ELSE 0 END) PIVisitMade
+		FROM Preintake AS a
+		INNER JOIN CaseProgram cp ON cp.HVCaseFK = a.HVCaseFK
+	    INNER join dbo.SplitString(@ProgramFK, ',') on cp.programfk = listitem
+		--WHERE ProgramFK = @ProgramFK
+		GROUP BY kempeFK) AS x ON x.KempeFK = k.KempePK
+	WHERE (h.IntakeDate IS NOT NULL OR cp.DischargeDate IS NOT NULL) AND k.KempeResult = 1 
+	AND k.KempeDate BETWEEN @startDt AND @endDT
 	)
+	--(SELECT
+	--    count(*) AS Totals
+	--	, sum(Case WHEN IntakeDate IS NOT NULL THEN 1 ELSE 0 END) TotalEnrolled
+	--	--, sum(Case WHEN DischargeDate IS NOT NULL AND IntakeDate IS NULL THEN 1 ELSE 0 END) TotalNotEnrolled
+	--	,CONVERT(VARCHAR, CONVERT(VARCHAR, round(COALESCE(cast(sum(Case WHEN IntakeDate IS NOT NULL THEN 1 ELSE 0 END) AS FLOAT) 
+	--	* 100/ NULLIF(count(*),0), 0), 0))  + '%') AS AcceptanceRate	 
+	-- FROM cteAcceptanceRateX
+	--)
 	
 	-- retention rate
 	,
