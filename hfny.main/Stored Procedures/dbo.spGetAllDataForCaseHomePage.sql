@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,7 +8,7 @@ GO
 -- Description:	Gets all the data needed to display the Case Home Page
 -- exec spGetAllDataForCaseHomePage 'CD97050257617' 'VB84010244287' 'EG81010218386' 'DS90010007908' 'AB77050250139' 'MC79140216559' 'JC79010253576'
 -- =============================================
-CREATE procedure [dbo].[spGetAllDataForCaseHomePage]
+CREATE procedure	[dbo].[spGetAllDataForCaseHomePage]
 (
 	@PC1ID char(13)
 )
@@ -21,6 +20,12 @@ begin
 
 	declare @HVCaseFK int
 	set @HVCaseFK = (select HVCaseFK 
+						from CaseProgram cp
+	 					where PC1ID = @PC1ID
+					);
+
+	declare @ProgramFK int
+	set @ProgramFK = (select ProgramFK 
 						from CaseProgram cp
 	 					where PC1ID = @PC1ID
 					);
@@ -413,7 +418,6 @@ begin
 		)
 
 --select * from cteFormReview
-
 	, cteRawFormApprovals
 	as
 		(
@@ -475,6 +479,38 @@ begin
 				, FatherFigure_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'FF')
 		)
 	
+	, cteCaseTransferStatus
+	as
+		(-- get the data related to whether this case was involved in a transfer
+		select 'to' as TransferredToFrom
+				, ProgramName
+				, case when TransferredStatus = 1 then 'Pending'
+						when TransferredStatus = 2 then 'Enrolled'
+						when TransferredStatus = 3 then 'Not Enrolled (Rejected)'
+					end as TransferStatusText
+		from CaseProgram cp
+		inner join HVProgram hp on hp.HVProgramPK = cp.TransferredtoProgramFK
+		where cp.PC1ID = @PC1ID and cp.TransferredtoProgramFK is not null
+		union
+		select 'from' as TransferredToFrom
+				, ProgramName
+				, case when TransferredStatus = 1 then 'Pending'
+						when TransferredStatus = 2 then 'Enrolled'
+						when TransferredStatus = 3 then 'Not Enrolled (Rejected)'
+					end as TransferStatusText
+		from CaseProgram cp
+		inner join HVProgram hp on hp.HVProgramPK = cp.ProgramFK
+		where cp.HVCaseFK = @HVCaseFK and PC1ID <> @PC1ID and cp.TransferredtoProgramFK = @ProgramFK
+		union
+		select '' as TransferredToFrom
+				, '' as ProgramName
+				, '' as TransferStatusText
+		from CaseProgram cp
+		inner join HVProgram hp on hp.HVProgramPK = cp.ProgramFK
+		where cp.HVCaseFK = @HVCaseFK and cp.TransferredtoProgramFK is null
+				and HVCaseFK not in (select HVCaseFK from CaseProgram cp2 group by HVCaseFK having count(cp2.HVCaseFK) > 1)
+		)
+
 	select HVCasePK
 			, cp.ProgramFK
 			, PC1ID
@@ -596,6 +632,9 @@ begin
 			, cfa.PSI_FormsReviewed
 			, cfa.FatherFigure_ReviewOn
 			, cfa.FatherFigure_FormsReviewed
+			, cts.TransferredToFrom
+			, cts.ProgramName
+			, cts.TransferStatusText
 		from HVCase hc
 		inner join CaseProgram cp on cp.HVCaseFK = hc.HVCasePK 
 		inner join PC pc on pc.PCPK = hc.PC1FK
@@ -635,6 +674,7 @@ begin
 		--left outer join cteTC on cteTC.HVCaseFK = hc.HVCasePK
 		--left outer join cteTCFU on cteTCFU.HVCaseFK = hc.HVCasePK
 		--left outer join cteFUP on cteFUP.HVCaseFK = hc.HVCasePK
+		inner join cteCaseTransferStatus cts on 1=1 
 		where PC1ID = @PC1ID
 
 end
