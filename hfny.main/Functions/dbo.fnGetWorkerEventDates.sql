@@ -66,6 +66,22 @@ RETURN
 		GROUP BY workerfk
 		)
 
+		--get first HITS date
+		, ctHITSDate AS (
+			SELECT DISTINCT kempe.FAWFK AS FSWFK, MIN(kempe.KempeDate)  AS HITSDate 
+			FROM [dbo].[HITS]
+			INNER JOIN dbo.Kempe ON hits.formfk=KempePK AND hits.FormType='KE'
+			GROUP BY FAWFK
+		  )
+
+		  --first Audit C Date
+		, ctAuditC AS (
+			SELECT DISTINCT kempe.FAWFK AS FSWFK, MIN(kempe.KempeDate)  AS AudtCDate 
+			FROM [dbo].[AuditC]
+			INNER JOIN dbo.Kempe ON [AuditC].formfk=KempePK AND [AuditC].FormType='KE'
+			GROUP BY FAWFK
+		  )
+
 		SELECT DISTINCT w.WorkerPK
 			 , w.LastName AS 'WrkrLName'
 			 , w.FirstName AS 'WrkrFName'
@@ -90,6 +106,8 @@ RETURN
 				END AS 'FirstEvent'
 			, MIN(ctPSI.PSIDate) AS 'FirstPSIDate'
 			, MIN(ctphq.PHQDate) AS 'FirstPHQDate'
+			, MIN(ctHITSDate.HITSDate) AS 'FirstHITSDate'
+			, MIN(ctAuditC.AudtCDate) AS 'FirstAuditCDate'
 		FROM Worker w
 		INNER JOIN workerprogram wp ON wp.WorkerFK= w.workerpk
 		INNER JOIN worker supervisor on supervisorfk = supervisor.workerpk
@@ -99,6 +117,8 @@ RETURN
 		LEFT OUTER JOIN ctSuper ON ctsuper.SupervisorFK=w.WorkerPK
 		LEFT OUTER JOIN ctPSI ON ctpsi.fswfk = w.WorkerPK
 		LEFT OUTER JOIN ctPHQ ON ctPHQ.FSWFK = w.WorkerPK
+		LEFT OUTER JOIN ctHITSDate ON ctHITSDate.FSWFK = w.WorkerPK
+		LEFT OUTER JOIN ctAuditC ON ctAuditC.FSWFK = w.WorkerPK
 		GROUP BY wp.programfk, w.WorkerPK, w.LastName, w.FirstName
 		,wp.supervisorfk
 		, wp.SupervisorStartDate, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate

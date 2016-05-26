@@ -76,6 +76,7 @@ where ta.WorkerFK is not null
 )
 
 
+
 , ctMain AS
 (
 SELECT firstname + lastname AS Name
@@ -92,6 +93,8 @@ SELECT firstname + lastname AS Name
 , fn.SupervisorFirstEvent
 , fn.FirstPSIDate
 , fn.FirstPHQDate
+, fn.firstHITSDate
+, fn.firstAuditCDate
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='1.0') AS 'f1'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='2.0' AND ctA.SubTopicFK IS Null) AS 'f2'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=65) AS 'f2a'
@@ -189,6 +192,9 @@ SELECT firstname + lastname AS Name
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='41.0') AS 'f41'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='42.0') AS 'f42'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='43.0') AS 'f43'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='44.0') AS 'f44'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='45.0') AS 'f45'
+
 -------END CP 6/12/2015 Adding New HFA Required topics ---------------
 FROM Worker w
 INNER JOIN dbo.fnGetWorkerEventDates(@prgfk, @super, @worker) fn ON fn.workerpk = w.workerpk
@@ -208,6 +214,8 @@ SELECT distinct [Name]
 	 , convert(VARCHAR(12), [FirstEvent], 101) AS [FirstEvent]
 	 , convert(VARCHAR(12), [FirstPSIDate], 101) AS [FirstPSIDate]
 	 , convert(VARCHAR(12), [FirstPHQDate], 101) AS [FirstPHQDate]
+	 , CONVERT(VARCHAR(12), [FirstHITSDate], 101) AS [FirstHITSDate]
+	 , CONVERT(VARCHAR(12), [FirstAuditCDate], 101) AS [FirstAuditCDate]
 	 , convert(VARCHAR(12), [f1], 101) AS [f1]
 	 , CASE isnull([f1], 0)
 		WHEN [f1] THEN
@@ -368,7 +376,19 @@ SELECT distinct [Name]
 			ELSE '' END
 		ELSE '' END AS 'f43_ast'	
 	
-	
+ , convert(VARCHAR(12), [f44], 101) AS [f44]
+	 , CASE isnull([f44], 0)
+		WHEN [f44] THEN
+			CASE WHEN datediff(dd, [f44], [firstHITSDate]) < 0 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f44_ast'		
+		
+ , convert(VARCHAR(12), [f45], 101) AS [f45]
+	 , CASE isnull([f45], 0)
+		WHEN [f45] THEN
+			CASE WHEN datediff(dd, [f45], [firstAuditCDate]) < 0 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f45_ast'
 	
 	
 	
