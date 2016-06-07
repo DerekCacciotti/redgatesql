@@ -7,7 +7,7 @@ GO
 -- Create date: <Feb. 17, 2016>
 -- Description: <report: Credentialing 7-5 B. Administration of the Depression Screen (PHQ-2/9)>
 -- Edit date: 
--- exec rspDepressionScreeningReferralDetails 1, null, null, null, null, ''
+-- exec rspDepressionScreeningReferralDetails 1, '2014-07-01', null, null, null, null, ''
 -- =============================================
 CREATE procedure [dbo].[rspDepressionScreeningReferralDetails] (@ProgramFK varchar(max) = null
 									, @CutoffDate date = null
@@ -67,8 +67,8 @@ with	cteMain
 								  when wp.SiteFK = @SiteFK then 1
 								  else 0
 							 end = 1)
-			 ) ,
-		ctePHQ
+			 ) 
+		, ctePHQ
 		  as (select	m.HVCaseFK
 					  , m.PC1ID
 					  , m.WorkerFirstName
@@ -122,6 +122,7 @@ with	cteMain
 		  , PC1ID
 		  , TCDOB
 		  , IntakeDate
+		  , @CutoffDate as CutoffDate
 		  , case when FormType = 'KE' then 'Kempe'
 					when FormType = 'IN' then 'Intake'
 					when FormType = 'TC' then 'TC ID'

@@ -7,7 +7,7 @@ GO
 -- Create date: <Feb. 17, 2016>
 -- Description: <report: Credentialing 7-5 B. Administration of the Depression Screen (PHQ-2/9) - Summary>
 -- Edit date: 
--- exec rspDepressionScreening 1, null, null, null, null, ''
+-- exec rspDepressionScreening 1, '2014-07-01', null, null, null, null, ''
 -- =============================================
 CREATE procedure [dbo].[rspDepressionScreening] (@ProgramFK varchar(max) = null
 									, @CutoffDate date = null
@@ -195,6 +195,7 @@ with	cteMain
 			 , case when Total > 0 then round(Meeting / (Total * 1.0000), 2) 
 					when Total = 0 then 0.00
 				end as MeetingPercentage
+			 , @CutoffDate as CutoffDate
 		from ctePHQFinal
 		order by WorkerName
 					, [Status at Enrollment]
