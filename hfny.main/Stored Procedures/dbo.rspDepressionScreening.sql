@@ -10,6 +10,7 @@ GO
 -- exec rspDepressionScreening 1, null, null, null, null, ''
 -- =============================================
 CREATE procedure [dbo].[rspDepressionScreening] (@ProgramFK varchar(max) = null
+									, @CutoffDate date = null
 									, @SupervisorFK int = null
 									, @WorkerFK int = null
 									, @PC1ID varchar(13) = ''
@@ -57,7 +58,7 @@ with	cteMain
 											 and wp.ProgramFK = ListItem
 			  inner join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
 			  where		cp.DischargeDate is null
-						and hc.IntakeDate >= '07/01/2014'
+						and hc.IntakeDate >= @CutoffDate
 						and datediff(month, hc.TCDOB, current_timestamp) >= 3 
 					    and datediff(month, hc.TCDOB, hc.IntakeDate) <= 3 
 						and cp.CurrentFSWFK = isnull(@WorkerFK, cp.CurrentFSWFK)

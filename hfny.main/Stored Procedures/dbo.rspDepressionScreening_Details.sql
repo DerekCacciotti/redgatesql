@@ -10,6 +10,7 @@ GO
 -- exec rspDepressionScreening_Details 1, null, null, null, null, ''
 -- =============================================
 CREATE procedure [dbo].[rspDepressionScreening_Details] (@ProgramFK varchar(max) = null
+									, @CutoffDate date = null
 									, @SupervisorFK int = null
 									, @WorkerFK int = null
 									, @PC1ID varchar(13) = ''
@@ -57,7 +58,7 @@ with	cteMain
 											 and wp.ProgramFK = ListItem
 			  inner join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
 			  where		cp.DischargeDate is null
-						and hc.IntakeDate >= '07/01/2014'
+						and hc.IntakeDate >= @CutoffDate
 						and datediff(month, hc.TCDOB, current_timestamp) >= 3 
 					    and datediff(month, hc.TCDOB, hc.IntakeDate) <= 3 
 						and cp.CurrentFSWFK = isnull(@WorkerFK, cp.CurrentFSWFK)
@@ -109,14 +110,8 @@ with	cteMain
 					  , p.TCDOB
 					  , p.IntakeDate
 					  , p.CaseTiming as 'Status at Enrollment'
-					  , case when pre.DateAdministered is not null
-								  and pre.ParticipantRefused = 1 then 'Refused'
-							 else pre.DateAdministered
-						end as 'Date of Prenatal Screen'
-					  , case when post.DateAdministered is not null
-								  and post.ParticipantRefused = 1 then 'Refused'
-							 else post.DateAdministered
-						end as 'Date of Postnatal Screen'
+					  , pre.DateAdministered as 'Date of Prenatal Screen'
+					  , post.DateAdministered as 'Date of Postnatal Screen'
 					  , pre.FormType as [Prenatal FormType]
 					  , post.FormType as [Postnatal FormType]
 					  , pre.ParticipantRefused as ParticipantRefusedPrenatal
@@ -148,10 +143,13 @@ with	cteMain
 		  , IntakeDate
 		  , [Status at Enrollment]
 		  , case when [Status at Enrollment] = 'Post-natal' then 'N/A'
+				 when ParticipantRefusedPrenatal = 1 then 'Refused'
 				 else [Date of Prenatal Screen]
-			end [Date of Prenatal Screen]
+			end as [Date of Prenatal Screen]
 		  , [Prenatal FormType]
-		  , [Date of Postnatal Screen]
+		  , case when ParticipantRefusedPostnatal = 1 then 'Refused'
+					else [Date of Postnatal Screen]
+			end as 'Date of Postnatal Screen'
 		  , [Postnatal FormType]
 		  , case when [Date of Postnatal Screen] is not null then datediff(month, TCDOB, [Date of Postnatal Screen])
 				 else -1
