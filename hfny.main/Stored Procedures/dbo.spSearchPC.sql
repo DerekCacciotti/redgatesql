@@ -67,6 +67,8 @@ as
 	select distinct pc.pcpk
 				   ,pc.pcfirstname
 				   ,pc.pclastname
+				   ,pc.PCOldName
+				   ,pc.PCOldName2
 				   ,pc.pcdob
 				   ,pc.pcphone
 				   ,pc.PCEmergencyPhone
@@ -75,7 +77,13 @@ as
 		from PC as pc
 		where
 			 (pc.pcfirstname like @PCFirstName+'%'
+			 or pc.pcOldName LIKE @PCFirstName+'%'
+			 or pc.pcOldName2 LIKE @PCFirstName+'%'
+
 			 or pc.pclastname like @PCLastName+'%'
+			 or pc.pcOldName LIKE  '%'+@PCLastName + '%'
+			 or pc.pcOldName2 LIKE '%'+@PCLastName
+
 			 or pc.pcdob = @PCDOB
 			 or pc.pcphone = @PCPhone
 			 or pc.pcemergencyphone = @PCEmergencyPhone)
@@ -142,6 +150,8 @@ as
 		  a.pcpk
 		 ,a.pcfirstname
 		 ,a.pclastname
+		 ,a.PCOldName
+		 ,a.PCOldName2
 		 ,a.pcdob
 		 ,a.pcphone
 		 ,a.PCEmergencyPhone
@@ -164,6 +174,8 @@ as
 	select top 100 pcpk	
 					, pcfirstname
 					, pclastname
+					, pcOldName
+					, pcOldName2 
 					, pcdob
 					, pcphone
 					, PCEmergencyPhone
@@ -171,17 +183,17 @@ as
 					, racespecify
 					, status
 					, roles
-					, orderColumn = case when pcfirstname like @PCFirstName+'%' then 1 else 0 end+
+					, orderColumn = CASE WHEN pcOldName LIKE  @PCFirstName+'%' then 1 else 0 end+
+					                CASE WHEN pcOldName LIKE  '%'+@PCLastName then 1 else 0 end+
+									CASE WHEN pcOldName2 LIKE  @PCFirstName+'%' then 1 else 0 end+
+					                CASE WHEN pcOldName2 LIKE  '%'+@PCLastName then 1 else 0 end+
+					                CASE when pcfirstname like @PCFirstName+'%' then 1 else 0 end+
 									case when pclastname like @PCLastName+'%' then 1 else 0 end+
 									case when pcdob = @PCDOB then 1 else 0 end+
 									case when pcphone = @PCPhone then 1 else 0 end+
 									case when pcemergencyphone = @PCEmergencyPhone then 1 else 0 end
 		from qqq
-		order by case when pcfirstname like @PCFirstName+'%' then 1 else 0 end+
-				case when pclastname like @PCLastName+'%' then 1 else 0 end+
-				case when pcdob = @PCDOB then 1 else 0 end+
-				case when pcphone = @PCPhone then 1 else 0 end+
-				case when pcemergencyphone = @PCEmergencyPhone then 1 else 0 end desc
+		order BY  orderColumn desc
 				, pclastname
 				, pcfirstname
 				--case when ethnicity = @Ethnicity then 1 else 0 end+
