@@ -196,8 +196,24 @@ with	cteMain
 					when Total = 0 then 0.00
 				end as MeetingPercentage
 			 , @CutoffDate as CutoffDate
+			 , '0' as SortOrder
 		from ctePHQFinal
-		order by WorkerName
+		union all
+		select '** All program workers' as WorkerName
+			 , 'N/A' as SupervisorName
+			 , [Status at Enrollment]
+			 , sum(Total)
+			 --, Total1
+			 , sum(Meeting)
+			 , sum(NotMeeting)
+			 , case when sum(Total) > 0 then round(sum(Meeting) / (sum(Total) * 1.0000), 2) 
+					when sum(Total) = 0 then 0.00
+				end as MeetingPercentage
+			 , @CutoffDate as CutoffDate
+			 , '1' as SortOrder
+		from ctePHQFinal
+		group by [Status at Enrollment]
+		order by SortOrder
+					, WorkerName
 					, [Status at Enrollment]
-					
 GO

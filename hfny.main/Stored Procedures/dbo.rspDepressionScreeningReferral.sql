@@ -9,7 +9,7 @@ GO
 -- Edit date: 
 -- exec rspDepressionScreeningReferral 1, '2014-07-01', null, null, null, null, ''
 -- =============================================
-create procedure [dbo].[rspDepressionScreeningReferral] (@ProgramFK varchar(max) = null
+CREATE procedure [dbo].[rspDepressionScreeningReferral] (@ProgramFK varchar(max) = null
 									, @CutoffDate date = null
 									, @SupervisorFK int = null
 									, @WorkerFK int = null
@@ -140,9 +140,21 @@ with	cteMain
 			, count(TotalScore) as TotalParticipants
 			, sum(case when MeetsStandard = 'Y' then 1 else 0 end) as MeetingStandard
 			, sum(case when MeetsStandard = 'N' then 1 else 0 end) as NotMeetingStandard
+			, '0' as SortOrder
 	from	cteFinal
 	group by WorkerName
 				, SupervisorName
-	order by WorkerName
+	union all
+	select '** All program workers' as WorkerName
+			, 'N/A' as SupervisorName
+			, @CutoffDate as CutoffDate
+			, count(TotalScore) as TotalParticipants
+			, sum(case when MeetsStandard = 'Y' then 1 else 0 end) as MeetingStandard
+			, sum(case when MeetsStandard = 'N' then 1 else 0 end) as NotMeetingStandard
+			, '1' as SortOrder
+	from cteFinal
+	order by SortOrder
+				, WorkerName
+	
 	
 GO

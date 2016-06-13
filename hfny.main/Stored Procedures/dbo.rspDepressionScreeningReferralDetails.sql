@@ -99,24 +99,25 @@ with	cteMain
 			  where		p.Invalid = 0
 						and p.Positive = 1
 			 ) 
-		--, ctePHQFinal
-		--  as (select distinct
-		--			  p.WorkerFirstName
-		--			  , p.WorkerLastname
-		--			  , p.SupervisorFirstName
-		--			  , p.SupervisorLastName
-		--			  , p.PC1ID
-		--			  , p.TCDOB
-		--			  , p.IntakeDate
-		--			  , p.FormType
-		--			  , p.TotalScore
-		--			  , p.DateAdministered
-		--			  , sr.ReferralDate
-		--			  , sr.ServiceReceived
-		--			  , sr.StartDate
-		--	  from		ctePHQ as p
-		--	  left outer join ServiceReferral sr on sr.HVCaseFK = p.HVCaseFK and sr.ServiceCode in (49, 50)
-		--	 )
+		, ctePHQFinal
+		  as (select distinct
+					  p.WorkerFirstName
+					  , p.WorkerLastname
+					  , p.SupervisorFirstName
+					  , p.SupervisorLastName
+					  , p.PC1ID
+					  , p.TCDOB
+					  , p.IntakeDate
+					  , p.FormType
+					  , p.TotalScore
+					  , p.DateAdministered
+					  , p.DepressionReferralMade
+					  , sr.ReferralDate
+					  , sr.ServiceReceived
+					  , sr.StartDate
+			  from		ctePHQ as p
+			  left outer join ServiceReferral sr on sr.HVCaseFK = p.HVCaseFK and sr.ServiceCode in (49, 50)
+			 )
 	select	ltrim(rtrim(WorkerLastName)) + ', ' + ltrim(rtrim(WorkerFirstName)) as WorkerName
           , ltrim(rtrim(SupervisorLastName)) + ', ' + ltrim(rtrim(SupervisorFirstName)) as SupervisorName
 		  , PC1ID
@@ -130,9 +131,10 @@ with	cteMain
 			end as FormName
 		  , DateAdministered
 		  , TotalScore
-		  , case when DepressionReferralMade is null or DepressionReferralMade = 0 then 0 else 1 end as ReferralMade
+		  , case when DepressionReferralMade is null or DepressionReferralMade = 0 then 'N' else 'Y' end as ReferralMade
 		  , case when DepressionReferralMade is null or DepressionReferralMade = 0 then 'N' else 'Y' end as MeetsStandard
-	from	ctePHQ
+		  , case when ReferralDate is not null then convert(varchar(10), ReferralDate, 101) else 'N/A' end as ReferralDate
+	from	ctePHQFinal
 	order by WorkerName
 		  , PC1ID
 GO
