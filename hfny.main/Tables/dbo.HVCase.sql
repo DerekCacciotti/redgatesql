@@ -36,34 +36,6 @@ CREATE TABLE [dbo].[HVCase]
 [TCDOD] [datetime] NULL,
 [TCNumber] [int] NULL
 ) ON [PRIMARY]
-CREATE NONCLUSTERED INDEX [IX_HVCase_IntakeDate] ON [dbo].[HVCase] ([IntakeDate]) INCLUDE ([CaseProgress], [EDC], [HVCasePK], [TCDOB], [TCNumber]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_HVCase_CPFK] ON [dbo].[HVCase] ([CPFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_HVCase_FFFK] ON [dbo].[HVCase] ([FFFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_HVCase_OBPFK] ON [dbo].[HVCase] ([OBPFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_HVCase_PC1FK] ON [dbo].[HVCase] ([PC1FK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_HVCase_PC2FK] ON [dbo].[HVCase] ([PC2FK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_HVCase_CaseProgress] ON [dbo].[HVCase] ([CaseProgress]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_HVCase_PC1FK] ON [dbo].[HVCase] ([PC1FK]) ON [PRIMARY]
-
-GO
-CREATE STATISTICS [_dta_stat_165575628_2_33] ON [dbo].[HVCase] ([CaseProgress], [TCDOB])
-
-GO
-CREATE STATISTICS [_dta_stat_165575628_1_2_24] ON [dbo].[HVCase] ([HVCasePK], [CaseProgress], [PC1FK])
-
-GO
-CREATE STATISTICS [_dta_stat_165575628_33_1_2_24] ON [dbo].[HVCase] ([TCDOB], [HVCasePK], [CaseProgress], [PC1FK])
-
-GO
-CREATE STATISTICS [_dta_stat_165575628_33_24_1] ON [dbo].[HVCase] ([TCDOB], [PC1FK], [HVCasePK])
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -151,7 +123,50 @@ AS
 Update HVCase Set HVCase.HVCaseEditDate= getdate()
 From [HVCase] INNER JOIN Inserted ON [HVCase].[HVCasePK]= Inserted.[HVCasePK]
 GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author: Bill O'Brien
+-- Create date: 06/13/2016
+-- Description: Automatically Update Common Attributes Intake Rows when Intake Date Changed
+-- =============================================
+create TRIGGER [dbo].[TR_HVCaseIntakeDate] ON [dbo].[HVCase]
+
+
+For Update 
+AS
+Update CommonAttributes Set FormDate= inserted.IntakeDate
+From CommonAttributes
+INNER JOIN Inserted ON CommonAttributes.HVCaseFK= Inserted.[HVCasePK]
+where FormType like 'IN%'
+GO
 ALTER TABLE [dbo].[HVCase] ADD CONSTRAINT [PK__HVCase__A36F84D600200768] PRIMARY KEY CLUSTERED  ([HVCasePK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_HVCase_CaseProgress] ON [dbo].[HVCase] ([CaseProgress]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVCase_CPFK] ON [dbo].[HVCase] ([CPFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVCase_FFFK] ON [dbo].[HVCase] ([FFFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_HVCase_IntakeDate] ON [dbo].[HVCase] ([IntakeDate]) INCLUDE ([CaseProgress], [EDC], [HVCasePK], [TCDOB], [TCNumber]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVCase_OBPFK] ON [dbo].[HVCase] ([OBPFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVCase_PC1FK] ON [dbo].[HVCase] ([PC1FK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_HVCase_PC1FK] ON [dbo].[HVCase] ([PC1FK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVCase_PC2FK] ON [dbo].[HVCase] ([PC2FK]) ON [PRIMARY]
+GO
+CREATE STATISTICS [_dta_stat_165575628_2_33] ON [dbo].[HVCase] ([CaseProgress], [TCDOB])
+GO
+CREATE STATISTICS [_dta_stat_165575628_1_2_24] ON [dbo].[HVCase] ([HVCasePK], [CaseProgress], [PC1FK])
+GO
+CREATE STATISTICS [_dta_stat_165575628_33_1_2_24] ON [dbo].[HVCase] ([TCDOB], [HVCasePK], [CaseProgress], [PC1FK])
+GO
+CREATE STATISTICS [_dta_stat_165575628_33_24_1] ON [dbo].[HVCase] ([TCDOB], [PC1FK], [HVCasePK])
 GO
 ALTER TABLE [dbo].[HVCase] WITH NOCHECK ADD CONSTRAINT [FK_HVCase_CPFK] FOREIGN KEY ([CPFK]) REFERENCES [dbo].[PC] ([PCPK])
 GO
