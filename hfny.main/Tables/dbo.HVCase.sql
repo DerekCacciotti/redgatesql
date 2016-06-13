@@ -142,6 +142,40 @@ From CommonAttributes
 INNER JOIN Inserted ON CommonAttributes.HVCaseFK= Inserted.[HVCasePK]
 where FormType like 'IN%'
 GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author:		Bill O'Brien
+-- Create date: 06/13/16
+-- Description:	Update Common Attributes Form Date with new Screen Date
+-- =============================================
+CREATE TRIGGER [dbo].[TR_HVCaseScreenDate] ON [dbo].[HVCase]
+For Update 
+AS
+Update CommonAttributes Set FormDate= inserted.ScreenDate
+From CommonAttributes
+INNER JOIN Inserted ON CommonAttributes.HVCaseFK= Inserted.[HVCasePK]
+where FormType like 'SC'
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author:		Bill O'Brien
+-- Create date: 06/13/16
+-- Description:	Update Common Attributes Form Date with new TCDOB
+-- =============================================
+CREATE TRIGGER [dbo].[TR_HVCaseTCDOB] ON [dbo].[HVCase]
+For Update 
+AS
+Update CommonAttributes Set FormDate= inserted.TCDOB
+From CommonAttributes
+INNER JOIN Inserted ON CommonAttributes.HVCaseFK= Inserted.[HVCasePK]
+where FormType = 'TC'
+GO
 ALTER TABLE [dbo].[HVCase] ADD CONSTRAINT [PK__HVCase__A36F84D600200768] PRIMARY KEY CLUSTERED  ([HVCasePK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_HVCase_CaseProgress] ON [dbo].[HVCase] ([CaseProgress]) ON [PRIMARY]
