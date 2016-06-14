@@ -149,6 +149,23 @@ GO
 -- =============================================
 -- Author:		Bill O'Brien
 -- Create date: 06/13/16
+-- Description:	Update Common Attributes Form Date with new TCDOB
+-- =============================================
+CREATE TRIGGER [dbo].[TR_HVCaseKempe] ON [dbo].[HVCase] 
+For Update 
+AS
+Update CommonAttributes Set FormDate= inserted.KempeDate
+From CommonAttributes
+INNER JOIN Inserted ON CommonAttributes.HVCaseFK= Inserted.[HVCasePK]
+where FormType = 'KE'
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author:		Bill O'Brien
+-- Create date: 06/13/16
 -- Description:	Update Common Attributes Form Date with new Screen Date
 -- =============================================
 CREATE TRIGGER [dbo].[TR_HVCaseScreenDate] ON [dbo].[HVCase]
