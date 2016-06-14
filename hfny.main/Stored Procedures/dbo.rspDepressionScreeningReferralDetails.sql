@@ -112,11 +112,16 @@ with	cteMain
 					  , p.TotalScore
 					  , p.DateAdministered
 					  , p.DepressionReferralMade
-					  , sr.ReferralDate
-					  , sr.ServiceReceived
-					  , sr.StartDate
+					  , srm.ReferralDate
+					  , srm.ServiceReceived
+					  , srm.StartDate
 			  from		ctePHQ as p
-			  left outer join ServiceReferral sr on sr.HVCaseFK = p.HVCaseFK and sr.ServiceCode in (49, 50)
+			  outer apply (select top 1 HVCaseFK
+										, ReferralDate	
+										, ServiceReceived
+										, StartDate 
+							from ServiceReferral sr 
+							where sr.HVCaseFK = p.HVCaseFK and sr.ServiceCode in (49, 50)) srm
 			 )
 	select	ltrim(rtrim(WorkerLastName)) + ', ' + ltrim(rtrim(WorkerFirstName)) as WorkerName
           , ltrim(rtrim(SupervisorLastName)) + ', ' + ltrim(rtrim(SupervisorFirstName)) as SupervisorName
@@ -132,7 +137,7 @@ with	cteMain
 		  , DateAdministered
 		  , TotalScore
 		  , case when DepressionReferralMade is null or DepressionReferralMade = 0 then 'N' else 'Y' end as ReferralMade
-		  , case when DepressionReferralMade is null or DepressionReferralMade = 0 then 'N' else 'Y' end as MeetsStandard
+		  , case when DepressionReferralMade = 1 and ReferralDate is not null then 'Y' else 'N' end as MeetsStandard
 		  , case when ReferralDate is not null then convert(varchar(10), ReferralDate, 101) else 'N/A' end as ReferralDate
 	from	ctePHQFinal
 	order by WorkerName

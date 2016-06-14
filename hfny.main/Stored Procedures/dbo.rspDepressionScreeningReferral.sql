@@ -97,24 +97,29 @@ with	cteMain
 			  where		p.Invalid = 0
 						and p.Positive = 1
 			 ) 
-		--, ctePHQFinal
-		--  as (select distinct
-		--			  p.WorkerFirstName
-		--			  , p.WorkerLastname
-		--			  , p.SupervisorFirstName
-		--			  , p.SupervisorLastName
-		--			  , p.PC1ID
-		--			  , p.TCDOB
-		--			  , p.IntakeDate
-		--			  , p.FormType
-		--			  , p.TotalScore
-		--			  , p.DateAdministered
-		--			  , sr.ReferralDate
-		--			  , sr.ServiceReceived
-		--			  , sr.StartDate
-		--	  from		ctePHQ as p
-		--	  left outer join ServiceReferral sr on sr.HVCaseFK = p.HVCaseFK and sr.ServiceCode in (49, 50)
-		--	 )
+		, ctePHQFinal
+		  as (select distinct
+					  p.WorkerName
+					  , p.SupervisorName
+					  , p.HVCaseFK
+					  , p.PC1ID
+					  , p.TCDOB
+					  , p.IntakeDate
+					  , p.FormType
+					  , p.TotalScore
+					  , p.DateAdministered
+					  , p.DepressionReferralMade
+					  , srm.ReferralDate
+					  , srm.ServiceReceived
+					  , srm.StartDate
+			  from		ctePHQ as p
+			  outer apply (select top 1 HVCaseFK
+										, ReferralDate	
+										, ServiceReceived
+										, StartDate 
+							from ServiceReferral sr 
+							where sr.HVCaseFK = p.HVCaseFK and sr.ServiceCode in (49, 50)) srm
+			 )
 	, cteFinal 
 	as (select	WorkerName
 				, SupervisorName
@@ -130,8 +135,8 @@ with	cteMain
 				, DateAdministered
 				, TotalScore
 				, case when DepressionReferralMade is null or DepressionReferralMade = 0 then 0 else 1 end as ReferralMade
-				, case when DepressionReferralMade is null or DepressionReferralMade = 0 then 'N' else 'Y' end as MeetsStandard
-	from	ctePHQ
+				, case when DepressionReferralMade = 1 and ReferralDate is not null then 'Y' else 'N' end as MeetsStandard
+	from	ctePHQFinal
 	)
 	
 	select	WorkerName
