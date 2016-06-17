@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -404,39 +403,48 @@ SELECT
 ctePSIFormDueDates
 as
 (
-SELECT m.HVCasePK, m.TCIDPK
---, P.PSIInterval as PSIInterval, psim.Interval as psim_Interval,  PSIPK , tcdob,TCAgeDays
-		  --,case when psim.Interval is null then ''	
-		 -- ,case when psim.Interval is null and PSIPK is null then 
+	select m.HVCasePK, m.TCIDPK
+		--, P.PSIInterval as PSIInterval, psim.Interval as psim_Interval,  PSIPK , tcdob,TCAgeDays
+		--,case when psim.Interval is null then ''	
+		-- ,case when psim.Interval is null and PSIPK is null then 
 		  
-			--			case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(20),  convert(varchar(12), dateadd(dd,30, tcdob), 101))  -- there is a baby
-			--			else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
-			--			end
+		--			case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(20),  convert(varchar(12), dateadd(dd,30, tcdob), 101))  -- there is a baby
+		--			else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
+		--			end
 				
-			--when  PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
-			--else ''
-			--end as PSIDue				
-			 ,case when psim.Interval is null and PSIPK is null then 
-		  
-						case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(12), dateadd(dd,30, tcdob), 101)  -- there is a baby
-						else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
+		--when  PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
+		--else ''
+		--end as PSIDue				
+		,case when psim.Interval is null and PSIPK is null then 
+						-- there is a baby
+		  				case when Childdob is not null then 'PSI due between ' + convert(varchar(20), tcdob, 101) + 
+															' and ' + convert(varchar(12), dateadd(dd, 30, tcdob), 101)
+						-- baby is not born yet. it is just a EDC
+						else ' PSI due upon Baby''s Birth'
 						end
-			WHEN m.IntakeDate >= m.tcdob AND psim.Interval = '00' THEN
-              CASE WHEN PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue , m.IntakeDate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue , m.IntakeDate), 101)
-				ELSE '' end
-			when  PSIPK is null then cd.EventDescription + ' Due  between ' 
-										+ convert(varchar(20), dateadd(dd, cd.MinimumDue, case when Childdob < IntakeDate then IntakeDate else Childdob end), 101)
+					when m.IntakeDate >= m.tcdob AND psim.Interval = '00' then
+						case when PSIPK is null then cd.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue , m.IntakeDate), 101) 
+														+ ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue , m.IntakeDate), 101)
+						else '' 
+						end
+					when  PSIPK is null then cd.EventDescription + ' Due  between ' 
+										+ convert(varchar(20), dateadd(dd, cd.MinimumDue, 
+																		case when psim.Interval = '00' and Childdob < IntakeDate 
+																				then IntakeDate 
+																				else Childdob end), 101)
 										+ ' and ' 
-										+ convert(varchar(20), dateadd(dd, cd.MaximumDue, case when Childdob < IntakeDate then IntakeDate else Childdob end), 101)
-			else ''
-			end as PSIDue		
+										+ convert(varchar(20), dateadd(dd, cd.MaximumDue, 
+																		case when psim.Interval = '00' and Childdob < IntakeDate 
+																				then IntakeDate 
+																				else Childdob end), 101)
+					else ''
+				end as PSIDue		
 	 
- from #tblCommonCohort m
-left join ctePSIIntervalAlreadyShouldHaveBeenDone psim on psim.hvcasepk = m.hvcasepk and m.TCIDPK = psim.TCIDPK 
-left join codeduebydates cd on scheduledevent = 'PSI' AND psim.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
- -- The following line gets those tcid's with PSI's that are due for the Interval
- left join PSI P on P.HVCaseFK = m.HVCasePK and P.PSIInterval= psim.Interval 
-
+	from #tblCommonCohort m
+	left join ctePSIIntervalAlreadyShouldHaveBeenDone psim on psim.hvcasepk = m.hvcasepk and m.TCIDPK = psim.TCIDPK 
+	left join codeduebydates cd on scheduledevent = 'PSI' AND psim.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
+	-- The following line gets those tcid's with PSI's that are due for the Interval
+	left join PSI P on P.HVCaseFK = m.HVCasePK and P.PSIInterval= psim.Interval 
 )
 
 
