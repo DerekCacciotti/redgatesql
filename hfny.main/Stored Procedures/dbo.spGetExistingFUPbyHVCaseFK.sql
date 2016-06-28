@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Jay Robohn
 -- Create date: Jul 22, 2010
@@ -10,7 +9,7 @@ GO
 --              been entered, eg, for Discharge to make sure there are no 
 --              98s or 99s (pre and post-natal discharge FUPs) for the case
 -- =============================================
-create PROCEDURE [dbo].[spGetExistingFUPbyHVCaseFK]
+CREATE procedure [dbo].[spGetExistingFUPbyHVCaseFK]
 (
     @HVCaseFK    INT,
     @FUPInterval VARCHAR(2)
@@ -44,7 +43,7 @@ BEGIN
 	WHERE
 		HVCaseFK = @HVCaseFK
 		AND FollowUpInterval = @FUPInterval
-		AND appCodeGroup = 'AgeInterval'
+		AND appCodeGroup = 'TCAge'
 		AND appCodeUsedWhere LIKE '%FU'
 
 END
