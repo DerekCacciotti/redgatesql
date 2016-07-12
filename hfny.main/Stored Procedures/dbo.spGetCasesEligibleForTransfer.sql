@@ -1,14 +1,14 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetCasesEligibleForTransfer] (@ProgramFK int)
+CREATE procedure	[dbo].[spGetCasesEligibleForTransfer] (@ProgramFK int)
 
 AS
 BEGIN
@@ -36,14 +36,14 @@ FROM    CaseProgram cp
 		inner join cteLastDischargeCases ldc on ldc.HVCaseFK = cp.HVCaseFK and cp.DischargeDate = ldc.DischargeDate 
         INNER JOIN HVCase c ON cp.HVCaseFK = c.HVCasePK 
         INNER JOIN PC ON c.PC1FK = PC.PCPK
-WHERE   (cp.DischargeReason = '37') AND 
-        (cp.DischargeDate IS NOT NULL) AND 
-        cp.TransferredToProgramFK = @ProgramFK AND 
-		cp.HVCaseFK not in 
-		(select cp2.HVCaseFK 
-		 from   CaseProgram cp2 
-		 where  cp2.HVCaseFK= cp.HVCaseFK and 
-				cp2.TransferredToProgramFK is null)
+WHERE   (cp.DischargeReason = '37') 
+        and (cp.DischargeDate IS NOT NULL)
+        and cp.TransferredToProgramFK = @ProgramFK
+		and cp.HVCaseFK not in (select cp2.HVCaseFK 
+								 from   CaseProgram cp2 
+								 where  cp2.HVCaseFK= cp.HVCaseFK and 
+										cp2.TransferredToProgramFK is null)
+		and TransferredStatus = 1
 ORDER BY DischargeDate 
 
 /* AND CaseProgram.HVCaseFK NOT IN */
