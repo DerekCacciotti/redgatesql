@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <October 24, 2012>
@@ -87,21 +85,17 @@ as
 				inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 				left join codeLevel on cp.CurrentLevelFK = codeLevel.codeLevelPK
 				inner join dbo.HVCase h on cp.HVCaseFK = h.HVCasePK
-				inner join worker fsw on cp.CurrentFSWFK = fsw.workerpk
-				left join workerprogram on workerprogram.workerfk = case CurrentFSWFK
-							 when CurrentFSWFK then
-								 CurrentFSWFK
-							 else
-								 CurrentFAWFK
-						 end
-				left join worker sup on sup.workerpk = workerprogram.supervisorfk
+				inner join workerprogram wp on wp.workerfk = isnull(CurrentFSWFK, CurrentFAWFK) and wp.ProgramFK = @programfk
+				inner join worker fsw on cp.CurrentFSWFK = fsw.workerpk 
+				left join worker sup on sup.workerpk = wp.supervisorfk
 			where ((h.IntakeDate <= dateadd(M,-1,@LastDayofPreviousMonth))
 				 and (h.IntakeDate is not null))
 				 and (cp.DischargeDate is null
 				 or cp.DischargeDate > @LastDayofPreviousMonth)
 			-- order by h.HVCasePK
 	)
-	-- rspQAReport16 12 ,'summary'
+	-- rspQAReport16 35 ,'summary'
+	-- rspQAReport16 35 ,'detail'
 
 	--SELECT * FROM @tbl4QAReport16Detail
 
@@ -115,14 +109,14 @@ as
 			from FormReview fr
 				inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = fr.ProgramFK
 				left join codeForm on codeForm.codeFormAbbreviation = fr.formtype
-				left join caseprogram on caseprogram.hvcasefk = fr.hvcasefk
+				left join caseprogram on caseprogram.hvcasefk = fr.hvcasefk and CaseProgram.ProgramFK = @programfk
 				left join workerprogram on workerprogram.workerfk = case CurrentFSWFK
 							 when CurrentFSWFK then
 								 CurrentFSWFK
 							 else
 								 CurrentFAWFK
 						 end
-				left join worker on worker.workerpk = workerprogram.supervisorfk
+				left join worker on worker.workerpk = workerprogram.supervisorfk and WorkerProgram.ProgramFK = @programfk
 				inner join dbo.SplitString(@programfk,',') on fr.programfk = listitem
 			where ReviewedBy is null
 				 and FormDate between FormReviewStartDate and isnull(FormReviewEndDate,current_timestamp)
@@ -166,7 +160,7 @@ as
 													 else
 														 CurrentFAWFK
 												 end
-										left join worker sup on sup.workerpk = workerprogram.supervisorfk
+										left join worker sup on sup.workerpk = workerprogram.supervisorfk and workerprogram.ProgramFK = @programfk
 									where ((h.IntakeDate <= dateadd(M,-1,@LastDayofPreviousMonth))
 										 and (h.IntakeDate is not null))
 										 and (cp.DischargeDate is null
