@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -10,7 +9,8 @@ CREATE PROCEDURE [dbo].[spEditcodeLevel](@codeLevelPK int=NULL,
 @LevelGroup char(10)=NULL,
 @LevelName varchar(50)=NULL,
 @MaximumVisit numeric(4, 2)=NULL,
-@MinimumVisit numeric(4, 2)=NULL)
+@MinimumVisit numeric(4, 2)=NULL,
+@SubLevelFK int=NULL)
 AS
 UPDATE codeLevel
 SET 
@@ -20,6 +20,7 @@ Enrolled = @Enrolled,
 LevelGroup = @LevelGroup, 
 LevelName = @LevelName, 
 MaximumVisit = @MaximumVisit, 
-MinimumVisit = @MinimumVisit
+MinimumVisit = @MinimumVisit, 
+SubLevelFK = @SubLevelFK
 WHERE codeLevelPK = @codeLevelPK
 GO
