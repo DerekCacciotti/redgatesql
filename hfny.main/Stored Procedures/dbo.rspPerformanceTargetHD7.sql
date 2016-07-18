@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -100,7 +99,7 @@ begin
 			 ,max(cd.Interval) as Interval -- given child age, this is the interval that one expect to find ASQ record in the DB
 
 			from cteCohort c
-				inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcASQAgeDays >= DueBy
+				inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcASQAgeDays between MinimumDue and MaximumDue -- tcASQAgeDays >= DueBy
 			group by HVCaseFK
 					,c.TCIDPK 
 						-- Must 'group by HVCasePK, TCIDPK' to bring in twins etc (twins have same hvcasepks) (not just 'group by HVCasePK')
