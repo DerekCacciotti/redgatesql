@@ -6,11 +6,11 @@ GO
 -- =============================================
 -- Author:	  <jrobohn>
 -- Create date: <Feb. 17, 2016>
--- Description: <report: Credentialing 7-5 B. Administration of the Depression Screen (PHQ-2/9) - Summary>
+-- Description: <report: Credentialing 7-5 B. Administration of the Depression Screen (PHQ-2/9)>
 -- Edit date: 
--- exec rspDepressionScreening 1, '2014-07-01', null, null, null, null, ''
+-- exec rspDepressionScreening_Details 1, '2014-07-01', null, null, null, null, ''
 -- =============================================
-CREATE procedure [dbo].[rspDepressionScreening] (@ProgramFK varchar(max) = null
+CREATE procedure [dbo].[rspDepressionScreeningDetails] (@ProgramFK varchar(max) = null
 									, @CutoffDate date = null
 									, @SupervisorFK int = null
 									, @WorkerFK int = null
@@ -18,7 +18,6 @@ CREATE procedure [dbo].[rspDepressionScreening] (@ProgramFK varchar(max) = null
 									, @SiteFK int = null
 									, @CaseFiltersPositive varchar(100) = ''
 									 )
-with recompile
 as
 
 if @ProgramFK is null
@@ -76,7 +75,9 @@ with	cteMain
 								  when wp.SiteFK = @SiteFK then 1
 								  else 0
 							 end = 1)
-			 )
+			 ) 
+		--select * from cteMain
+
 		, ctePHQ
 		  as (select distinct	
 						m.PC1ID
@@ -98,10 +99,11 @@ with	cteMain
 			  left outer join PHQ9 p on p.HVCaseFK = m.HVCaseFK
 			  where		p.Invalid = 0
 			 ) 
+
 		--select * from ctePHQ
 
-		, ctePHQPrePost
-		  as (select distinct 
+		, ctePHQFinal
+		  as (select distinct
 						m.WorkerFirstName
 					  , m.WorkerLastname
 					  , m.SupervisorFirstName
@@ -145,83 +147,43 @@ with	cteMain
 						   order by	c.DateAdministered
 						  ) as post
 			 )
-		--select * from ctePHQPrePost
-		--order by WorkerLastName
-		--			, WorkerFirstName
-		--			, PC1ID
+		
+		--select * from ctePHQFinal
 
-		, ctePHQPreFinal 
-		  as (select ltrim(rtrim(WorkerLastName)) + ', ' + ltrim(rtrim(WorkerFirstName)) as WorkerName
-						, ltrim(rtrim(SupervisorLastName)) + ', ' + ltrim(rtrim(SupervisorFirstName)) as SupervisorName
-						, PC1ID
-						, TCDOB
-						, IntakeDate
-						, [Status at Enrollment]
-						, case when [Status at Enrollment] = 'Post-natal' then 'N/A'
-								else [Date of Prenatal Screen]
-						end [Date of Prenatal Screen]
-						, [Prenatal FormType]
-						, [Date of Postnatal Screen]
-						, [Postnatal FormType]
-						, case when [Date of Postnatal Screen] is not null then datediff(month, TCDOB, [Date of Postnatal Screen])
-								else -1
-						end [Month Old for Postnatal Screen]
-						, case when [Date of Prenatal Screen] is not null then datediff(month, [Date of Prenatal Screen], TCDOB)
-								else -1
-						end [Month Old for Prenatal Screen]
-						, case when [Status at Enrollment] = 'Pre-natal' and (ParticipantRefusedPrenatal = 1 
-																			or ([Date of Prenatal Screen] is not null 
-																				and [Date of Postnatal Screen] is not null))
-								then 'Y'
-							when [Status at Enrollment] = 'Post-natal' and (ParticipantRefusedPostnatal = 1 
-																			or [Date of Postnatal Screen] is not null)
-								then 'Y'
-							else 'N'
-						end as MeetsStandard
-				from	ctePHQPrePost
-			)
-		, ctePHQFinal
-		  as (select distinct WorkerName
-								, SupervisorName
-								, [Status at Enrollment]
-								, count(PC1ID) as Total
-								--, sum(count(PC1ID)) over (partition by WorkerName order by WorkerName) as Total
-								, sum(case when MeetsStandard = 'Y' then 1 else 0 end) as Meeting
-								, sum(case when MeetsStandard = 'N' then 1 else 0 end) as NotMeeting
-				from ctePHQPreFinal
-				group by WorkerName
-							, SupervisorName
-							, [Status at Enrollment]
-			)
-		select WorkerName
-			 , SupervisorName
-			 , [Status at Enrollment]
-			 , Total
-			 --, Total1
-			 , Meeting
-			 , NotMeeting
-			 , case when Total > 0 then round(Meeting / (Total * 1.0000), 2) 
-					when Total = 0 then 0.00
-				end as MeetingPercentage
-			 , @CutoffDate as CutoffDate
-			 , '0' as SortOrder
-		from ctePHQFinal
-		union all
-		select '** All program workers' as WorkerName
-			 , 'N/A' as SupervisorName
-			 , [Status at Enrollment]
-			 , sum(Total)
-			 --, Total1
-			 , sum(Meeting)
-			 , sum(NotMeeting)
-			 , case when sum(Total) > 0 then round(sum(Meeting) / (sum(Total) * 1.0000), 2) 
-					when sum(Total) = 0 then 0.00
-				end as MeetingPercentage
-			 , @CutoffDate as CutoffDate
-			 , '1' as SortOrder
-		from ctePHQFinal
-		group by [Status at Enrollment]
-		order by SortOrder
-					, WorkerName
-					, [Status at Enrollment]
+	select	ltrim(rtrim(WorkerLastName)) + ', ' + ltrim(rtrim(WorkerFirstName)) as WorkerName
+          , ltrim(rtrim(SupervisorLastName)) + ', ' + ltrim(rtrim(SupervisorFirstName)) as SupervisorName
+		  , PC1ID
+		  , convert(date, TCDOB) as TCDOB
+		  , convert(date, IntakeDate) as IntakeDate
+		  , @CutoffDate as CutoffDate
+		  , [Status at Enrollment]
+		  , case when [Status at Enrollment] = 'Post-natal' then 'N/A'
+				 when ParticipantRefusedPrenatal = 1 then 'Refused'
+				 else [Date of Prenatal Screen]
+			end as [Date of Prenatal Screen]
+		  , [Prenatal FormType]
+		  , case when ParticipantRefusedPostnatal = 1 then 'Refused'
+					else [Date of Postnatal Screen]
+			end as 'Date of Postnatal Screen'
+		  , [Postnatal FormType]
+		  , case when [Date of Postnatal Screen] is not null and [Date of Postnatal Screen] not in ('N/A', 'Refused')
+					then datediff(month, TCDOB, [Date of Postnatal Screen])
+					else -1
+				end [Month Old for Postnatal Screen]
+		  , case when [Date of Prenatal Screen] is not null and [Date of Prenatal Screen] not in ('N/A', 'Refused')
+					then datediff(month, [Date of Prenatal Screen], TCDOB)
+					else -1
+				end [Month Old for Prenatal Screen]
+		  , case when [Status at Enrollment] = 'Pre-natal' and (ParticipantRefusedPrenatal = 1 
+																or ([Date of Prenatal Screen] is not null 
+																	and [Date of Postnatal Screen] is not null))
+					then 'Y'
+				when [Status at Enrollment] = 'Post-natal' and (ParticipantRefusedPostnatal = 1 
+																or [Date of Postnatal Screen] is not null)
+					then 'Y'
+				else 'N'
+			end as MeetsStandard
+	from	ctePHQFinal
+	order by WorkerName
+		  , PC1ID
 GO
