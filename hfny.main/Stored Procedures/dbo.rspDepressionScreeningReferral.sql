@@ -2,6 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:	  <jrobohn>
 -- Create date: <Feb. 17, 2016>
@@ -126,7 +127,7 @@ with	cteMain
 				, PC1ID
 				, @CutoffDate as CutoffDate
 				, case when sum(convert(int, DepressionReferralMade)) = 0 then 0 else 1 end as ReferralMade
-				, case when sum(convert(int, DepressionReferralMade)) >= 1 then 'Y' else 'N' end as MeetsStandard
+				, case when sum(convert(int, DepressionReferralMade)) >= 1 or max(ReferralDate) is not null then 'Y' else 'N' end as MeetsStandard
 				, max(ReferralDate) as ReferralDate
 	from	ctePHQFinal
 	group by WorkerName

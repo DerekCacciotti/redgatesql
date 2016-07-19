@@ -2,6 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:	  <jrobohn>
 -- Create date: <Feb. 17, 2016>
@@ -137,7 +138,7 @@ with	cteMain
 		  , DateAdministered
 		  , TotalScore
 		  , case when DepressionReferralMade is null or DepressionReferralMade = 0 then 'N' else 'Y' end as ReferralMade
-		  , case when DepressionReferralMade = 1 and ReferralDate is not null then 'Y' else 'N' end as MeetsStandard
+		  , case when DepressionReferralMade = 1 or ReferralDate is not null then 'Y' else 'N' end as MeetsStandard
 		  , case when ReferralDate is not null then convert(varchar(10), ReferralDate, 101) else 'N/A' end as ReferralDate
 	from	ctePHQFinal
 	order by WorkerName
