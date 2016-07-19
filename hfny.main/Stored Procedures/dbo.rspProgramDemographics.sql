@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -103,7 +102,7 @@ as
 					   ,ca2.IsCurrentlyEmployed [pc2Employed]
 					   ,caOBP.IsCurrentlyEmployed [obpEmployed]
 					   ,caOBP.EducationalEnrollment [obpTrainingProgram]
-					   ,pc.PCPK [OBPMaleInHoushold]
+					   ,caID.OBPInHome [OBPInHousehold]
 					   ,ca1.EducationalEnrollment [pc1TrainingProgram]
 					   ,ca2.EducationalEnrollment [pc2TrainingProgram]
 					   ,ca.PC1ReceivingMedicaid [pc1Medicaid]
@@ -111,8 +110,7 @@ as
 					   ,ca.PBTANF [TANF]
 					   ,ca.PBWIC [WIC]
 					   ,ca1.MaritalStatus [pc1MaritalStatus]
-					   ,caOBP.CommonAttributesPK [OBPInHoushold]
-					   ,ca2.CommonAttributesPK [PC2InHoushold]
+					   ,PC2inHomeIntake [PC2InHousehold]
 					   ,case
 							when b.DischargeDate is not null and b.DischargeDate <= @EndDt then
 								b.DischargeDate
@@ -134,17 +132,18 @@ as
 
 			from
 				dbo.HVCase as a
-				join dbo.CaseProgram as b on a.HVCasePK = b.HVCaseFK
-				join PC as c on c.PCPK = a.PC1FK
-				join Intake as d on d.HVCaseFK = a.HVCasePK
-				join worker fsw on b.CurrentFSWFK = fsw.workerpk
-				join workerprogram wp on wp.workerfk = fsw.workerpk
+				inner join dbo.CaseProgram as b on a.HVCasePK = b.HVCaseFK
+				inner join PC as c on c.PCPK = a.PC1FK
+				inner join Intake as d on d.HVCaseFK = a.HVCasePK
+				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
+				inner join workerprogram wp on wp.workerfk = fsw.workerpk
 				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
 				left outer join CommonAttributes as ca on ca.FormFK = d.IntakePK and ca.FormType = 'IN'
 				left outer join CommonAttributes as ca1 on ca1.FormFK = d.IntakePK and ca1.FormType = 'IN-PC1'
 				left outer join CommonAttributes as ca2 on ca2.FormFK = d.IntakePK and ca2.FormType = 'IN-PC2'
 				left outer join CommonAttributes as caOBP on caOBP.FormFK = d.IntakePK and caOBP.FormType = 'IN-OBP'
-				left outer join PC as pc on pc.PCPK = caOBP.PCFK and pc.Gender = '02'
+				left outer join CommonAttributes as caID on caID.HVCaseFK = a.HVCasePK and caID.FormType = 'ID'
+				--left outer join PC as pc on pc.PCPK = caOBP.PCFK and pc.Gender = '02'
 				left outer join (select HVCaseFK
 									   ,min(TCDOB) [TCDOB]
 									 from
@@ -306,18 +305,8 @@ as
 				   else
 					   0
 			   end) [PD06Married]
-			  ,sum(case
-				   when x.OBPMaleInHoushold is not null then
-					   1
-				   else
-					   0
-			   end) [PD07OBPInHousehold]
-			  ,sum(case
-				   when x.PC2InHoushold is not null then
-					   1
-				   else
-					   0
-			   end) [PD07PC2InHousehold]
+			  ,sum(convert(int, x.OBPInHousehold)) as [PD07OBPInHousehold]
+			  ,sum(convert(int, x.PC2InHousehold)) [PD07PC2InHousehold]
 			  ,sum(case
 				   when x.yrEnrolled < 1 then
 					   1
