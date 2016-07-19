@@ -121,28 +121,23 @@ with	cteMain
 							where sr.HVCaseFK = p.HVCaseFK and sr.ServiceCode in (49, 50)) srm
 			 )
 	, cteFinal 
-	as (select	WorkerName
+	as (select distinct	WorkerName
 				, SupervisorName
 				, PC1ID
-				, TCDOB
-				, IntakeDate
 				, @CutoffDate as CutoffDate
-				, case when FormType = 'KE' then 'Kempe'
-						when FormType = 'IN' then 'Intake'
-						when FormType = 'TC' then 'TC ID'
-						when FormType = 'FU' then 'Follow Up'
-				end as FormName
-				, DateAdministered
-				, TotalScore
-				, case when DepressionReferralMade is null or DepressionReferralMade = 0 then 0 else 1 end as ReferralMade
-				, case when DepressionReferralMade = 1 and ReferralDate is not null then 'Y' else 'N' end as MeetsStandard
+				, case when sum(convert(int, DepressionReferralMade)) = 0 then 0 else 1 end as ReferralMade
+				, case when sum(convert(int, DepressionReferralMade)) >= 1 then 'Y' else 'N' end as MeetsStandard
+				, max(ReferralDate) as ReferralDate
 	from	ctePHQFinal
+	group by WorkerName
+				, SupervisorName
+				, PC1ID
 	)
-	
+
 	select	WorkerName
 			, SupervisorName
 			, @CutoffDate as CutoffDate
-			, count(TotalScore) as TotalParticipants
+			, count(PC1ID) as TotalParticipants
 			, sum(case when MeetsStandard = 'Y' then 1 else 0 end) as MeetingStandard
 			, sum(case when MeetsStandard = 'N' then 1 else 0 end) as NotMeetingStandard
 			, '0' as SortOrder
@@ -153,13 +148,12 @@ with	cteMain
 	select '** All program workers' as WorkerName
 			, 'N/A' as SupervisorName
 			, @CutoffDate as CutoffDate
-			, count(TotalScore) as TotalParticipants
+			, count(PC1ID) as TotalParticipants
 			, sum(case when MeetsStandard = 'Y' then 1 else 0 end) as MeetingStandard
 			, sum(case when MeetsStandard = 'N' then 1 else 0 end) as NotMeetingStandard
 			, '1' as SortOrder
 	from cteFinal
 	order by SortOrder
 				, WorkerName
-	
 	
 GO

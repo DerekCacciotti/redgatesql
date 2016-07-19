@@ -97,7 +97,8 @@ with	cteMain
 						end as VisitTiming
 			  from		cteMain m
 			  left outer join PHQ9 p on p.HVCaseFK = m.HVCaseFK
-			  where		p.Invalid = 0
+			  where	p.Invalid = 0
+					and p.DateAdministered <= dateadd(month, 3, TCDOB)
 			 ) 
 
 		--select * from ctePHQ
