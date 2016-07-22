@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -63,6 +62,7 @@ begin
 				, pc1i.MentalIllness
 				, pc1i.AlcoholAbuse
 				, pc1i.SubstanceAbuse
+				, pc1i.DevelopmentalDisability
 				, IntakeDate
 			from cteTotalCases tc
 			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
@@ -71,7 +71,7 @@ begin
 			where datediff(day,IntakeDate,@StartDate) <= 365
 				 and datediff(day,IntakeDate,lastdate) >= 183
 				 and (pc1i.DomesticViolence = '1' or pc1i.Depression = '1' or pc1i.MentalIllness = '1' or 
-						pc1i.AlcoholAbuse = '1' or pc1i.SubstanceAbuse = '1')
+						pc1i.AlcoholAbuse = '1' or pc1i.SubstanceAbuse = '1' or pc1i.DevelopmentalDisability = '1')
 		)
 	,
 	cteReferrals
@@ -118,6 +118,20 @@ begin
 			from cteCohort coh
 			left outer join ServiceReferral sr on sr.HVCaseFK = coh.HVCaseFK
 			where (AlcoholAbuse = '1' or SubstanceAbuse = '1') and ServiceCode = '52' and FamilyCode = '01'
+		union 
+		select coh.*
+				, ServiceReferralPK
+				, ReferralDate
+				, ServiceCode
+				, ServiceReceived
+				, case when dbo.IsFormReviewed(sr.ReferralDate,'SR',ServiceReferralPK) = 1 then 1 else 0 end as FormReviewed
+				, 0 as FormOutOfWindow
+				, 0 as FormMissing
+				--, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
+				--, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
+			from cteCohort coh
+			left outer join ServiceReferral sr on sr.HVCaseFK = coh.HVCaseFK
+			where DevelopmentalDisability = '1' and ServiceCode = '17' and FamilyCode = '01'
 		)
 	,
 	cteSummarizedReferrals
@@ -128,6 +142,7 @@ begin
 				, sum(case when DomesticViolence = '1' and ServiceCode = '51' and FormReviewed = 1 then 1
 							when (Depression = '1' or MentalIllness = '1') and (ServiceCode = '49' or ServiceCode = '50') and FormReviewed = 1 then 1
 							when (AlcoholAbuse = '1' or SubstanceAbuse = '1') and ServiceCode = '52' and FormReviewed = 1 then 1
+							when DevelopmentalDisability = '1' and ServiceCode = '17' and FormReviewed = 1 then 1
 							else 0
 						end) as GoodRefs
 				, sum(FormReviewed) as FormReviewed

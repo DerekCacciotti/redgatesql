@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Dar Chen>
 -- Create date: <04/04/2016>
@@ -12,7 +10,6 @@ GO
 -- rspCredentialingKempeAnalysis_Summary 1, '04/01/2012', '03/31/2013'
 
 -- =============================================
-
 
 CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Summary](
 	@programfk    varchar(max)    = NULL,	
@@ -85,7 +82,7 @@ SET @EndDateX = @EndDate
 		  ,FOBPartnerPresent --as FOBPartner
 		  ,GrandParentPresent --as MOBGrandmother
 	,PIVisitMade
-	,y.DV ,y.MH, y.SA
+	,y.DV ,y.MH, y.SA, y.DD
 
 	, CASE WHEN (ISNULL(k.MOBPartnerPresent,0) = 0 AND ISNULL(k.FOBPartnerPresent,0) = 0 
 			 AND ISNULL(k.GrandParentPresent,0) = 0 AND ISNULL(k.OtherPresent,0) = 0) THEN
@@ -96,7 +93,6 @@ SET @EndDateX = @EndDate
 	 END
 	ELSE 4 -- parent/other
 	END presentCode
-
 
 	 FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
@@ -111,9 +107,10 @@ SET @EndDateX = @EndDate
 	LEFT OUTER JOIN
 	(SELECT 
 		a.HVCaseFK
-		,case when DomesticViolence = 1 then 1 else 0 end as DV
-		,case when (Depression = 1 or MentalIllness = 1) then 1 else 0 end as MH
-		,case when (AlcoholAbuse = 1 or SubstanceAbuse = 1) then 1 else 0 end as SA
+		,case when DomesticViolence = '1' then 1 else 0 end as DV
+		,case when (Depression = '1' or MentalIllness = '1') then 1 else 0 end as MH
+		,case when (AlcoholAbuse = '1' or SubstanceAbuse = '1') then 1 else 0 end as SA
+		,case when DevelopmentalDisability = '1' then 1 else 0 end as DD
 		FROM PC1Issues AS a
 		JOIN (
 		SELECT MIN(PC1IssuesPK) AS PC1IssuesPK, HVCaseFK
@@ -807,11 +804,15 @@ SELECT
   , SUM(CASE WHEN a.Status = '2' and MH = 1 THEN 1 ELSE 0 END) AS issues02G2
   , SUM(CASE WHEN a.Status = '3' and MH = 1 THEN 1 ELSE 0 END) AS issues02G3
 
-  
   , SUM(CASE WHEN SA = 1 THEN 1 ELSE 0 END) AS issues03
   , SUM(CASE WHEN a.Status = '1' and SA = 1 THEN 1 ELSE 0 END) AS issues03G1
   , SUM(CASE WHEN a.Status = '2' and SA = 1 THEN 1 ELSE 0 END) AS issues03G2
   , SUM(CASE WHEN a.Status = '3' and SA = 1 THEN 1 ELSE 0 END) AS issues03G3
+
+  , SUM(CASE WHEN DD = 1 THEN 1 ELSE 0 END) AS issues04
+  , SUM(CASE WHEN a.Status = '1' and DD = 1 THEN 1 ELSE 0 END) AS issues04G1
+  , SUM(CASE WHEN a.Status = '2' and DD = 1 THEN 1 ELSE 0 END) AS issues04G2
+  , SUM(CASE WHEN a.Status = '3' and DD = 1 THEN 1 ELSE 0 END) AS issues04G3
   FROM main1 AS a
 )
 
@@ -842,6 +843,15 @@ SELECT
  , CONVERT(VARCHAR, issues03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
  , CONVERT(VARCHAR, issues03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
  , CONVERT(VARCHAR, issues03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
+ , '3' AS col4
+FROM issues1
+
+UNION ALL
+SELECT
+ '  DD' AS [title]
+ , CONVERT(VARCHAR, issues04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
+ , CONVERT(VARCHAR, issues04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
+ , CONVERT(VARCHAR, issues04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
  , '3' AS col4
 FROM issues1
 
