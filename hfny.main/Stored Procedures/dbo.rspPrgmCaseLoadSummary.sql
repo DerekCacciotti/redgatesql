@@ -85,7 +85,7 @@ AS
 			LEFT OUTER JOIN HVLevel hl ON hl.HVCaseFK = cp.HVCaseFK 
 				AND hl.ProgramFK = cp.ProgramFK 
 				AND hl.LevelAssignDate <= @rpdate
-			INNER JOIN codeLevel l ON Enrolled = 0 and CaseWeight > 0 -- captures all pre-intake levels with caseweights
+			INNER JOIN codeLevel l ON Enrolled = 0 and CaseWeight > 0 AND cp.currentLevelFK = l.codeLevelPK -- captures all pre-intake levels with caseweights
 			INNER JOIN dbo.SplitString(@programfk,',') ON cp.programfk = listitem
 		WHERE
 			(IntakeDate IS NULL OR IntakeDate > @rpdate)
