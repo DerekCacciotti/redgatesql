@@ -117,37 +117,19 @@ CREATE TABLE [dbo].[HVLog]
 [VisitLengthMinute] [int] NOT NULL,
 [VisitLocation] [char] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [VisitStartTime] [datetime] NOT NULL,
-[VisitType] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+[VisitType] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[CDParentConcerned] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[FamilyMemberReads] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TCAlwaysOnBack] [bit] NULL,
+[TCAlwaysWithoutSharing] [bit] NULL
 ) ON [PRIMARY]
-CREATE NONCLUSTERED INDEX [HVCase_ProgramFK] ON [dbo].[HVLog] ([HVCaseFK], [ProgramFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_HVLog_VisitStartTime] ON [dbo].[HVLog] ([VisitStartTime]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_HVLog_VisitType] ON [dbo].[HVLog] ([VisitType]) ON [PRIMARY]
-
-GO
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'HVLog', 'COLUMN', N'HVLogPK'
-GO
-
-ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD
-CONSTRAINT [FK_HVLog_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD
-CONSTRAINT [FK_HVLog_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-CREATE NONCLUSTERED INDEX [IX_FK_HVLog_FSWFK] ON [dbo].[HVLog] ([FSWFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_HVLog_HVCaseFK] ON [dbo].[HVLog] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_HVLog_ProgramFK] ON [dbo].[HVLog] ([ProgramFK]) ON [PRIMARY]
-
-
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 Create TRIGGER [dbo].[fr_delete_hvlog]
-on dbo.HVLog
+on [dbo].[HVLog]
 After DELETE
 
 AS
@@ -165,7 +147,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE TRIGGER [dbo].[fr_hvlog]
-on dbo.HVLog
+on [dbo].[HVLog]
 After insert
 
 AS
@@ -188,7 +170,7 @@ GO
 -- Description:	Updates FormReview Table with form date on Supervisor Review of Form
 -- =============================================
 CREATE TRIGGER [dbo].[fr_HVLog_Edit]
-on dbo.HVLog
+on [dbo].[HVLog]
 AFTER UPDATE
 
 AS
@@ -214,7 +196,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE TRIGGER [dbo].[TR_HVLogEditDate] ON dbo.HVLog
+CREATE TRIGGER [dbo].[TR_HVLogEditDate] ON [dbo].[HVLog]
 For Update 
 AS
 Update HVLog Set HVLog.HVLogEditDate= getdate()
@@ -222,6 +204,23 @@ From [HVLog] INNER JOIN Inserted ON [HVLog].[HVLogPK]= Inserted.[HVLogPK]
 GO
 ALTER TABLE [dbo].[HVLog] ADD CONSTRAINT [PK__HVLog__ED876F581332DBDC] PRIMARY KEY CLUSTERED  ([HVLogPK]) ON [PRIMARY]
 GO
-
+CREATE NONCLUSTERED INDEX [IX_FK_HVLog_FSWFK] ON [dbo].[HVLog] ([FSWFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVLog_HVCaseFK] ON [dbo].[HVLog] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [HVCase_ProgramFK] ON [dbo].[HVLog] ([HVCaseFK], [ProgramFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVLog_ProgramFK] ON [dbo].[HVLog] ([ProgramFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_HVLog_VisitStartTime] ON [dbo].[HVLog] ([VisitStartTime]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_HVLog_VisitType] ON [dbo].[HVLog] ([VisitType]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD CONSTRAINT [FK_HVLog_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
 ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD CONSTRAINT [FK_HVLog_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+GO
+ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD CONSTRAINT [FK_HVLog_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'HVLog', 'COLUMN', N'HVLogPK'
 GO

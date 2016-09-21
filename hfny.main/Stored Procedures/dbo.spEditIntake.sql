@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -15,7 +14,11 @@ CREATE PROCEDURE [dbo].[spEditIntake](@IntakePK int=NULL,
 @MIECHV_Race_Black bit=NULL,
 @MIECHV_Race_Hawaiian bit=NULL,
 @MIECHV_Race_White bit=NULL,
-@MIECHV_Hispanic nvarchar(1)=NULL)
+@MIECHV_Hispanic nvarchar(1)=NULL,
+@OtherChildrenDevelopmentalDelays char(1)=NULL,
+@PC1SelfLowStudentAchievement char(1)=NULL,
+@PC1ChildrenLowStudentAchievement char(1)=NULL,
+@PC1FamilyArmedForces char(1)=NULL)
 AS
 UPDATE Intake
 SET 
@@ -30,6 +33,10 @@ MIECHV_Race_Asian = @MIECHV_Race_Asian,
 MIECHV_Race_Black = @MIECHV_Race_Black, 
 MIECHV_Race_Hawaiian = @MIECHV_Race_Hawaiian, 
 MIECHV_Race_White = @MIECHV_Race_White, 
-MIECHV_Hispanic = @MIECHV_Hispanic
+MIECHV_Hispanic = @MIECHV_Hispanic, 
+OtherChildrenDevelopmentalDelays = @OtherChildrenDevelopmentalDelays, 
+PC1SelfLowStudentAchievement = @PC1SelfLowStudentAchievement, 
+PC1ChildrenLowStudentAchievement = @PC1ChildrenLowStudentAchievement, 
+PC1FamilyArmedForces = @PC1FamilyArmedForces
 WHERE IntakePK = @IntakePK
 GO

@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -32,6 +31,8 @@ CREATE PROCEDURE [dbo].[spAddFollowUp](@BCAbstinence bit=NULL,
 @FollowUpInterval char(2)=NULL,
 @FSWFK int=NULL,
 @FUPInWindow bit=NULL,
+@HealthCareCoverageContinuity bit=NULL,
+@HOMECompleted bit=NULL,
 @HVCaseFK int=NULL,
 @IFSPAdultRelationship char(1)=NULL,
 @IFSPChildDevelopment char(1)=NULL,
@@ -53,7 +54,8 @@ CREATE PROCEDURE [dbo].[spAddFollowUp](@BCAbstinence bit=NULL,
 @ProgramFK int=NULL,
 @SafetyPlan bit=NULL,
 @SixMonthHome bit=NULL,
-@TimesPregnant int=NULL)
+@TimesPregnant int=NULL,
+@TCDentalCareSource char(2)=NULL)
 AS
 INSERT INTO FollowUp(
 BCAbstinence,
@@ -85,6 +87,8 @@ FollowUpDate,
 FollowUpInterval,
 FSWFK,
 FUPInWindow,
+HealthCareCoverageContinuity,
+HOMECompleted,
 HVCaseFK,
 IFSPAdultRelationship,
 IFSPChildDevelopment,
@@ -106,7 +110,8 @@ Pregnant,
 ProgramFK,
 SafetyPlan,
 SixMonthHome,
-TimesPregnant
+TimesPregnant,
+TCDentalCareSource
 )
 VALUES(
 @BCAbstinence,
@@ -138,6 +143,8 @@ VALUES(
 @FollowUpInterval,
 @FSWFK,
 @FUPInWindow,
+@HealthCareCoverageContinuity,
+@HOMECompleted,
 @HVCaseFK,
 @IFSPAdultRelationship,
 @IFSPChildDevelopment,
@@ -159,7 +166,8 @@ VALUES(
 @ProgramFK,
 @SafetyPlan,
 @SixMonthHome,
-@TimesPregnant
+@TimesPregnant,
+@TCDentalCareSource
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

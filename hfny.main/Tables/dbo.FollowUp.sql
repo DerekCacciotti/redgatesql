@@ -54,26 +54,11 @@ CREATE TABLE [dbo].[FollowUp]
 [ProgramFK] [int] NOT NULL,
 [SafetyPlan] [bit] NULL,
 [SixMonthHome] [bit] NULL,
-[TimesPregnant] [int] NULL
+[TimesPregnant] [int] NULL,
+[HealthCareCoverageContinuity] [bit] NULL,
+[HOMECompleted] [bit] NULL,
+[TCDentalCareSource] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-GO
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'FollowUp', 'COLUMN', N'FollowUpPK'
-GO
-
-ALTER TABLE [dbo].[FollowUp] WITH NOCHECK ADD
-CONSTRAINT [FK_FollowUp_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[FollowUp] WITH NOCHECK ADD
-CONSTRAINT [FK_FollowUp_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-CREATE NONCLUSTERED INDEX [IX_FollowUpInterval] ON [dbo].[FollowUp] ([FollowUpInterval]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_FSWFK] ON [dbo].[FollowUp] ([FSWFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_HVCaseFK] ON [dbo].[FollowUp] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_PC1IssuesFK] ON [dbo].[FollowUp] ([PC1IssuesFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_ProgramFK] ON [dbo].[FollowUp] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -158,8 +143,23 @@ From [FollowUp] INNER JOIN Inserted ON [FollowUp].[FollowUpPK]= Inserted.[Follow
 GO
 ALTER TABLE [dbo].[FollowUp] ADD CONSTRAINT [PK__FollowUp__D50BBDE871D1E811] PRIMARY KEY CLUSTERED  ([FollowUpPK]) ON [PRIMARY]
 GO
-
+CREATE NONCLUSTERED INDEX [IX_FollowUpInterval] ON [dbo].[FollowUp] ([FollowUpInterval]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_FSWFK] ON [dbo].[FollowUp] ([FSWFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_HVCaseFK] ON [dbo].[FollowUp] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_PC1IssuesFK] ON [dbo].[FollowUp] ([PC1IssuesFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_FollowUp_ProgramFK] ON [dbo].[FollowUp] ([ProgramFK]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[FollowUp] WITH NOCHECK ADD CONSTRAINT [FK_FollowUp_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
 ALTER TABLE [dbo].[FollowUp] WITH NOCHECK ADD CONSTRAINT [FK_FollowUp_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[FollowUp] WITH NOCHECK ADD CONSTRAINT [FK_FollowUp_PC1IssuesFK] FOREIGN KEY ([PC1IssuesFK]) REFERENCES [dbo].[PC1Issues] ([PC1IssuesPK])
+GO
+ALTER TABLE [dbo].[FollowUp] WITH NOCHECK ADD CONSTRAINT [FK_FollowUp_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'FollowUp', 'COLUMN', N'FollowUpPK'
 GO

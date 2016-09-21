@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -33,6 +32,8 @@ CREATE PROCEDURE [dbo].[spEditFollowUp](@FollowUpPK int=NULL,
 @FollowUpInterval char(2)=NULL,
 @FSWFK int=NULL,
 @FUPInWindow bit=NULL,
+@HealthCareCoverageContinuity bit=NULL,
+@HOMECompleted bit=NULL,
 @HVCaseFK int=NULL,
 @IFSPAdultRelationship char(1)=NULL,
 @IFSPChildDevelopment char(1)=NULL,
@@ -54,7 +55,8 @@ CREATE PROCEDURE [dbo].[spEditFollowUp](@FollowUpPK int=NULL,
 @ProgramFK int=NULL,
 @SafetyPlan bit=NULL,
 @SixMonthHome bit=NULL,
-@TimesPregnant int=NULL)
+@TimesPregnant int=NULL,
+@TCDentalCareSource char(2)=NULL)
 AS
 UPDATE FollowUp
 SET 
@@ -87,6 +89,8 @@ FollowUpEditor = @FollowUpEditor,
 FollowUpInterval = @FollowUpInterval, 
 FSWFK = @FSWFK, 
 FUPInWindow = @FUPInWindow, 
+HealthCareCoverageContinuity = @HealthCareCoverageContinuity, 
+HOMECompleted = @HOMECompleted, 
 HVCaseFK = @HVCaseFK, 
 IFSPAdultRelationship = @IFSPAdultRelationship, 
 IFSPChildDevelopment = @IFSPChildDevelopment, 
@@ -108,6 +112,7 @@ Pregnant = @Pregnant,
 ProgramFK = @ProgramFK, 
 SafetyPlan = @SafetyPlan, 
 SixMonthHome = @SixMonthHome, 
-TimesPregnant = @TimesPregnant
+TimesPregnant = @TimesPregnant, 
+TCDentalCareSource = @TCDentalCareSource
 WHERE FollowUpPK = @FollowUpPK
 GO

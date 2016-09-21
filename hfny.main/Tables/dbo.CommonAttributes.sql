@@ -77,39 +77,13 @@ CREATE TABLE [dbo].[CommonAttributes]
 [TCReceivingMedicaid] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TimeBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WasBreastFed] [bit] NULL,
-[WhyNotBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[WhyNotBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LivingArrangement] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LivingArrangementSpecific] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TCMedicalCareSource] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TCMedicalCareSourceOtherSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[CommonAttributes] ADD
-CONSTRAINT [FK_CommonAttributes_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_HVCaseFK] ON [dbo].[CommonAttributes] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PC1MedicalFacilityFK] ON [dbo].[CommonAttributes] ([PC1MedicalFacilityFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PC1MedicalProviderFK] ON [dbo].[CommonAttributes] ([PC1MedicalProviderFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PCFK] ON [dbo].[CommonAttributes] ([PCFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_ProgramFK] ON [dbo].[CommonAttributes] ([ProgramFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_TCMedicalFacilityFK] ON [dbo].[CommonAttributes] ([TCMedicalFacilityFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_TCMedicalProviderFK] ON [dbo].[CommonAttributes] ([TCMedicalProviderFK]) ON [PRIMARY]
-
-ALTER TABLE [dbo].[CommonAttributes] ADD
-CONSTRAINT [FK_CommonAttributes_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
-ALTER TABLE [dbo].[CommonAttributes] ADD
-CONSTRAINT [FK_CommonAttributes_PC1MedicalFacilityFK] FOREIGN KEY ([PC1MedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
-ALTER TABLE [dbo].[CommonAttributes] ADD
-CONSTRAINT [FK_CommonAttributes_PC1MedicalProviderFK] FOREIGN KEY ([PC1MedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
-ALTER TABLE [dbo].[CommonAttributes] ADD
-CONSTRAINT [FK_CommonAttributes_PCFK] FOREIGN KEY ([PCFK]) REFERENCES [dbo].[PC] ([PCPK])
-
-ALTER TABLE [dbo].[CommonAttributes] ADD
-CONSTRAINT [FK_CommonAttributes_TCMedicalFacilityFK] FOREIGN KEY ([TCMedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
-ALTER TABLE [dbo].[CommonAttributes] ADD
-CONSTRAINT [FK_CommonAttributes_TCMedicalProviderFK] FOREIGN KEY ([TCMedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
 GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -124,4 +98,32 @@ Update CommonAttributes Set CommonAttributes.CommonAttributesEditDate= getdate()
 From [CommonAttributes] INNER JOIN Inserted ON [CommonAttributes].[CommonAttributesPK]= Inserted.[CommonAttributesPK]
 GO
 ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [PK__CommonAt__14761E7359FA5E80] PRIMARY KEY CLUSTERED  ([CommonAttributesPK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_HVCaseFK] ON [dbo].[CommonAttributes] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PC1MedicalFacilityFK] ON [dbo].[CommonAttributes] ([PC1MedicalFacilityFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PC1MedicalProviderFK] ON [dbo].[CommonAttributes] ([PC1MedicalProviderFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PCFK] ON [dbo].[CommonAttributes] ([PCFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_ProgramFK] ON [dbo].[CommonAttributes] ([ProgramFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_TCMedicalFacilityFK] ON [dbo].[CommonAttributes] ([TCMedicalFacilityFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_TCMedicalProviderFK] ON [dbo].[CommonAttributes] ([TCMedicalProviderFK]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [FK_CommonAttributes_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+GO
+ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [FK_CommonAttributes_PC1MedicalFacilityFK] FOREIGN KEY ([PC1MedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
+GO
+ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [FK_CommonAttributes_PC1MedicalProviderFK] FOREIGN KEY ([PC1MedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
+GO
+ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [FK_CommonAttributes_PCFK] FOREIGN KEY ([PCFK]) REFERENCES [dbo].[PC] ([PCPK])
+GO
+ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [FK_CommonAttributes_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [FK_CommonAttributes_TCMedicalFacilityFK] FOREIGN KEY ([TCMedicalFacilityFK]) REFERENCES [dbo].[listMedicalFacility] ([listMedicalFacilityPK])
+GO
+ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [FK_CommonAttributes_TCMedicalProviderFK] FOREIGN KEY ([TCMedicalProviderFK]) REFERENCES [dbo].[listMedicalProvider] ([listMedicalProviderPK])
 GO
