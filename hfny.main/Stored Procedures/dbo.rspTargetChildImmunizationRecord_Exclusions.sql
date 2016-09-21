@@ -2,13 +2,12 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
 -- =============================================
-create procedure [dbo].[rspTargetChildImmunizationRecord_Exclusions]
+CREATE procedure [dbo].[rspTargetChildImmunizationRecord_Exclusions]
 (
     @programfk varchar(max)    = null,
     @rdate     datetime
@@ -53,5 +52,5 @@ as
 			 and levelname <> 'Level X'
 		order by pc1id
 				,TargetChild
-				,TCDOB
+				,hvcase.TCDOB
 GO
