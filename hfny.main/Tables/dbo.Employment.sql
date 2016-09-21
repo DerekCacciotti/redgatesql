@@ -32,7 +32,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_EmploymentEditDate ON Employment
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_EmploymentEditDate] ON dbo.Employment
+CREATE TRIGGER [dbo].[TR_EmploymentEditDate] ON [dbo].[Employment]
 For Update 
 AS
 Update Employment Set Employment.EmploymentEditDate= getdate()

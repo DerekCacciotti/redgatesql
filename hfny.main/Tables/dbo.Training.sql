@@ -20,14 +20,13 @@ CREATE TABLE [dbo].[Training]
 ALTER TABLE [dbo].[Training] WITH NOCHECK ADD
 CONSTRAINT [FK_Training_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 
 CREATE TRIGGER [dbo].[fr_delete_training]
-on dbo.Training
+on [dbo].[Training]
 After DELETE
 AS
 Declare @PK int
@@ -109,7 +108,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_TrainingEditDate ON Training
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_TrainingEditDate] ON dbo.Training
+CREATE TRIGGER [dbo].[TR_TrainingEditDate] ON [dbo].[Training]
 For Update 
 AS
 Update Training Set Training.TrainingEditDate= getdate()

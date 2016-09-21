@@ -83,7 +83,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE TRIGGER [dbo].[fr_delete_PSI]
-on dbo.PSI
+on [dbo].[PSI]
 After DELETE
 
 AS
@@ -101,7 +101,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE TRIGGER [dbo].[fr_PSI]
-on dbo.PSI
+on [dbo].[PSI]
 After insert
 
 AS
@@ -124,7 +124,7 @@ GO
 -- Description:	Updates FormReview Table with form date on Supervisor Review of Form
 -- =============================================
 CREATE trigger [dbo].[fr_PSI_Edit]
-on dbo.PSI
+on [dbo].[PSI]
 AFTER UPDATE
 
 AS
@@ -153,7 +153,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_PSIEditDate ON PSI
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_PSIEditDate] ON dbo.PSI
+CREATE TRIGGER [dbo].[TR_PSIEditDate] ON [dbo].[PSI]
 For Update 
 AS
 Update PSI Set PSI.PSIEditDate= getdate()

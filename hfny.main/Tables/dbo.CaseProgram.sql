@@ -67,7 +67,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_CaseProgramEditDate ON CaseProgram
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_CaseProgramEditDate] ON dbo.CaseProgram
+CREATE TRIGGER [dbo].[TR_CaseProgramEditDate] ON [dbo].[CaseProgram]
 For Update 
 AS
 Update CaseProgram Set CaseProgram.CaseProgramEditDate= getdate()

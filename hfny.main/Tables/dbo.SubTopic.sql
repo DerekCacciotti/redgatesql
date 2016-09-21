@@ -26,7 +26,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_SubTopicEditDate ON SubTopic
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_SubTopicEditDate] ON dbo.SubTopic
+CREATE TRIGGER [dbo].[TR_SubTopicEditDate] ON [dbo].[SubTopic]
 For Update 
 AS
 Update SubTopic Set SubTopic.SubTopicEditDate= getdate()

@@ -85,7 +85,6 @@ as
 
 	end
 GO
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -93,7 +92,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_FatherFigureEditDate ON FatherFigure
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_FatherFigureEditDate] ON dbo.FatherFigure
+CREATE TRIGGER [dbo].[TR_FatherFigureEditDate] ON [dbo].[FatherFigure]
 For Update 
 AS
 Update FatherFigure Set FatherFigure.FatherFigureEditDate= getdate()

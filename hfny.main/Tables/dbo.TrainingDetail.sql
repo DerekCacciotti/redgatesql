@@ -37,7 +37,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_TrainingDetailEditDate ON TrainingDetail
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_TrainingDetailEditDate] ON dbo.TrainingDetail
+CREATE TRIGGER [dbo].[TR_TrainingDetailEditDate] ON [dbo].[TrainingDetail]
 For Update 
 AS
 Update TrainingDetail Set TrainingDetail.TrainingDetailEditDate= getdate()

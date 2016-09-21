@@ -22,7 +22,7 @@ GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_TrainerEditDate ON Trainer
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-CREATE TRIGGER [dbo].[TR_TrainerEditDate] ON dbo.Trainer
+CREATE TRIGGER [dbo].[TR_TrainerEditDate] ON [dbo].[Trainer]
 For Update 
 AS
 Update Trainer Set Trainer.TrainerEditDate= getdate()

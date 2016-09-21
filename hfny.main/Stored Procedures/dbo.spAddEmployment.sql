@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,7 +11,7 @@ CREATE PROCEDURE [dbo].[spAddEmployment](@EmploymentCreator char(10)=NULL,
 @FormType char(2)=NULL,
 @HVCaseFK int=NULL,
 @Interval char(2)=NULL,
-@EmploymentMonthlyWages numeric(8, 2)=NULL,
+@EmploymentMonthlyWages numeric(6, 0)=NULL,
 @PCType char(3)=NULL,
 @ProgramFK int=NULL,
 @StillWorking char(1)=NULL)
