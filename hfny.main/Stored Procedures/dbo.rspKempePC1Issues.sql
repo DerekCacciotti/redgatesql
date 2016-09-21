@@ -69,7 +69,7 @@ begin
 		  ,sum(case when sr.servicecode in ('49','50') and sr.FamilyCode = '01' then 1 else 0 end) MentalHealthServices
 		  ,sum(case when sr.servicecode = '51' and sr.FamilyCode = '01' then 1 else 0 end) DomesticViolenceServices
 		  ,sum(case when sr.servicecode = '52' and sr.FamilyCode = '01' then 1 else 0 end) SubstanceAbuseServices
-		  ,sum(case when sr.servicecode = '17' and sr.FamilyCode = '01' then 1 else 0 end) DevelopmentalDisabilityServices
+		  ,sum(case when sr.servicecode = '65' and sr.FamilyCode = '01' then 1 else 0 end) DevelopmentalDisabilityServices
 			, pc1id
 		from HVCase c
 			join ServiceReferral sr on sr.HVCaseFK = c.HVCasePK

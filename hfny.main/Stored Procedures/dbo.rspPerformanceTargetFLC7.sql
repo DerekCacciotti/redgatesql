@@ -131,7 +131,7 @@ begin
 				--, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
 			from cteCohort coh
 			left outer join ServiceReferral sr on sr.HVCaseFK = coh.HVCaseFK
-			where DevelopmentalDisability = '1' and ServiceCode = '17' and FamilyCode = '01'
+			where DevelopmentalDisability = '1' and ServiceCode = '65' and FamilyCode = '01'
 		)
 	,
 	cteSummarizedReferrals
@@ -142,7 +142,7 @@ begin
 				, sum(case when DomesticViolence = '1' and ServiceCode = '51' and FormReviewed = 1 then 1
 							when (Depression = '1' or MentalIllness = '1') and (ServiceCode = '49' or ServiceCode = '50') and FormReviewed = 1 then 1
 							when (AlcoholAbuse = '1' or SubstanceAbuse = '1') and ServiceCode = '52' and FormReviewed = 1 then 1
-							when DevelopmentalDisability = '1' and ServiceCode = '17' and FormReviewed = 1 then 1
+							when DevelopmentalDisability = '1' and ServiceCode = '65' and FormReviewed = 1 then 1
 							else 0
 						end) as GoodRefs
 				, sum(FormReviewed) as FormReviewed
