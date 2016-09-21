@@ -119,7 +119,7 @@ AS
 			(DischargeDate IS NULL OR DischargeDate >= @rpdate)
 	)
 
-	SELECT DISTINCT
+	SELECT
 		*
 	FROM
 		cteMain
