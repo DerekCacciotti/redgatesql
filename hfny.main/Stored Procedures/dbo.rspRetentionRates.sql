@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -73,7 +72,7 @@ SET NOCOUNT ON;
 		, EighteenMonthsDischarge int
 		, TwoYearsIntake int
 		, TwoYearsDischarge int);
-	
+
 	declare @tblPC1withStats table (
 		PC1ID char(13)
 		, IntakeDate datetime
@@ -178,7 +177,7 @@ SET NOCOUNT ON;
 		, TrimesterAtIntake2nd int
 		, TrimesterAtIntake1st int
 		, CountOfFSWs int);
-	
+
 --#endregion
 --#region cteCohort - Get the cohort for the report
 	with cteCohort as
@@ -200,14 +199,22 @@ SET NOCOUNT ON;
 		)	
 
 	--select * 
+
 	--from cteCohort
 	--order by HVCasePK
 
 	--select HVCasePK, count(HVCasePK)
+
 	--from cteCohort
 	--group by HVCasePK
 	--having count(HVCasePK) > 1
-	
+
+
+
+
+
+
+
 --#endregion
 --#region cteLastFollowUp - Get last follow up completed for all cases in cohort
 	, cteLastFollowUp as 
@@ -219,7 +226,7 @@ SET NOCOUNT ON;
 			inner join cteCohort c on c.HVCasePK = fu.HVCaseFK
 			group by fu.HVCaseFK
 		)
-	
+
 	--select * 
 	--from cteLastFollowUp 
 	--order by HVCaseFK
@@ -537,12 +544,15 @@ SET NOCOUNT ON;
 			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
 				  -- and cp.ProgramFK=@ProgramFK
 		)
+
 --#endregion
+
 --select *
 --from cteDischargeData
 
 --select *
 --from cteMain
+
 --where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
 --order by DischargeReasonCode, PC1ID
 
@@ -651,7 +661,7 @@ insert into @tblPC1withStats
 		, TrimesterAtIntake2nd
 		, TrimesterAtIntake1st
 		, CountOfFSWs)
-select distinct pc1id
+select distinct PC1ID
 		, IntakeDate
 		, DischargeDate
 		, LastHomeVisit
@@ -660,7 +670,8 @@ select distinct pc1id
 					else
 						datediff(mm,IntakeDate,current_timestamp)
 					end as RetentionMonths
-					
+
+
 		, ActiveAt6Months
 		, ActiveAt12Months
 		, ActiveAt18Months
@@ -677,13 +688,13 @@ select distinct pc1id
 		, case when MaritalStatusAtIntake = 'Married' then 1 else 0 end as MarriedAtIntake
 		, case when MaritalStatusAtDischarge = 'Married' then 1 else 0 end as MarriedAtDischarge
 		, case when MaritalStatusAtIntake = 'Never married' then 1 else 0 end as NeverMarriedAtIntake
-		, case when MaritalStatusAtIntake = 'Never married' then 1 else 0 end as NeverMarriedAtDischarge
+		, case when MaritalStatusAtDischarge = 'Never married' then 1 else 0 end as NeverMarriedAtDischarge
 		, case when MaritalStatusAtIntake = 'Separated' then 1 else 0 end as SeparatedAtIntake
-		, case when MaritalStatusAtIntake = 'Separated' then 1 else 0 end as SeparatedAtDischarge
+		, case when MaritalStatusAtDischarge = 'Separated' then 1 else 0 end as SeparatedAtDischarge
 		, case when MaritalStatusAtIntake = 'Divorced' then 1 else 0 end as DivorcedAtIntake
-		, case when MaritalStatusAtIntake = 'Divorced' then 1 else 0 end as DivorcedAtDischarge
+		, case when MaritalStatusAtDischarge= 'Divorced' then 1 else 0 end as DivorcedAtDischarge
 		, case when MaritalStatusAtIntake = 'Widowed' then 1 else 0 end as WidowedAtIntake
-		, case when MaritalStatusAtIntake = 'Widowed' then 1 else 0 end as WidowedAtDischarge
+		, case when MaritalStatusAtDischarge = 'Widowed' then 1 else 0 end as WidowedAtDischarge
 		, case when MaritalStatusAtIntake is null or MaritalStatusAtIntake='' or left(MaritalStatusAtIntake,7) = 'Unknown' then 1 else 0 end as MarriedUnknownMissingAtIntake
 		, case when MaritalStatusAtDischarge is null or MaritalStatusAtDischarge='' or left(MaritalStatusAtDischarge,7) = 'Unknown' then 1 else 0 end as MarriedUnknownMissingAtDischarge
 		, case when OtherChildrenInHouseholdAtIntake > 0 then 1 else 0 end as OtherChildrenInHouseholdAtIntake
@@ -815,10 +826,12 @@ declare @AllEnrolledParticipants int
 --#region Retention Rate %
 select @SixMonthsTotal = count(PC1ID)
 from @tblPC1withStats
+
 where ActiveAt6Months = 1
 
 select @TwelveMonthsTotal = count(PC1ID)
 from @tblPC1withStats
+
 where ActiveAt12Months = 1
 
 select @EighteenMonthsTotal = count(PC1ID)
@@ -837,19 +850,24 @@ set @RetentionRateTwoYears = case when @TotalCohortCount = 0 then 0.0000 else ro
 --#region Enrolled Participants
 select @EnrolledParticipantsSixMonths = count(*)
 from @tblPC1withStats
-where ActiveAt6Months = 1 and (DischargeDate is null or LastHomeVisit >= dateadd(day, 6*30.44, IntakeDate)) -- and dateadd(day, 12*30.44, IntakeDate)
+where ActiveAt6Months = 1 
 
 select @EnrolledParticipantsOneYear = count(*)
+
 from @tblPC1withStats
-where ActiveAt12Months = 1 and (DischargeDate is NULL or LastHomeVisit > dateadd(day, 12*30.44, IntakeDate)) -- and dateadd(day, 18*30.44, IntakeDate)
+where ActiveAt12Months = 1 
 
 select @EnrolledParticipantsEighteenMonths = count(*)
 from @tblPC1withStats
-where ActiveAt18Months = 1 and (DischargeDate is NULL or LastHomeVisit > dateadd(day, 18*30.44, IntakeDate)) -- and dateadd(day, 24*30.44, IntakeDate)
+where ActiveAt18Months = 1 
 
 select @EnrolledParticipantsTwoYears = count(*)
 from @tblPC1withStats
-where ActiveAt24Months = 1 and (DischargeDate is NULL or LastHomeVisit > dateadd(day, 24*30.44, IntakeDate))
+where ActiveAt24Months = 1
+
+
+
+
 --#endregion
 --#region Running Total Discharged
 select @RunningTotalDischargedSixMonths = count(*)
@@ -889,6 +907,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and LastHomeVisit is not null
 
 select @TotalNOneYear = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and LastHomeVisit is not null
 
@@ -957,6 +976,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and AgeAtIntake_Under18 = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and AgeAtIntake_Under18 = 1
 
@@ -1028,6 +1048,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and AgeAtIntake_18upto20 = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and AgeAtIntake_18upto20 = 1
 
@@ -1099,6 +1120,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and AgeAtIntake_20upto30 = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and AgeAtIntake_20upto30 = 1
 
@@ -1170,6 +1192,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and AgeAtIntake_Over30 = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and AgeAtIntake_Over30 = 1
 
@@ -1290,6 +1313,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and RaceWhite = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and RaceWhite = 1
 
@@ -1361,6 +1385,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and RaceBlack = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and RaceBlack = 1
 
@@ -1432,6 +1457,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and RaceHispanic = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and RaceHispanic = 1
 
@@ -1503,6 +1529,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and RaceOther = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and RaceOther = 1
 
@@ -1574,6 +1601,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and RaceUnknownMissing = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and RaceUnknownMissing = 1
 
@@ -1691,6 +1719,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and MarriedAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and MarriedAtDischarge = 1
@@ -1698,6 +1728,8 @@ where ActiveAt6Months = 0 and MarriedAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and MarriedAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -1786,6 +1818,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and NeverMarriedAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and NeverMarriedAtDischarge = 1
@@ -1793,6 +1827,8 @@ where ActiveAt6Months = 0 and NeverMarriedAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and NeverMarriedAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -1881,6 +1917,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and SeparatedAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and SeparatedAtDischarge = 1
@@ -1888,6 +1926,8 @@ where ActiveAt6Months = 0 and SeparatedAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and SeparatedAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -1978,6 +2018,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and DivorcedAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and DivorcedAtDischarge = 1
@@ -1985,6 +2027,8 @@ where ActiveAt6Months = 0 and DivorcedAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and DivorcedAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -2073,6 +2117,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and WidowedAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and WidowedAtDischarge = 1
@@ -2080,6 +2126,8 @@ where ActiveAt6Months = 0 and WidowedAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and WidowedAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -2168,6 +2216,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and MarriedUnknownMissingAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and MarriedUnknownMissingAtDischarge = 1
@@ -2175,6 +2225,8 @@ where ActiveAt6Months = 0 and MarriedUnknownMissingAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and MarriedUnknownMissingAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -2310,6 +2362,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OtherChildrenInHouseholdAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OtherChildrenInHouseholdAtDischarge = 1
@@ -2317,6 +2371,8 @@ where ActiveAt6Months = 0 and OtherChildrenInHouseholdAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and OtherChildrenInHouseholdAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -2405,6 +2461,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and NoOtherChildrenInHouseholdAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and NoOtherChildrenInHouseholdAtDischarge = 1
@@ -2412,6 +2470,8 @@ where ActiveAt6Months = 0 and NoOtherChildrenInHouseholdAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and NoOtherChildrenInHouseholdAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -2487,10 +2547,49 @@ values ('    No'
 		, @SixMonthsAtDischarge
 		, @TwelveMonthsAtIntake
 		, @TwelveMonthsAtDischarge
+
 		, @EighteenMonthsAtIntake
 		, @EighteenMonthsAtDischarge
 		, @TwentyFourMonthsAtIntake
 		, @TwentyFourMonthsAtDischarge)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 --#endregion
 --#region Receiving TANF Services
 -- Receiving TANF Services
@@ -2547,6 +2646,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and ReceivingTANFAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and ReceivingTANFAtDischarge = 1
@@ -2554,6 +2655,8 @@ where ActiveAt6Months = 0 and ReceivingTANFAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and ReceivingTANFAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -2642,6 +2745,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and NotReceivingTANFAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and NotReceivingTANFAtDischarge = 1
@@ -2649,6 +2754,8 @@ where ActiveAt6Months = 0 and NotReceivingTANFAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and NotReceivingTANFAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -2741,6 +2848,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0
 
 select @TwelveMonthsAtIntake = avg(MomScore)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0
 
@@ -2860,6 +2968,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationAtIntakeLessThan12 = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationAtDischargeLessThan12 = 1
@@ -2867,6 +2977,8 @@ where ActiveAt6Months = 0 and PC1EducationAtDischargeLessThan12 = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeLessThan12 = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -2955,6 +3067,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationAtIntakeHSGED = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationAtDischargeHSGED = 1
@@ -2962,6 +3076,8 @@ where ActiveAt6Months = 0 and PC1EducationAtDischargeHSGED = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeHSGED = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3050,6 +3166,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationAtDischargeMoreThan12 = 1
@@ -3057,6 +3175,8 @@ where ActiveAt6Months = 0 and PC1EducationAtDischargeMoreThan12 = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3145,6 +3265,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationAtDischargeUnknownMissing = 1
@@ -3152,6 +3274,8 @@ where ActiveAt6Months = 0 and PC1EducationAtDischargeUnknownMissing = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3288,6 +3412,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtIntakeYes = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtDischargeYes = 1
@@ -3295,6 +3421,8 @@ where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtDischargeYes = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationalEnrollmentAtIntakeYes = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3383,6 +3511,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtIntakeNo = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtDischargeNo = 1
@@ -3390,6 +3520,8 @@ where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtDischargeNo = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationalEnrollmentAtIntakeNo = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3478,6 +3610,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtIntakeUnknownMissing = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtDischargeUnknownMissing = 1
@@ -3485,6 +3619,8 @@ where ActiveAt6Months = 0 and PC1EducationalEnrollmentAtDischargeUnknownMissing 
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationalEnrollmentAtIntakeUnknownMissing = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3621,6 +3757,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EmploymentAtIntakeYes = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EmploymentAtDischargeYes = 1
@@ -3628,6 +3766,8 @@ where ActiveAt6Months = 0 and PC1EmploymentAtDischargeYes = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeYes = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3716,6 +3856,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EmploymentAtIntakeNo = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EmploymentAtDischargeNo = 1
@@ -3723,6 +3865,8 @@ where ActiveAt6Months = 0 and PC1EmploymentAtDischargeNo = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeNo = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3811,6 +3955,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1EmploymentAtDischargeUnknownMissing = 1
@@ -3818,6 +3964,8 @@ where ActiveAt6Months = 0 and PC1EmploymentAtDischargeUnknownMissing = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -3909,6 +4057,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPInHouseholdAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPInHouseholdAtDischarge = 1
@@ -3916,6 +4066,8 @@ where ActiveAt6Months = 0 and OBPInHouseholdAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and OBPInHouseholdAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4052,6 +4204,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPEmploymentAtIntakeYes = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPEmploymentAtDischargeYes = 1
@@ -4059,6 +4213,8 @@ where ActiveAt6Months = 0 and OBPEmploymentAtDischargeYes = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and OBPEmploymentAtIntakeYes = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4147,6 +4303,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPEmploymentAtIntakeNo = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPEmploymentAtDischargeNo = 1
@@ -4154,6 +4312,8 @@ where ActiveAt6Months = 0 and OBPEmploymentAtDischargeNo = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and OBPEmploymentAtIntakeNo = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4242,6 +4402,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPEmploymentAtIntakeNoOBP = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPEmploymentAtDischargeNoOBP = 1
@@ -4249,6 +4411,8 @@ where ActiveAt6Months = 0 and OBPEmploymentAtDischargeNoOBP = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and OBPEmploymentAtIntakeNoOBP = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4337,6 +4501,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPEmploymentAtIntakeUnknownMissing = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and OBPEmploymentAtDischargeUnknownMissing = 1
@@ -4344,6 +4510,8 @@ where ActiveAt6Months = 0 and OBPEmploymentAtDischargeUnknownMissing = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and OBPEmploymentAtIntakeUnknownMissing = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4435,6 +4603,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2InHouseholdAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2InHouseholdAtDischarge = 1
@@ -4442,6 +4612,8 @@ where ActiveAt6Months = 0 and PC2InHouseholdAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC2InHouseholdAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4578,6 +4750,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2EmploymentAtIntakeYes = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2EmploymentAtDischargeYes = 1
@@ -4585,6 +4759,8 @@ where ActiveAt6Months = 0 and PC2EmploymentAtDischargeYes = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC2EmploymentAtIntakeYes = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4673,6 +4849,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2EmploymentAtIntakeNo = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2EmploymentAtDischargeNo = 1
@@ -4680,6 +4858,8 @@ where ActiveAt6Months = 0 and PC2EmploymentAtDischargeNo = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC2EmploymentAtIntakeNo = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4768,6 +4948,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2EmploymentAtIntakeNoPC2 = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2EmploymentAtDischargeNoPC2 = 1
@@ -4775,6 +4957,8 @@ where ActiveAt6Months = 0 and PC2EmploymentAtDischargeNoPC2 = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC2EmploymentAtIntakeNoPC2 = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -4863,6 +5047,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2EmploymentAtIntakeUnknownMissing = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC2EmploymentAtDischargeUnknownMissing = 1
@@ -4870,6 +5056,8 @@ where ActiveAt6Months = 0 and PC2EmploymentAtDischargeUnknownMissing = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC2EmploymentAtIntakeUnknownMissing = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -5005,6 +5193,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtIntakeYes = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtDischargeYes = 1
@@ -5012,6 +5202,8 @@ where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtDischargeYes = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1OrPC2OrOBPEmployedAtIntakeYes = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -5100,6 +5292,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtIntakeNo = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtDischargeNo = 1
@@ -5107,6 +5301,8 @@ where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtDischargeNo = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1OrPC2OrOBPEmployedAtIntakeNo = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -5195,6 +5391,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtIntakeUnknownMissing = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtDischargeUnknownMissing = 1
@@ -5202,6 +5400,8 @@ where ActiveAt6Months = 0 and PC1OrPC2OrOBPEmployedAtDischargeUnknownMissing = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1OrPC2OrOBPEmployedAtIntakeUnknownMissing = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -5293,6 +5493,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0
 
 select @TwelveMonthsAtDischarge = avg(CountOfHomeVisits)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0
 
@@ -5367,6 +5568,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and DischargedOnLevelX = 1
 
 select @TwelveMonthsAtDischarge = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and DischargedOnLevelX = 1
 
@@ -5484,6 +5686,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1DVAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1DVAtDischarge = 1
@@ -5491,6 +5695,8 @@ where ActiveAt6Months = 0 and PC1DVAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1DVAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -5579,6 +5785,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1MHAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1MHAtDischarge = 1
@@ -5586,6 +5794,8 @@ where ActiveAt6Months = 0 and PC1MHAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1MHAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -5674,6 +5884,8 @@ select @SixMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1SAAtIntake = 1
 
+
+
 select @SixMonthsAtDischarge = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1SAAtDischarge = 1
@@ -5681,6 +5893,8 @@ where ActiveAt6Months = 0 and PC1SAAtDischarge = 1
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1SAAtIntake = 1
+
+
 
 select @TwelveMonthsAtDischarge = count(*)
 from @tblPC1withStats
@@ -5817,6 +6031,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1PrimaryLanguageAtIntakeEnglish = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1PrimaryLanguageAtIntakeEnglish = 1
 
@@ -5888,6 +6103,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1PrimaryLanguageAtIntakeSpanish = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1PrimaryLanguageAtIntakeSpanish = 1
 
@@ -5959,6 +6175,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and PC1PrimaryLanguageAtIntakeOtherUnknown = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1PrimaryLanguageAtIntakeOtherUnknown = 1
 
@@ -6078,6 +6295,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and TrimesterAtIntakePostnatal = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and TrimesterAtIntakePostnatal = 1
 
@@ -6149,6 +6367,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and TrimesterAtIntake1st = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and TrimesterAtIntake1st = 1
 
@@ -6220,6 +6439,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and TrimesterAtIntake2nd = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and TrimesterAtIntake2nd = 1
 
@@ -6291,6 +6511,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and TrimesterAtIntake3rd = 1
 
 select @TwelveMonthsAtIntake = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and TrimesterAtIntake3rd = 1
 
@@ -6365,6 +6586,7 @@ from @tblPC1withStats
 where ActiveAt6Months = 0 and CountOfFSWs>1
 
 select @TwelveMonthsAtDischarge = count(*)
+
 from @tblPC1withStats
 where ActiveAt6Months = 1 and ActiveAt12Months = 0 and CountOfFSWs>1
 
@@ -6425,7 +6647,46 @@ values ('Cases With >1 Home Visitor'
 		, @SixMonthsAtDischarge
 		, @TwelveMonthsAtDischarge
 		, @EighteenMonthsAtDischarge
+
+
 		, @TwentyFourMonthsAtDischarge)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 --select *
 --from @tblPC1withStats
@@ -6472,7 +6733,6 @@ from @tblResults
 --   (Orders FOR Employee IN 
 --      (Emp1, Emp2, Emp3, Emp4, Emp5)
 --)AS unpvt;
+
 end
-
-
 GO
