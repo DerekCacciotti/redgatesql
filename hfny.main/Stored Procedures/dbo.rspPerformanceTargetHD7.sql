@@ -70,22 +70,22 @@ begin
 			  , ctc.TCDOB
 			  , DischargeDate
 			  , tcAgeDays
-			  , case when datediff(month,ctc.TCDOB,lastdate) >= 24 or GestationalAge = 40
+			  , case when datediff(month, ctc.TCDOB, lastdate) >= 24 or GestationalAge = 40
 						then tcAgeDays
-					when datediff(month,ctc.TCDOB,lastdate) < 24 and GestationalAge < 40
-						then tcAgeDays - ((40-GestationalAge) * 7)
+					when datediff(month, ctc.TCDOB, lastdate) < 24 and GestationalAge < 40
+						then tcAgeDays - ((40 - GestationalAge) * 7)
 				end as tcASQAgeDays
 			  , lastdate
 			  , GestationalAge			  
 			from cteTotalCases ctc
-				inner join TCID T on T.HVCaseFK = ctc.HVCaseFK and T.TCIDPK = ctc.TCIDPK 
+				inner join TCID t on t.HVCaseFK = ctc.HVCaseFK and t.TCIDPK = ctc.TCIDPK 
 					-- looking at each child individualy i.e. gestationalage
 			where
 				 case
-					 when T.GestationalAge is null then
-						 dateadd(dd,.33*365.25,(((40-0)*7)+ctc.TCDOB))
+					 when t.GestationalAge is null then
+						 dateadd(month, 4, dateadd(week, 40, ctc.TCDOB))
 					 else
-						 dateadd(dd,.33*365.25,(((40-gestationalage)*7)+ctc.TCDOB))
+						 dateadd(month, 4, dateadd(week, (40 - GestationalAge), ctc.TCDOB))
 				 end <= lastdate -- 4 months 
 	)
 	-- SELECT * FROM cteCohort
