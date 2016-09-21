@@ -8,7 +8,7 @@ GO
 -- Description:	Gets all the data needed to display the Case Home Page
 -- exec spGetAllDataForCaseHomePage 'CD97050257617' 'VB84010244287' 'EG81010218386' 'DS90010007908' 'AB77050250139' 'MC79140216559' 'JC79010253576'
 -- =============================================
-CREATE procedure	[dbo].[spGetAllDataForCaseHomePage]
+CREATE procedure [dbo].[spGetAllDataForCaseHomePage]
 (
 	@PC1ID char(13)
 )
@@ -635,6 +635,10 @@ begin
 			, cts.TransferredToFrom
 			, cts.ProgramName
 			, cts.TransferStatusText
+			, CaseProgramCreator
+			, CaseProgramCreateDate
+			, CaseProgramEditor
+			, CaseProgramEditDate
 		from HVCase hc
 		inner join CaseProgram cp on cp.HVCaseFK = hc.HVCasePK 
 		inner join PC pc on pc.PCPK = hc.PC1FK
