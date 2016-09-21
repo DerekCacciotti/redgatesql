@@ -2,12 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
-
-
-
-
 -- =============================================
 -- Author:		Dorothy Baum
 -- Create date: June 9, 2009 
@@ -16,8 +10,8 @@ GO
 --              appCodeUsedWhere
 -- =============================================
 
-CREATE PROCEDURE [dbo].[spGetCodebyGroup]
-@AppCodeGroup varchar(30) = NULL,
+CREATE procedure [dbo].[spGetCodebyGroup]
+@AppCodeGroup varchar(32) = NULL,
 @AppCodeUsedWhere varchar(10) = NULL,
 @AppCode varchar(2)=NULL
 
