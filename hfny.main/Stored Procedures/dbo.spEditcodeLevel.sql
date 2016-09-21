@@ -10,7 +10,8 @@ CREATE PROCEDURE [dbo].[spEditcodeLevel](@codeLevelPK int=NULL,
 @LevelName varchar(50)=NULL,
 @MaximumVisit numeric(4, 2)=NULL,
 @MinimumVisit numeric(4, 2)=NULL,
-@SubLevelFK int=NULL)
+@SubLevelFK int=NULL,
+@LevelAbbr varchar(10)=NULL)
 AS
 UPDATE codeLevel
 SET 
@@ -21,6 +22,7 @@ LevelGroup = @LevelGroup,
 LevelName = @LevelName, 
 MaximumVisit = @MaximumVisit, 
 MinimumVisit = @MinimumVisit, 
-SubLevelFK = @SubLevelFK
+SubLevelFK = @SubLevelFK, 
+LevelAbbr = @LevelAbbr
 WHERE codeLevelPK = @codeLevelPK
 GO

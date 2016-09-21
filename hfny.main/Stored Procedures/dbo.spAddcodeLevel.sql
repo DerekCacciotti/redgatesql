@@ -9,7 +9,8 @@ CREATE PROCEDURE [dbo].[spAddcodeLevel](@CaseWeight numeric(4, 2)=NULL,
 @LevelName varchar(50)=NULL,
 @MaximumVisit numeric(4, 2)=NULL,
 @MinimumVisit numeric(4, 2)=NULL,
-@SubLevelFK int=NULL)
+@SubLevelFK int=NULL,
+@LevelAbbr varchar(10)=NULL)
 AS
 INSERT INTO codeLevel(
 CaseWeight,
@@ -19,7 +20,8 @@ LevelGroup,
 LevelName,
 MaximumVisit,
 MinimumVisit,
-SubLevelFK
+SubLevelFK,
+LevelAbbr
 )
 VALUES(
 @CaseWeight,
@@ -29,7 +31,8 @@ VALUES(
 @LevelName,
 @MaximumVisit,
 @MinimumVisit,
-@SubLevelFK
+@SubLevelFK,
+@LevelAbbr
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
