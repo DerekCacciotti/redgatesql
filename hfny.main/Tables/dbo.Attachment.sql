@@ -8,10 +8,10 @@ CREATE TABLE [dbo].[Attachment]
 [AttachmentFilePath] [varchar] (255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [AttachmentTitle] [varchar] (255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [FormDate] [datetime] NOT NULL,
-[FormFK] [int] NOT NULL,
+[FormFK] [int] NULL,
 [FormType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[HVCaseFK] [int] NOT NULL,
-[ProgramFK] [int] NOT NULL
+[HVCaseFK] [int] NULL,
+[ProgramFK] [int] NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[Attachment] ADD CONSTRAINT [PK_Attachment] PRIMARY KEY CLUSTERED  ([AttachmentPK]) ON [PRIMARY]
