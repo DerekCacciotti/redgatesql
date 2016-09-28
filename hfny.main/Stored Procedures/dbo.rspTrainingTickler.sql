@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -321,7 +320,9 @@ SELECT workerpk
 			, [theGrouping] AS [Grouping]
 			, [DateDue]	
 FROM cteRemovals 
-WHERE Removals IS NULL 
+--9-28-2016 CP Changed after Peggy SHeehan noticed workerfk 2411 was still appearing in IFSP/FGP code topic 7.0 even though she had recieved stop gap 7.1
+--CHANGED THIS LING: 'WHERE Removals IS NULL' to 'WHERE Removals IS NOT NULL'
+WHERE Removals IS NOT NULL
 )
 
 

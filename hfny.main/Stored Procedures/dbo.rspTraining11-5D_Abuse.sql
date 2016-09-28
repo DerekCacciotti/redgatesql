@@ -5,7 +5,7 @@ GO
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 05/22/2013
--- Description:	Report Training Culturally Sensitive
+-- Description:	Annual Child Abuse & Neglect
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTraining11-5D_Abuse]
 	
