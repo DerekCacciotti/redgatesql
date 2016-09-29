@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -55,7 +54,7 @@ as
 
 
 ---- create a table that will be filled in with data at the end
-		create table #tblQ8ReportMain (QuarterNumber [int]
+		create table #tblQ8ReportMain (QuarterNumber [varchar](10)
 									 , QuarterEndDate [varchar](200) null
 									 , numberOfScreens [varchar](200) null
 									 , numberOfKempAssessments [varchar](200) null
@@ -371,7 +370,8 @@ as
 				  as (	-- "1. Total Screens"
 		-- Screens Row 1
 					  select distinct
-								QuarterNumber
+								--Chris Papas
+								CONVERT(varchar(10), QuarterNumber) as QuarterNumber
 							  , count(*) over (partition by [QuarterNumber]) as 'numberOfScreens'
 					  from		#tblInitial_cohort h
 					  inner join #tblMake8Quarter q8 on h.screendate between [QuarterStartDate] and [QuarterEndDate]
