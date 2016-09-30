@@ -300,9 +300,9 @@ WHERE TrainingTickler='YES'
 			  END AS 'Removals'
 			FROM cteReadyForRemoval rfr
 			)
-	
-			
-, cteAlmostFinal AS (		
+
+
+, cteAlmostFinal_a AS (		
 SELECT workerpk
 			, WorkerName
 			, hiredate
@@ -319,14 +319,46 @@ SELECT workerpk
 			, TrainingDate
 			, [theGrouping] AS [Grouping]
 			, [DateDue]	
-FROM cteRemovals 
---9-28-2016 CP Changed after Peggy SHeehan noticed workerfk 2411 was still appearing in IFSP/FGP code topic 7.0 even though she had recieved stop gap 7.1
---CHANGED THIS LING: 'WHERE Removals IS NULL' to 'WHERE Removals IS NOT NULL'
-WHERE Removals IS NOT NULL
+			, CASE WHEN TopicCode = '7.1' then
+				case when cteRemovals.TrainingDate is null then
+						CASE WHEN (SELECT Removals FROM cteRemovals WHERE TopicCode='7.0' AND workerpk = cteRemovals.WorkerPK) IS not null THEN 'Remove' --If they have 7.0 they don't need 7.1 (7.1 is just a stop gap)
+						end
+				else [cteRemovals].[Removals] END
+			WHEN TopicCode = '7.0' then
+				case when cteRemovals.TrainingDate is null then
+					case WHEN (SELECT Removals FROM cteRemovals WHERE TopicCode='7.1' AND workerpk = cteRemovals.WorkerPK) IS not null THEN 'Remove' --If they have 7.0 they don't need 7.1 (7.1 is just a stop gap)
+				END
+				else [cteRemovals].[Removals] END
+			  ELSE [Removals]
+			  END AS 'Removals'
+FROM cteRemovals)
+
+
+
+			
+, cteAlmostFinal AS (		
+SELECT workerpk
+			, WorkerName
+			, hiredate
+			, FirstKempeDate
+			, FirstHomeVisitDate
+			, SupervisorInitialStart
+			, FAWInitialStart
+			, FSWInitialStart
+			, TopicName
+			, TopicCode
+			, SubTopicCode
+			, CSST
+			, SubTopicName
+			, TrainingDate
+			, [Grouping]
+			, [DateDue]	
+FROM cteAlmostFinal_a 
+
+WHERE Removals IS NULL
 )
 
 
---SELECT workerpk, topiccode, cteFinal.Removals, cteFinal.TrainingDate FROM cteFinal WHERE TopicCode='7.0' ORDER BY workerpk, TopicCode --AND workerpk = ctefinal.WorkerPK
 , cteFinal AS (
 SELECT workerpk 
 			, WorkerName
@@ -337,14 +369,7 @@ SELECT workerpk
 			, FAWInitialStart
 			, FSWInitialStart
 			, TopicName
-			, CASE WHEN TopicCode = '7.1' THEN
-				CASE WHEN (SELECT Removals FROM cteRemovals WHERE TopicCode='7.0' AND workerpk = cteAlmostFinal.WorkerPK) IS NULL THEN TopicCode --If they have 7.0 they don't need 7.1 (7.1 is just a stop gap)
-				ELSE '98' END
-				WHEN TopicCode = '41.0' THEN
-				CASE WHEN (SELECT Removals FROM cteRemovals WHERE TopicCode='40.0' AND workerpk = cteAlmostFinal.WorkerPK) IS NULL THEN TopicCode --If they have 7.0 they don't need 7.1 (7.1 is just a stop gap)
-				ELSE '98' END
-			  ELSE cteAlmostFinal.TopicCode
-			  END AS 'TopicCode'
+			, TopicCode
 			, SubTopicCode
 			, CSST
 			, SubTopicName
@@ -373,7 +398,6 @@ SELECT workerpk
 FROM cteFinal 
 WHERE TopicCode <> '98'
 ORDER BY Workerpk, TopicCode, SubTopicCode
-
 
 END
 GO
