@@ -10,7 +10,7 @@ CREATE TABLE [dbo].[ELMAH_Error]
 [StatusCode] [int] NOT NULL,
 [TimeUtc] [datetime] NOT NULL,
 [Sequence] [int] NOT NULL IDENTITY(1, 1),
-[AllXml] [ntext] COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+[AllXml] [nvarchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[ELMAH_Error] ADD CONSTRAINT [PK_ELMAH_Error] PRIMARY KEY NONCLUSTERED  ([ErrorId]) ON [PRIMARY]
