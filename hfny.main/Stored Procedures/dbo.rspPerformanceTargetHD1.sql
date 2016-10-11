@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -54,7 +53,9 @@ begin
 		from @tblPTCases ptc
 			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
 			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join TCID t on t.HVCaseFK = h.HVCasePK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
+		where t.NoImmunization is null or t.NoImmunization <> 1
 	)
 	,
 	-- Report: HD1. Immunization at one year
