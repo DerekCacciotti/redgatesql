@@ -17,8 +17,6 @@ CREATE TABLE [dbo].[Training]
 [TrainingTitle] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [IsExempt] [bit] NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[Training] WITH NOCHECK ADD
-CONSTRAINT [FK_Training_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -39,8 +37,6 @@ END
 GO
 DISABLE TRIGGER [dbo].[fr_delete_training] ON [dbo].[Training]
 GO
-
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -120,11 +116,14 @@ CREATE NONCLUSTERED INDEX [IX_FK_Training_ProgramFK] ON [dbo].[Training] ([Progr
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_Training_TrainerFK] ON [dbo].[Training] ([TrainerFK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_TrainingDate] ON [dbo].[Training] ([TrainingDate]) ON [PRIMARY]
+GO
 CREATE NONCLUSTERED INDEX [IX_FK_Training_TrainingMethodFK] ON [dbo].[Training] ([TrainingMethodFK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [TrainingPK_ProgramFK] ON [dbo].[Training] ([TrainingPK], [ProgramFK]) ON [PRIMARY]
 GO
-
+ALTER TABLE [dbo].[Training] WITH NOCHECK ADD CONSTRAINT [FK_Training_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
 ALTER TABLE [dbo].[Training] WITH NOCHECK ADD CONSTRAINT [FK_Training_TrainerFK] FOREIGN KEY ([TrainerFK]) REFERENCES [dbo].[Trainer] ([TrainerPK])
 GO
 ALTER TABLE [dbo].[Training] WITH NOCHECK ADD CONSTRAINT [FK_Training_TrainingMethodFK] FOREIGN KEY ([TrainingMethodFK]) REFERENCES [dbo].[TrainingMethod] ([TrainingMethodPK])
