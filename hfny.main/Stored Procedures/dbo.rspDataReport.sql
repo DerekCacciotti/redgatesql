@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -477,6 +476,7 @@ as
 								from	[codeLevel]
 								where	((LevelName like 'level%'
 										  and Enrolled = 1
+										  and LevelGroup <> 'SUB'
 										 )
 										 or LevelName like 'Preintake-enroll'
 										)
