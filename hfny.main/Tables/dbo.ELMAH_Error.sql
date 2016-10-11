@@ -17,3 +17,5 @@ ALTER TABLE [dbo].[ELMAH_Error] ADD CONSTRAINT [PK_ELMAH_Error] PRIMARY KEY NONC
 GO
 CREATE NONCLUSTERED INDEX [IX_ELMAH_Error_App_Time_Seq] ON [dbo].[ELMAH_Error] ([Application], [TimeUtc] DESC, [Sequence] DESC) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_Sequence] ON [dbo].[ELMAH_Error] ([Sequence]) ON [PRIMARY]
+GO
