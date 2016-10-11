@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,14 +7,12 @@ GO
 -- Create date: 05/22/2013
 -- Description:	Report Training Culturally Sensitive
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTrainingCulturallySensitive]
+CREATE procedure [dbo].[rspTrainingCulturallySensitive]
 	
 	-- Add the parameters for the stored procedure here
 	@sdate AS DATETIME,
 	@edate AS DATETIME,
 	@progfk AS int
-	
-	with recompile
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
