@@ -22,7 +22,7 @@ GO
 -- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
 -- =============================================
 -- =============================================
-create procedure [dbo].[rspRetentionRates_MIECHV]
+CREATE procedure [dbo].[rspRetentionRates_MIECHV]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @StartDate datetime
@@ -413,23 +413,23 @@ SET NOCOUNT ON;
 --               ,dd.DischargeReason
 --			   ,PC1AgeAtIntake
 --			   ,case 
---				when DischargeDate is null and current_timestamp-IntakeDate > 182.125 then 1
---				when DischargeDate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
+--				when DischargeDate is null and datediff(week, IntakeDate, current_timestamp) >= 13 then 1
+--				when DischargeDate is not null and datediff(week, IntakeDate, LastHomeVisit) >= 13 then 1
 --					else 0
 --				end	as ActiveAt3Months
 --			   ,case
---				when DischargeDate is null and current_timestamp-IntakeDate > 365.25 then 1
---				when DischargeDate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
+--				when DischargeDate is null and datediff(week, IntakeDate, current_timestamp) >= 26 then 1
+--				when DischargeDate is not null and datediff(week, IntakeDate, LastHomeVisit) >= 26 then 1
 --					else 0
 --				end as ActiveAt6Months
 --			   ,case
---				when DischargeDate is null and current_timestamp-IntakeDate > 547.375 then 1
---				when DischargeDate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
+--				when DischargeDate is null and datediff(week, IntakeDate, current_timestamp) >= 39 then 1
+--				when DischargeDate is not null and datediff(week, IntakeDate, LastHomeVisit) >= 39 then 1
 --					else 0
 --				end as ActiveAt9Months
 --			   ,case
---				when DischargeDate is null and current_timestamp-IntakeDate > 730.50 then 1
---				when DischargeDate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
+--				when DischargeDate is null and datediff(week, IntakeDate, current_timestamp) >= 52 then 1
+--				when DischargeDate is not null and datediff(week, IntakeDate, LastHomeVisit) >= 52 then 1
 --					else 0
 --				end as ActiveAt12Months
 --			   ,Race
@@ -612,7 +612,7 @@ with cteTemp as
 		from [HFNY-MIHCOE].[dbo].[temptable2]
 		inner join HVProgram hp on ProgramCode = substring(PC1ID, 5, 3)
 		inner join SplitString(@ProgramFK, ',') ss on ss.ListItem = HVProgramPK
-		where substring(PC1ID, 5, 3) in ('130', '140', '420', '701', '702', '703', '710', '713', '715')
+		--where substring(PC1ID, 5, 3) in ('130', '140', '420', '701', '702', '703', '710', '713', '715')
 	)
 
 	, cteParity as 
@@ -955,7 +955,7 @@ select distinct PC1ID
 		, case when OtherChildCount is null then 1 else 0 end as OtherChildrenZeroUnknownMissing
 from cteMain
 -- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
---where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37')
+where DischargeReasonCode is null or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37')
 		-- datediff(day,IntakeDate,DischargeDate)>=(4*6*30.44))
 order by PC1ID,IntakeDate
 --#endregion

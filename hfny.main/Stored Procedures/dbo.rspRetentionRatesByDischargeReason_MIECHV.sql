@@ -17,7 +17,7 @@ GO
 -- Author:    <Jay Robohn>
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
 -- =============================================
-create procedure [dbo].[rspRetentionRatesByDischargeReason_MIECHV]
+CREATE procedure [dbo].[rspRetentionRatesByDischargeReason_MIECHV]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @StartDate datetime
@@ -219,8 +219,8 @@ insert into @tblPC1WithStats
 		from cteMain
 			left outer join codeDischarge d on cteMain.DischargeReasonCode = DischargeCode -- and 
 		-- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
-		--where DischargeReasonCode is null
-		--	 or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
+		where DischargeReasonCode is null
+			 or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
 		order by ReportDischargeText
 				,PC1ID
 				,IntakeDate
