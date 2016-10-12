@@ -2,6 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Create date: <Feb 20, 2012>
@@ -18,42 +19,42 @@ CREATE procedure [dbo].[rspTargetChildImmunizationRecord_Detailed]
 as
 	if @programfk is null
 	begin
-		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
+		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
 										   from HVProgram
 										   for xml path ('')),2,8000)
 	end
 
-	set @programfk = REPLACE(@programfk,'"','')
+	set @programfk = replace(@programfk,'"','')
 
 	---- TCMedical
-	select distinct pc1id
-				   ,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
-								   from tcid
-								   where hvcasepk = tcid.hvcasefk
-										and tcid.programfk = programfk
-								   for xml path ('')),3,1000) TargetChild
-				   ,TCDOB
-				   ,datediff(M,TCDOB,@rdate) TCAge
-				   ,EventDescription
-				   ,TCItemDate
-				   ,case
-						when IsDelayed = 1 then
-							'Yes'
-						else
-							'No'
-					end IsDelayed
-				   ,interval
-				   ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
-				   ,LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
-		from (select distinct pc1id
-							 ,hvcase.tcdob
-							 ,hvcase.hvcasepk
-							 ,caseprogram.programfk
-							 ,null as TCItemDate
-							 ,0 IsDelayed
-							 ,EventDescription
-							 ,Interval
-							 ,CurrentFSWFK
+	select pc1id
+			,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
+							from tcid
+							where hvcasepk = tcid.hvcasefk
+								and tcid.programfk = programfk
+							for xml path ('')),3,1000) TargetChild
+			,TCDOB
+			,datediff(M,TCDOB,@rdate) TCAge
+			,EventDescription
+			,TCItemDate
+			,case
+				when IsDelayed = 1 then
+					'Yes'
+				else
+					'No'
+			end IsDelayed
+			,interval
+			,ltrim(rtrim(fsw.firstname))+' '+ltrim(rtrim(fsw.lastname)) worker
+			,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) supervisor
+		from (select pc1id
+					,hvcase.tcdob
+					,hvcase.hvcasepk
+					,caseprogram.programfk
+					,null as TCItemDate
+					,0 IsDelayed
+					,EventDescription
+					,Interval
+					,CurrentFSWFK
 				  from caseprogram
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
@@ -70,15 +71,15 @@ as
 					   and (TCID.NoImmunization = 0
 					   or TCID.NoImmunization is null)
 			  union
-			  select distinct pc1id
-							 ,hvcase.tcdob
-							 ,hvcase.hvcasepk
-							 ,caseprogram.programfk
-							 ,TCItemDate
-							 ,IsDelayed
-							 ,MedicalItemTitle
-							 ,datediff(M,dateadd(dd,-30.44,HVCase.TCDOB),TCItemDate) Interval
-							 ,CurrentFSWFK
+			  select pc1id
+					,hvcase.tcdob
+					,hvcase.hvcasepk
+					,caseprogram.programfk
+					,TCItemDate
+					,IsDelayed
+					,MedicalItemTitle
+					,datediff(M,dateadd(dd,-30.44,HVCase.TCDOB),TCItemDate) Interval
+					,CurrentFSWFK
 				  from caseprogram
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
@@ -107,8 +108,8 @@ as
 			 and PC1ID = isnull(@pc1id,PC1ID)
 			 and levelname <> 'Level X'
 		order by PC1ID
-				,TCDOB
-				,interval
-				,TCItemDate
+				,case when TCItemDate is null then 1 else 0 end
+				,EventDescription
+				,TCItemDate desc
 
 GO
