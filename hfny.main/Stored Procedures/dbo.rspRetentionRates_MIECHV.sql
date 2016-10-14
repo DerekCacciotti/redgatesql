@@ -618,7 +618,7 @@ with cteTemp as
 	, cteParity as 
 	(
 	select cp.HVCaseFK
-			, max(case when try_convert(int, ca.Parity) is null
+			, max(case when ca.Parity is null
 				then 0
 				else convert(int, ca.Parity)
 			end) as MaxParity
