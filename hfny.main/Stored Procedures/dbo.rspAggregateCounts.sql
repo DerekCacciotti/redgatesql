@@ -1,8 +1,8 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:		jrobohn
 -- Create date: <June 17, 2014>
@@ -549,234 +549,278 @@ begin
 		  where convert(date, VisitStartTime) between @StartDate and @EndDate and
 				(OBPParticipated = 1 or FatherFigureParticipated = 1)
 		)
+	, 
+	cteFinal 
+	as
+		(select /* Screens completed */
+				countOfScreensCompletedSinceBeginning
+				, 1 as pctOfScreensCompletedSinceBeginning
+				, countOfScreensCompletedInPeriod
+				, 1  as pctOfScreensCompletedInPeriod
+				, countOfPositiveScreensSinceBeginning
+				, case when countOfScreensCompletedSinceBeginning is null or countOfScreensCompletedSinceBeginning = 0 then 0 
+						else round(countOfPositiveScreensSinceBeginning / (countOfScreensCompletedSinceBeginning * 1.0000), 0) 
+					end as pctOfPositiveScreensSinceBeginning
+				, countOfNegativeScreensSinceBeginning
+				, case when countOfScreensCompletedSinceBeginning is null or countOfScreensCompletedSinceBeginning = 0 then 0
+						else round(countOfNegativeScreensSinceBeginning / (countOfScreensCompletedSinceBeginning * 1.0000), 0) 
+					end as pctOfNegativeScreensSinceBeginning
+				
+				/* Positive screens */
+				, countOfPositiveScreensInPeriod
+				, case when countOfScreensCompletedInPeriod is null or countOfScreensCompletedInPeriod = 0 then 0
+						else round(countOfPositiveScreensInPeriod / (countOfScreensCompletedInPeriod * 1.0000), 0) 
+					end as pctOfPositiveScreensInPeriod
 
-	select replace(convert(varchar(20), (cast(countOfScreensCompletedSinceBeginning as money)), 1), '.00', '') as countOfScreensCompletedSinceBeginning
-			, '(100%)' as pctOfScreensCompletedSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfScreensCompletedInPeriod as money)), 1), '.00', '') as countOfScreensCompletedInPeriod
-			, '(100%)'  as pctOfScreensCompletedInPeriod
-			, replace(convert(varchar(20), (cast(countOfPositiveScreensSinceBeginning as money)), 1), '.00', '') as countOfPositiveScreensSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfPositiveScreensSinceBeginning / 
-															(countOfScreensCompletedSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfPositiveScreensSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfNegativeScreensSinceBeginning as money)), 1), '.00', '') as countOfNegativeScreensSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfNegativeScreensSinceBeginning / 
-															(countOfScreensCompletedSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfNegativeScreensSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfPositiveScreensInPeriod as money)), 1), '.00', '') as countOfPositiveScreensInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfPositiveScreensInPeriod / 
-															(countOfScreensCompletedInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfPositiveScreensInPeriod
-			, replace(convert(varchar(20), (cast(countOfNegativeScreensInPeriod as money)), 1), '.00', '') as countOfNegativeScreensInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfNegativeScreensInPeriod / 
-															(countOfScreensCompletedInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfNegativeScreensInPeriod
-			, replace(convert(varchar(20), (cast(countOfKempesCompletedSinceBeginning as money)), 1), '.00', '') as countOfKempesCompletedSinceBeginning
-			, '(100%)' as pctOfKempesCompletedSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfKempesCompletedInPeriod as money)), 1), '.00', '') as countOfKempesCompletedInPeriod
-			, '(100%)' as pctOfKempesCompletedInPeriod
-			, replace(convert(varchar(20), (cast(countOfPositiveKempesSinceBeginning as money)), 1), '.00', '') as countOfPositiveKempesSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfPositiveKempesSinceBeginning / 
-															(countOfKempesCompletedSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfPositiveKempesSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfNegativeKempesSinceBeginning as money)), 1), '.00', '') as countOfNegativeKempesSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfNegativeKempesSinceBeginning / 
-															(countOfKempesCompletedSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfNegativeKempesSinceBeginning
+				/* Negative screens */
+				, countOfNegativeScreensInPeriod
+				, case when countOfScreensCompletedInPeriod is null or countOfScreensCompletedInPeriod = 0 then 0
+						else round(countOfNegativeScreensInPeriod / (countOfScreensCompletedInPeriod * 1.0000), 0) 
+					end as pctOfNegativeScreensInPeriod
+				
+				/* Kempes completed */
+				, countOfKempesCompletedSinceBeginning
+				, 1 as pctOfKempesCompletedSinceBeginning
+				, countOfKempesCompletedInPeriod
+				, 1 as pctOfKempesCompletedInPeriod
+				
+				/* Positive Kempes */
+				, countOfPositiveKempesSinceBeginning
+				, case when countOfKempesCompletedSinceBeginning is null or countOfKempesCompletedSinceBeginning = 0 then 0
+						else round(countOfPositiveKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 0) 
+					end as pctOfPositiveKempesSinceBeginning
+				, countOfPositiveKempesInPeriod
+				, case when countOfKempesCompletedInPeriod is null or countOfKempesCompletedInPeriod = 0 then 0
+						else round(countOfPositiveKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 0) 
+					end as pctOfPositiveKempesInPeriod
+
+				/* Negative Kempes */
+				, countOfNegativeKempesSinceBeginning
+				, case when countOfKempesCompletedSinceBeginning is null or countOfKempesCompletedSinceBeginning = 0 then 0
+						else round(countOfNegativeKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 0) 
+					end as pctOfNegativeKempesSinceBeginning
+				, countOfNegativeKempesInPeriod
+				, case when countOfKempesCompletedInPeriod is null or countOfKempesCompletedInPeriod = 0 then 0
+						else round(countOfNegativeKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 0) 
+					end as pctOfNegativeKempesInPeriod
+
+				/* Father of Baby Present Kempes */
+				, countOfFOBPresentKempesSinceBeginning
+				, case when countOfKempesCompletedSinceBeginning is null or countOfKempesCompletedSinceBeginning = 0 then 0
+						else round(countOfFOBPresentKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 0) 
+					end as pctOfFOBPresentKempesSinceBeginning
+
+				, countOfFOBPresentKempesInPeriod
+				, case when countOfKempesCompletedInPeriod is null or countOfKempesCompletedInPeriod = 0 then 0
+						else round(countOfFOBPresentKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 0) 
+					end as pctOfFOBPresentKempesInPeriod
+
+				, countOfPreintakeHomeVisitInPeriod
+				, countOfPreintakeHomeVisitSinceBeginning
+
+				/* Enrolled Families */
+				/* Since Beginning */
+				, countOfFamiliesEnrolledSinceBeginning
+				, 1 as pctOfFamiliesEnrolledSinceBeginning
+				/* Prenatally */
+				, countOfFamiliesEnrolledPrenatallySinceBeginning
+				, case when countOfFamiliesEnrolledSinceBeginning is null or countOfFamiliesEnrolledSinceBeginning = 0 then 0
+						else round(countOfFamiliesEnrolledPrenatallySinceBeginning / (countOfFamiliesEnrolledSinceBeginning * 1.0000), 0) 
+					end as pctOfFamiliesEnrolledPrenatallySinceBeginning
+				/* Postnatally */
+				, countOfFamiliesEnrolledPostnatallySinceBeginning
+				, case when countOfFamiliesEnrolledSinceBeginning is null or countOfFamiliesEnrolledSinceBeginning = 0 then 0
+						else round(countOfFamiliesEnrolledPostnatallySinceBeginning / (countOfFamiliesEnrolledSinceBeginning * 1.0000), 0) 
+					end as pctOfFamiliesEnrolledPostnatallySinceBeginning
+				/* In Period */
+				, countOfFamiliesEnrolledInPeriod
+				, 1 as pctOfFamiliesEnrolledInPeriod
+				/* Prenatally */
+				, countOfFamiliesEnrolledPrenatallyInPeriod
+				, case when countOfFamiliesEnrolledInPeriod is null or countOfFamiliesEnrolledInPeriod = 0 then 0
+						else round(countOfFamiliesEnrolledPrenatallyInPeriod / (countOfFamiliesEnrolledInPeriod * 1.0000), 0) 
+					end as pctOfFamiliesEnrolledPrenatallyInPeriod
+				/* Postnatally */
+				, countOfFamiliesEnrolledPostnatallyInPeriod
+				, case when countOfFamiliesEnrolledInPeriod is null or countOfFamiliesEnrolledInPeriod = 0 then 0
+						else round(countOfFamiliesEnrolledPostnatallyInPeriod / (countOfFamiliesEnrolledInPeriod * 1.0000), 0) 
+					end as pctOfFamiliesEnrolledPostnatallyInPeriod
 			
-			
-			, replace(convert(varchar(20), (cast(countOfFOBPresentKempesSinceBeginning as money)), 1), '.00', '') as countOfFOBPresentKempesSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfFOBPresentKempesSinceBeginning / 
-															(countOfKempesCompletedSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFOBPresentKempesSinceBeginning
-			
-			
-			, replace(convert(varchar(20), (cast(countOfPositiveKempesInPeriod as money)), 1), '.00', '') as countOfPositiveKempesInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfPositiveKempesInPeriod / 
-															(countOfKempesCompletedInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfPositiveKempesInPeriod
-			, replace(convert(varchar(20), (cast(countOfNegativeKempesInPeriod as money)), 1), '.00', '') as countOfNegativeKempesInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfNegativeKempesInPeriod / 
-															(countOfKempesCompletedInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfNegativeKempesInPeriod
-
-
-			, replace(convert(varchar(20), (cast(countOfFOBPresentKempesInPeriod as money)), 1), '.00', '') as countOfFOBPresentKempesInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfFOBPresentKempesInPeriod / 
-															(countOfKempesCompletedInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFOBPresentKempesInPeriod
-
-
-			, replace(convert(varchar(20), (cast(countOfPreintakeHomeVisitInPeriod as money)), 1), '.00', '') as countOfPreintakeHomeVisitInPeriod
-			, replace(convert(varchar(20), (cast(countOfPreintakeHomeVisitSinceBeginning as money)), 1), '.00', '') as countOfPreintakeHomeVisitSinceBeginning
-
-
-			/* Enrolled Families */
-			/* Since Beginning */
-			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledSinceBeginning as money)), 1), '.00', '') as countOfFamiliesEnrolledSinceBeginning
-			, '(100%)' as pctOfFamiliesEnrolledSinceBeginning
-			/* Prenatally */
-			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledPrenatallySinceBeginning as money)), 1), '.00', '') as countOfFamiliesEnrolledPrenatallySinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfFamiliesEnrolledPrenatallySinceBeginning / 
-															(countOfFamiliesEnrolledSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFamiliesEnrolledPrenatallySinceBeginning
-			/* Postnatally */
-			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledPostnatallySinceBeginning as money)), 1), '.00', '') as countOfFamiliesEnrolledPostnatallySinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfFamiliesEnrolledPostnatallySinceBeginning / 
-															(countOfFamiliesEnrolledSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFamiliesEnrolledPostnatallySinceBeginning
-			/* In Period */
-			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledInPeriod as money)), 1), '.00', '') as countOfFamiliesEnrolledInPeriod
-			, '(100%)' as pctOfFamiliesEnrolledInPeriod
-			/* Prenatally */
-			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledPrenatallyInPeriod as money)), 1), '.00', '') as countOfFamiliesEnrolledPrenatallyInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfFamiliesEnrolledPrenatallyInPeriod / 
-															(countOfFamiliesEnrolledInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFamiliesEnrolledPrenatallyInPeriod
-			/* Postnatally */
-			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledPostnatallyInPeriod as money)), 1), '.00', '') as countOfFamiliesEnrolledPostnatallyInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfFamiliesEnrolledPostnatallyInPeriod / 
-															(countOfFamiliesEnrolledInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFamiliesEnrolledPostnatallyInPeriod
-			
-			/* Families Served */
-			, replace(convert(varchar(20), (cast(countOfFamiliesServedSinceBeginning as money)), 1), '.00', '') as countOfFamiliesServedSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfFamiliesServedInPeriod as money)), 1), '.00', '') as countOfFamiliesServedInPeriod
-			, replace(convert(varchar(20), (cast(countOfFamiliesEnrolledAtEndOfPeriod as money)), 1), '.00', '') as countOfFamiliesEnrolledAtEndOfPeriod
+				/* Families Served */
+				, countOfFamiliesServedSinceBeginning
+				, countOfFamiliesServedInPeriod
+				, countOfFamiliesEnrolledAtEndOfPeriod
 	
-			/* Target Children born and served */
-			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornSinceBeginning as money)), 1), '.00', '') as countOfTargetChildrenBornSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornInPeriod as money)), 1), '.00', '') as countOfTargetChildrenBornInPeriod
-			, '0' as countOfOtherTargetChildrenServedSinceBeginning
-			--, replace(convert(varchar(20), (cast(countOfOtherTargetChildrenServedSinceBeginning as money)), 1), '.00', '') as countOfOtherTargetChildrenServedSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfOtherTargetChildrenServedInPeriod as money)), 1), '.00', '') as countOfOtherTargetChildrenServedInPeriod
-			, replace(convert(varchar(20), (cast(countOfTargetChildrenBornInPeriod as money)), 1), '.00', '') as countOfTargetChildrenBornInPeriod
-			, replace(convert(varchar(20), (cast(countOfOtherChildrenServedSinceBeginning as money)), 1), '.00', '') as countOfOtherChildrenServedSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfOtherChildrenServedInPeriod as money)), 1), '.00', '') as countOfOtherChildrenServedInPeriod
+				/* Target Children born and served */
+				, countOfTargetChildrenBornSinceBeginning
+				, countOfTargetChildrenBornInPeriod
+				, 0 as countOfOtherTargetChildrenServedSinceBeginning
+				--, replace(convert(varchar(20), (cast(countOfOtherTargetChildrenServedSinceBeginning as money)), 1), '.00', '') as countOfOtherTargetChildrenServedSinceBeginning
+				, countOfOtherTargetChildrenServedInPeriod
+				, countOfOtherChildrenServedSinceBeginning
+				, countOfOtherChildrenServedInPeriod
 
-			/* Home Visit Logs*/
-			/* Since Beginning */
-			, replace(convert(varchar(20), (cast(countOfHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfHomeVisitLogsSinceBeginning
-			, '(100%)' as pctOfHomeVisitLogsSinceBeginning
-			/* Completed */
-			, replace(convert(varchar(20), (cast(countOfCompletedHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfCompletedHomeVisitLogsSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfCompletedHomeVisitLogsSinceBeginning / 
-															(countOfHomeVisitLogsSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfCompletedHomeVisitLogsSinceBeginning
-			/* Attempted */
-			, replace(convert(varchar(20), (cast(countOfAttemptedHomeVisitLogsSinceBeginning as money)), 1), '.00', '') as countOfAttemptedHomeVisitLogsSinceBeginning
-			, '('+replace(convert(varchar(20), cast(round(countOfAttemptedHomeVisitLogsSinceBeginning / 
-															(countOfHomeVisitLogsSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfAttemptedHomeVisitLogsSinceBeginning
-			/* In Period */
-			, replace(convert(varchar(20), (cast(countOfHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfHomeVisitLogsInPeriod
-			, '(100%)' as pctOfHomeVisitLogsInPeriod
-			/* Completed */
-			, replace(convert(varchar(20), (cast(countOfCompletedHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfCompletedHomeVisitLogsInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfCompletedHomeVisitLogsInPeriod / 
-															(countOfHomeVisitLogsInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfCompletedHomeVisitLogsInPeriod
-			/* Attempted */
-			, replace(convert(varchar(20), (cast(countOfAttemptedHomeVisitLogsInPeriod as money)), 1), '.00', '') as countOfAttemptedHomeVisitLogsInPeriod
-			, '('+replace(convert(varchar(20), cast(round(countOfAttemptedHomeVisitLogsInPeriod / 
-															(countOfHomeVisitLogsInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfAttemptedHomeVisitLogsInPeriod
+				/* Home Visit Logs*/
+				/* Since Beginning */
+				, countOfHomeVisitLogsSinceBeginning
+				, 1 as pctOfHomeVisitLogsSinceBeginning
+				/* Completed */
+				, countOfCompletedHomeVisitLogsSinceBeginning
+				, case when countOfHomeVisitLogsSinceBeginning is null or countOfHomeVisitLogsSinceBeginning = 0 then 0
+						else round(countOfCompletedHomeVisitLogsSinceBeginning / (countOfHomeVisitLogsSinceBeginning * 1.0000), 0) 
+					end as pctOfCompletedHomeVisitLogsSinceBeginning
+				/* Attempted */
+				, countOfAttemptedHomeVisitLogsSinceBeginning
+				, case when countOfHomeVisitLogsSinceBeginning is null or countOfHomeVisitLogsSinceBeginning = 0 then 0
+						else round(countOfAttemptedHomeVisitLogsSinceBeginning / (countOfHomeVisitLogsSinceBeginning * 1.0000), 0) 
+					end as pctOfAttemptedHomeVisitLogsSinceBeginning
+				/* In Period */
+				, countOfHomeVisitLogsInPeriod
+				, 1 as pctOfHomeVisitLogsInPeriod
+				/* Completed */
+				, countOfCompletedHomeVisitLogsInPeriod
+				, case when countOfHomeVisitLogsInPeriod is null or countOfHomeVisitLogsInPeriod = 0 then 0
+						else round(countOfCompletedHomeVisitLogsInPeriod / (countOfHomeVisitLogsInPeriod * 1.0000), 0) 
+					end as pctOfCompletedHomeVisitLogsInPeriod
+				/* Attempted */
+				, countOfAttemptedHomeVisitLogsInPeriod
+				, case when countOfHomeVisitLogsInPeriod is null or countOfHomeVisitLogsInPeriod = 0 then 0
+						else round(countOfAttemptedHomeVisitLogsInPeriod / (countOfHomeVisitLogsInPeriod * 1.0000), 0) 
+					end as pctOfAttemptedHomeVisitLogsInPeriod
 
-			/* Families with at least one */
-			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
-			, '' as pctOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
-			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitInPeriod as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitInPeriod
-			, '' as pctOfFamiliesWithAtLeastOneHomeVisitInPeriod
-			/* At least one with OBP or father/father figure */
-			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
-			, '' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
-			/* ('+replace(convert(varchar(20), cast(round(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning / 
-															(countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning */
-			, replace(convert(varchar(20), (cast(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod as money)), 1), '.00', '') as countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
-			, '' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
-			/* ('+replace(convert(varchar(20), cast(round(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod / 
-															(countOfFamiliesWithAtLeastOneHomeVisitInPeriod * 1.0000) * 100, 0) 
-													as money)), '.00', '') + '%)' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod */
-			--	countOfScreensCompletedSinceBeginning
-			--, countOfScreensCompletedInPeriod
-			--, countOfPositiveScreensSinceBeginning
-			--, countOfNegativeScreensSinceBeginning
-			--, countOfPositiveScreensInPeriod
-			--, countOfNegativeScreensInPeriod
-			--, countOfKempesCompletedSinceBeginning
-			--, countOfKempesCompletedInPeriod
-			--, countOfPositiveKempesSinceBeginning
-			--, countOfNegativeKempesSinceBeginning
-			--, countOfPositiveKempesInPeriod
-			--, countOfNegativeKempesInPeriod
-			--, countOfFamiliesEnrolledSinceBeginning
-			--, countOfFamiliesEnrolledPrenatallySinceBeginning
-			--, countOfFamiliesEnrolledPostnatallySinceBeginning
-			--, countOfFamiliesEnrolledInPeriod
-			--, countOfFamiliesEnrolledPrenatallyInPeriod
-			--, countOfFamiliesEnrolledPostnatallyInPeriod
-			--, countOfFamiliesServedSinceBeginning
-			--, countOfFamiliesServedInPeriod
-			--, countOfFamiliesEnrolledAtEndOfPeriod
-			--, countOfHomeVisitLogsSinceBeginning
-			--, countOfCompletedHomeVisitLogsSinceBeginning
-			--, countOfAttemptedHomeVisitLogsSinceBeginning
-			--, countOfHomeVisitLogsInPeriod
-			--, countOfCompletedHomeVisitLogsInPeriod
-			--, countOfAttemptedHomeVisitLogsInPeriod
-			--, countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
-			--, countOfFamiliesWithAtLeastOneHomeVisitInPeriod
-			--, countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
-			--, countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
-			----, countOfTargetChildrenBornSinceBeginning
-			----, countOfTargetChildrenBornInPeriod
-			----, countOfOtherChildrenServedSinceBeginning
-			----, countOfOtherChildrenServedInPeriod
-	from cteScreensCompletedSinceBeginning
-	inner join cteScreensCompletedInPeriod on 1=1
-	inner join ctePositiveScreensSinceBeginning on 1=1
-	inner join cteNegativeScreensSinceBeginning on 1=1
-	inner join ctePositiveScreensInPeriod on 1=1
-	inner join cteNegativeScreensInPeriod on 1=1
-	inner join cteKempesCompletedSinceBeginning on 1=1
-	inner join cteKempesCompletedInPeriod on 1=1
+				/* Families with at least one */
+				, countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
+				--, 0 as pctOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
+				, countOfFamiliesWithAtLeastOneHomeVisitInPeriod
+				--, 0 as pctOfFamiliesWithAtLeastOneHomeVisitInPeriod
+				
+				/* At least one with OBP or father/father figure */
+				, countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
+				--, 0 as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
+				/* ('+replace(convert(varchar(20), cast(round(countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning / 
+																(countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning * 1.0000) * 100, 0) 
+														as money)), '.00', '') + '%)' as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning */
+				, countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
+				--, 0 as pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
+		from cteScreensCompletedSinceBeginning
+		inner join cteScreensCompletedInPeriod on 1=1
+		inner join ctePositiveScreensSinceBeginning on 1=1
+		inner join cteNegativeScreensSinceBeginning on 1=1
+		inner join ctePositiveScreensInPeriod on 1=1
+		inner join cteNegativeScreensInPeriod on 1=1
+		inner join cteKempesCompletedSinceBeginning on 1=1
+		inner join cteKempesCompletedInPeriod on 1=1
 
-	inner join ctePreintakeHomeVisitInPeriod on 1=1
-	inner join ctePreintakeHomeVisitSinceBeginning on 1=1
+		inner join ctePreintakeHomeVisitInPeriod on 1=1
+		inner join ctePreintakeHomeVisitSinceBeginning on 1=1
 
-	inner join ctePositiveKempesSinceBeginning on 1=1
-	inner join cteNegativeKempesSinceBeginning on 1=1
-	inner join cteFOBPresentKempesSinceBeginning on 1=1
+		inner join ctePositiveKempesSinceBeginning on 1=1
+		inner join cteNegativeKempesSinceBeginning on 1=1
+		inner join cteFOBPresentKempesSinceBeginning on 1=1
 
-	inner join ctePositiveKempesInPeriod on 1=1
-	inner join cteNegativeKempesInPeriod on 1=1
-	inner join cteFOBPresentKempesInPeriod on 1=1
+		inner join ctePositiveKempesInPeriod on 1=1
+		inner join cteNegativeKempesInPeriod on 1=1
+		inner join cteFOBPresentKempesInPeriod on 1=1
 
-	inner join cteFamiliesEnrolledSinceBeginning on 1=1
-	inner join cteFamiliesEnrolledPrenatallySinceBeginning on 1=1
-	inner join cteFamiliesEnrolledPostnatallySinceBeginning on 1=1
-	inner join cteFamiliesEnrolledInPeriod on 1=1
-	inner join cteFamiliesEnrolledPrenatallyInPeriod on 1=1
-	inner join cteFamiliesEnrolledPostnatallyInPeriod on 1=1
-	inner join cteFamiliesServedSinceBeginning on 1=1
-	inner join cteFamiliesServedInPeriod on 1=1
-	inner join cteFamiliesEnrolledAtEndOfPeriod on 1=1
-	inner join cteTargetChildrenBornSinceBeginning on 1=1
-	inner join cteTargetChildrenBornInPeriod on 1=1
-	--inner join cteOtherTargetChildrenServedSinceBeginning on 1=1
-	inner join cteOtherTargetChildrenServedInPeriod on 1=1
-	inner join cteOtherChildrenServedSinceBeginning on 1=1
-	inner join cteOtherChildrenServedInPeriod on 1=1
-	inner join cteHomeVisitLogsSinceBeginning on 1=1
-	inner join cteCompletedHomeVisitLogsSinceBeginning on 1=1
-	inner join cteAttemptedHomeVisitLogsSinceBeginning on 1=1
-	inner join cteHomeVisitLogsInPeriod on 1=1
-	inner join cteCompletedHomeVisitLogsInPeriod on 1=1
-	inner join cteAttemptedHomeVisitLogsInPeriod on 1=1
-	inner join cteFamiliesWithAtLeastOneHomeVisitSinceBeginning on 1=1
-	inner join cteFamiliesWithAtLeastOneHomeVisitInPeriod on 1=1
-	inner join cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning on 1=1
-	inner join cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod on 1=1
+		inner join cteFamiliesEnrolledSinceBeginning on 1=1
+		inner join cteFamiliesEnrolledPrenatallySinceBeginning on 1=1
+		inner join cteFamiliesEnrolledPostnatallySinceBeginning on 1=1
+		inner join cteFamiliesEnrolledInPeriod on 1=1
+		inner join cteFamiliesEnrolledPrenatallyInPeriod on 1=1
+		inner join cteFamiliesEnrolledPostnatallyInPeriod on 1=1
+		inner join cteFamiliesServedSinceBeginning on 1=1
+		inner join cteFamiliesServedInPeriod on 1=1
+		inner join cteFamiliesEnrolledAtEndOfPeriod on 1=1
+		inner join cteTargetChildrenBornSinceBeginning on 1=1
+		inner join cteTargetChildrenBornInPeriod on 1=1
+		--inner join cteOtherTargetChildrenServedSinceBeginning on 1=1
+		inner join cteOtherTargetChildrenServedInPeriod on 1=1
+		inner join cteOtherChildrenServedSinceBeginning on 1=1
+		inner join cteOtherChildrenServedInPeriod on 1=1
+		inner join cteHomeVisitLogsSinceBeginning on 1=1
+		inner join cteCompletedHomeVisitLogsSinceBeginning on 1=1
+		inner join cteAttemptedHomeVisitLogsSinceBeginning on 1=1
+		inner join cteHomeVisitLogsInPeriod on 1=1
+		inner join cteCompletedHomeVisitLogsInPeriod on 1=1
+		inner join cteAttemptedHomeVisitLogsInPeriod on 1=1
+		inner join cteFamiliesWithAtLeastOneHomeVisitSinceBeginning on 1=1
+		inner join cteFamiliesWithAtLeastOneHomeVisitInPeriod on 1=1
+		inner join cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning on 1=1
+		inner join cteFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod on 1=1
+	)
+
+	select countOfScreensCompletedSinceBeginning
+		 , pctOfScreensCompletedSinceBeginning
+		 , countOfScreensCompletedInPeriod
+		 , pctOfScreensCompletedInPeriod
+		 , countOfPositiveScreensSinceBeginning
+		 , pctOfPositiveScreensSinceBeginning
+		 , countOfNegativeScreensSinceBeginning
+		 , pctOfNegativeScreensSinceBeginning
+		 , countOfPositiveScreensInPeriod
+		 , pctOfPositiveScreensInPeriod
+		 , countOfNegativeScreensInPeriod
+		 , pctOfNegativeScreensInPeriod
+		 , countOfKempesCompletedSinceBeginning
+		 , pctOfKempesCompletedSinceBeginning
+		 , countOfKempesCompletedInPeriod
+		 , pctOfKempesCompletedInPeriod
+		 , countOfPositiveKempesSinceBeginning
+		 , pctOfPositiveKempesSinceBeginning
+		 , countOfPositiveKempesInPeriod
+		 , pctOfPositiveKempesInPeriod
+		 , countOfNegativeKempesSinceBeginning
+		 , pctOfNegativeKempesSinceBeginning
+		 , countOfNegativeKempesInPeriod
+		 , pctOfNegativeKempesInPeriod
+		 , countOfFOBPresentKempesSinceBeginning
+		 , pctOfFOBPresentKempesSinceBeginning
+		 , countOfFOBPresentKempesInPeriod
+		 , pctOfFOBPresentKempesInPeriod
+		 , countOfPreintakeHomeVisitInPeriod
+		 , countOfPreintakeHomeVisitSinceBeginning
+		 , countOfFamiliesEnrolledSinceBeginning
+		 , pctOfFamiliesEnrolledSinceBeginning
+		 , countOfFamiliesEnrolledPrenatallySinceBeginning
+		 , pctOfFamiliesEnrolledPrenatallySinceBeginning
+		 , countOfFamiliesEnrolledPostnatallySinceBeginning
+		 , pctOfFamiliesEnrolledPostnatallySinceBeginning
+		 , countOfFamiliesEnrolledInPeriod
+		 , pctOfFamiliesEnrolledInPeriod
+		 , countOfFamiliesEnrolledPrenatallyInPeriod
+		 , pctOfFamiliesEnrolledPrenatallyInPeriod
+		 , countOfFamiliesEnrolledPostnatallyInPeriod
+		 , pctOfFamiliesEnrolledPostnatallyInPeriod
+		 , countOfFamiliesServedSinceBeginning
+		 , countOfFamiliesServedInPeriod
+		 , countOfFamiliesEnrolledAtEndOfPeriod
+		 , countOfTargetChildrenBornSinceBeginning
+		 , countOfTargetChildrenBornInPeriod
+		 , countOfOtherTargetChildrenServedSinceBeginning
+		 , countOfOtherTargetChildrenServedInPeriod
+		 , countOfOtherChildrenServedSinceBeginning
+		 , countOfOtherChildrenServedInPeriod
+		 , countOfHomeVisitLogsSinceBeginning
+		 , pctOfHomeVisitLogsSinceBeginning
+		 , countOfCompletedHomeVisitLogsSinceBeginning
+		 , pctOfCompletedHomeVisitLogsSinceBeginning
+		 , countOfAttemptedHomeVisitLogsSinceBeginning
+		 , pctOfAttemptedHomeVisitLogsSinceBeginning
+		 , countOfHomeVisitLogsInPeriod
+		 , pctOfHomeVisitLogsInPeriod
+		 , countOfCompletedHomeVisitLogsInPeriod
+		 , pctOfCompletedHomeVisitLogsInPeriod
+		 , countOfAttemptedHomeVisitLogsInPeriod
+		 , pctOfAttemptedHomeVisitLogsInPeriod
+		 , countOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
+		 --, pctOfFamiliesWithAtLeastOneHomeVisitSinceBeginning
+		 , countOfFamiliesWithAtLeastOneHomeVisitInPeriod
+		 --, pctOfFamiliesWithAtLeastOneHomeVisitInPeriod
+		 , countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
+		 --, pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherSinceBeginning
+		 , countOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod
+		 --, pctOfFamiliesWithAtLeastOneHomeVisitIncludingOBPOrFatherInPeriod 
+	from cteFinal
 
 end
 
