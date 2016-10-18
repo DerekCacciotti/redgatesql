@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		jrobohn
 -- Create date: <June 17, 2014>
@@ -559,23 +558,23 @@ begin
 				, 1  as pctOfScreensCompletedInPeriod
 				, countOfPositiveScreensSinceBeginning
 				, case when countOfScreensCompletedSinceBeginning is null or countOfScreensCompletedSinceBeginning = 0 then 0 
-						else round(countOfPositiveScreensSinceBeginning / (countOfScreensCompletedSinceBeginning * 1.0000), 0) 
+						else round(countOfPositiveScreensSinceBeginning / (countOfScreensCompletedSinceBeginning * 1.0000), 2) 
 					end as pctOfPositiveScreensSinceBeginning
 				, countOfNegativeScreensSinceBeginning
 				, case when countOfScreensCompletedSinceBeginning is null or countOfScreensCompletedSinceBeginning = 0 then 0
-						else round(countOfNegativeScreensSinceBeginning / (countOfScreensCompletedSinceBeginning * 1.0000), 0) 
+						else round(countOfNegativeScreensSinceBeginning / (countOfScreensCompletedSinceBeginning * 1.0000), 2) 
 					end as pctOfNegativeScreensSinceBeginning
 				
 				/* Positive screens */
 				, countOfPositiveScreensInPeriod
 				, case when countOfScreensCompletedInPeriod is null or countOfScreensCompletedInPeriod = 0 then 0
-						else round(countOfPositiveScreensInPeriod / (countOfScreensCompletedInPeriod * 1.0000), 0) 
+						else round(countOfPositiveScreensInPeriod / (countOfScreensCompletedInPeriod * 1.0000), 2) 
 					end as pctOfPositiveScreensInPeriod
 
 				/* Negative screens */
 				, countOfNegativeScreensInPeriod
 				, case when countOfScreensCompletedInPeriod is null or countOfScreensCompletedInPeriod = 0 then 0
-						else round(countOfNegativeScreensInPeriod / (countOfScreensCompletedInPeriod * 1.0000), 0) 
+						else round(countOfNegativeScreensInPeriod / (countOfScreensCompletedInPeriod * 1.0000), 2) 
 					end as pctOfNegativeScreensInPeriod
 				
 				/* Kempes completed */
@@ -587,32 +586,32 @@ begin
 				/* Positive Kempes */
 				, countOfPositiveKempesSinceBeginning
 				, case when countOfKempesCompletedSinceBeginning is null or countOfKempesCompletedSinceBeginning = 0 then 0
-						else round(countOfPositiveKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 0) 
+						else round(countOfPositiveKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 2) 
 					end as pctOfPositiveKempesSinceBeginning
 				, countOfPositiveKempesInPeriod
 				, case when countOfKempesCompletedInPeriod is null or countOfKempesCompletedInPeriod = 0 then 0
-						else round(countOfPositiveKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 0) 
+						else round(countOfPositiveKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 2) 
 					end as pctOfPositiveKempesInPeriod
 
 				/* Negative Kempes */
 				, countOfNegativeKempesSinceBeginning
 				, case when countOfKempesCompletedSinceBeginning is null or countOfKempesCompletedSinceBeginning = 0 then 0
-						else round(countOfNegativeKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 0) 
+						else round(countOfNegativeKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 2) 
 					end as pctOfNegativeKempesSinceBeginning
 				, countOfNegativeKempesInPeriod
 				, case when countOfKempesCompletedInPeriod is null or countOfKempesCompletedInPeriod = 0 then 0
-						else round(countOfNegativeKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 0) 
+						else round(countOfNegativeKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 2) 
 					end as pctOfNegativeKempesInPeriod
 
 				/* Father of Baby Present Kempes */
 				, countOfFOBPresentKempesSinceBeginning
 				, case when countOfKempesCompletedSinceBeginning is null or countOfKempesCompletedSinceBeginning = 0 then 0
-						else round(countOfFOBPresentKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 0) 
+						else round(countOfFOBPresentKempesSinceBeginning / (countOfKempesCompletedSinceBeginning * 1.0000), 2) 
 					end as pctOfFOBPresentKempesSinceBeginning
 
 				, countOfFOBPresentKempesInPeriod
 				, case when countOfKempesCompletedInPeriod is null or countOfKempesCompletedInPeriod = 0 then 0
-						else round(countOfFOBPresentKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 0) 
+						else round(countOfFOBPresentKempesInPeriod / (countOfKempesCompletedInPeriod * 1.0000), 2) 
 					end as pctOfFOBPresentKempesInPeriod
 
 				, countOfPreintakeHomeVisitInPeriod
@@ -625,12 +624,12 @@ begin
 				/* Prenatally */
 				, countOfFamiliesEnrolledPrenatallySinceBeginning
 				, case when countOfFamiliesEnrolledSinceBeginning is null or countOfFamiliesEnrolledSinceBeginning = 0 then 0
-						else round(countOfFamiliesEnrolledPrenatallySinceBeginning / (countOfFamiliesEnrolledSinceBeginning * 1.0000), 0) 
+						else round(countOfFamiliesEnrolledPrenatallySinceBeginning / (countOfFamiliesEnrolledSinceBeginning * 1.0000), 2) 
 					end as pctOfFamiliesEnrolledPrenatallySinceBeginning
 				/* Postnatally */
 				, countOfFamiliesEnrolledPostnatallySinceBeginning
 				, case when countOfFamiliesEnrolledSinceBeginning is null or countOfFamiliesEnrolledSinceBeginning = 0 then 0
-						else round(countOfFamiliesEnrolledPostnatallySinceBeginning / (countOfFamiliesEnrolledSinceBeginning * 1.0000), 0) 
+						else round(countOfFamiliesEnrolledPostnatallySinceBeginning / (countOfFamiliesEnrolledSinceBeginning * 1.0000), 2) 
 					end as pctOfFamiliesEnrolledPostnatallySinceBeginning
 				/* In Period */
 				, countOfFamiliesEnrolledInPeriod
@@ -638,12 +637,12 @@ begin
 				/* Prenatally */
 				, countOfFamiliesEnrolledPrenatallyInPeriod
 				, case when countOfFamiliesEnrolledInPeriod is null or countOfFamiliesEnrolledInPeriod = 0 then 0
-						else round(countOfFamiliesEnrolledPrenatallyInPeriod / (countOfFamiliesEnrolledInPeriod * 1.0000), 0) 
+						else round(countOfFamiliesEnrolledPrenatallyInPeriod / (countOfFamiliesEnrolledInPeriod * 1.0000), 2) 
 					end as pctOfFamiliesEnrolledPrenatallyInPeriod
 				/* Postnatally */
 				, countOfFamiliesEnrolledPostnatallyInPeriod
 				, case when countOfFamiliesEnrolledInPeriod is null or countOfFamiliesEnrolledInPeriod = 0 then 0
-						else round(countOfFamiliesEnrolledPostnatallyInPeriod / (countOfFamiliesEnrolledInPeriod * 1.0000), 0) 
+						else round(countOfFamiliesEnrolledPostnatallyInPeriod / (countOfFamiliesEnrolledInPeriod * 1.0000), 2) 
 					end as pctOfFamiliesEnrolledPostnatallyInPeriod
 			
 				/* Families Served */
@@ -667,12 +666,12 @@ begin
 				/* Completed */
 				, countOfCompletedHomeVisitLogsSinceBeginning
 				, case when countOfHomeVisitLogsSinceBeginning is null or countOfHomeVisitLogsSinceBeginning = 0 then 0
-						else round(countOfCompletedHomeVisitLogsSinceBeginning / (countOfHomeVisitLogsSinceBeginning * 1.0000), 0) 
+						else round(countOfCompletedHomeVisitLogsSinceBeginning / (countOfHomeVisitLogsSinceBeginning * 1.0000), 2) 
 					end as pctOfCompletedHomeVisitLogsSinceBeginning
 				/* Attempted */
 				, countOfAttemptedHomeVisitLogsSinceBeginning
 				, case when countOfHomeVisitLogsSinceBeginning is null or countOfHomeVisitLogsSinceBeginning = 0 then 0
-						else round(countOfAttemptedHomeVisitLogsSinceBeginning / (countOfHomeVisitLogsSinceBeginning * 1.0000), 0) 
+						else round(countOfAttemptedHomeVisitLogsSinceBeginning / (countOfHomeVisitLogsSinceBeginning * 1.0000), 2) 
 					end as pctOfAttemptedHomeVisitLogsSinceBeginning
 				/* In Period */
 				, countOfHomeVisitLogsInPeriod
@@ -680,12 +679,12 @@ begin
 				/* Completed */
 				, countOfCompletedHomeVisitLogsInPeriod
 				, case when countOfHomeVisitLogsInPeriod is null or countOfHomeVisitLogsInPeriod = 0 then 0
-						else round(countOfCompletedHomeVisitLogsInPeriod / (countOfHomeVisitLogsInPeriod * 1.0000), 0) 
+						else round(countOfCompletedHomeVisitLogsInPeriod / (countOfHomeVisitLogsInPeriod * 1.0000), 2) 
 					end as pctOfCompletedHomeVisitLogsInPeriod
 				/* Attempted */
 				, countOfAttemptedHomeVisitLogsInPeriod
 				, case when countOfHomeVisitLogsInPeriod is null or countOfHomeVisitLogsInPeriod = 0 then 0
-						else round(countOfAttemptedHomeVisitLogsInPeriod / (countOfHomeVisitLogsInPeriod * 1.0000), 0) 
+						else round(countOfAttemptedHomeVisitLogsInPeriod / (countOfHomeVisitLogsInPeriod * 1.0000), 2) 
 					end as pctOfAttemptedHomeVisitLogsInPeriod
 
 				/* Families with at least one */
