@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddcodePerformanceTargetTitle](@PerformanceTargetCode varchar(5)=NULL,
-@PerformanceTargetCohortDescription varchar(200)=NULL,
+@PerformanceTargetCohortDescription varchar(150)=NULL,
 @PerformanceTargetDescription varchar(500)=NULL,
 @PerformanceTargetSection varchar(32)=NULL,
 @PerformanceTargetTitle varchar(150)=NULL)

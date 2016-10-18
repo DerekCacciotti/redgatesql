@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditcodePerformanceTargetTitle](@codePerformanceTargetTitlePK int=NULL,
 @PerformanceTargetCode varchar(5)=NULL,
-@PerformanceTargetCohortDescription varchar(200)=NULL,
+@PerformanceTargetCohortDescription varchar(150)=NULL,
 @PerformanceTargetDescription varchar(500)=NULL,
 @PerformanceTargetSection varchar(32)=NULL,
 @PerformanceTargetTitle varchar(150)=NULL)

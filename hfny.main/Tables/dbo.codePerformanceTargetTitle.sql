@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[codePerformanceTargetTitle]
 (
 [codePerformanceTargetTitlePK] [int] NOT NULL IDENTITY(1, 1),
 [PerformanceTargetCode] [varchar] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[PerformanceTargetCohortDescription] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[PerformanceTargetCohortDescription] [varchar] (160) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PerformanceTargetDescription] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PerformanceTargetSection] [varchar] (32) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PerformanceTargetTitle] [varchar] (150) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
