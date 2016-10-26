@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Dar Chen>
 -- Create date: <04/04/2016>
@@ -39,7 +37,36 @@ SET @programfkX = @programfk
 SET @StartDateX = @StartDate
 SET @EndDateX = @EndDate
 
-; WITH main AS
+; WITH 	ctePIVisits 
+			as (select	KempeFK
+						, sum(case when PIVisitMade > 0 then 1
+									else 0
+							end) PIVisitMade
+				from		Preintake pi
+				inner join dbo.SplitString(@programfk, ',') on pi.ProgramFK = ListItem
+				group by	KempeFK
+				) 
+		, ctePreviousPC1Issue
+		as (select
+                    min(PC1IssuesPK) AS PC1IssuesPK
+                   ,HVCaseFK
+                from PC1Issues
+                inner join dbo.SplitString(@programfk, ',') on PC1Issues.ProgramFK = ListItem
+				where rtrim(Interval) = '1'
+                group by HVCaseFK)
+		, cteIssues
+		as (select a.HVCaseFK
+					,case when DomesticViolence = 1 then 1 else 0 end as DV
+					,case when (Depression = 1 or MentalIllness = 1) then 1 else 0 end as MH
+					,case when (AlcoholAbuse = 1 or SubstanceAbuse = 1) then 1 else 0 end as SA
+				from PC1Issues a
+				inner join (select min(PC1IssuesPK) AS PC1IssuesPK
+									, HVCaseFK
+					from PC1Issues
+					where RTRIM(Interval) = '1'
+					group BY HVCaseFK) b on a.PC1IssuesPK = b.PC1IssuesPK
+			)
+		, cteMain AS
 (
 	SELECT HVCasePK
 		 , 	case
@@ -84,8 +111,10 @@ SET @EndDateX = @EndDate
 		  ,MOBPartnerPresent --as MOBPartner 
 		  ,FOBPartnerPresent --as FOBPartner
 		  ,GrandParentPresent --as MOBGrandmother
-	,PIVisitMade
-	,y.DV ,y.MH, y.SA
+	, PIVisitMade
+	, i.DV 
+	, i.MH
+	, i.SA
 
 	, CASE WHEN (ISNULL(k.MOBPartnerPresent,0) = 0 AND ISNULL(k.FOBPartnerPresent,0) = 0 
 			 AND ISNULL(k.GrandParentPresent,0) = 0 AND ISNULL(k.OtherPresent,0) = 0) THEN
@@ -103,31 +132,15 @@ SET @EndDateX = @EndDate
 	inner join dbo.SplitString(@programfkX,',') on cp.programfk = listitem
 	INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
 	INNER JOIN PC P ON P.PCPK = h.PC1FK
-	LEFT OUTER JOIN 
-	(SELECT KempeFK, sum(CASE WHEN PIVisitMade > 0 THEN 1 ELSE 0 END) PIVisitMade
-		FROM Preintake
-		WHERE ProgramFK = @programfkX
-		GROUP BY kempeFK) AS x ON x.KempeFK = k.KempePK
-	LEFT OUTER JOIN
-	(SELECT 
-		a.HVCaseFK
-		,case when DomesticViolence = 1 then 1 else 0 end as DV
-		,case when (Depression = 1 or MentalIllness = 1) then 1 else 0 end as MH
-		,case when (AlcoholAbuse = 1 or SubstanceAbuse = 1) then 1 else 0 end as SA
-		FROM PC1Issues AS a
-		JOIN (
-		SELECT MIN(PC1IssuesPK) AS PC1IssuesPK, HVCaseFK
-		FROM PC1Issues
-		WHERE ProgramFK = 1 AND RTRIM(Interval) = '1'
-		GROUP BY HVCaseFK) AS b ON a.PC1IssuesPK = b.PC1IssuesPK
-	) AS y ON h.HVCasePK = y.HVCaseFK
+	LEFT OUTER JOIN ctePIVisits piv on piv.KempeFK = k.KempePK
+	LEFT OUTER join cteIssues i on i.HVCaseFK = h.HVCasePK
 	LEFT JOIN CommonAttributes ca ON ca.hvcasefk = h.hvcasepk AND ca.formtype = 'KE'
 	WHERE (h.IntakeDate IS NOT NULL OR cp.DischargeDate IS NOT NULL) -- only include kempes that are positive and where there is a clos_date or an intake date.
 	AND k.KempeResult = 1
 	AND k.KempeDate BETWEEN @StartDateX AND @EndDateX
 	)
 
-, main1 AS (	
+, cteMain1 AS (	
 
 	SELECT 
 	CASE WHEN IntakeDate IS NOT NULL THEN  '1' --'AcceptedFirstVisitEnrolled' 
@@ -148,7 +161,7 @@ SET @EndDateX = @EndDate
 	end as Trimester 	
 	, *
 	
-	FROM main AS a
+	FROM cteMain AS a
 )
 
 , total1 AS (
@@ -157,7 +170,7 @@ SELECT
 , SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
 , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
 , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-FROM main1 AS a
+FROM cteMain1 AS a
 )
 
 , total2 AS (
@@ -211,7 +224,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '2' and (age >= 30) THEN 1 ELSE 0 END) AS age40G2
   , SUM(CASE WHEN a.Status = '3' and (age >= 30) THEN 1 ELSE 0 END) AS age40G3
 
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 , age2 AS (
@@ -305,7 +318,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '2' and (Race IS NULL or Race = '') THEN 1 ELSE 0 END) AS race08G2
   , SUM(CASE WHEN a.Status = '3' and (Race IS NULL or Race = '') THEN 1 ELSE 0 END) AS race08G3
 
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 , race2 AS (
@@ -424,7 +437,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '2' and (MaritalStatus IS NULL OR MaritalStatus NOT IN ('01', '02', '03', '04', '05')) THEN 1 ELSE 0 END) AS MaritalStatus06G2
   , SUM(CASE WHEN a.Status = '3' and (MaritalStatus IS NULL OR MaritalStatus NOT IN ('01', '02', '03', '04', '05')) THEN 1 ELSE 0 END) AS MaritalStatus06G3
 
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 
@@ -517,7 +530,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '2' and HighestGrade IS NULL THEN 1 ELSE 0 END) AS HighestGrade04G2
   , SUM(CASE WHEN a.Status = '3' and HighestGrade IS NULL THEN 1 ELSE 0 END) AS HighestGrade04G3
  
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 , edu2 AS (
@@ -581,7 +594,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '2' and IsCurrentlyEmployed = 0 THEN 1 ELSE 0 END) AS Employed02G2
   , SUM(CASE WHEN a.Status = '3' and IsCurrentlyEmployed = 0 THEN 1 ELSE 0 END) AS Employed02G3
 
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 , employed2 AS (
@@ -632,7 +645,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '1' and OBPInHome IS NULL THEN 1 ELSE 0 END) AS InHome03G1
   , SUM(CASE WHEN a.Status = '2' and OBPInHome IS NULL THEN 1 ELSE 0 END) AS InHome03G2
   , SUM(CASE WHEN a.Status = '3' and OBPInHome IS NULL THEN 1 ELSE 0 END) AS InHome03G3
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 , inHome2 AS (
@@ -691,7 +704,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '1' and MomScore >= 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score03G1
   , SUM(CASE WHEN a.Status = '2' and MomScore >= 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score03G2
   , SUM(CASE WHEN a.Status = '3' and MomScore >= 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score03G3
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 
@@ -751,7 +764,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '1' and KempeScore >= 75 THEN 1 ELSE 0 END) AS KempeScore03G1
   , SUM(CASE WHEN a.Status = '2' and KempeScore >= 75 THEN 1 ELSE 0 END) AS KempeScore03G2
   , SUM(CASE WHEN a.Status = '3' and KempeScore >= 75 THEN 1 ELSE 0 END) AS KempeScore03G3
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 
@@ -812,7 +825,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '1' and SA = 1 THEN 1 ELSE 0 END) AS issues03G1
   , SUM(CASE WHEN a.Status = '2' and SA = 1 THEN 1 ELSE 0 END) AS issues03G2
   , SUM(CASE WHEN a.Status = '3' and SA = 1 THEN 1 ELSE 0 END) AS issues03G3
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 , issues2 AS (
@@ -876,7 +889,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '2' and Trimester = 4 THEN 1 ELSE 0 END) AS trimester04G2
   , SUM(CASE WHEN a.Status = '3' and Trimester = 4 THEN 1 ELSE 0 END) AS trimester04G3
  
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 , trimester2 AS (
@@ -949,7 +962,7 @@ SELECT
   , SUM(CASE WHEN a.Status = '2' and presentCode = 4 THEN 1 ELSE 0 END) AS assessment04G2
   , SUM(CASE WHEN a.Status = '3' and presentCode = 4 THEN 1 ELSE 0 END) AS assessment04G3
  
-  FROM main1 AS a
+  FROM cteMain1 AS a
 )
 
 , assessment2 AS (
@@ -1005,7 +1018,7 @@ SELECT
 	,sum(CASE WHEN DischargeReason = '07' THEN 1 ELSE 0 END) [OutOfTargetArea]
 	,sum(CASE WHEN DischargeReason IN ('25') THEN 1 ELSE 0 END) [Transfered]
 	,sum(CASE WHEN DischargeReason NOT IN ('36','12','19','07','25')  THEN 1 ELSE 0 END) [AllOthers]
-FROM main1 AS a
+FROM cteMain1 AS a
 WHERE a.Status = '3'
 
 )

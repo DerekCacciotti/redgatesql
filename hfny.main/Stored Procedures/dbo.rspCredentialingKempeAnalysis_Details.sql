@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <04/15/2013>
@@ -31,10 +29,18 @@ AS
 	set @programfk = REPLACE(@programfk,'"','')
 
 ;
-with cteCohert
-as
-(
-	SELECT HVCasePK
+with 	ctePIVisits 
+			as (select	KempeFK
+						, sum(case when PIVisitMade > 0 then 1
+									else 0
+							end) PIVisitMade
+				from		Preintake pi
+				inner join dbo.SplitString(@programfk, ',') on pi.ProgramFK = ListItem
+				group by	KempeFK
+				) 
+		, cteCohort
+
+		as (SELECT HVCasePK
 		 , 	case
 			   when h.tcdob is not null then
 				   h.tcdob
@@ -86,11 +92,7 @@ as
 	inner join dbo.SplitString(@ProgramFK,',') on cp.programfk = listitem
 	INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
 	INNER JOIN PC P ON P.PCPK = h.PC1FK
-	LEFT OUTER JOIN 
-	(SELECT KempeFK, sum(CASE WHEN PIVisitMade > 0 THEN 1 ELSE 0 END) PIVisitMade
-		FROM Preintake
-		WHERE ProgramFK = @programfk
-		GROUP BY kempeFK) AS x ON x.KempeFK = k.KempePK
+	left outer join ctePIVisits piv on piv.KempeFK = k.KempePK
 	LEFT JOIN CommonAttributes ca ON ca.hvcasefk = h.hvcasepk AND ca.formtype = 'KE'
 
 	WHERE (h.IntakeDate IS NOT NULL OR cp.DischargeDate IS NOT NULL) -- only include kempes that are positive and where there is a clos_date or an intake date.
@@ -122,7 +124,7 @@ as
 	AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL) THEN '2' -- 'AcceptedFirstVisitNotEnrolled'
 	ELSE '3' -- 'Refused' 
 	END) mainsortkey
-	 FROM cteCohert h
+	 FROM cteCohort h
 	left  join worker faw on CurrentFAWFK = faw.workerpk  -- faw
 	left  join worker fsw on CurrentFSWFK = fsw.workerpk   -- fsw	 
 	left join codeDischarge cd on h.DischargeReason = cd.DischargeCode
