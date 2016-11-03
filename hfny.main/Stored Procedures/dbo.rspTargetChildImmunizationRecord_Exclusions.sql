@@ -30,8 +30,8 @@ as
 		from caseprogram
 			inner join hvcase on hvcasepk = caseprogram.hvcasefk
 			inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-			inner join TCMedical on TCMedical.hvcasefk = hvcasepk and TCMedical.programfk = caseprogram.programfk and TCMedical.TCIDFK = TCID.TCIDPK and @rdate >= TCItemDate
-			inner join codeMedicalItem cmi on MedicalItemCode = TCMedical.TCMedicalItem and MedicalItemCode <= 13
+			--inner join TCMedical on TCMedical.hvcasefk = hvcasepk and TCMedical.programfk = caseprogram.programfk and TCMedical.TCIDFK = TCID.TCIDPK and @rdate >= TCItemDate
+			--inner join codeMedicalItem cmi on MedicalItemCode = TCMedical.TCMedicalItem and MedicalItemCode <= 13
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			inner join (select hvcasefk
 							  ,programfk
