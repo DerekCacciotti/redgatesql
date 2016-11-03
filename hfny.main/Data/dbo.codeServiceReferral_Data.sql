@@ -1,6 +1,5 @@
 SET IDENTITY_INSERT [dbo].[codeServiceReferral] ON
-INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (64, 'OTH', '63', 'Other Services (specify)                     ')
-INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (66, 'OTH', '64', 'Case Management                              ')
+INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (67, 'OTH', '65', 'Developmental Disability Services            ')
 SET IDENTITY_INSERT [dbo].[codeServiceReferral] OFF
 SET IDENTITY_INSERT [dbo].[codeServiceReferral] ON
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (1, 'HC ', '01', 'Adult primary care                           ')
@@ -32,6 +31,7 @@ INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferr
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (27, 'DSS', '27', 'Emergency Assistance                         ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (28, 'DSS', '28', 'SSI                                          ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (29, 'DSS', '29', 'HEAP (Energy Assistance)                     ')
+INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (30, 'DSS', '30', 'Child Protective Services                    ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (31, 'DSS', '31', 'Preventive Services                          ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (32, 'FSS', '32', 'Childbirth education                         ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (33, 'FSS', '33', 'Parenting education/training                 ')
@@ -41,9 +41,6 @@ INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferr
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (37, 'FSS', '37', 'Head Start                                   ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (38, 'FSS', '38', 'Fatherhood Services                          ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (39, 'ETE', '39', 'Adult basic education                        ')
-SET IDENTITY_INSERT [dbo].[codeServiceReferral] OFF
-SET IDENTITY_INSERT [dbo].[codeServiceReferral] ON
-INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (30, 'DSS', '30', 'Child Protective Services                    ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (40, 'ETE', '40', 'ESL (English as Second Language)             ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (41, 'ETE', '41', 'GED preparation                              ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (42, 'ETE', '42', 'Special education                            ')
@@ -67,4 +64,6 @@ INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferr
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (60, 'OTH', '60', 'Money management                             ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (61, 'OTH', '61', 'Immigration services                         ')
 INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (62, 'OTH', '62', 'Translation services                         ')
+INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (64, 'OTH', '63', 'Other Services (specify)                     ')
+INSERT INTO [dbo].[codeServiceReferral] ([codeServiceReferralPK], [ServiceReferralCategory], [ServiceReferralCode], [ServiceReferralType]) VALUES (66, 'OTH', '64', 'Case Management                              ')
 SET IDENTITY_INSERT [dbo].[codeServiceReferral] OFF
