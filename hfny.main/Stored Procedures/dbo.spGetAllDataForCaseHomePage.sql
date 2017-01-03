@@ -10,13 +10,17 @@ GO
 -- =============================================
 CREATE procedure [dbo].[spGetAllDataForCaseHomePage]
 (
-	@PC1ID char(13)
+	@PC1ID char(13),
+	@Username varchar(MAX) 
 )
 as
 begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	set nocount on;
+
+	-- Record User Access of Case Home Page
+	INSERT INTO CaseView VALUES(@PC1ID, @Username, GETDATE()); 
 
 	declare @HVCaseFK int
 	set @HVCaseFK = (select HVCaseFK 
