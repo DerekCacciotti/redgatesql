@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -176,7 +175,7 @@ begin
 					,FLOOR(expvisitcount) AS expvisitcount
 					,startdate
 					,enddate
-					,(select distinct levelname
+					,(select top 1 levelname
 						  from hvleveldetail hld
 						  where hld.hvcasefk = cteSummary.casefk
 							   and hld.StartLevelDate = cteSummary.levelstart
