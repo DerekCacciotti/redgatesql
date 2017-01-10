@@ -77,7 +77,7 @@ where ta.WorkerFK is not null
 
 , ctMain AS
 (
-SELECT rtrim(FirstName) + ' ' + rtrim(LastName) as Name
+SELECT rtrim(FirstName) + ' ' + rtrim(LastName) AS Name
 , fn.WorkerPK
 , fn.FAWInitialStart
 , fn.SupervisorInitialStart
@@ -115,6 +115,7 @@ SELECT rtrim(FirstName) + ' ' + rtrim(LastName) as Name
 	--END HW997	
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='11.0') as 'f11'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='12.0') as 'f12'
+, (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='12.1') as 'f12.1'
 , (SELECT min(trainingdate) FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode='13.0') as 'f13'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=1) AS 'f14a'
 , (SELECT CASE max(cast(ctA.IsExempt AS INT)) WHEN 1 THEN '01/01/1901' ELSE min(trainingdate) END AS ccc FROM ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=2) AS 'f14b'
@@ -332,6 +333,12 @@ SELECT distinct [Name]
 		ELSE 
 			CASE WHEN datediff(dd, [f12], [SupervisorInitialStart]) < -183 THEN '*' END
 		END AS 'f12_ast'
+	 , convert(VARCHAR(12), [f12.1], 101) AS [f12_1]
+	 , CASE isnull(SupervisorInitialStart,0)
+		WHEN 0 THEN '' --do nothing as 12 is only for Supervisors
+		ELSE 
+			CASE WHEN datediff(dd, [f12.1], [SupervisorInitialStart]) < -183 THEN '*' END
+		END AS 'f12_1_ast'
 	 , convert(VARCHAR(12), [f13], 101) AS [f13]
 	 , CASE isnull(FSWInitialStart,0)
 		WHEN 0 THEN '' --do nothing as 13 ASQ is only for FSW's
@@ -548,19 +555,19 @@ SELECT distinct [Name]
 	 , CASE [f18a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f18a], 101) END AS [f18a]
 	 , CASE isnull([f18a], 0)
 		WHEN [f18a] THEN
-			CASE WHEN datediff(dd, [f18a], [HireDate]) < -366 THEN '*' 
+			CASE WHEN datediff(dd, [f18a], [HireDate]) < -183 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f18a_ast'
 	 , CASE [f18b] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f18b], 101) END AS [f18b]
 	 , CASE isnull([f18b], 0)
 		WHEN [f18b] THEN
-			CASE WHEN datediff(dd, [f18b], [HireDate]) < -366 THEN '*' 
+			CASE WHEN datediff(dd, [f18b], [HireDate]) < -183 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f18b_ast'
 	 , CASE [f18c] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f18c], 101) END AS [f18c]
 	 , CASE isnull([f18c], 0)
 		WHEN [f18c] THEN
-			CASE WHEN datediff(dd, [f18c], [HireDate]) < -366 THEN '*' 
+			CASE WHEN datediff(dd, [f18c], [HireDate]) < -183 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f18c_ast'
 	 , CASE [f19a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f19a], 101) END AS [f19a]
