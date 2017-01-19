@@ -555,19 +555,19 @@ SELECT distinct [Name]
 	 , CASE [f18a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f18a], 101) END AS [f18a]
 	 , CASE isnull([f18a], 0)
 		WHEN [f18a] THEN
-			CASE WHEN datediff(dd, [f18a], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f18a], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f18a_ast'
 	 , CASE [f18b] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f18b], 101) END AS [f18b]
 	 , CASE isnull([f18b], 0)
 		WHEN [f18b] THEN
-			CASE WHEN datediff(dd, [f18b], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f18b], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f18b_ast'
 	 , CASE [f18c] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f18c], 101) END AS [f18c]
 	 , CASE isnull([f18c], 0)
 		WHEN [f18c] THEN
-			CASE WHEN datediff(dd, [f18c], [HireDate]) < -183 THEN '*' 
+			CASE WHEN datediff(dd, [f18c], [HireDate]) < -366 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f18c_ast'
 	 , CASE [f19a] WHEN '01/01/1901' THEN 'EXEMPT' ELSE convert(VARCHAR(12), [f19a], 101) END AS [f19a]
