@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -15,6 +14,7 @@ CREATE procedure [dbo].[spSearchCases] (@PC1ID varchar(13) = null
 									 , @TCDOB datetime = null
 									 , @WorkerPK int = null
 									 , @ProgramFK int = null
+									 , @HVCasePK int = null
 									  )
 as
 	set nocount on;
@@ -66,6 +66,7 @@ as
 							 or TCID.TCLastName like @TCLastName + '%'
 							 or hv.TCDOB = @TCDOB
 							 or WorkerPK = @WorkerPK
+							 or HVCasePK = @HVCasePK
 							)
 				 )
 		select distinct top 100
@@ -91,40 +92,54 @@ as
 			  , casehaspc2
 			  , levelname
 			  , case when dischargedate is null then 0
-					 else 1
+					else 1
 				end
 			  , (case when PC1ID = @PC1ID then 1
-					  else 0
-				 end + case	when pcpk = @PCPK then 1
-							else 0
-					   end + case when r1.pcfirstname like @PCFirstName + '%' then 1
-								  else 0
-							 end + case	when r1.pclastname like @PCLastName + '%' then 1
-										else 0
-								   end + case when r1.pcOldName like @PCFirstName + '%' then 1
-											  else 0
-										 end + case	when r1.pcOldName2 like @PCFirstName + '%' then 1
-													else 0
-											   end + case when r1.pcOldName like '%' + @PCLastName then 1
-														  else 0
-													 end + case	when r1.pcOldName2 like '%' + @PCLastName then 1
-																else 0
-														   end + case when r1.pcdob = @PCDOB then 1
-																	  else 0
-																 end
-				 + case	when r1.tcfirstname like @TCFirstName + '%' then 1
 						else 0
-				   end + case when r1.tclastname like @TCLastName + '%' then 1
-							  else 0
-						 end + case	when r1.tcdob = @TCDOB then 1
-									else 0
-							   end + case when WorkerPK = @WorkerPK then 1
-										  else 0
-									 end) as SCORE4ORDERINGROWS
+					end + 
+				 case	when pcpk = @PCPK then 1
+						else 0
+					end + 
+				case when r1.pcfirstname like @PCFirstName + '%' then 1
+					else 0
+				end + 
+				case when r1.pclastname like @PCLastName + '%' then 1
+					else 0
+				end + 
+				case when r1.pcOldName like @PCFirstName + '%' then 1
+					else 0
+				end + 
+				case when r1.pcOldName2 like @PCFirstName + '%' then 1
+					else 0
+				end + 
+				case when r1.pcOldName like '%' + @PCLastName then 1
+					else 0
+				end + 
+				case when r1.pcOldName2 like '%' + @PCLastName then 1
+					else 0
+				end + 
+				case when r1.pcdob = @PCDOB then 1
+					else 0
+				end + 
+				case when r1.tcfirstname like @TCFirstName + '%' then 1
+					else 0
+				end + 
+				case when r1.tclastname like @TCLastName + '%' then 1
+					else 0
+				end + 
+				case when r1.tcdob = @TCDOB then 1
+					else 0
+				end + 
+				case when WorkerPK = @WorkerPK then 1
+					  else 0
+				end + 
+				case when HVCasePK = @HVCasePK then 1
+					  else 0
+				end) as Score4OrderingRows
 		from	results r1
 		order by case when dischargedate is null then 0
 					  else 1
 				 end
-			  , SCORE4ORDERINGROWS desc
+			  , Score4OrderingRows desc
 			  , PC1ID;
 GO
