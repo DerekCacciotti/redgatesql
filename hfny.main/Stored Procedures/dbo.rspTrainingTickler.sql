@@ -328,7 +328,13 @@ SELECT workerpk
 				case when cteRemovals.TrainingDate is null then
 					case WHEN (SELECT top 1 Removals FROM cteRemovals WHERE TopicCode='7.1' AND workerpk = cteRemovals.WorkerPK) IS not null THEN 'Remove' --If they have 7.0 they don't need 7.1 (7.1 is just a stop gap)
 				END
-				else [cteRemovals].[Removals] END
+				else [cteRemovals].[Removals] end
+			WHEN TopicCode = '41.0' then 
+				case when cteRemovals.TrainingDate is null then
+					case WHEN (SELECT top 1 Removals FROM cteRemovals WHERE TopicCode='40.0' AND workerpk = cteRemovals.WorkerPK) IS not null THEN 'Remove' --If they have 40.0 they don't need 41 (41 is just a stop gap)
+				END
+				else [cteRemovals].[Removals] end
+			
 			  ELSE [Removals]
 			  END AS 'Removals'
 FROM cteRemovals)
