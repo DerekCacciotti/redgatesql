@@ -375,11 +375,12 @@ SELECT distinct [Name]
 		ELSE '' END AS 'f42_ast'
 			
  , convert(VARCHAR(12), [f43], 101) AS [f43]
-	 , CASE isnull([f43], 0)
-		WHEN [f43] THEN
+ 	 , CASE isnull(FirstPSIDate,0)
+		WHEN 0 THEN '' --do nothing as 43 are only for people completing PSI's
+		ELSE 
 			CASE WHEN datediff(dd, [f43], [HireDate]) < -91 THEN '*' 
 			ELSE '' END
-		ELSE '' END AS 'f43_ast'	
+		END AS 'f43_ast'	
 	
  , convert(VARCHAR(12), [f44], 101) AS [f44]
 	 , CASE isnull([f44], 0)
