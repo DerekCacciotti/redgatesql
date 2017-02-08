@@ -103,12 +103,17 @@ AS
 			, rtrim(w.FirstName) AS WorkerFirstName
 			, rtrim(w.LastName) AS WorkerLastName
 			, w.WorkerPK
+			, StartAssignmentDate
+			, EndAssignmentDate
 			, FSWAssignDate
 		FROM 
 			cteData d
 			INNER JOIN CaseProgram cp ON d.HVCaseFK = cp.HVCaseFK 
 				AND d.ProgramFK = cp.ProgramFK
-			INNER JOIN Worker w ON w.WorkerPK = cp.currentfswfk	  
+			INNER JOIN WorkerAssignmentDetail wad ON wad.programfk = cp.ProgramFK 
+				AND wad.hvcasefk = cp.HVCaseFK 
+				AND FSWAssignDate BETWEEN StartAssignmentDate AND ISNULL(EndAssignmentDate,FSWAssignDate)
+			INNER JOIN Worker w ON WorkerPK = cp.currentfswfk	  
 			INNER JOIN dbo.SplitString(@ProgramFK,',') ON cp.ProgramFK = ListItem
 		WHERE 
 			(DischargeDate IS NULL OR DischargeDate >= @rpdate)
@@ -122,4 +127,5 @@ AS
 		WorkerFirstName
 		, WorkerLastName
 		, PC1ID
+		, StartAssignmentDate
 GO
