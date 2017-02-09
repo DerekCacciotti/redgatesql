@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -59,6 +58,7 @@ BEGIN
 	
 	declare @tblPC1withStats table (
 		PC1ID char(13)
+		, HVCaseFK int
 		, OldID char(23)
 		, HVCaseFK_old int
 		, IntakeDate datetime
@@ -342,6 +342,7 @@ BEGIN
 	, cteMain as
 	------------------------
 		(select PC1ID
+			   ,HVCasePK as HVCaseFK
 			   ,OldID
 			   ,HVCaseFK_old
 			   ,IntakeDate
@@ -493,6 +494,7 @@ BEGIN
 --#region Add rows to @tblPC1withStats for each case/pc1id in the cohort, which will create the basis for the final stats
 insert into @tblPC1withStats 
 		(PC1ID
+		, HVCaseFK
 		, OldID
 		, HVCaseFK_old
 		, IntakeDate
@@ -595,6 +597,7 @@ insert into @tblPC1withStats
 		, CountOfFSWs
 		, TotalDaysEnrolled)
 select distinct pc1id
+		, HVCaseFK
 		, OldID
 		, HVCaseFK_old
 		, IntakeDate
