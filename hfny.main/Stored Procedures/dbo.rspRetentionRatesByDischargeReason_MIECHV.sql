@@ -87,112 +87,112 @@ print @enddate
 	
 --#endregion
 --#region cteCohort - Get the cohort for the report
---	with cteCohort as
---	-----------------------
---		(select HVCasePK
---			from HVCase h 
---			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
---			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
---			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
---			left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
---			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = cp.ProgramFK
---			where case when @SiteFK = 0 then 1
---							 when wp.SiteFK = @SiteFK then 1
---							 else 0
---						end = 1
---				and (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
---				and  w.WorkerPK = isnull(@WorkerFK, w.WorkerPK)
---				-- and cp.ProgramFK=@ProgramFK
---		)	
+	with cteCohort as
+	-----------------------
+		(select HVCasePK
+			from HVCase h 
+			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
+			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
+			left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
+			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = cp.ProgramFK
+			where case when @SiteFK = 0 then 1
+							 when wp.SiteFK = @SiteFK then 1
+							 else 0
+						end = 1
+				and (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+				and  w.WorkerPK = isnull(@WorkerFK, w.WorkerPK)
+				-- and cp.ProgramFK=@ProgramFK
+		)	
 
---	--select * 
---	--from cteCohort
---	--order by HVCasePK
+	--select * 
+	--from cteCohort
+	--order by HVCasePK
 
---	--select HVCasePK, count(HVCasePK)
---	--from cteCohort
---	--group by HVCasePK
---	--having count(HVCasePK) > 1
+	--select HVCasePK, count(HVCasePK)
+	--from cteCohort
+	--group by HVCasePK
+	--having count(HVCasePK) > 1
 	
-----#endregion
-----#region cteCaseLastHomeVisit - get the last home visit for each case in the cohort 
---	, cteCaseLastHomeVisit AS 
---	-----------------------------
---		(select HVCaseFK
---				  , max(vl.VisitStartTime) as LastHomeVisit
---				  , count(vl.VisitStartTime) as CountOfHomeVisits
---			from HVLog vl
---			inner join HVCase c on c.HVCasePK = vl.HVCaseFK
---			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
---			inner join cteCohort co on co.HVCasePK = c.HVCasePK
---			where VisitType <> '0001' and 
---					(IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
---							 -- and vl.ProgramFK = @ProgramFK
---			group by HVCaseFK
---		)
+--#endregion
+--#region cteCaseLastHomeVisit - get the last home visit for each case in the cohort 
+	, cteCaseLastHomeVisit AS 
+	-----------------------------
+		(select HVCaseFK
+				  , max(vl.VisitStartTime) as LastHomeVisit
+				  , count(vl.VisitStartTime) as CountOfHomeVisits
+			from HVLog vl
+			inner join HVCase c on c.HVCasePK = vl.HVCaseFK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
+			inner join cteCohort co on co.HVCasePK = c.HVCasePK
+			where VisitType <> '0001' and 
+					(IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
+							 -- and vl.ProgramFK = @ProgramFK
+			group by HVCaseFK
+		)
 	
-----select * 
-----from cteCaseLastHomeVisit
+--select * 
+--from cteCaseLastHomeVisit
 
-----#endregion
-----#region cteMain - main select for the report sproc, gets data at intake and joins to data at discharge
---	, cteMain as
---	------------------------
---	(select PC1ID
---		   ,IntakeDate
---		   ,LastHomeVisit
---		   ,DischargeDate
---		   ,cp.DischargeReason as DischargeReasonCode
---		   ,cd.ReportDischargeText
---		   ,case
---				when dischargedate is null and current_timestamp-IntakeDate > 182.125 then 1
---				when dischargedate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
---				else 0
---			end as ActiveAt3Months
---		   ,case
---				when dischargedate is null and current_timestamp-IntakeDate > 365.25 then 1
---				when dischargedate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
---				else 0
---			end as ActiveAt6Months
---		   ,case
---				when dischargedate is null and current_timestamp-IntakeDate > 547.375 then 1
---				when dischargedate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
---				else 0
---			end as ActiveAt9Months
---		   ,case
---				when dischargedate is null and current_timestamp-IntakeDate > 730.50 then 1
---				when dischargedate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
---				else 0
---			end as ActiveAt12Months
---	 from HVCase c
---		inner join cteCaseLastHomeVisit lhv on lhv.HVCaseFK = c.HVCasePK
---		inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
---		inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
---		 left outer join dbo.codeDischarge cd on cd.DischargeCode = cp.DischargeReason and DischargeUsedWhere like '%DS%'
---	 where (IntakeDate is not null
---		  and IntakeDate between @StartDate and @EndDate)
---		  --and cp.ProgramFK = @ProgramFK
---	)
-
-with cteMain as
+--#endregion
+--#region cteMain - main select for the report sproc, gets data at intake and joins to data at discharge
+	, cteMain as
+	------------------------
 	(select PC1ID
-		  , IntakeDate
-		  , LastHomeVisit
-		  , DischargeDate
-		  , tt.DischargeReasonCode
-		  , cd.ReportDischargeText
-		  , PC1AgeAtIntake
-		  , ActiveAt3Months
-		  , ActiveAt6Months
-		  , ActiveAt9Months
-		  , ActiveAt12Months
-		from [HFNY-MIHCOE].[dbo].[temptable2] tt
-		left outer join dbo.codeDischarge cd on cd.DischargeCode = tt.DischargeReason and DischargeUsedWhere like '%DS%'
-		inner join HVProgram hp on ProgramCode = substring(PC1ID, 5, 3)
-		inner join SplitString(@ProgramFK, ',') ss on ss.ListItem = HVProgramPK
-		-- substring(PC1ID, 5, 3) in ('130', '140', '420', '701', '702', '703', '710', '713', '715')
-				
+		   ,IntakeDate
+		   ,LastHomeVisit
+		   ,DischargeDate
+		   ,cp.DischargeReason as DischargeReasonCode
+		   ,cd.ReportDischargeText
+		   ,case
+			when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 3 then 1
+			when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 3 then 1
+				else 0
+			end	as ActiveAt3Months
+		   ,case
+			when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 6 then 1
+			when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 6 then 1
+				else 0
+			end	as ActiveAt6Months
+			,case
+			when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 9 then 1
+			when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 9 then 1
+				else 0
+			end as ActiveAt9Months
+			,case
+			when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 12 then 1
+			when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 12 then 1
+				else 0
+			end as ActiveAt12Months
+	 from HVCase c
+		inner join cteCaseLastHomeVisit lhv on lhv.HVCaseFK = c.HVCasePK
+		inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
+		inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
+		 left outer join dbo.codeDischarge cd on cd.DischargeCode = cp.DischargeReason and DischargeUsedWhere like '%DS%'
+	 where (IntakeDate is not null
+		  and IntakeDate between @StartDate and @EndDate)
+		  --and cp.ProgramFK = @ProgramFK
 	)
+
+--with cteMain as
+--	(select PC1ID
+--		  , IntakeDate
+--		  , LastHomeVisit
+--		  , DischargeDate
+--		  , tt.DischargeReasonCode
+--		  , cd.ReportDischargeText
+--		  , PC1AgeAtIntake
+--		  , ActiveAt3Months
+--		  , ActiveAt6Months
+--		  , ActiveAt9Months
+--		  , ActiveAt12Months
+--		from [HFNY-MIHCOE].[dbo].[temptable2] tt
+--		left outer join dbo.codeDischarge cd on cd.DischargeCode = tt.DischargeReason and DischargeUsedWhere like '%DS%'
+--		inner join HVProgram hp on ProgramCode = substring(PC1ID, 5, 3)
+--		inner join SplitString(@ProgramFK, ',') ss on ss.ListItem = HVProgramPK
+--		-- substring(PC1ID, 5, 3) in ('130', '140', '420', '701', '702', '703', '710', '713', '715')
+				
+--	)
 --select *
 --from cteMain
 --where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 

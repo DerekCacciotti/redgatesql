@@ -374,7 +374,7 @@ SET NOCOUNT ON;
 	, ctePC1AgeAtIntake as
 	------------------------
 		(select c.HVCasePK as HVCaseFK
-				,round(datediff(day,PCDOB,IntakeDate)/365.25,0) as PC1AgeAtIntake
+				, datediff(year, PCDOB, IntakeDate) as PC1AgeAtIntake
 			from PC 
 			inner join PCProgram pcp on pcp.PCFK=PCPK
 			inner join HVCase c on c.PC1FK=PCPK
@@ -384,7 +384,7 @@ SET NOCOUNT ON;
 				--and pcp.ProgramFK=@ProgramFK
 			)
 --#endregion
---#region ctePC1AgeAtIntake - get the PC1's age at intake
+--#region cteTCInformation - get the info we need from the TCID table
 	, cteTCInformation as
 	------------------------
 		(select t.HVCaseFK
@@ -412,24 +412,24 @@ SET NOCOUNT ON;
 			   ,cp.DischargeReason AS DischargeReasonCode
                ,dd.DischargeReason
 			   ,PC1AgeAtIntake
-			   ,case 
-				when DischargeDate is null and datediff(week, IntakeDate, current_timestamp) >= 13 then 1
-				when DischargeDate is not null and datediff(week, IntakeDate, LastHomeVisit) >= 13 then 1
+			   ,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 3 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 3 then 1
 					else 0
 				end	as ActiveAt3Months
 			   ,case
-				when DischargeDate is null and datediff(week, IntakeDate, current_timestamp) >= 26 then 1
-				when DischargeDate is not null and datediff(week, IntakeDate, LastHomeVisit) >= 26 then 1
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 6 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 6 then 1
 					else 0
-				end as ActiveAt6Months
-			   ,case
-				when DischargeDate is null and datediff(week, IntakeDate, current_timestamp) >= 39 then 1
-				when DischargeDate is not null and datediff(week, IntakeDate, LastHomeVisit) >= 39 then 1
+				end	as ActiveAt6Months
+				,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 9 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 9 then 1
 					else 0
 				end as ActiveAt9Months
-			   ,case
-				when DischargeDate is null and datediff(week, IntakeDate, current_timestamp) >= 52 then 1
-				when DischargeDate is not null and datediff(week, IntakeDate, LastHomeVisit) >= 52 then 1
+				,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 12 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 12 then 1
 					else 0
 				end as ActiveAt12Months
 			   ,Race
