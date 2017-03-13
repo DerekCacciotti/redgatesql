@@ -8,6 +8,9 @@ GO
 -- Description:	Training Tickler
 -- EXEC rspTrainingTickler @progfk = 1, @workerfk = 54, @supervisorfk = 0
 -- exec dbo.rspTrainingTickler @progfk=1,@workerfk=85,@supervisorfk=0
+-- Edited by: Chris Papas
+-- Edit Date: 3-13-2017
+-- Edit Reason: Codetopic 12.1 'Stop Gap for Supervisors' was appearing for non-Supervisors
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingTickler]
 	-- Add the parameters for the stored procedure here
@@ -116,7 +119,7 @@ WHERE TrainingTickler='YES'
 		FROM cteWorkerList, cteCompleteTopicList 
 		WHERE CASE WHEN FAWInitialStart IS NULL AND TopicCode = '9.0' THEN 0 -- Remove topic code 9 if not an FAW
 			  WHEN FSWInitialStart IS NULL AND TopicCode = '8.0' THEN 0 -- Remove topic code 8 if not an FSW
-			  WHEN SupervisorInitialStart IS NULL AND TopicCode = '9.1' THEN 0 --Remove topic code 9.1 if not a Supervisor
+			  WHEN SupervisorInitialStart IS NULL AND (TopicCode = '9.1' or TopicCode = '12.1') THEN 0 --Remove if worker is not a Supervisor
 			ELSE 1
 			END = 1
 )
