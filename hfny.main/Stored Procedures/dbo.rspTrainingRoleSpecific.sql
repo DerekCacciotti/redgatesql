@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -27,7 +26,7 @@ BEGIN
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE FAWStartDate BETWEEN @sdate AND dateadd(day, -183, GETDATE())
+	WHERE FAWInitialStart BETWEEN @sdate AND dateadd(day, -183, GETDATE())
 	AND (FAWEndDate IS NULL OR FAWEndDate > dateadd(day, 180, FAWStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
 	AND wp.ProgramFK = @progfk
@@ -44,7 +43,7 @@ BEGIN
     , FSWInitialStart  AS StartDate
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE FSWStartDate BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
+	WHERE FSWInitialStart BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
 	AND (FSWEndDate IS NULL OR FSWEndDate > dateadd(day, 180, FSWStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
 	AND wp.ProgramFK = @progfk
@@ -55,17 +54,17 @@ BEGIN
 , cteSupMain AS (
 
 	SELECT DISTINCT wp.workerfk
-	, wp.SupervisorStartDate AS StartDate
+	, w.SupervisorInitialStart AS StartDate
 	, 'Supervisor' AS CurrentRole
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) AS WorkerName
     , ROW_NUMBER() OVER(ORDER BY workerfk DESC) AS 'RowNumber'
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE SupervisorStartDate BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
+	WHERE SupervisorInitialStart BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
 	AND (SupervisorEndDate IS NULL OR SupervisorEndDate > dateadd(day, 180, SupervisorStartDate))
 	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
 	AND wp.ProgramFK = @progfk
-	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorStartDate
+	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorInitialStart
 )
 
 --Now we get the trainings (or lack thereof)
