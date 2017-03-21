@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -115,8 +114,8 @@ BEGIN
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) < .9 THEN '1'
 	END AS Rating
 ,	CASE cteFinal.Workertype 
-		WHEN 'FAW' THEN 'NYS1a. Home visitors shadow experienced staff prior to direct work with families.'
-		WHEN 'FSW' THEN 'NYS1b. Assessment workers shadow experienced staff prior to direct work with families.'
+		WHEN 'FAW' THEN 'NYS1b. Assessment workers shadow experienced staff prior to direct work with families.'
+		WHEN 'FSW' THEN 'NYS1a. Home visitors shadow experienced staff prior to direct work with families.'
 		WHEN 'Supervisor' THEN 'NYS1c. Supervisors shadow experienced staff prior to direct work with families.'
 	END AS CSST
 ,	CASE cteFinal.Workertype 
