@@ -254,7 +254,7 @@ SET NOCOUNT ON;
 				, OBPInHome as OBPInHomeAtDischarge
 				, ca.HVCaseFK 
 		   from CommonAttributes ca
-		   left outer join codeApp capp ON capp.AppCode=MaritalStatus and AppCodeGroup='MaritalStatus'
+		   --left outer join codeApp capp ON capp.AppCode=MaritalStatus and AppCodeGroup='MaritalStatus'
 		   inner join cteLastFollowUp fu on FollowUpPK = FormFK
 		  where FormType='FU-OBP'
 		)
@@ -263,7 +263,7 @@ SET NOCOUNT ON;
 		(select IsCurrentlyEmployed AS PC2EmploymentAtDischarge
 				, ca.HVCaseFK 
 		   from CommonAttributes ca
-		   left outer join codeApp capp ON capp.AppCode=MaritalStatus and AppCodeGroup='MaritalStatus'
+		   --left outer join codeApp capp ON capp.AppCode=MaritalStatus and AppCodeGroup='MaritalStatus'
 		   inner join cteLastFollowUp fu on FollowUpPK = FormFK
 		  where FormType='FU-PC2'
 		)
@@ -366,7 +366,7 @@ SET NOCOUNT ON;
 	, ctePC1AgeAtIntake as
 	------------------------
 		(select c.HVCasePK as HVCaseFK
-				,round(datediff(day,PCDOB,IntakeDate)/365.25,0) as PC1AgeAtIntake
+				,datediff(year,PCDOB,IntakeDate) as PC1AgeAtIntake
 			from PC 
 			inner join PCProgram pcp on pcp.PCFK=PCPK
 			inner join HVCase c on c.PC1FK=PCPK
@@ -404,24 +404,24 @@ SET NOCOUNT ON;
 			   ,cp.DischargeReason AS DischargeReasonCode
                ,dd.DischargeReason
 			   ,PC1AgeAtIntake
-			   ,case 
-				when DischargeDate is null and current_timestamp-IntakeDate > 182.125 then 1
-				when DischargeDate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
+			   ,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 6 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 6 then 1
 					else 0
 				end	as ActiveAt6Months
 			   ,case
-				when DischargeDate is null and current_timestamp-IntakeDate > 365.25 then 1
-				when DischargeDate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 12 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 12 then 1
 					else 0
-				end as ActiveAt12Months
-			   ,case
-				when DischargeDate is null and current_timestamp-IntakeDate > 547.375 then 1
-				when DischargeDate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
+				end	as ActiveAt12Months
+				,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 18 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 18 then 1
 					else 0
 				end as ActiveAt18Months
-			   ,case
-				when DischargeDate is null and current_timestamp-IntakeDate > 730.50 then 1
-				when DischargeDate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
+				,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 24 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 24 then 1
 					else 0
 				end as ActiveAt24Months
 			   ,Race

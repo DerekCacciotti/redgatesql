@@ -20,7 +20,7 @@ GO
 -- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
 -- =============================================
 -- =============================================
-create procedure [dbo].[rspRetentionRatePercentage]
+CREATE procedure [dbo].[rspRetentionRatePercentage]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @StartDate datetime
@@ -174,24 +174,24 @@ SET NOCOUNT ON;
 			   ,DischargeDate
 			   ,cp.DischargeReason AS DischargeReasonCode
                ,dd.DischargeReason
-			   ,case 
-				when DischargeDate is null and current_timestamp-IntakeDate > 182.125 then 1
-				when DischargeDate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
+			   ,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 6 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 6 then 1
 					else 0
 				end	as ActiveAt6Months
 			   ,case
-				when DischargeDate is null and current_timestamp-IntakeDate > 365.25 then 1
-				when DischargeDate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 12 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 12 then 1
 					else 0
-				end as ActiveAt12Months
-			   ,case
-				when DischargeDate is null and current_timestamp-IntakeDate > 547.375 then 1
-				when DischargeDate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
+				end	as ActiveAt12Months
+				,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 18 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 18 then 1
 					else 0
 				end as ActiveAt18Months
-			   ,case
-				when DischargeDate is null and current_timestamp-IntakeDate > 730.50 then 1
-				when DischargeDate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
+				,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 24 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 24 then 1
 					else 0
 				end as ActiveAt24Months
 			FROM HVCase c

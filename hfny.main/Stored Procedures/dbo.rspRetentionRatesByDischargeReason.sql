@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -18,7 +17,7 @@ GO
 -- Author:    <Jay Robohn>
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
 -- =============================================
-CREATE PROCEDURE [dbo].[rspRetentionRatesByDischargeReason]
+CREATE procedure [dbo].[rspRetentionRatesByDischargeReason]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @StartDate datetime
@@ -141,26 +140,26 @@ print @enddate
 		   ,DischargeDate
 		   ,cp.DischargeReason as DischargeReasonCode
 		   ,cd.ReportDischargeText
-		   ,case
-				when dischargedate is null and current_timestamp-IntakeDate > 182.125 then 1
-				when dischargedate is not null and LastHomeVisit-IntakeDate > 182.125 then 1
-				else 0
-			end as ActiveAt6Months
-		   ,case
-				when dischargedate is null and current_timestamp-IntakeDate > 365.25 then 1
-				when dischargedate is not null and LastHomeVisit-IntakeDate > 365.25 then 1
-				else 0
-			end as ActiveAt12Months
-		   ,case
-				when dischargedate is null and current_timestamp-IntakeDate > 547.375 then 1
-				when dischargedate is not null and LastHomeVisit-IntakeDate > 547.375 then 1
-				else 0
-			end as ActiveAt18Months
-		   ,case
-				when dischargedate is null and current_timestamp-IntakeDate > 730.50 then 1
-				when dischargedate is not null and LastHomeVisit-IntakeDate > 730.50 then 1
-				else 0
-			end as ActiveAt24Months
+			,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 6 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 6 then 1
+					else 0
+				end	as ActiveAt6Months
+			,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 12 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 12 then 1
+					else 0
+				end	as ActiveAt12Months
+			,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 18 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 18 then 1
+					else 0
+				end as ActiveAt18Months
+			,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 24 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 24 then 1
+					else 0
+				end as ActiveAt24Months
 	 from HVCase c
 		inner join cteCaseLastHomeVisit lhv on lhv.HVCaseFK = c.HVCasePK
 		inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
