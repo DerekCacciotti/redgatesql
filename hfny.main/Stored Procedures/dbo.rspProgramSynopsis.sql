@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -322,7 +321,7 @@ declare @col4 varchar(100)
 	set @col1 = (SELECT  count(HVCasePK) [Q4TotalEnrolled]
 		FROM @tblCommonCohort AS a 
 		where IntakeDate < @sdate and IntakeDate is not null
-		and (DischargeDate > @sdate or DischargeDate is null)
+		and (DischargeDate >= @sdate or DischargeDate is null)
 )
 
 	 -- New Families	
