@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Devinder Singh Khalsa
 -- Create date: January 9th, 2014
@@ -58,19 +56,19 @@ END
 	insert into #tblFAWFSWWorkers
 			exec spGetAllWorkersbyProgram @ProgramFK,null,'FAW,FSW', null
 	
-	-- Exclude Worker who are SUP and PM from the above list of workers
-		create table #tblSUPPMWorkers(
-			WorkerName varchar(100)
-			,LastName		varchar(50)
-			,FirstName		varchar(50)
-			,TerminationDate datetime
-			,WorkerPK int
-			,SortOrder int
+	---- Exclude Worker who are SUP and PM from the above list of workers
+	--	create table #tblSUPPMWorkers(
+	--		WorkerName varchar(100)
+	--		,LastName		varchar(50)
+	--		,FirstName		varchar(50)
+	--		,TerminationDate datetime
+	--		,WorkerPK int
+	--		,SortOrder int
 		
-		)
+	--	)
 		
-	insert into #tblSUPPMWorkers
-			exec spGetAllWorkersbyProgram @ProgramFK,null,'SUP,PM', null		
+	--insert into #tblSUPPMWorkers
+	--		exec spGetAllWorkersbyProgram @ProgramFK,null,'SUP,PM', null		
 
 
 		-- List of workers i.e. FAW, FSW minus 	SUP,PM
@@ -127,8 +125,8 @@ END
 		   --AND wp.programfk = @ProgramFK
 	INNER JOIN dbo.fnGetWorkerEventDatesALL(@ProgramFK, NULL, NULL) fn ON fn.workerpk = w.workerpk
 	where 
-	w.workerpk not in (SELECT workerpk FROM #tblSUPPMWorkers)
-	and
+	--w.workerpk not in (SELECT workerpk FROM #tblSUPPMWorkers)
+	--and
 	fn.FirstEvent <= @eDate -- exclude workers who are probably new and have not activity (visits) yet ... khalsa
 	
 	and  w.workerpk = isnull(@workerfk,w.workerpk)
@@ -817,7 +815,7 @@ SELECT * FROM cteReportHeaderStatistics, cteSupervisionsThatTookPlacePercActivit
 
 
 	drop table #tblFAWFSWWorkers
-	drop table #tblSUPPMWorkers
+	--drop table #tblSUPPMWorkers
 	drop table #tblWorkers
 	drop table #tblWeekPeriods
 	drop table #tblWorkerAndSupName
