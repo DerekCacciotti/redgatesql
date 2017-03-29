@@ -5,10 +5,10 @@ GO
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Sep. 16, 2016>
--- Description:	<Gets all Accreditation documents from the Attachment table>
+-- Description:	<Gets all Program documents from the Attachment table>
 -- =============================================
 
-create procedure [dbo].[spGetAllAccreditationDocuments]
+create procedure [dbo].[spGetAllProgramDocuments]
 as
 	begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
