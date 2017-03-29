@@ -11,7 +11,6 @@ CREATE PROCEDURE [dbo].[rspTraining7-5D_PHQ]
 	
 	-- Add the parameters for the stored procedure here
 	@sdate AS DATETIME,
-	@edate AS DATETIME,
 	@progfk AS int
 	
 AS
