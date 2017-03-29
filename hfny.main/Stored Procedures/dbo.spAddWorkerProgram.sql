@@ -1,9 +1,9 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddWorkerProgram](@CommunityOutreach bit=NULL,
+CREATE PROCEDURE [dbo].[spAddWorkerProgram](@BackgroundCheckDate date=NULL,
+@CommunityOutreach bit=NULL,
 @DirectParticipantServices bit=NULL,
 @FatherAdvocate bit=NULL,
 @FatherAdvocateEndDate datetime=NULL,
@@ -48,6 +48,7 @@ CREATE PROCEDURE [dbo].[spAddWorkerProgram](@CommunityOutreach bit=NULL,
 @WorkPhone char(12)=NULL)
 AS
 INSERT INTO WorkerProgram(
+BackgroundCheckDate,
 CommunityOutreach,
 DirectParticipantServices,
 FatherAdvocate,
@@ -93,6 +94,7 @@ WorkerProgramCreator,
 WorkPhone
 )
 VALUES(
+@BackgroundCheckDate,
 @CommunityOutreach,
 @DirectParticipantServices,
 @FatherAdvocate,
