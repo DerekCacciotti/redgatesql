@@ -1,6 +1,7 @@
 CREATE TABLE [dbo].[WorkerProgram]
 (
 [WorkerProgramPK] [int] NOT NULL IDENTITY(1, 1),
+[BackgroundCheckDate] [date] NULL,
 [CommunityOutreach] [bit] NULL,
 [DirectParticipantServices] [bit] NULL,
 [FatherAdvocate] [bit] NULL,
@@ -62,43 +63,27 @@ AS
 Update WorkerProgram Set WorkerProgram.WorkerProgramEditDate= getdate()
 From [WorkerProgram] INNER JOIN Inserted ON [WorkerProgram].[WorkerProgramPK]= Inserted.[WorkerProgramPK]
 GO
-
-ALTER TABLE [dbo].[WorkerProgram] ADD 
-CONSTRAINT [PK__WorkerPr__61F2F2132EA5EC27] PRIMARY KEY CLUSTERED  ([WorkerProgramPK]) ON [PRIMARY]
+ALTER TABLE [dbo].[WorkerProgram] ADD CONSTRAINT [PK__WorkerPr__61F2F2132EA5EC27] PRIMARY KEY CLUSTERED  ([WorkerProgramPK]) ON [PRIMARY]
+GO
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_ProgramFK] ON [dbo].[WorkerProgram] ([ProgramFK]) ON [PRIMARY]
-
+GO
 CREATE NONCLUSTERED INDEX [IX_WorkerProgram_ProgramFK] ON [dbo].[WorkerProgram] ([ProgramFK]) ON [PRIMARY]
-
+GO
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_SiteFK] ON [dbo].[WorkerProgram] ([SiteFK]) ON [PRIMARY]
-
+GO
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_SupervisorFK] ON [dbo].[WorkerProgram] ([SupervisorFK]) ON [PRIMARY]
-
+GO
 CREATE NONCLUSTERED INDEX [IX_FK_WorkerProgram_WorkerFK] ON [dbo].[WorkerProgram] ([WorkerFK]) ON [PRIMARY]
-
+GO
 CREATE NONCLUSTERED INDEX [IX_WorkerProgram] ON [dbo].[WorkerProgram] ([WorkerFK]) ON [PRIMARY]
-
+GO
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD CONSTRAINT [FK_WorkerProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD CONSTRAINT [FK_WorkerProgram_SiteFK] FOREIGN KEY ([SiteFK]) REFERENCES [dbo].[listSite] ([listSitePK])
+GO
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD CONSTRAINT [FK_WorkerProgram_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
+ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD CONSTRAINT [FK_WorkerProgram_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO
 EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'WorkerProgram', 'COLUMN', N'WorkerProgramPK'
-GO
-
-
-ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
-CONSTRAINT [FK_WorkerProgram_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
-CONSTRAINT [FK_WorkerProgram_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
-CONSTRAINT [FK_WorkerProgram_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-
-
-
-
-
-
-
-
-
-
-ALTER TABLE [dbo].[WorkerProgram] WITH NOCHECK ADD
-CONSTRAINT [FK_WorkerProgram_SiteFK] FOREIGN KEY ([SiteFK]) REFERENCES [dbo].[listSite] ([listSitePK])
-
 GO

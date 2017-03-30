@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -52,6 +51,8 @@ BEGIN
 )
 
 
+
+
 , ctePutWorkersTogether as (
 		Select distinct *, COUNT(workertype) OVER(PARTITION BY workerType) as workercounter FROM cteFAW
 	UNION
@@ -60,8 +61,6 @@ BEGIN
 		Select distinct *, COUNT(workertype) OVER(PARTITION BY workerType) as workercounter FROM cteSups
 )
 
---select *, COUNT(workertype) OVER(PARTITION BY workerType) as workercounter from ctePutWorkersTogether
---Group by workerpk, wrkrLName, WorkerName, FirstEventDate, workerType
 
 , cteGetShadowDate AS (
 		select WorkerPK, WrkrLName, WorkerName
@@ -92,31 +91,48 @@ BEGIN
 		 from ctePutWorkersTogether 
 )
 
+
 , cteFinal as (
 	Select Workertype, workername, firsteventdate, FirstShadowDate, workercounter
 		,CASE WHEN FirstShadowDate Is Null THEN 'F'
-		WHEN FirstEventDate >= FirstShadowDate THEN 'T'
+		WHEN FirstEventDate < FirstShadowDate THEN 'F'
 		ELSE 'T' END AS MeetsTarget
 	From cteGetShadowDate
  )
  
- 
+
 --Now calculate the number meeting count, by currentrole
-, cteCountMeeting AS (
-		SELECT Workertype, count(*) AS totalmeetingcount
+, cteCountMeeting1 AS (
+		SELECT 
+		WorkerType,
+		CASE WHEN MeetsTarget = 'T' THEN
+			 COUNT(*) 
+		END AS totalmeetingcount
 		FROM cteFinal
-		WHERE MeetsTarget='T'
-		GROUP BY Workertype
+		GROUP BY Workertype, MeetsTarget
+)
+
+, cteCountMeeting2 AS (
+	SELECT WorkerType, SUM(totalmeetingcount) AS totalmeetingcount
+	FROM cteCountMeeting1
+	GROUP BY WorkerType
+)
+
+, cteCountMeeting AS (
+	SELECT WorkerType
+	, CASE WHEN totalmeetingcount IS NULL THEN '0' ELSE totalmeetingcount END AS totalmeetingcount
+	FROM cteCountMeeting2
 )
 
  SELECT cteFinal.Workertype, workername, firsteventdate, FirstShadowDate, MeetsTarget, workercounter, totalmeetingcount
  ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) = 1 THEN '3' 
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) < .9 THEN '1'
+	when totalmeetingcount = 0 then '1'
 	END AS Rating
 ,	CASE cteFinal.Workertype 
-		WHEN 'FAW' THEN 'NYS1a. Home visitors shadow experienced staff prior to direct work with families.'
-		WHEN 'FSW' THEN 'NYS1b. Assessment workers shadow experienced staff prior to direct work with families.'
+		WHEN 'FAW' THEN 'NYS1b. Assessment workers shadow experienced staff prior to direct work with families.'
+		WHEN 'FSW' THEN 'NYS1a. Home visitors shadow experienced staff prior to direct work with families.'
 		WHEN 'Supervisor' THEN 'NYS1c. Supervisors shadow experienced staff prior to direct work with families.'
 	END AS CSST
 ,	CASE cteFinal.Workertype 
