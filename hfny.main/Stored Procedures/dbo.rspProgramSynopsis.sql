@@ -1453,7 +1453,7 @@ SELECT 	'17','2', ''
 		   lr.LevelName
 		  ,CASE when levelCount IS NOT NULL THEN 1 ELSE 0 END AS levelCount
 		  FROM cteDataReportRow14RestOfIt	t14Rest
-	RIGHT JOIN (SELECT [LevelName] FROM [codeLevel] WHERE ((LevelName LIKE 'level%' AND Enrolled = 1) OR LevelName LIKE 'Preintake-enroll'))  lr ON lr.LevelName = t14Rest.LevelName  -- add missing levelnames
+	RIGHT JOIN (SELECT DISTINCT [LevelName] FROM [codeLevel] WHERE ((LevelName LIKE 'level%' AND Enrolled = 1) OR LevelName LIKE 'Preintake-enroll'))  lr ON lr.LevelName = t14Rest.LevelName  -- add missing levelnames
 	ORDER BY LevelName 
 
 
