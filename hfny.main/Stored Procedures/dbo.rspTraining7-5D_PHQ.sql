@@ -28,6 +28,7 @@ BEGIN
 	, '1' AS TotalCounter --used to get a count of all workers in this report towards the end
 	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
 	WHERE FirstPHQDate is not null
+	and HireDate >= @sdate
 	
 )
 
