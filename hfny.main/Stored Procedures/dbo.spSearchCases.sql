@@ -2,6 +2,10 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
+--Edited On: 4-5-2017
+--Edited by Chris Papas - removed function and removed the XML inner join to speed up search
+
 -- 'AD85030196603'
 -- exec spSearchCases null,null,'Allison','Dough'
 CREATE procedure [dbo].[spSearchCases] (@PC1ID varchar(13) = null
@@ -18,9 +22,10 @@ CREATE procedure [dbo].[spSearchCases] (@PC1ID varchar(13) = null
 									  )
 as
 	set nocount on;
-	-- Rewrote this store proc to make it compatible with SQL 2008.
-	with	results(hvcasepk, pcpk, PC1ID, pcfirstname, pclastname, pcOldName, pcOldName2, pcdob, tcfirstname, tclastname, tcdob, workerlastname, workerfirstname, intakedate, dischargedate, caseprogress, casehasobp, casehaspc2, levelname, WorkerPK)
-			  as (select	HVCasePK
+	
+		;with cteresults as (
+	
+			select top 100 HVCasePK
 						  , PC.PCPK
 						  , PC1ID
 						  , PC.PCFirstName
@@ -28,8 +33,8 @@ as
 						  , PC.PCOldName
 						  , PC.PCOldName2
 						  , PC.PCDOB
-						  , rtrim(TCID.TCFirstName)
-						  , rtrim(TCID.TCLastName)
+						  , rtrim(TCID.TCFirstName) as TCFirstName
+						  , rtrim(TCID.TCLastName) as TCLastName
 						  , hv.TCDOB
 						  , rtrim(Worker.LastName) as workerlastname
 						  , rtrim(Worker.FirstName) as workerfirstname
@@ -44,7 +49,7 @@ as
 							end as CaseHasPC2
 						  , cdlvl.LevelName
 						  , WorkerPK
-				  from		fnTableCaseProgram(@ProgramFK) cp -- Note: fnTableCaseProgram is like a parameterised view ... Khalsa
+				  from		CaseProgram cp -- Note: fnTableCaseProgram is like a parameterised view ... Khalsa
 				  inner join codeLevel cdlvl on cdlvl.codeLevelPK = cp.CurrentLevelFK
 				  inner join HVCase hv on cp.HVCaseFK = hv.HVCasePK
 				  inner join PC on hv.PC1FK = PC.PCPK
@@ -68,8 +73,9 @@ as
 							 or WorkerPK = @WorkerPK
 							 or HVCasePK = @HVCasePK
 							)
+							and cp.ProgramFK = isnull(@ProgramFK, cp.ProgramFK)
 				 )
-		select distinct top 100
+		select distinct	
 				hvcasepk
 			  , pcpk
 			  , PC1ID
@@ -77,12 +83,7 @@ as
 			  , pcOldName
 			  , pcOldName2 
 			  , pcdob
-			  , tc = substring((select	', ' + tcfirstname + ' ' + tclastname
-								from	results r2
-								where	r1.PC1ID = r2.PC1ID
-							   for
-								xml	path('')
-							   ), 3, 1000)
+			  , tc = tcfirstname + ' ' + tclastname
 			  , tcdob
 			  , workerfirstname + ' ' + workerlastname as worker
 			  , dischargedate
@@ -100,34 +101,34 @@ as
 				 case	when pcpk = @PCPK then 1
 						else 0
 					end + 
-				case when r1.pcfirstname like @PCFirstName + '%' then 1
+				case when pcfirstname like @PCFirstName + '%' then 1
 					else 0
 				end + 
-				case when r1.pclastname like @PCLastName + '%' then 1
+				case when pclastname like @PCLastName + '%' then 1
 					else 0
 				end + 
-				case when r1.pcOldName like @PCFirstName + '%' then 1
+				case when pcOldName like @PCFirstName + '%' then 1
 					else 0
 				end + 
-				case when r1.pcOldName2 like @PCFirstName + '%' then 1
+				case when pcOldName2 like @PCFirstName + '%' then 1
 					else 0
 				end + 
-				case when r1.pcOldName like '%' + @PCLastName then 1
+				case when pcOldName like '%' + @PCLastName then 1
 					else 0
 				end + 
-				case when r1.pcOldName2 like '%' + @PCLastName then 1
+				case when pcOldName2 like '%' + @PCLastName then 1
 					else 0
 				end + 
-				case when r1.pcdob = @PCDOB then 1
+				case when pcdob = @PCDOB then 1
 					else 0
 				end + 
-				case when r1.tcfirstname like @TCFirstName + '%' then 1
+				case when tcfirstname like @TCFirstName + '%' then 1
 					else 0
 				end + 
-				case when r1.tclastname like @TCLastName + '%' then 1
+				case when tclastname like @TCLastName + '%' then 1
 					else 0
 				end + 
-				case when r1.tcdob = @TCDOB then 1
+				case when tcdob = @TCDOB then 1
 					else 0
 				end + 
 				case when WorkerPK = @WorkerPK then 1
@@ -136,7 +137,7 @@ as
 				case when HVCasePK = @HVCasePK then 1
 					  else 0
 				end) as Score4OrderingRows
-		from	results r1
+		from	cteresults
 		order by case when dischargedate is null then 0
 					  else 1
 				 end
