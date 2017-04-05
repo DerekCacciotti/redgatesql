@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -53,8 +52,8 @@ begin
 		  end as lastdate
 		 ,h.IntakeDate
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
@@ -97,7 +96,7 @@ begin
 		  , TCDOB
 		  , FormFK
 		from cteCohort c
-			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'TC'
+			left join CommonAttributes cach WITH (NOLOCK) on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'TC'
 		where c.tcAgeDays < 183
 			 and FormDate <= @EndDate
 	)
@@ -114,7 +113,7 @@ begin
 		  , 'Change Form' as FormName
 		  , max(FormDate) as FormDate -- get the latest CH
 		from cteCohort c
-			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
+			left join CommonAttributes cach WITH (NOLOCK) on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
 		where c.tcAgeDays < 183
 			 and FormDate <= @EndDate
 		group by c.HVCaseFK
@@ -228,7 +227,7 @@ begin
 		  ,'Change Form' as FormName
 		  ,max(FormDate) as FormDate -- get the latest CH
 		from cteCohort c
-			left join CommonAttributes cach on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
+			left join CommonAttributes cach WITH (NOLOCK) on cach.HVCaseFK = c.HVCaseFK and cach.FormType = 'CH'
 		where c.tcAgeDays >= 183
 			 and FormDate <= @EndDate
 		group by c.HVCaseFK
@@ -341,10 +340,10 @@ begin
 																				and tcGE6FUInterval.TCIDPK = c.TCIDPK -- GE = Greater or Equal
 			left outer join codeApp capp on tcGE6FUInterval.Interval = AppCode and AppCodeGroup = 'TCAge' and 
 												AppCodeUsedWhere like '%FU%'
-			left join CommonAttributes cafu on cafu.HVCaseFK = c.HVCaseFK and cafu.FormType = 'FU' 
+			left join CommonAttributes cafu WITH (NOLOCK) on cafu.HVCaseFK = c.HVCaseFK and cafu.FormType = 'FU' 
 												and tcGE6FUInterval.Interval = cafu.FormInterval -- get the FU row
 			left join cteLatestCHForm4TC6MonthsOrOlder ch on ch.HVCaseFK = c.HVCaseFK
-			left join CommonAttributes cach on cach.HVCaseFK = ch.HVCaseFK and cach.FormType = 'CH' 
+			left join CommonAttributes cach WITH (NOLOCK) on cach.HVCaseFK = ch.HVCaseFK and cach.FormType = 'CH' 
 												and cach.FormDate = ch.FormDate -- get the latest CH row	
 	)
 	-- combine the above two disconnected tables (one for tc < 6 and other for TC >= 6)

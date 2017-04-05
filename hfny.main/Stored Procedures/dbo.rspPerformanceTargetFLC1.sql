@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -56,8 +55,8 @@ begin
 				, PC2FK
 				, OBPFK
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.HVCaseFK = h.HVCasePK
-			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join HVCase h WITH (NOLOCK) on ptc.HVCaseFK = h.HVCasePK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
@@ -118,8 +117,8 @@ begin
 			-- to get dueby, max, min (given interval)
 			-- The following line gets those fu's that are due for the Interval
 			-- note 'Interval' is the minimum interval 
-			left outer join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
-			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType like 'FU-%' 
+			left outer join FollowUp fu WITH (NOLOCK) on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
+			left outer join CommonAttributes ca WITH (NOLOCK) on ca.HVCaseFK = fu.HVCaseFK and FormType like 'FU-%' 
 												and fu.FollowUpInterval = ca.FormInterval 
 		)
 	,

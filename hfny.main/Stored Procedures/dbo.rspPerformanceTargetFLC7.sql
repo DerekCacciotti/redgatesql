@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -49,8 +48,8 @@ begin
 				  @EndDate
 		  end as lastdate
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
@@ -65,9 +64,9 @@ begin
 				, pc1i.SubstanceAbuse
 				, IntakeDate
 			from cteTotalCases tc
-			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
-			inner join Kempe k on k.HVCaseFK = c.HVCasePK
-			inner join PC1Issues pc1i on pc1i.PC1IssuesPK = k.PC1IssuesFK
+			inner join HVCase c WITH (NOLOCK) on c.HVCasePK = tc.HVCaseFK
+			inner join Kempe k WITH (NOLOCK) on k.HVCaseFK = c.HVCasePK
+			inner join PC1Issues pc1i WITH (NOLOCK) on pc1i.PC1IssuesPK = k.PC1IssuesFK
 			where datediff(day,IntakeDate,@StartDate) <= 365
 				 and datediff(day,IntakeDate,lastdate) >= 183
 				 and (pc1i.DomesticViolence = '1' or pc1i.Depression = '1' or pc1i.MentalIllness = '1' or 
@@ -102,7 +101,7 @@ begin
 				--, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
 				--, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
 			from cteCohort coh
-			left outer join ServiceReferral sr on sr.HVCaseFK = coh.HVCaseFK
+			left outer join ServiceReferral sr WITH (NOLOCK) on sr.HVCaseFK = coh.HVCaseFK
 			where (Depression = '1' or MentalIllness = '1') and (ServiceCode = '49' or ServiceCode = '50') and FamilyCode = '01'
 		union 
 		select coh.*
@@ -116,7 +115,7 @@ begin
 				--, case when ReferralDate <= dateadd(day,183,IntakeDate) then 0 else 1 end as FormOutOfWindow
 				--, case when ServiceReferralPK is null then 1 else 0 end as FormMissing
 			from cteCohort coh
-			left outer join ServiceReferral sr on sr.HVCaseFK = coh.HVCaseFK
+			left outer join ServiceReferral sr WITH (NOLOCK) on sr.HVCaseFK = coh.HVCaseFK
 			where (AlcoholAbuse = '1' or SubstanceAbuse = '1') and ServiceCode = '52' and FamilyCode = '01'
 		)
 	,

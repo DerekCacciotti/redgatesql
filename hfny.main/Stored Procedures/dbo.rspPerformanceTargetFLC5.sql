@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -52,8 +51,8 @@ begin
 				  @EndDate
 		  end as lastdate
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
@@ -63,10 +62,10 @@ begin
 		select tc.*
 				, HighestGrade
 			from cteTotalCases tc
-			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
-			inner join Intake i on i.HVCaseFK = c.HVCasePK
-			inner join CommonAttributes ca on ca.HVCaseFK = c.HVCasePK and FormFK = IntakePK and FormType = 'IN-PC1'
-			inner join PC P on P.PCPK = c.PC1FK
+			inner join HVCase c WITH (NOLOCK) on c.HVCasePK = tc.HVCaseFK
+			inner join Intake i WITH (NOLOCK) on i.HVCaseFK = c.HVCasePK
+			inner join CommonAttributes ca WITH (NOLOCK) on ca.HVCaseFK = c.HVCasePK and FormFK = IntakePK and FormType = 'IN-PC1'
+			inner join PC P WITH (NOLOCK) on P.PCPK = c.PC1FK
 			where datediff(day,tc.tcdob,@StartDate) <= 365
 				 and datediff(day,tc.tcdob,lastdate) >= 183
 				 and HighestGrade < '03'
@@ -115,10 +114,10 @@ begin
 			-- to get dueby, max, min (given interval)
 			-- The following line gets those fu's that are due for the Interval
 			-- note 'Interval' is the minimum interval 
-			left outer join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
-			left outer join CommonAttributes ca on ca.HVCaseFK = fu.HVCaseFK and FormType = 'FU-PC1' 
+			left outer join FollowUp fu WITH (NOLOCK) on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
+			left outer join CommonAttributes ca WITH (NOLOCK) on ca.HVCaseFK = fu.HVCaseFK and FormType = 'FU-PC1' 
 												and fu.FollowUpInterval = ca.FormInterval 
-			left outer join Education e on e.FormType = 'FU' and e.FormFK = ca.FormFK and e.PCType = 'PC1'
+			left outer join Education e WITH (NOLOCK) on e.FormType = 'FU' and e.FormFK = ca.FormFK and e.PCType = 'PC1'
 											and ProgramType in ('01','02','03','06')
 		)
 	select distinct PTCode

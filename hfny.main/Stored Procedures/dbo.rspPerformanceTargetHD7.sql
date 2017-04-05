@@ -50,8 +50,8 @@ begin
 			  end as lastdate
 			 ,h.IntakeDate
 			from @tblPTCases ptc
-				inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-				inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+				inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+				inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 				-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
@@ -78,7 +78,7 @@ begin
 			  , lastdate
 			  , GestationalAge			  
 			from cteTotalCases ctc
-				inner join TCID t on t.HVCaseFK = ctc.HVCaseFK and t.TCIDPK = ctc.TCIDPK 
+				inner join TCID t WITH (NOLOCK) on t.HVCaseFK = ctc.HVCaseFK and t.TCIDPK = ctc.TCIDPK 
 					-- looking at each child individualy i.e. gestationalage
 			where
 				 case
@@ -153,7 +153,7 @@ begin
        
        from cteCohort c
        inner join codeDueByDates cd on scheduledevent = 'ASQ' and tcASQAgeDays >= DueBy 
-       inner join ASQ A on c.HVCaseFK = A.HVCaseFK and A.TCIDFK = c.TCIDPK  
+       inner join ASQ A WITH (NOLOCK) on c.HVCaseFK = A.HVCaseFK and A.TCIDFK = c.TCIDPK  
        group by c.HVCaseFK,c.TCIDPK 
     )
     
@@ -250,25 +250,25 @@ begin
 		  	   , a4.DateCompleted as a4DateCompleted
 			from cteCohort c
 				left outer join cteASQDueInterval casi on casi.hvcasefk = c.hvcasefk and casi.tcidpk = c.tcidpk
-				left outer join ASQ a1 on a1.hvcasefk = c.hvcasefk and casi.tcidpk = a1.tcidfk and a1.TCAge = casi.Interval
+				left outer join ASQ a1 WITH (NOLOCK) on a1.hvcasefk = c.hvcasefk and casi.tcidpk = a1.tcidfk and a1.TCAge = casi.Interval
 				left outer join scoreASQ score1 on score1.TCAge = casi.Interval and score1.ASQVersion = a1.VersionNumber 
 				left outer join codeApp capp1 on casi.Interval = capp1.AppCode and capp1.AppCodeGroup = 'TCAge' and 
 													charindex('AQ',capp1.AppCodeUsedWhere)>0
 				--One interval before due Interval			   
 				left outer join cteASQDueIntervalOneBefore casi2 on casi2.hvcasefk = c.hvcasefk and casi2.tcidpk = c.tcidpk
-				left outer join ASQ a2 on a2.hvcasefk = c.hvcasefk and casi2.tcidpk = a2.tcidfk and a2.TCAge = casi2.Interval
+				left outer join ASQ a2 WITH (NOLOCK) on a2.hvcasefk = c.hvcasefk and casi2.tcidpk = a2.tcidfk and a2.TCAge = casi2.Interval
 				left outer join scoreASQ score2 on score2.TCAge = casi2.Interval and score2.ASQVersion = a2.VersionNumber 
 				left outer join codeApp capp2 on casi2.Interval = capp2.AppCode and capp2.AppCodeGroup = 'TCAge' and 
 													charindex('AQ',capp2.AppCodeUsedWhere)>0
 				--Two interval before due Interval			   
 				left outer join cteASQDueIntervalTwoBefore casi3 on casi3.hvcasefk = c.hvcasefk and casi3.tcidpk = c.tcidpk
-				left outer join ASQ a3 on a3.hvcasefk = c.hvcasefk and casi3.tcidpk = a3.tcidfk and a3.TCAge = casi3.Interval
+				left outer join ASQ a3 WITH (NOLOCK) on a3.hvcasefk = c.hvcasefk and casi3.tcidpk = a3.tcidfk and a3.TCAge = casi3.Interval
 				left outer join scoreASQ score3 on score3.TCAge = casi3.Interval and score3.ASQVersion = a3.VersionNumber 
 				left outer join codeApp capp3 on casi3.Interval = capp3.AppCode and capp3.AppCodeGroup = 'TCAge' and 
 													charindex('AQ',capp3.AppCodeUsedWhere)>0
 				--Last ASQ Done prior to expected
 				left outer join cteLastASQDone lasq on lasq.hvcasefk = c.hvcasefk and lasq.tcidpk = c.tcidpk
-				left outer join ASQ a4 on a4.hvcasefk = c.hvcasefk and lasq.tcidpk = a4.tcidfk and a4.TCAge = lasq.Interval
+				left outer join ASQ a4 WITH (NOLOCK) on a4.hvcasefk = c.hvcasefk and lasq.tcidpk = a4.tcidfk and a4.TCAge = lasq.Interval
 				left outer join scoreASQ score4 on score4.TCAge = lasq.Interval and score4.ASQVersion = a4.VersionNumber 
 				left outer join codeApp capp4 on a4.TCAge = capp4.AppCode and capp4.AppCodeGroup = 'TCAge' and 
 													charindex('AQ',capp4.AppCodeUsedWhere) > 0
@@ -394,25 +394,25 @@ begin
 		      end as MeetsTargetCode -- FormMeetsTarget
 		from cteExpectedForm ef
 			left outer join cteASQDueInterval casi on casi.hvcasefk = ef.hvcasefk and casi.tcidpk = ef.tcidpk
-			left outer join ASQ a1 on a1.hvcasefk = ef.hvcasefk and casi.tcidpk = a1.tcidfk and a1.TCAge = casi.Interval
+			left outer join ASQ a1 WITH (NOLOCK) on a1.hvcasefk = ef.hvcasefk and casi.tcidpk = a1.tcidfk and a1.TCAge = casi.Interval
 			left outer join scoreASQ score1 on score1.TCAge = casi.Interval and score1.ASQVersion = a1.VersionNumber 
 			left outer join codeApp capp1 on casi.Interval = capp1.AppCode and capp1.AppCodeGroup = 'TCAge' and 
 												charindex('AQ',capp1.AppCodeUsedWhere) > 0
 			--One interval before due Interval			   
 			left outer join cteASQDueIntervalOneBefore casi2 on casi2.hvcasefk = ef.hvcasefk and casi2.tcidpk = ef.tcidpk
-			left outer join ASQ a2 on a2.hvcasefk = ef.hvcasefk and casi2.tcidpk = a2.tcidfk and a2.TCAge = casi2.Interval
+			left outer join ASQ a2 WITH (NOLOCK) on a2.hvcasefk = ef.hvcasefk and casi2.tcidpk = a2.tcidfk and a2.TCAge = casi2.Interval
 			left outer join scoreASQ score2 on score2.TCAge = casi2.Interval and score2.ASQVersion = a2.VersionNumber 
 			left outer join codeApp capp2 on casi2.Interval = capp2.AppCode and capp2.AppCodeGroup = 'TCAge' and 
 												charindex('AQ',capp2.AppCodeUsedWhere) > 0
 			--Two interval before due Interval			   
 			left outer join cteASQDueIntervalTwoBefore casi3 on casi3.hvcasefk = ef.hvcasefk and casi3.tcidpk = ef.tcidpk
-			left outer join ASQ a3 on a3.hvcasefk = ef.hvcasefk and casi3.tcidpk = a3.tcidfk and a3.TCAge = casi3.Interval
+			left outer join ASQ a3 WITH (NOLOCK) on a3.hvcasefk = ef.hvcasefk and casi3.tcidpk = a3.tcidfk and a3.TCAge = casi3.Interval
 			left outer join scoreASQ score3 on score3.TCAge = casi3.Interval and score3.ASQVersion = a3.VersionNumber 
 			left outer join codeApp capp3 on casi3.Interval = capp3.AppCode and capp3.AppCodeGroup = 'TCAge' and 
 												charindex('AQ',capp3.AppCodeUsedWhere) > 0
 			--Last ASQ Done prior to expected
 			left outer join cteLastASQDone lasq on lasq.hvcasefk = ef.hvcasefk and lasq.tcidpk = ef.tcidpk
-			left outer join ASQ a4 on a4.hvcasefk = ef.hvcasefk and lasq.tcidpk = a4.tcidfk and a4.TCAge = lasq.Interval
+			left outer join ASQ a4 WITH (NOLOCK) on a4.hvcasefk = ef.hvcasefk and lasq.tcidpk = a4.tcidfk and a4.TCAge = lasq.Interval
 			left outer join scoreASQ score4 on score4.TCAge = lasq.Interval and score4.ASQVersion = a4.VersionNumber 
 			left outer join codeApp capp4 on a4.TCAge = capp4.AppCode and capp4.AppCodeGroup = 'TCAge' and 
 												charindex('AQ',capp4.AppCodeUsedWhere) > 0

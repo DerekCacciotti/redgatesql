@@ -51,9 +51,9 @@ begin
 				  @EndDate
 		  end as lastdate
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
-			inner join TCID t on t.HVCaseFK = h.HVCasePK
+			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join TCID t WITH (NOLOCK) on t.HVCaseFK = h.HVCasePK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 		where t.NoImmunization is null or t.NoImmunization <> 1
 	)
@@ -92,7 +92,7 @@ begin
 					else 0 
 					end) as FormReviewedCountPolio
 		from cteCohort coh
-			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
+			left join TCMedical WITH (NOLOCK) on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and dateadd(dd,365,TCDOB)
 				and MedicalItemTitle = 'Polio'
@@ -114,7 +114,7 @@ begin
 					else 0 
 					end) as FormReviewedCountDTaP
 		from cteCohort coh
-			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
+			left join TCMedical WITH (NOLOCK) on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between TCDOB and dateadd(dd,365,TCDOB)
 				and MedicalItemTitle = 'DTaP'

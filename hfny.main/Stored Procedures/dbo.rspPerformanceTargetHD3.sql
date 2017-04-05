@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -52,8 +51,8 @@ begin
 					  @EndDate
 			  end as lastdate
 			from @tblPTCases ptc
-				inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-				inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+				inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+				inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 				-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 		)
 	,
@@ -116,7 +115,7 @@ begin
 			inner join cteInterval i on c.HVCaseFK = i.HVCaseFK 
 			inner join codeDueByDates cd on ScheduledEvent = 'Follow Up' 
 											and i.Interval = cd.Interval 
-			left join FollowUp fu on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
+			left join FollowUp fu WITH (NOLOCK) on fu.HVCaseFK = c.HVCaseFK and fu.FollowUpInterval = i.Interval
 		)
 	,
 	cteMain

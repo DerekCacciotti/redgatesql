@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -48,8 +47,8 @@ begin
 				  @EndDate
 		  end as lastdate
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
@@ -58,7 +57,7 @@ begin
 		(
 		select tc.*	
 			from cteTotalCases tc
-			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
+			inner join HVCase c WITH (NOLOCK) on c.HVCasePK = tc.HVCaseFK
 			where dateadd(day, 30, case when IntakeDate > tc.tcdob then IntakeDate else tc.tcdob end) 
 					between @StartDate and @EndDate -- dateadd(day,-29,@StartDate) and dateadd(day,62,@StartDate)
 					and (DischargeDate > tc.TCDOB or DischargeDate is null or DischargeDate = '')
@@ -91,7 +90,7 @@ begin
 			  , case when PSIPK is null then 1 else 0 end as FormMissing
 			  --, case when PSIPK is not null then 1 else 0 end as FormMeetsTarget
 			  from cteCohort coh
-			  left outer join PSI P on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '00'
+			  left outer join PSI P WITH (NOLOCK) on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '00'
 		)
 	select PTCode
 			  , HVCaseFK
