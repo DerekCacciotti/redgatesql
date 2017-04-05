@@ -49,7 +49,7 @@ as
 							end as CaseHasPC2
 						  , cdlvl.LevelName
 						  , WorkerPK
-				  from		CaseProgram cp -- Note: fnTableCaseProgram is like a parameterised view ... Khalsa
+				  from		CaseProgram cp WITH (NOLOCK) --no reason to lock since we're just searching
 				  inner join codeLevel cdlvl on cdlvl.codeLevelPK = cp.CurrentLevelFK
 				  inner join HVCase hv on cp.HVCaseFK = hv.HVCasePK
 				  inner join PC on hv.PC1FK = PC.PCPK
