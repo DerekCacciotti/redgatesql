@@ -13,7 +13,6 @@ CREATE PROCEDURE [dbo].[spEditASQ](@ASQPK int=NULL,
 @ASQProblemSolvingScore numeric(4, 1)=NULL,
 @ASQTCReceiving char(1)=NULL,
 @DateCompleted datetime=NULL,
-@DevServicesStartDate date=NULL,
 @DiscussedWithPC1 bit=NULL,
 @FSWFK int=NULL,
 @HVCaseFK int=NULL,
@@ -26,7 +25,8 @@ CREATE PROCEDURE [dbo].[spEditASQ](@ASQPK int=NULL,
 @UnderGrossMotor bit=NULL,
 @UnderPersonalSocial bit=NULL,
 @UnderProblemSolving bit=NULL,
-@VersionNumber varchar(10)=NULL)
+@VersionNumber varchar(10)=NULL,
+@DevServicesStartDate date=NULL)
 AS
 UPDATE ASQ
 SET 
@@ -40,7 +40,6 @@ ASQPersonalSocialScore = @ASQPersonalSocialScore,
 ASQProblemSolvingScore = @ASQProblemSolvingScore, 
 ASQTCReceiving = @ASQTCReceiving, 
 DateCompleted = @DateCompleted, 
-DevServicesStartDate = @DevServicesStartDate, 
 DiscussedWithPC1 = @DiscussedWithPC1, 
 FSWFK = @FSWFK, 
 HVCaseFK = @HVCaseFK, 
@@ -53,6 +52,7 @@ UnderFineMotor = @UnderFineMotor,
 UnderGrossMotor = @UnderGrossMotor, 
 UnderPersonalSocial = @UnderPersonalSocial, 
 UnderProblemSolving = @UnderProblemSolving, 
-VersionNumber = @VersionNumber
+VersionNumber = @VersionNumber, 
+DevServicesStartDate = @DevServicesStartDate
 WHERE ASQPK = @ASQPK
 GO
