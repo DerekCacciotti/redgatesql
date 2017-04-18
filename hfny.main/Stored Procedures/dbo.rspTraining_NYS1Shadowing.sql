@@ -19,10 +19,16 @@ BEGIN
 	SET NOCOUNT ON;
 --Get FAW's in time period
 
+declare @sdate2 as datetime
+declare @progfk2 as int
+
+set @sdate2 = @sdate
+set @progfk2 = @progfk
+
 ;WITH  cteEventDates AS (
 	SELECT workerpk, wrkrLName
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName, hiredate
-	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
+	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent FROM [dbo].[fnGetWorkerEventDates](@progfk2, NULL, NULL)
 )
 
 
@@ -31,7 +37,7 @@ BEGIN
 	, FirstKempeDate as FirstEventDate
 	, 'FAW' as WorkerType
 	FROM cteEventDates
-	WHERE FirstKempeDate >= @sdate
+	WHERE FirstKempeDate >= @sdate2
 )
 
 , cteFSW as (
@@ -39,7 +45,7 @@ BEGIN
 	, FirstHomeVisitDate as FirstEventDate
 	, 'FSW' as WorkerType
 	FROM cteEventDates
-	WHERE FirstHomeVisitDate >= @sdate
+	WHERE FirstHomeVisitDate >= @sdate2
 )
 
 , cteSups as (
@@ -47,7 +53,7 @@ BEGIN
 	, SupervisorFirstEvent as FirstEventDate
 	, 'Supervisor' as WorkerType
 	FROM cteEventDates
-	WHERE SupervisorFirstEvent >= @sdate 
+	WHERE SupervisorFirstEvent >= @sdate2 
 )
 
 
