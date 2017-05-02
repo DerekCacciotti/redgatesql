@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -51,8 +50,8 @@ begin
 		  end as lastdate
 		  ,h.IntakeDate 
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
@@ -92,7 +91,7 @@ begin
 					else 0 
 					end) as FormReviewedCountWBV
 		from cteCohort coh
-			left join TCMedical on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
+			left join TCMedical WITH (NOLOCK) on TCMedical.hvcasefk = coh.hvcaseFK and TCMedical.TCIDFK = coh.TCIDPK
 			inner join codeMedicalItem cmi on cmi.MedicalItemCode = TCMedical.TCMedicalItem
 		where TCItemDate between dateadd(month,15,TCDOB) and dateadd(month,27,TCDOB)
 				and MedicalItemTitle = 'WBV'

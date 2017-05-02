@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -97,7 +96,7 @@ begin
 					, ParentChildDysfunctionalInteractionValid
 					, ParentChildDisfunctionalInteractionScore
 			  from cteCohort coh
-			  left outer join PSI P on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '01'
+			  left outer join PSI P WITH (NOLOCK) on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '01'
 		)
 	select PTCode
 				, HVCaseFK

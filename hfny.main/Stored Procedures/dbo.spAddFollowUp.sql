@@ -31,8 +31,6 @@ CREATE PROCEDURE [dbo].[spAddFollowUp](@BCAbstinence bit=NULL,
 @FollowUpInterval char(2)=NULL,
 @FSWFK int=NULL,
 @FUPInWindow bit=NULL,
-@HealthCareCoverageContinuity bit=NULL,
-@HOMECompleted bit=NULL,
 @HVCaseFK int=NULL,
 @IFSPAdultRelationship char(1)=NULL,
 @IFSPChildDevelopment char(1)=NULL,
@@ -55,6 +53,8 @@ CREATE PROCEDURE [dbo].[spAddFollowUp](@BCAbstinence bit=NULL,
 @SafetyPlan bit=NULL,
 @SixMonthHome bit=NULL,
 @TimesPregnant int=NULL,
+@HealthCareCoverageContinuity bit=NULL,
+@HOMECompleted bit=NULL,
 @TCDentalCareSource char(2)=NULL)
 AS
 INSERT INTO FollowUp(
@@ -87,8 +87,6 @@ FollowUpDate,
 FollowUpInterval,
 FSWFK,
 FUPInWindow,
-HealthCareCoverageContinuity,
-HOMECompleted,
 HVCaseFK,
 IFSPAdultRelationship,
 IFSPChildDevelopment,
@@ -111,6 +109,8 @@ ProgramFK,
 SafetyPlan,
 SixMonthHome,
 TimesPregnant,
+HealthCareCoverageContinuity,
+HOMECompleted,
 TCDentalCareSource
 )
 VALUES(
@@ -143,8 +143,6 @@ VALUES(
 @FollowUpInterval,
 @FSWFK,
 @FUPInWindow,
-@HealthCareCoverageContinuity,
-@HOMECompleted,
 @HVCaseFK,
 @IFSPAdultRelationship,
 @IFSPChildDevelopment,
@@ -167,6 +165,8 @@ VALUES(
 @SafetyPlan,
 @SixMonthHome,
 @TimesPregnant,
+@HealthCareCoverageContinuity,
+@HOMECompleted,
 @TCDentalCareSource
 )
 

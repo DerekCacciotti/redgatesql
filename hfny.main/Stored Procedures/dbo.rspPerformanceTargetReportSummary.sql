@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -71,16 +70,16 @@ begin
 				  else
 					  h.edc
 			  end as TCDOB
-			from HVCase h
-				inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
-				inner join PC P on P.PCPK = h.PC1FK
-				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
-				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+			from HVCase h WITH (NOLOCK)
+				inner join CaseProgram cp WITH (NOLOCK) on cp.HVCaseFK = h.HVCasePK
+				inner join PC P WITH (NOLOCK) on P.PCPK = h.PC1FK
+				inner join Worker w WITH (NOLOCK) on w.WorkerPK = cp.CurrentFSWFK
+				inner join WorkerProgram wp WITH (NOLOCK) on wp.WorkerFK = w.WorkerPK
 				-- inner join codeLevel l on l.codeLevelPK = cp.CurrentLevelFK
 				inner join dbo.udfHVLevel(@ProgramFKs, @EndDate) hvl on hvl.hvcasefk = cp.HVCaseFK
 				inner join dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFKs) cf on cf.HVCaseFK = h.HVCasePK
 				inner join dbo.SplitString(@ProgramFKs, ',') ss on ss.ListItem = cp.ProgramFK
-				left join tcid on tcid.hvcasefk = h.hvcasepk -- for dead babies dod
+				left join tcid WITH (NOLOCK) on tcid.hvcasefk = h.hvcasepk -- for dead babies dod
 			where
 				--cp.ProgramFK = @ProgramFKs and 
 				CurrentFSWFK = isnull(@FSWFK, CurrentFSWFK)

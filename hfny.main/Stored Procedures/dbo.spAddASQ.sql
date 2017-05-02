@@ -12,7 +12,6 @@ CREATE PROCEDURE [dbo].[spAddASQ](@ASQCreator char(10)=NULL,
 @ASQProblemSolvingScore numeric(4, 1)=NULL,
 @ASQTCReceiving char(1)=NULL,
 @DateCompleted datetime=NULL,
-@DevServicesStartDate date=NULL,
 @DiscussedWithPC1 bit=NULL,
 @FSWFK int=NULL,
 @HVCaseFK int=NULL,
@@ -25,7 +24,8 @@ CREATE PROCEDURE [dbo].[spAddASQ](@ASQCreator char(10)=NULL,
 @UnderGrossMotor bit=NULL,
 @UnderPersonalSocial bit=NULL,
 @UnderProblemSolving bit=NULL,
-@VersionNumber varchar(10)=NULL)
+@VersionNumber varchar(10)=NULL,
+@DevServicesStartDate date=NULL)
 AS
 INSERT INTO ASQ(
 ASQCreator,
@@ -38,7 +38,6 @@ ASQPersonalSocialScore,
 ASQProblemSolvingScore,
 ASQTCReceiving,
 DateCompleted,
-DevServicesStartDate,
 DiscussedWithPC1,
 FSWFK,
 HVCaseFK,
@@ -51,7 +50,8 @@ UnderFineMotor,
 UnderGrossMotor,
 UnderPersonalSocial,
 UnderProblemSolving,
-VersionNumber
+VersionNumber,
+DevServicesStartDate
 )
 VALUES(
 @ASQCreator,
@@ -64,7 +64,6 @@ VALUES(
 @ASQProblemSolvingScore,
 @ASQTCReceiving,
 @DateCompleted,
-@DevServicesStartDate,
 @DiscussedWithPC1,
 @FSWFK,
 @HVCaseFK,
@@ -77,7 +76,8 @@ VALUES(
 @UnderGrossMotor,
 @UnderPersonalSocial,
 @UnderProblemSolving,
-@VersionNumber
+@VersionNumber,
+@DevServicesStartDate
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

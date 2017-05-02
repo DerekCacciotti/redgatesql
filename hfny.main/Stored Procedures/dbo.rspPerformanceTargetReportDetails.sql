@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -65,8 +64,8 @@ begin
 				  else
 					  h.edc
 			  end as TCDOB
-			from HVCase h
-				inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+			from HVCase h  WITH (NOLOCK)
+				inner join CaseProgram cp  WITH (NOLOCK) on cp.HVCaseFK = h.HVCasePK 
 				inner join PC P on P.PCPK = h.PC1FK
 				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
 				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK

@@ -25,7 +25,7 @@ as
 	
 		;with cteresults as (
 	
-			select top 100 HVCasePK
+			select HVCasePK
 						  , PC.PCPK
 						  , PC1ID
 						  , PC.PCFirstName
@@ -75,7 +75,7 @@ as
 							)
 							and cp.ProgramFK = isnull(@ProgramFK, cp.ProgramFK)
 				 )
-		select distinct	
+		select distinct	top 100 
 				hvcasepk
 			  , pcpk
 			  , PC1ID

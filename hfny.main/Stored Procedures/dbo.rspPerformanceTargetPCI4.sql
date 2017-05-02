@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -49,8 +48,8 @@ begin
 				  @EndDate
 		  end as lastdate
 		from @tblPTCases ptc
-			inner join HVCase h on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
 	,
@@ -59,8 +58,8 @@ begin
 		(
 		select tc.*	
 			from cteTotalCases tc
-			inner join HVCase c on c.HVCasePK = tc.HVCaseFK
-			inner join PSI P on P.HVCaseFK = c.HVCasePK
+			inner join HVCase c WITH (NOLOCK) on c.HVCasePK = tc.HVCaseFK
+			inner join PSI P WITH (NOLOCK) on P.HVCaseFK = c.HVCasePK
 			where datediff(day,tc.tcdob,@StartDate) <= 548
 				 and datediff(day,tc.tcdob,lastdate) >= 365
 				 and PSIInterval = '00'
@@ -97,7 +96,7 @@ begin
 					, PSITotalScoreValid
 					, PSITotalScore
 			  from cteCohort coh
-			  left outer join PSI P on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '02'
+			  left outer join PSI P WITH (NOLOCK) on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '02'
 		)
 	select PTCode
 			, HVCaseFK

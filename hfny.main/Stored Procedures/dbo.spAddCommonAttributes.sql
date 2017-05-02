@@ -26,8 +26,6 @@ CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyBenefits numeric
 @HVCaseFK int=NULL,
 @IsCurrentlyEmployed char(1)=NULL,
 @LanguageSpecify varchar(100)=NULL,
-@LivingArrangement char(2)=NULL,
-@LivingArrangementSpecific char(2)=NULL,
 @Looked4Employment char(1)=NULL,
 @MaritalStatus char(2)=NULL,
 @MonthlyIncomeUnknown bit=NULL,
@@ -74,12 +72,14 @@ CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyBenefits numeric
 @TCHIUnknown bit=NULL,
 @TCMedicalFacilityFK int=NULL,
 @TCMedicalProviderFK int=NULL,
-@TCMedicalCareSource char(2)=NULL,
-@TCMedicalCareSourceOtherSpecify varchar(100)=NULL,
 @TCReceivingMedicaid char(1)=NULL,
 @TimeBreastFed char(2)=NULL,
 @WasBreastFed bit=NULL,
-@WhyNotBreastFed char(2)=NULL)
+@WhyNotBreastFed char(2)=NULL,
+@LivingArrangement char(2)=NULL,
+@LivingArrangementSpecific char(2)=NULL,
+@TCMedicalCareSource char(2)=NULL,
+@TCMedicalCareSourceOtherSpecify varchar(100)=NULL)
 AS
 INSERT INTO CommonAttributes(
 AvailableMonthlyBenefits,
@@ -106,8 +106,6 @@ HoursPerMonth,
 HVCaseFK,
 IsCurrentlyEmployed,
 LanguageSpecify,
-LivingArrangement,
-LivingArrangementSpecific,
 Looked4Employment,
 MaritalStatus,
 MonthlyIncomeUnknown,
@@ -154,12 +152,14 @@ TCHIUninsured,
 TCHIUnknown,
 TCMedicalFacilityFK,
 TCMedicalProviderFK,
-TCMedicalCareSource,
-TCMedicalCareSourceOtherSpecify,
 TCReceivingMedicaid,
 TimeBreastFed,
 WasBreastFed,
-WhyNotBreastFed
+WhyNotBreastFed,
+LivingArrangement,
+LivingArrangementSpecific,
+TCMedicalCareSource,
+TCMedicalCareSourceOtherSpecify
 )
 VALUES(
 @AvailableMonthlyBenefits,
@@ -186,8 +186,6 @@ VALUES(
 @HVCaseFK,
 @IsCurrentlyEmployed,
 @LanguageSpecify,
-@LivingArrangement,
-@LivingArrangementSpecific,
 @Looked4Employment,
 @MaritalStatus,
 @MonthlyIncomeUnknown,
@@ -234,12 +232,14 @@ VALUES(
 @TCHIUnknown,
 @TCMedicalFacilityFK,
 @TCMedicalProviderFK,
-@TCMedicalCareSource,
-@TCMedicalCareSourceOtherSpecify,
 @TCReceivingMedicaid,
 @TimeBreastFed,
 @WasBreastFed,
-@WhyNotBreastFed
+@WhyNotBreastFed,
+@LivingArrangement,
+@LivingArrangementSpecific,
+@TCMedicalCareSource,
+@TCMedicalCareSourceOtherSpecify
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
