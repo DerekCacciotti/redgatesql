@@ -2,7 +2,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- Edit date: 10/11/2013 CP  -- transfered worker fix NOT NECESSARY. The code already took care of it.
+-- Edit date: 5/10/17 Benjamin Simmons  -- Added average PC1 Kempe score and individual kempe score to report
+										-- and included PCGender so that the proper kempe score is used
 
 
 CREATE procedure [dbo].[rspFSWCaseList](@programfk    varchar(max)    = null,
@@ -37,6 +38,8 @@ as
 		CaseWeight FLOAT,
 		pcfirstname VARCHAR(200),
 		pclastname VARCHAR(200),
+		pcGender char(2),
+		pc1KempeScore int,
 		street VARCHAR(200),
 		pccsz VARCHAR(200),
 		pcphone VARCHAR(MAX),
@@ -60,6 +63,17 @@ as
 			,CaseWeight
 			,LTRIM(RTRIM(pc.pcfirstname))
 			,LTRIM(RTRIM(pc.pclastname))
+			,pc.Gender
+			,(case
+				when pc.Gender = '01' then
+					cast(kempe.MomScore as int)
+				when pc.Gender = '02' then
+					cast(kempe.DadScore as int)
+				when pc.Gender = '03' then
+					cast(kempe.PartnerScore as int)
+				else
+					null
+				end) as pcScore
 			,rtrim(pc.pcstreet) + CASE
 				WHEN pcapt IS NULL OR pcapt = '' THEN
 					''
@@ -122,6 +136,8 @@ as
 		currentleveldate DATE,
 		pcfirstname VARCHAR(200),
 		pclastname VARCHAR(200),
+		pcGender char(2),
+		pc1KempeScore int,
 		street VARCHAR(200),
 		pccsz VARCHAR(200),
 		pcphone VARCHAR(200),
@@ -160,6 +176,8 @@ as
 			,currentleveldate
 			,pcfirstname
 			,pclastname
+			,pcGender
+			,pc1KempeScore
 			,street
 			,pccsz
 			,pcphone
@@ -202,6 +220,15 @@ as
 			WHERE
 				c2.worker = r1.worker
 		) AS CaseWeight_ttl
+		,(
+			select
+				isnull(avg(pc1KempeScore), 0)
+			from
+				@caselist_distinct c2
+			where
+				c2.worker = r1.worker
+		) as pc1KempeScore_average
+		,pc1KempeScore
 		,Enrolled_Cases
 		,Preintake_Cases
 		,PC1ID
