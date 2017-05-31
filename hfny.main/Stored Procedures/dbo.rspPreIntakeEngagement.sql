@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,6 +8,7 @@ GO
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <July 16th, 2012>
 -- Description:	<gets you data for Pre-Intake Engagement Quarterly and Contract Period>
+-- Edit Date: 5/30/17 Fixed wording for activities (Benjamin Simmons)
 -- exec [rspPreIntakeEngagement] ',1,','09/01/2010','11/30/2010',null,0
 -- exec [rspPreIntakeEngagement] ',1,','09/01/2010','11/30/2010',null,1
 -- exec [rspPreIntakeEngagement] ',2,','04/01/2013' , '06/30/2013',null,0
@@ -795,14 +795,14 @@ IF (@CustomQuarterlyDates = 0)
 	BEGIN 
 
 			-- Q1
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('1. Pre-Intake Cases at the beginning of period', @TotalNumberOfPreIntakeCasesQuarterly, @TotalNumberOfPreIntakeCasesContractPeriod)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('1. Pre-Intake Cases at the Beginning of this Period', @TotalNumberOfPreIntakeCasesQuarterly, @TotalNumberOfPreIntakeCasesContractPeriod)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q2			
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Kempes this period', @TotalNumberOfKempesThisPeriodQuarterly, @TotalNumberOfKempesContractPeriod)
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive Assigned to FSW', @nQ2a, @nQ2CPa)
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive Not Assigned to FSW', @nQ2b, @nQ2CPb)
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive Pending Assignment to FSW', @nQ2c, @nQ2CPc)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Kempes this Period', @TotalNumberOfKempesThisPeriodQuarterly, @TotalNumberOfKempesContractPeriod)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive, assigned to FSW', @nQ2a, @nQ2CPa)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, not assigned to FSW', @nQ2b, @nQ2CPb)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, pending assignment to FSW', @nQ2c, @nQ2CPc)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Negative', @nQ2d, @nQ2CPd)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Positive average score - Mother', @nQ2e, @nQ2CPe)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    f. Positive average score - Father', @nQ2f, @nQ2CPf)
@@ -814,18 +814,18 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q3
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Kempe Assessments from previous periods assigned this period', @nQ3, @nQCP3)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Kempe Assessments from Previous Periods Assigned this Period', @nQ3, @nQCP3)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q4
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('4. Pre-Intake Cases this period(1+2a+3)', 
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('4. Pre-Intake Cases this Period(1+2a+3)', 
 			@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ3 ,
 			@TotalNumberOfPreIntakeCasesContractPeriod + @nQ2CPa + @nQCP3
 			)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q5
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('5. Outcomes for Pre-Intake Cases this period(1+2a+3)', '', '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('5. Outcomes for Pre-Intake Cases this Period(1+2a+3)', '', '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Engagement Efforts contiue', @nQ5a, @nQ5CPa)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Enrolled', @nQ5b, @nQ5CPb)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Terminated', @nQ5c, @nQ5CPc)
@@ -833,17 +833,17 @@ IF (@CustomQuarterlyDates = 0)
 
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('6. Activities for Period', '', '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Letters mailed to parent',(SELECT nQ6a FROM @tblnQ6Q), (SELECT nQ6CPa FROM @tblnQ6CP))
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Phone calls made to parent',(SELECT nQ6b FROM @tblnQ6Q), (SELECT nQ6CPb FROM @tblnQ6CP))
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Phone calls received from parent',(SELECT nQ6c FROM @tblnQ6Q), (SELECT nQ6CPc FROM @tblnQ6CP))
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Visits conducted to asses parent (unavailable)',(SELECT nQ6d FROM @tblnQ6Q), (SELECT nQ6CPd FROM @tblnQ6CP))
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Visits conducted to asses parent',(SELECT nQ6e FROM @tblnQ6Q), (SELECT nQ6CPe FROM @tblnQ6CP))
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('6. Activities for this Period', '', '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Letters mailed to Parent',(SELECT nQ6a FROM @tblnQ6Q), (SELECT nQ6CPa FROM @tblnQ6CP))
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Phone calls/text messages, emails to Parent',(SELECT nQ6b FROM @tblnQ6Q), (SELECT nQ6CPb FROM @tblnQ6CP))
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Phone calls/text messages, emails from Parent',(SELECT nQ6c FROM @tblnQ6Q), (SELECT nQ6CPc FROM @tblnQ6CP))
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Visits conducted to engage Parent (unavailable)',(SELECT nQ6d FROM @tblnQ6Q), (SELECT nQ6CPd FROM @tblnQ6CP))
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Visits conducted to engage Parent',(SELECT nQ6e FROM @tblnQ6Q), (SELECT nQ6CPe FROM @tblnQ6CP))
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    f. Referrals made to service other than home visiting',(SELECT nQ6f FROM @tblnQ6Q), (SELECT nQ6CPf FROM @tblnQ6CP))
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    g. Parent came to office',(SELECT nQ6g FROM @tblnQ6Q), (SELECT nQ6CPg FROM @tblnQ6CP))
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    h. Program material provided/sent to parent',(SELECT nQ6h FROM @tblnQ6Q), (SELECT nQ6CPh FROM @tblnQ6CP))
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    i. Gift provided to parent',(SELECT nQ6i FROM @tblnQ6Q), (SELECT nQ6CPi FROM @tblnQ6CP))
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    j. Case Conference/review',(SELECT nQ6j FROM @tblnQ6Q), (SELECT nQ6CPj FROM @tblnQ6CP))
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    h. Program materials provided/sent to Parent',(SELECT nQ6h FROM @tblnQ6Q), (SELECT nQ6CPh FROM @tblnQ6CP))
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    i. Gifts provided to Parent',(SELECT nQ6i FROM @tblnQ6Q), (SELECT nQ6CPi FROM @tblnQ6CP))
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    j. Case conferences/reviews',(SELECT nQ6j FROM @tblnQ6Q), (SELECT nQ6CPj FROM @tblnQ6CP))
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    k. Other',(SELECT nQ6k FROM @tblnQ6Q), (SELECT nQ6CPk FROM @tblnQ6CP))
 
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
@@ -854,14 +854,14 @@ IF (@CustomQuarterlyDates = 0)
 	BEGIN 
 
 			-- Q1
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('1. Pre-Intake Cases at the beginning of period', @TotalNumberOfPreIntakeCasesQuarterly, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('1. Pre-Intake Cases at the Beginning of this Period', @TotalNumberOfPreIntakeCasesQuarterly, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q2			
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Kempes this period', @TotalNumberOfKempesThisPeriodQuarterly, '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive Assigned to FSW', @nQ2a, '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive Not Assigned to FSW', @nQ2b, '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive Pending Assignment to FSW', @nQ2c, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Kempes this Period', @TotalNumberOfKempesThisPeriodQuarterly, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive, assigned to FSW', @nQ2a, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, not assigned to FSW', @nQ2b, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, pending assignment to FSW', @nQ2c, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Negative', @nQ2d, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Positive average score - Mother', @nQ2e, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    f. Positive average score - Father', @nQ2f, '')
@@ -873,16 +873,16 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q3
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Kempe Assessments from previous periods assigned this period', @nQ3, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Kempe Assessments from Previous Periods Assigned this Period', @nQ3, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q4
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('4. Pre-Intake Cases this period(1+2a+3)', 
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('4. Pre-Intake Cases this Period(1+2a+3)', 
 			@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ3 , '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q5
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('5. Outcomes for Pre-Intake Cases this period(1+2a+3)', '', '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('5. Outcomes for Pre-Intake Cases this Period(1+2a+3)', '', '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Engagement Efforts contiue', @nQ5a, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Enrolled', @nQ5b, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Terminated', @nQ5c, '')
@@ -890,17 +890,17 @@ IF (@CustomQuarterlyDates = 0)
 
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('6. Activities for Period', '', '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('6. Activities for this Period', '', '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Letters mailed to parent',(SELECT nQ6a FROM @tblnQ6Q), '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Phone calls made to parent',(SELECT nQ6b FROM @tblnQ6Q), '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Phone calls received from parent',(SELECT nQ6c FROM @tblnQ6Q), '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Visits conducted to asses parent (unavailable)',(SELECT nQ6d FROM @tblnQ6Q), '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Visits conducted to asses parent',(SELECT nQ6e FROM @tblnQ6Q), '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Phone calls/text messages, emails to Parent',(SELECT nQ6b FROM @tblnQ6Q), '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Phone calls/text messages, emails from Parent',(SELECT nQ6c FROM @tblnQ6Q), '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Visits attempted to engage Parent (unavailable)',(SELECT nQ6d FROM @tblnQ6Q), '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Visits conducted to engage Parent',(SELECT nQ6e FROM @tblnQ6Q), '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    f. Referrals made to service other than home visiting',(SELECT nQ6f FROM @tblnQ6Q), '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    g. Parent came to office',(SELECT nQ6g FROM @tblnQ6Q), '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    h. Program material provided/sent to parent',(SELECT nQ6h FROM @tblnQ6Q), '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    i. Gift provided to parent',(SELECT nQ6i FROM @tblnQ6Q), '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    j. Case Conference/review',(SELECT nQ6j FROM @tblnQ6Q), '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    h. Program materials provided/sent to Parent',(SELECT nQ6h FROM @tblnQ6Q), '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    i. Gifts provided to Parent',(SELECT nQ6i FROM @tblnQ6Q), '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    j. Case conferences/reviews',(SELECT nQ6j FROM @tblnQ6Q), '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    k. Other',(SELECT nQ6k FROM @tblnQ6Q), '')
 
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
