@@ -33,15 +33,25 @@ BEGIN
 )
 
 
-, ctePHQTraining AS ( 
+
+, ctePHQTrainingAll AS ( 
 Select t.TrainingDate AS [PHQTrainingDt]
 , workerpk, cteEventDates.FirstPHQDate, t.IsExempt AS [TrainingExempt] , t.TrainingPK, t.TrainingTitle
+, workerrownumber = row_number() over(partition by workerpk order by t.TrainingDate asc) 
 from cteEventDates
 INNER JOIN TrainingAttendee ta ON ta.WorkerFK=cteEventDates.WorkerPK
 LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
 LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
 LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
 where (cdT.TopicCode = 39.0)
+)
+
+, ctePHQTraining as (
+--get only one training per worker
+select [PHQTrainingDt]
+, workerpk, FirstPHQDate, [TrainingExempt] , TrainingPK, TrainingTitle
+from ctePHQTrainingAll
+where workerrownumber = 1 
 )
 
 
