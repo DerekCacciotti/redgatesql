@@ -92,14 +92,14 @@ END
 				[CaseProgress] [numeric](3, 1) NULL,
 				[TCNumber] [int] NULL,
 				[MultipleBirth] char (3) null,
-				[Intakedd] varchar(20),
+				[Intakedd] varchar(100),
 				[tcid_dd] varchar(50),				
 				XDateAge int,
 				CurrentLevelFK int,
 				TCAgeDays int,
-				[Childdob] [datetime] NULL,	)
+				[Childdob] [datetime] null,	)
 
-	INSERT INTO #tblCommonCohort
+	insert into #tblCommonCohort
 	select distinct
 		h.HVCasePK,
 		CaseProgramPK,
@@ -114,18 +114,18 @@ END
 		   else
 			   h.edc
 		end as tcdob,
-		LTRIM(RTRIM(supervisor.firstname)) + ' ' + LTRIM(RTRIM(supervisor.lastname)) supervisor,
+		ltrim(rtrim(supervisor.firstname)) + ' ' + ltrim(rtrim(supervisor.lastname)) supervisor,
 		supervisor.WorkerPK as SupervisorFK,	
-		LTRIM(RTRIM(fsw.firstname)) + ' ' + LTRIM(RTRIM(fsw.lastname)) fswworker,
+		ltrim(rtrim(fsw.firstname)) + ' ' + ltrim(rtrim(fsw.lastname)) fswworker,
 		fsw.WorkerPK as fswFK,	
-		LTRIM(RTRIM(pc.pcfirstname))+' '+LTRIM(RTRIM(pc.pclastname)) as pcname,
+		ltrim(rtrim(pc.pcfirstname))+' '+ltrim(rtrim(pc.pclastname)) as pcname,
 		h.IntakeDate,
 		cp.DischargeDate,
 		h.CaseProgress,
 		h.TCNumber,
-		CASE WHEN h.TCNumber > 1 THEN 'Yes' ELSE 'No' End
+		case when h.TCNumber > 1 then 'Yes' else 'No' end
 		as [MultipleBirth],
-		case when CaseProgress >= 10 then 'Complete' else 'due by ' + convert(VARCHAR(20), dateadd(dd,30,IntakeDate), 101) end as  intakedd,	 
+		case when CaseProgress >= 10 then 'Completed on ' + (convert(varchar(100), isnull(h.TCDOB, h.EDC), 1)) + ' (' + (case when isnull(h.TCDOB, h.EDC) > h.IntakeDate then 'Pre-natal)' when isnull(h.TCDOB, h.EDC) <= h.IntakeDate then 'Post-natal)' else '' end) else 'Due by ' + convert(VARCHAR(20), dateadd(dd,30,IntakeDate), 101) end as  intakedd,	 
 		case when CaseProgress >= 11 then 'Complete' else 'Not Complete' end as  tcid_dd,	 
 		 
 		case
