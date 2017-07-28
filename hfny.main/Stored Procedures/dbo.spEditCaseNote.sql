@@ -1,10 +1,9 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditCaseNote](@CaseNotePK int=NULL,
-@CaseNote varchar(max)=NULL,
+@CaseNoteContents varchar(max)=NULL,
 @CaseNoteDate date=NULL,
 @CaseNoteEditor char(10)=NULL,
 @HVCaseFK int=NULL,
@@ -12,7 +11,7 @@ CREATE PROCEDURE [dbo].[spEditCaseNote](@CaseNotePK int=NULL,
 AS
 UPDATE CaseNote
 SET 
-CaseNote = @CaseNote, 
+CaseNoteContents = @CaseNoteContents, 
 CaseNoteDate = @CaseNoteDate, 
 CaseNoteEditor = @CaseNoteEditor, 
 HVCaseFK = @HVCaseFK, 
