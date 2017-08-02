@@ -33,6 +33,8 @@ CREATE TABLE [dbo].[FollowUp]
 [FollowUpInterval] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [FSWFK] [int] NOT NULL,
 [FUPInWindow] [bit] NOT NULL,
+[HealthCareCoverageContinuity] [bit] NULL,
+[HOMECompleted] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
 [IFSPAdultRelationship] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [IFSPChildDevelopment] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -54,10 +56,8 @@ CREATE TABLE [dbo].[FollowUp]
 [ProgramFK] [int] NOT NULL,
 [SafetyPlan] [bit] NULL,
 [SixMonthHome] [bit] NULL,
-[TimesPregnant] [int] NULL,
-[HealthCareCoverageContinuity] [bit] NULL,
-[HOMECompleted] [bit] NULL,
-[TCDentalCareSource] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[TCDentalCareSource] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TimesPregnant] [int] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

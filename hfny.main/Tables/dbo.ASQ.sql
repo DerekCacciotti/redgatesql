@@ -14,6 +14,7 @@ CREATE TABLE [dbo].[ASQ]
 [ASQProblemSolvingScore] [numeric] (4, 1) NULL,
 [ASQTCReceiving] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [DateCompleted] [datetime] NOT NULL,
+[DevServicesStartDate] [date] NULL,
 [DiscussedWithPC1] [bit] NULL,
 [FSWFK] [int] NOT NULL,
 [HVCaseFK] [int] NOT NULL,
@@ -26,8 +27,7 @@ CREATE TABLE [dbo].[ASQ]
 [UnderGrossMotor] [bit] NULL,
 [UnderPersonalSocial] [bit] NULL,
 [UnderProblemSolving] [bit] NULL,
-[VersionNumber] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[DevServicesStartDate] [date] NULL
+[VersionNumber] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
