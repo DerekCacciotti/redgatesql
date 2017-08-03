@@ -1,0 +1,116 @@
+{
+  "Id": "b160da93-c84c-4de3-b02b-cf10ee147c90",
+  "Name": "Script created at 2017-08-03 11:12.",
+  "ObjectIds": [
+    {
+      "Name": "HVLogOld",
+      "Owner": "dbo",
+      "ObjectType": "Table"
+    },
+    {
+      "Name": "HVLog",
+      "Owner": "dbo",
+      "ObjectType": "Table"
+    },
+    {
+      "Name": "__Temp_RetentionRate_Report",
+      "Owner": "dbo",
+      "ObjectType": "Table"
+    },
+    {
+      "Name": "rspActiveEnrolledCaseList",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspAggregateCounts",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspCapacityBuilding",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspClosedEnrolledCaseList",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspHFAHomeVisitCompletionRate_Detail",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspHFAHomeVisitCompletionRate_Summary",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspHomeVisitLogSummaryQuarterly",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspNYSFSWHomeVisitRecord_Detail",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspNYSFSWHomeVisitRecord_Summary",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspProgramInformationFor8Quarters",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspQAReport14",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspQAReport19",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspRetentionRatePercentage",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "rspRetentionRates_fill_cache",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "spAddHVLogOld",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "spAddHVLog",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "spDelHVLogOld",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "spEditHVLogOld",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    },
+    {
+      "Name": "spEditHVLog",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    }
+  ]
+}
