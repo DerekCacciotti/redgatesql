@@ -824,6 +824,7 @@ create table [dbo].[RG_Recovery_2_HVLog] (	 [HVLogPK] [int] not null identity(1,
 										   , [HVLogEditor] [char](10) collate SQL_Latin1_General_CP1_CI_AS null
 										   , [HVSupervisorParticipated] [bit] null
 										   , [NextScheduledVisit] [datetime] null
+                                           , [NextVisitNotes] [varchar](max) null
 										   , [NonPrimaryFSWParticipated] [bit] null
 										   , [NonPrimaryFSWFK] [int] null
 										   , [OBPParticipated] [bit] null
@@ -892,6 +893,7 @@ create table [dbo].[RG_Recovery_2_HVLog] (	 [HVLogPK] [int] not null identity(1,
 										   , [SSComments] [varchar](max) collate SQL_Latin1_General_CP1_CI_AS null
 										   , [SSEducation] [bit] null
 										   , [SSEmployment] [bit] null
+										   , [SSHomeEnvironment] [bit] null
 										   , [SSHousekeeping] [bit] null
 										   , [SSJob] [bit] null
 										   , [SSMoneyManagement] [bit] null
@@ -923,7 +925,7 @@ create table [dbo].[RG_Recovery_2_HVLog] (	 [HVLogPK] [int] not null identity(1,
 										   , [VisitLengthMinute] [int] not null
 										   , [VisitLocation] [char](5) collate SQL_Latin1_General_CP1_CI_AS not null
 										   , [VisitStartTime] [datetime] not null
-										   , [VisitType] [char](5) collate SQL_Latin1_General_CP1_CI_AS not null
+										   , [VisitType] [char](6) collate SQL_Latin1_General_CP1_CI_AS not null
 										   , [VisitTypeComments] [varchar](max) collate SQL_Latin1_General_CP1_CI_AS null
 										 ) on [PRIMARY] textimage_on [PRIMARY];
 go
@@ -1372,6 +1374,7 @@ alter procedure [dbo].[spAddHVLog] (   @AdditionalComments varchar(max) = null
 									 , @HVLogCreator char(10) = null
 									 , @HVSupervisorParticipated bit = null
 									 , @NextScheduledVisit datetime = null
+									 , @NextVisitNotes varchar(max) = null
 									 , @NonPrimaryFSWParticipated bit = null
 									 , @NonPrimaryFSWFK int = null
 									 , @OBPParticipated bit = null
@@ -1440,6 +1443,7 @@ alter procedure [dbo].[spAddHVLog] (   @AdditionalComments varchar(max) = null
 									 , @SSComments varchar(max) = null
 									 , @SSEducation bit = null
 									 , @SSEmployment bit = null
+									 , @SSHomeEnvironment bit = null
 									 , @SSHousekeeping bit = null
 									 , @SSJob bit = null
 									 , @SSMoneyManagement bit = null
@@ -1599,6 +1603,7 @@ as
 						, HVLogCreator
 						, HVSupervisorParticipated
 						, NextScheduledVisit
+						, NextVisitNotes
 						, NonPrimaryFSWParticipated
 						, NonPrimaryFSWFK
 						, OBPParticipated
@@ -1667,6 +1672,7 @@ as
 						, SSComments
 						, SSEducation
 						, SSEmployment
+						, SSHomeEnvironment
 						, SSHousekeeping
 						, SSJob
 						, SSMoneyManagement
@@ -1825,6 +1831,7 @@ as
 		  , @HVLogCreator
 		  , @HVSupervisorParticipated
 		  , @NextScheduledVisit
+		  , @NextVisitNotes
 		  , @NonPrimaryFSWParticipated
 		  , @NonPrimaryFSWFK
 		  , @OBPParticipated
@@ -1893,6 +1900,7 @@ as
 		  , @SSComments
 		  , @SSEducation
 		  , @SSEmployment
+		  , @SSHomeEnvironment
 		  , @SSHousekeeping
 		  , @SSJob
 		  , @SSMoneyManagement
@@ -2056,7 +2064,8 @@ alter procedure [dbo].[spEditHVLog] (	@HVLogPK int = null
 									  , @HVCaseFK int = null
 									  , @HVLogEditor char(10) = null
 									  , @HVSupervisorParticipated bit = null
-									  , @NextScheduledVisit datetime = null
+									  , @NextScheduledVisit datetime = NULL
+                                      , @NextVisitNotes varchar(max) = null
 									  , @NonPrimaryFSWParticipated bit = null
 									  , @NonPrimaryFSWFK int = null
 									  , @OBPParticipated bit = null
@@ -2125,6 +2134,7 @@ alter procedure [dbo].[spEditHVLog] (	@HVLogPK int = null
 									  , @SSComments varchar(max) = null
 									  , @SSEducation bit = null
 									  , @SSEmployment bit = null
+									  , @SSHomeEnvironment bit = null
 									  , @SSHousekeeping bit = null
 									  , @SSJob bit = null
 									  , @SSMoneyManagement bit = null
@@ -2285,6 +2295,7 @@ as
 		 , HVLogEditor = @HVLogEditor
 		 , HVSupervisorParticipated = @HVSupervisorParticipated
 		 , NextScheduledVisit = @NextScheduledVisit
+		 , NextVisitNotes = @NextVisitNotes
 		 , NonPrimaryFSWParticipated = @NonPrimaryFSWParticipated
 		 , NonPrimaryFSWFK = @NonPrimaryFSWFK
 		 , OBPParticipated = @OBPParticipated
@@ -2353,6 +2364,7 @@ as
 		 , SSComments = @SSComments
 		 , SSEducation = @SSEducation
 		 , SSEmployment = @SSEmployment
+		 , SSHomeEnvironment = @SSHomeEnvironment
 		 , SSHousekeeping = @SSHousekeeping
 		 , SSJob = @SSJob
 		 , SSMoneyManagement = @SSMoneyManagement
@@ -15285,4 +15297,5 @@ from @tblResults
 
 end
 GO
+
 
