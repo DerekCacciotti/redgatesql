@@ -2400,16 +2400,16 @@ as
 		 , VisitTypeComments = @VisitTypeComments
 	where  HVLogPK = @HVLogPK;
 go
-print N'Creating [dbo].[spGetHVLogOldbyPK]';
-go
-create procedure [dbo].[spGetHVLogOldbyPK] (@HVLogOldPK int)
-as
-	set nocount on;
+--print N'Creating [dbo].[spGetHVLogOldbyPK]';
+--go
+--create procedure [dbo].[spGetHVLogOldbyPK] (@HVLogOldPK int)
+--as
+--	set nocount on;
 
-	select *
-	from   HVLogOld
-	where  HVLogOldPK = @HVLogOldPK;
-go
+--	select *
+--	from   HVLogOld
+--	where  HVLogOldPK = @HVLogOldPK;
+--go
 print N'Creating [dbo].[spAddHVLogOld]';
 go
 create procedure [dbo].[spAddHVLogOld] (   @CAAdvocacy char(2) = null
@@ -15297,5 +15297,6 @@ from @tblResults
 
 end
 GO
+
 
 
