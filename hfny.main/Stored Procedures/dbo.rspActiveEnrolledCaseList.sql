@@ -72,7 +72,7 @@ as
 		  ,convert(varchar(12),ca.FormDate,101) [Eligible]
 		  ,(select count(*)
 				from HVLog
-				where VisitType <> '00010'
+				where SUBSTRING(VisitType, 4, 1) <> '1'
 					 and cast(VisitStartTime as date) <= @EndDt
 					 and cast(VisitStartTime as date) >= b.IntakeDate
 					 and HVCaseFK = b.HVCasePK
@@ -135,7 +135,7 @@ as
 														   order by FormDate desc)
 
 			-- # of actual home visits since intake = a.HVCaseFK <-> HVLog.HVCaseFK, ProgramFK, 
-			-- VisitType <> '0001', VisitStartTime < @EndDt and VisitStartTime >= b.IntakeDate
+			-- substring(VisitType, 4, 1) <> '1', VisitStartTime < @EndDt and VisitStartTime >= b.IntakeDate
 
 			left outer join TCID T on T.HVCaseFK = b.HVCasePK and T.TCDOD is null
 
