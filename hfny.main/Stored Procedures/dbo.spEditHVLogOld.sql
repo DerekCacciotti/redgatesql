@@ -3,8 +3,8 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditHVLogOld](@HVLogOldPK int=NULL,
-@CAChildSupport char(2)=NULL,
 @CAAdvocacy char(2)=NULL,
+@CAChildSupport char(2)=NULL,
 @CAGoods char(2)=NULL,
 @CAHousing char(2)=NULL,
 @CALaborSupport char(2)=NULL,
@@ -124,8 +124,8 @@ CREATE PROCEDURE [dbo].[spEditHVLogOld](@HVLogOldPK int=NULL,
 AS
 UPDATE HVLogOld
 SET 
-CAChildSupport = @CAChildSupport, 
 CAAdvocacy = @CAAdvocacy, 
+CAChildSupport = @CAChildSupport, 
 CAGoods = @CAGoods, 
 CAHousing = @CAHousing, 
 CALaborSupport = @CALaborSupport, 
