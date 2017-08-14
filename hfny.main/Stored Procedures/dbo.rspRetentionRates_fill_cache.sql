@@ -27,7 +27,6 @@ CREATE PROCEDURE [dbo].[rspRetentionRates_fill_cache]
 	, @EndDate datetime
     , @WorkerFK int = null
 	, @SiteFK int = null
-	, @CaseFiltersPositive varchar(100) = ''
 as
 BEGIN 
 -- SET NOCOUNT ON added to prevent extra result sets from
@@ -40,10 +39,6 @@ SET NOCOUNT ON;
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0
 					   else @SiteFK
 				  end
-	set @casefilterspositive = case	when @casefilterspositive = '' then null
-									else @casefilterspositive
-							   end
-
 	declare @tblResults table (
 		LineDescription varchar(50)
 		, LineGroupingLevel int
@@ -181,14 +176,21 @@ SET NOCOUNT ON;
 		, CountOfFSWs int);
 
 --#endregion
---#region cteCohort - Get the cohort for the report
-	with cteCohort as
-	-----------------------
-		(select HVCasePK
+--#region tmpCohort - Get the cohort for the report
+if exists(select * from tempdb.dbo.sysobjects where id=object_id(N'tempdb..#tmpCohort'))
+	-- where charindex('#',name)>0 order by name
+	drop table #tmpCohort
+
+create table #tmpCohort
+	(HVCasePK int);
+
+--#endregion
+--#region tmpCohort - Get the cohort for the report
+	insert into #tmpCohort 
+		select HVCasePK
 			from HVCase h 
 			inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
 			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
-			inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = h.HVCasePK
 			left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
 			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = cp.ProgramFK
 			where case when @SiteFK = 0 then 1
@@ -196,36 +198,27 @@ SET NOCOUNT ON;
 							 else 0
 						end = 1
 				and (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
-				and  w.WorkerPK = isnull(@WorkerFK, w.WorkerPK)
+				and  w.WorkerPK = isnull(@WorkerFK, w.WorkerPK);
 				-- and cp.ProgramFK=@ProgramFK
-		)	
-
+			
 	--select * 
-
-	--from cteCohort
+	--from #tmpCohort
 	--order by HVCasePK
 
 	--select HVCasePK, count(HVCasePK)
-
-	--from cteCohort
+	--from #tmpCohort
 	--group by HVCasePK
 	--having count(HVCasePK) > 1
 
-
-
-
-
-
-
 --#endregion
 --#region cteLastFollowUp - Get last follow up completed for all cases in cohort
-	, cteLastFollowUp as 
+	with cteLastFollowUp as 
 	-----------------------
 		(select max(FollowUpPK) as FollowUpPK
 			   , max(FollowUpDate) as FollowUpDate
 			   , fu.HVCaseFK
 			from FollowUp fu
-			inner join cteCohort c on c.HVCasePK = fu.HVCaseFK
+			inner join #tmpCohort c on c.HVCasePK = fu.HVCaseFK
 			group by fu.HVCaseFK
 		)
 
@@ -322,7 +315,7 @@ SET NOCOUNT ON;
 		inner join Kempe k on k.HVCaseFK=h.HVCasePK
 		inner join codeLevel cl ON cl.codeLevelPK=CurrentLevelFK
 		inner join codeDischarge cd on cd.DischargeCode=cp.DischargeReason 
-		inner join cteCohort c on h.HVCasePK = c.HVCasePK
+		inner join #tmpCohort c on h.HVCasePK = c.HVCasePK
 		left outer join cteLastFollowUp lfu on lfu.HVCaseFK = c.HVCasePK
 		left outer join FollowUp fu ON fu.FollowUpPK = lfu.FollowUpPK
 		left outer join PC1Issues pc1is ON pc1is.PC1IssuesPK=fu.PC1IssuesFK
@@ -345,8 +338,8 @@ SET NOCOUNT ON;
 			from HVLog vl
 			inner join HVCase c on c.HVCasePK = vl.HVCaseFK
 			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
-			inner join cteCohort co on co.HVCasePK = c.HVCasePK
-			where VisitType <> '00010' and 
+			inner join #tmpCohort co on co.HVCasePK = c.HVCasePK
+			where SUBSTRING(VisitType, 4, 1) <> '1' and 
 					(IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
 							 -- and vl.ProgramFK = @ProgramFK
 			group by HVCaseFK
@@ -359,7 +352,7 @@ SET NOCOUNT ON;
 		   from dbo.WorkerAssignment wa
 			inner join hvcase c on c.HVCasePK=wa.HVCaseFK 
 			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = wa.ProgramFK
-			inner join cteCohort co on co.HVCasePK = c.HVCasePK
+			inner join #tmpCohort co on co.HVCasePK = c.HVCasePK
 			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
 				-- and wa.ProgramFK=@ProgramFK
 			group by HVCaseFK)
@@ -373,7 +366,7 @@ SET NOCOUNT ON;
 			inner join PCProgram pcp on pcp.PCFK=PCPK
 			inner join HVCase c on c.PC1FK=PCPK
 			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = pcp.ProgramFK
-			inner join cteCohort co on co.HVCasePK = c.HVCasePK
+			inner join #tmpCohort co on co.HVCasePK = c.HVCasePK
 			WHERE (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
 				--and pcp.ProgramFK=@ProgramFK
 			)
@@ -388,7 +381,7 @@ SET NOCOUNT ON;
 			inner join HVCase c on c.HVCasePK = t.HVCaseFK
 			inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
 			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
-			inner join cteCohort co on co.HVCasePK = c.HVCasePK
+			inner join #tmpCohort co on co.HVCasePK = c.HVCasePK
 			where (IntakeDate is not null and IntakeDate between @StartDate and @EndDate)
 					-- and cp.ProgramFK=@ProgramFK
 			group by t.HVCaseFK)
