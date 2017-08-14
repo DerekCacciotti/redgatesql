@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -13,7 +12,7 @@ GO
 -- added: How to handle some special url redirections - bug# HW946 ... Khalsa 3/7/2014
 -- 
 -- =============================================
-CREATE procedure [dbo].[spGetAllFormsForSupervisorReview]
+CREATE PROCEDURE [dbo].[spGetAllFormsForSupervisorReview]
 	(
 	@ProgramFK int
 	, @DaysToLoad int=30
@@ -36,14 +35,19 @@ begin
 		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 		where programfk = @ProgramFK 
 				and current_timestamp between SupervisorStartDate and isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
-
-		--declare @Sups table
-		--@Sups = spGetAllWorkersByProgram @ProgramFK = 1 
-		--								, @EventDate = null
-		--								, @WorkerType = 'SUP'
-		--								, @AllWorkers = 0
-	),
-	cteFormReview as 
+	)	
+	, cteCohort as 
+	(
+		select max(CaseProgramPK) as CaseProgramPK
+			from CaseProgram cp
+			inner join FormReview fr on fr.HVCaseFK = cp.HVCaseFK
+									and fr.ProgramFK = cp.ProgramFK
+									and convert(date, FormDate) >= CaseStartDate
+									and convert(date, FormDate) between dateadd(day, @DaysToLoad * -1, current_timestamp) and current_timestamp
+			inner join SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
+			group by cp.HVCaseFK
+	)
+	, cteFormReview as 
 	(	
 		select FormReviewPK
 			  ,PC1ID
@@ -68,7 +72,8 @@ begin
 					when fr.FormType='PA' then 'preassessment.aspx?pc1id='+PC1ID+ '&papk=' + convert(varchar,FormFK)		  -- Note: here we use preassessment.aspx
 					when fr.FormType='PI' then 'PreIntake.aspx?pc1id='+PC1ID+ '&pipk=' + convert(varchar,FormFK)		  -- Note: here we use PreIntakes.aspx
 					when fr.FormType='SR' then 'ServiceReferral.aspx?pc1id='+PC1ID+ '&srpk=' + convert(varchar,FormFK)		  -- Note: here we use ServiceReferral.aspx
-					when fr.FormType='VL' then 'HomeVisitLog.aspx?pc1id='+PC1ID+ '&hvlogpk=' + convert(varchar,FormFK)		  -- Note: here we use HomeVisitLogs.aspx
+					when fr.FormType='VL' AND fr.FormDate > '2017-06-05 00:00:00.000' THEN 'HomeVisitLog.aspx?pc1id='+PC1ID+ '&hvlogpk=' + convert(varchar,FormFK)		  -- Note: here we use HomeVisitLogs.aspx
+					when fr.FormType='VL' AND fr.FormDate <= '2017-06-05 00:00:00.000' then 'HomeVisitLogOld.aspx?pc1id='+PC1ID+ '&hvlogpk=' + convert(varchar,FormFK)		  -- Note: here we use HomeVisitLogs.aspx
 					when fr.FormType='ID' then 'IdContactInformation.aspx?pc1id='+PC1ID		  -- Note: here we use IdContactInformation.aspx
 					when fr.FormType='IN' then 'Intake.aspx?pc1id='+PC1ID+ '&ipk=' + convert(varchar,FormFK)		  -- Note: here we use Intake.aspx
 					when fr.FormType='DS' then 'PreDischarge.aspx?pc1id='+PC1ID	-- Note: here we use PreDischarge.aspx
@@ -93,11 +98,12 @@ begin
 					when cp.CurrentFAWFK is not null then supfaw.WorkerName
 					else '*Unassigned*'
 				end as SupervisorName
-		from FormReview fr
+		from cteCohort co
+		inner join CaseProgram cp ON cp.CaseProgramPK = co.CaseProgramPK
+		inner join FormReview fr on fr.HVCaseFK = cp.HVCaseFK and fr.ProgramFK = cp.ProgramFK and FormDate >= CaseStartDate
 		inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = isnull(@ProgramFK,fro.ProgramFK)
 		inner join codeForm f on codeFormAbbreviation = fr.FormType
-		inner join CaseProgram cp on cp.HVCaseFK = fr.HVCaseFK
-									and cp.ProgramFK = fr.ProgramFK
+		left outer join HVLog vl on vl.ProgramFK = cp.ProgramFK and fr.FormType = 'VL' and fr.FormFK = vl.HVLogPK
 		left outer join WorkerProgram wpfsw on wpfsw.WorkerFK = cp.CurrentFSWFK and wpfsw.ProgramFK = @ProgramFK
 		left outer join WorkerProgram wpfaw on wpfaw.WorkerFK = cp.CurrentFAWFK and wpfaw.ProgramFK = @ProgramFK
 		left outer join Worker wfsw on wfsw.WorkerPK = wpfsw.WorkerFK
@@ -108,6 +114,7 @@ begin
 				and ReviewedBy is null
 				and FormDate between FormReviewStartDate and isnull(FormReviewEndDate, current_timestamp)
 				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
+				and case when fr.FormType = 'VL' then FormComplete else 1 end = 1
 		union all 
 		select FormReviewPK
 			  ,case when len(rtrim(TrainingTitle)) <= 16 
