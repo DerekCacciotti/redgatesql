@@ -238,4 +238,6 @@ a.Meets END AS Meets, CASE WHEN a.[ASQTCReceiving] = 1 THEN 'Yes' ELSE 'No' END 
 FROM cteYYY AS a JOIN cteASQTCReceiving AS b ON a.PC1ID = b.PC1ID
 WHERE Age > 0 AND Age <= 5
 order by Age DESC, worker, PC1ID, TCAgeCode
+
+drop table #cteAll
 GO
