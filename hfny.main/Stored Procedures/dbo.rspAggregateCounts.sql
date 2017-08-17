@@ -62,7 +62,7 @@ begin
 	create table #tblHVLogInformation (
 		HVLogPK int
 		, VisitStartTime datetime
-		, VisitType varchar(6)
+		, VisitType char(6)
 		, HVCaseFK int
 		, OBPParticipated bit
 		, FatherFigureParticipated bit
@@ -508,7 +508,7 @@ begin
 		(select count(HVLogPK) as countOfCompletedHomeVisitLogsSinceBeginning
 		  from #tblHVLogInformation
 		  where convert(date, VisitStartTime) <= @EndDate
-				and VisitType <> '0001'
+				and VisitType <> '000100'
 		)
 	,
 	/* 
@@ -519,7 +519,7 @@ begin
 		(select count(HVLogPK) as countOfAttemptedHomeVisitLogsSinceBeginning
 		  from #tblHVLogInformation
 		  where convert(date, VisitStartTime) <= @EndDate
-				and VisitType = '0001'
+				and VisitType = '000100'
 		)
 	,
 	/* 
@@ -540,7 +540,7 @@ begin
 		(select count(HVLogPK) as countOfCompletedHomeVisitLogsInPeriod
 		  from #tblHVLogInformation
 		  where convert(date, VisitStartTime) between @StartDate and @EndDate
-				and VisitType <> '0001'
+				and VisitType <> '000100'
 		)
 	,
 	/* 
@@ -551,7 +551,7 @@ begin
 		(select count(HVLogPK) as countOfAttemptedHomeVisitLogsInPeriod
 		  from #tblHVLogInformation
 		  where convert(date, VisitStartTime) between @StartDate and @EndDate and 
-				VisitType = '0001'
+				VisitType = '000100'
 		)
 	,
 	/* 
