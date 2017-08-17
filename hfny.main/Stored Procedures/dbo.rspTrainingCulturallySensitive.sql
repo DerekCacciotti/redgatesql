@@ -158,6 +158,6 @@ insert into #cteEventDates
 FROM cteFinal, cteCountMeeting
 --LEFT JOIN cteCountMeeting ON cteCountMeeting.WorkerCount = cteFinal.WorkerCount
 
-
+drop table #cteEventDates
 END
 GO
