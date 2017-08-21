@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -11,7 +10,7 @@ GO
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 --			  02/24/2015 jr - add support for Site and Case Filter criteria
 -- =============================================
-CREATE procedure [dbo].[rspNYSFSWHomeVisitRecord_Summary]
+CREATE PROCEDURE [dbo].[rspNYSFSWHomeVisitRecord_Summary]
 				(@programfk    varchar(max)    = null
 					, @sdate        datetime
 					, @edate        datetime
@@ -56,19 +55,19 @@ begin
 							   and hvr.programfk = hld.programfk) as levelstart
 					,reqvisit as expvisitcount
 					,sum(case
-							 when visittype <> '0001' then
+							 when SUBSTRING(VisitType, 4, 1) <> '1' then
 								 1
 							 else
 								 0
 						 end) as actvisitcount
 					,sum(case
-							 when substring(visittype,1,1) = '1' or substring(visittype,2,1) = '1' then
+							 when substring(visittype,1,1) = '1' or substring(visittype,2,1) = '1' or substring(visittype,3,1) = '1' then
 								 1
 							 else
 								 0
 						 end) as inhomevisitcount
 					,sum(case
-							 when visittype = '0001' then
+							 when SUBSTRING(VisitType, 4, 1) = '1' then
 								 1
 							 else
 								 0

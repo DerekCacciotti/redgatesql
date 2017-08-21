@@ -14,7 +14,7 @@ GO
 -- =============================================
 
 
-CREATE procedure [dbo].[rspFSWEnrolledCaseTickler](
+CREATE PROCEDURE [dbo].[rspFSWEnrolledCaseTickler](
 	@programfk    varchar(max)    = NULL,
     @edate     datetime,
     @supervisorfk int             = null,
@@ -666,19 +666,19 @@ as
 	SELECT cc.HVCasePK	
 	
 	,sum(case
-			 when visittype <> '0001' then
+			 when SUBSTRING(VisitType, 4, 1) <> '1' then
 				 1
 			 else
 				 0
 		 end) as actualvisitcount
 	,sum(case
-			 when substring(visittype,1,1) = '1' or substring(visittype,2,1) = '1' then
+			 when substring(VisitType,1,1) = '1' or substring(VisitType,2,1) = '1' or substring(VisitType,3,1) = '1' then
 				 1
 			 else
 				 0
 		 end) as inhomevisitcount
 	,sum(case
-			 when visittype = '0001' then
+			 when substring(VisitType,4,1) = '1' then
 				 1
 			 else
 				 0
@@ -728,19 +728,19 @@ as
 	SELECT cc.HVCasePK	
 	
 	,sum(case
-			 when visittype <> '0001' then
+			 when substring(VisitType,4,1) <> '1' then
 				 1
 			 else
 				 0
 		 end) as actual3Monthsvisitcount
 	,sum(case
-			 when visittype = '1000' then
+			 when substring(VisitType,1,1) = '1' or substring(VisitType,2,1) = '1' or substring(VisitType,3,1) = '1' then
 				 1
 			 else
 				 0
 		 end) as inhome3Monthsvisitcount
 	,sum(case
-			 when visittype = '0001' then
+			 when SUBSTRING(VisitType, 4, 1) = '1' then
 				 1
 			 else
 				 0
@@ -768,7 +768,7 @@ as
 (
 select HVCasePK
 		 ,case
-			 when visittype = '0001' then
+			 when SUBSTRING(VisitType, 4, 1) = '1' then
 				 Convert(VARCHAR(12), VisitStartTime, 101) + 'a'  -- attempted visits
 			 else
 				 Convert(VARCHAR(12), VisitStartTime, 101)

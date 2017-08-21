@@ -14,7 +14,7 @@ GO
 -- Edit Date: 08/17/17
 -- Edit Reason: Optimized report so that it works better in Azure
 -- =============================================
-CREATE procedure [dbo].[rspAggregateCounts]
+CREATE PROCEDURE [dbo].[rspAggregateCounts]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartDate				datetime,

@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +7,7 @@ GO
 -- Create date: Feb/25/2015
 -- Description: <Report: Capacity Building>
 -- =============================================
-CREATE procedure [dbo].[rspCapacityBuilding]
+CREATE PROCEDURE [dbo].[rspCapacityBuilding]
 (
     @startDt    DATE,
     @endDT      DATE,
@@ -181,7 +180,7 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 		from HVLog vl
 		inner join hvcase c on c.HVCasePK = vl.HVCaseFK
 		inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
-		where VisitType <> '0001' and (IntakeDate is not null and 
+		where SUBSTRING(VisitType, 4, 1) <> '1' and (IntakeDate is not null and 
 		IntakeDate between @startDTRetention and @endDTRetention)
 		group by HVCaseFK
 	)

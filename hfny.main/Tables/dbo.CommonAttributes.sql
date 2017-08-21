@@ -28,6 +28,8 @@ CREATE TABLE [dbo].[CommonAttributes]
 [HVCaseFK] [int] NOT NULL,
 [IsCurrentlyEmployed] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LanguageSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LivingArrangement] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LivingArrangementSpecific] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Looked4Employment] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [MaritalStatus] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [MonthlyIncomeUnknown] [bit] NULL,
@@ -72,16 +74,14 @@ CREATE TABLE [dbo].[CommonAttributes]
 [TCHIOtherSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TCHIUninsured] [bit] NULL,
 [TCHIUnknown] [bit] NULL,
+[TCMedicalCareSource] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TCMedicalCareSourceOtherSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TCMedicalFacilityFK] [int] NULL,
 [TCMedicalProviderFK] [int] NULL,
 [TCReceivingMedicaid] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TimeBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WasBreastFed] [bit] NULL,
-[WhyNotBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[LivingArrangement] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[LivingArrangementSpecific] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TCMedicalCareSource] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TCMedicalCareSourceOtherSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[WhyNotBreastFed] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
