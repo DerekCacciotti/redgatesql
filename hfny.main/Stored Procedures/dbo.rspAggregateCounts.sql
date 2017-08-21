@@ -11,7 +11,7 @@ GO
 -- exec [rspAggregateCounts] ',16,','09/01/2013' , '5/31/2014'
 -- exec [rspAggregateCounts] '1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39','09/01/2013' , '5/31/2014'
 -- =============================================
-CREATE procedure [dbo].[rspAggregateCounts]
+CREATE PROCEDURE [dbo].[rspAggregateCounts]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartDate				datetime,
@@ -453,7 +453,7 @@ begin
 		  from HVLog
 		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
 		  where convert(date, VisitStartTime) <= @EndDate
-				and VisitType <> '00010'
+				and VisitType <> '0001'
 		)
 	,
 	/* 
@@ -465,7 +465,7 @@ begin
 		  from HVLog
 		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
 		  where convert(date, VisitStartTime) <= @EndDate
-				and VisitType = '00010'
+				and VisitType = '0001'
 		)
 	,
 	/* 
@@ -488,7 +488,7 @@ begin
 		  from HVLog
 		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
 		  where convert(date, VisitStartTime) between @StartDate and @EndDate
-				and VisitType <> '00010'
+				and VisitType <> '0001'
 		)
 	,
 	/* 
@@ -500,7 +500,7 @@ begin
 		  from HVLog
 		  inner join SplitString(@ProgramFKs, ',') ss on ListItem = ProgramFK
 		  where convert(date, VisitStartTime) between @StartDate and @EndDate and 
-				VisitType = '00010'
+				VisitType = '0001'
 		)
 	,
 	/* 
