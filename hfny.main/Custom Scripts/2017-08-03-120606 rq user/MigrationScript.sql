@@ -1231,11 +1231,11 @@ go
 create nonclustered index [IX_HVLog_VisitType]
 	on [dbo].[HVLog] ([VisitType]) on [PRIMARY];
 go
-print N'Creating index [IX_FK_HVLog_FormComplete] on [dbo].[HVLog]';
-go
-create nonclustered index [IX_HVLog_FormComplete]
-	on [dbo].[HVLog] ([FormComplete]) on [PRIMARY];
-go
+--print N'Creating index [IX_FK_HVLog_FormComplete] on [dbo].[HVLog]';
+--go
+--create nonclustered index [IX_HVLog_FormComplete]
+--	on [dbo].[HVLog] ([FormComplete]) on [PRIMARY];
+--go
 print N'Refreshing [dbo].[HVLevelDetail]';
 go
 exec sp_refreshview N'[dbo].[HVLevelDetail]';
@@ -15297,6 +15297,7 @@ from @tblResults
 
 end
 GO
+
 
 
 
