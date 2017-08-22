@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -74,6 +73,7 @@ as
 				   ,pc.PCEmergencyPhone
 				   ,pc.race
 				   ,pc.racespecify
+				   ,pc.Gender
 		from PC as pc
 		where
 			 (pc.pcfirstname like @PCFirstName+'%'
@@ -157,6 +157,7 @@ as
 		 ,a.PCEmergencyPhone
 		 ,case when AppCodeText = 'Other' then racespecify else AppCodeText end as race
 		 ,a.racespecify
+		 ,a.Gender
 		 ,status =
 		  case when b.PCPK is not null then b.LevelName else '' end
 		 ,roles =
@@ -181,6 +182,7 @@ as
 					, PCEmergencyPhone
 					, race
 					, racespecify
+					, gender
 					, status
 					, roles
 					, orderColumn = CASE WHEN pcOldName LIKE  @PCFirstName+'%' then 1 else 0 end+
