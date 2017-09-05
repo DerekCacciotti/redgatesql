@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -641,539 +640,539 @@ as --DECLARE	@programfk INT = 1
 											 else 0
 										end) [OtherParticipated]
 -- child development
-								  , sum(case when substring(CDChildDevelopment, 1, 1) = '1' then 1
+								  , sum(case when CDChildDevelopment = 1  then 1
 											 else 0
 										end) [CDChildDevelopment]
-								  , sum(case when substring(CDChildDevelopment, 2, 1) = '1' then 1
+								  , sum(case when CDChildDevelopment = 1  then 1
 											 else 0
 										end) [CDChildDevelopmentNon]
-								  , sum(case when substring(CDToys, 1, 1) = '1' then 1
+								  , sum(case when CDToys = 1  then 1
 											 else 0
 										end) [CDToys]
-								  , sum(case when substring(CDToys, 2, 1) = '1' then 1
+								  , sum(case when CDToys = 1  then 1
 											 else 0
 										end) [CDToysNon]
-								  , sum(case when substring(CDOther, 1, 1) = '1' then 1
+								  , sum(case when CDOther = 1  then 1
 											 else 0
 										end) [CDOther]
-								  , sum(case when substring(CDOther, 2, 1) = '1' then 1
+								  , sum(case when CDOther = 1  then 1
 											 else 0
 										end) [CDOtherNon]
-								  , sum(case when substring(CDChildDevelopment, 1, 1) = '1'
-												  or substring(CDToys, 1, 1) = '1'
-												  or substring(CDOther, 1, 1) = '1' then 1
+								  , sum(case when CDChildDevelopment = 1 
+												  or CDToys = 1 
+												  or CDOther = 1  then 1
 											 else 0
 										end) [CD1]
-								  , sum(case when substring(CDChildDevelopment, 2, 1) = '1'
-												  or substring(CDToys, 2, 1) = '1'
-												  or substring(CDOther, 2, 1) = '1' then 1
+								  , sum(case when CDChildDevelopment = 1 
+												  or CDToys = 1 
+												  or CDOther = 1  then 1
 											 else 0
 										end) [CD2]
 -- parent child interaction
-								  , sum(case when substring(PCChildInteraction, 1, 1) = '1' then 1
+								  , sum(case when PCChildInteraction = 1  then 1
 											 else 0
 										end) [PCChildInteraction]
-								  , sum(case when substring(PCChildInteraction, 2, 1) = '1' then 1
+								  , sum(case when PCChildInteraction = 1  then 1
 											 else 0
 										end) [PCChildInteractionNon]
-								  , sum(case when substring(PCChildManagement, 1, 1) = '1' then 1
+								  , sum(case when PCChildManagement = 1  then 1
 											 else 0
 										end) [PCChildManagement]
-								  , sum(case when substring(PCChildManagement, 2, 1) = '1' then 1
+								  , sum(case when PCChildManagement = 1  then 1
 											 else 0
 										end) [PCChildManagementNon]
-								  , sum(case when substring(PCFeelings, 1, 1) = '1' then 1
+								  , sum(case when PCFeelings = 1  then 1
 											 else 0
 										end) [PCFeelings]
-								  , sum(case when substring(PCFeelings, 2, 1) = '1' then 1
+								  , sum(case when PCFeelings = 1  then 1
 											 else 0
 										end) [PCFeelingsNon]
-								  , sum(case when substring(PCStress, 1, 1) = '1' then 1
+								  , sum(case when PCStress = 1  then 1
 											 else 0
 										end) [PCStress]
-								  , sum(case when substring(PCStress, 2, 1) = '1' then 1
+								  , sum(case when PCStress = 1  then 1
 											 else 0
 										end) [PCStressNon]
-								  , sum(case when substring(PCBasicNeeds, 1, 1) = '1' then 1
+								  , sum(case when PCBasicNeeds = 1  then 1
 											 else 0
 										end) [PCBasicNeeds]
-								  , sum(case when substring(PCBasicNeeds, 2, 1) = '1' then 1
+								  , sum(case when PCBasicNeeds = 1  then 1
 											 else 0
 										end) [PCBasicNeedsNon]
-								  , sum(case when substring(PCShakenBaby, 1, 1) = '1' then 1
+								  , sum(case when PCShakenBaby = 1  then 1
 											 else 0
 										end) [PCShakenBaby]
-								  , sum(case when substring(PCShakenBaby, 2, 1) = '1' then 1
+								  , sum(case when PCShakenBaby = 1  then 1
 											 else 0
 										end) [PCShakenBabyNon]
-								  , sum(case when substring(PCShakenBabyVideo, 1, 1) = '1' then 1
+								  , sum(case when PCShakenBabyVideo = 1  then 1
 											 else 0
 										end) [PCShakenBabyVideo]
-								  , sum(case when substring(PCShakenBabyVideo, 2, 1) = '1' then 1
+								  , sum(case when PCShakenBabyVideo = 1  then 1
 											 else 0
 										end) [PCShakenBabyVideoNon]
-								  , sum(case when substring(PCOther, 1, 1) = '1' then 1
+								  , sum(case when PCOther = 1  then 1
 											 else 0
 										end) [PCOther]
-								  , sum(case when substring(PCOther, 2, 1) = '1' then 1
+								  , sum(case when PCOther = 1  then 1
 											 else 0
 										end) [PCOtherNon]
-								  , sum(case when substring(PCChildInteraction, 1, 1) = '1'
-												  or substring(PCChildManagement, 1, 1) = '1'
-												  or substring(PCFeelings, 1, 1) = '1'
-												  or substring(PCStress, 1, 1) = '1'
-												  or substring(PCBasicNeeds, 1, 1) = '1'
-												  or substring(PCShakenBaby, 1, 1) = '1'
-												  or substring(PCShakenBabyVideo, 1, 1) = '1'
-												  or substring(PCOther, 1, 1) = '1' then 1
+								  , sum(case when PCChildInteraction = 1 
+												  or  PCChildManagement = 1 
+												  or  PCFeelings = 1 
+												  or  PCStress = 1 
+												  or  PCBasicNeeds = 1 
+												  or  PCShakenBaby = 1 
+												  or  PCShakenBabyVideo = 1 
+												  or  PCOther = 1  then 1
 											 else 0
 										end) [PC1]
-								  , sum(case when substring(PCChildInteraction, 2, 1) = '1'
-												  or substring(PCChildManagement, 2, 1) = '1'
-												  or substring(PCFeelings, 2, 1) = '1'
-												  or substring(PCStress, 2, 1) = '1'
-												  or substring(PCBasicNeeds, 2, 1) = '1'
-												  or substring(PCShakenBaby, 2, 1) = '1'
-												  or substring(PCShakenBabyVideo, 2, 1) = '1'
-												  or substring(PCOther, 2, 1) = '1' then 1
+								  , sum(case when PCChildInteraction = 1 
+												  or  PCChildManagement = 1 
+												  or  PCFeelings = 1 
+												  or  PCStress = 1 
+												  or  PCBasicNeeds = 1 
+												  or  PCShakenBaby = 1 
+												  or  PCShakenBabyVideo = 1 
+												  or  PCOther = 1  then 1
 											 else 0
 										end) [PC2]
 -- health care
-								  , sum(case when substring(HCGeneral, 1, 1) = '1' then 1
+								  , sum(case when  HCGeneral = 1   then 1
 											 else 0
 										end) [HCGeneral]
-								  , sum(case when substring(HCGeneral, 2, 1) = '1' then 1
+								  , sum(case when  HCGeneral = 1   then 1
 											 else 0
 										end) [HCGeneralNon]
-								  , sum(case when substring(HCChild, 1, 1) = '1' then 1
+								  , sum(case when  HCChild = 1   then 1
 											 else 0
 										end) [HCChild]
-								  , sum(case when substring(HCChild, 2, 1) = '1' then 1
+								  , sum(case when  HCChild = 1   then 1
 											 else 0
 										end) [HCChildNon]
-								  , sum(case when substring(HCDental, 1, 1) = '1' then 1
+								  , sum(case when  HCDental = 1   then 1
 											 else 0
 										end) [HCDental]
-								  , sum(case when substring(HCDental, 2, 1) = '1' then 1
+								  , sum(case when  HCDental = 1   then 1
 											 else 0
 										end) [HCDentalNon]
-								  , sum(case when substring(HCFeeding, 1, 1) = '1' then 1
+								  , sum(case when  HCFeeding = 1   then 1
 											 else 0
 										end) [HCFeeding]
-								  , sum(case when substring(HCFeeding, 2, 1) = '1' then 1
+								  , sum(case when  HCFeeding = 1   then 1
 											 else 0
 										end) [HCFeedingNon]
-								  , sum(case when substring(HCBreastFeeding, 1, 1) = '1' then 1
+								  , sum(case when  HCBreastFeeding = 1   then 1
 											 else 0
 										end) [HCBreastFeeding]
-								  , sum(case when substring(HCBreastFeeding, 2, 1) = '1' then 1
+								  , sum(case when  HCBreastFeeding = 1   then 1
 											 else 0
 										end) [HCBreastFeedingNon]
-								  , sum(case when substring(HCNutrition, 1, 1) = '1' then 1
+								  , sum(case when  HCNutrition = 1   then 1
 											 else 0
 										end) [HCNutrition]
-								  , sum(case when substring(HCNutrition, 2, 1) = '1' then 1
+								  , sum(case when  HCNutrition = 1   then 1
 											 else 0
 										end) [HCNutritionNon]
-								  , sum(case when substring(HCFamilyPlanning, 1, 1) = '1' then 1
+								  , sum(case when  HCFamilyPlanning = 1   then 1
 											 else 0
 										end) [HCFamilyPlanning]
-								  , sum(case when substring(HCFamilyPlanning, 2, 1) = '1' then 1
+								  , sum(case when  HCFamilyPlanning = 1   then 1
 											 else 0
 										end) [HCFamilyPlanningNon]
-								  , sum(case when substring(HCProviders, 1, 1) = '1' then 1
+								  , sum(case when  HCProviders = 1   then 1
 											 else 0
 										end) [HCProviders]
-								  , sum(case when substring(HCProviders, 2, 1) = '1' then 1
+								  , sum(case when  HCProviders = 1   then 1
 											 else 0
 										end) [HCProvidersNon]
-								  , sum(case when substring(HCFASD, 1, 1) = '1' then 1
+								  , sum(case when  HCFASD = 1   then 1
 											 else 0
 										end) [HCFASD]
-								  , sum(case when substring(HCFASD, 2, 1) = '1' then 1
+								  , sum(case when  HCFASD = 1   then 1
 											 else 0
 										end) [HCFASDNon]
-								  , sum(case when substring(HCSexEducation, 1, 1) = '1' then 1
+								  , sum(case when  HCSexEducation = 1   then 1
 											 else 0
 										end) [HCSexEducation]
-								  , sum(case when substring(HCSexEducation, 2, 1) = '1' then 1
+								  , sum(case when  HCSexEducation = 1   then 1
 											 else 0
 										end) [HCSexEducationNon]
-								  , sum(case when substring(HCPrenatalCare, 1, 1) = '1' then 1
+								  , sum(case when  HCPrenatalCare = 1   then 1
 											 else 0
 										end) [HCPrenatalCare]
-								  , sum(case when substring(HCPrenatalCare, 2, 1) = '1' then 1
+								  , sum(case when  HCPrenatalCare = 1   then 1
 											 else 0
 										end) [HCPrenatalCareNon]
-								  , sum(case when substring(HCMedicalAdvocacy, 1, 1) = '1' then 1
+								  , sum(case when  HCMedicalAdvocacy = 1   then 1
 											 else 0
 										end) [HCMedicalAdvocacy]
-								  , sum(case when substring(HCMedicalAdvocacy, 2, 1) = '1' then 1
+								  , sum(case when  HCMedicalAdvocacy = 1   then 1
 											 else 0
 										end) [HCMedicalAdvocacyNon]
-								  , sum(case when substring(HCSafety, 1, 1) = '1' then 1
+								  , sum(case when  HCSafety = 1   then 1
 											 else 0
 										end) [HCSafety]
-								  , sum(case when substring(HCSafety, 2, 1) = '1' then 1
+								  , sum(case when  HCSafety = 1   then 1
 											 else 0
 										end) [HCSafetyNon]
-								  , sum(case when substring(HCSmoking, 1, 1) = '1' then 1
+								  , sum(case when  HCSmoking = 1   then 1
 											 else 0
 										end) [HCSmoking]
-								  , sum(case when substring(HCSmoking, 2, 1) = '1' then 1
+								  , sum(case when  HCSmoking = 1   then 1
 											 else 0
 										end) [HCSmokingNon]
-								  , sum(case when substring(HCSIDS, 1, 1) = '1' then 1
+								  , sum(case when  HCSIDS = 1   then 1
 											 else 0
 										end) [HCSIDS]
-								  , sum(case when substring(HCSIDS, 2, 1) = '1' then 1
+								  , sum(case when  HCSIDS = 1   then 1
 											 else 0
 										end) [HCSIDSNon]
-								  , sum(case when substring(HCOther, 1, 1) = '1' then 1
+								  , sum(case when  HCOther = 1   then 1
 											 else 0
 										end) [HCOther]
-								  , sum(case when substring(HCOther, 2, 1) = '1' then 1
+								  , sum(case when  HCOther = 1   then 1
 											 else 0
 										end) [HCOtherNon]
-								  , sum(case when substring(HCGeneral, 1, 1) = '1'
-												  or substring(HCChild, 1, 1) = '1'
-												  or substring(HCDental, 1, 1) = '1'
-												  or substring(HCFeeding, 1, 1) = '1'
-												  or substring(HCBreastFeeding, 1, 1) = '1'
-												  or substring(HCNutrition, 1, 1) = '1'
-												  or substring(HCFamilyPlanning, 1, 1) = '1'
-												  or substring(HCProviders, 1, 1) = '1'
-												  or substring(HCFASD, 1, 1) = '1'
-												  or substring(HCSexEducation, 1, 1) = '1'
-												  or substring(HCPrenatalCare, 1, 1) = '1'
-												  or substring(HCMedicalAdvocacy, 1, 1) = '1'
-												  or substring(HCSafety, 1, 1) = '1'
-												  or substring(HCSmoking, 1, 1) = '1'
-												  or substring(HCSIDS, 1, 1) = '1'
-												  or substring(HCOther, 1, 1) = '1' then 1
+								  , sum(case when  HCGeneral = 1  
+												  or  HCChild = 1  
+												  or  HCDental = 1  
+												  or  HCFeeding = 1  
+												  or  HCBreastFeeding = 1  
+												  or  HCNutrition = 1  
+												  or  HCFamilyPlanning = 1  
+												  or  HCProviders = 1  
+												  or  HCFASD = 1  
+												  or  HCSexEducation = 1  
+												  or  HCPrenatalCare = 1  
+												  or  HCMedicalAdvocacy = 1  
+												  or  HCSafety = 1  
+												  or  HCSmoking = 1  
+												  or  HCSIDS = 1  
+												  or  HCOther = 1   then 1
 											 else 0
 										end) [HC1]
-								  , sum(case when substring(HCGeneral, 2, 1) = '1'
-												  or substring(HCChild, 2, 1) = '1'
-												  or substring(HCDental, 2, 1) = '1'
-												  or substring(HCFeeding, 2, 1) = '1'
-												  or substring(HCBreastFeeding, 2, 1) = '1'
-												  or substring(HCNutrition, 2, 1) = '1'
-												  or substring(HCFamilyPlanning, 2, 1) = '1'
-												  or substring(HCProviders, 2, 1) = '1'
-												  or substring(HCFASD, 2, 1) = '1'
-												  or substring(HCSexEducation, 2, 1) = '1'
-												  or substring(HCPrenatalCare, 2, 1) = '1'
-												  or substring(HCMedicalAdvocacy, 2, 1) = '1'
-												  or substring(HCSafety, 2, 1) = '1'
-												  or substring(HCSmoking, 2, 1) = '1'
-												  or substring(HCSIDS, 2, 1) = '1'
-												  or substring(HCOther, 2, 1) = '1' then 1
+								  , sum(case when  HCGeneral = 1  
+												  or  HCChild = 1  
+												  or  HCDental = 1  
+												  or  HCFeeding = 1  
+												  or  HCBreastFeeding = 1  
+												  or  HCNutrition = 1  
+												  or  HCFamilyPlanning = 1  
+												  or  HCProviders = 1  
+												  or  HCFASD = 1  
+												  or  HCSexEducation = 1  
+												  or  HCPrenatalCare = 1  
+												  or  HCMedicalAdvocacy = 1  
+												  or  HCSafety = 1  
+												  or  HCSmoking = 1  
+												  or  HCSIDS = 1  
+												  or  HCOther = 1   then 1
 											 else 0
 										end) [HC2]
 -- family funvtioning
-								  , sum(case when substring(FFDomesticViolence, 1, 1) = '1' then 1
+								  , sum(case when FFDomesticViolence = 1   then 1
 											 else 0
 										end) [FFDomesticViolence]
-								  , sum(case when substring(FFDomesticViolence, 2, 1) = '1' then 1
+								  , sum(case when FFDomesticViolence = 1   then 1
 											 else 0
 										end) [FFDomesticViolenceNon]
-								  , sum(case when substring(FFFamilyRelations, 1, 1) = '1' then 1
+								  , sum(case when FFFamilyRelations = 1   then 1
 											 else 0
 										end) [FFFamilyRelations]
-								  , sum(case when substring(FFFamilyRelations, 2, 1) = '1' then 1
+								  , sum(case when FFFamilyRelations = 1   then 1
 											 else 0
 										end) [FFFamilyRelationsNon]
-								  , sum(case when substring(FFSubstanceAbuse, 1, 1) = '1' then 1
+								  , sum(case when FFSubstanceAbuse = 1   then 1
 											 else 0
 										end) [FFSubstanceAbuse]
-								  , sum(case when substring(FFSubstanceAbuse, 2, 1) = '1' then 1
+								  , sum(case when FFSubstanceAbuse = 1   then 1
 											 else 0
 										end) [FFSubstanceAbuseNon]
-								  , sum(case when substring(FFMentalHealth, 1, 1) = '1' then 1
+								  , sum(case when FFMentalHealth = 1   then 1
 											 else 0
 										end) [FFMentalHealth]
-								  , sum(case when substring(FFMentalHealth, 2, 1) = '1' then 1
+								  , sum(case when FFMentalHealth = 1   then 1
 											 else 0
 										end) [FFMentalHealthNon]
-								  , sum(case when substring(FFCommunication, 1, 1) = '1' then 1
+								  , sum(case when FFCommunication = 1   then 1
 											 else 0
 										end) [FFCommunication]
-								  , sum(case when substring(FFCommunication, 2, 1) = '1' then 1
+								  , sum(case when FFCommunication = 1   then 1
 											 else 0
 										end) [FFCommunicationNon]
-								  , sum(case when substring(FFOther, 1, 1) = '1' then 1
+								  , sum(case when FFOther = 1   then 1
 											 else 0
 										end) [FFOther]
-								  , sum(case when substring(FFOther, 2, 1) = '1' then 1
+								  , sum(case when FFOther = 1   then 1
 											 else 0
 										end) [FFOtherNon]
-								  , sum(case when substring(FFDomesticViolence, 1, 1) = '1'
-												  or substring(FFFamilyRelations, 1, 1) = '1'
-												  or substring(FFSubstanceAbuse, 1, 1) = '1'
-												  or substring(FFMentalHealth, 1, 1) = '1'
-												  or substring(FFCommunication, 1, 1) = '1'
-												  or substring(FFOther, 1, 1) = '1' then 1
+								  , sum(case when FFDomesticViolence = 1  
+												  or FFFamilyRelations = 1  
+												  or FFSubstanceAbuse = 1  
+												  or FFMentalHealth = 1  
+												  or FFCommunication = 1  
+												  or FFOther = 1   then 1
 											 else 0
 										end) [FF1]
-								  , sum(case when substring(FFDomesticViolence, 2, 1) = '1'
-												  or substring(FFFamilyRelations, 2, 1) = '1'
-												  or substring(FFSubstanceAbuse, 2, 1) = '1'
-												  or substring(FFMentalHealth, 2, 1) = '1'
-												  or substring(FFCommunication, 2, 1) = '1'
-												  or substring(FFOther, 2, 1) = '1' then 1
+								  , sum(case when FFDomesticViolence = 1  
+												  or FFFamilyRelations = 1  
+												  or FFSubstanceAbuse = 1  
+												  or FFMentalHealth = 1  
+												  or FFCommunication = 1  
+												  or FFOther = 1   then 1
 											 else 0
 										end) [FF2]
 -- self sufficiency
-								  , sum(case when substring(SSCalendar, 1, 1) = '1' then 1
+								  , sum(case when SSCalendar = 1  then 1
 											 else 0
 										end) [SSCalendar]
-								  , sum(case when substring(SSCalendar, 2, 1) = '1' then 1
+								  , sum(case when SSCalendar = 1  then 1
 											 else 0
 										end) [SSCalendarNon]
-								  , sum(case when substring(SSHousekeeping, 1, 1) = '1' then 1
+								  , sum(case when SSHousekeeping = 1  then 1
 											 else 0
 										end) [SSHousekeeping]
-								  , sum(case when substring(SSHousekeeping, 2, 1) = '1' then 1
+								  , sum(case when SSHousekeeping = 1  then 1
 											 else 0
 										end) [SSHousekeepingNon]
-								  , sum(case when substring(SSTransportation, 1, 1) = '1' then 1
+								  , sum(case when SSTransportation = 1  then 1
 											 else 0
 										end) [SSTransportation]
-								  , sum(case when substring(SSTransportation, 2, 1) = '1' then 1
+								  , sum(case when SSTransportation = 1  then 1
 											 else 0
 										end) [SSTransportationNon]
-								  , sum(case when substring(SSEmployment, 1, 1) = '1' then 1
+								  , sum(case when SSEmployment = 1  then 1
 											 else 0
 										end) [SSEmployment]
-								  , sum(case when substring(SSEmployment, 2, 1) = '1' then 1
+								  , sum(case when SSEmployment = 1  then 1
 											 else 0
 										end) [SSEmploymentNon]
-								  , sum(case when substring(SSMoneyManagement, 1, 1) = '1' then 1
+								  , sum(case when SSMoneyManagement = 1  then 1
 											 else 0
 										end) [SSMoneyManagement]
-								  , sum(case when substring(SSMoneyManagement, 2, 1) = '1' then 1
+								  , sum(case when SSMoneyManagement = 1  then 1
 											 else 0
 										end) [SSMoneyManagementNon]
-								  , sum(case when substring(SSChildCare, 1, 1) = '1' then 1
+								  , sum(case when SSChildCare = 1  then 1
 											 else 0
 										end) [SSChildCare]
-								  , sum(case when substring(SSChildCare, 2, 1) = '1' then 1
+								  , sum(case when SSChildCare = 1  then 1
 											 else 0
 										end) [SSChildCareNon]
-								  , sum(case when substring(SSProblemSolving, 1, 1) = '1' then 1
+								  , sum(case when SSProblemSolving = 1  then 1
 											 else 0
 										end) [SSProblemSolving]
-								  , sum(case when substring(SSProblemSolving, 2, 1) = '1' then 1
+								  , sum(case when SSProblemSolving = 1  then 1
 											 else 0
 										end) [SSProblemSolvingNon]
-								  , sum(case when substring(SSEducation, 1, 1) = '1' then 1
+								  , sum(case when SSEducation = 1  then 1
 											 else 0
 										end) [SSEducation]
-								  , sum(case when substring(SSEducation, 2, 1) = '1' then 1
+								  , sum(case when SSEducation = 1  then 1
 											 else 0
 										end) [SSEducationNon]
-								  , sum(case when substring(SSJob, 1, 1) = '1' then 1
+								  , sum(case when SSJob = 1  then 1
 											 else 0
 										end) [SSJob]
-								  , sum(case when substring(SSJob, 2, 1) = '1' then 1
+								  , sum(case when SSJob = 1  then 1
 											 else 0
 										end) [SSJobNon]
-								  , sum(case when substring(SSOther, 1, 1) = '1' then 1
+								  , sum(case when SSOther = 1  then 1
 											 else 0
 										end) [SSOther]
-								  , sum(case when substring(SSOther, 2, 1) = '1' then 1
+								  , sum(case when SSOther = 1  then 1
 											 else 0
 										end) [SSOtherNon]
-								  , sum(case when substring(SSCalendar, 1, 1) = '1'
-												  or substring(SSHousekeeping, 1, 1) = '1'
-												  or substring(SSTransportation, 1, 1) = '1'
-												  or substring(SSEmployment, 1, 1) = '1'
-												  or substring(SSMoneyManagement, 1, 1) = '1'
-												  or substring(SSChildCare, 1, 1) = '1'
-												  or substring(SSProblemSolving, 1, 1) = '1'
-												  or substring(SSEducation, 1, 1) = '1'
-												  or substring(SSJob, 1, 1) = '1'
-												  or substring(SSOther, 1, 1) = '1' then 1
+								  , sum(case when SSCalendar = 1 
+												  or SSHousekeeping = 1 
+												  or SSTransportation = 1 
+												  or SSEmployment = 1 
+												  or SSMoneyManagement = 1 
+												  or SSChildCare = 1 
+												  or SSProblemSolving = 1 
+												  or SSEducation = 1 
+												  or SSJob = 1 
+												  or SSOther = 1  then 1
 											 else 0
 										end) [SS1]
-								  , sum(case when substring(SSCalendar, 2, 1) = '1'
-												  or substring(SSHousekeeping, 2, 1) = '1'
-												  or substring(SSTransportation, 2, 1) = '1'
-												  or substring(SSEmployment, 2, 1) = '1'
-												  or substring(SSMoneyManagement, 2, 1) = '1'
-												  or substring(SSChildCare, 2, 1) = '1'
-												  or substring(SSProblemSolving, 2, 1) = '1'
-												  or substring(SSEducation, 2, 1) = '1'
-												  or substring(SSJob, 2, 1) = '1'
-												  or substring(SSOther, 2, 1) = '1' then 1
+								  , sum(case when SSCalendar = 1 
+												  or SSHousekeeping = 1 
+												  or SSTransportation = 1 
+												  or SSEmployment = 1 
+												  or SSMoneyManagement = 1 
+												  or SSChildCare = 1 
+												  or SSProblemSolving = 1 
+												  or SSEducation = 1 
+												  or SSJob = 1 
+												  or SSOther = 1  then 1
 											 else 0
 										end) [SS2]
 -- crisis intervention
-								  , sum(case when substring(CIProblems, 1, 1) = '1' then 1
+								  , sum(case when CIProblems = 1  then 1
 											 else 0
 										end) [CIProblems]
-								  , sum(case when substring(CIProblems, 2, 1) = '1' then 1
+								  , sum(case when CIProblems = 1  then 1
 											 else 0
 										end) [CIProblemsNon]
-								  , sum(case when substring(CIOther, 1, 1) = '1' then 1
+								  , sum(case when CIOther = 1  then 1
 											 else 0
 										end) [CIOther]
-								  , sum(case when substring(CIOther, 2, 1) = '1' then 1
+								  , sum(case when CIOther = 1  then 1
 											 else 0
 										end) [CIOtherNon]
-								  , sum(case when substring(CIProblems, 1, 1) = '1'
-												  or substring(CIOther, 1, 1) = '1' then 1
+								  , sum(case when CIProblems = 1 
+												  or CIOther = 1  then 1
 											 else 0
 										end) [CI1]
-								  , sum(case when substring(CIProblems, 2, 1) = '1'
-												  or substring(CIOther, 2, 1) = '1' then 1
+								  , sum(case when CIProblems = 1 
+												  or CIOther = 1  then 1
 											 else 0
 										end) [CI2]
 -- program activities
-								  , sum(case when substring(PAForms, 1, 1) = '1' then 1
+								  , sum(case when PAForms = 1  then 1
 											 else 0
 										end) [PAForms]
-								  , sum(case when substring(PAForms, 2, 1) = '1' then 1
+								  , sum(case when PAForms = 1  then 1
 											 else 0
 										end) [PAFormsNon]
-								  , sum(case when substring(PAVideo, 1, 1) = '1' then 1
+								  , sum(case when PAVideo = 1  then 1
 											 else 0
 										end) [PAVideo]
-								  , sum(case when substring(PAVideo, 2, 1) = '1' then 1
+								  , sum(case when PAVideo = 1  then 1
 											 else 0
 										end) [PAVideoNon]
-								  , sum(case when substring(PAGroups, 1, 1) = '1' then 1
+								  , sum(case when PAGroups = 1  then 1
 											 else 0
 										end) [PAGroups]
-								  , sum(case when substring(PAGroups, 2, 1) = '1' then 1
+								  , sum(case when PAGroups = 1  then 1
 											 else 0
 										end) [PAGroupsNon]
-								  , sum(case when substring(PAIFSP, 1, 1) = '1' then 1
+								  , sum(case when PAIFSP = 1  then 1
 											 else 0
 										end) [PAIFSP]
-								  , sum(case when substring(PAIFSP, 2, 1) = '1' then 1
+								  , sum(case when PAIFSP = 1  then 1
 											 else 0
 										end) [PAIFSPNon]
-								  , sum(case when substring(PARecreation, 1, 1) = '1' then 1
+								  , sum(case when PARecreation = 1  then 1
 											 else 0
 										end) [PARecreation]
-								  , sum(case when substring(PARecreation, 2, 1) = '1' then 1
+								  , sum(case when PARecreation = 1  then 1
 											 else 0
 										end) [PARecreationNon]
-								  , sum(case when substring(PAOther, 1, 1) = '1' then 1
+								  , sum(case when PAOther = 1  then 1
 											 else 0
 										end) [PAOther]
-								  , sum(case when substring(PAOther, 2, 1) = '1' then 1
+								  , sum(case when PAOther = 1  then 1
 											 else 0
 										end) [PAOtherNon]
-								  , sum(case when substring(PAForms, 1, 1) = '1'
-												  or substring(PAVideo, 1, 1) = '1'
-												  or substring(PAGroups, 1, 1) = '1'
-												  or substring(PAIFSP, 1, 1) = '1'
-												  or substring(PARecreation, 1, 1) = '1'
-												  or substring(PAOther, 1, 1) = '1' then 1
+								  , sum(case when PAForms = 1 
+												  or PAVideo = 1 
+												  or PAGroups = 1 
+												  or PAIFSP = 1 
+												  or PARecreation = 1 
+												  or PAOther = 1  then 1
 											 else 0
 										end) [PA1]
-								  , sum(case when substring(PAForms, 2, 1) = '1'
-												  or substring(PAVideo, 2, 1) = '1'
-												  or substring(PAGroups, 2, 1) = '1'
-												  or substring(PAIFSP, 2, 1) = '1'
-												  or substring(PARecreation, 2, 1) = '1'
-												  or substring(PAOther, 2, 1) = '1' then 1
+								  , sum(case when PAForms = 1 
+												  or PAVideo = 1 
+												  or PAGroups = 1 
+												  or PAIFSP = 1 
+												  or PARecreation = 1 
+												  or PAOther = 1  then 1
 											 else 0
 										end) [PA2]
 -- concrete activities
-								  , sum(case when substring(CATransportation, 1, 1) = '1' then 1
+								  , sum(case when CATransportation = 1  then 1
 											 else 0
 										end) [CATransportation]
-								  , sum(case when substring(CATransportation, 2, 1) = '1' then 1
+								  , sum(case when CATransportation = 1  then 1
 											 else 0
 										end) [CATransportationNon]
-								  , sum(case when substring(CAGoods, 1, 1) = '1' then 1
+								  , sum(case when CAGoods = 1  then 1
 											 else 0
 										end) [CAGoods]
-								  , sum(case when substring(CAGoods, 2, 1) = '1' then 1
+								  , sum(case when CAGoods = 1  then 1
 											 else 0
 										end) [CAGoodsNon]
-								  , sum(case when substring(CALegal, 1, 1) = '1' then 1
+								  , sum(case when CALegal = 1  then 1
 											 else 0
 										end) [CALegal]
-								  , sum(case when substring(CALegal, 2, 1) = '1' then 1
+								  , sum(case when CALegal = 1  then 1
 											 else 0
 										end) [CALegalNon]
-								  , sum(case when substring(CAHousing, 1, 1) = '1' then 1
+								  , sum(case when CAHousing = 1  then 1
 											 else 0
 										end) [CAHousing]
-								  , sum(case when substring(CAHousing, 2, 1) = '1' then 1
+								  , sum(case when CAHousing = 1  then 1
 											 else 0
 										end) [CAHousingNon]
-								  , sum(case when substring(CAAdvocacy, 1, 1) = '1' then 1
+								  , sum(case when CAAdvocacy = 1  then 1
 											 else 0
 										end) [CAAdvocacy]
-								  , sum(case when substring(CAAdvocacy, 2, 1) = '1' then 1
+								  , sum(case when CAAdvocacy = 1  then 1
 											 else 0
 										end) [CAAdvocacyNon]
-								  , sum(case when substring(CATranslation, 1, 1) = '1' then 1
+								  , sum(case when CATranslation = 1  then 1
 											 else 0
 										end) [CATranslation]
-								  , sum(case when substring(CATranslation, 2, 1) = '1' then 1
+								  , sum(case when CATranslation = 1  then 1
 											 else 0
 										end) [CATranslationNon]
-								  , sum(case when substring(CALaborSupport, 1, 1) = '1' then 1
+								  , sum(case when CALaborSupport = 1  then 1
 											 else 0
 										end) [CALaborSupport]
-								  , sum(case when substring(CALaborSupport, 2, 1) = '1' then 1
+								  , sum(case when CALaborSupport = 1  then 1
 											 else 0
 										end) [CALaborSupportNon]
-								  , sum(case when substring(CAChildSupport, 1, 1) = '1' then 1
+								  , sum(case when CAChildSupport = 1  then 1
 											 else 0
 										end) [CAChildSupport]
-								  , sum(case when substring(CAChildSupport, 2, 1) = '1' then 1
+								  , sum(case when CAChildSupport = 1  then 1
 											 else 0
 										end) [CAChildSupportNon]
-								  , sum(case when substring(CAParentRights, 1, 1) = '1' then 1
+								  , sum(case when CAParentRights = 1  then 1
 											 else 0
 										end) [CAParentRights]
-								  , sum(case when substring(CAParentRights, 2, 1) = '1' then 1
+								  , sum(case when CAParentRights = 1  then 1
 											 else 0
 										end) [CAParentRightsNon]
-								  , sum(case when substring(CAVisitation, 1, 1) = '1' then 1
+								  , sum(case when CAVisitation = 1  then 1
 											 else 0
 										end) [CAVisitation]
-								  , sum(case when substring(CAVisitation, 2, 1) = '1' then 1
+								  , sum(case when CAVisitation = 1  then 1
 											 else 0
 										end) [CAVisitationNon]
-								  , sum(case when substring(CAOther, 1, 1) = '1' then 1
+								  , sum(case when CAOther = 1  then 1
 											 else 0
 										end) [CAOther]
-								  , sum(case when substring(CAOther, 2, 1) = '1' then 1
+								  , sum(case when CAOther = 1  then 1
 											 else 0
 										end) [CAOtherNon]
-								  , sum(case when substring(CATransportation, 1, 1) = '1'
-												  or substring(CAGoods, 1, 1) = '1'
-												  or substring(CALegal, 1, 1) = '1'
-												  or substring(CALegal, 1, 1) = '1'
-												  or substring(CAHousing, 1, 1) = '1'
-												  or substring(CAAdvocacy, 1, 1) = '1'
-												  or substring(CATranslation, 1, 1) = '1'
-												  or substring(CALaborSupport, 1, 1) = '1'
-												  or substring(CAChildSupport, 1, 1) = '1'
-												  or substring(CAVisitation, 1, 1) = '1'
-												  or substring(CAOther, 1, 1) = '1' then 1
+								  , sum(case when CATransportation = 1 
+												  or CAGoods = 1 
+												  or CALegal = 1 
+												  or CALegal = 1 
+												  or CAHousing = 1 
+												  or CAAdvocacy = 1 
+												  or CATranslation = 1 
+												  or CALaborSupport = 1 
+												  or CAChildSupport = 1 
+												  or CAVisitation = 1 
+												  or CAOther = 1  then 1
 											 else 0
 										end) [CA1]
-								  , sum(case when substring(CATransportation, 2, 1) = '1'
-												  or substring(CAGoods, 2, 1) = '1'
-												  or substring(CALegal, 2, 1) = '1'
-												  or substring(CALegal, 2, 1) = '1'
-												  or substring(CAHousing, 2, 1) = '1'
-												  or substring(CAAdvocacy, 2, 1) = '1'
-												  or substring(CATranslation, 2, 1) = '1'
-												  or substring(CALaborSupport, 2, 1) = '1'
-												  or substring(CAChildSupport, 2, 1) = '1'
-												  or substring(CAVisitation, 2, 1) = '1'
-												  or substring(CAOther, 2, 1) = '1' then 1
+								  , sum(case when CATransportation = 1 
+												  or CAGoods = 1 
+												  or CALegal = 1 
+												  or CALegal = 1 
+												  or CAHousing = 1 
+												  or CAAdvocacy = 1 
+												  or CATranslation = 1 
+												  or CALaborSupport = 1 
+												  or CAChildSupport = 1 
+												  or CAVisitation = 1 
+												  or CAOther = 1  then 1
 											 else 0
 										end) [CA2]
 								  , count(*) [Total]
