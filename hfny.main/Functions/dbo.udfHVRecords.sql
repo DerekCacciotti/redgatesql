@@ -57,7 +57,7 @@ begin
 			from CaseProgram cp
 			inner join HVLog hl on hl.HVCaseFK = cp.HVCaseFK 
 									and convert(date, VisitStartTime) > CaseStartDate 
-									and convert(date, VisitStartTime) between @sdate and @edate
+									and VisitStartTime between @sdate and @edate
 			inner join SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
 			group by cp.HVCaseFK
 	)
