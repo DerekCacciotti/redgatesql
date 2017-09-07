@@ -39,16 +39,9 @@ CREATE TABLE [dbo].[Worker]
 [YearsHVExperience] [int] NULL,
 [YearsEarlyChildhoodExperience] [int] NULL,
 [YearsChildAbuseClasses] [int] NULL,
-[SupervisionScheduledDay] [int] NULL
+[SupervisionScheduledDay] [int] NULL,
+[UserName] [varchar] (256) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[Worker] ADD 
-CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
-CREATE NONCLUSTERED INDEX [IX_Worker_FirstName] ON [dbo].[Worker] ([FirstName]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_Worker_LastName_FirstName] ON [dbo].[Worker] ([LastName], [FirstName]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_Worker_LastName] ON [dbo].[Worker] ([LastName]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -62,4 +55,13 @@ For Update
 AS
 Update Worker Set Worker.WorkerEditDate= getdate()
 From [Worker] INNER JOIN Inserted ON [Worker].[WorkerPK]= Inserted.[WorkerPK]
+
+GO
+ALTER TABLE [dbo].[Worker] ADD CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Worker_FirstName] ON [dbo].[Worker] ([FirstName]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Worker_LastName] ON [dbo].[Worker] ([LastName]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_Worker_LastName_FirstName] ON [dbo].[Worker] ([LastName], [FirstName]) ON [PRIMARY]
 GO

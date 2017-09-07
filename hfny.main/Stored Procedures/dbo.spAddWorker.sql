@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -38,7 +37,8 @@ CREATE PROCEDURE [dbo].[spAddWorker](@Apt char(10)=NULL,
 @YearsHVExperience int=NULL,
 @YearsEarlyChildhoodExperience int=NULL,
 @YearsChildAbuseClasses int=NULL,
-@SupervisionScheduledDay int=NULL)
+@SupervisionScheduledDay int=NULL,
+@UserName varchar(256)=NULL)
 AS
 INSERT INTO Worker(
 Apt,
@@ -76,7 +76,8 @@ LoginCreated,
 YearsHVExperience,
 YearsEarlyChildhoodExperience,
 YearsChildAbuseClasses,
-SupervisionScheduledDay
+SupervisionScheduledDay,
+UserName
 )
 VALUES(
 @Apt,
@@ -114,7 +115,8 @@ VALUES(
 @YearsHVExperience,
 @YearsEarlyChildhoodExperience,
 @YearsChildAbuseClasses,
-@SupervisionScheduledDay
+@SupervisionScheduledDay,
+@UserName
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
