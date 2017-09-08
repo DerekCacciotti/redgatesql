@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -13,16 +12,13 @@ CREATE procedure [dbo].[rspWorkerCharacteristicsSummary]
     @programfk VARCHAR(MAX) = null,
     @StartDt   datetime,
     @EndDt     datetime,
-    @SiteFK	   int = null,
-    @casefilterspositive varchar(200)
+    @SiteFK	   int = null
 as
 
 --DECLARE @StartDt AS DATE = '07/01/2012'
 --DECLARE @EndDt AS DATE = '03/31/2013'
 --DECLARE @ProgramFK AS VARCHAR(MAX) = '24'
 --DECLARE @SiteFK	   int = null
---DECLARE @casefilterspositive varchar(200) = null
-
 
 if @programfk is null
   begin
@@ -32,7 +28,6 @@ if @programfk is null
   end
 set @programfk = replace(@programfk,'"','')
 set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
-set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
 DECLARE @tblOutput TABLE(
     [ID] int,
