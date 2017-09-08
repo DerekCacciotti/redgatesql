@@ -23,8 +23,7 @@ returns
 	workerfk int,
 	reqvisitcalc float,
 	hvlevelpk int,
-	reqvisit float,
-	casestartdate date 
+	reqvisit float
 )
 as
 begin
@@ -37,35 +36,13 @@ begin
 							  for xml path ('')),2,8000)
 	end
 
-	set @programfk = REPLACE(@programfk,'"','');
+	set @programfk = REPLACE(@programfk,'"','')
 
-	with cteCohort as 
-		(
-			select max(CaseProgramPK) as CaseProgramPK
-			from CaseProgram cp
-			inner join HVLevel hl on hl.HVCaseFK = cp.HVCaseFK 
-									and convert(date, LevelAssignDate) > CaseStartDate 
-									and convert(date, LevelAssignDate) between @sdate and @edate
-			inner join SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
-			group by cp.HVCaseFK
-	)
-		
-	--select * from cteCohort
-	--order by CaseProgramPK
-	
 	--get the date ranges per worker, per level
 	insert
 		into @tLevelPieces
-		select HVCaseFK
-			 , beginning
-			 , ending
-			 , levelname
-			 , ProgramFK
-			 , workerfk
-			 , MaximumVisit
-			 , HVLevelPK
-			 , (CAST(datediff(day,beginning,ending)as decimal(10,3)) + 1)/7 * maximumvisit --CP 4/04/2014 needed CAST to create decimal because 01/01 - 03/31 was coming up as 90 days / 7 = .96 not 1.02, where level 4's were showing up without any required visits
-			 , CaseStartDate
+		select *
+			  , (CAST(datediff(day,beginning,ending)as decimal(10,3)) + 1)/7 * maximumvisit --CP 4/04/2014 needed CAST to create decimal because 01/01 - 03/31 was coming up as 90 days / 7 = .96 not 1.02, where level 4's were showing up without any required visits
 			from (
 				  select wad.hvcasefk
 						,case
@@ -106,24 +83,16 @@ begin
 						,workerfk
 						,maximumvisit
 						,hld.hvlevelpk
-						,cp.CaseStartDate
-					from cteCohort co
-						inner join CaseProgram cp on cp.CaseProgramPK = co.CaseProgramPK
-						inner join workerassignmentdetail wad on wad.HVCaseFK = cp.HVCaseFK 
-																	--and wad.EndAssignmentDate >= @sdate 
-																	--and wad.StartAssignmentDate >= CaseStartDate
-						inner join hvleveldetail hld on wad.hvcasefk = hld.hvcasefk 
-														--and hld.EndLevelDate >= @sdate
-														--and hld.StartLevelDate >= CaseStartDate
-						--inner join dbo.SplitString(@programfk,',') on wad.programfk = listitem
-					where isnull(hld.endLevelDate,@edate) >= wad.StartAssignmentDate
+					  from workerassignmentdetail wad
+						  inner join hvleveldetail hld on wad.hvcasefk = hld.hvcasefk
+						  inner join dbo.SplitString(@programfk,',') on wad.programfk = listitem
+					  where isnull(hld.endLevelDate,@edate) >= wad.StartAssignmentDate
 						   and hld.StartLevelDate <= @edate
 						   and wad.StartAssignmentDate <= @edate --get assignments in report range
 						   and isnull(wad.EndAssignmentDate,@edate) >= @sdate
-						   and isnull(hld.endlevelDate,@edate) >= @sdate
+						   and isnull(hld.endlevelDate,@EDATE) >= @sdate
 				 ) a
 			where beginning <= ending
-					and beginning >= casestartdate
 	return
 end
 GO
