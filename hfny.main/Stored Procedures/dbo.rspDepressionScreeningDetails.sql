@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:	  <jrobohn>
 -- Create date: <Feb. 17, 2016>
@@ -54,16 +53,16 @@ with	cteMain
 						end as CaseTiming
 			  from		CaseProgram cp
 			  inner join HVCase hc on hc.HVCasePK = cp.HVCaseFK
-			  --inner join dbo.SplitString(@ProgramFK, ',') on cp.ProgramFK = ListItem
-			  --inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = cp.HVCaseFK
+			  inner join dbo.SplitString(@ProgramFK, ',') on cp.ProgramFK = ListItem
+			  inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = cp.HVCaseFK
 			  inner join Worker fsw on cp.CurrentFSWFK = fsw.WorkerPK
 			  inner join WorkerProgram wp on wp.WorkerFK = fsw.WorkerPK
-											 and wp.ProgramFK = @ProgramFK
+											 and wp.ProgramFK = ListItem
 			  inner join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
 			  inner join TCID tc on tc.HVCaseFK = cp.HVCaseFK
 			  where		cp.DischargeDate is null
 						and hc.IntakeDate >= @CutoffDate
-						and cp.ProgramFK = @ProgramFK
+						--and cp.ProgramFK = @ProgramFK
 						and datediff(month, hc.TCDOB, current_timestamp) >= 3 
 					    and datediff(month, hc.TCDOB, hc.IntakeDate) <= 3 
 						and cp.CurrentFSWFK = isnull(@WorkerFK, cp.CurrentFSWFK)
