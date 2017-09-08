@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -180,7 +179,6 @@ END
 	-- use a recursive CTE to generate the list of dates  ... Khalsa
 	-- Given any startdate, find all week dates starting with that date and less then the end date
 	-- We need these dates to figure out if a given worker was supervised in each of the week within startdate and enddate for credentialing purposes
-
 	
 	create table #tblWeekPeriods(
 			 WorkerPK int
@@ -216,6 +214,7 @@ END
 	insert into #tblWeekPeriods	
 		select *
 		from cteGenerateWeeksGiven2Dates
+	  OPTION (maxrecursion 0) --CP 9-8-2017 fixes error SQL Server : the maximum recursion 100 has been exhausted before statement completion
 	
 	------ We are only interested in each week's start date
 	------ These are all the weeks between given two dates but at the end we added user given @eDate ... khalsa
