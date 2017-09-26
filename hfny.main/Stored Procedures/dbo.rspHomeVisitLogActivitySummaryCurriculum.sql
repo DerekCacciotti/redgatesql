@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -86,6 +85,10 @@ CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
     OR CurriculumBoyz2Dads = 0) THEN 0 ELSE 1 END)
     CurriculumBoyz2Dads
 
+, sum(Case WHEN (CurriculumGreatBeginnings IS NULL 
+   OR CurriculumGreatBeginnings = 0) THEN 0 ELSE 1 END)
+   CurriculumGreatBeginnings
+
 , sum(Case WHEN (CurriculumInsideOutDads IS NULL 
     OR CurriculumInsideOutDads = 0) THEN 0 ELSE 1 END)
     CurriculumInsideOutDads
@@ -102,17 +105,23 @@ CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
     OR CurriculumOther = 0) THEN 0 ELSE 1 END)
     CurriculumOther
 
+, sum(Case WHEN (CurriculumOtherSupplementalInformation IS NULL 
+    OR CurriculumOtherSupplementalInformation = 0) THEN 0 ELSE 1 END)
+    CurriculumOtherSupplementalInformation
+
 , sum(Case WHEN ((CurriculumPartnersHealthyBaby IS NULL OR CurriculumPartnersHealthyBaby = 0) AND 
     (CurriculumPAT IS NULL OR CurriculumPAT = 0) AND
     (CurriculumSanAngelo IS NULL OR CurriculumSanAngelo = 0) AND
     (CurriculumParentsForLearning IS NULL OR CurriculumParentsForLearning = 0) AND
     (CurriculumHelpingBabiesLearn IS NULL OR CurriculumHelpingBabiesLearn = 0) AND
     (CurriculumGrowingGreatKids IS NULL OR CurriculumGrowingGreatKids = 0) AND
-    (Curriculum247Dads IS NULL OR Curriculum247Dads = 0) AND 
+    (Curriculum247Dads IS NULL OR Curriculum247Dads = 0) AND
     (CurriculumBoyz2Dads IS NULL OR CurriculumBoyz2Dads = 0) AND 
     (CurriculumInsideOutDads IS NULL OR CurriculumInsideOutDads = 0) AND
     (CurriculumMomGateway IS NULL OR CurriculumMomGateway = 0) AND
     (CurriculumPATFocusFathers IS NULL OR CurriculumPATFocusFathers = 0) AND 
+	(CurriculumGreatBeginnings IS NULL OR CurriculumGreatBeginnings = 0) AND 
+	(CurriculumOtherSupplementalInformation IS NULL OR CurriculumOtherSupplementalInformation = 0) AND
     (CurriculumOther IS NULL OR CurriculumOther = 0)
     ) THEN 1 ELSE 0 END) CurriculumNone
     
@@ -152,11 +161,13 @@ rtrim(c.LastName) + ', ' + rtrim(c.FirstName) END WorkerName
 , 100 * CurriculumHelpingBabiesLearn / CompletedVisit AS CurriculumHelpingBabiesLearn 
 , 100 * CurriculumGrowingGreatKids / CompletedVisit AS CurriculumGrowingGreatKids 
 , 100 * Curriculum247Dads / CompletedVisit AS Curriculum247Dads  
+, 100 * CurriculumGreatBeginnings / CompletedVisit AS CurriculumGreatBeginnings
 , 100 * CurriculumBoyz2Dads / CompletedVisit AS CurriculumBoyz2Dads  
 , 100 * CurriculumInsideOutDads / CompletedVisit AS CurriculumInsideOutDads 
 , 100 * CurriculumMomGateway / CompletedVisit AS CurriculumMomGateway 
 , 100 * CurriculumPATFocusFathers / CompletedVisit AS CurriculumPATFocusFathers  
 , 100 * CurriculumOther / CompletedVisit AS CurriculumOther
+, 100 * CurriculumOtherSupplementalInformation / CompletedVisit AS CurriculumOtherSupplementalInformation
 , 100 * CurriculumNone / CompletedVisit AS CurriculumNone
 
 FROM curriculum01 AS a

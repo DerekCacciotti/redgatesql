@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -91,6 +90,14 @@ CASE WHEN @showWorkerDetail = 'N' THEN 0 ELSE a.FSWFK END FSWFK
     OR CurriculumOther = 0) THEN 0 ELSE 1 END)) > 0 THEN 1 ELSE 0 END
     CurriculumOther
 
+, Case WHEN (sum(CASE WHEN (CurriculumOtherSupplementalInformation IS NULL 
+    OR CurriculumOtherSupplementalInformation = 0) THEN 0 ELSE 1 END)) > 0 THEN 1 ELSE 0 END
+    CurriculumOtherSupplementalInformation
+
+, Case WHEN (sum(CASE WHEN (CurriculumGreatBeginnings IS NULL 
+   OR CurriculumGreatBeginnings = 0) THEN 0 ELSE 1 END) ) > 0 THEN 1 ELSE 0 END
+   CurriculumGreatBeginnings
+
     
 FROM HVLog AS a
 INNER JOIN worker fsw
@@ -119,10 +126,12 @@ SELECT FSWFK, PC1ID, count(*) [UniqueFamilies]
 , sum(a.CurriculumHelpingBabiesLearn) AS CurriculumHelpingBabiesLearn
 , sum(a.CurriculumGrowingGreatKids) AS CurriculumGrowingGreatKids
 , sum(a.Curriculum247Dads) AS Curriculum247Dads 
-, sum(a.CurriculumBoyz2Dads) AS CurriculumBoyz2Dads 
+, sum(a.CurriculumBoyz2Dads) AS CurriculumBoyz2Dads
+, SUM(a.CurriculumGreatBeginnings) AS CurriculumGreatBeginnings 
 , sum(a.CurriculumInsideOutDads) AS CurriculumInsideOutDads
 , sum(a.CurriculumMomGateway) AS CurriculumMomGateway
 , sum(a.CurriculumPATFocusFathers) AS CurriculumPATFocusFathers 
+, SUM(a.CurriculumOtherSupplementalInformation) AS CurriculumOtherSupplementalInformation
 , sum(a.CurriculumOther) AS CurriculumOther
 
 , sum(CASE WHEN (a.CurriculumPartnersHealthyBaby = 0
@@ -133,9 +142,11 @@ AND a.CurriculumHelpingBabiesLearn = 0
 AND a.CurriculumGrowingGreatKids = 0
 AND a.Curriculum247Dads = 0
 AND a.CurriculumBoyz2Dads = 0
+AND a.CurriculumGreatBeginnings = 0
 AND a.CurriculumInsideOutDads = 0
 AND a.CurriculumMomGateway = 0
 AND a.CurriculumPATFocusFathers = 0
+AND a.CurriculumOtherSupplementalInformation = 0
 AND a.CurriculumOther = 0) THEN 1 ELSE 0 END) AS CurriculumNone
 
 FROM curriculumFamily01 AS a
