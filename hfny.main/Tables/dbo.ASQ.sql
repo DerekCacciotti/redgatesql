@@ -84,7 +84,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-Create TRIGGER [dbo].[fr_delete_asq]
+CREATE TRIGGER [dbo].[fr_delete_asq]
 on [dbo].[ASQ]
 After DELETE
 
@@ -96,7 +96,38 @@ set @PK = (SELECT ASQPK from deleted)
 
 BEGIN
 	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='AQ'
+
+	INSERT INTO	asqdeleted ([ASQPK]
+      ,[ASQCreateDate]
+      ,[ASQCreator]
+      ,[ProgramFK]
+      ,[ASQCommunicationScore]
+      ,[ASQEditDate]
+      ,[ASQEditor]
+      ,[ASQFineMotorScore]
+      ,[ASQGrossMotorScore]
+      ,[ASQInWindow]
+      ,[ASQPersonalSocialScore]
+      ,[ASQProblemSolvingScore]
+      ,[ASQTCReceiving]
+      ,[DateCompleted]
+      ,[DevServicesStartDate]
+      ,[DiscussedWithPC1]
+      ,[FSWFK]
+      ,[HVCaseFK]
+      ,[ReviewCDS]
+      ,[TCAge]
+      ,[TCIDFK]
+      ,[TCReferred]
+      ,[UnderCommunication]
+      ,[UnderFineMotor]
+      ,[UnderGrossMotor]
+      ,[UnderPersonalSocial]
+      ,[UnderProblemSolving]
+      ,[VersionNumber])
+	  SELECT * FROM Deleted WHERE Deleted.asqpk= @pk
 END
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO
