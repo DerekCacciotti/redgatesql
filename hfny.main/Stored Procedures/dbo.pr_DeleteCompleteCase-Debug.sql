@@ -8,7 +8,7 @@ GO
 -- Description:	Adapted from FamSys on Feb 13, 2013
 -- exec pr_DeleteCompleteCase 217026, 7, ''
 -- =============================================
-create procedure [dbo].[pr_DeleteCompleteCase-Debug]
+CREATE procedure [dbo].[pr_DeleteCompleteCase-Debug]
 (
     @hvcasefk          int,
     @programfk         int,
@@ -138,6 +138,27 @@ begin try
 	while @@FETCH_STATUS = 0
 	begin
 		exec spDelHVLog @HVLogPK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	--HVLogOld
+	print 'HVLogOld'
+	declare del_cursor cursor for
+	select HVLogOldPK
+		from HVLogOld
+		where hvcasefk = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		exec dbo.spDelHVLogOld @HVLogOldPK = @PK
 
 		fetch next from del_cursor into @PK
 
