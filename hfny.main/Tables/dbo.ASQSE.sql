@@ -123,7 +123,25 @@ BEGIN
       ,[HVCaseFK]
       ,[ProgramFK]
       ,[TCIDFK])
-	  SELECT * FROM Deleted WHERE deleted.ASQSEPK=@PK
+	  SELECT Deleted.ASQSEPK
+		   , Deleted.ASQSECreateDate
+		   , Deleted.ASQSECreator
+		   , Deleted.ASQSEDateCompleted
+		   , Deleted.ASQSEEditDate
+		   , Deleted.ASQSEEditor
+		   , Deleted.ASQSEInWindow
+		   , Deleted.ASQSEOverCutOff
+		   , Deleted.ASQSEReceiving
+		   , Deleted.ASQSEReferred
+		   , Deleted.ASQSETCAge
+		   , Deleted.ASQSETotalScore
+		   , Deleted.ASQSEVersion
+		   , Deleted.DiscussedWithPC1
+		   , Deleted.FSWFK
+		   , Deleted.ReviewCDS
+		   , Deleted.HVCaseFK
+		   , Deleted.ProgramFK
+		   , Deleted.TCIDFK FROM Deleted WHERE deleted.ASQSEPK=@PK
 END
 GO
 SET QUOTED_IDENTIFIER ON
