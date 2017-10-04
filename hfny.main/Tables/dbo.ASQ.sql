@@ -125,7 +125,34 @@ BEGIN
       ,[UnderPersonalSocial]
       ,[UnderProblemSolving]
       ,[VersionNumber])
-	  SELECT * FROM Deleted WHERE Deleted.asqpk= @pk
+	  SELECT Deleted.ASQPK
+		   , Deleted.ASQCreateDate
+		   , Deleted.ASQCreator
+		   , Deleted.ProgramFK
+		   , Deleted.ASQCommunicationScore
+		   , Deleted.ASQEditDate
+		   , Deleted.ASQEditor
+		   , Deleted.ASQFineMotorScore
+		   , Deleted.ASQGrossMotorScore
+		   , Deleted.ASQInWindow
+		   , Deleted.ASQPersonalSocialScore
+		   , Deleted.ASQProblemSolvingScore
+		   , Deleted.ASQTCReceiving
+		   , Deleted.DateCompleted
+		   , Deleted.DevServicesStartDate
+		   , Deleted.DiscussedWithPC1
+		   , Deleted.FSWFK
+		   , Deleted.HVCaseFK
+		   , Deleted.ReviewCDS
+		   , Deleted.TCAge
+		   , Deleted.TCIDFK
+		   , Deleted.TCReferred
+		   , Deleted.UnderCommunication
+		   , Deleted.UnderFineMotor
+		   , Deleted.UnderGrossMotor
+		   , Deleted.UnderPersonalSocial
+		   , Deleted.UnderProblemSolving
+		   , Deleted.VersionNumber FROM Deleted WHERE Deleted.asqpk= @pk
 END
 
 GO
