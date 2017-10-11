@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -127,6 +126,26 @@ begin try
 	while @@FETCH_STATUS = 0
 	begin
 		exec spDelHVLog @HVLogPK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	--Old HVLogs
+	declare del_cursor cursor for
+	select HVLogOldPK
+		from HVLogOld
+		where hvcasefk = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		exec spDelHVLogOld @HVLogOldPK = @PK
 
 		fetch next from del_cursor into @PK
 
