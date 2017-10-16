@@ -331,7 +331,7 @@ begin
 										then 'Name not specified'
 										else rtrim(lmptc.MPLastName) + 
 											case when lmptc.MPFirstName is not null and lmptc.MPFirstName <> ''
-												then ', ' + rtrim(lmppc1.MPFirstName)
+												then ', ' + rtrim(lmptc.MPFirstName)
 												else ''
 											end
 									end
