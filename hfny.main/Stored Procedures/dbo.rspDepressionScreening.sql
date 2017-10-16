@@ -17,7 +17,6 @@ CREATE procedure [dbo].[rspDepressionScreening] (@ProgramFK varchar(max) = null
 									, @SiteFK int = null
 									, @CaseFiltersPositive varchar(100) = ''
 									 )
-with recompile
 as
 
 if @ProgramFK is null
@@ -35,8 +34,9 @@ set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
 								else @CaseFiltersPositive
 						   end;
 
-with	cteMain
-		  as (select	cp.HVCaseFK
+if object_id('tempdb..#tmpDepressionScreeningCohort') is not null drop table #tmpDepressionScreeningCohort
+
+select	cp.HVCaseFK
 					  , cp.PC1ID
 					  , cp.CaseStartDate
 					  , supervisor.FirstName as SupervisorFirstName
@@ -52,6 +52,7 @@ with	cteMain
 					  , case when hc.TCDOB > hc.IntakeDate then 'Pre-natal'
 							 else 'Post-natal'
 						end as CaseTiming
+			  into #tmpDepressionScreeningCohort
 			  from		CaseProgram cp
 			  inner join HVCase hc on hc.HVCasePK = cp.HVCaseFK
 			  inner join dbo.SplitString(@ProgramFK, ',') on cp.ProgramFK = ListItem
@@ -74,11 +75,13 @@ with	cteMain
 						and (case when @SiteFK = 0 then 1
 								  when wp.SiteFK = @SiteFK then 1
 								  else 0
-							 end = 1)
-			 )
-		, ctePHQ
+							 end = 1);
+			 
+-- select * from cteMain
+
+		with ctePHQ
 		  as (select distinct	
-						m.PC1ID
+						tdsc.PC1ID
 					  , convert(varchar(12), p.DateAdministered, 101) as DateAdministered
 					  , p.ParticipantRefused
 					  , p.DepressionReferralMade
@@ -90,26 +93,26 @@ with	cteMain
 							 when p.Invalid = 0 then 'Valid'
 							 else 'Unknown'
 						end Validity
-					  , case when m.TCDOB > p.DateAdministered then 'Prenatal Screen'
+					  , case when tdsc.TCDOB > p.DateAdministered then 'Prenatal Screen'
 							 else 'Postnatal Screen'
 						end as VisitTiming
-			  from		cteMain m
-			  left outer join PHQ9 p on p.HVCaseFK = m.HVCaseFK
+			  from		#tmpDepressionScreeningCohort tdsc
+			  left outer join PHQ9 p on p.HVCaseFK = tdsc.HVCaseFK
 			  where		p.Invalid = 0
 					and p.DateAdministered <= dateadd(month, 3, TCDOB)
 			 ) 
-		--select * from ctePHQ
-
+--select * from ctePHQ
+		
 		, ctePHQPrePost
 		  as (select distinct 
-						m.WorkerFirstName
-					  , m.WorkerLastname
-					  , m.SupervisorFirstName
-					  , m.SupervisorLastName
-					  , m.PC1ID
-					  , m.TCDOB
-					  , m.IntakeDate
-					  , m.CaseTiming as 'Status at Enrollment'
+						tdsc.WorkerFirstName
+					  , tdsc.WorkerLastname
+					  , tdsc.SupervisorFirstName
+					  , tdsc.SupervisorLastName
+					  , tdsc.PC1ID
+					  , tdsc.TCDOB
+					  , tdsc.IntakeDate
+					  , tdsc.CaseTiming as 'Status at Enrollment'
 					  , case when pre.DateAdministered is not null
 								  and pre.ParticipantRefused = 1 then 'Refused'
 							 else pre.DateAdministered
@@ -122,8 +125,8 @@ with	cteMain
 					  , post.FormType as [Postnatal FormType]
 					  , pre.ParticipantRefused as ParticipantRefusedPrenatal
 					  , post.ParticipantRefused as ParticipantRefusedPostnatal
-			  from cteMain m
-			  inner join ctePHQ p on m.PC1ID = p.PC1ID
+			  from #tmpDepressionScreeningCohort tdsc
+			  inner join ctePHQ p on tdsc.PC1ID = p.PC1ID
 			  --left outer join ctePHQ pre on pre.PC1ID = p.PC1ID and pre.VisitTiming = 'Prenatal Screen'
 			  --left outer join ctePHQ post on post.PC1ID = p.PC1ID and post.VisitTiming = 'Prenatal Screen'
 			  outer apply (select top 1
@@ -224,4 +227,5 @@ with	cteMain
 		order by SortOrder
 					, WorkerName
 					, [Status at Enrollment]
+
 GO
