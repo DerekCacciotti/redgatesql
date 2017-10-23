@@ -10,7 +10,7 @@ GO
 -- is showing home visits without observations (Benjamin Simmons)
 -- Edit date: 5/30/17 Bug fix - Supervisor not always displaying correctly for FSWs that have no home visit observations
 -- =============================================
-CREATE PROCEDURE [dbo].[rspHomeVisitObservationBySupervisor]
+CREATE procedure [dbo].[rspHomeVisitObservationBySupervisor]
 (
     @programfk varchar(max)    = null,
     @sitefk		 int		   = null
@@ -67,7 +67,7 @@ as
 				and wp.TerminationDate is null
 				and w.LastName <> 'Transfer Worker'
 				and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-				and (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK = ListItem) --Eliminate transfer cases
+				and (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK <> ListItem) --Eliminate transfer cases
 
 	)
 	select coalesce(pc1id,'No Home Visit Observations') pc1id

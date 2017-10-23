@@ -83,14 +83,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		jrobohn
 -- Create date: 2014Feb24
 -- Description:	Delete FormReview row when  
 --				the Supervision row deleted
 -- =============================================
-CREATE TRIGGER [dbo].[fr_delete_Supervision]
+CREATE trigger [dbo].[fr_delete_Supervision]
 on [dbo].[Supervision]
 After DELETE
 AS
@@ -166,7 +165,72 @@ BEGIN
       ,[TrainingNeeds]
       ,[Weather]
       ,[WorkerFK])
-	  SELECT * FROM Deleted WHERE Deleted.SupervisionPK= @pk
+	  select Deleted.SupervisionPK ,
+             Deleted.ActivitiesOther ,
+             Deleted.ActivitiesOtherSpecify ,
+             Deleted.AreasGrowth ,
+             Deleted.AssessmentIssues ,
+             Deleted.AssessmentRate ,
+             Deleted.Boundaries ,
+             Deleted.Caseload ,
+             Deleted.Coaching ,
+             Deleted.CommunityResources ,
+             Deleted.CulturalSensitivity ,
+             Deleted.Curriculum ,
+             Deleted.FamilyProgress ,
+             Deleted.HomeVisitLogActivities ,
+             Deleted.HomeVisitRate ,
+             Deleted.IFSP ,
+             Deleted.ImplementTraining ,
+             Deleted.LevelChange ,
+             Deleted.Outreach ,
+             Deleted.ParticipantEmergency ,
+             Deleted.PersonalGrowth ,
+             Deleted.ProfessionalGrowth ,
+             Deleted.ProgramFK ,
+             Deleted.ReasonOther ,
+             Deleted.ReasonOtherSpecify ,
+             Deleted.RecordDocumentation ,
+             Deleted.Referrals ,
+             Deleted.Retention ,
+             Deleted.RolePlaying ,
+             Deleted.Safety ,
+             Deleted.ShortWeek ,
+             Deleted.StaffCourt ,
+             Deleted.StaffFamilyEmergency ,
+             Deleted.StaffForgot ,
+             Deleted.StaffIll ,
+             Deleted.StaffTraining ,
+             Deleted.StaffVacation ,
+             Deleted.StaffOutAllWeek ,
+             Deleted.StrengthBasedApproach ,
+             Deleted.Strengths ,
+             Deleted.SupervisionCreateDate ,
+             Deleted.SupervisionCreator ,
+             Deleted.SupervisionDate ,
+             Deleted.SupervisionEditDate ,
+             Deleted.SupervisionEditor ,
+             Deleted.SupervisionEndTime ,
+             Deleted.SupervisionHours ,
+             Deleted.SupervisionMinutes ,
+             Deleted.SupervisionNotes ,
+             Deleted.SupervisionStartTime ,
+             Deleted.SupervisorFamilyEmergency ,
+             Deleted.SupervisorFK ,
+             Deleted.SupervisorForgot ,
+             Deleted.SupervisorHoliday ,
+             Deleted.SupervisorIll ,
+             Deleted.SupervisorObservationAssessment ,
+             Deleted.SupervisorObservationHomeVisit ,
+             Deleted.SupervisorTraining ,
+             Deleted.SupervisorVacation ,
+             Deleted.TakePlace ,
+             Deleted.TechniquesApproaches ,
+             Deleted.Tools ,
+             Deleted.TrainingNeeds ,
+             Deleted.Weather ,
+             Deleted.WorkerFK
+	  from Deleted WHERE Deleted.SupervisionPK= @pk
 
 END
 GO
