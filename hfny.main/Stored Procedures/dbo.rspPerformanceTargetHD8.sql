@@ -22,42 +22,40 @@ as
 begin
 
 	;
-	with cteTotalCases
-	as
-		(
-		select
-			  ptc.HVCaseFK
-			 ,ptc.PC1ID
-			 ,ptc.OldID
-			 ,ptc.PC1FullName
-			 ,ptc.CurrentWorkerFK
-			 ,ptc.CurrentWorkerFullName
-			 ,ptc.CurrentLevelName
-			 ,ptc.ProgramFK
-			 ,ptc.TCIDPK
-			 ,ptc.TCDOB
-			 ,cp.DischargeDate
-			 ,case
-				  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-					  datediff(day,ptc.tcdob,DischargeDate)
-				  else
-					  datediff(day,ptc.tcdob,@EndDate)
-			  end as tcAgeDays
-			 ,case
-				  when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
-					  DischargeDate
-				  else
-					  @EndDate
-			  end as lastdate
-			 ,h.IntakeDate
-			from @tblPTCases ptc
+	if object_id('tempdb..#tmpHD8TotalCases') is not null drop table #tmpHD8TotalCases
+	
+	select
+			ptc.HVCaseFK
+			,ptc.PC1ID
+			,ptc.OldID
+			,ptc.PC1FullName
+			,ptc.CurrentWorkerFK
+			,ptc.CurrentWorkerFullName
+			,ptc.CurrentLevelName
+			,ptc.ProgramFK
+			,ptc.TCIDPK
+			,ptc.TCDOB
+			,cp.DischargeDate
+			,case
+				when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
+					datediff(day,ptc.tcdob,DischargeDate)
+				else
+					datediff(day,ptc.tcdob,@EndDate)
+			end as tcAgeDays
+			,case
+				when DischargeDate is not null and DischargeDate <> '' and DischargeDate <= @EndDate then
+					DischargeDate
+				else
+					@EndDate
+			end as lastdate
+			,h.IntakeDate
+		into #tmpHD8TotalCases
+		from @tblPTCases ptc
 				inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
-				inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
+				inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK;
 				-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
-		)
-	,
 
-	cteCohort
+	with cteCohort
 	as
 		(
 		select HVCaseFK
@@ -73,7 +71,7 @@ begin
 			  ,DischargeDate
 			  ,tcAgeDays
 			  ,lastdate
-			from cteTotalCases
+			from #tmpHD8TotalCases thtc
 			where DATEADD(dd,30,IntakeDate) <= lastdate --PC1's enrolled 30 days atleast
 		)
 	-- TC less than 6 months old (while doing TCID, a row is inserted into CommonAttribute table). There are no followups for tc < 6 mos
