@@ -12,134 +12,143 @@ GO
 -- =============================================
 
 
-CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Details](
-	@programfk    varchar(max)    = NULL,	
-	@StartDate DATETIME,
-	@EndDate DATETIME
-
-)WITH RECOMPILE
-AS
+CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Details]
+	(
+		@programfk varchar(max) = null ,
+		@StartDate datetime ,
+		@EndDate datetime
+	)
+as
 	if @programfk is null
-	begin
-		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
-										   from HVProgram
-										   for xml path ('')),2,8000)
-	end
+		begin
+			select @programfk = substring(
+								(	select ','
+										   + ltrim(rtrim(str(HVProgramPK)))
+									from   HVProgram
+									for xml path('')) ,
+								2 ,
+								8000);
+		end;
 
-	set @programfk = REPLACE(@programfk,'"','')
+	set @programfk = replace(@programfk, '"', '');
+	with
+	ctePIVisits
+		as
+			(
+				select	 KempeFK ,
+						 sum(case when PIVisitMade > 0 then 1
+								  else 0
+							 end) PIVisitMade
+				from	 Preintake pi
+						 inner join dbo.SplitString(@programfk, ',') on pi.ProgramFK = ListItem
+				group by KempeFK
+			) ,
+	cteCohort
+		as
+			(
+				select HVCasePK ,
+					   case when h.TCDOB is not null then h.TCDOB
+							else h.EDC
+					   end as tcdob ,
+					   DischargeDate ,
+					   IntakeDate ,
+					   k.KempeDate ,
+					   PC1FK ,
+					   cp.DischargeReason ,
+					   isnull(cp.DischargeReasonSpecify, '') DischargeReasonSpecify ,
+					   OldID ,
+					   PC1ID ,
+					   KempeResult ,
+					   cp.CurrentFSWFK ,
+					   cp.CurrentFAWFK ,
+					   case when h.TCDOB is not null then h.TCDOB
+							else h.EDC
+					   end as babydate ,
+					   case when h.IntakeDate is not null then h.IntakeDate
+							else cp.DischargeDate
+					   end as testdate ,
+					   P.PCDOB ,
+					   P.Race ,
+					   ca.MaritalStatus ,
+					   ca.HighestGrade ,
+					   ca.IsCurrentlyEmployed ,
+					   ca.OBPInHome ,
+					   case when MomScore = 'U' then 0
+							else cast(MomScore as int)
+					   end as MomScore ,
+					   case when DadScore = 'U' then 0
+							else cast(DadScore as int)
+					   end as DadScore ,
+					   FOBPresent ,
+					   MOBPresent ,
+					   MOBPartnerPresent ,
+					   OtherPresent ,
+					   MOBPartnerPresent as MOBPartner ,
+					   FOBPartnerPresent as FOBPartner ,
+					   GrandParentPresent as MOBGrandmother ,
+					   PIVisitMade
+				from   HVCase h
+					   inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+					   inner join dbo.SplitString(@programfk, ',') on cp.ProgramFK = ListItem
+					   inner join Kempe k on k.HVCaseFK = h.HVCasePK
+					   inner join PC P on P.PCPK = h.PC1FK
+					   left outer join ctePIVisits piv on piv.KempeFK = k.KempePK
+					   left join CommonAttributes ca on ca.HVCaseFK = h.HVCasePK
+														and ca.FormType = 'KE'
+				where  (   h.IntakeDate is not null
+						   or cp.DischargeDate is not null ) -- only include kempes that are positive and where there is a clos_date or an intake date.
+					   and k.KempeResult = 1
+					   and k.KempeDate
+					   between @StartDate and @EndDate
+			)
+	select	 ( case when IntakeDate is not null then ''					--'AcceptedFirstVisitEnrolled' 
+					when KempeResult = 1
+						 and IntakeDate is null
+						 and DischargeDate is not null
+						 and (	 PIVisitMade > 0
+								 and PIVisitMade is not null ) then '*' -- 'AcceptedFirstVisitNotEnrolled'
+					else ''												-- 'Refused' 
+			   end ) + PC1ID as PC1ID ,
+			 ltrim(rtrim(faw.FirstName)) + ' ' + ltrim(rtrim(faw.LastName)) as FAW ,
+			 convert(varchar(10), KempeDate, 101) as KempeDate ,
+			 ltrim(rtrim(fsw.FirstName)) + ' ' + ltrim(rtrim(fsw.LastName)) as FSW ,
+			 convert(varchar(10), h.DischargeDate, 101) as DischargeDate ,
+			 --,cd.ReportDischargeText
+			 case when h.DischargeReason = '99' then h.DischargeReasonSpecify
+				  else cd.ReportDischargeText
+			 end ReportDischargeText ,
+			 case when h.DischargeReason = '36' then 1
+				  when h.DischargeReason = '12' then 2
+				  when h.DischargeReason = '19' then 3
+				  when h.DischargeReason = '07' then 4
+				  when h.DischargeReason = '25' then 5
+				  else 6
+			 end as DischargeSortCode ,
+			 ( case when IntakeDate is not null then '1'				--'AcceptedFirstVisitEnrolled' 
+					when KempeResult = 1
+						 and IntakeDate is null
+						 and DischargeDate is not null
+						 and (	 PIVisitMade > 0
+								 and PIVisitMade is not null ) then '2' -- 'AcceptedFirstVisitNotEnrolled'
+					else '3'											-- 'Refused' 
+			   end ) mainsortkey
+	from	 cteCohort h
+			 left join Worker faw on CurrentFAWFK = faw.WorkerPK -- faw
+			 left join Worker fsw on CurrentFSWFK = fsw.WorkerPK -- fsw	 
+			 left join codeDischarge cd on h.DischargeReason = cd.DischargeCode
+	where --DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
 
-;
-with 	ctePIVisits 
-			as (select	KempeFK
-						, sum(case when PIVisitMade > 0 then 1
-									else 0
-							end) PIVisitMade
-				from		Preintake pi
-				inner join dbo.SplitString(@programfk, ',') on pi.ProgramFK = ListItem
-				group by	KempeFK
-				) 
-		, cteCohort
-
-		as (SELECT HVCasePK
-		 , 	case
-			   when h.tcdob is not null then
-				   h.tcdob
-			   else
-				   h.edc
-			end as tcdob
-		 , DischargeDate
-		 , IntakeDate
-		 , k.KempeDate
-		 , PC1FK
-		 , cp.DischargeReason
-		 , ISNULL(cp.DischargeReasonSpecify, '') DischargeReasonSpecify
-		 , OldID
-		 , PC1ID		 
-		 , KempeResult
-		 , cp.CurrentFSWFK
-		 , cp.CurrentFAWFK	
-		 ,	case
-			   when h.tcdob is not null then
-				   h.tcdob
-			   else
-				   h.edc
-			end as babydate	
-		 ,	case
-			   when h.IntakeDate is not null then
-				   h.IntakeDate
-			   else
-				   cp.DischargeDate 
-			end as testdate	
-		  , P.PCDOB 
-		  , P.Race 
-		  ,ca.MaritalStatus
-		  ,ca.HighestGrade 
-		  ,ca.IsCurrentlyEmployed
-		  ,ca.OBPInHome  		
-		  ,case when MomScore = 'U' then 0 else cast(MomScore as int) end as MomScore
-		  ,case when DadScore = 'U' then 0 else cast(DadScore as int) end as DadScore 
-		  ,FOBPresent
-		  ,MOBPresent 
-		  ,MOBPartnerPresent
-		  ,OtherPresent 
-		  ,MOBPartnerPresent as MOBPartner 
-		  ,FOBPartnerPresent as FOBPartner
-		  ,GrandParentPresent as MOBGrandmother
-	,PIVisitMade
-
-	 FROM HVCase h
-	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	inner join dbo.SplitString(@ProgramFK,',') on cp.programfk = listitem
-	INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
-	INNER JOIN PC P ON P.PCPK = h.PC1FK
-	left outer join ctePIVisits piv on piv.KempeFK = k.KempePK
-	LEFT JOIN CommonAttributes ca ON ca.hvcasefk = h.hvcasepk AND ca.formtype = 'KE'
-
-	WHERE (h.IntakeDate IS NOT NULL OR cp.DischargeDate IS NOT NULL) -- only include kempes that are positive and where there is a clos_date or an intake date.
-	AND k.KempeResult = 1
-	AND k.KempeDate BETWEEN @StartDate AND @EndDate
-	
-)	
-	
-	 SELECT  
-	 (CASE WHEN IntakeDate IS NOT NULL THEN  '' --'AcceptedFirstVisitEnrolled' 
-	WHEN KempeResult = 1 AND IntakeDate IS NULL AND DischargeDate IS NOT NULL 
-	AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL) THEN '*' -- 'AcceptedFirstVisitNotEnrolled'
-	ELSE '' -- 'Refused' 
-	END) + PC1ID AS PC1ID
-			, LTRIM(RTRIM(faw.firstname))+' '+LTRIM(RTRIM(faw.lastname)) as FAW			
-			,convert(varchar(10),KempeDate,101)  as KempeDate
-			,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) as FSW
-			,convert(varchar(10),h.DischargeDate,101)  as DischargeDate
-			--,cd.ReportDischargeText
-			, CASE WHEN h.DischargeReason = '99' THEN h.DischargeReasonSpecify ELSE cd.ReportDischargeText END ReportDischargeText
-			, CASE WHEN h.DischargeReason = '36' THEN 1
-			WHEN h.DischargeReason = '12' THEN 2
-			WHEN h.DischargeReason = '19' THEN 3
-			WHEN h.DischargeReason = '07' THEN 4
-			WHEN h.DischargeReason = '25' THEN 5
-			ELSE 6 END AS DischargeSortCode
-            , (CASE WHEN IntakeDate IS NOT NULL THEN  '1' --'AcceptedFirstVisitEnrolled' 
-	WHEN KempeResult = 1 AND IntakeDate IS NULL AND DischargeDate IS NOT NULL 
-	AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL) THEN '2' -- 'AcceptedFirstVisitNotEnrolled'
-	ELSE '3' -- 'Refused' 
-	END) mainsortkey
-	 FROM cteCohort h
-	left  join worker faw on CurrentFAWFK = faw.workerpk  -- faw
-	left  join worker fsw on CurrentFSWFK = fsw.workerpk   -- fsw	 
-	left join codeDischarge cd on h.DischargeReason = cd.DischargeCode
-
-	 
-	 WHERE --DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
-
-	 (CASE WHEN IntakeDate IS NOT NULL THEN  '1' --'AcceptedFirstVisitEnrolled' 
-	WHEN KempeResult = 1 AND IntakeDate IS NULL AND DischargeDate IS NOT NULL 
-	AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL) THEN '2' -- 'AcceptedFirstVisitNotEnrolled'
-	ELSE '3' -- 'Refused' 
-	END) IN ('2', '3')
-
-
-	 ORDER BY mainsortkey, DischargeSortCode, PC1ID -- ReportDischargeText, PC1ID
+			 ( case when IntakeDate is not null then '1'				--'AcceptedFirstVisitEnrolled' 
+					when KempeResult = 1
+						 and IntakeDate is null
+						 and DischargeDate is not null
+						 and (	 PIVisitMade > 0
+								 and PIVisitMade is not null ) then '2' -- 'AcceptedFirstVisitNotEnrolled'
+					else '3'											-- 'Refused' 
+			   end ) in ( '2', '3' )
+	order by mainsortkey ,
+			 DischargeSortCode ,
+			 PC1ID; -- ReportDischargeText, PC1ID
 
 -- rspCredentialingKempeAnalysis_Details 2, '01/01/2011', '12/31/2011'
 

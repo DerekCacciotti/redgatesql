@@ -12,1195 +12,2943 @@ GO
 -- =============================================
 
 
-CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Summary](
-	@programfk    varchar(max)    = NULL,	
-	@StartDate DATETIME,
-	@EndDate DATETIME
-)
-AS
-DECLARE @programfkX varchar(max)
-DECLARE	@StartDateX DATETIME	 = @StartDate
-DECLARE	@EndDateX   DATETIME     = @EndDate
+CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Summary]
+	(
+		@programfk varchar(max) = null ,
+		@StartDate datetime ,
+		@EndDate datetime
+	)
+as
+	declare @programfkX varchar(max);
+	declare @StartDateX datetime = @StartDate;
+	declare @EndDateX datetime = @EndDate;
 
-if @programfk is null
-begin
-	select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
-									from HVProgram
-									for xml path ('')),2,8000)
-end
+	if @programfk is null
+		begin
+			select @programfk = substring(
+								(	select ','
+										   + ltrim(rtrim(str(HVProgramPK)))
+									from   HVProgram
+									for xml path('')) ,
+								2 ,
+								8000);
+		end;
 
-set @programfk = REPLACE(@programfk,'"','')
-SET @programfkX = @programfk
-SET @StartDateX = @StartDate
-SET @EndDateX = @EndDate
+	set @programfk = replace(@programfk, '"', '');
+	set @programfkX = @programfk;
+	set @StartDateX = @StartDate;
+	set @EndDateX = @EndDate;
 
-if object_id('tempdb..#cteMain') is not null drop table #cteMain
-if object_id('tempdb..#cteMain1') is not null drop table #cteMain1
+	if object_id('tempdb..#cteMain') is not null
+		drop table #cteMain;
+	if object_id('tempdb..#cteMain1') is not null
+		drop table #cteMain1;
 
-create table #cteMain (
-	HVCasePK int
-		 , tcdob datetime
-		 , DischargeDate datetime
-		 , IntakeDate datetime
-		 , KempeDate datetime
-		 , PC1FK int
-		 , DischargeReason char(2)
-		 , OldID char(23)
-		 , PC1ID char(13)
-		 , KempeResult bit
-		 , cCurrentFSWFK int
-		 , cCurrentFAWFK int
-		 , babydate	datetime
-		 , testdate	datetime
-		  , PCDOB datetime
-		  , Race char(2)
-		  ,MaritalStatus char(2)
-		  ,HighestGrade char(2)
-		  ,IsCurrentlyEmployed char(1)
-		  ,OBPInHome char(1)		
-		  , MomScore int
-		  , DadScore int
-		  ,FOBPresent bit
-		  ,MOBPresent bit
-		  ,OtherPresent bit
-		  ,MOBPartnerPresent bit --as MOBPartner 
-		  ,FOBPartnerPresent bit --as FOBPartner
-		  ,GrandParentPresent bit --as MOBGrandmother
-	, PIVisitMade int
-	, DV int
-	, MH int
-	, SA int
-	, presentCode int
-)
+	create table #cteMain
+		(
+			HVCasePK int ,
+			tcdob datetime ,
+			DischargeDate datetime ,
+			IntakeDate datetime ,
+			KempeDate datetime ,
+			PC1FK int ,
+			DischargeReason char(2) ,
+			OldID char(23) ,
+			PC1ID char(13) ,
+			KempeResult bit ,
+			cCurrentFSWFK int ,
+			cCurrentFAWFK int ,
+			babydate datetime ,
+			testdate datetime ,
+			PCDOB datetime ,
+			Race char(2) ,
+			MaritalStatus char(2) ,
+			HighestGrade char(2) ,
+			IsCurrentlyEmployed char(1) ,
+			OBPInHome char(1) ,
+			MomScore int ,
+			DadScore int ,
+			FOBPresent bit ,
+			MOBPresent bit ,
+			OtherPresent bit ,
+			MOBPartnerPresent bit ,	 --as MOBPartner 
+			FOBPartnerPresent bit ,	 --as FOBPartner
+			GrandParentPresent bit , --as MOBGrandmother
+			PIVisitMade int ,
+			DV int ,
+			MH int ,
+			SA int ,
+			presentCode int
+		);
 
-create table #cteMain1 (
-	 Status char(1)
-	, [IntakeDate2] datetime
-	, [KempeResult2] bit
-	, [PIVisitMade2] int
-	, [DischargeDate2] datetime
-	, [DischargeReason2] char(2)
-	, age int
-	, KempeScore int
-	, Trimester int
-	, HVCasePK int
-	, tcdob datetime
-	, DischargeDate datetime
-	, IntakeDate datetime
-	, KempeDate datetime
-	, PC1FK int
-	, DischargeReason char(2)
-	, OldID char(23)
-	, PC1ID char(13)
-	, KempeResult bit
-	, cCurrentFSWFK int
-	, cCurrentFAWFK int
-	, babydate	datetime
-	, testdate	datetime
-	, PCDOB datetime
-	, Race char(2)
-	, MaritalStatus char(2)
-	, HighestGrade char(2)
-	, IsCurrentlyEmployed char(1)
-	, OBPInHome char(1)		
-	, MomScore int
-	, DadScore int
-	, FOBPresent bit
-	, MOBPresent bit
-	, OtherPresent bit
-	, MOBPartnerPresent bit --as MOBPartner 
-	, FOBPartnerPresent bit --as FOBPartner
-	, GrandParentPresent bit --as MOBGrandmother
-	, PIVisitMade int
-	, DV int
-	, MH int
-	, SA int
-	, presentCode int
-)
-
-; WITH 	ctePIVisits 
-			as (select	KempeFK
-						, sum(case when PIVisitMade > 0 then 1
-									else 0
-							end) PIVisitMade
-				from		Preintake pi
-				inner join dbo.SplitString(@programfk, ',') on pi.ProgramFK = ListItem
-				group by	KempeFK
-				) 
-		, ctePreviousPC1Issue
-		as (select
-                    min(PC1IssuesPK) AS PC1IssuesPK
-                   ,HVCaseFK
-                from PC1Issues
-                inner join dbo.SplitString(@programfk, ',') on PC1Issues.ProgramFK = ListItem
-				where rtrim(Interval) = '1'
-                group by HVCaseFK)
-		, cteIssues
-		as (select a.HVCaseFK
-					,case when DomesticViolence = 1 then 1 else 0 end as DV
-					,case when (Depression = 1 or MentalIllness = 1) then 1 else 0 end as MH
-					,case when (AlcoholAbuse = 1 or SubstanceAbuse = 1) then 1 else 0 end as SA
-				from PC1Issues a
-				inner join (select min(PC1IssuesPK) AS PC1IssuesPK
-									, HVCaseFK
-					from PC1Issues
-					where RTRIM(Interval) = '1'
-					group BY HVCaseFK) b on a.PC1IssuesPK = b.PC1IssuesPK
+	create table #cteMain1
+		(
+			Status char(1) ,
+			[IntakeDate2] datetime ,
+			[KempeResult2] bit ,
+			[PIVisitMade2] int ,
+			[DischargeDate2] datetime ,
+			[DischargeReason2] char(2) ,
+			age int ,
+			KempeScore int ,
+			Trimester int ,
+			HVCasePK int ,
+			tcdob datetime ,
+			DischargeDate datetime ,
+			IntakeDate datetime ,
+			KempeDate datetime ,
+			PC1FK int ,
+			DischargeReason char(2) ,
+			OldID char(23) ,
+			PC1ID char(13) ,
+			KempeResult bit ,
+			cCurrentFSWFK int ,
+			cCurrentFAWFK int ,
+			babydate datetime ,
+			testdate datetime ,
+			PCDOB datetime ,
+			Race char(2) ,
+			MaritalStatus char(2) ,
+			HighestGrade char(2) ,
+			IsCurrentlyEmployed char(1) ,
+			OBPInHome char(1) ,
+			MomScore int ,
+			DadScore int ,
+			FOBPresent bit ,
+			MOBPresent bit ,
+			OtherPresent bit ,
+			MOBPartnerPresent bit ,	 --as MOBPartner 
+			FOBPartnerPresent bit ,	 --as FOBPartner
+			GrandParentPresent bit , --as MOBGrandmother
+			PIVisitMade int ,
+			DV int ,
+			MH int ,
+			SA int ,
+			presentCode int
+		);
+	with
+	ctePIVisits
+		as
+			(
+				select	 KempeFK ,
+						 sum(case when PIVisitMade > 0 then 1
+								  else 0
+							 end) PIVisitMade
+				from	 Preintake pi
+						 inner join dbo.SplitString(@programfk, ',') on pi.ProgramFK = ListItem
+				group by KempeFK
+			) ,
+	ctePreviousPC1Issue
+		as
+			(
+				select	 min(PC1IssuesPK) as PC1IssuesPK ,
+						 HVCaseFK
+				from	 PC1Issues
+						 inner join dbo.SplitString(@programfk, ',') on PC1Issues.ProgramFK = ListItem
+				where	 rtrim(Interval) = '1'
+				group by HVCaseFK
+			) ,
+	cteIssues
+		as
+			(
+				select a.HVCaseFK ,
+					   case when DomesticViolence = 1 then 1
+							else 0
+					   end as DV ,
+					   case when (	 Depression = 1
+									 or MentalIllness = 1 ) then 1
+							else 0
+					   end as MH ,
+					   case when (	 AlcoholAbuse = 1
+									 or SubstanceAbuse = 1 ) then 1
+							else 0
+					   end as SA
+				from   PC1Issues a
+					   inner join (	  select   min(PC1IssuesPK) as PC1IssuesPK ,
+											   HVCaseFK
+									  from	   PC1Issues
+									  where	   rtrim(Interval) = '1'
+									  group by HVCaseFK ) b on a.PC1IssuesPK = b.PC1IssuesPK
 			)
-insert into #cteMain
-	SELECT HVCasePK
-		 , 	case
-			   when h.tcdob is not null then
-				   h.tcdob
-			   else
-				   h.edc
-			end as tcdob
-		 , DischargeDate
-		 , IntakeDate
-		 , k.KempeDate
-		 , PC1FK
-		 , cp.DischargeReason
-		 , OldID
-		 , PC1ID		 
-		 , KempeResult
-		 , cp.CurrentFSWFK
-		 , cp.CurrentFAWFK	
-		 ,	case
-			   when h.tcdob is not null then
-				   h.tcdob
-			   else
-				   h.edc
-			end as babydate	
-		 ,	case
-			   when h.IntakeDate is not null then
-				   h.IntakeDate
-			   else
-				   cp.DischargeDate 
-			end as testdate	
-		  , P.PCDOB 
-		  , P.Race 
-		  ,ca.MaritalStatus
-		  ,ca.HighestGrade 
-		  ,ca.IsCurrentlyEmployed
-		  ,ca.OBPInHome  		
-		  ,case when MomScore = 'U' then 0 else cast(MomScore as int) end as MomScore
-		  ,case when DadScore = 'U' then 0 else cast(DadScore as int) end as DadScore 
-		  ,FOBPresent
-		  ,MOBPresent 
-		  ,OtherPresent 
-		  ,MOBPartnerPresent --as MOBPartner 
-		  ,FOBPartnerPresent --as FOBPartner
-		  ,GrandParentPresent --as MOBGrandmother
-	, PIVisitMade
-	, i.DV 
-	, i.MH
-	, i.SA
-
-	, CASE WHEN (ISNULL(k.MOBPartnerPresent,0) = 0 AND ISNULL(k.FOBPartnerPresent,0) = 0 
-			 AND ISNULL(k.GrandParentPresent,0) = 0 AND ISNULL(k.OtherPresent,0) = 0) THEN
-     CASE WHEN k.MOBPresent = 1 AND k.FOBPresent = 1 THEN 3 -- both parent
-		 WHEN k.MOBPresent = 1 THEN  1 -- MOB Only
-		 WHEN k.FOBPresent = 1 THEN  2 -- FOB Only
-		 ELSE 4  -- parent/other
-	 END
-	ELSE 4 -- parent/other
-	END presentCode
-
-
-	 FROM HVCase h
-	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
-	inner join dbo.SplitString(@programfkX,',') on cp.programfk = listitem
-	INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
-	INNER JOIN PC P ON P.PCPK = h.PC1FK
-	LEFT OUTER JOIN ctePIVisits piv on piv.KempeFK = k.KempePK
-	LEFT OUTER join cteIssues i on i.HVCaseFK = h.HVCasePK
-	LEFT JOIN CommonAttributes ca ON ca.hvcasefk = h.hvcasepk AND ca.formtype = 'KE'
-	WHERE (h.IntakeDate IS NOT NULL OR cp.DischargeDate IS NOT NULL) -- only include kempes that are positive and where there is a clos_date or an intake date.
-	AND k.KempeResult = 1
-	AND k.KempeDate BETWEEN @StartDateX AND @EndDateX
-
-insert into #cteMain1	
-
-	SELECT 
-	CASE WHEN IntakeDate IS NOT NULL THEN  '1' --'AcceptedFirstVisitEnrolled' 
-	WHEN KempeResult = 1 AND IntakeDate IS NULL AND DischargeDate IS NOT NULL 
-	AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL) THEN '2' -- 'AcceptedFirstVisitNotEnrolled'
-	ELSE '3' -- 'Refused' 
-	END Status
-
-	, a.IntakeDate AS [IntakeDate2], a.KempeResult as [KempeResult2], a.PIVisitMade AS [PIVisitMade2], 
-	a.DischargeDate AS [DischargeDate2], a.DischargeReason AS [DischargeReason2]
-
-	, datediff(day,pcdob, testdate)/365.25 AS age
-	, CASE WHEN a.MomScore > a.DadScore THEN a.MomScore ELSE a.DadScore END KempeScore
-	, CASE WHEN datediff(d, testdate, babydate) > 0 and datediff(d, testdate, babydate) < 30.44*3  then 3 
-		WHEN ( datediff(d, testdate, babydate) >= 30.44*3 and datediff(d, testdate, babydate) < 30.44*6 ) then 2
-		WHEN datediff(d, testdate, babydate) >= round(30.44*6,0) then 1
-		WHEN datediff(d, testdate, babydate) <= 0 then 4	
-	end as Trimester 	
-	, *
-	
-	FROM #cteMain AS a
-
-; with total1 AS (
-SELECT 
-  COUNT(*) AS total
-, SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-, SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-, SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-FROM #cteMain1 AS a
-)
-
-, total2 AS (
-SELECT 
- 'Totals (N = ' + CONVERT(VARCHAR, total) + ')' AS [title]
- , CONVERT(VARCHAR, totalG1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( totalG1 AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, totalG2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( totalG2 AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, totalG3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( totalG3 AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM total1
-)
-
-, total3 AS (
-SELECT 
- 'Acceptance Rate - ' + 
- CONVERT(VARCHAR, round(COALESCE(cast( (totalG1 + totalG2) AS FLOAT) * 100/ NULLIF(total,0), 0), 0))  + '%' AS [title]
- , '' AS col1
- , '' AS col2
- , '' AS col3
- , '1' AS col4
-FROM total1
-
-UNION ALL	
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
-, '1' AS col4
-)
-
-, age1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN age < 18 THEN 1 ELSE 0 END) AS age18
-  , SUM(CASE WHEN a.Status = '1' and age < 18 THEN 1 ELSE 0 END) AS age18G1
-  , SUM(CASE WHEN a.Status = '2' and age < 18 THEN 1 ELSE 0 END) AS age18G2
-  , SUM(CASE WHEN a.Status = '3' and age < 18 THEN 1 ELSE 0 END) AS age18G3
-
-  , SUM(CASE WHEN (age >= 18 AND age < 20) THEN 1 ELSE 0 END) AS age20
-  , SUM(CASE WHEN a.Status = '1' and (age >= 18 AND age < 20) THEN 1 ELSE 0 END) AS age20G1
-  , SUM(CASE WHEN a.Status = '2' and (age >= 18 AND age < 20) THEN 1 ELSE 0 END) AS age20G2
-  , SUM(CASE WHEN a.Status = '3' and (age >= 18 AND age < 20) THEN 1 ELSE 0 END) AS age20G3
-
-  , SUM(CASE WHEN (age >= 20 AND age < 30) THEN 1 ELSE 0 END) AS age30
-  , SUM(CASE WHEN a.Status = '1' and (age >= 20 AND age < 30) THEN 1 ELSE 0 END) AS age30G1
-  , SUM(CASE WHEN a.Status = '2' and (age >= 20 AND age < 30) THEN 1 ELSE 0 END) AS age30G2
-  , SUM(CASE WHEN a.Status = '3' and (age >= 20 AND age < 30) THEN 1 ELSE 0 END) AS age30G3
-
-  , SUM(CASE WHEN (age >= 30) THEN 1 ELSE 0 END) AS age40
-  , SUM(CASE WHEN a.Status = '1' and (age >= 30) THEN 1 ELSE 0 END) AS age40G1
-  , SUM(CASE WHEN a.Status = '2' and (age >= 30) THEN 1 ELSE 0 END) AS age40G2
-  , SUM(CASE WHEN a.Status = '3' and (age >= 30) THEN 1 ELSE 0 END) AS age40G3
-
-  FROM #cteMain1 AS a
-)
-
-, age2 AS (
-SELECT 'Age' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '1' AS col4
-UNION ALL
-
-SELECT
- '  Under 18' AS [title]
- , CONVERT(VARCHAR, age18G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age18G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, age18G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age18G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, age18G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age18G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM age1
-
-UNION ALL
-SELECT 
- '  18 up to 20' AS [title]
- , CONVERT(VARCHAR, age20G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age20G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, age20G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age20G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, age20G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age20G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM age1
-
-UNION ALL
-SELECT 
- '  20 up to 30' AS [title]
- , CONVERT(VARCHAR, age30G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age30G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, age30G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age30G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, age30G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age30G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM age1
-
-UNION ALL
-SELECT 
- '  30 and over' AS [title]
- , CONVERT(VARCHAR, age40G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age40G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, age40G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age40G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, age40G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( age40G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM age1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '1' AS col4
-)
-
-, race1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN race = '01' THEN 1 ELSE 0 END) AS race01
-  , SUM(CASE WHEN a.Status = '1' and race = '01' THEN 1 ELSE 0 END) AS race01G1
-  , SUM(CASE WHEN a.Status = '2' and race = '01' THEN 1 ELSE 0 END) AS race01G2
-  , SUM(CASE WHEN a.Status = '3' and race = '01' THEN 1 ELSE 0 END) AS race01G3
-
-  , SUM(CASE WHEN race = '02' THEN 1 ELSE 0 END) AS race02
-  , SUM(CASE WHEN a.Status = '1' and race = '02' THEN 1 ELSE 0 END) AS race02G1
-  , SUM(CASE WHEN a.Status = '2' and race = '02' THEN 1 ELSE 0 END) AS race02G2
-  , SUM(CASE WHEN a.Status = '3' and race = '02' THEN 1 ELSE 0 END) AS race02G3
-
-  , SUM(CASE WHEN race = '03' THEN 1 ELSE 0 END) AS race03
-  , SUM(CASE WHEN a.Status = '1' and race = '03' THEN 1 ELSE 0 END) AS race03G1
-  , SUM(CASE WHEN a.Status = '2' AND race = '03' THEN 1 ELSE 0 END) AS race03G2
-  , SUM(CASE WHEN a.Status = '3' and race = '03' THEN 1 ELSE 0 END) AS race03G3
-
-  , SUM(CASE WHEN race = '04' THEN 1 ELSE 0 END) AS race04
-  , SUM(CASE WHEN a.Status = '1' and race = '04' THEN 1 ELSE 0 END) AS race04G1
-  , SUM(CASE WHEN a.Status = '2' and race = '04' THEN 1 ELSE 0 END) AS race04G2
-  , SUM(CASE WHEN a.Status = '3' and race = '04' THEN 1 ELSE 0 END) AS race04G3
-
-  , SUM(CASE WHEN race = '05' THEN 1 ELSE 0 END) AS race05
-  , SUM(CASE WHEN a.Status = '1' and race = '05' THEN 1 ELSE 0 END) AS race05G1
-  , SUM(CASE WHEN a.Status = '2' and race = '05' THEN 1 ELSE 0 END) AS race05G2
-  , SUM(CASE WHEN a.Status = '3' and race = '05' THEN 1 ELSE 0 END) AS race05G3
-
-  , SUM(CASE WHEN race = '06' THEN 1 ELSE 0 END) AS race06
-  , SUM(CASE WHEN a.Status = '1' and race = '06' THEN 1 ELSE 0 END) AS race06G1
-  , SUM(CASE WHEN a.Status = '2' and race = '06' THEN 1 ELSE 0 END) AS race06G2
-  , SUM(CASE WHEN a.Status = '3' and race = '06' THEN 1 ELSE 0 END) AS race06G3
-
-  , SUM(CASE WHEN race = '07' THEN 1 ELSE 0 END) AS race07
-  , SUM(CASE WHEN a.Status = '1' and race = '07' THEN 1 ELSE 0 END) AS race07G1
-  , SUM(CASE WHEN a.Status = '2' and race = '07' THEN 1 ELSE 0 END) AS race07G2
-  , SUM(CASE WHEN a.Status = '3' and race = '07' THEN 1 ELSE 0 END) AS race07G3
-
-  , SUM(CASE WHEN (Race IS NULL or Race = '') THEN 1 ELSE 0 END) AS race08
-  , SUM(CASE WHEN a.Status = '1' and (Race IS NULL or Race = '') THEN 1 ELSE 0 END) AS race08G1
-  , SUM(CASE WHEN a.Status = '2' and (Race IS NULL or Race = '') THEN 1 ELSE 0 END) AS race08G2
-  , SUM(CASE WHEN a.Status = '3' and (Race IS NULL or Race = '') THEN 1 ELSE 0 END) AS race08G3
-
-  FROM #cteMain1 AS a
-)
-
-, race2 AS (
-SELECT 'Race' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '1' AS col4
-UNION ALL
-SELECT 
- '  White, non-Hispanic' AS [title]
- , CONVERT(VARCHAR, race01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, race01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, race01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM race1
-
-UNION ALL
-SELECT
- '  Black, non-Hispanic' AS [title]
- , CONVERT(VARCHAR, race02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, race02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, race02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM race1
-
-UNION ALL
-SELECT
- '  Hispanic/Latina/Latino' AS [title]
- , CONVERT(VARCHAR, race03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, race03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, race03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM race1
-
-UNION ALL
-SELECT
- '  Asian' AS [title]
- , CONVERT(VARCHAR, race04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, race04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, race04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM race1
-
-UNION ALL
-SELECT
- '  Native American' AS [title]
- , CONVERT(VARCHAR, race05G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race05G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, race05G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race05G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, race05G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race05G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM race1
-
-UNION ALL
-SELECT
- '  Multiracial' AS [title]
- , CONVERT(VARCHAR, race06G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race06G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, race06G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race06G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, race06G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race06G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM race1
-
-UNION ALL
-SELECT
- '  Other' AS [title]
- , CONVERT(VARCHAR, race07G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race07G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, race07G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race07G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, race07G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race07G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM race1
-
-UNION ALL
-SELECT
- '  Missing' AS [title]
- , CONVERT(VARCHAR, race08G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race08G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, race08G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race08G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, race08G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( race08G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM race1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '1' AS col4
-)
-
-, martial1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN MaritalStatus = '01' THEN 1 ELSE 0 END) AS MaritalStatus01
-  , SUM(CASE WHEN a.Status = '1' and MaritalStatus = '01' THEN 1 ELSE 0 END) AS MaritalStatus01G1
-  , SUM(CASE WHEN a.Status = '2' and MaritalStatus = '01' THEN 1 ELSE 0 END) AS MaritalStatus01G2
-  , SUM(CASE WHEN a.Status = '3' and MaritalStatus = '01' THEN 1 ELSE 0 END) AS MaritalStatus01G3
-
-  , SUM(CASE WHEN MaritalStatus = '02' THEN 1 ELSE 0 END) AS MaritalStatus02
-  , SUM(CASE WHEN a.Status = '1' and MaritalStatus = '02' THEN 1 ELSE 0 END) AS MaritalStatus02G1
-  , SUM(CASE WHEN a.Status = '2' and MaritalStatus = '02' THEN 1 ELSE 0 END) AS MaritalStatus02G2
-  , SUM(CASE WHEN a.Status = '3' and MaritalStatus = '02' THEN 1 ELSE 0 END) AS MaritalStatus02G3
-
-  , SUM(CASE WHEN MaritalStatus = '03' THEN 1 ELSE 0 END) AS MaritalStatus03
-  , SUM(CASE WHEN a.Status = '1' and MaritalStatus = '03' THEN 1 ELSE 0 END) AS MaritalStatus03G1
-  , SUM(CASE WHEN a.Status = '2' AND MaritalStatus = '03' THEN 1 ELSE 0 END) AS MaritalStatus03G2
-  , SUM(CASE WHEN a.Status = '3' and MaritalStatus = '03' THEN 1 ELSE 0 END) AS MaritalStatus03G3
-
-  , SUM(CASE WHEN MaritalStatus = '04' THEN 1 ELSE 0 END) AS MaritalStatus04
-  , SUM(CASE WHEN a.Status = '1' and MaritalStatus = '04' THEN 1 ELSE 0 END) AS MaritalStatus04G1
-  , SUM(CASE WHEN a.Status = '2' and MaritalStatus = '04' THEN 1 ELSE 0 END) AS MaritalStatus04G2
-  , SUM(CASE WHEN a.Status = '3' and MaritalStatus = '04' THEN 1 ELSE 0 END) AS MaritalStatus04G3
-  
-  , SUM(CASE WHEN MaritalStatus = '05' THEN 1 ELSE 0 END) AS MaritalStatus05
-  , SUM(CASE WHEN a.Status = '1' and MaritalStatus = '05' THEN 1 ELSE 0 END) AS MaritalStatus05G1
-  , SUM(CASE WHEN a.Status = '2' and MaritalStatus = '05' THEN 1 ELSE 0 END) AS MaritalStatus05G2
-  , SUM(CASE WHEN a.Status = '3' and MaritalStatus = '05' THEN 1 ELSE 0 END) AS MaritalStatus05G3
-
-  , SUM(CASE WHEN (MaritalStatus IS NULL OR MaritalStatus NOT IN ('01', '02', '03', '04', '05')) THEN 1 ELSE 0 END) AS MaritalStatus06
-  , SUM(CASE WHEN a.Status = '1' and (MaritalStatus IS NULL OR MaritalStatus NOT IN ('01', '02', '03', '04', '05')) THEN 1 ELSE 0 END) AS MaritalStatus06G1
-  , SUM(CASE WHEN a.Status = '2' and (MaritalStatus IS NULL OR MaritalStatus NOT IN ('01', '02', '03', '04', '05')) THEN 1 ELSE 0 END) AS MaritalStatus06G2
-  , SUM(CASE WHEN a.Status = '3' and (MaritalStatus IS NULL OR MaritalStatus NOT IN ('01', '02', '03', '04', '05')) THEN 1 ELSE 0 END) AS MaritalStatus06G3
-
-  FROM #cteMain1 AS a
-)
-
-
-, martial2 AS (
-SELECT 'Martial Status' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '1' AS col4
-
-UNION ALL
-SELECT 
- '  Married' AS [title]
- , CONVERT(VARCHAR, MaritalStatus01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, MaritalStatus01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, MaritalStatus01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM martial1
-
-UNION ALL
-SELECT
- '  Not Married' AS [title]
- , CONVERT(VARCHAR, MaritalStatus02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, MaritalStatus02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, MaritalStatus02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM martial1
-
-UNION ALL
-SELECT
- '  Separated' AS [title]
- , CONVERT(VARCHAR, MaritalStatus03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, MaritalStatus03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, MaritalStatus03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM martial1
-
-UNION ALL
-SELECT
- '  Divorced' AS [title]
- , CONVERT(VARCHAR, MaritalStatus04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, MaritalStatus04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, MaritalStatus04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM martial1
-
-UNION ALL
-SELECT
- '  Widowed' AS [title]
- , CONVERT(VARCHAR, MaritalStatus05G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus05G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, MaritalStatus05G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus05G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, MaritalStatus05G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus05G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM martial1
-
-UNION ALL
-SELECT
- '  Unknown' AS [title]
- , CONVERT(VARCHAR, MaritalStatus06G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus06G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, MaritalStatus06G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus06G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, MaritalStatus06G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( MaritalStatus06G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '1' AS col4
-FROM martial1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '1' AS col4
-)
-
-, edu1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN HighestGrade IN ('01','02') THEN 1 ELSE 0 END) AS HighestGrade01
-  , SUM(CASE WHEN a.Status = '1' and HighestGrade IN ('01','02') THEN 1 ELSE 0 END) AS HighestGrade01G1
-  , SUM(CASE WHEN a.Status = '2' and HighestGrade IN ('01','02') THEN 1 ELSE 0 END) AS HighestGrade01G2
-  , SUM(CASE WHEN a.Status = '3' and HighestGrade IN ('01','02') THEN 1 ELSE 0 END) AS HighestGrade01G3
-
-  , SUM(CASE WHEN HighestGrade IN ('03','04') THEN 1 ELSE 0 END) AS HighestGrade02
-  , SUM(CASE WHEN a.Status = '1' and HighestGrade IN ('03','04') THEN 1 ELSE 0 END) AS HighestGrade02G1
-  , SUM(CASE WHEN a.Status = '2' and HighestGrade IN ('03','04') THEN 1 ELSE 0 END) AS HighestGrade02G2
-  , SUM(CASE WHEN a.Status = '3' and HighestGrade IN ('03','04') THEN 1 ELSE 0 END) AS HighestGrade02G3
-
-  , SUM(CASE WHEN HighestGrade IN ('05','06','07','08') THEN 1 ELSE 0 END) AS HighestGrade03
-  , SUM(CASE WHEN a.Status = '1' and HighestGrade IN ('05','06','07','08') THEN 1 ELSE 0 END) AS HighestGrade03G1
-  , SUM(CASE WHEN a.Status = '2' AND HighestGrade IN ('05','06','07','08') THEN 1 ELSE 0 END) AS HighestGrade03G2
-  , SUM(CASE WHEN a.Status = '3' and HighestGrade IN ('05','06','07','08') THEN 1 ELSE 0 END) AS HighestGrade03G3
-
-  , SUM(CASE WHEN HighestGrade IS NULL THEN 1 ELSE 0 END) AS HighestGrade04
-  , SUM(CASE WHEN a.Status = '1' and HighestGrade IS NULL THEN 1 ELSE 0 END) AS HighestGrade04G1
-  , SUM(CASE WHEN a.Status = '2' and HighestGrade IS NULL THEN 1 ELSE 0 END) AS HighestGrade04G2
-  , SUM(CASE WHEN a.Status = '3' and HighestGrade IS NULL THEN 1 ELSE 0 END) AS HighestGrade04G3
- 
-  FROM #cteMain1 AS a
-)
-
-, edu2 AS (
-SELECT 'Education' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-
-UNION ALL
-SELECT 
- '  Less than 12' AS [title]
- , CONVERT(VARCHAR, HighestGrade01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, HighestGrade01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, HighestGrade01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM edu1
-
-UNION ALL
-SELECT
- '  HS/GED' AS [title]
- , CONVERT(VARCHAR, HighestGrade02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, HighestGrade02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, HighestGrade02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM edu1
-
-UNION ALL
-SELECT
- '  More than 12' AS [title]
- , CONVERT(VARCHAR, HighestGrade03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, HighestGrade03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, HighestGrade03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM edu1
-
-UNION ALL
-SELECT
- '  Unknown' AS [title]
- , CONVERT(VARCHAR, HighestGrade04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, HighestGrade04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, HighestGrade04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( HighestGrade04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM edu1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-)
-
-, employed1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN IsCurrentlyEmployed = 1 THEN 1 ELSE 0 END) AS Employed01
-  , SUM(CASE WHEN a.Status = '1' and IsCurrentlyEmployed = 1 THEN 1 ELSE 0 END) AS Employed01G1
-  , SUM(CASE WHEN a.Status = '2' and IsCurrentlyEmployed = 1 THEN 1 ELSE 0 END) AS Employed01G2
-  , SUM(CASE WHEN a.Status = '3' and IsCurrentlyEmployed = 1 THEN 1 ELSE 0 END) AS Employed01G3
-
-  , SUM(CASE WHEN IsCurrentlyEmployed = 0 THEN 1 ELSE 0 END) AS Employed02
-  , SUM(CASE WHEN a.Status = '1' and IsCurrentlyEmployed = 0 THEN 1 ELSE 0 END) AS Employed02G1
-  , SUM(CASE WHEN a.Status = '2' and IsCurrentlyEmployed = 0 THEN 1 ELSE 0 END) AS Employed02G2
-  , SUM(CASE WHEN a.Status = '3' and IsCurrentlyEmployed = 0 THEN 1 ELSE 0 END) AS Employed02G3
-
-  FROM #cteMain1 AS a
-)
-
-, employed2 AS (
-SELECT 'Employed' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-
-UNION ALL
-SELECT 
- '  Yes' AS [title]
- , CONVERT(VARCHAR, Employed01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, Employed01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, Employed01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM employed1
-
-UNION ALL
-SELECT
- '  No' AS [title]
- , CONVERT(VARCHAR, Employed02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, Employed02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, Employed02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Employed02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM employed1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-)
- 
-, inHome1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN OBPInHome = 1 THEN 1 ELSE 0 END) AS InHome01
-  , SUM(CASE WHEN a.Status = '1' and OBPInHome = 1 THEN 1 ELSE 0 END) AS InHome01G1
-  , SUM(CASE WHEN a.Status = '2' and OBPInHome = 1 THEN 1 ELSE 0 END) AS InHome01G2
-  , SUM(CASE WHEN a.Status = '3' and OBPInHome = 1 THEN 1 ELSE 0 END) AS InHome01G3
-
-  , SUM(CASE WHEN OBPInHome = 0 THEN 1 ELSE 0 END) AS InHome02
-  , SUM(CASE WHEN a.Status = '1' and OBPInHome = 0 THEN 1 ELSE 0 END) AS InHome02G1
-  , SUM(CASE WHEN a.Status = '2' and OBPInHome = 0 THEN 1 ELSE 0 END) AS InHome02G2
-  , SUM(CASE WHEN a.Status = '3' and OBPInHome = 0 THEN 1 ELSE 0 END) AS InHome02G3
-
-  
-  , SUM(CASE WHEN OBPInHome IS NULL THEN 1 ELSE 0 END) AS InHome03
-  , SUM(CASE WHEN a.Status = '1' and OBPInHome IS NULL THEN 1 ELSE 0 END) AS InHome03G1
-  , SUM(CASE WHEN a.Status = '2' and OBPInHome IS NULL THEN 1 ELSE 0 END) AS InHome03G2
-  , SUM(CASE WHEN a.Status = '3' and OBPInHome IS NULL THEN 1 ELSE 0 END) AS InHome03G3
-  FROM #cteMain1 AS a
-)
-
-, inHome2 AS (
-SELECT 'Bio Father in Home' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-UNION ALL
-SELECT 
- '  Yes' AS [title]
- , CONVERT(VARCHAR, InHome01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, InHome01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, InHome01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM inHome1
-
-UNION ALL
-SELECT
- '  No' AS [title]
- , CONVERT(VARCHAR, InHome02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, InHome02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, InHome02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM inHome1
-
-UNION ALL
-SELECT
- '  Unknown' AS [title]
- , CONVERT(VARCHAR, InHome03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, InHome03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, InHome03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( InHome03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM inHome1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-)
-
-, score1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN MomScore >= 25 AND DadScore < 25 THEN 1 ELSE 0 END) AS Score01
-  , SUM(CASE WHEN a.Status = '1' and MomScore >= 25 AND DadScore < 25 THEN 1 ELSE 0 END) AS Score01G1
-  , SUM(CASE WHEN a.Status = '2' and MomScore >= 25 AND DadScore < 25 THEN 1 ELSE 0 END) AS Score01G2
-  , SUM(CASE WHEN a.Status = '3' and MomScore >= 25 AND DadScore < 25 THEN 1 ELSE 0 END) AS Score01G3
-
-  , SUM(CASE WHEN MomScore < 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score02
-  , SUM(CASE WHEN a.Status = '1' and MomScore < 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score02G1
-  , SUM(CASE WHEN a.Status = '2' and MomScore < 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score02G2
-  , SUM(CASE WHEN a.Status = '3' and MomScore < 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score02G3
-
-  
-  , SUM(CASE WHEN MomScore >= 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score03
-  , SUM(CASE WHEN a.Status = '1' and MomScore >= 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score03G1
-  , SUM(CASE WHEN a.Status = '2' and MomScore >= 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score03G2
-  , SUM(CASE WHEN a.Status = '3' and MomScore >= 25 AND DadScore >= 25 THEN 1 ELSE 0 END) AS Score03G3
-  FROM #cteMain1 AS a
-)
-
-
-, score2 AS (
-SELECT 'Whose Score Qualifies' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-UNION ALL
-SELECT 
- '  Mother' AS [title]
- , CONVERT(VARCHAR, Score01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, Score01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, Score01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM score1
-
-UNION ALL
-SELECT
- '  Father' AS [title]
- , CONVERT(VARCHAR, Score02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, Score02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, Score02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM score1
-
-UNION ALL
-SELECT
- '  Mother & Father' AS [title]
- , CONVERT(VARCHAR, Score03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, Score03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, Score03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Score03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM score1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-)
-
-, kempescore1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN KempeScore BETWEEN  25 AND 49 THEN 1 ELSE 0 END) AS KempeScore01
-  , SUM(CASE WHEN a.Status = '1' and KempeScore BETWEEN  25 AND 49 THEN 1 ELSE 0 END) AS KempeScore01G1
-  , SUM(CASE WHEN a.Status = '2' and KempeScore BETWEEN  25 AND 49 THEN 1 ELSE 0 END) AS KempeScore01G2
-  , SUM(CASE WHEN a.Status = '3' and KempeScore BETWEEN  25 AND 49 THEN 1 ELSE 0 END) AS KempeScore01G3
-
-  , SUM(CASE WHEN KempeScore BETWEEN  50 AND 74 THEN 1 ELSE 0 END) AS KempeScore02
-  , SUM(CASE WHEN a.Status = '1' and KempeScore BETWEEN  50 AND 74 THEN 1 ELSE 0 END) AS KempeScore02G1
-  , SUM(CASE WHEN a.Status = '2' and KempeScore BETWEEN  50 AND 74 THEN 1 ELSE 0 END) AS KempeScore02G2
-  , SUM(CASE WHEN a.Status = '3' and KempeScore BETWEEN  50 AND 74 THEN 1 ELSE 0 END) AS KempeScore02G3
-
-  
-  , SUM(CASE WHEN KempeScore >= 75 THEN 1 ELSE 0 END) AS KempeScore03
-  , SUM(CASE WHEN a.Status = '1' and KempeScore >= 75 THEN 1 ELSE 0 END) AS KempeScore03G1
-  , SUM(CASE WHEN a.Status = '2' and KempeScore >= 75 THEN 1 ELSE 0 END) AS KempeScore03G2
-  , SUM(CASE WHEN a.Status = '3' and KempeScore >= 75 THEN 1 ELSE 0 END) AS KempeScore03G3
-  FROM #cteMain1 AS a
-)
-
-
-, kempescore2 AS (
-SELECT 'Kempe Score' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-UNION ALL
-SELECT 
- '  25-49' AS [title]
- , CONVERT(VARCHAR, KempeScore01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, KempeScore01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, KempeScore01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM kempescore1
-
-UNION ALL
-SELECT
- '  50-74' AS [title]
- , CONVERT(VARCHAR, KempeScore02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, KempeScore02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, KempeScore02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM kempescore1
-
-
-UNION ALL
-SELECT
- '  75+' AS [title]
- , CONVERT(VARCHAR, KempeScore03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, KempeScore03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, KempeScore03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( KempeScore03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '2' AS col4
-FROM kempescore1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '2' AS col4
-)
-
-, issues1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN DV = 1 THEN 1 ELSE 0 END) AS issues01
-  , SUM(CASE WHEN a.Status = '1' and DV = 1 THEN 1 ELSE 0 END) AS issues01G1
-  , SUM(CASE WHEN a.Status = '2' and DV = 1 THEN 1 ELSE 0 END) AS issues01G2
-  , SUM(CASE WHEN a.Status = '3' and DV = 1 THEN 1 ELSE 0 END) AS issues01G3
-
-  , SUM(CASE WHEN MH = 1 THEN 1 ELSE 0 END) AS issues02
-  , SUM(CASE WHEN a.Status = '1' and MH = 1 THEN 1 ELSE 0 END) AS issues02G1
-  , SUM(CASE WHEN a.Status = '2' and MH = 1 THEN 1 ELSE 0 END) AS issues02G2
-  , SUM(CASE WHEN a.Status = '3' and MH = 1 THEN 1 ELSE 0 END) AS issues02G3
-
-  
-  , SUM(CASE WHEN SA = 1 THEN 1 ELSE 0 END) AS issues03
-  , SUM(CASE WHEN a.Status = '1' and SA = 1 THEN 1 ELSE 0 END) AS issues03G1
-  , SUM(CASE WHEN a.Status = '2' and SA = 1 THEN 1 ELSE 0 END) AS issues03G2
-  , SUM(CASE WHEN a.Status = '3' and SA = 1 THEN 1 ELSE 0 END) AS issues03G3
-  FROM #cteMain1 AS a
-)
-
-, issues2 AS (
-SELECT 'PC1 Issues' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '3' AS col4
-UNION ALL
-SELECT 
- '  DV' AS [title]
- , CONVERT(VARCHAR, issues01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, issues01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, issues01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM issues1
-
-UNION ALL
-SELECT
- '  MH' AS [title]
- , CONVERT(VARCHAR, issues02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, issues02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, issues02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM issues1
-
-UNION ALL
-SELECT
- '  SA' AS [title]
- , CONVERT(VARCHAR, issues03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, issues03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, issues03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( issues03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM issues1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '3' AS col4
-)
-
-, trimester1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN Trimester = 1 THEN 1 ELSE 0 END) AS trimester01
-  , SUM(CASE WHEN a.Status = '1' and Trimester = 1 THEN 1 ELSE 0 END) AS trimester01G1
-  , SUM(CASE WHEN a.Status = '2' and Trimester = 1 THEN 1 ELSE 0 END) AS trimester01G2
-  , SUM(CASE WHEN a.Status = '3' and Trimester = 1 THEN 1 ELSE 0 END) AS trimester01G3
-
-  , SUM(CASE WHEN Trimester = 2 THEN 1 ELSE 0 END) AS trimester02
-  , SUM(CASE WHEN a.Status = '1' and Trimester = 2 THEN 1 ELSE 0 END) AS trimester02G1
-  , SUM(CASE WHEN a.Status = '2' and Trimester = 2 THEN 1 ELSE 0 END) AS trimester02G2
-  , SUM(CASE WHEN a.Status = '3' and Trimester = 2 THEN 1 ELSE 0 END) AS trimester02G3
-
-  , SUM(CASE WHEN Trimester = 3 THEN 1 ELSE 0 END) AS trimester03
-  , SUM(CASE WHEN a.Status = '1' and Trimester = 3 THEN 1 ELSE 0 END) AS trimester03G1
-  , SUM(CASE WHEN a.Status = '2' AND Trimester = 3 THEN 1 ELSE 0 END) AS trimester03G2
-  , SUM(CASE WHEN a.Status = '3' and Trimester = 3 THEN 1 ELSE 0 END) AS trimester03G3
-
-  , SUM(CASE WHEN Trimester = 4 THEN 1 ELSE 0 END) AS trimester04
-  , SUM(CASE WHEN a.Status = '1' and Trimester = 4 THEN 1 ELSE 0 END) AS trimester04G1
-  , SUM(CASE WHEN a.Status = '2' and Trimester = 4 THEN 1 ELSE 0 END) AS trimester04G2
-  , SUM(CASE WHEN a.Status = '3' and Trimester = 4 THEN 1 ELSE 0 END) AS trimester04G3
- 
-  FROM #cteMain1 AS a
-)
-
-, trimester2 AS (
-SELECT 'Trimester (at time of Enrollment/Discharge)' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '3' AS col4
-UNION ALL
-SELECT 
- '  1st' AS [title]
- , CONVERT(VARCHAR, trimester01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, trimester01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, trimester01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM trimester1
-
-UNION ALL
-SELECT
- '  2nd' AS [title]
- , CONVERT(VARCHAR, trimester02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, trimester02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, trimester02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM trimester1
-
-UNION ALL
-SELECT
- '  3rd' AS [title]
- , CONVERT(VARCHAR, trimester03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, trimester03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, trimester03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM trimester1
-
-UNION ALL
-SELECT
- '  Postnatal' AS [title]
- , CONVERT(VARCHAR, trimester04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, trimester04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, trimester04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( trimester04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM trimester1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '3' AS col4
-)
-
-, assessment1 AS (
-SELECT 
-    SUM(CASE WHEN a.Status = '1' THEN 1 ELSE 0 END) AS totalG1
-  , SUM(CASE WHEN a.Status = '2' THEN 1 ELSE 0 END) AS totalG2
-  , SUM(CASE WHEN a.Status = '3' THEN 1 ELSE 0 END) AS totalG3
-
-  , SUM(CASE WHEN presentCode = 1 THEN 1 ELSE 0 END) AS assessment01
-  , SUM(CASE WHEN a.Status = '1' and presentCode = 1 THEN 1 ELSE 0 END) AS assessment01G1
-  , SUM(CASE WHEN a.Status = '2' and presentCode = 1 THEN 1 ELSE 0 END) AS assessment01G2
-  , SUM(CASE WHEN a.Status = '3' and presentCode = 1 THEN 1 ELSE 0 END) AS assessment01G3
-
-  , SUM(CASE WHEN presentCode = 2 THEN 1 ELSE 0 END) AS assessment02
-  , SUM(CASE WHEN a.Status = '1' and presentCode = 2 THEN 1 ELSE 0 END) AS assessment02G1
-  , SUM(CASE WHEN a.Status = '2' and presentCode = 2 THEN 1 ELSE 0 END) AS assessment02G2
-  , SUM(CASE WHEN a.Status = '3' and presentCode = 2 THEN 1 ELSE 0 END) AS assessment02G3
-
-  , SUM(CASE WHEN presentCode = 3 THEN 1 ELSE 0 END) AS assessment03
-  , SUM(CASE WHEN a.Status = '1' and presentCode = 3 THEN 1 ELSE 0 END) AS assessment03G1
-  , SUM(CASE WHEN a.Status = '2' AND presentCode = 3 THEN 1 ELSE 0 END) AS assessment03G2
-  , SUM(CASE WHEN a.Status = '3' and presentCode = 3 THEN 1 ELSE 0 END) AS assessment03G3
-
-  , SUM(CASE WHEN presentCode = 4 THEN 1 ELSE 0 END) AS assessment04
-  , SUM(CASE WHEN a.Status = '1' and presentCode = 4 THEN 1 ELSE 0 END) AS assessment04G1
-  , SUM(CASE WHEN a.Status = '2' and presentCode = 4 THEN 1 ELSE 0 END) AS assessment04G2
-  , SUM(CASE WHEN a.Status = '3' and presentCode = 4 THEN 1 ELSE 0 END) AS assessment04G3
- 
-  FROM #cteMain1 AS a
-)
-
-, assessment2 AS (
-SELECT 'Present at Assessment' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '3' AS col4
-UNION ALL
-SELECT 
- '  MOB only' AS [title]
- , CONVERT(VARCHAR, assessment01G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment01G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, assessment01G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment01G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, assessment01G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment01G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM assessment1
-
-UNION ALL
-SELECT
- '  FOB Only' AS [title]
- , CONVERT(VARCHAR, assessment02G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment02G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, assessment02G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment02G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, assessment02G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment02G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM assessment1
-
-UNION ALL
-SELECT
- '  Both Parents' AS [title]
- , CONVERT(VARCHAR, assessment03G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment03G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, assessment03G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment03G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, assessment03G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment03G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM assessment1
-
-UNION ALL
-SELECT
- '  Parent and Other' AS [title]
- , CONVERT(VARCHAR, assessment04G1) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment04G1 AS FLOAT) * 100/ NULLIF(totalG1,0), 0), 0))  + '%)' AS col1
- , CONVERT(VARCHAR, assessment04G2) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment04G2 AS FLOAT) * 100/ NULLIF(totalG2,0), 0), 0))  + '%)' AS col2
- , CONVERT(VARCHAR, assessment04G3) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( assessment04G3 AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM assessment1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '3' AS col4
-)
-
-, refused1 AS (
-SELECT 
-	COUNT(*) AS totalG3
-	,sum(CASE WHEN DischargeReason = '36' THEN 1 ELSE 0 END) [Refused]
-	,sum(CASE WHEN DischargeReason = '12' THEN 1 ELSE 0 END) [UnableToLocate]
-	,sum(CASE WHEN DischargeReason = '19' THEN 1 ELSE 0 END) [TCAgedOut]
-	,sum(CASE WHEN DischargeReason = '07' THEN 1 ELSE 0 END) [OutOfTargetArea]
-	,sum(CASE WHEN DischargeReason IN ('25') THEN 1 ELSE 0 END) [Transfered]
-	,sum(CASE WHEN DischargeReason NOT IN ('36','12','19','07','25')  THEN 1 ELSE 0 END) [AllOthers]
-FROM #cteMain1 AS a
-WHERE a.Status = '3'
-
-)
-, 
-
-refused2 AS (
-
-SELECT 'Reason for Refused' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '3' AS col4
-UNION ALL
-SELECT
- '  Refused' AS [title]
- , '' AS col1, '' AS col2
- , CONVERT(VARCHAR, Refused) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Refused AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM refused1
-
-UNION ALL
-SELECT
- '  Unable To Locate' AS [title]
- , '' AS col1, '' AS col2
- , CONVERT(VARCHAR, UnableToLocate) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( UnableToLocate AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM refused1
-
-UNION ALL
-SELECT
- '  TC Aged Out' AS [title]
- , '' AS col1, '' AS col2
- , CONVERT(VARCHAR, TCAgedOut) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( TCAgedOut AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM refused1
-
-UNION ALL
-SELECT
- '  Out of Target Area' AS [title]
- , '' AS col1, '' AS col2
- , CONVERT(VARCHAR, OutOfTargetArea) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( OutOfTargetArea AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM refused1
-
-UNION ALL
-SELECT
- '  Transfered' AS [title]
- , '' AS col1, '' AS col2
- , CONVERT(VARCHAR, Transfered) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( Transfered AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM refused1
-
-UNION ALL
-SELECT
- '  All Others' AS [title]
- , '' AS col1, '' AS col2
- , CONVERT(VARCHAR, AllOthers) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast( AllOthers AS FLOAT) * 100/ NULLIF(totalG3,0), 0), 0))  + '%)' AS col3
- , '3' AS col4
-FROM refused1
-
-UNION ALL
-SELECT '' AS [title], '' AS col1, '' AS col2, '' AS col3
- , '3' AS col4
-),
-
-rpt1 AS (
-SELECT * FROM total2
-UNION ALL
-SELECT * FROM total3
-UNION ALL
-SELECT * FROM age2
-UNION ALL
-SELECT * FROM race2
-UNION ALL
-SELECT * FROM martial2
-UNION ALL 
-SELECT * FROM edu2
-UNION ALL
-SELECT * FROM employed2
-UNION ALL 
-SELECT * FROM inHome2
-UNION ALL
-SELECT * FROM score2
-UNION ALL 
-SELECT * FROM kempescore2
-UNION ALL
-SELECT * FROM issues2
-UNION ALL 
-SELECT * FROM trimester2
-UNION ALL
-SELECT * FROM assessment2
-UNION ALL
-SELECT * FROM refused2
-)
-
--- listing records
---SELECT * 
---FROM main1 AS a
---WHERE a.Status = 3
-
-SELECT title AS [Title]
-, col1 AS [AcceptedFirstVisitEnrolled]
-, col2 AS [AcceptedFirstVisitNotEnrolled]
-, col3 AS [Refused]
-, col4 AS [groupID]
-FROM rpt1
-
-drop table #cteMain
-drop table #cteMain1
+	insert into #cteMain
+				select HVCasePK ,
+					   case when h.TCDOB is not null then h.TCDOB
+							else h.EDC
+					   end as tcdob ,
+					   DischargeDate ,
+					   IntakeDate ,
+					   k.KempeDate ,
+					   PC1FK ,
+					   cp.DischargeReason ,
+					   OldID ,
+					   PC1ID ,
+					   KempeResult ,
+					   cp.CurrentFSWFK ,
+					   cp.CurrentFAWFK ,
+					   case when h.TCDOB is not null then h.TCDOB
+							else h.EDC
+					   end as babydate ,
+					   case when h.IntakeDate is not null then h.IntakeDate
+							else cp.DischargeDate
+					   end as testdate ,
+					   P.PCDOB ,
+					   P.Race ,
+					   ca.MaritalStatus ,
+					   ca.HighestGrade ,
+					   ca.IsCurrentlyEmployed ,
+					   ca.OBPInHome ,
+					   case when MomScore = 'U' then 0
+							else cast(MomScore as int)
+					   end as MomScore ,
+					   case when DadScore = 'U' then 0
+							else cast(DadScore as int)
+					   end as DadScore ,
+					   FOBPresent ,
+					   MOBPresent ,
+					   OtherPresent ,
+					   MOBPartnerPresent ,	--as MOBPartner 
+					   FOBPartnerPresent ,	--as FOBPartner
+					   GrandParentPresent , --as MOBGrandmother
+					   PIVisitMade ,
+					   i.DV ,
+					   i.MH ,
+					   i.SA ,
+					   case when (	 isnull(k.MOBPartnerPresent, 0) = 0
+									 and isnull(k.FOBPartnerPresent, 0) = 0
+									 and isnull(k.GrandParentPresent, 0) = 0
+									 and isnull(k.OtherPresent, 0) = 0 ) then
+								case when k.MOBPresent = 1
+										  and k.FOBPresent = 1 then 3 -- both parent
+									 when k.MOBPresent = 1 then 1	  -- MOB Only
+									 when k.FOBPresent = 1 then 2	  -- FOB Only
+									 else 4							  -- parent/other
+								end
+							else 4 -- parent/other
+					   end presentCode
+				from   HVCase h
+					   inner join CaseProgram cp on cp.HVCaseFK = h.HVCasePK
+					   inner join dbo.SplitString(@programfkX, ',') on cp.ProgramFK = ListItem
+					   inner join Kempe k on k.HVCaseFK = h.HVCasePK
+					   inner join PC P on P.PCPK = h.PC1FK
+					   left outer join ctePIVisits piv on piv.KempeFK = k.KempePK
+					   left outer join cteIssues i on i.HVCaseFK = h.HVCasePK
+					   left join CommonAttributes ca on ca.HVCaseFK = h.HVCasePK
+														and ca.FormType = 'KE'
+				where  (   h.IntakeDate is not null
+						   or cp.DischargeDate is not null ) -- only include kempes that are positive and where there is a clos_date or an intake date.
+					   and k.KempeResult = 1
+					   and k.KempeDate
+					   between @StartDateX and @EndDateX;
+
+	insert into #cteMain1
+				select case when IntakeDate is not null then '1' --'AcceptedFirstVisitEnrolled' 
+							when KempeResult = 1
+								 and IntakeDate is null
+								 and DischargeDate is not null
+								 and (	 PIVisitMade > 0
+										 and PIVisitMade is not null ) then
+								'2'								 -- 'AcceptedFirstVisitNotEnrolled'
+							else '3'							 -- 'Refused' 
+					   end Status ,
+					   a.IntakeDate as [IntakeDate2] ,
+					   a.KempeResult as [KempeResult2] ,
+					   a.PIVisitMade as [PIVisitMade2] ,
+					   a.DischargeDate as [DischargeDate2] ,
+					   a.DischargeReason as [DischargeReason2] ,
+					   datediff(day, PCDOB, testdate) / 365.25 as age ,
+					   case when a.MomScore > a.DadScore then a.MomScore
+							else a.DadScore
+					   end KempeScore ,
+					   case when datediff(d, testdate, babydate) > 0
+								 and datediff(d, testdate, babydate) < 30.44
+																	   * 3 then
+								3
+							when (	 datediff(d, testdate, babydate) >= 30.44
+																		* 3
+									 and datediff(d, testdate, babydate) < 30.44
+																		   * 6 ) then
+								2
+							when datediff(d, testdate, babydate) >= round(
+																		30.44
+																		* 6 ,
+																		0) then
+								1
+							when datediff(d, testdate, babydate) <= 0 then 4
+					   end as Trimester ,
+					   *
+				from   #cteMain as a;
+	with
+	total1
+		as
+			(
+				select count(*) as total ,
+					   sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3
+				from   #cteMain1 as a
+			) ,
+	total2
+		as
+			(
+				select 'Totals (N = ' + convert(varchar, total) + ')' as [title] ,
+					   convert(varchar, totalG1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(totalG1 as float) * 100
+									 / nullif(total, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, totalG2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(totalG2 as float) * 100
+									 / nullif(total, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, totalG3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(totalG3 as float) * 100
+									 / nullif(total, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   total1
+			) ,
+	total3
+		as
+			(
+				select 'Acceptance Rate - '
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(( totalG1 + totalG2 ) as float)
+									 * 100 / nullif(total, 0) ,
+									 0) ,
+								 0)) + '%' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '1' as col4
+				from   total1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '1' as col4
+			) ,
+	age1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when age < 18 then 1
+								else 0
+						   end) as age18 ,
+					   sum(case when a.Status = '1'
+									 and age < 18 then 1
+								else 0
+						   end) as age18G1 ,
+					   sum(case when a.Status = '2'
+									 and age < 18 then 1
+								else 0
+						   end) as age18G2 ,
+					   sum(case when a.Status = '3'
+									 and age < 18 then 1
+								else 0
+						   end) as age18G3 ,
+					   sum(case when (	 age >= 18
+										 and age < 20 ) then 1
+								else 0
+						   end) as age20 ,
+					   sum(case when a.Status = '1'
+									 and (	 age >= 18
+											 and age < 20 ) then 1
+								else 0
+						   end) as age20G1 ,
+					   sum(case when a.Status = '2'
+									 and (	 age >= 18
+											 and age < 20 ) then 1
+								else 0
+						   end) as age20G2 ,
+					   sum(case when a.Status = '3'
+									 and (	 age >= 18
+											 and age < 20 ) then 1
+								else 0
+						   end) as age20G3 ,
+					   sum(case when (	 age >= 20
+										 and age < 30 ) then 1
+								else 0
+						   end) as age30 ,
+					   sum(case when a.Status = '1'
+									 and (	 age >= 20
+											 and age < 30 ) then 1
+								else 0
+						   end) as age30G1 ,
+					   sum(case when a.Status = '2'
+									 and (	 age >= 20
+											 and age < 30 ) then 1
+								else 0
+						   end) as age30G2 ,
+					   sum(case when a.Status = '3'
+									 and (	 age >= 20
+											 and age < 30 ) then 1
+								else 0
+						   end) as age30G3 ,
+					   sum(case when ( age >= 30 ) then 1
+								else 0
+						   end) as age40 ,
+					   sum(case when a.Status = '1'
+									 and ( age >= 30 ) then 1
+								else 0
+						   end) as age40G1 ,
+					   sum(case when a.Status = '2'
+									 and ( age >= 30 ) then 1
+								else 0
+						   end) as age40G2 ,
+					   sum(case when a.Status = '3'
+									 and ( age >= 30 ) then 1
+								else 0
+						   end) as age40G3
+				from   #cteMain1 as a
+			) ,
+	age2
+		as
+			(
+				select 'Age' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '1' as col4
+				union all
+				select '  Under 18' as [title] ,
+					   convert(varchar, age18G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age18G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, age18G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age18G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, age18G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age18G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   age1
+				union all
+				select '  18 up to 20' as [title] ,
+					   convert(varchar, age20G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age20G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, age20G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age20G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, age20G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age20G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   age1
+				union all
+				select '  20 up to 30' as [title] ,
+					   convert(varchar, age30G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age30G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, age30G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age30G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, age30G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age30G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   age1
+				union all
+				select '  30 and over' as [title] ,
+					   convert(varchar, age40G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age40G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, age40G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age40G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, age40G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(age40G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   age1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '1' as col4
+			) ,
+	race1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when Race = '01' then 1
+								else 0
+						   end) as race01 ,
+					   sum(case when a.Status = '1'
+									 and Race = '01' then 1
+								else 0
+						   end) as race01G1 ,
+					   sum(case when a.Status = '2'
+									 and Race = '01' then 1
+								else 0
+						   end) as race01G2 ,
+					   sum(case when a.Status = '3'
+									 and Race = '01' then 1
+								else 0
+						   end) as race01G3 ,
+					   sum(case when Race = '02' then 1
+								else 0
+						   end) as race02 ,
+					   sum(case when a.Status = '1'
+									 and Race = '02' then 1
+								else 0
+						   end) as race02G1 ,
+					   sum(case when a.Status = '2'
+									 and Race = '02' then 1
+								else 0
+						   end) as race02G2 ,
+					   sum(case when a.Status = '3'
+									 and Race = '02' then 1
+								else 0
+						   end) as race02G3 ,
+					   sum(case when Race = '03' then 1
+								else 0
+						   end) as race03 ,
+					   sum(case when a.Status = '1'
+									 and Race = '03' then 1
+								else 0
+						   end) as race03G1 ,
+					   sum(case when a.Status = '2'
+									 and Race = '03' then 1
+								else 0
+						   end) as race03G2 ,
+					   sum(case when a.Status = '3'
+									 and Race = '03' then 1
+								else 0
+						   end) as race03G3 ,
+					   sum(case when Race = '04' then 1
+								else 0
+						   end) as race04 ,
+					   sum(case when a.Status = '1'
+									 and Race = '04' then 1
+								else 0
+						   end) as race04G1 ,
+					   sum(case when a.Status = '2'
+									 and Race = '04' then 1
+								else 0
+						   end) as race04G2 ,
+					   sum(case when a.Status = '3'
+									 and Race = '04' then 1
+								else 0
+						   end) as race04G3 ,
+					   sum(case when Race = '05' then 1
+								else 0
+						   end) as race05 ,
+					   sum(case when a.Status = '1'
+									 and Race = '05' then 1
+								else 0
+						   end) as race05G1 ,
+					   sum(case when a.Status = '2'
+									 and Race = '05' then 1
+								else 0
+						   end) as race05G2 ,
+					   sum(case when a.Status = '3'
+									 and Race = '05' then 1
+								else 0
+						   end) as race05G3 ,
+					   sum(case when Race = '06' then 1
+								else 0
+						   end) as race06 ,
+					   sum(case when a.Status = '1'
+									 and Race = '06' then 1
+								else 0
+						   end) as race06G1 ,
+					   sum(case when a.Status = '2'
+									 and Race = '06' then 1
+								else 0
+						   end) as race06G2 ,
+					   sum(case when a.Status = '3'
+									 and Race = '06' then 1
+								else 0
+						   end) as race06G3 ,
+					   sum(case when Race = '07' then 1
+								else 0
+						   end) as race07 ,
+					   sum(case when a.Status = '1'
+									 and Race = '07' then 1
+								else 0
+						   end) as race07G1 ,
+					   sum(case when a.Status = '2'
+									 and Race = '07' then 1
+								else 0
+						   end) as race07G2 ,
+					   sum(case when a.Status = '3'
+									 and Race = '07' then 1
+								else 0
+						   end) as race07G3 ,
+					   sum(case when (	 Race is null
+										 or Race = '' ) then 1
+								else 0
+						   end) as race08 ,
+					   sum(case when a.Status = '1'
+									 and (	 Race is null
+											 or Race = '' ) then 1
+								else 0
+						   end) as race08G1 ,
+					   sum(case when a.Status = '2'
+									 and (	 Race is null
+											 or Race = '' ) then 1
+								else 0
+						   end) as race08G2 ,
+					   sum(case when a.Status = '3'
+									 and (	 Race is null
+											 or Race = '' ) then 1
+								else 0
+						   end) as race08G3
+				from   #cteMain1 as a
+			) ,
+	race2
+		as
+			(
+				select 'Race' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '1' as col4
+				union all
+				select '  White, non-Hispanic' as [title] ,
+					   convert(varchar, race01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, race01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, race01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   race1
+				union all
+				select '  Black, non-Hispanic' as [title] ,
+					   convert(varchar, race02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, race02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, race02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   race1
+				union all
+				select '  Hispanic/Latina/Latino' as [title] ,
+					   convert(varchar, race03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, race03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, race03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   race1
+				union all
+				select '  Asian' as [title] ,
+					   convert(varchar, race04G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race04G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, race04G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race04G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, race04G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race04G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   race1
+				union all
+				select '  Native American' as [title] ,
+					   convert(varchar, race05G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race05G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, race05G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race05G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, race05G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race05G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   race1
+				union all
+				select '  Multiracial' as [title] ,
+					   convert(varchar, race06G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race06G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, race06G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race06G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, race06G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race06G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   race1
+				union all
+				select '  Other' as [title] ,
+					   convert(varchar, race07G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race07G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, race07G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race07G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, race07G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race07G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   race1
+				union all
+				select '  Missing' as [title] ,
+					   convert(varchar, race08G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race08G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, race08G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race08G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, race08G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(race08G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   race1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '1' as col4
+			) ,
+	martial1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when MaritalStatus = '01' then 1
+								else 0
+						   end) as MaritalStatus01 ,
+					   sum(case when a.Status = '1'
+									 and MaritalStatus = '01' then 1
+								else 0
+						   end) as MaritalStatus01G1 ,
+					   sum(case when a.Status = '2'
+									 and MaritalStatus = '01' then 1
+								else 0
+						   end) as MaritalStatus01G2 ,
+					   sum(case when a.Status = '3'
+									 and MaritalStatus = '01' then 1
+								else 0
+						   end) as MaritalStatus01G3 ,
+					   sum(case when MaritalStatus = '02' then 1
+								else 0
+						   end) as MaritalStatus02 ,
+					   sum(case when a.Status = '1'
+									 and MaritalStatus = '02' then 1
+								else 0
+						   end) as MaritalStatus02G1 ,
+					   sum(case when a.Status = '2'
+									 and MaritalStatus = '02' then 1
+								else 0
+						   end) as MaritalStatus02G2 ,
+					   sum(case when a.Status = '3'
+									 and MaritalStatus = '02' then 1
+								else 0
+						   end) as MaritalStatus02G3 ,
+					   sum(case when MaritalStatus = '03' then 1
+								else 0
+						   end) as MaritalStatus03 ,
+					   sum(case when a.Status = '1'
+									 and MaritalStatus = '03' then 1
+								else 0
+						   end) as MaritalStatus03G1 ,
+					   sum(case when a.Status = '2'
+									 and MaritalStatus = '03' then 1
+								else 0
+						   end) as MaritalStatus03G2 ,
+					   sum(case when a.Status = '3'
+									 and MaritalStatus = '03' then 1
+								else 0
+						   end) as MaritalStatus03G3 ,
+					   sum(case when MaritalStatus = '04' then 1
+								else 0
+						   end) as MaritalStatus04 ,
+					   sum(case when a.Status = '1'
+									 and MaritalStatus = '04' then 1
+								else 0
+						   end) as MaritalStatus04G1 ,
+					   sum(case when a.Status = '2'
+									 and MaritalStatus = '04' then 1
+								else 0
+						   end) as MaritalStatus04G2 ,
+					   sum(case when a.Status = '3'
+									 and MaritalStatus = '04' then 1
+								else 0
+						   end) as MaritalStatus04G3 ,
+					   sum(case when MaritalStatus = '05' then 1
+								else 0
+						   end) as MaritalStatus05 ,
+					   sum(case when a.Status = '1'
+									 and MaritalStatus = '05' then 1
+								else 0
+						   end) as MaritalStatus05G1 ,
+					   sum(case when a.Status = '2'
+									 and MaritalStatus = '05' then 1
+								else 0
+						   end) as MaritalStatus05G2 ,
+					   sum(case when a.Status = '3'
+									 and MaritalStatus = '05' then 1
+								else 0
+						   end) as MaritalStatus05G3 ,
+					   sum(case when (	 MaritalStatus is null
+										 or MaritalStatus not in ( '01' ,
+																   '02' ,
+																   '03' ,
+																   '04' , '05' )) then
+									1
+								else 0
+						   end) as MaritalStatus06 ,
+					   sum(case when a.Status = '1'
+									 and (	 MaritalStatus is null
+											 or MaritalStatus not in ( '01' ,
+																	   '02' ,
+																	   '03' ,
+																	   '04' ,
+																	   '05' )) then
+									1
+								else 0
+						   end) as MaritalStatus06G1 ,
+					   sum(case when a.Status = '2'
+									 and (	 MaritalStatus is null
+											 or MaritalStatus not in ( '01' ,
+																	   '02' ,
+																	   '03' ,
+																	   '04' ,
+																	   '05' )) then
+									1
+								else 0
+						   end) as MaritalStatus06G2 ,
+					   sum(case when a.Status = '3'
+									 and (	 MaritalStatus is null
+											 or MaritalStatus not in ( '01' ,
+																	   '02' ,
+																	   '03' ,
+																	   '04' ,
+																	   '05' )) then
+									1
+								else 0
+						   end) as MaritalStatus06G3
+				from   #cteMain1 as a
+			) ,
+	martial2
+		as
+			(
+				select 'Martial Status' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '1' as col4
+				union all
+				select '  Married' as [title] ,
+					   convert(varchar, MaritalStatus01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, MaritalStatus01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, MaritalStatus01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   martial1
+				union all
+				select '  Not Married' as [title] ,
+					   convert(varchar, MaritalStatus02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, MaritalStatus02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, MaritalStatus02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   martial1
+				union all
+				select '  Separated' as [title] ,
+					   convert(varchar, MaritalStatus03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, MaritalStatus03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, MaritalStatus03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   martial1
+				union all
+				select '  Divorced' as [title] ,
+					   convert(varchar, MaritalStatus04G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus04G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, MaritalStatus04G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus04G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, MaritalStatus04G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus04G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   martial1
+				union all
+				select '  Widowed' as [title] ,
+					   convert(varchar, MaritalStatus05G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus05G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, MaritalStatus05G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus05G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, MaritalStatus05G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus05G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   martial1
+				union all
+				select '  Unknown' as [title] ,
+					   convert(varchar, MaritalStatus06G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus06G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, MaritalStatus06G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus06G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, MaritalStatus06G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(MaritalStatus06G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '1' as col4
+				from   martial1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '1' as col4
+			) ,
+	edu1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when HighestGrade in ( '01', '02' ) then 1
+								else 0
+						   end) as HighestGrade01 ,
+					   sum(case when a.Status = '1'
+									 and HighestGrade in ( '01', '02' ) then
+									1
+								else 0
+						   end) as HighestGrade01G1 ,
+					   sum(case when a.Status = '2'
+									 and HighestGrade in ( '01', '02' ) then
+									1
+								else 0
+						   end) as HighestGrade01G2 ,
+					   sum(case when a.Status = '3'
+									 and HighestGrade in ( '01', '02' ) then
+									1
+								else 0
+						   end) as HighestGrade01G3 ,
+					   sum(case when HighestGrade in ( '03', '04' ) then 1
+								else 0
+						   end) as HighestGrade02 ,
+					   sum(case when a.Status = '1'
+									 and HighestGrade in ( '03', '04' ) then
+									1
+								else 0
+						   end) as HighestGrade02G1 ,
+					   sum(case when a.Status = '2'
+									 and HighestGrade in ( '03', '04' ) then
+									1
+								else 0
+						   end) as HighestGrade02G2 ,
+					   sum(case when a.Status = '3'
+									 and HighestGrade in ( '03', '04' ) then
+									1
+								else 0
+						   end) as HighestGrade02G3 ,
+					   sum(case when HighestGrade in ( '05', '06', '07', '08' ) then
+									1
+								else 0
+						   end) as HighestGrade03 ,
+					   sum(case when a.Status = '1'
+									 and HighestGrade in ( '05', '06', '07' ,
+														   '08' ) then 1
+								else 0
+						   end) as HighestGrade03G1 ,
+					   sum(case when a.Status = '2'
+									 and HighestGrade in ( '05', '06', '07' ,
+														   '08' ) then 1
+								else 0
+						   end) as HighestGrade03G2 ,
+					   sum(case when a.Status = '3'
+									 and HighestGrade in ( '05', '06', '07' ,
+														   '08' ) then 1
+								else 0
+						   end) as HighestGrade03G3 ,
+					   sum(case when HighestGrade is null then 1
+								else 0
+						   end) as HighestGrade04 ,
+					   sum(case when a.Status = '1'
+									 and HighestGrade is null then 1
+								else 0
+						   end) as HighestGrade04G1 ,
+					   sum(case when a.Status = '2'
+									 and HighestGrade is null then 1
+								else 0
+						   end) as HighestGrade04G2 ,
+					   sum(case when a.Status = '3'
+									 and HighestGrade is null then 1
+								else 0
+						   end) as HighestGrade04G3
+				from   #cteMain1 as a
+			) ,
+	edu2
+		as
+			(
+				select 'Education' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+				union all
+				select '  Less than 12' as [title] ,
+					   convert(varchar, HighestGrade01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, HighestGrade01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, HighestGrade01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   edu1
+				union all
+				select '  HS/GED' as [title] ,
+					   convert(varchar, HighestGrade02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, HighestGrade02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, HighestGrade02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   edu1
+				union all
+				select '  More than 12' as [title] ,
+					   convert(varchar, HighestGrade03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, HighestGrade03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, HighestGrade03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   edu1
+				union all
+				select '  Unknown' as [title] ,
+					   convert(varchar, HighestGrade04G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade04G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, HighestGrade04G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade04G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, HighestGrade04G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(HighestGrade04G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   edu1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+			) ,
+	employed1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when IsCurrentlyEmployed = 1 then 1
+								else 0
+						   end) as Employed01 ,
+					   sum(case when a.Status = '1'
+									 and IsCurrentlyEmployed = 1 then 1
+								else 0
+						   end) as Employed01G1 ,
+					   sum(case when a.Status = '2'
+									 and IsCurrentlyEmployed = 1 then 1
+								else 0
+						   end) as Employed01G2 ,
+					   sum(case when a.Status = '3'
+									 and IsCurrentlyEmployed = 1 then 1
+								else 0
+						   end) as Employed01G3 ,
+					   sum(case when IsCurrentlyEmployed = 0 then 1
+								else 0
+						   end) as Employed02 ,
+					   sum(case when a.Status = '1'
+									 and IsCurrentlyEmployed = 0 then 1
+								else 0
+						   end) as Employed02G1 ,
+					   sum(case when a.Status = '2'
+									 and IsCurrentlyEmployed = 0 then 1
+								else 0
+						   end) as Employed02G2 ,
+					   sum(case when a.Status = '3'
+									 and IsCurrentlyEmployed = 0 then 1
+								else 0
+						   end) as Employed02G3
+				from   #cteMain1 as a
+			) ,
+	employed2
+		as
+			(
+				select 'Employed' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+				union all
+				select '  Yes' as [title] ,
+					   convert(varchar, Employed01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Employed01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, Employed01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Employed01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, Employed01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Employed01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   employed1
+				union all
+				select '  No' as [title] ,
+					   convert(varchar, Employed02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Employed02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, Employed02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Employed02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, Employed02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Employed02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   employed1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+			) ,
+	inHome1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when OBPInHome = 1 then 1
+								else 0
+						   end) as InHome01 ,
+					   sum(case when a.Status = '1'
+									 and OBPInHome = 1 then 1
+								else 0
+						   end) as InHome01G1 ,
+					   sum(case when a.Status = '2'
+									 and OBPInHome = 1 then 1
+								else 0
+						   end) as InHome01G2 ,
+					   sum(case when a.Status = '3'
+									 and OBPInHome = 1 then 1
+								else 0
+						   end) as InHome01G3 ,
+					   sum(case when OBPInHome = 0 then 1
+								else 0
+						   end) as InHome02 ,
+					   sum(case when a.Status = '1'
+									 and OBPInHome = 0 then 1
+								else 0
+						   end) as InHome02G1 ,
+					   sum(case when a.Status = '2'
+									 and OBPInHome = 0 then 1
+								else 0
+						   end) as InHome02G2 ,
+					   sum(case when a.Status = '3'
+									 and OBPInHome = 0 then 1
+								else 0
+						   end) as InHome02G3 ,
+					   sum(case when OBPInHome is null then 1
+								else 0
+						   end) as InHome03 ,
+					   sum(case when a.Status = '1'
+									 and OBPInHome is null then 1
+								else 0
+						   end) as InHome03G1 ,
+					   sum(case when a.Status = '2'
+									 and OBPInHome is null then 1
+								else 0
+						   end) as InHome03G2 ,
+					   sum(case when a.Status = '3'
+									 and OBPInHome is null then 1
+								else 0
+						   end) as InHome03G3
+				from   #cteMain1 as a
+			) ,
+	inHome2
+		as
+			(
+				select 'Bio Father in Home' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+				union all
+				select '  Yes' as [title] ,
+					   convert(varchar, InHome01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, InHome01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, InHome01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   inHome1
+				union all
+				select '  No' as [title] ,
+					   convert(varchar, InHome02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, InHome02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, InHome02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   inHome1
+				union all
+				select '  Unknown' as [title] ,
+					   convert(varchar, InHome03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, InHome03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, InHome03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(InHome03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   inHome1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+			) ,
+	score1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when MomScore >= 25
+									 and DadScore < 25 then 1
+								else 0
+						   end) as Score01 ,
+					   sum(case when a.Status = '1'
+									 and MomScore >= 25
+									 and DadScore < 25 then 1
+								else 0
+						   end) as Score01G1 ,
+					   sum(case when a.Status = '2'
+									 and MomScore >= 25
+									 and DadScore < 25 then 1
+								else 0
+						   end) as Score01G2 ,
+					   sum(case when a.Status = '3'
+									 and MomScore >= 25
+									 and DadScore < 25 then 1
+								else 0
+						   end) as Score01G3 ,
+					   sum(case when MomScore < 25
+									 and DadScore >= 25 then 1
+								else 0
+						   end) as Score02 ,
+					   sum(case when a.Status = '1'
+									 and MomScore < 25
+									 and DadScore >= 25 then 1
+								else 0
+						   end) as Score02G1 ,
+					   sum(case when a.Status = '2'
+									 and MomScore < 25
+									 and DadScore >= 25 then 1
+								else 0
+						   end) as Score02G2 ,
+					   sum(case when a.Status = '3'
+									 and MomScore < 25
+									 and DadScore >= 25 then 1
+								else 0
+						   end) as Score02G3 ,
+					   sum(case when MomScore >= 25
+									 and DadScore >= 25 then 1
+								else 0
+						   end) as Score03 ,
+					   sum(case when a.Status = '1'
+									 and MomScore >= 25
+									 and DadScore >= 25 then 1
+								else 0
+						   end) as Score03G1 ,
+					   sum(case when a.Status = '2'
+									 and MomScore >= 25
+									 and DadScore >= 25 then 1
+								else 0
+						   end) as Score03G2 ,
+					   sum(case when a.Status = '3'
+									 and MomScore >= 25
+									 and DadScore >= 25 then 1
+								else 0
+						   end) as Score03G3
+				from   #cteMain1 as a
+			) ,
+	score2
+		as
+			(
+				select 'Whose Score Qualifies' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+				union all
+				select '  Mother' as [title] ,
+					   convert(varchar, Score01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, Score01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, Score01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   score1
+				union all
+				select '  Father' as [title] ,
+					   convert(varchar, Score02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, Score02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, Score02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   score1
+				union all
+				select '  Mother & Father' as [title] ,
+					   convert(varchar, Score03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, Score03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, Score03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Score03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   score1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+			) ,
+	kempescore1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when KempeScore
+									 between 25 and 49 then 1
+								else 0
+						   end) as KempeScore01 ,
+					   sum(case when a.Status = '1'
+									 and KempeScore
+									 between 25 and 49 then 1
+								else 0
+						   end) as KempeScore01G1 ,
+					   sum(case when a.Status = '2'
+									 and KempeScore
+									 between 25 and 49 then 1
+								else 0
+						   end) as KempeScore01G2 ,
+					   sum(case when a.Status = '3'
+									 and KempeScore
+									 between 25 and 49 then 1
+								else 0
+						   end) as KempeScore01G3 ,
+					   sum(case when KempeScore
+									 between 50 and 74 then 1
+								else 0
+						   end) as KempeScore02 ,
+					   sum(case when a.Status = '1'
+									 and KempeScore
+									 between 50 and 74 then 1
+								else 0
+						   end) as KempeScore02G1 ,
+					   sum(case when a.Status = '2'
+									 and KempeScore
+									 between 50 and 74 then 1
+								else 0
+						   end) as KempeScore02G2 ,
+					   sum(case when a.Status = '3'
+									 and KempeScore
+									 between 50 and 74 then 1
+								else 0
+						   end) as KempeScore02G3 ,
+					   sum(case when KempeScore >= 75 then 1
+								else 0
+						   end) as KempeScore03 ,
+					   sum(case when a.Status = '1'
+									 and KempeScore >= 75 then 1
+								else 0
+						   end) as KempeScore03G1 ,
+					   sum(case when a.Status = '2'
+									 and KempeScore >= 75 then 1
+								else 0
+						   end) as KempeScore03G2 ,
+					   sum(case when a.Status = '3'
+									 and KempeScore >= 75 then 1
+								else 0
+						   end) as KempeScore03G3
+				from   #cteMain1 as a
+			) ,
+	kempescore2
+		as
+			(
+				select 'Kempe Score' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+				union all
+				select '  25-49' as [title] ,
+					   convert(varchar, KempeScore01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, KempeScore01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, KempeScore01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   kempescore1
+				union all
+				select '  50-74' as [title] ,
+					   convert(varchar, KempeScore02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, KempeScore02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, KempeScore02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   kempescore1
+				union all
+				select '  75+' as [title] ,
+					   convert(varchar, KempeScore03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, KempeScore03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, KempeScore03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(KempeScore03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '2' as col4
+				from   kempescore1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '2' as col4
+			) ,
+	issues1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when DV = 1 then 1
+								else 0
+						   end) as issues01 ,
+					   sum(case when a.Status = '1'
+									 and DV = 1 then 1
+								else 0
+						   end) as issues01G1 ,
+					   sum(case when a.Status = '2'
+									 and DV = 1 then 1
+								else 0
+						   end) as issues01G2 ,
+					   sum(case when a.Status = '3'
+									 and DV = 1 then 1
+								else 0
+						   end) as issues01G3 ,
+					   sum(case when MH = 1 then 1
+								else 0
+						   end) as issues02 ,
+					   sum(case when a.Status = '1'
+									 and MH = 1 then 1
+								else 0
+						   end) as issues02G1 ,
+					   sum(case when a.Status = '2'
+									 and MH = 1 then 1
+								else 0
+						   end) as issues02G2 ,
+					   sum(case when a.Status = '3'
+									 and MH = 1 then 1
+								else 0
+						   end) as issues02G3 ,
+					   sum(case when SA = 1 then 1
+								else 0
+						   end) as issues03 ,
+					   sum(case when a.Status = '1'
+									 and SA = 1 then 1
+								else 0
+						   end) as issues03G1 ,
+					   sum(case when a.Status = '2'
+									 and SA = 1 then 1
+								else 0
+						   end) as issues03G2 ,
+					   sum(case when a.Status = '3'
+									 and SA = 1 then 1
+								else 0
+						   end) as issues03G3
+				from   #cteMain1 as a
+			) ,
+	issues2
+		as
+			(
+				select 'PC1 Issues' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '3' as col4
+				union all
+				select '  DV' as [title] ,
+					   convert(varchar, issues01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, issues01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, issues01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   issues1
+				union all
+				select '  MH' as [title] ,
+					   convert(varchar, issues02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, issues02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, issues02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   issues1
+				union all
+				select '  SA' as [title] ,
+					   convert(varchar, issues03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, issues03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, issues03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(issues03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   issues1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '3' as col4
+			) ,
+	trimester1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when Trimester = 1 then 1
+								else 0
+						   end) as trimester01 ,
+					   sum(case when a.Status = '1'
+									 and Trimester = 1 then 1
+								else 0
+						   end) as trimester01G1 ,
+					   sum(case when a.Status = '2'
+									 and Trimester = 1 then 1
+								else 0
+						   end) as trimester01G2 ,
+					   sum(case when a.Status = '3'
+									 and Trimester = 1 then 1
+								else 0
+						   end) as trimester01G3 ,
+					   sum(case when Trimester = 2 then 1
+								else 0
+						   end) as trimester02 ,
+					   sum(case when a.Status = '1'
+									 and Trimester = 2 then 1
+								else 0
+						   end) as trimester02G1 ,
+					   sum(case when a.Status = '2'
+									 and Trimester = 2 then 1
+								else 0
+						   end) as trimester02G2 ,
+					   sum(case when a.Status = '3'
+									 and Trimester = 2 then 1
+								else 0
+						   end) as trimester02G3 ,
+					   sum(case when Trimester = 3 then 1
+								else 0
+						   end) as trimester03 ,
+					   sum(case when a.Status = '1'
+									 and Trimester = 3 then 1
+								else 0
+						   end) as trimester03G1 ,
+					   sum(case when a.Status = '2'
+									 and Trimester = 3 then 1
+								else 0
+						   end) as trimester03G2 ,
+					   sum(case when a.Status = '3'
+									 and Trimester = 3 then 1
+								else 0
+						   end) as trimester03G3 ,
+					   sum(case when Trimester = 4 then 1
+								else 0
+						   end) as trimester04 ,
+					   sum(case when a.Status = '1'
+									 and Trimester = 4 then 1
+								else 0
+						   end) as trimester04G1 ,
+					   sum(case when a.Status = '2'
+									 and Trimester = 4 then 1
+								else 0
+						   end) as trimester04G2 ,
+					   sum(case when a.Status = '3'
+									 and Trimester = 4 then 1
+								else 0
+						   end) as trimester04G3
+				from   #cteMain1 as a
+			) ,
+	trimester2
+		as
+			(
+				select 'Trimester (at time of Enrollment/Discharge)' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '3' as col4
+				union all
+				select '  1st' as [title] ,
+					   convert(varchar, trimester01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, trimester01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, trimester01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   trimester1
+				union all
+				select '  2nd' as [title] ,
+					   convert(varchar, trimester02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, trimester02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, trimester02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   trimester1
+				union all
+				select '  3rd' as [title] ,
+					   convert(varchar, trimester03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, trimester03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, trimester03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   trimester1
+				union all
+				select '  Postnatal' as [title] ,
+					   convert(varchar, trimester04G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester04G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, trimester04G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester04G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, trimester04G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(trimester04G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   trimester1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '3' as col4
+			) ,
+	assessment1
+		as
+			(
+				select sum(case when a.Status = '1' then 1
+								else 0
+						   end) as totalG1 ,
+					   sum(case when a.Status = '2' then 1
+								else 0
+						   end) as totalG2 ,
+					   sum(case when a.Status = '3' then 1
+								else 0
+						   end) as totalG3 ,
+					   sum(case when presentCode = 1 then 1
+								else 0
+						   end) as assessment01 ,
+					   sum(case when a.Status = '1'
+									 and presentCode = 1 then 1
+								else 0
+						   end) as assessment01G1 ,
+					   sum(case when a.Status = '2'
+									 and presentCode = 1 then 1
+								else 0
+						   end) as assessment01G2 ,
+					   sum(case when a.Status = '3'
+									 and presentCode = 1 then 1
+								else 0
+						   end) as assessment01G3 ,
+					   sum(case when presentCode = 2 then 1
+								else 0
+						   end) as assessment02 ,
+					   sum(case when a.Status = '1'
+									 and presentCode = 2 then 1
+								else 0
+						   end) as assessment02G1 ,
+					   sum(case when a.Status = '2'
+									 and presentCode = 2 then 1
+								else 0
+						   end) as assessment02G2 ,
+					   sum(case when a.Status = '3'
+									 and presentCode = 2 then 1
+								else 0
+						   end) as assessment02G3 ,
+					   sum(case when presentCode = 3 then 1
+								else 0
+						   end) as assessment03 ,
+					   sum(case when a.Status = '1'
+									 and presentCode = 3 then 1
+								else 0
+						   end) as assessment03G1 ,
+					   sum(case when a.Status = '2'
+									 and presentCode = 3 then 1
+								else 0
+						   end) as assessment03G2 ,
+					   sum(case when a.Status = '3'
+									 and presentCode = 3 then 1
+								else 0
+						   end) as assessment03G3 ,
+					   sum(case when presentCode = 4 then 1
+								else 0
+						   end) as assessment04 ,
+					   sum(case when a.Status = '1'
+									 and presentCode = 4 then 1
+								else 0
+						   end) as assessment04G1 ,
+					   sum(case when a.Status = '2'
+									 and presentCode = 4 then 1
+								else 0
+						   end) as assessment04G2 ,
+					   sum(case when a.Status = '3'
+									 and presentCode = 4 then 1
+								else 0
+						   end) as assessment04G3
+				from   #cteMain1 as a
+			) ,
+	assessment2
+		as
+			(
+				select 'Present at Assessment' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '3' as col4
+				union all
+				select '  MOB only' as [title] ,
+					   convert(varchar, assessment01G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment01G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, assessment01G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment01G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, assessment01G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment01G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   assessment1
+				union all
+				select '  FOB Only' as [title] ,
+					   convert(varchar, assessment02G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment02G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, assessment02G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment02G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, assessment02G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment02G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   assessment1
+				union all
+				select '  Both Parents' as [title] ,
+					   convert(varchar, assessment03G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment03G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, assessment03G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment03G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, assessment03G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment03G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   assessment1
+				union all
+				select '  Parent and Other' as [title] ,
+					   convert(varchar, assessment04G1) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment04G1 as float) * 100
+									 / nullif(totalG1, 0) ,
+									 0) ,
+								 0)) + '%)' as col1 ,
+					   convert(varchar, assessment04G2) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment04G2 as float) * 100
+									 / nullif(totalG2, 0) ,
+									 0) ,
+								 0)) + '%)' as col2 ,
+					   convert(varchar, assessment04G3) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(assessment04G3 as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   assessment1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '3' as col4
+			) ,
+	refused1
+		as
+			(
+				select count(*) as totalG3 ,
+					   sum(case when DischargeReason = '36' then 1
+								else 0
+						   end) [Refused] ,
+					   sum(case when DischargeReason = '12' then 1
+								else 0
+						   end) [UnableToLocate] ,
+					   sum(case when DischargeReason = '19' then 1
+								else 0
+						   end) [TCAgedOut] ,
+					   sum(case when DischargeReason = '07' then 1
+								else 0
+						   end) [OutOfTargetArea] ,
+					   sum(case when DischargeReason in ( '25' ) then 1
+								else 0
+						   end) [Transfered] ,
+					   sum(case when DischargeReason not in ( '36', '12' ,
+															  '19' , '07' ,
+															  '25' ) then 1
+								else 0
+						   end) [AllOthers]
+				from   #cteMain1 as a
+				where  a.Status = '3'
+			) ,
+	refused2
+		as
+			(
+				select 'Reason for Refused' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '3' as col4
+				union all
+				select '  Refused' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   convert(varchar, Refused) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Refused as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   refused1
+				union all
+				select '  Unable To Locate' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   convert(varchar, UnableToLocate) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(UnableToLocate as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   refused1
+				union all
+				select '  TC Aged Out' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   convert(varchar, TCAgedOut) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(TCAgedOut as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   refused1
+				union all
+				select '  Out of Target Area' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   convert(varchar, OutOfTargetArea) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(OutOfTargetArea as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   refused1
+				union all
+				select '  Transfered' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   convert(varchar, Transfered) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(Transfered as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   refused1
+				union all
+				select '  All Others' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   convert(varchar, AllOthers) + ' ('
+					   + convert(
+							 varchar ,
+							 round(
+								 coalesce(
+									 cast(AllOthers as float) * 100
+									 / nullif(totalG3, 0) ,
+									 0) ,
+								 0)) + '%)' as col3 ,
+					   '3' as col4
+				from   refused1
+				union all
+				select '' as [title] ,
+					   '' as col1 ,
+					   '' as col2 ,
+					   '' as col3 ,
+					   '3' as col4
+			) ,
+	rpt1
+		as
+			(
+				select *
+				from   total2
+				union all
+				select *
+				from   total3
+				union all
+				select *
+				from   age2
+				union all
+				select *
+				from   race2
+				union all
+				select *
+				from   martial2
+				union all
+				select *
+				from   edu2
+				union all
+				select *
+				from   employed2
+				union all
+				select *
+				from   inHome2
+				union all
+				select *
+				from   score2
+				union all
+				select *
+				from   kempescore2
+				union all
+				select *
+				from   issues2
+				union all
+				select *
+				from   trimester2
+				union all
+				select *
+				from   assessment2
+				union all
+				select *
+				from   refused2
+			)
+
+	-- listing records
+	--SELECT * 
+	--FROM main1 AS a
+	--WHERE a.Status = 3
+
+	select title as [Title] ,
+		   col1 as [AcceptedFirstVisitEnrolled] ,
+		   col2 as [AcceptedFirstVisitNotEnrolled] ,
+		   col3 as [Refused] ,
+		   col4 as [groupID]
+	from   rpt1;
+
+	drop table #cteMain;
+	drop table #cteMain1;
 GO
