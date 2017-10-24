@@ -10,13 +10,12 @@ GO
 -- rspCredentialingKempeAnalysis_Summary 1, '04/01/2012', '03/31/2013'
 
 -- =============================================
-
-
 CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Summary]
 	(
 		@programfk varchar(max) = null ,
 		@StartDate datetime ,
-		@EndDate datetime
+		@EndDate datetime ,
+		@SiteFK int = null
 	)
 as
 	declare @programfkX varchar(max);
@@ -35,6 +34,7 @@ as
 		end;
 
 	set @programfk = replace(@programfk, '"', '');
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
 	set @programfkX = @programfk;
 	set @StartDateX = @StartDate;
 	set @EndDateX = @EndDate;
@@ -234,11 +234,16 @@ as
 					   left outer join cteIssues i on i.HVCaseFK = h.HVCasePK
 					   left join CommonAttributes ca on ca.HVCaseFK = h.HVCasePK
 														and ca.FormType = 'KE'
+					   left join Worker faw on CurrentFAWFK = faw.WorkerPK -- faw
+					   left join WorkerProgram wpfaw on wpfaw.WorkerFK = faw.WorkerPK
+					   left join Worker fsw on CurrentFSWFK = fsw.WorkerPK -- fsw	 
+					   left join WorkerProgram wpfsw on wpfsw.WorkerFK = fsw.WorkerPK
 				where  (   h.IntakeDate is not null
 						   or cp.DischargeDate is not null ) -- only include kempes that are positive and where there is a clos_date or an intake date.
 					   and k.KempeResult = 1
-					   and k.KempeDate
-					   between @StartDateX and @EndDateX;
+					   and k.KempeDate between @StartDateX and @EndDateX
+					   and (case when @SiteFK = 0 then 1 when wpfaw.SiteFK = @SiteFK then 1 else 0 end = 1)
+					   and (case when @SiteFK = 0 then 1 when wpfsw.SiteFK = @SiteFK then 1 else 0 end = 1);
 
 	insert into #cteMain1
 				select case when IntakeDate is not null then '1' --'AcceptedFirstVisitEnrolled' 
