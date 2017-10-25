@@ -7,6 +7,7 @@ GO
 -- Create date: 03/22/2013
 -- Description:	Training [10-3] Credential Evidence (Intensive Role Specific Training)
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
+-- Edit date: 10/23/2017 CP - Removed WHERE clause in CTECountMeeting - this was removing
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingRoleSpecific]
 	-- Add the parameters for the stored procedure here
@@ -170,19 +171,31 @@ BEGIN
 )
 
 ----now put it all together
-SELECT *, CAST(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)) AS MeetingPercent
+SELECT cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerfk
+, cteAggregates.WorkerName, cteAggregates.StartDate, cteAggregates.TopicCode, cteAggregates.topicname
+, cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers
+,  case when cteCountMeeting.CurrentRole is null then cteAggregates.CurrentRole else cteCountMeeting.CurrentRole end as CurrentRole
+,  case when cteCountMeeting.totalmeetingcount is null then 0 else cteCountMeeting.totalmeetingcount end as [totalmeetingcount]
+,  case when totalmeetingcount is null then 0 else cast(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)) end AS MeetingPercent
 ,	CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) = 1 THEN '3' 
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) > .9 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(TotalWorkers AS DECIMAL) < .9 THEN '1'
+	else '1'
 	END AS Rating
-,	CASE cteCountMeeting.CurrentRole 
+,	CASE cteAggregates.CurrentRole 
 		WHEN 'FAW' THEN '10-3a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
 		WHEN 'FSW' THEN '10-3b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
 		WHEN 'Supervisor' THEN '10-3c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
+		
 	END AS CSST
 FROM cteAggregates
-INNER JOIN cteCountMeeting ON cteCountMeeting.CurrentRole = cteAggregates.CurrentRole
+LEFT JOIN cteCountMeeting ON cteCountMeeting.CurrentRole = cteAggregates.CurrentRole
+group by cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerfk
+, cteAggregates.WorkerName, cteAggregates.StartDate, cteAggregates.TopicCode, cteAggregates.topicname
+, cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers, cteCountMeeting.CurrentRole
+, cteCountMeeting.totalmeetingcount
 ORDER BY cteAggregates.CurrentRole, RowNumber
+
 
 END
 GO
