@@ -73,6 +73,26 @@ begin try
 	close del_cursor;
 	deallocate del_cursor;
 
+	--Case Note--
+	declare del_cursor cursor for
+	select CaseNotePK
+		from CaseNote
+		where HVCaseFK = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC dbo.spDelCaseNote @CaseNotePK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
 	--Education
 	declare del_cursor cursor for
 	select Educationpk
