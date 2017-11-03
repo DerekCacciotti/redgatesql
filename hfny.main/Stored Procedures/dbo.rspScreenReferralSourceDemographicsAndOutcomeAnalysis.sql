@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Devinder Singh Khalsa
 -- Create date: Oct. 3rd, 2013
@@ -22,7 +20,6 @@ ON [dbo].[HVCase] ([ScreenDate])
 INCLUDE ([HVCasePK],[CaseProgress],[EDC],[IntakeDate],[KempeDate],[PC1FK],[TCDOB])
 GO
 */
-
 
 CREATE procedure [dbo].[rspScreenReferralSourceDemographicsAndOutcomeAnalysis]
 (
@@ -1128,12 +1125,12 @@ DECLARE @numOfTotalKempesCompleted561 INT = 0
 DECLARE @numOfTotalEnrolled561 INT = 0  
 
 
-SET @numOfALLScreens561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-')
-SET @numOfTotalPositiveScreens561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled561 = (SELECT count(*) FROM #tblMainCohort where TargetArea is null or  TargetArea = '-' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+SET @numOfALLScreens561 = (SELECT count(*) FROM #tblMainCohort where (TargetArea is null or  TargetArea = '-'))
+SET @numOfTotalPositiveScreens561 = (SELECT count(*) FROM #tblMainCohort where (TargetArea is null or  TargetArea = '-') and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred561 = (SELECT count(*) FROM #tblMainCohort where (TargetArea is null or  TargetArea = '-') and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens561 = (SELECT count(*) FROM #tblMainCohort where (TargetArea is null or  TargetArea = '-') and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted561 = (SELECT count(*) FROM #tblMainCohort where (TargetArea is null or  TargetArea = '-') and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled561 = (SELECT count(*) FROM #tblMainCohort where (TargetArea is null or  TargetArea = '-') and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
@@ -1216,12 +1213,12 @@ DECLARE @numOfTotalKempesCompleted581 INT = 0
 DECLARE @numOfTotalEnrolled581 INT = 0  
 
 
-SET @numOfALLScreens581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-')
-SET @numOfTotalPositiveScreens581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled581 = (SELECT count(*) FROM #tblMainCohort where OBPInHome is null or  OBPInHome = '-' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+SET @numOfALLScreens581 = (SELECT count(*) FROM #tblMainCohort where (OBPInHome is null or  OBPInHome = '-'))
+SET @numOfTotalPositiveScreens581 = (SELECT count(*) FROM #tblMainCohort where (OBPInHome is null or  OBPInHome = '-') and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred581 = (SELECT count(*) FROM #tblMainCohort where (OBPInHome is null or  OBPInHome = '-') and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens581 = (SELECT count(*) FROM #tblMainCohort where (OBPInHome is null or  OBPInHome = '-') and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted581 = (SELECT count(*) FROM #tblMainCohort where (OBPInHome is null or  OBPInHome = '-') and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled581 = (SELECT count(*) FROM #tblMainCohort where (OBPInHome is null or  OBPInHome = '-') and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
@@ -1334,12 +1331,12 @@ DECLARE @numOfTotalKempesCompleted611 INT = 0
 DECLARE @numOfTotalEnrolled611 INT = 0  
 
 
-SET @numOfALLScreens611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-')
-SET @numOfTotalPositiveScreens611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled611 = (SELECT count(*) FROM #tblMainCohort where ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+SET @numOfALLScreens611 = (SELECT count(*) FROM #tblMainCohort where (ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-'))
+SET @numOfTotalPositiveScreens611 = (SELECT count(*) FROM #tblMainCohort where (ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-') and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred611 = (SELECT count(*) FROM #tblMainCohort where (ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-') and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens611 = (SELECT count(*) FROM #tblMainCohort where (ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-') and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted611 = (SELECT count(*) FROM #tblMainCohort where (ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-') and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled611 = (SELECT count(*) FROM #tblMainCohort where (ReceivingPreNatalCare is null or  ReceivingPreNatalCare = '-') and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
@@ -1638,4 +1635,5 @@ drop table #tblPositiveScreensNotReferred
 drop table #tblNegativeScreens
 drop table #tblKempesCompleted
 drop table #tblEnrolled
+
 GO
