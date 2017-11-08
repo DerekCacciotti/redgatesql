@@ -10,14 +10,14 @@ GO
 -- rspCredentialingKempeAnalysis_Details 4, '04/01/2012', '03/31/2013'
 
 -- =============================================
+
+
 CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Details]
 	(
 		@programfk varchar(max) = null ,
 		@StartDate datetime ,
-		@EndDate datetime ,
-		@SiteFK int = null
+		@EndDate datetime
 	)
-with recompile
 as
 	if @programfk is null
 		begin
@@ -30,9 +30,7 @@ as
 								8000);
 		end;
 
-	set @programfk = replace(@programfk, '"', '')
-	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
-
+	set @programfk = replace(@programfk, '"', '');
 	with
 	ctePIVisits
 		as
@@ -48,8 +46,7 @@ as
 	cteCohort
 		as
 			(
-				select cp.ProgramFK ,
-					   HVCasePK ,
+				select HVCasePK ,
 					   case when h.TCDOB is not null then h.TCDOB
 							else h.EDC
 					   end as tcdob ,
@@ -137,11 +134,10 @@ as
 			   end ) mainsortkey
 	from	 cteCohort h
 			 left join Worker faw on CurrentFAWFK = faw.WorkerPK -- faw
-			 left join WorkerProgram wpfaw on wpfaw.WorkerFK = faw.WorkerPK and wpfaw.ProgramFK = h.ProgramFK
 			 left join Worker fsw on CurrentFSWFK = fsw.WorkerPK -- fsw	 
-			 left join WorkerProgram wpfsw on wpfsw.WorkerFK = fsw.WorkerPK and wpfsw.ProgramFK = h.ProgramFK
 			 left join codeDischarge cd on h.DischargeReason = cd.DischargeCode
 	where --DischargeDate IS NOT NULL AND  IntakeDate  IS  NULL  
+
 			 ( case when IntakeDate is not null then '1'				--'AcceptedFirstVisitEnrolled' 
 					when KempeResult = 1
 						 and IntakeDate is null
@@ -150,9 +146,6 @@ as
 								 and PIVisitMade is not null ) then '2' -- 'AcceptedFirstVisitNotEnrolled'
 					else '3'											-- 'Refused' 
 			   end ) in ( '2', '3' )
-			 and (case when @SiteFK = 0 then 1 when wpfaw.SiteFK = @SiteFK then 1 else 0 end = 1)
-			 and (case when @SiteFK = 0 then 1 when wpfsw.SiteFK = @SiteFK then 1 else 0 end = 1)
-
 	order by mainsortkey ,
 			 DischargeSortCode ,
 			 PC1ID; -- ReportDischargeText, PC1ID
