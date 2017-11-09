@@ -356,7 +356,7 @@ SELECT distinct [Name]
  , convert(VARCHAR(12), [f40], 101) AS [f40]
 	 , CASE isnull([f40], 0)
 		WHEN [f40] THEN
-			CASE WHEN datediff(dd, [f40], [HireDate]) < -91 THEN '*' 
+			CASE WHEN datediff(dd, [f40], [HireDate]) < -181 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f40_ast'
 
