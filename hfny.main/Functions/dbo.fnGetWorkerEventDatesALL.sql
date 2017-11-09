@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -65,6 +64,7 @@ RETURN
 			 , wp.FAWStartDate AS FAWInitialStart --12/12/2013 No longer using IntitialStart date
 			 , wp.SupervisorStartDate as SupervisorInitialStart --12/12/2013 No longer using IntitialStart date
 			 , wp.FSWStartDate as FSWInitialStart --12/12/2013 No longer using IntitialStart date
+			 , wp.ProgramManagerStartDate --Program Manager start date (there is no worker.ProgramManagerIntitialStartDate
 			 , wp.TerminationDate
 			 , wp.HireDate
 			 , CASE WHEN datediff(dd, w.SupervisorFirstEvent, ctSuper.SuperDate) < 0 THEN 
@@ -93,7 +93,7 @@ RETURN
 		GROUP BY wp.programfk, w.WorkerPK, w.LastName, w.firstname
 		,wp.supervisorfk
 		,wp.SupervisorStartDate, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate
-		, ctHVLog.VisitStartTime, ctk.KempeDate, wp.FAWStartDate, wp.FSWStartDate
+		, ctHVLog.VisitStartTime, ctk.KempeDate, wp.FAWStartDate, wp.FSWStartDate, wp.ProgramManagerStartDate
 		HAVING (wp.ProgramFK=@prgfk)
 		and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
 		AND w.LastName NOT LIKE '%Transfer%'
