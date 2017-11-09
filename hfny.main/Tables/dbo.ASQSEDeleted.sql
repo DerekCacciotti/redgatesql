@@ -5,6 +5,8 @@ CREATE TABLE [dbo].[ASQSEDeleted]
 [ASQSECreateDate] [datetime] NOT NULL,
 [ASQSECreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ASQSEDateCompleted] [datetime] NOT NULL,
+[ASQSEDeleteDate] [datetime] NULL,
+[ASQSEDeleter] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ASQSEEditDate] [datetime] NULL,
 [ASQSEEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ASQSEInWindow] [bit] NOT NULL,

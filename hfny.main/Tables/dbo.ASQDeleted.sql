@@ -6,6 +6,8 @@ CREATE TABLE [dbo].[ASQDeleted]
 [ASQCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL,
 [ASQCommunicationScore] [numeric] (4, 1) NULL,
+[ASQDeleteDate] [datetime] NULL,
+[ASQDeleter] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ASQEditDate] [datetime] NULL,
 [ASQEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ASQFineMotorScore] [numeric] (4, 1) NULL,
