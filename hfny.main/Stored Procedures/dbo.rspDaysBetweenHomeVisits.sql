@@ -22,13 +22,13 @@ as
 
 		insert into #cteMAIN
 					select	   CurrentLevelFK ,
-							   codeLevel.LevelName ,
+							   cl.LevelName ,
 							   PC1ID ,
 							   HVCaseFK
-					from	   dbo.CaseProgram
-					inner join dbo.HVCase on dbo.CaseProgram.HVCaseFK = dbo.HVCase.HVCasePK
-					inner join dbo.codeLevel on CaseProgram.CurrentLevelFK = codeLevelPK
-					where	   CaseProgram.ProgramFK = @programfk
+					from	   CaseProgram cp
+					inner join HVCase hc on cp.HVCaseFK = hc.HVCasePK
+					inner join codeLevel cl on cp.CurrentLevelFK = codeLevelPK
+					where	   cp.ProgramFK = @programfk
 							   and CaseProgress >= 9
 							   and CaseStartDate <= getdate()
 							   and DischargeDate is null
@@ -39,50 +39,51 @@ as
 		cteLastVisit
 			as
 				(
-					select	   distinct #cteMAIN.HVCaseFK ,
-							   max(VisitStartTime) over ( partition by #cteMAIN.HVCaseFK ) as HVDATE2
-					from	   dbo.HVLog
-					inner join #cteMAIN on dbo.HVLog.HVCaseFK = #cteMAIN.HVCaseFK
+					select	   distinct m.HVCaseFK ,
+							   max(VisitStartTime) over ( partition by m.HVCaseFK ) as HVDATE2
+					from	   HVLog hl
+					inner join #cteMAIN m on hl.HVCaseFK = m.HVCaseFK
 					where	   left(VisitType, 1) = '1'
 				) ,
 		--now get the most recent HVLOGPK from the list above
 		cteLastVisitPlusHVLOGPK
 			as
 				(
-					select	   distinct cteLastVisit.HVCaseFK ,
-							   row_number() over ( partition by cteLastVisit.HVCaseFK
-												   order by HVLog.HVLogCreateDate desc ) as RowNum ,
+					select	   distinct lv.HVCaseFK ,
+							   row_number() over ( partition by lv.HVCaseFK
+												   order by hl.HVLogCreateDate desc ) as RowNum ,
 							   HVDATE2 ,
 							   HVLogPK
-					from	   dbo.HVLog
-					inner join cteLastVisit on dbo.HVLog.HVCaseFK = cteLastVisit.HVCaseFK
-											   and HVLog.VisitStartTime = cteLastVisit.HVDATE2
+					from	   HVLog hl
+					inner join cteLastVisit lv on hl.HVCaseFK = lv.HVCaseFK
+											   and hl.VisitStartTime = lv.HVDATE2
 					where	   left(VisitType, 1) = '1'
 				) ,
 		cteSecondToLastVisit
 			as
 				(
 					select	   max(VisitStartTime) as HVDATE1 ,
-							   HVLog.HVCaseFK
-					from	   dbo.HVLog
-					inner join cteLastVisitPlusHVLOGPK CLV on CLV.HVLogPK <> HVLog.HVLogPK
-															  and CLV.HVCaseFK = HVLog.HVCaseFK
+							   hl.HVCaseFK
+					from	   HVLog hl
+					inner join cteLastVisitPlusHVLOGPK lvp on lvp.HVLogPK <> hl.HVLogPK
+															  and lvp.HVCaseFK = hl.HVCaseFK
 					where	   left(VisitType, 1) = '1'
-					group by   HVLog.HVCaseFK
+					group by   hl.HVCaseFK
 				) ,
 		cteDatesBetween
 			as
 				(
-					select	   cteSecondToLastVisit.HVCaseFK ,
-							   #cteMAIN.PC1ID ,
-							   #cteMAIN.LevelName ,
+					select	   stlv.HVCaseFK ,
+							   m.PC1ID ,
+							   m.LevelName ,
+							   m.CurrentLevelFK ,
 							   HVDATE1 ,
 							   HVDATE2 ,
 							   datediff(dd, HVDATE1, HVDATE2) as DaysBetweenHomeVisits
-					from	   cteSecondToLastVisit
-					inner join cteLastVisitPlusHVLOGPK CLV on CLV.HVCaseFK = cteSecondToLastVisit.HVCaseFK
-					inner join #cteMAIN on #cteMAIN.HVCaseFK = cteSecondToLastVisit.HVCaseFK
-					where	   CLV.RowNum = 1
+					from	   cteSecondToLastVisit stlv
+					inner join cteLastVisitPlusHVLOGPK lvp on lvp.HVCaseFK = stlv.HVCaseFK
+					inner join #cteMAIN m on m.HVCaseFK = stlv.HVCaseFK
+					where	   lvp.RowNum = 1
 				) ,
 		cteAverageDays
 			as
@@ -96,6 +97,7 @@ as
 				(
 					select PC1ID as 'Case #' ,
 						   LevelName as 'Level' ,
+						   CurrentLevelFK , 
 						   convert(date, HVDATE2, 101) as 'Most Recent Home Visit' ,
 						   convert(date, HVDATE1, 101) as 'Previous Home Visit' ,
 						   DaysBetweenHomeVisits as 'Days Between Visits' ,
@@ -112,7 +114,7 @@ as
 						   case when MinimumVisit = 0 then null
 								else ( 1 / MinimumVisit ) * 7
 						   end as 'MinDays'
-					from   dbo.codeLevel
+					from   dbo.codeLevel cl
 					where  codeLevelPK >= 9
 						   and MinimumVisit is not null
 				)
@@ -125,12 +127,12 @@ as
 				   [Days Between Visits] - [MinDays] as 'Difference' ,
 				   [Avg Days Calculated] ,
 				   rtrim(FirstName) + ' ' + rtrim(LastName) as 'Worker Name'
-		from	   ctePutTheTwoTogether
-		inner join CaseProgram on ctePutTheTwoTogether.[Case #] = CaseProgram.PC1ID
+		from	   ctePutTheTwoTogether pttt
+		inner join CaseProgram on pttt.[Case #] = CaseProgram.PC1ID
 		inner join Worker on WorkerPK = CaseProgram.CurrentFSWFK
 		inner join HVCase on HVCase.HVCasePK = CaseProgram.HVCaseFK
-		inner join cteLevelCodes on ctePutTheTwoTogether.Level = cteLevelCodes.LevelName
-		order by   cteLevelCodes.codeLevelPK ,
+		inner join cteLevelCodes lc on pttt.CurrentLevelFK = lc.codeLevelPK
+		order by   lc.codeLevelPK ,
 				   Difference desc;
 
 		drop table #cteMAIN;
