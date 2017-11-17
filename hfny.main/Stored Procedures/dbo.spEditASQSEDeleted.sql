@@ -5,6 +5,8 @@ GO
 CREATE PROCEDURE [dbo].[spEditASQSEDeleted](@ASQSEDeletedPK int=NULL,
 @ASQSEPK int=NULL,
 @ASQSEDateCompleted datetime=NULL,
+@ASQSEDeleteDate datetime=NULL,
+@ASQSEDeleter char(10)=NULL,
 @ASQSEEditor char(10)=NULL,
 @ASQSEInWindow bit=NULL,
 @ASQSEOverCutOff bit=NULL,
@@ -24,6 +26,8 @@ UPDATE ASQSEDeleted
 SET 
 ASQSEPK = @ASQSEPK, 
 ASQSEDateCompleted = @ASQSEDateCompleted, 
+ASQSEDeleteDate = @ASQSEDeleteDate, 
+ASQSEDeleter = @ASQSEDeleter, 
 ASQSEEditor = @ASQSEEditor, 
 ASQSEInWindow = @ASQSEInWindow, 
 ASQSEOverCutOff = @ASQSEOverCutOff, 
