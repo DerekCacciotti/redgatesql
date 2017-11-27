@@ -34,7 +34,8 @@ CREATE TABLE [dbo].[HVCase]
 [ScreenDate] [datetime] NOT NULL,
 [TCDOB] [datetime] NULL,
 [TCDOD] [datetime] NULL,
-[TCNumber] [int] NULL
+[TCNumber] [int] NULL,
+[KempeDate2] [datetime] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

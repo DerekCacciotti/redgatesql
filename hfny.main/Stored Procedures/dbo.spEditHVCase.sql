@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -34,7 +33,8 @@ CREATE PROCEDURE [dbo].[spEditHVCase](@HVCasePK int=NULL,
 @ScreenDate datetime=NULL,
 @TCDOB datetime=NULL,
 @TCDOD datetime=NULL,
-@TCNumber int=NULL)
+@TCNumber int=NULL,
+@KempeDate2 datetime=NULL)
 AS
 UPDATE HVCase
 SET 
@@ -68,6 +68,7 @@ PrenatalCheckupsB4 = @PrenatalCheckupsB4,
 ScreenDate = @ScreenDate, 
 TCDOB = @TCDOB, 
 TCDOD = @TCDOD, 
-TCNumber = @TCNumber
+TCNumber = @TCNumber, 
+KempeDate2 = @KempeDate2
 WHERE HVCasePK = @HVCasePK
 GO
