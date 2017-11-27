@@ -528,6 +528,7 @@ begin
 			, LevelName as CurrentLevelName
 			, CurrentLevelDate
 			, hc.KempeDate
+			, hc.KempeDate2
 			, DischargeDate
 			, rtrim(obp.PCFirstName) + ' ' + rtrim(obp.PCLastName) as OBPName
 			, hc.TCNumber
