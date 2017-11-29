@@ -56,7 +56,11 @@ CREATE PROCEDURE [dbo].[spEditFollowUp](@FollowUpPK int=NULL,
 @SafetyPlan bit=NULL,
 @SixMonthHome bit=NULL,
 @TCDentalCareSource char(2)=NULL,
-@TimesPregnant int=NULL)
+@TimesPregnant int=NULL,
+@OtherChildrenDevelopmentDelays char(1)=NULL,
+@PC1SelfLowStudentAchievement char(1)=NULL,
+@PC1ChildrenLowStudentAchievement char(1)=NULL,
+@PC1FamilyArmedForces char(1)=NULL)
 AS
 UPDATE FollowUp
 SET 
@@ -113,6 +117,10 @@ ProgramFK = @ProgramFK,
 SafetyPlan = @SafetyPlan, 
 SixMonthHome = @SixMonthHome, 
 TCDentalCareSource = @TCDentalCareSource, 
-TimesPregnant = @TimesPregnant
+TimesPregnant = @TimesPregnant, 
+OtherChildrenDevelopmentDelays = @OtherChildrenDevelopmentDelays, 
+PC1SelfLowStudentAchievement = @PC1SelfLowStudentAchievement, 
+PC1ChildrenLowStudentAchievement = @PC1ChildrenLowStudentAchievement, 
+PC1FamilyArmedForces = @PC1FamilyArmedForces
 WHERE FollowUpPK = @FollowUpPK
 GO
