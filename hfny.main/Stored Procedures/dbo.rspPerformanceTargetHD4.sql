@@ -23,9 +23,9 @@ as
 begin
 
 	;
-	with cteTotalCases
-	as
-	(
+	
+	if object_id('tempdb..#tmpHD4TotalCases') is not null drop table #tmpHD4TotalCases
+ 
 	select
 		  ptc.HVCaseFK
 		 ,ptc.PC1ID
@@ -51,14 +51,13 @@ begin
 				  @EndDate
 		  end as lastdate
 		 ,h.IntakeDate
+		into #tmpHD4TotalCases
 		from @tblPTCases ptc
 			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
-			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
+			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK;
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
-	)
-	,
 
-	cteCohort
+	with cteCohort
 	as
 	(
 	select HVCaseFK
@@ -74,7 +73,7 @@ begin
 		  ,DischargeDate
 		  ,tcAgeDays
 		  ,lastdate
-		from cteTotalCases
+		from #tmpHD4TotalCases thtc
 		where ((TCDOB > IntakeDate
 			 and tcAgeDays > 30)
 			 or (TCDOB <= IntakeDate
