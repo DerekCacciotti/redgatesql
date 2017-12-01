@@ -42,7 +42,8 @@ create table #cteEverythingRequired (
 			, FirstASQDate datetime
 			, SupervisorInitialStart datetime
 			, FAWInitialStart datetime
-			, FSWInitialStart datetime
+			, FSWInitialStart DATETIME
+            , ProgramManagerStartDate DATETIME
 			, TerminationDate datetime
 			, SupervisorFK int
 			, TopicFK int
@@ -88,6 +89,7 @@ WHERE TrainingTickler='YES'
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName, hiredate
 	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent
 	, SupervisorInitialStart, FAWInitialStart, FSWInitialStart --these are NOT Intitial Start Dates, the function was modified but the name stayed the same
+	, ProgramManagerStartDate 
 	, FirstASQDate
 	, FirstPSIDate
 	, TerminationDate
@@ -110,7 +112,7 @@ WHERE TrainingTickler='YES'
 		   WHEN FirstHomeVisitDate < COALESCE(SupervisorFirstEvent, DATEADD(dd, 1, FirstHomeVisitDate)) THEN FirstHomeVisitDate
 		ELSE SupervisorFirstEvent
 		END AS FirstEvent
-	, SupervisorInitialStart, FAWInitialStart, FSWInitialStart
+	, SupervisorInitialStart, FAWInitialStart, FSWInitialStart, cteEventDates.ProgramManagerStartDate
 	, cteEventDates.TerminationDate
 	, SupervisorFK
 	FROM cteEventDates 
@@ -135,6 +137,7 @@ insert into #cteEverythingRequired
 			, SupervisorInitialStart
 			, FAWInitialStart
 			, FSWInitialStart
+			, ProgramManagerStartDate
 			, TerminationDate
 			, SupervisorFK
 			, TopicFK
@@ -150,6 +153,7 @@ insert into #cteEverythingRequired
 		FROM cteWorkerList, cteCompleteTopicList 
 		WHERE CASE WHEN FAWInitialStart IS NULL AND TopicCode = '9.0' THEN 0 -- Remove topic code 9 if not an FAW
 			  WHEN FSWInitialStart IS NULL AND TopicCode = '8.0' THEN 0 -- Remove topic code 8 if not an FSW
+			  WHEN (FSWInitialStart IS NULL AND SupervisorInitialStart IS NULL AND ProgramManagerStartDate IS null) AND TopicCode = '7.0' THEN 0 -- Remove topic code 7 if not an FSW
 			  WHEN SupervisorInitialStart IS NULL AND (TopicCode = '9.1' or TopicCode = '12.1') THEN 0 --Remove if worker is not a Supervisor
 			ELSE 1
 			END = 1
