@@ -30,6 +30,7 @@ DECLARE @edate AS DATE = GETDATE()
 	, '1' AS TotalCounter --used to get a count of all workers in this report towards the end
 	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
 	WHERE (HireDate BETWEEN @sdate and DATEADD(DAY, -182, @edate))
+	AND (FSWInitialStart IS NOT NULL OR FAWInitialStart IS NOT NULL OR SupervisorInitialStart IS NOT NULL)
 	
 )
 
