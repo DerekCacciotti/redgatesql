@@ -2,8 +2,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddHVLogOld](@CAAdvocacy char(2)=NULL,
-@CAChildSupport char(2)=NULL,
+CREATE PROCEDURE [dbo].[spAddHVLogOld](@CAChildSupport char(2)=NULL,
+@CAAdvocacy char(2)=NULL,
 @CAGoods char(2)=NULL,
 @CAHousing char(2)=NULL,
 @CALaborSupport char(2)=NULL,
@@ -122,8 +122,8 @@ CREATE PROCEDURE [dbo].[spAddHVLogOld](@CAAdvocacy char(2)=NULL,
 @VisitType char(4)=NULL)
 AS
 INSERT INTO HVLogOld(
-CAAdvocacy,
 CAChildSupport,
+CAAdvocacy,
 CAGoods,
 CAHousing,
 CALaborSupport,
@@ -242,8 +242,8 @@ VisitStartTime,
 VisitType
 )
 VALUES(
-@CAAdvocacy,
 @CAChildSupport,
+@CAAdvocacy,
 @CAGoods,
 @CAHousing,
 @CALaborSupport,

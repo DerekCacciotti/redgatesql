@@ -1,0 +1,13 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[spDelHVLogDeleted](@HVLogDeletedPK int)
+
+AS
+
+
+DELETE 
+FROM HVLogDeleted
+WHERE HVLogDeletedPK = @HVLogDeletedPK
+GO
