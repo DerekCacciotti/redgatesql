@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -35,6 +34,7 @@ BEGIN
 	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
 	WHERE (FSWInitialStart >=  @sdate and FSWInitialStart < DATEADD(d, -91, GETDATE())
 	OR SupervisorInitialStart >=  @sdate and SupervisorInitialStart < DATEADD(d, -91, GETDATE())
+	AND rtrim(wrkrFname) NOT LIKE 'Historic%'
 	)
 )
 	
