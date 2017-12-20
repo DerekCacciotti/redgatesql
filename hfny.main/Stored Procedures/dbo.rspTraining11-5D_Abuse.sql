@@ -57,7 +57,7 @@ AND t.TrainingDate BETWEEN @sdate AND @edate
 			, TotalCounter
 			, cteAbuseTraining.TrainingTitle
 		FROM cteEventDates 
-		LEFT JOIN cteAbuseTraining ON cteAbuseTraining.WorkerPK = cteEventDates.WorkerPK
+		LEFT JOIN cteAbuseTraining ON cteAbuseTraining.WorkerPK = cteEventDates.WorkerPK and Corr=1
 		GROUP BY cteEventDates.WorkerName, cteEventDates.HireDate, [AbuseTrainingDt], cteEventDates.workerpk
 		,  [TrainingExempt], TotalCounter, cteAbuseTraining.TrainingTitle
 )
