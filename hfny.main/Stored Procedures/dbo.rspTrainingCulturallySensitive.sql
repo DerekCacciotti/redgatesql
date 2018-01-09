@@ -37,6 +37,8 @@ create table #cteEventDates (
 )
 
 --Get FAW's in time period
+
+--Get FAW's in time period
 insert into #cteEventDates
 	SELECT workerpk, wrkrLName
 	, '1' AS MyWrkrCount
@@ -45,67 +47,71 @@ insert into #cteEventDates
 	WHERE TerminationDate IS NULL
 	AND DATEDIFF(d,HireDate, @edate2) > 365
 
-;WITH cteCultureSensitive AS (
+;with cteCultureSensitive as (
 	select WorkerPK
 	, WorkerName
 	, HireDate
 	, Mywrkrcount
-	, MIN(TrainingDate) as CulturallySensitiveDate
+	, min(TrainingDate) as CulturallySensitiveDate
 	, CulturalCompetency
-	, ROW_NUMBER() OVER ( PARTITION BY workerpk ORDER BY CulturalCompetency DESC ) AS 'RowNumber'
-	From #cteEventDates
-	LEFT JOIN TrainingAttendee ta ON #cteEventDates.WorkerPK = ta.WorkerFK 
-	LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
-	LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
-	LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
-	WHERE --CulturalCompetency = 1
-	TrainingDate between @sdate2 AND @edate2
-	GROUP BY WorkerPK
+	, row_number() over ( partition by workerpk order by CulturalCompetency desc ) as 'RowNumber'
+	, TrainingPK
+	from #cteEventDates
+	left join TrainingAttendee ta on #cteEventDates.WorkerPK = ta.WorkerFK 
+	left join Training t on ta.TrainingFK = t.TrainingPK
+	left join TrainingDetail td on td.TrainingFK=t.TrainingPK
+	left join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
+	where --CulturalCompetency = 1
+	TrainingDate between @sdate2 and @edate2
+	group by WorkerPK
 	, CulturalCompetency
 	, WorkerName
-	, HireDate, MyWrkrCount
+	, HireDate, MyWrkrCount, TrainingPK
 )
 
-, cteWorkerCount AS (
-	SELECT WorkerPK
-	, COUNT(WorkerPK) OVER (PARTITION BY MyWrkrCount) AS WorkerCount
-	FROM #cteEventDates
+, cteWorkerCount as (
+	select WorkerPK
+	, count(WorkerPK) over (partition by MyWrkrCount) as WorkerCount
+	from #cteEventDates
 	)
 
 ,  cteCultSenses as (
 	select WorkerPK
 	, WorkerName
 	, HireDate
-	, COUNT(workerpk) OVER (PARTITION BY MyWrkrCount) AS WorkerCount
+	, count(workerpk) over (partition by MyWrkrCount) as WorkerCount
 	, CulturallySensitiveDate
 	, CulturalCompetency
+	, TrainingPK
 	from cteCultureSensitive
 	where RowNumber=1
 )
 
 
-
-, cteCultSense2 AS (
+, cteCultSense2 as (
 	select cteCultSenses.WorkerPK
 	, WorkerName
 	, HireDate
 	, CulturallySensitiveDate
-	, MIN(TrainingTitle) AS TrainingTitle
+	, min(TrainingTitle) as TrainingTitle
 	, cteCultSenses.CulturalCompetency
+	, cteCultSenses.TrainingPK
 	from cteCultSenses
-	LEFT JOIN TrainingAttendee ta ON cteCultSenses.WorkerPK = ta.WorkerFK
-	LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK AND cteCultSenses.CulturallySensitiveDate = t.TrainingDate
-	LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
-	WHERE --CulturalCompetency = 1
-	TrainingDate between @sdate2 AND @edate2
-	GROUP BY cteCultSenses.WorkerPK
+	left join TrainingAttendee ta on cteCultSenses.WorkerPK = ta.WorkerFK
+	left join Training t on ta.TrainingFK = t.TrainingPK and cteCultSenses.TrainingPK = t.TrainingPK
+	left join TrainingDetail td on td.TrainingFK=t.TrainingPK
+	where --CulturalCompetency = 1
+	TrainingDate between @sdate2 and @edate2
+	group by cteCultSenses.WorkerPK
 	, WorkerName
 	, HireDate
 	, CulturallySensitiveDate
 	, cteCultSenses.CulturalCompetency
+	, cteCultSenses.TrainingPK
 )
 
-, cteCultSense AS (
+
+, cteCultSense as (
   
 	select #cteEventDates.WorkerPK
 	, #cteEventDates.WorkerName
@@ -113,9 +119,11 @@ insert into #cteEventDates
 	, CulturallySensitiveDate
 	, TrainingTitle
 	, CulturalCompetency
+	, TrainingPK
 	from #cteEventDates
 	LEFT JOIN  cteCultSense2 ON #cteEventDates.WorkerPK = cteCultSense2.WorkerPK	
 )
+
 
 , cteFinal as (
 		SELECT WorkerPK, workername, HireDate
@@ -160,4 +168,5 @@ FROM cteFinal, cteCountMeeting
 
 drop table #cteEventDates
 END
+
 GO
