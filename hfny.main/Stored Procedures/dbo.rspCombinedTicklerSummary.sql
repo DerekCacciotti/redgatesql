@@ -1,10 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Feb 5, 2012>
@@ -74,7 +71,7 @@ as
 					,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 									from tcid
 									where hvcase.hvcasepk = tcid.hvcasefk
-										 and tcid.programfk = caseprogram.programfk
+										 --and tcid.programfk = caseprogram.programfk
 									for xml path ('')),3,1000) TargetChild
 					,rtrim(fsw.firstname)+' '+rtrim(fsw.lastname) fswname
 					,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) supervisor
@@ -206,7 +203,7 @@ as
 					,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 									from tcid
 									where hvcase.hvcasepk = tcid.hvcasefk
-										 and tcid.programfk = caseprogram.programfk
+										 --and tcid.programfk = caseprogram.programfk
 									for xml path ('')),3,1000) TargetChild
 					,rtrim(fsw.firstname)+' '+rtrim(fsw.lastname) fswname
 					,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) supervisor
@@ -214,7 +211,7 @@ as
 				  from caseprogram
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
-					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+					  inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 					  --inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asqse version'
 					  inner join codeduebydates on scheduledevent = 'ASQSE-1'  --optionValue
 					  --inner join codeduebydates on scheduledevent = optionValue
@@ -252,7 +249,7 @@ as
 					,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 									from tcid
 									where hvcase.hvcasepk = tcid.hvcasefk
-										 and tcid.programfk = caseprogram.programfk
+										 --and tcid.programfk = caseprogram.programfk
 									for xml path ('')),3,1000) TargetChild
 					,rtrim(fsw.firstname)+' '+rtrim(fsw.lastname) fswname
 					,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) supervisor
@@ -260,7 +257,7 @@ as
 				  from caseprogram
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
-					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+					  inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 					  inner join codeduebydates on scheduledevent = 'Follow Up'
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
@@ -304,7 +301,7 @@ as
 					,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 									from tcid
 									where hvcase.hvcasepk = tcid.hvcasefk
-										 and tcid.programfk = caseprogram.programfk
+										 --and tcid.programfk = caseprogram.programfk
 									for xml path ('')),3,1000) TargetChild
 					,rtrim(fsw.firstname)+' '+rtrim(fsw.lastname) fswname
 					,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) supervisor
@@ -314,7 +311,7 @@ as
 				  from caseprogram
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
-					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+					  inner join tcid on tcid.hvcasefk = hvcasepk -- and tcid.programfk = caseprogram.programfk
 					  --inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asqse version'
 					  inner join codeduebydates on scheduledevent = 'IFSP/FGP'  --optionValue
 					  --inner join codeduebydates on scheduledevent = optionValue
@@ -355,7 +352,7 @@ as
 					,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 									from tcid
 									where hvcase.hvcasepk = tcid.hvcasefk
-										 and tcid.programfk = caseprogram.programfk
+										 --and tcid.programfk = caseprogram.programfk
 									for xml path ('')),3,1000) TargetChild
 					,rtrim(fsw.firstname)+' '+rtrim(fsw.lastname) fswname
 					,ltrim(rtrim(supervisor.firstname))+' '+ltrim(rtrim(supervisor.lastname)) supervisor
@@ -363,7 +360,7 @@ as
 				  from caseprogram
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
-					  inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
+					  inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 					  inner join codeduebydates on scheduledevent = 'PSI'
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
