@@ -2,7 +2,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-create procedure [dbo].[spGetAllCaseloadData]
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2018-01-24
+-- Description:	Gets the data needed to display the FSW-specific Case Weight graph on the Home Page
+-- exec spGetAllCaseloadData 1, '2018-01-01', 'jrobohn'
+-- =============================================
+CREATE procedure [dbo].[spGetAllCaseloadData]
 					(@programFK int, @rpdate date, @username varchar(255))
 
 as
