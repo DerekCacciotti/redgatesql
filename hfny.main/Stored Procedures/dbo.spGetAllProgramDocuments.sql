@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Sep. 16, 2016>
@@ -18,11 +17,12 @@ BEGIN
 	SELECT AttachmentPK
 	, REPLACE(AttachmentTitle, '.pdf', '') AS 'AttachmentTitle'
 	, AttachmentDescription
-	, CONVERT(VARCHAR(10), FormDate, 101) AS 'FormDate'
-	, AttachmentCreateDate
+	, CONVERT(VARCHAR(10), FormDate, 111) AS 'FormDate'
+	, convert(varchar(25), AttachmentCreateDate, 126)
 	, AttachmentCreator
 	FROM Attachment
 	WHERE FormType = 'AD' AND ProgramFK = @programFK
 	ORDER BY AttachmentCreateDate DESC;
 END
+
 GO
