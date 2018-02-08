@@ -29,7 +29,7 @@ CREATE NONCLUSTERED INDEX [IX_FK_WorkerAssignment_ProgramFK] ON [dbo].[WorkerAss
 
 
 
-CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_HVCaseFK] ON [dbo].[WorkerAssignment] ([HVCaseFK]) ON [PRIMARY]
+
 
 CREATE NONCLUSTERED INDEX [IX_WorkerAssignment_ProgramFK] ON [dbo].[WorkerAssignment] ([ProgramFK]) ON [PRIMARY]
 

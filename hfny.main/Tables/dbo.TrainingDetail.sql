@@ -21,7 +21,7 @@ CREATE NONCLUSTERED INDEX [TopicFK] ON [dbo].[TrainingDetail] ([TopicFK]) ON [PR
 
 CREATE NONCLUSTERED INDEX [IX_TrainingDetailSubtopicFK] ON [dbo].[TrainingDetail] ([SubTopicFK]) ON [PRIMARY]
 
-CREATE NONCLUSTERED INDEX [IX_TrainingDetailTrainingFK] ON [dbo].[TrainingDetail] ([TrainingFK]) ON [PRIMARY]
+
 
 CREATE NONCLUSTERED INDEX [IX_FK_TrainingDetail_ProgramFK] ON [dbo].[TrainingDetail] ([ProgramFK]) ON [PRIMARY]
 
