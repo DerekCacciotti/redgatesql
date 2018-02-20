@@ -6,7 +6,8 @@ GO
 -- Author:		Benjamin Simmons
 -- Create date: 02/20/18
 -- Description:	This stored procedure obtains the 50 most recently
--- viewed cases for a specific user and filters those results by program
+-- viewed cases for a specific user and filters those results by program.
+-- The @ProgramFK parameter is now optional.
 -- =============================================
 CREATE PROCEDURE [dbo].[spGetRecentlyViewedCasesByUserNameAndProgramFK] (@UserName VARCHAR(255), @ProgramFK INT)
 AS
@@ -21,7 +22,7 @@ BEGIN
 			FROM CaseView cv
 			INNER JOIN CaseProgram cp ON cp.PC1ID = cv.PC1ID
 			WHERE cv.Username = @UserName 
-			AND cp.ProgramFK = @ProgramFK
+			AND cp.ProgramFK = ISNULL(@ProgramFK, cp.ProgramFK)
 			GROUP BY cv.PC1ID
 			ORDER BY ViewDateMax DESC
 	)
