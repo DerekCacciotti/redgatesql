@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -16,9 +15,8 @@ CREATE PROCEDURE [dbo].[rspTraining_Orientation]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
 	@sdate AS DATE
-	
-	WITH RECOMPILE
-AS
+
+as
 
 
 BEGIN
@@ -164,7 +162,7 @@ BEGIN
 	, cte10_2b.SupervisorFirstEvent
 	, FirstEvent
 	, CASE WHEN FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 'T'
-		-- OLD CODE Orientation MUST HAPPEN PRIOR TO FIRSTEVENT , NOT SURE WHY 6 month given: WHEN TrainingDate <= dateadd(day, 183, FirstEvent) THEN 'T' 
+		when TopicCode = 3.0 and TrainingDate < FirstHomeVisitDate then 'T'
 		WHEN TrainingDate < FirstEvent THEN 'T' 
 		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN 'T'
 		else 'F' END AS 'Meets Target'
