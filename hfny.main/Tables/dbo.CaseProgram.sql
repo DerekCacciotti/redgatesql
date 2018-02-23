@@ -81,15 +81,11 @@ CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAWFK] ON [dbo].[CaseProgram
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFSWFK] ON [dbo].[CaseProgram] ([CurrentFSWFK]) ON [PRIMARY]
 GO
-CREATE NONCLUSTERED INDEX [IX_CaseProgram_CurrentLevelFK] ON [dbo].[CaseProgram] ([CurrentLevelFK]) ON [PRIMARY]
-GO
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentLevelFK] ON [dbo].[CaseProgram] ([CurrentLevelFK]) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CaseProgram_HVCaseFK] ON [dbo].[CaseProgram] ([HVCaseFK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_HVCaseFK] ON [dbo].[CaseProgram] ([HVCaseFK]) ON [PRIMARY]
 GO
-CREATE NONCLUSTERED INDEX [IX_CaseProgram_ProgramFK] ON [dbo].[CaseProgram] ([ProgramFK]) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [nci_wi_CaseProgram_10DDC32CB7FBC483EA60D57385553998] ON [dbo].[CaseProgram] ([PC1ID]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_ProgramFK] ON [dbo].[CaseProgram] ([ProgramFK]) ON [PRIMARY]
 GO
