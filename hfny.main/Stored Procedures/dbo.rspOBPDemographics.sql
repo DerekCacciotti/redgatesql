@@ -174,6 +174,7 @@ BEGIN
 	INSERT INTO @tblOBPInfo
 	SELECT c.HVCasePK, obp.PCPK, obp.PCDOB, ca.OBPInHome, c.OBPinHomeIntake, obp.Race, ca.MaritalStatus, ca.HighestGrade,
 		ca.EducationalEnrollment, ca.IsCurrentlyEmployed, i.DomesticViolence, k.DadScore, c.TCDOB, c.EDC,
+		--Get the OBP's age in years when the TC was born. Source: https://stackoverflow.com/questions/1572110/how-to-calculate-age-in-years-based-on-date-of-birth-and-getdate
 		(CONVERT(INT,CONVERT(CHAR(8),ISNULL(TCDOB, EDC),112))-CONVERT(char(8),obp.PCDOB,112))/10000 AS OBPAgeAtTCBirth
 		FROM @tblSecondaryCohort sc
 		INNER JOIN dbo.HVCase c ON c.HVCasePK = sc.HVCasePK
