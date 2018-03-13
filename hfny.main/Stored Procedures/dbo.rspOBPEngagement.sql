@@ -14,7 +14,8 @@ CREATE PROCEDURE [dbo].[rspOBPEngagement]
 	@EndDate	DATETIME = NULL
 AS
 BEGIN
-	--Set the ProgramFK
+		
+--Set the ProgramFK
 	IF @ProgramFK IS NULL
 	BEGIN
 		SELECT @ProgramFK = SUBSTRING((SELECT ',' + LTRIM(RTRIM(STR(HVProgramPK)))
@@ -75,6 +76,20 @@ BEGIN
 	)
 
 	DECLARE @tblServiceReferral TABLE (
+		HVCasePK INT,
+		ServiceReferralPK INT,
+		FamilyCode CHAR(2),
+		ServiceCode INT
+	)
+
+	DECLARE @tblResidentOBPsServiceReferral TABLE (
+		HVCasePK INT,
+		ServiceReferralPK INT,
+		FamilyCode CHAR(2),
+		ServiceCode INT
+	)
+
+	DECLARE @tblNonResidentOBPsServiceReferral TABLE (
 		HVCasePK INT,
 		ServiceReferralPK INT,
 		FamilyCode CHAR(2),
@@ -166,6 +181,17 @@ BEGIN
 		FROM @tblSecondaryCohort sc
 		INNER JOIN dbo.ServiceReferral sr ON sr.HVCaseFK = sc.HVCasePK
 
+	--Service Referral info for second cohort
+	INSERT INTO @tblResidentOBPsServiceReferral
+		SELECT sr.HVCasePK, sr.ServiceReferralPK, sr.FamilyCode, CONVERT(INT, ISNULL(sr.ServiceCode, 0))
+		FROM @tblServiceReferral sr
+		INNER JOIN @tblResidentOBPs ro ON sr.HVCasePK = ro.HVCasePK
+
+	--Service Referral info for second cohort
+	INSERT INTO @tblNonResidentOBPsServiceReferral
+		SELECT sr.HVCasePK, sr.ServiceReferralPK, sr.FamilyCode, CONVERT(INT, ISNULL(sr.ServiceCode, 0))
+		FROM @tblServiceReferral sr
+		INNER JOIN @tblNonResidentOBPs nro ON sr.HVCasePK = nro.HVCasePK
 
 	;WITH cteFirstHVLogInfo AS 
 	(
@@ -238,16 +264,16 @@ BEGIN
 		, (SELECT COUNT(ro.HVCasePK) FROM cteMoreThan10PostnatalHVLogs tphl INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = tphl.HVCasePK WHERE tphl.NumVisits >= 10) AS NumResident10PostnatalVisits
 		, (SELECT COUNT(nro.HVCasePK) FROM cteMoreThan10PostnatalHVLogs tphl INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = tphl.HVCasePK WHERE tphl.NumVisits >= 10) AS NumNonResident10PostnatalVisits
 		-- REFERRALS FOR OBPS SECTION
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03') AS NumResidentWithServiceReferrals
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03') AS NumNonResidentWithServiceReferrals
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03' AND (sr.ServiceCode >= 32 AND sr.ServiceCode <= 38)) AS NumResidentReferredParenting
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03' AND (sr.ServiceCode >= 32 AND sr.ServiceCode <= 38)) AS NumNonResidentReferredParenting
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03' AND (sr.ServiceCode = 49 or sr.ServiceCode = 50)) AS NumResidentReferredMental
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03' AND (sr.ServiceCode = 49 or sr.ServiceCode = 50)) AS NumNonResidentReferredMental
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03' AND sr.ServiceCode = 52) AS NumResidentReferredSubstance
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03' AND sr.ServiceCode = 52) AS NumNonResidentReferredSubstance
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03' AND sr.ServiceCode IN (46,47,48)) AS NumResidentReferredEmployment
-		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblServiceReferral sr INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = sr.HVCasePK WHERE sr.FamilyCode = '03' AND sr.ServiceCode IN (46,47,48)) AS NumNonResidentReferredEmployment
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03') AS NumResidentWithServiceReferrals
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblNonResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03') AS NumNonResidentWithServiceReferrals
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03' AND (sr.ServiceCode >= 32 AND sr.ServiceCode <= 38)) AS NumResidentReferredParenting
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblNonResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03' AND (sr.ServiceCode >= 32 AND sr.ServiceCode <= 38)) AS NumNonResidentReferredParenting
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03' AND (sr.ServiceCode = 49 or sr.ServiceCode = 50)) AS NumResidentReferredMental
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblNonResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03' AND (sr.ServiceCode = 49 or sr.ServiceCode = 50)) AS NumNonResidentReferredMental
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03' AND sr.ServiceCode = 52) AS NumResidentReferredSubstance
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblNonResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03' AND sr.ServiceCode = 52) AS NumNonResidentReferredSubstance
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03' AND sr.ServiceCode IN (46,47,48)) AS NumResidentReferredEmployment
+		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblNonResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03' AND sr.ServiceCode IN (46,47,48)) AS NumNonResidentReferredEmployment
 		FROM @tblMainCohort c
 		LEFT JOIN @tblDadInfo d ON d.HVCasePK = c.HVCasePK
 	)
