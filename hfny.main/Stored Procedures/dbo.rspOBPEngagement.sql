@@ -208,6 +208,7 @@ BEGIN
 			INNER JOIN @tblHVLog hl ON hl.HVCasePK = hc.HVCasePK
 			WHERE hl.VisitStartTime < CASE WHEN hc.TCDOB IS NULL THEN hc.EDC ELSE hc.TCDOB END
             AND hl.OBPParticipated = 1
+			AND hl.VisitStartTime < @EndDate
 	),
 
 	--Get all the cases in the second cohort with postnatal home visits where the OBP participated
@@ -217,6 +218,7 @@ BEGIN
 			INNER JOIN @tblHVLog hl ON hl.HVCasePK = hc.HVCasePK
 			WHERE hl.VisitStartTime > CASE WHEN hc.TCDOB IS NULL THEN hc.EDC ELSE hc.TCDOB END
             AND hl.OBPParticipated = 1
+			AND hl.VisitStartTime < @EndDate
 	),
 
 	--Get the home visits for cases with a discharge date
@@ -227,6 +229,7 @@ BEGIN
 			FROM @tblHVCaseInfo hc
 			INNER JOIN @tblHVLog hl ON hl.HVCasePK = hc.HVCasePK
 			WHERE hc.DischargeDate IS NOT NULL
+			AND hl.VisitStartTime < @EndDate
 	),
 
 	--Get cases and number of postnatal home visits from the second cohort home visit table where the OBP participated
@@ -237,6 +240,7 @@ BEGIN
 			INNER JOIN @tblHVLog hl ON hl.HVCasePK = hc.HVCasePK
 			WHERE hl.VisitStartTime > CASE WHEN hc.TCDOB IS NULL THEN hc.EDC ELSE hc.TCDOB END
 			AND hl.OBPParticipated = 1
+			AND hl.VisitStartTime < @EndDate
 			GROUP BY hc.HVCasePK
 	)
 
