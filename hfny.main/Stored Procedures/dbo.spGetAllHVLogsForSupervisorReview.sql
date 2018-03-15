@@ -90,8 +90,33 @@ begin
 				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
 	)
 	
-	select * from cteFormReview
+	select fr.FormReviewPK ,
+           fr.PC1ID ,
+           fr.codeFormName ,
+           fr.FormDate ,
+           fr.FormFK ,
+           fr.FormReviewCreateDate ,
+           fr.FormReviewCreator ,
+           fr.FormReviewEditDate ,
+           fr.FormReviewEditor ,
+           fr.FormType ,
+           fr.HVCaseFK ,
+           fr.ProgramFK ,
+           fr.ReviewDateTime ,
+           fr.ReviewedBy ,
+           fr.FormReviewStartDate ,
+           fr.FormReviewEndDate ,
+           fr.HVLogStatus ,
+           fr.CaseHomeLink ,
+           fr.FormLink ,
+           fr.EffectiveEndDate ,
+           fr.EffectiveStartDate ,
+           fr.HomeVisitorName ,
+           fr.WorkerName ,
+           fr.SupervisorName
+	from cteFormReview fr
 	order by convert(date,FormDate)
 
 end
+
 GO
