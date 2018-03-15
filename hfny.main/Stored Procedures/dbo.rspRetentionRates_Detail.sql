@@ -16,7 +16,7 @@ GO
 -- exec rspRetentionRatesByDischargeReason 1, '03/01/10', '02/29/12'
 -- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
 -- =============================================
-CREATE PROCEDURE [dbo].[rspRetentionRates_Detail]
+CREATE procedure [dbo].[rspRetentionRates_Detail]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @StartDate datetime
@@ -480,10 +480,112 @@ where DischargeReasonCode is NULL or DischargeReasonCode not in ('07', '17', '18
 order by PC1ID,IntakeDate
 --#endregion
 
-select *
+select PC1ID
+	 , IntakeDate
+	 , DischargeDate
+	 , LastHomeVisit
+	 , RetentionMonths
+	 , ActiveAt6Months
+	 , ActiveAt12Months
+	 , ActiveAt18Months
+	 , ActiveAt24Months
+	 , AgeAtIntake_Under18
+	 , AgeAtIntake_18UpTo20
+	 , AgeAtIntake_20UpTo30
+	 , AgeAtIntake_Over30
+	 , RaceWhite
+	 , RaceBlack
+	 , RaceHispanic
+	 , RaceOther
+	 , RaceUnknownMissing
+	 , MarriedAtIntake
+	 , MarriedAtDischarge
+	 , NeverMarriedAtIntake
+	 , NeverMarriedAtDischarge
+	 , SeparatedAtIntake
+	 , SeparatedAtDischarge
+	 , DivorcedAtIntake
+	 , DivorcedAtDischarge
+	 , WidowedAtIntake
+	 , WidowedAtDischarge
+	 , MarriedUnknownMissingAtIntake
+	 , MarriedUnknownMissingAtDischarge
+	 , OtherChildrenInHouseholdAtIntake
+	 , OtherChildrenInHouseholdAtDischarge
+	 , NoOtherChildrenInHouseholdAtIntake
+	 , NoOtherChildrenInHouseholdAtDischarge
+	 , ReceivingTANFAtIntake
+	 , ReceivingTANFAtDischarge
+	 , NotReceivingTANFAtIntake
+	 , NotReceivingTANFAtDischarge
+	 , MomScore
+	 , DadScore
+	 , PartnerScore
+	 , PC1EducationAtIntakeLessThan12
+	 , PC1EducationAtDischargeLessThan12
+	 , PC1EducationAtIntakeHSGED
+	 , PC1EducationAtDischargeHSGED
+	 , PC1EducationAtIntakeMoreThan12
+	 , PC1EducationAtDischargeMoreThan12
+	 , PC1EducationAtIntakeUnknownMissing
+	 , PC1EducationAtDischargeUnknownMissing
+	 , PC1EducationalEnrollmentAtIntakeYes
+	 , PC1EducationalEnrollmentAtDischargeYes
+	 , PC1EducationalEnrollmentAtIntakeNo
+	 , PC1EducationalEnrollmentAtDischargeNo
+	 , PC1EducationalEnrollmentAtIntakeUnknownMissing
+	 , PC1EducationalEnrollmentAtDischargeUnknownMissing
+	 , PC1EmploymentAtIntakeYes
+	 , PC1EmploymentAtDischargeYes
+	 , PC1EmploymentAtIntakeNo
+	 , PC1EmploymentAtDischargeNo
+	 , PC1EmploymentAtIntakeUnknownMissing
+	 , PC1EmploymentAtDischargeUnknownMissing
+	 , OBPInHouseholdAtIntake
+	 , OBPInHouseholdAtDischarge
+	 , OBPEmploymentAtIntakeYes
+	 , OBPEmploymentAtDischargeYes
+	 , OBPEmploymentAtIntakeNo
+	 , OBPEmploymentAtDischargeNo
+	 , OBPEmploymentAtIntakeNoOBP
+	 , OBPEmploymentAtDischargeNoOBP
+	 , OBPEmploymentAtIntakeUnknownMissing
+	 , OBPEmploymentAtDischargeUnknownMissing
+	 , PC2InHouseholdAtIntake
+	 , PC2InHouseholdAtDischarge
+	 , PC2EmploymentAtIntakeYes
+	 , PC2EmploymentAtDischargeYes
+	 , PC2EmploymentAtIntakeNo
+	 , PC2EmploymentAtDischargeNo
+	 , PC2EmploymentAtIntakeNoPC2
+	 , PC2EmploymentAtDischargeNoPC2
+	 , PC2EmploymentAtIntakeUnknownMissing
+	 , PC2EmploymentAtDischargeUnknownMissing
+	 , PC1OrPC2OrOBPEmployedAtIntakeYes
+	 , PC1OrPC2OrOBPEmployedAtDischargeYes
+	 , PC1OrPC2OrOBPEmployedAtIntakeNo
+	 , PC1OrPC2OrOBPEmployedAtDischargeNo
+	 , PC1OrPC2OrOBPEmployedAtIntakeUnknownMissing
+	 , PC1OrPC2OrOBPEmployedAtDischargeUnknownMissing
+	 , CountOfHomeVisits
+	 , DischargedOnLevelX
+	 , PC1DVAtIntake
+	 , PC1DVAtDischarge
+	 , PC1MHAtIntake
+	 , PC1MHAtDischarge
+	 , PC1SAAtIntake
+	 , PC1SAAtDischarge
+	 , PC1PrimaryLanguageAtIntakeEnglish
+	 , PC1PrimaryLanguageAtIntakeSpanish
+	 , PC1PrimaryLanguageAtIntakeOtherUnknown
+	 , TrimesterAtIntakePostnatal
+	 , TrimesterAtIntake3rd
+	 , TrimesterAtIntake2nd
+	 , TrimesterAtIntake1st
+	 , CountOfFSWs
 from @tblPC1withStats
 -- order by HVCaseFK_old
-order by pc1id, dischargereasoncode, RetentionMonths
+order by PC1ID
 
 end
 
