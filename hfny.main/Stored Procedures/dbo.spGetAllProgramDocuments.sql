@@ -15,14 +15,13 @@ BEGIN
 	SET NOCOUNT ON;
 
 	SELECT AttachmentPK
-	, REPLACE(AttachmentTitle, '.pdf', '') AS 'AttachmentTitle'
+	, replace(AttachmentTitle, '.pdf', '') as AttachmentTitle
 	, AttachmentDescription
-	, CONVERT(VARCHAR(10), FormDate, 111) AS 'FormDate'
-	, convert(varchar(25), AttachmentCreateDate, 126)
+	, convert(varchar(10), FormDate, 126) as FormDate
+	, convert(varchar(10), AttachmentCreateDate, 126) as AttachmentCreateDate
 	, AttachmentCreator
 	FROM Attachment
 	WHERE FormType = 'AD' AND ProgramFK = @programFK
 	ORDER BY AttachmentCreateDate DESC;
 END
-
 GO

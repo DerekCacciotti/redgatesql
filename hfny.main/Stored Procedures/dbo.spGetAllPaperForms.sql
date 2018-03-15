@@ -8,7 +8,7 @@ GO
 -- Description:	<Gets all Paper Forms from the Attachment table>
 -- =============================================
 
-create procedure [dbo].[spGetAllPaperForms]
+CREATE procedure [dbo].[spGetAllPaperForms]
 as
 	begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -19,8 +19,8 @@ as
 		select	AttachmentPK
 			  , replace(AttachmentTitle, '.pdf', '') as AttachmentTitle
 			  , AttachmentDescription
-			  , convert(varchar(10), FormDate, 101) as FormDate
-			  , AttachmentCreateDate
+			  , convert(varchar(10), FormDate, 126) as FormDate
+			  , convert(varchar(10), AttachmentCreateDate, 126) as AttachmentCreateDate
 			  , AttachmentCreator
 		from	Attachment a 
 		where	FormType = 'PF'

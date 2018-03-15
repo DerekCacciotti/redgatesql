@@ -21,10 +21,10 @@ as
 		select	CaseNotePK
 			  , CaseNoteContents
 			  , rtrim(left(CaseNoteContents, 55)) + '...' as CaseNoteExtract
-			  , CaseNoteCreateDate
+			  , convert(varchar(10), CaseNoteCreateDate, 126) as CaseNoteCreateDate
 			  , CaseNoteCreator
-			  , CaseNoteEditDate
-			  , convert(varchar(10), CaseNoteDate, 101) as CaseNoteDate
+			  , convert(varchar(10), CaseNoteEditDate, 126) as CaseNoteEditDate
+			  , convert(varchar(10), CaseNoteDate, 126) as CaseNoteDate
 			  , CaseNoteEditor
 			  , cn.HVCaseFK
 			  , cn.ProgramFK

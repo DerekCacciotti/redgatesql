@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -70,8 +69,8 @@ begin
 		  ,Defaults
 		  --,'O:'+rtrim(CriteriaOptions)+' D(calc):'+rtrim(dbo.CalculateReportDefaults([Defaults]))+' D(raw):'+rtrim([Defaults]) as DefaultsBag
 		  ,Keywords
-		  ,convert(varchar(10),UserLastRun,101) as UserLastRun
-		  ,convert(varchar(10),ProgramLastRun,101) as ProgramLastRun
+		  ,convert(varchar(10), UserLastRun, 126) as UserLastRun
+		  ,convert(varchar(10), ProgramLastRun, 126) as ProgramLastRun
 		  ,UserRank
 		  ,UserCount
 		  ,ProgramRank
