@@ -329,13 +329,13 @@ BEGIN
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.DomesticViolence IS NULL) AS NumNotInvolvedUnknownDomesticViolence
 		--Involved OBPs Kempe Score
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) >= 25) AS NumInvolvedPositiveOBPKempe
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) < 25) AS NumInvolvedNegativeOBPKempe
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) IS NULL) AS NumInvolvedUnknownOBPKempe
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) < 25 AND obp.DadScore <> '0') AS NumInvolvedNegativeOBPKempe
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) = 0) AS NumInvolvedUnknownOBPKempe
 		--Not Involved OBPs Kempe Score
 		--Kempe cutoff is currently 25 (as of 3/6/18)
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) >= 25) AS NumNotInvolvedPositiveOBPKempe
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) < 25) AS NumNotInvolvedNegativeOBPKempe
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) IS NULL) AS NumNotInvolvedUnknownOBPKempe
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) < 25 AND obp.DadScore <> '0') AS NumNotInvolvedNegativeOBPKempe
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) = 0) AS NumNotInvolvedUnknownOBPKempe
 		--Present at 10+ postnatal HVs
 		--Involved OBPs
 		, (SELECT COUNT(io.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblInvolvedOBPs io ON io.HVCasePK = h.HVCasePK WHERE h.NumVisits >= 10) AS NumInvolved10PostnatalVisits
