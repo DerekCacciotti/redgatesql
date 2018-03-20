@@ -120,6 +120,11 @@ BEGIN
 		OBPAgeAtTCBirth INT
 	)
 
+	DECLARE @tblMoreThan10PostnatalVisits TABLE (
+		HVCasePK INT,
+		NumVisits INT
+	)
+
 	--Get the main cohort
 	INSERT INTO @tblMainCohort
 		SELECT h.HVCasePK, MAX(cp.CaseProgramPK)
@@ -203,7 +208,7 @@ BEGIN
 		   INNER JOIN @tblNotInvolvedOBPs ni ON ni.HVCasePK = obp.HVCasePK
 
 	--Get cases and number of postnatal home visits from the second cohort home visit table where the OBP participated
-	;WITH cteMoreThan10PostnatalHVLogs AS (
+	INSERT INTO @tblMoreThan10PostnatalVisits
 		--Will be filtered by number of postnatal home visits (NumVisits >= 10)
 		SELECT hc.HVCasePK, COUNT(DISTINCT hl.HVLogPK) NumVisits
 			FROM @tblHVCaseInfo hc
@@ -212,10 +217,9 @@ BEGIN
 			WHERE hl.VisitStartTime > CASE WHEN hc.TCDOB IS NULL THEN hc.EDC ELSE hc.TCDOB END
 			AND hl.OBPParticipated = 1
 			GROUP BY hc.HVCasePK
-	)
 
 	--Get the results from the tables and CTEs
-	 ,cteResults AS (
+	 ;WITH cteResults AS (
 	 SELECT
 		--ACTIVE IN PERIOD SECTION
 		COUNT(c.HVCasePK) AS TotalActiveCases
@@ -333,8 +337,12 @@ BEGIN
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) < 25) AS NumNotInvolvedNegativeOBPKempe
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) IS NULL) AS NumNotInvolvedUnknownOBPKempe
 		--Present at 10+ postnatal HVs
-		, (SELECT COUNT(io.HVCasePK) FROM cteMoreThan10PostnatalHVLogs tphl INNER JOIN @tblInvolvedOBPs io ON io.HVCasePK = tphl.HVCasePK WHERE tphl.NumVisits >= 10) AS NumResident10PostnatalVisits
-		, (SELECT COUNT(nio.HVCasePK) FROM cteMoreThan10PostnatalHVLogs tphl INNER JOIN @tblNotInvolvedOBPs nio ON nio.HVCasePK = tphl.HVCasePK WHERE tphl.NumVisits >= 10) AS NumNonResident10PostnatalVisits
+		--Involved OBPs
+		, (SELECT COUNT(io.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblInvolvedOBPs io ON io.HVCasePK = h.HVCasePK WHERE h.NumVisits >= 10) AS NumInvolved10PostnatalVisits
+		, (SELECT COUNT(io.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblInvolvedOBPs io ON io.HVCasePK = h.HVCasePK WHERE h.NumVisits < 10) AS NumInvolvedNot10PostnatalVisits
+		--Not Involved OBPs
+		, (SELECT COUNT(nio.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblNotInvolvedOBPs nio ON nio.HVCasePK = h.HVCasePK WHERE h.NumVisits >= 10) AS NumNotInvolved10PostnatalVisits
+		, (SELECT COUNT(nio.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblNotInvolvedOBPs nio ON nio.HVCasePK = h.HVCasePK WHERE h.NumVisits < 10) AS NumNotInvolvedNot10PostnatalVisits
 		FROM @tblMainCohort c
 		LEFT JOIN @tblDadInfo d ON d.HVCasePK = c.HVCasePK
 	)
