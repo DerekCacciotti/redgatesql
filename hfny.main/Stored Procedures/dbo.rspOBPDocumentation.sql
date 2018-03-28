@@ -111,8 +111,9 @@ BEGIN
 	--Get the 'Dads as OBPs, active in period' cohort
 	INSERT INTO @tblCohortDadsAsOBPs
 		SELECT HVCasePK
-		FROM @tblDadInfo
-		WHERE (OBPGender = '02' AND OBPRelationToTC = '01') OR OBPRelationToTC IS NULL
+		FROM @tblDadInfo di
+		WHERE (di.OBPGender = '02' AND di.OBPRelationToTC = '01') OR 
+		((di.OBPRelationToTC IS NULL OR di.OBPGender = '') AND di.PC1Gender <> '02') --This allows cases that have unknown relationships with OBP to be counted
 
 	--Get information about the Screens that relate to the above cohort
 	INSERT INTO @tblSceenInfo
@@ -152,7 +153,7 @@ BEGIN
 	COUNT(DISTINCT c.HVCasePK) AS TotalActiveCases
 	, SUM(CASE WHEN d.PC1Gender = '02' AND d.PC1RelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsPC1
 	, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsOBP
-	, SUM(CASE WHEN d.OBPRelationToTC IS NULL THEN 1 ELSE 0 END) AS NumDadsOther
+	, SUM(CASE WHEN (d.OBPRelationToTC IS NULL OR d.OBPGender = '') AND d.PC1Gender <> '02' THEN 1 ELSE 0 END) AS NumDadsOther
 	, SUM(CASE WHEN s.HVScreenPK IS NOT NULL THEN 1 ELSE 0 END) AS NumScreensInPeriod
 	, SUM(CASE WHEN s.OBPInHome IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInHomeScreen
 	, SUM(CASE WHEN s.RiskNotMarried IN ('1', '2') THEN 1 ELSE 0 END) AS NumPC1MaritalStatus
