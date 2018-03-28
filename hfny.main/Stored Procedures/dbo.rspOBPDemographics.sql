@@ -26,12 +26,12 @@ BEGIN
 
 	--Declare the necessary tables
 	 DECLARE @tblMainCohort TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		CaseProgramPK INT
 	)
 
 	DECLARE @tblSecondaryCohort TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		CommonAttributesPK INT,
 		FormDate DATETIME,
 		IntakeDate DATETIME,
@@ -40,15 +40,15 @@ BEGIN
 	)
 
 	DECLARE @tblInvolvedOBPs TABLE (
-		HVCasePK INT
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED
 	)
 
 	DECLARE @tblNotInvolvedOBPs TABLE (
-		HVCasePK INT
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED
 	)
 
 	DECLARE @tblDadInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		IntakeDate DATETIME,
 		PC1PK INT,
 		PC1Gender CHAR(2),
@@ -59,13 +59,13 @@ BEGIN
 	)
 
 	DECLARE @tblHVCaseInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCDOB DATETIME,
 		EDC DATETIME
 	)
 
 	DECLARE @tblOBPInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
@@ -82,7 +82,7 @@ BEGIN
 	)
 
 	DECLARE @tblInvolvedOBPInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
@@ -99,7 +99,7 @@ BEGIN
 	)
 
 	DECLARE @tblNotInvolvedOBPInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
@@ -116,7 +116,7 @@ BEGIN
 	)
 
 	DECLARE @tblMoreThan10PostnatalVisits TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		NumVisits INT
 	)
 

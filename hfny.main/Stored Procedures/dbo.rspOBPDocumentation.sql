@@ -25,16 +25,16 @@ BEGIN
 
 	--Declare the necessary tables
 	 DECLARE @tblMainCohort TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		CaseProgramPK INT
 	)
 
 	DECLARE @tblCohortDadsAsOBPs TABLE (
-		HVCasePK INT
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED
 	)
 
 	DECLARE @tblDadInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		PC1PK INT,
 		PC1Gender CHAR(2),
 		PC1RelationToTC CHAR(2),
@@ -44,7 +44,7 @@ BEGIN
 	)
 
 	DECLARE @tblSceenInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		HVScreenPK INT,
 		ScreenDate DATETIME,
 		FormType CHAR(8),
@@ -53,7 +53,7 @@ BEGIN
 	)
 
 	DECLARE @tblAssessmentInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		KempePK INT,
 		FormDate DATETIME,
 		FormType CHAR(8),
@@ -62,7 +62,7 @@ BEGIN
 	)
 
 	DECLARE @tblIntakeInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		IntakePK INT,
 		IntakeDate DATETIME,
 		FormDate DATETIME,
