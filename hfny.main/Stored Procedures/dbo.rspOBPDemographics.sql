@@ -15,7 +15,7 @@ CREATE PROCEDURE [dbo].[rspOBPDemographics]
 	@EndDate	DATETIME = NULL
 AS
 BEGIN
-	--Set the ProgramFK
+--Set the ProgramFK
 	IF @ProgramFK IS NULL
 	BEGIN
 		SELECT @ProgramFK = SUBSTRING((SELECT ',' + LTRIM(RTRIM(STR(HVProgramPK)))
@@ -35,7 +35,6 @@ BEGIN
 		CommonAttributesPK INT,
 		FormDate DATETIME,
 		IntakeDate DATETIME,
-		OBPInHomeIntake BIT,
 		DischargeDate DATETIME,
 		OBPInvolvement CHAR(2)
 	)
@@ -50,7 +49,6 @@ BEGIN
 
 	DECLARE @tblDadInfo TABLE (
 		HVCasePK INT,
-		OBPInHomeIntake BIT,
 		IntakeDate DATETIME,
 		PC1PK INT,
 		PC1Gender CHAR(2),
@@ -71,7 +69,6 @@ BEGIN
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
-		OBPInHomeIntake BIT,
 		Race CHAR(2),
 		MaritalStatus CHAR(2),
 		HighestGrade CHAR(2),
@@ -89,7 +86,6 @@ BEGIN
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
-		OBPInHomeIntake BIT,
 		Race CHAR(2),
 		MaritalStatus CHAR(2),
 		HighestGrade CHAR(2),
@@ -107,7 +103,6 @@ BEGIN
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
-		OBPInHomeIntake BIT,
 		Race CHAR(2),
 		MaritalStatus CHAR(2),
 		HighestGrade CHAR(2),
@@ -131,13 +126,13 @@ BEGIN
 		FROM dbo.HVCase h 
 		INNER JOIN dbo.CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 		INNER JOIN dbo.SplitString(@ProgramFK, ',') ON cp.ProgramFK = ListItem
-		WHERE h.IntakeDate BETWEEN @StartDate AND @EndDate
+		WHERE h.IntakeDate <= @EndDate
 		AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @StartDate)
 		GROUP BY h.HVCasePK
 
 	--Get the information about the PC and OBP
 	INSERT INTO @tblDadInfo
-		SELECT h.HVCasePK, h.OBPinHomeIntake, h.IntakeDate, pc.PCPK, pc.Gender, h.PC1Relation2TC, obp.PCPK, obp.Gender, h.OBPRelation2TC
+		SELECT h.HVCasePK, h.IntakeDate, pc.PCPK, pc.Gender, h.PC1Relation2TC, obp.PCPK, obp.Gender, h.OBPRelation2TC
 		FROM @tblMainCohort c 
 		INNER JOIN dbo.HVCase h ON c.HVCasePK = h.HVCasePK
 		INNER JOIN dbo.PC pc ON pc.PCPK = h.PC1FK
@@ -145,7 +140,7 @@ BEGIN
 
 	--Get the 'Dads as OBPs, active in period, Residence as of Intake/Last FU' cohort
 	INSERT INTO @tblSecondaryCohort
-		SELECT di.HVCasePK, ca.CommonAttributesPK, ca.FormDate, di.IntakeDate, di.OBPInHomeIntake, cp.DischargeDate, ca.OBPInvolvement
+		SELECT di.HVCasePK, ca.CommonAttributesPK, ca.FormDate, di.IntakeDate, cp.DischargeDate, ca.OBPInvolvement
 		FROM @tblDadInfo di
 		INNER JOIN dbo.CaseProgram cp ON cp.HVCaseFK = di.HVCasePK			
 		INNER JOIN dbo.SplitString(@ProgramFK, ',') ON cp.ProgramFK = ListItem
@@ -155,7 +150,7 @@ BEGIN
 												INNER JOIN dbo.SplitString(@ProgramFK, ',') ON ca2.ProgramFK = ListItem
 												WHERE ca2.HVCaseFK = di.HVCasePK AND (ca2.FormType = 'FU' OR ca2.FormType = 'IN')
 												ORDER BY ca2.FormDate DESC)
-		WHERE OBPGender = '02' AND OBPRelationToTC = '01'
+		WHERE (OBPGender = '02' AND OBPRelationToTC = '01') OR ((di.OBPRelationToTC IS NULL OR di.OBPGender = '') AND di.PC1Gender <> '02')
 
 	--Get all the cases with resident OBPs at intake
 	INSERT INTO @tblInvolvedOBPs
@@ -177,31 +172,34 @@ BEGIN
 
 	--All OBP info
 	INSERT INTO @tblOBPInfo
-	SELECT c.HVCasePK, obp.PCPK, obp.PCDOB, ca.OBPInHome, c.OBPinHomeIntake, obp.Race, ca.MaritalStatus, ca.HighestGrade,
+	SELECT c.HVCasePK, obp.PCPK, obp.PCDOB, ca.OBPInHome, obp.Race, ca.MaritalStatus, ca.HighestGrade,
 		ca.EducationalEnrollment, ca.IsCurrentlyEmployed, i.DomesticViolence, k.DadScore, c.TCDOB, c.EDC,
 		--Get the OBP's age in years when the TC was born. Source: https://stackoverflow.com/questions/1572110/how-to-calculate-age-in-years-based-on-date-of-birth-and-getdate
 		(CONVERT(INT,CONVERT(CHAR(8),ISNULL(TCDOB, EDC),112))-CONVERT(char(8),obp.PCDOB,112))/10000 AS OBPAgeAtTCBirth
 		FROM @tblSecondaryCohort sc
 		INNER JOIN dbo.HVCase c ON c.HVCasePK = sc.HVCasePK
 		INNER JOIN dbo.Kempe k ON k.HVCaseFK = c.HVCasePK
-		INNER JOIN dbo.PC obp ON obp.PCPK = c.OBPFK
-		LEFT JOIN dbo.PC1Issues i ON i.HVCaseFK = c.HVCasePK
-		LEFT JOIN dbo.CommonAttributes ca ON  ca.CommonAttributesPK = 
+		LEFT JOIN dbo.PC obp ON obp.PCPK = c.OBPFK
+		LEFT JOIN dbo.PC1Issues i ON i.PC1IssuesPK = (SELECT TOP 1 p.PC1IssuesPK
+													FROM dbo.PC1Issues p
+													WHERE p.HVCaseFK = c.HVCasePK
+													ORDER BY CONVERT(INT, p.Interval) DESC)
+		LEFT JOIN dbo.CommonAttributes ca ON ca.CommonAttributesPK = 
 												(SELECT TOP 1 CommonAttributesPK 
 												FROM dbo.CommonAttributes ca2 			
 												INNER JOIN dbo.SplitString(@ProgramFK, ',') ON ca2.ProgramFK = ListItem
-												WHERE ca2.HVCaseFK = c.HVCasePK AND (ca2.FormType = 'FU-OBP')
+												WHERE ca2.HVCaseFK = c.HVCasePK AND (ca2.FormType = 'FU-OBP' OR ca2.FormType = 'ID')
 												ORDER BY ca2.FormDate DESC)
 
 	INSERT INTO @tblInvolvedOBPInfo
-	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome, obp.OBPInHomeIntake,
+	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome,
            obp.Race, obp.MaritalStatus, obp.HighestGrade, obp.EducationalEnrollment,
            obp.IsCurrentlyEmployed, obp.DomesticViolence, obp.DadScore, obp.TCDOB, obp.EDC, obp.OBPAgeAtTCBirth
 		   FROM @tblOBPInfo obp 
 		   INNER JOIN @tblInvolvedOBPs i ON i.HVCasePK = obp.HVCasePK
 
 	INSERT INTO @tblNotInvolvedOBPInfo
-	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome, obp.OBPInHomeIntake,
+	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome,
            obp.Race, obp.MaritalStatus, obp.HighestGrade, obp.EducationalEnrollment,
            obp.IsCurrentlyEmployed, obp.DomesticViolence, obp.DadScore, obp.TCDOB, obp.EDC, obp.OBPAgeAtTCBirth
 		   FROM @tblOBPInfo obp 
@@ -225,24 +223,24 @@ BEGIN
 		COUNT(c.HVCasePK) AS TotalActiveCases
 		, SUM(CASE WHEN d.PC1Gender = '02' AND d.PC1RelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsPC1
 		, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsOBP
-		, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC IS NULL THEN 1 ELSE 0 END) AS NumDadsOther
+		, SUM(CASE WHEN (d.OBPRelationToTC IS NULL OR d.OBPGender = '') AND d.PC1Gender <> '02' THEN 1 ELSE 0 END) AS NumDadsOther
 		--DADS AS OBPS, ACTIVE IN PERIOD: INVOLVEMENT AS OF INTAKE/LAST FU SECTION
-		, (SELECT COUNT(sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '01') AS NumFinanciallyInvolved
-		, (SELECT COUNT(sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '02') AS NumEmotionallyInvolved
-		, (SELECT COUNT(sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '03') AS NumFinanciallyAndEmotionallyInvolved
-		, (SELECT COUNT(sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '04') AS NumNotInvolved
-		, (SELECT COUNT(sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '05') AS NumDoesNotKnow
-		, (SELECT COUNT(sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '06' OR sc.OBPInvolvement IS NULL) AS NumOtherMissing
-		, (SELECT COUNT(sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '07') AS NumDeceased
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '01') AS NumFinanciallyInvolved
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '02') AS NumEmotionallyInvolved
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '03') AS NumFinanciallyAndEmotionallyInvolved
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '04') AS NumNotInvolved
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '05') AS NumDoesNotKnow
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '06' OR sc.OBPInvolvement IS NULL) AS NumOtherMissing
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '07') AS NumDeceased
 		--DADS AS OBPS, ACTIVE IN PERIOD, NOT DECEASED: ANSWERS AS OF INTAKE/LAST FU SECTION
-		, (SELECT COUNT(io.HVCasePK) FROM @tblInvolvedOBPs io) AS NumTotalInvolved
-		, (SELECT COUNT(nio.HVCasePK) FROM @tblNotInvolvedOBPs nio) AS NumTotalNotInvolved
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE ISNULL(CONVERT(BIT, obp.OBPInHome), obp.OBPInHomeIntake) = 1) AS NumInvolvedResident
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE ISNULL(CONVERT(BIT, obp.OBPInHome), obp.OBPInHomeIntake) = 1) AS NumNotInvolvedResident
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE ISNULL(CONVERT(BIT, obp.OBPInHome), obp.OBPInHomeIntake) = 0) AS NumInvolvedNotResident
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE ISNULL(CONVERT(BIT, obp.OBPInHome), obp.OBPInHomeIntake) = 0) AS NumNotInvolvedNotResident
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE ISNULL(CONVERT(BIT, obp.OBPInHome), obp.OBPInHomeIntake) IS NULL) AS NumInvolvedUnknown
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE ISNULL(CONVERT(BIT, obp.OBPInHome), obp.OBPInHomeIntake) IS NULL) AS NumNotInvolvedUnknown
+		, (SELECT COUNT(DISTINCT io.HVCasePK) FROM @tblInvolvedOBPs io) AS NumTotalInvolved
+		, (SELECT COUNT(DISTINCT nio.HVCasePK) FROM @tblNotInvolvedOBPs nio) AS NumTotalNotInvolved
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.OBPInHome = '1') AS NumInvolvedResident
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.OBPInHome = '1') AS NumNotInvolvedResident
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.OBPInHome = '0') AS NumInvolvedNotResident
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.OBPInHome = '0') AS NumNotInvolvedNotResident
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.OBPInHome IS NULL) AS NumInvolvedUnknown
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.OBPInHome IS NULL) AS NumNotInvolvedUnknown
 		--Involved OBPs age at TC's birth
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.OBPAgeAtTCBirth < 19) AS NumInvolvedUnder19
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.OBPAgeAtTCBirth >= 19 AND obp.OBPAgeAtTCBirth < 21) AS NumInvolved19To21
@@ -269,7 +267,7 @@ BEGIN
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '05') AS NumInvolvedNativeAmerican
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '06') AS NumInvolvedMultiracial
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '07') AS NumInvolvedOtherRace
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race IS NULL) AS NumInvolvedUnknownRace
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race IS NULL OR obp.Race = '') AS NumInvolvedUnknownRace
 		--Not Involved OBPs race
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '01') AS NumNotInvolvedWhite
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '02') AS NumNotInvolvedBlack
@@ -278,7 +276,7 @@ BEGIN
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '05') AS NumNotInvolvedNativeAmerican
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '06') AS NumNotInvolvedMultiracial
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '07') AS NumNotInvolvedOtherRace
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race IS NULL) AS NumNotInvolvedUnknownRace
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race IS NULL OR obp.Race = '') AS NumNotInvolvedUnknownRace
 		--Involved OBPs marital status
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.MaritalStatus = '01') AS NumInvolvedMarried
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.MaritalStatus = '02') AS NumInvolvedNotMarried
@@ -322,11 +320,11 @@ BEGIN
 		--Involved OBPs Domestic Violence
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.DomesticViolence = '1') AS NumInvolvedDomesticViolence
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.DomesticViolence = '0') AS NumInvolvedNoDomesticViolence
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.DomesticViolence IS NULL) AS NumInvolvedUnknownDomesticViolence
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.DomesticViolence IS NULL OR obp.DomesticViolence IN ('', '9')) AS NumInvolvedUnknownDomesticViolence
 		--Involved OBPs Domestic Violence
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.DomesticViolence = '1') AS NumNotInvolvedDomesticViolence
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.DomesticViolence = '0') AS NumNotInvolvedNoDomesticViolence
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.DomesticViolence IS NULL) AS NumNotInvolvedUnknownDomesticViolence
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.DomesticViolence IS NULL  OR obp.DomesticViolence IN ('', '9')) AS NumNotInvolvedUnknownDomesticViolence
 		--Involved OBPs Kempe Score
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) >= 25) AS NumInvolvedPositiveOBPKempe
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) < 25 AND obp.DadScore <> '0') AS NumInvolvedNegativeOBPKempe
@@ -338,15 +336,16 @@ BEGIN
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE CONVERT(INT, obp.DadScore) = 0) AS NumNotInvolvedUnknownOBPKempe
 		--Present at 10+ postnatal HVs
 		--Involved OBPs
-		, (SELECT COUNT(io.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblInvolvedOBPs io ON io.HVCasePK = h.HVCasePK WHERE h.NumVisits >= 10) AS NumInvolved10PostnatalVisits
-		, (SELECT COUNT(io.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblInvolvedOBPs io ON io.HVCasePK = h.HVCasePK WHERE h.NumVisits < 10) AS NumInvolvedNot10PostnatalVisits
+		, (SELECT COUNT(DISTINCT io.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblInvolvedOBPs io ON io.HVCasePK = h.HVCasePK WHERE h.NumVisits >= 10) AS NumInvolved10PostnatalVisits
+		, (SELECT COUNT(DISTINCT io.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblInvolvedOBPs io ON io.HVCasePK = h.HVCasePK WHERE h.NumVisits < 10) AS NumInvolvedNot10PostnatalVisits
 		--Not Involved OBPs
-		, (SELECT COUNT(nio.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblNotInvolvedOBPs nio ON nio.HVCasePK = h.HVCasePK WHERE h.NumVisits >= 10) AS NumNotInvolved10PostnatalVisits
-		, (SELECT COUNT(nio.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblNotInvolvedOBPs nio ON nio.HVCasePK = h.HVCasePK WHERE h.NumVisits < 10) AS NumNotInvolvedNot10PostnatalVisits
+		, (SELECT COUNT(DISTINCT nio.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblNotInvolvedOBPs nio ON nio.HVCasePK = h.HVCasePK WHERE h.NumVisits >= 10) AS NumNotInvolved10PostnatalVisits
+		, (SELECT COUNT(DISTINCT nio.HVCasePK) FROM @tblMoreThan10PostnatalVisits h INNER JOIN @tblNotInvolvedOBPs nio ON nio.HVCasePK = h.HVCasePK WHERE h.NumVisits < 10) AS NumNotInvolvedNot10PostnatalVisits
 		FROM @tblMainCohort c
 		LEFT JOIN @tblDadInfo d ON d.HVCasePK = c.HVCasePK
 	)
 
 	SELECT * FROM cteResults
 END
+   
 GO
