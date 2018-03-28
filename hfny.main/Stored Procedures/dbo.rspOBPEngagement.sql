@@ -126,7 +126,8 @@ BEGIN
 												INNER JOIN dbo.SplitString(@ProgramFK, ',') ON ca2.ProgramFK = ListItem
 												WHERE ca2.HVCaseFK = di.HVCasePK AND (ca2.FormType = 'FU-OBP' OR ca2.FormType = 'ID')
 												ORDER BY ca2.FormDate DESC)
-		WHERE (OBPGender = '02' AND OBPRelationToTC = '01') OR di.OBPRelationToTC IS NULL
+		WHERE (OBPGender = '02' AND OBPRelationToTC = '01') OR 
+		((di.OBPRelationToTC IS NULL OR di.OBPGender = '') AND di.PC1Gender <> '02') --This allows cases that have unknown relationships with OBP to be counted
 
 	--Get all the cases with resident OBPs at intake
 	INSERT INTO @tblResidentOBPs
@@ -251,7 +252,7 @@ BEGIN
 		COUNT(c.HVCasePK) AS TotalActiveCases
 		, SUM(CASE WHEN d.PC1Gender = '02' AND d.PC1RelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsPC1
 		, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsOBP
-		, SUM(CASE WHEN d.OBPRelationToTC IS NULL THEN 1 ELSE 0 END) AS NumDadsOther
+		, SUM(CASE WHEN (d.OBPRelationToTC IS NULL OR d.OBPGender = '') AND d.PC1Gender <> '02' THEN 1 ELSE 0 END) AS NumDadsOther
 		--DADS AS OBPS, ACTIVE IN PERIOD.... SECTION
 		, (SELECT COUNT(ro.HVCasePK) FROM @tblResidentOBPs ro) AS NumResidentOBPs
 		, (SELECT COUNT(nro.HVCasePK) FROM @tblNonResidentOBPs nro) AS NumNonResidentOBPs
