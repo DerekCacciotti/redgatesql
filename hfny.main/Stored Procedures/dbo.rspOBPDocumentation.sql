@@ -68,7 +68,7 @@ BEGIN
 		FormDate DATETIME,
 		FormType CHAR(8),
 		OBPInformationAvailable BIT,
-		OBPInHomeIntake bit,
+		OBPInHome CHAR(1),
 		OBPInvolvement CHAR(2)
 	)
 
@@ -96,7 +96,7 @@ BEGIN
 		FROM dbo.HVCase h 
 		INNER JOIN dbo.CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 		INNER JOIN dbo.SplitString(@ProgramFK, ',') ON cp.ProgramFK = ListItem
-		WHERE h.IntakeDate BETWEEN @StartDate AND @EndDate
+		WHERE h.IntakeDate <= @EndDate
 		AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @StartDate)
 		GROUP BY h.HVCasePK
 
@@ -112,7 +112,7 @@ BEGIN
 	INSERT INTO @tblCohortDadsAsOBPs
 		SELECT HVCasePK
 		FROM @tblDadInfo
-		WHERE OBPGender = '02' AND OBPRelationToTC = '01'
+		WHERE (OBPGender = '02' AND OBPRelationToTC = '01') OR OBPRelationToTC IS NULL
 
 	--Get information about the Screens that relate to the above cohort
 	INSERT INTO @tblSceenInfo
@@ -136,21 +136,23 @@ BEGIN
 
 	--Get information about the Intakes that relate to the above cohort
 	INSERT INTO @tblIntakeInfo
-		SELECT h.HVCasePK, i.IntakePK, i.IntakeDate, ca.FormDate, ca.FormType, h.OBPInformationAvailable, h.OBPinHomeIntake, ca.OBPInvolvement
+		SELECT h.HVCasePK, i.IntakePK, i.IntakeDate, intake.FormDate, intake.FormType, h.OBPInformationAvailable, id.OBPInHome, intake.OBPInvolvement
 		FROM @tblCohortDadsAsOBPs c
 		INNER JOIN dbo.HVCase h ON c.HVCasePK = h.HVCasePK
 		INNER JOIN dbo.Intake i ON i.HVCaseFK = h.HVCasePK
-		INNER JOIN dbo.CommonAttributes ca ON ca.HVCaseFK = h.HVCasePK AND ca.FormFK = i.IntakePK AND ca.FormType = 'IN'
-		INNER JOIN dbo.SplitString(@ProgramFK, ',') ON ca.ProgramFK = ListItem
-		WHERE ca.FormDate BETWEEN @StartDate AND @EndDate
+		INNER JOIN dbo.CommonAttributes intake ON intake.HVCaseFK = h.HVCasePK AND intake.FormType = 'IN'
+		INNER JOIN dbo.CommonAttributes id ON id.HVCaseFK = h.HVCasePK AND id.FormType = 'ID'
+		INNER JOIN dbo.SplitString(@ProgramFK, ',') ON intake.ProgramFK = ListItem AND id.ProgramFK = ListItem
+		WHERE intake.FormDate BETWEEN @StartDate AND @EndDate
+		AND id.FormDate BETWEEN @StartDate AND @EndDate
 
 	--Get the results
 	INSERT INTO @tblResults
 	SELECT
-	COUNT(c.HVCasePK) AS TotalActiveCases
+	COUNT(DISTINCT c.HVCasePK) AS TotalActiveCases
 	, SUM(CASE WHEN d.PC1Gender = '02' AND d.PC1RelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsPC1
 	, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsOBP
-	, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC IS NULL THEN 1 ELSE 0 END) AS NumDadsOther
+	, SUM(CASE WHEN d.OBPRelationToTC IS NULL THEN 1 ELSE 0 END) AS NumDadsOther
 	, SUM(CASE WHEN s.HVScreenPK IS NOT NULL THEN 1 ELSE 0 END) AS NumScreensInPeriod
 	, SUM(CASE WHEN s.OBPInHome IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInHomeScreen
 	, SUM(CASE WHEN s.RiskNotMarried IN ('1', '2') THEN 1 ELSE 0 END) AS NumPC1MaritalStatus
@@ -158,8 +160,8 @@ BEGIN
 	, SUM(CASE WHEN a.OBPInHome IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInHomeAssessment
 	, SUM(CASE WHEN a.DadScore <> '0' THEN 1 ELSE 0 END) AS NumOBPWithKScore
 	, SUM(CASE WHEN i.IntakePK IS NOT NULL THEN 1 ELSE 0 END) AS NumIntakeInPeriod
-	, SUM(CASE WHEN i.OBPInHomeIntake IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInHomeIntake
-	, SUM(CASE WHEN i.OBPInvolvement IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInvolvement
+	, SUM(CASE WHEN i.OBPInHome IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInHomeIntake
+	, SUM(CASE WHEN i.OBPInvolvement IS NOT NULL AND i.OBPInvolvement <> '' THEN 1 ELSE 0 END) AS NumOBPInvolvement
 	, SUM(CASE WHEN i.OBPInformationAvailable = 1 THEN 1 ELSE 0 END) AS NumOBPInfoAvailable
 	, SUM(CASE WHEN i.OBPInvolvement IN ('01', '02', '03') AND (i.OBPInformationAvailable IS NULL OR i.OBPInformationAvailable = 0) THEN 1 ELSE 0 END) AS NumInappropriateMissing
 	FROM @tblMainCohort c
