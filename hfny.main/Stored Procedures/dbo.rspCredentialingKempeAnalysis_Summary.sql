@@ -973,7 +973,7 @@ as
 					   '' as col3 ,
 					   '1' as col4
 			) ,
-	martial1
+	marital1
 		as
 			(
 				select sum(case when a.Status = '1' then 1
@@ -1100,10 +1100,10 @@ as
 						   end) as MaritalStatus06G3
 				from   #cteMain1 as a
 			) ,
-	martial2
+	marital2
 		as
 			(
-				select 'Martial Status' as [title] ,
+				select 'Marital Status' as [title] ,
 					   '' as col1 ,
 					   '' as col2 ,
 					   '' as col3 ,
@@ -1138,7 +1138,7 @@ as
 									 0) ,
 								 0)) + '%)' as col3 ,
 					   '1' as col4
-				from   martial1
+				from   marital1
 				union all
 				select '  Not Married' as [title] ,
 					   convert(varchar, MaritalStatus02G1) + ' ('
@@ -1169,7 +1169,7 @@ as
 									 0) ,
 								 0)) + '%)' as col3 ,
 					   '1' as col4
-				from   martial1
+				from   marital1
 				union all
 				select '  Separated' as [title] ,
 					   convert(varchar, MaritalStatus03G1) + ' ('
@@ -1200,7 +1200,7 @@ as
 									 0) ,
 								 0)) + '%)' as col3 ,
 					   '1' as col4
-				from   martial1
+				from   marital1
 				union all
 				select '  Divorced' as [title] ,
 					   convert(varchar, MaritalStatus04G1) + ' ('
@@ -1231,7 +1231,7 @@ as
 									 0) ,
 								 0)) + '%)' as col3 ,
 					   '1' as col4
-				from   martial1
+				from   marital1
 				union all
 				select '  Widowed' as [title] ,
 					   convert(varchar, MaritalStatus05G1) + ' ('
@@ -1262,7 +1262,7 @@ as
 									 0) ,
 								 0)) + '%)' as col3 ,
 					   '1' as col4
-				from   martial1
+				from   marital1
 				union all
 				select '  Unknown' as [title] ,
 					   convert(varchar, MaritalStatus06G1) + ' ('
@@ -1293,7 +1293,7 @@ as
 									 0) ,
 								 0)) + '%)' as col3 ,
 					   '1' as col4
-				from   martial1
+				from   marital1
 				union all
 				select '' as [title] ,
 					   '' as col1 ,
@@ -2907,7 +2907,7 @@ as
 				from   race2
 				union all
 				select *
-				from   martial2
+				from   marital2
 				union all
 				select *
 				from   edu2
