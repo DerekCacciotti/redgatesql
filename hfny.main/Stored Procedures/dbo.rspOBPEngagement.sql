@@ -31,7 +31,7 @@ BEGIN
 	)
 
 	DECLARE @tblSecondaryCohort TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		CommonAttributesPK INT,
 		FormDate DATETIME,
 		OBPInHome CHAR(1),
@@ -41,15 +41,15 @@ BEGIN
 	)
 
 	DECLARE @tblResidentOBPs TABLE (
-		HVCasePK INT
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED
 	)
 
 	DECLARE @tblNonResidentOBPs TABLE (
-		HVCasePK INT
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED
 	)
 
 	DECLARE @tblDadInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		OBPInHomeIntake BIT,
 		IntakeDate DATETIME,
 		PC1PK INT,
@@ -61,7 +61,7 @@ BEGIN
 	)
 
 	DECLARE @tblHVCaseInfo TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCDOB DATETIME,
 		EDC DATETIME,
 		FOBPresent BIT,
@@ -69,31 +69,63 @@ BEGIN
 	)
 
 	DECLARE @tblHVLog TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		HVLogPK INT,
 		VisitStartTime DATETIME,
 		OBPParticipated BIT
 	)
 
 	DECLARE @tblServiceReferral TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		ServiceReferralPK INT,
 		FamilyCode CHAR(2),
 		ServiceCode INT
 	)
 
 	DECLARE @tblResidentOBPsServiceReferral TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		ServiceReferralPK INT,
 		FamilyCode CHAR(2),
 		ServiceCode INT
 	)
 
 	DECLARE @tblNonResidentOBPsServiceReferral TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		ServiceReferralPK INT,
 		FamilyCode CHAR(2),
 		ServiceCode INT
+	)
+
+	DECLARE @tblFirstHVLogInfo TABLE
+	(
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
+		OBPParticipated BIT,
+		VisitStartTime DATETIME,
+		RowNum INT
+	)
+
+	DECLARE @tblPrenatalHVLogsInfo TABLE
+	(
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED
+	)
+
+	DECLARE @tblPostnatalHVLogsInfo TABLE
+	(
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED
+	)
+
+	DECLARE @tblDischargeHVLogInfo TABLE
+	(
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
+		OBPParticipated BIT,
+		VisitStartTime DATETIME,
+		RowNum INT
+	)
+
+	DECLARE @tblMoreThan10PostnatalHVLogs TABLE
+	(
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
+		NumVisits INT
 	)
 
 	--Get the main cohort
@@ -102,7 +134,7 @@ BEGIN
 		FROM dbo.HVCase h 
 		INNER JOIN dbo.CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
 		INNER JOIN dbo.SplitString(@ProgramFK, ',') ON cp.ProgramFK = ListItem
-		WHERE h.IntakeDate BETWEEN @StartDate AND @EndDate
+		WHERE h.IntakeDate <= @EndDate
 		AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @StartDate)
 		GROUP BY h.HVCasePK
 
@@ -124,9 +156,10 @@ BEGIN
 												(SELECT TOP 1 CommonAttributesPK 
 												FROM dbo.CommonAttributes ca2 			
 												INNER JOIN dbo.SplitString(@ProgramFK, ',') ON ca2.ProgramFK = ListItem
-												WHERE ca2.HVCaseFK = di.HVCasePK AND ca2.FormType = 'FU-OBP'
+												WHERE ca2.HVCaseFK = di.HVCasePK AND (ca2.FormType = 'FU-OBP' OR ca2.FormType = 'ID')
 												ORDER BY ca2.FormDate DESC)
-		WHERE OBPGender = '02' AND OBPRelationToTC = '01'
+		WHERE (OBPGender = '02' AND OBPRelationToTC = '01') OR 
+		((di.OBPRelationToTC IS NULL OR di.OBPGender = '') AND di.PC1Gender <> '02') --This allows cases that have unknown relationships with OBP to be counted
 
 	--Get all the cases with resident OBPs at intake
 	INSERT INTO @tblResidentOBPs
@@ -193,36 +226,32 @@ BEGIN
 		FROM @tblServiceReferral sr
 		INNER JOIN @tblNonResidentOBPs nro ON sr.HVCasePK = nro.HVCasePK
 
-	;WITH cteFirstHVLogInfo AS 
-	(
+	INSERT INTO @tblFirstHVLogInfo
 	--Get the first HVLog for each case by checking if RowNum = 1
 		SELECT hl.HVCasePK, hl.OBPParticipated, hl.VisitStartTime, 
 			ROW_NUMBER() OVER (PARTITION BY hl.HVCasePK ORDER BY hl.VisitStartTime ASC) AS RowNum
 			FROM @tblHVLog hl
-	),
 	
 	--Get all the cases in the second cohort with prenatal home visits where the OBP participated
-	ctePrenatalHVLogsInfo AS (
+	INSERT INTO @tblPrenatalHVLogsInfo
 		SELECT DISTINCT hc.HVCasePK
 			FROM @tblHVCaseInfo hc
 			INNER JOIN @tblHVLog hl ON hl.HVCasePK = hc.HVCasePK
 			WHERE hl.VisitStartTime < CASE WHEN hc.TCDOB IS NULL THEN hc.EDC ELSE hc.TCDOB END
             AND hl.OBPParticipated = 1
 			AND hl.VisitStartTime < @EndDate
-	),
 
 	--Get all the cases in the second cohort with postnatal home visits where the OBP participated
-	ctePostnatalHVLogsInfo AS (
+	INSERT INTO @tblPostnatalHVLogsInfo
 		SELECT DISTINCT hc.HVCasePK
 			FROM @tblHVCaseInfo hc
 			INNER JOIN @tblHVLog hl ON hl.HVCasePK = hc.HVCasePK
 			WHERE hl.VisitStartTime > CASE WHEN hc.TCDOB IS NULL THEN hc.EDC ELSE hc.TCDOB END
             AND hl.OBPParticipated = 1
 			AND hl.VisitStartTime < @EndDate
-	),
-
+			
 	--Get the home visits for cases with a discharge date
-	cteDischargeHVLogsInfo AS (
+	INSERT INTO @tblDischargeHVLogInfo
 		--Will be filtered by only taking the newest home visit (RowNum = 1)
 		SELECT hl.HVCasePK, hl.OBPParticipated, hl.VisitStartTime, 
 			ROW_NUMBER() OVER (PARTITION BY hl.HVCasePK ORDER BY hl.VisitStartTime DESC) AS RowNum
@@ -230,10 +259,9 @@ BEGIN
 			INNER JOIN @tblHVLog hl ON hl.HVCasePK = hc.HVCasePK
 			WHERE hc.DischargeDate IS NOT NULL
 			AND hl.VisitStartTime < @EndDate
-	),
-
+			
 	--Get cases and number of postnatal home visits from the second cohort home visit table where the OBP participated
-	cteMoreThan10PostnatalHVLogs AS (
+	INSERT INTO @tblMoreThan10PostnatalHVLogs
 		--Will be filtered by number of postnatal home visits (NumVisits >= 10)
 		SELECT hc.HVCasePK, COUNT(DISTINCT hl.HVLogPK) NumVisits
 			FROM @tblHVCaseInfo hc
@@ -242,31 +270,31 @@ BEGIN
 			AND hl.OBPParticipated = 1
 			AND hl.VisitStartTime < @EndDate
 			GROUP BY hc.HVCasePK
-	)
 
+			;with
 	--Get the results from the tables and CTEs
-	 ,cteResults AS (
+	 cteResults AS (
 	 SELECT
 		--ACTIVE IN PERIOD SECTION
 		COUNT(c.HVCasePK) AS TotalActiveCases
 		, SUM(CASE WHEN d.PC1Gender = '02' AND d.PC1RelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsPC1
 		, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsOBP
-		, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC IS NULL THEN 1 ELSE 0 END) AS NumDadsOther
+		, SUM(CASE WHEN (d.OBPRelationToTC IS NULL OR d.OBPGender = '') AND d.PC1Gender <> '02' THEN 1 ELSE 0 END) AS NumDadsOther
 		--DADS AS OBPS, ACTIVE IN PERIOD.... SECTION
 		, (SELECT COUNT(ro.HVCasePK) FROM @tblResidentOBPs ro) AS NumResidentOBPs
 		, (SELECT COUNT(nro.HVCasePK) FROM @tblNonResidentOBPs nro) AS NumNonResidentOBPs
 		, (SELECT COUNT(ci.HVCasePK) AS NumPresentAssessment FROM @tblHVCaseInfo ci INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = ci.HVCasePK WHERE ci.FOBPresent = 1) AS NumResidentPresentAssessment
 		, (SELECT COUNT(ci.HVCasePK) AS NumPresentAssessment FROM @tblHVCaseInfo ci INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = ci.HVCasePK WHERE ci.FOBPresent = 1) AS NumNonResidentPresentAssessment
-		, (SELECT COUNT(ro.HVCasePK) FROM cteFirstHVLogInfo fv INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = fv.HVCasePK WHERE fv.OBPParticipated = 1 AND fv.RowNum = 1) AS NumResidentPresentIntake
-		, (SELECT COUNT(nro.HVCasePK) FROM cteFirstHVLogInfo fv INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = fv.HVCasePK WHERE fv.OBPParticipated = 1 AND fv.RowNum = 1) AS NumNonResidentPresentIntake
-		, (SELECT COUNT(ro.HVCasePK) FROM ctePrenatalHVLogsInfo pv INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = pv.HVCasePK) AS NumResidentPrenatal
-		, (SELECT COUNT(nro.HVCasePK) FROM ctePrenatalHVLogsInfo pv INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = pv.HVCasePK) AS NumNonResidentPrenatal
-		, (SELECT COUNT(ro.HVCasePK) FROM ctePostnatalHVLogsInfo pv INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = pv.HVCasePK) AS NumResidentPostnatal
-		, (SELECT COUNT(nro.HVCasePK) FROM ctePostnatalHVLogsInfo pv INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = pv.HVCasePK) AS NumNonResidentPostnatal
-		, (SELECT COUNT(ro.HVCasePK) FROM cteDischargeHVLogsInfo dhl INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = dhl.HVCasePK WHERE dhl.OBPParticipated = 1 AND dhl.RowNum = 1) AS NumResidentDischarge
-		, (SELECT COUNT(nro.HVCasePK) FROM cteDischargeHVLogsInfo dhl INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = dhl.HVCasePK WHERE dhl.OBPParticipated = 1 AND dhl.RowNum = 1) AS NumNonResidentDischarge
-		, (SELECT COUNT(ro.HVCasePK) FROM cteMoreThan10PostnatalHVLogs tphl INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = tphl.HVCasePK WHERE tphl.NumVisits >= 10) AS NumResident10PostnatalVisits
-		, (SELECT COUNT(nro.HVCasePK) FROM cteMoreThan10PostnatalHVLogs tphl INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = tphl.HVCasePK WHERE tphl.NumVisits >= 10) AS NumNonResident10PostnatalVisits
+		, (SELECT COUNT(ro.HVCasePK) FROM @tblFirstHVLogInfo fv INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = fv.HVCasePK WHERE fv.OBPParticipated = 1 AND fv.RowNum = 1) AS NumResidentPresentIntake
+		, (SELECT COUNT(nro.HVCasePK) FROM @tblFirstHVLogInfo fv INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = fv.HVCasePK WHERE fv.OBPParticipated = 1 AND fv.RowNum = 1) AS NumNonResidentPresentIntake
+		, (SELECT COUNT(ro.HVCasePK) FROM @tblPrenatalHVLogsInfo pv INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = pv.HVCasePK) AS NumResidentPrenatal
+		, (SELECT COUNT(nro.HVCasePK) FROM @tblPrenatalHVLogsInfo pv INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = pv.HVCasePK) AS NumNonResidentPrenatal
+		, (SELECT COUNT(ro.HVCasePK) FROM @tblPostnatalHVLogsInfo pv INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = pv.HVCasePK) AS NumResidentPostnatal
+		, (SELECT COUNT(nro.HVCasePK) FROM @tblPostnatalHVLogsInfo pv INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = pv.HVCasePK) AS NumNonResidentPostnatal
+		, (SELECT COUNT(ro.HVCasePK) FROM @tblDischargeHVLogInfo dhl INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = dhl.HVCasePK WHERE dhl.OBPParticipated = 1 AND dhl.RowNum = 1) AS NumResidentDischarge
+		, (SELECT COUNT(nro.HVCasePK) FROM @tblDischargeHVLogInfo dhl INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = dhl.HVCasePK WHERE dhl.OBPParticipated = 1 AND dhl.RowNum = 1) AS NumNonResidentDischarge
+		, (SELECT COUNT(ro.HVCasePK) FROM @tblMoreThan10PostnatalHVLogs tphl INNER JOIN @tblResidentOBPs ro ON ro.HVCasePK = tphl.HVCasePK WHERE tphl.NumVisits >= 10) AS NumResident10PostnatalVisits
+		, (SELECT COUNT(nro.HVCasePK) FROM @tblMoreThan10PostnatalHVLogs tphl INNER JOIN @tblNonResidentOBPs nro ON nro.HVCasePK = tphl.HVCasePK WHERE tphl.NumVisits >= 10) AS NumNonResident10PostnatalVisits
 		-- REFERRALS FOR OBPS SECTION
 		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03') AS NumResidentWithServiceReferrals
 		, (SELECT COUNT(DISTINCT sr.HVCasePK) FROM @tblNonResidentOBPsServiceReferral sr WHERE sr.FamilyCode = '03') AS NumNonResidentWithServiceReferrals
