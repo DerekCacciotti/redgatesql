@@ -138,10 +138,9 @@ as
 	                               )
 	SELECT hvcasefk, followuppk
 	FROM dbo.FollowUp fu
-	WHERE DATEADD(dd, 365, fu.FollowUpDate) < GETDATE() --must have occurred in past year
+	inner join dbo.SplitString(@programfk,',') on fu.ProgramFK = ListItem
+	WHERE GETDATE() <= dateadd(dd, 365, fu.FollowUpDate)  --must have occurred in past year
 	AND fu.CPSACSReport = 1
-
-
 	
 	UPDATE PR 
 	SET PR.cpsreport = 'Yes'
