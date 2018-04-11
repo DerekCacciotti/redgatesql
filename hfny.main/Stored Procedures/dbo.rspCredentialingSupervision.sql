@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Devinder Singh Khalsa
 -- Create date: August 8, 2013
@@ -983,6 +982,7 @@ SELECT WorkerName
 		 ,asn.AssignedSupervisorName
 		 
 		 ,twrkr.ScheduledDayName as ScheduledDayName
+		 ,twrkr.SupervisionScheduledDay
 		 ,convert(varchar(12),twrkr.sDate,101) as AdjustedStartDate
 		 ----,@DayofWeek as DayNameSelectedByUser
 		 --, w.FTEFullTime AS FTEFullTime
