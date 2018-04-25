@@ -9,6 +9,7 @@ GO
 -- Description: <copied from FamSys - see header below>
 -- Edit date: 5/17/17 Bug fix - Report not displaying FAWs that have Kempes and no supervisor observations (Benjamin Simmons)
 -- Edit date: 5/30/17 Bug fix - Supervisor not always displaying correctly for FAWs that have no supervisor observations
+-- Edit date: 4/23/2018 Bug fix - Ticket #3992 - Yates worker (active in two programs) was duplicating every observation (Chris Papas)
 -- =============================================
 CREATE procedure [dbo].[rspKempeObservationBySupervisor]
 (
@@ -62,7 +63,7 @@ as
 			inner join CaseProgram cp on cp.HVCaseFK = observed.hvcasepk --and cp.CurrentFAWFK = top5.FAWFK
 			inner join dbo.SplitString(@programfk,',') on cp.programfk = ListItem --Restrict to the programs selected
 			right join Worker w on w.WorkerPK = observed.FAWFK --Include workers who do not have observed kempes
-			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK --and wp.ProgramFK = ListItem
+			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = ListItem  --UNREMARKED 'and wp.ProgramFK = ListItem 4/23/2018 Bug fix (Chris Papas)
 			left outer join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
 			where w.WorkerPK in (select FAWFK from cteWorkerCohort)
 				and wp.TerminationDate is null
