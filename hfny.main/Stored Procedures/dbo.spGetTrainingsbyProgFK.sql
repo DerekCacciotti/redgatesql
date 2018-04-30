@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +7,7 @@ GO
 -- Create date: 7/11/2012
 -- Description:	Gets Training List by program for the TrainingHome.aspx page
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetTrainingsbyProgFK]
+CREATE procedure [dbo].[spGetTrainingsbyProgFK]
 	-- Add the parameters for the stored procedure here
 	@ProgFK AS int
 AS
@@ -26,7 +25,7 @@ BEGIN
 		  ,tr.[TrainingMethodFK]
 		  ,tr.[TrainingCreateDate]
 		  ,tr.[TrainingCreator]
-		  ,tr.[TrainingDate]
+		  , convert(varchar(10), tr.[TrainingDate], 126) as TrainingDate
 		  ,tr.[TrainingDays]
 		  ,tr.[TrainingDescription]
 		  ,tr.[TrainingDuration]
