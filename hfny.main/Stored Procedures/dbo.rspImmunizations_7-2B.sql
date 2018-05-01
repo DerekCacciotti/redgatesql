@@ -339,8 +339,8 @@ BEGIN
 	UPDATE @tblResults SET HFNumReceived18Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND GroupBy = 18)
 
 	--Update the percent of cases that meet
-	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL(4,2), (HFNumReceived6Month + HFNumExceptions6Month)) /  @NumDue6Month))
-	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL(4,2), (HFNumReceived18Month + HFNumExceptions18Month)) / @NumDue18Month))
+	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived6Month + HFNumExceptions6Month)) /  @NumDue6Month))
+	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived18Month + HFNumExceptions18Month)) / @NumDue18Month))
 	
 	--Update the scores for the program
 	UPDATE @tblResults SET HFScore6Month = CASE WHEN HFPercentMeeting6Month >= 0.90 THEN '3' 
