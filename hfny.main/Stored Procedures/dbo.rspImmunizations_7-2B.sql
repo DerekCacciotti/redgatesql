@@ -117,6 +117,19 @@ BEGIN
 		GroupNum INT
 	)
 
+	DECLARE @tblCreativeOutreachDates TABLE (
+		HVCasePK INT,
+		StartDate DATETIME,
+		EndDate DATETIME,
+		Cohort INT
+	)
+
+	DECLARE @tblCreativeOutreachDatesCombined TABLE (
+		HVCasePK INT,
+		Dates VARCHAR(MAX),
+		Cohort INT
+	)
+
 	--The results table
 	DECLARE @tblResults TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
@@ -141,7 +154,7 @@ BEGIN
 		NumShotsRequired INT,
 		NumShotsReceived INT,
 		PercentUpToDate DECIMAL(4,2),
-		CreativeOutreachDates VARCHAR(30),
+		CreativeOutreachDates VARCHAR(MAX),
 		Meeting VARCHAR(3),
 		ReasonNotMeeting VARCHAR(MAX),
 		Exempt BIT
@@ -260,21 +273,42 @@ BEGIN
 		SELECT HVCasePK, TCIDFK, STUFF((SELECT ', ' + Meeting AS [text()] FROM @tblMeeting18Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Meeting <> 'Meeting' FOR XML PATH('')), 1, 2, ''), 18
 		FROM @tblMeeting18Month mt2
 
+	INSERT INTO @tblCreativeOutreachDates
+		SELECT coh.HVCasePK, hvl.StartLevelDate, hvl.EndLevelDate, 6
+		FROM @tblCohort6Month coh
+		INNER JOIN dbo.HVLevelDetail hvl ON coh.HVCasePK = hvl.HVCaseFK
+		INNER JOIN dbo.SplitString(@ProgramFK,',') on hvl.ProgramFK = listitem
+		WHERE hvl.LevelName LIKE '%Level X%'
+
+	INSERT INTO @tblCreativeOutreachDates
+		SELECT coh.HVCasePK, hvl.StartLevelDate, hvl.EndLevelDate, 18
+		FROM @tblCohort18Month coh
+		INNER JOIN dbo.HVLevelDetail hvl ON coh.HVCasePK = hvl.HVCaseFK
+		INNER JOIN dbo.SplitString(@ProgramFK,',') on hvl.ProgramFK = listitem
+		WHERE hvl.LevelName LIKE '%Level X%'
+
+	INSERT INTO @tblCreativeOutreachDatesCombined
+		SELECT DISTINCT mt2.HVCasePK, STUFF((SELECT ' Start: ' + CONVERT(VARCHAR(10), mt.StartDate, 101) + ' End: ' + CONVERT(VARCHAR(10), mt.EndDate, 101) AS [text()] FROM @tblCreativeOutreachDates mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Cohort = mt2.Cohort FOR XML PATH('')), 1, 1, ''), mt2.Cohort
+		FROM @tblCreativeOutreachDates mt2
+
 	--Insert the 6 month cohort into the results table
 	INSERT INTO @tblResults
-		(HVCasePK, GroupBy, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt)
-		SELECT DISTINCT coh.HVCasePK, 6, coh.PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt
+		(HVCasePK, GroupBy, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt, CreativeOutreachDates)
+		SELECT DISTINCT coh.HVCasePK, 6, coh.PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
 		FROM @tblCohort6Month coh
 		INNER JOIN @tblNumImmunizations6Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDFK = coh.TCIDPK
 		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDFK = coh.TCIDPK AND reason.GroupNum = 6
+		LEFT JOIN @tblCreativeOutreachDatesCombined levelx ON levelx.HVCasePK = coh.HVCasePK AND levelx.Cohort = 6
+		
 
 	--Insert the 18 month cohort into the results table
 	INSERT INTO @tblResults
-		(HVCasePK, GroupBy, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt)
-		SELECT DISTINCT coh.HVCasePK, 18, coh.PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt
+		(HVCasePK, GroupBy, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt, CreativeOutreachDates)
+		SELECT DISTINCT coh.HVCasePK, 18, coh.PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
 		FROM @tblCohort18Month coh
 		INNER JOIN @tblNumImmunizations18Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDFK = coh.TCIDPK
 		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDFK = coh.TCIDPK AND reason.GroupNum = 18
+		LEFT JOIN @tblCreativeOutreachDatesCombined levelx ON levelx.HVCasePK = coh.HVCasePK AND levelx.Cohort = 18
 
 	--UPDATE @tblResults SET HFNumDueFor6Month = 1, HFNumReceived6Month = 1, HFPercentMeeting6Month = .75, HFScore6Month = 'A',
 	--	HFNumDueFor18Month = 1, HFNumReceived18Month = 1, HFPercentMeeting18Month = .75, HFScore18Month = 'A'
@@ -307,7 +341,7 @@ BEGIN
 	--Update the percent of cases that meet
 	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL(4,2), (HFNumReceived6Month + HFNumExceptions6Month)) /  @NumDue6Month))
 	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL(4,2), (HFNumReceived18Month + HFNumExceptions18Month)) / @NumDue18Month))
-
+	
 	--Update the scores for the program
 	UPDATE @tblResults SET HFScore6Month = CASE WHEN HFPercentMeeting6Month >= 0.90 THEN '3' 
 												WHEN HFPercentMeeting6Month < 0.90 AND HFPercentMeeting6Month >= 0.75 THEN '2'
