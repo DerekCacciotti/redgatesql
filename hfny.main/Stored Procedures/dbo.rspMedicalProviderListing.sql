@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -40,14 +39,10 @@ as
 			inner join CaseProgram cp on cp.hvcasefk = ca.hvcasefk
 			inner join HVCase c on c.HVCasePK = cp.HVCaseFK 
 			inner join dbo.SplitString(@programfk, ',') on cp.programfk = listitem
-			left join listMedicalProvider pc1mp 
-					on pc1mp.listmedicalproviderpk = ca.pc1medicalproviderfk
-			left join listMedicalProvider tcmp 
-					on tcmp.listmedicalproviderpk = ca.tcmedicalproviderfk
-			left join listMedicalFacility pc1mf 
-					on pc1mf.listmedicalfacilitypk = ca.pc1medicalfacilityfk
-			left join listMedicalFacility tcmf 
-					on tcmf.listmedicalfacilitypk = ca.tcmedicalfacilityfk
+			left join listMedicalProvider pc1mp on pc1mp.listmedicalproviderpk = ca.pc1medicalproviderfk
+			left join listMedicalProvider tcmp on tcmp.listmedicalproviderpk = ca.tcmedicalproviderfk
+			left join listMedicalFacility pc1mf on pc1mf.listmedicalfacilitypk = ca.pc1medicalfacilityfk
+			left join listMedicalFacility tcmf on tcmf.listmedicalfacilitypk = ca.tcmedicalfacilityfk
 			where convert(datetime,FormDate,112)+CommonAttributesPK in 
 					(select CAMatchingKey=max(convert(datetime,FormDate,112)+CommonAttributesPK)
 						from CommonAttributes cainner
@@ -146,7 +141,7 @@ as
 			inner join tcid on tcidpk = formfk
 					and formtype = 'TC'
 			inner join caseprogram on caseprogram.hvcasefk = ca.hvcasefk
-					and caseprogram.programfk = ca.programfk
+					and caseprogram.programfk = @programfk
 			inner join HVCase c on c.HVCasePK = caseprogram.HVCaseFK 
 			inner join dbo.SplitString(@programfk, ',') on caseprogram.programfk = listitem
 			left join listMedicalProvider tcmp 
