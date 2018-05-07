@@ -73,6 +73,99 @@ AS
 Update CaseProgram Set CaseProgram.CaseProgramEditDate= getdate()
 From [CaseProgram] INNER JOIN Inserted ON [CaseProgram].[CaseProgramPK]= Inserted.[CaseProgramPK]
 GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author:		jayrobot
+-- Create date: 2018-05-03
+-- Description:	Writes a row to the CaseProgramDeleted 
+--				when a Caseprogram, row was deleted	
+-- =============================================
+create trigger [dbo].[tr_delete_caseprogram]
+   on [dbo].[CaseProgram]
+   after delete 
+as
+begin
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for trigger here
+	Declare @PC1ID varchar(13)
+
+	set @PC1ID = (SELECT PC1ID from deleted)
+
+	begin
+
+		INSERT INTO	CaseProgramDeleted
+			(
+				CaseProgramCreateDate
+			, CaseProgramCreator
+			, CaseProgramEditDate
+			, CaseProgramEditor
+			, CaseStartDate
+			, CurrentFAFK
+			, CurrentFAWFK
+			, CurrentFSWFK
+			, CurrentLevelDate
+			, CurrentLevelFK
+			, DischargeDate
+			, DischargeReason
+			, DischargeReasonSpecify
+			, ExtraField1
+			, ExtraField2
+			, ExtraField3
+			, ExtraField4
+			, ExtraField5
+			, ExtraField6
+			, ExtraField7
+			, ExtraField8
+			, ExtraField9
+			, HVCaseFK
+			, HVCaseFK_old
+			, OldID
+			, PC1ID
+			, ProgramFK
+			, TransferredtoProgram
+			, TransferredtoProgramFK
+			, TransferredStatus
+			)
+			select Deleted.CaseProgramCreateDate
+			, Deleted.CaseProgramCreator
+			, Deleted.CaseProgramEditDate
+			, Deleted.CaseProgramEditor
+			, Deleted.CaseStartDate
+			, Deleted.CurrentFAFK
+			, Deleted.CurrentFAWFK
+			, Deleted.CurrentFSWFK
+			, Deleted.CurrentLevelDate
+			, Deleted.CurrentLevelFK
+			, Deleted.DischargeDate
+			, Deleted.DischargeReason
+			, Deleted.DischargeReasonSpecify
+			, Deleted.ExtraField1
+			, Deleted.ExtraField2
+			, Deleted.ExtraField3
+			, Deleted.ExtraField4
+			, Deleted.ExtraField5
+			, Deleted.ExtraField6
+			, Deleted.ExtraField7
+			, Deleted.ExtraField8
+			, Deleted.ExtraField9
+			, Deleted.HVCaseFK
+			, Deleted.HVCaseFK_old
+			, Deleted.OldID
+			, Deleted.PC1ID
+			, Deleted.ProgramFK
+			, Deleted.TransferredtoProgram
+			, Deleted.TransferredtoProgramFK
+			, Deleted.TransferredStatus
+		from Deleted WHERE Deleted.PC1ID = @PC1ID
+	end
+end
+GO
 ALTER TABLE [dbo].[CaseProgram] ADD CONSTRAINT [PK_CaseProgram] PRIMARY KEY CLUSTERED  ([CaseProgramPK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentFAFK] ON [dbo].[CaseProgram] ([CurrentFAFK]) ON [PRIMARY]
