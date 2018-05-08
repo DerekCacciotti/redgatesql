@@ -288,7 +288,7 @@ BEGIN
 		WHERE hvl.LevelName LIKE '%Level X%'
 
 	INSERT INTO @tblCreativeOutreachDatesCombined
-		SELECT DISTINCT mt2.HVCasePK, STUFF((SELECT ' Start: ' + CONVERT(VARCHAR(10), mt.StartDate, 101) + ' End: ' + CONVERT(VARCHAR(10), mt.EndDate, 101) AS [text()] FROM @tblCreativeOutreachDates mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Cohort = mt2.Cohort FOR XML PATH('')), 1, 1, ''), mt2.Cohort
+		SELECT DISTINCT mt2.HVCasePK, STUFF((SELECT ' | ' + CONVERT(VARCHAR(10), mt.StartDate, 101) + ' - ' + CONVERT(VARCHAR(10), mt.EndDate, 101) AS [text()] FROM @tblCreativeOutreachDates mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Cohort = mt2.Cohort FOR XML PATH('')), 1, 2, ''), mt2.Cohort
 		FROM @tblCreativeOutreachDates mt2
 
 	--Insert the 6 month cohort into the results table
