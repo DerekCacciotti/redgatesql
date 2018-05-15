@@ -49,12 +49,16 @@ BEGIN
 	)
 
 	DECLARE @tblRequiredImmunizations6Month TABLE (
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
+		TCIDPK INT,
 		MedicalItemCode CHAR(2),
 		ScheduledEvent VARCHAR(50),
 		NumImmunizationsRequired INT
 	)
 
 	DECLARE @tblRequiredImmunizations18Month TABLE (
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
+		TCIDPK INT,
 		MedicalItemCode CHAR(2),
 		ScheduledEvent VARCHAR(50),
 		NumImmunizationsRequired INT
@@ -196,21 +200,21 @@ BEGIN
 
 	--Get the required immunizations for both cohorts
 	INSERT INTO @tblRequiredImmunizations6Month
-		SELECT item.MedicalItemCode, due.ScheduledEvent, MAX(due.frequency) numRequired
-		FROM dbo.codeDueByDates due 
+		SELECT DISTINCT HVCasePK, TCIDPK, item.MedicalItemCode, due.ScheduledEvent, MAX(due.frequency) numRequired
+		FROM @tblCohort6Month, dbo.codeDueByDates due 
 		INNER JOIN dbo.codeMedicalItem item ON due.ScheduledEvent = item.MedicalItemTitle
 		WHERE due.ScheduledEvent IN ('DTaP', 'HEP-B', 'HIB', 'PCV', 'Polio', 'Roto', 'Flu', 'MMR', 'HEP-A', 'VZ')
 		AND CONVERT(INT, due.Interval) <= 6
-		GROUP BY MedicalItemCode, ScheduledEvent
+		GROUP BY HVCasePK, TCIDPK, MedicalItemCode, ScheduledEvent
 
 		--Get the required immunizations for both cohorts
 	INSERT INTO @tblRequiredImmunizations18Month
-		SELECT item.MedicalItemCode, due.ScheduledEvent, MAX(due.frequency) numRequired
-		FROM dbo.codeDueByDates due 
+		SELECT DISTINCT HVCasePK, TCIDPK, item.MedicalItemCode, due.ScheduledEvent, MAX(due.frequency) numRequired
+		FROM @tblCohort18Month, dbo.codeDueByDates due 
 		INNER JOIN dbo.codeMedicalItem item ON due.ScheduledEvent = item.MedicalItemTitle
 		WHERE due.ScheduledEvent IN ('DTaP', 'HEP-B', 'HIB', 'PCV', 'Polio', 'Roto', 'Flu', 'MMR', 'HEP-A', 'VZ')
 		AND CONVERT(INT, due.Interval) <= 18
-		GROUP BY MedicalItemCode, ScheduledEvent
+		GROUP BY HVCasePK, TCIDPK, MedicalItemCode, ScheduledEvent
 
 	INSERT INTO @tblReceivedImmunizations
 		SELECT DISTINCT coh.HVCasePK, med.TCIDFK, med.TCItemDate, med.TCMedicalPK, med.TCMedicalItem, item.MedicalItemTitle,  6
@@ -249,20 +253,20 @@ BEGIN
 		GROUP BY HVCasePK, TCIDFK
 
 	INSERT INTO @tblMeeting6Month
-		SELECT HVCasePK, TCIDFK, CASE WHEN req.NumImmunizationsRequired IS NULL THEN TRIM(TCMedicalItemTitle) + ' Missing' ELSE 'Meeting' END AS Meeting
+		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN TRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
 		FROM
-		@tblReceivedImmunizations6Month rec
-		LEFT JOIN 
 		@tblRequiredImmunizations6Month req
-		ON rec.TCMedicalItem = req.MedicalItemCode AND rec.NumImmunizationsReceived >= req.NumImmunizationsRequired
+		LEFT JOIN 
+		@tblReceivedImmunizations6Month rec
+		ON req.HVCasePK = rec.HVCasePK AND MedicalItemCode = TCMedicalItem
 
 	INSERT INTO @tblMeeting18Month
-		SELECT HVCasePK, TCIDFK, CASE WHEN req.NumImmunizationsRequired IS NULL THEN TRIM(TCMedicalItemTitle) + ' Missing' ELSE 'Meeting' END AS Meeting
+		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN TRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
 		FROM
-		@tblReceivedImmunizations18Month rec
-		LEFT JOIN 
 		@tblRequiredImmunizations18Month req
-		ON rec.TCMedicalItem = req.MedicalItemCode AND rec.NumImmunizationsReceived >= req.NumImmunizationsRequired
+		LEFT JOIN 
+		@tblReceivedImmunizations18Month rec
+		ON req.HVCasePK = rec.HVCasePK AND MedicalItemCode = TCMedicalItem
 
 	
 	INSERT INTO @tblMeetingReason
@@ -321,8 +325,14 @@ BEGIN
 	DELETE FROM @tblResults WHERE TCAgeMonths > 12 AND TCAgeMonths < 24 AND Meeting = 'No'
 
 	--Update the number of shots required
-	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumImmunizationsRequired) FROM @tblRequiredImmunizations6Month) WHERE GroupBy = 6
-	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumImmunizationsRequired) FROM @tblRequiredImmunizations18Month) WHERE GroupBy = 18
+	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumImmunizationsRequired) 
+		FROM @tblRequiredImmunizations6Month 
+		WHERE HVCasePK = (SELECT TOP 1 HVCasePK FROM @tblRequiredImmunizations6Month)) --Get the required number of immunizations for one case
+		WHERE GroupBy = 6
+	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumImmunizationsRequired) 
+		FROM @tblRequiredImmunizations18Month 
+		WHERE HVCasePK = (SELECT TOP 1 HVCasePK FROM @tblRequiredImmunizations18Month)) 
+		WHERE GroupBy = 18
 
 	--Update the number of exceptions in the results table
 	UPDATE @tblResults SET HFNumExceptions6Month = @NumExceptions6Month
