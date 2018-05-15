@@ -39,9 +39,46 @@ begin
 									else @CaseFiltersPositive
 							   end;
 
-	with cteHVRecords
-	as
-	(select rtrim(firstname)+' '+rtrim(lastname) as workername
+	declare @cteHVRecords as table (
+	workername char(51)
+	,workerfk	int
+	,pc1id	char(15)
+	,startdate	date
+	,enddate	date
+	,levelname	char(50)
+	,levelstart	date
+	,expvisitcount	float
+	,actvisitcount	int
+	,inhomevisitcount	 int
+	,attvisitcount	int
+	,DirectServiceTime	datetime
+	,visitlengthminute	int
+	,visitlengthhour	 int
+	,dischargedate date	
+	,pc1wrkfk	char(25)
+	,casefk int
+)
+	insert into @cteHVRecords(
+	workername
+	,workerfk	
+	,casefk 	
+	,pc1id	
+	,startdate	
+	,enddate	
+	,levelname	
+	,levelstart
+	,expvisitcount	
+	,actvisitcount	
+	,inhomevisitcount	 
+	,attvisitcount	
+	,DirectServiceTime	
+	,visitlengthminute	
+	,visitlengthhour	 
+	,dischargedate 	
+	,pc1wrkfk	
+	
+	)
+	select rtrim(firstname)+' '+rtrim(lastname) as workername
 					,hvr.workerfk
 					,hvr.casefk
 					,pc1id
@@ -99,11 +136,11 @@ begin
 				 ,dischargedate
 				 ,hvr.casefk
 				 ,hvr.programfk --,hld.StartLevelDate
-	), 
-	cteCaseCount 
+	;
+	with cteCaseCount 
 	as 
 	(select count(distinct casefk) as casecount
-		from cteHVRecords
+		from @cteHVRecords
 	),
 	cteMain 
 	as 
@@ -134,7 +171,7 @@ begin
 			 --,sum(attvisitcount) over (partition by pc1wrkfk) as attvisitcount
 			 --,max(dischargedate) over (partition by pc1wrkfk) as dischargedate
 
-		from cteHVRecords
+		from @cteHVRecords
 		group by workername
 			,pc1wrkfk
 			,workerfk
@@ -162,4 +199,5 @@ begin
 		where isnull(dischargedate, getdate()) > @sdate
 		
 end
+
 GO
