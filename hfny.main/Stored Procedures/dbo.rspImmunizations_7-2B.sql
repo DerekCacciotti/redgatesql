@@ -26,6 +26,17 @@ BEGIN
 	, @NumDue6Month INT = 0
 	, @NumDue18Month INT = 0
 
+	DECLARE @tblCohort TABLE (
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
+		IntakeDate DATETIME,
+		PC1ID CHAR(13),
+		HomeVisitorName VARCHAR(60),
+		TCIDPK INT INDEX ixTCIDPK NONCLUSTERED,
+		TCDOB DATETIME,
+		TCName VARCHAR(401),
+		Exempt BIT
+	)
+
 	DECLARE @tblCohort6Month TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		IntakeDate DATETIME,
@@ -164,9 +175,8 @@ BEGIN
 		Exempt BIT
 	)
 
-	--Get the 6 month cohort (children between 6 months and 23 months old)
-	INSERT INTO	@tblCohort6Month
-		SELECT h.HVCasePK, h.IntakeDate, cp.PC1ID, (TRIM(w.FirstName) + ' ' + TRIM(w.LastName)) AS WorkerName, t.TCIDPK, t.TCDOB, (t.TCFirstName + ' ' + t.TCLastName) AS TCName, t.NoImmunization
+	INSERT INTO @tblCohort
+	SELECT h.HVCasePK, h.IntakeDate, cp.PC1ID, (TRIM('test') + ' ' + TRIM('test')) AS WorkerName, t.TCIDPK, t.TCDOB, (t.TCFirstName + ' ' + t.TCLastName) AS TCName, t.NoImmunization
 		FROM dbo.HVCase h
 		INNER JOIN dbo.TCID t ON t.HVCaseFK = h.HVCasePK
 		INNER JOIN dbo.CaseProgram cp on cp.HVCaseFK = h.HVCasePK
@@ -175,21 +185,24 @@ BEGIN
 		WHERE (cp.DischargeDate IS NULL OR cp.DischargeDate > @PointInTime)
 		AND h.IntakeDate < DATEADD(MONTH, 6, t.TCDOB)
 		AND @PointInTime >= DATEADD(MONTH, 6, t.TCDOB)
-		AND @PointInTime <= DATEADD(MONTH, 23, t.TCDOB)
+		--AND @PointInTime < DATEADD(YEAR, 3, t.TCDOB)
 		ORDER BY cp.PC1ID
+
+
+	--Get the 6 month cohort (children between 6 months and 23 months old)
+	INSERT INTO	@tblCohort6Month
+		SELECT HVCasePK, IntakeDate, PC1ID, HomeVisitorName, TCIDPK, TCDOB, TCName, Exempt
+		FROM @tblCohort
+		WHERE @PointInTime >= DATEADD(MONTH, 6, TCDOB)
+		AND @PointInTime <= DATEADD(MONTH, 23, TCDOB)
+		ORDER BY PC1ID
 
 	--Get the 18 month cohort (children older than 18 months)
 	INSERT INTO	@tblCohort18Month
-		SELECT h.HVCasePK, h.IntakeDate, cp.PC1ID, (TRIM(w.FirstName) + ' ' + TRIM(w.LastName)) AS WorkerName, t.TCIDPK, t.TCDOB, (t.TCFirstName + ' ' + t.TCLastName) AS TCName, t.NoImmunization
-		FROM dbo.HVCase h
-		INNER JOIN dbo.TCID t ON t.HVCaseFK = h.HVCasePK
-		INNER JOIN dbo.CaseProgram cp on cp.HVCaseFK = h.HVCasePK
-		INNER JOIN dbo.SplitString(@ProgramFK,',') on cp.ProgramFK = listitem
-		INNER JOIN dbo.Worker w ON w.WorkerPK = cp.CurrentFSWFK
-		WHERE (cp.DischargeDate IS NULL OR cp.DischargeDate > @PointInTime)
-		AND h.IntakeDate < DATEADD(MONTH, 6, t.TCDOB)
-		AND @PointInTime >= DATEADD(MONTH, 18, t.TCDOB)
-		ORDER BY cp.PC1ID
+		SELECT HVCasePK, IntakeDate, PC1ID, HomeVisitorName, TCIDPK, TCDOB, TCName, Exempt
+		FROM @tblCohort
+		WHERE @PointInTime >= DATEADD(MONTH, 18, TCDOB)
+		ORDER BY PC1ID
 
 	--Remove(?) exceptions from the cohort after recording the number of exceptions
 	SET @NumExceptions6Month = (SELECT ISNULL(COUNT(HVCasePK), 0) FROM @tblCohort6Month WHERE Exempt = 1)
@@ -317,13 +330,6 @@ BEGIN
 	--UPDATE @tblResults SET HFNumDueFor6Month = 1, HFNumReceived6Month = 1, HFPercentMeeting6Month = .75, HFScore6Month = 'A',
 	--	HFNumDueFor18Month = 1, HFNumReceived18Month = 1, HFPercentMeeting18Month = .75, HFScore18Month = 'A'
 	
-	--Update exempt cases
-	UPDATE @tblResults SET Meeting = 'N/A', ReasonNotMeeting = 'Exempt' WHERE Exempt = 1
-
-	--Remove certain cases
-	DELETE FROM @tblResults WHERE TCAgeMonths > 6 AND TCAgeMonths < 12 AND Meeting = 'No'
-	DELETE FROM @tblResults WHERE TCAgeMonths > 12 AND TCAgeMonths < 24 AND Meeting = 'No'
-
 	--Update the number of shots required
 	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumImmunizationsRequired) 
 		FROM @tblRequiredImmunizations6Month 
@@ -333,6 +339,13 @@ BEGIN
 		FROM @tblRequiredImmunizations18Month 
 		WHERE HVCasePK = (SELECT TOP 1 HVCasePK FROM @tblRequiredImmunizations18Month)) 
 		WHERE GroupBy = 18
+
+	--Update exempt cases
+	UPDATE @tblResults SET Meeting = 'N/A', NumShotsRequired = 0, ReasonNotMeeting = 'Exempt' WHERE Exempt = 1
+
+	--Remove certain cases
+	DELETE FROM @tblResults WHERE TCAgeMonths > 6 AND TCAgeMonths < 12 AND Meeting = 'No'
+	DELETE FROM @tblResults WHERE TCAgeMonths > 12 AND TCAgeMonths < 24 AND Meeting = 'No'
 
 	--Update the number of exceptions in the results table
 	UPDATE @tblResults SET HFNumExceptions6Month = @NumExceptions6Month
