@@ -75,8 +75,18 @@ BEGIN
 		NumImmunizationsRequired INT
 	)
 
+	DECLARE @ImmunizationCount6Month TABLE (
+		MedicalItemCode CHAR(2),
+		NumRequired INT
+    )
+
+	DECLARE @ImmunizationCount18Month TABLE (
+		MedicalItemCode CHAR(2),
+		NumRequired INT
+    )
+
 	DECLARE @tblReceivedImmunizations TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCIDFK INT,
 		TCItemDate DATETIME,
 		TCMedicalPK INT,
@@ -86,7 +96,7 @@ BEGIN
 	)
 
 	DECLARE @tblReceivedImmunizations6Month TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCIDFK INT,
 		TCMedicalItem CHAR(2),
 		TCMedicalItemTitle CHAR(20),
@@ -94,7 +104,7 @@ BEGIN
 	)
 
 	DECLARE @tblReceivedImmunizations18Month TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCIDFK INT,
 		TCMedicalItem CHAR(2),
 		TCMedicalItemTitle CHAR(20),
@@ -102,45 +112,45 @@ BEGIN
 	)
 
 	DECLARE @tblNumImmunizations6Month TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCIDFK INT,
 		NumImmunizationsReceived INT
 	)
 
 	DECLARE @tblNumImmunizations18Month TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCIDFK INT,
 		NumImmunizationsReceived INT
 	)
 
 	DECLARE @tblMeeting6Month TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCIDFK INT,
 		Meeting VARCHAR(MAX)
 	)
 
 	DECLARE @tblMeeting18Month TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCIDFK INT,
 		Meeting VARCHAR(MAX)
 	)
 
 	DECLARE @tblMeetingReason TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		TCIDFK INT,
 		Meeting VARCHAR(MAX),
 		GroupNum INT
 	)
 
 	DECLARE @tblCreativeOutreachDates TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		StartDate DATETIME,
 		EndDate DATETIME,
 		Cohort INT
 	)
 
 	DECLARE @tblCreativeOutreachDatesCombined TABLE (
-		HVCasePK INT,
+		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
 		Dates VARCHAR(MAX),
 		Cohort INT
 	)
@@ -229,19 +239,25 @@ BEGIN
 		AND CONVERT(INT, due.Interval) <= 18
 		GROUP BY HVCasePK, TCIDPK, MedicalItemCode, ScheduledEvent
 
+	INSERT INTO @ImmunizationCount6Month
+        SELECT DISTINCT MedicalItemCode, NumImmunizationsRequired FROM @tblRequiredImmunizations6Month
+
+	INSERT INTO @ImmunizationCount18Month
+		SELECT DISTINCT MedicalItemCode, NumImmunizationsRequired FROM @tblRequiredImmunizations18Month
+
 	INSERT INTO @tblReceivedImmunizations
 		SELECT DISTINCT coh.HVCasePK, med.TCIDFK, med.TCItemDate, med.TCMedicalPK, med.TCMedicalItem, item.MedicalItemTitle,  6
 		FROM @tblCohort6Month coh
 		INNER JOIN dbo.TCMedical med ON coh.HVCasePK = med.HVCaseFK
 		INNER JOIN dbo.codeMedicalItem item ON med.TCMedicalItem = item.MedicalItemCode
-		WHERE med.TCMedicalItem IN (SELECT MedicalItemCode FROM @tblRequiredImmunizations6Month)
+		WHERE med.TCMedicalItem IN (SELECT MedicalItemCode FROM @ImmunizationCount6Month)
 
 	INSERT INTO @tblReceivedImmunizations
 		SELECT DISTINCT coh.HVCasePK, med.TCIDFK, med.TCItemDate, med.TCMedicalPK, med.TCMedicalItem, item.MedicalItemTitle,  18
 		FROM @tblCohort18Month coh
 		INNER JOIN dbo.TCMedical med ON coh.HVCasePK = med.HVCaseFK
 		INNER JOIN dbo.codeMedicalItem item ON med.TCMedicalItem = item.MedicalItemCode
-		WHERE med.TCMedicalItem IN (SELECT MedicalItemCode FROM @tblRequiredImmunizations18Month)
+		WHERE med.TCMedicalItem IN (SELECT MedicalItemCode FROM @ImmunizationCount18Month)
 
 	INSERT INTO @tblReceivedImmunizations6Month
 		SELECT HVCasePK, TCIDFK, TCMedicalItem, TCMedicalItemTitle, COUNT(TCMedicalItem) numImmunizations 
@@ -326,18 +342,13 @@ BEGIN
 		INNER JOIN @tblNumImmunizations18Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDFK = coh.TCIDPK
 		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDFK = coh.TCIDPK AND reason.GroupNum = 18
 		LEFT JOIN @tblCreativeOutreachDatesCombined levelx ON levelx.HVCasePK = coh.HVCasePK AND levelx.Cohort = 18
-
-	--UPDATE @tblResults SET HFNumDueFor6Month = 1, HFNumReceived6Month = 1, HFPercentMeeting6Month = .75, HFScore6Month = 'A',
-	--	HFNumDueFor18Month = 1, HFNumReceived18Month = 1, HFPercentMeeting18Month = .75, HFScore18Month = 'A'
 	
 	--Update the number of shots required
-	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumImmunizationsRequired) 
-		FROM @tblRequiredImmunizations6Month 
-		WHERE HVCasePK = (SELECT TOP 1 HVCasePK FROM @tblRequiredImmunizations6Month)) --Get the required number of immunizations for one case
+	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumRequired) 
+		FROM @ImmunizationCount6Month) --Get the required number of immunizations for one case
 		WHERE GroupBy = 6
-	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumImmunizationsRequired) 
-		FROM @tblRequiredImmunizations18Month 
-		WHERE HVCasePK = (SELECT TOP 1 HVCasePK FROM @tblRequiredImmunizations18Month)) 
+	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumRequired) 
+		FROM @ImmunizationCount18Month) 
 		WHERE GroupBy = 18
 
 	--Update exempt cases
@@ -360,10 +371,10 @@ BEGIN
 	--Update the number of cases that received all immunizations
 	UPDATE @tblResults SET HFNumReceived6Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND GroupBy = 6)
 	UPDATE @tblResults SET HFNumReceived18Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND GroupBy = 18)
-
+	
 	--Update the percent of cases that meet
-	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived6Month + HFNumExceptions6Month)) /  @NumDue6Month))
-	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived18Month + HFNumExceptions18Month)) / @NumDue18Month))
+	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived6Month + HFNumExceptions6Month)) /  NULLIF(@NumDue6Month, 0)))
+	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived18Month + HFNumExceptions18Month)) / NULLIF(@NumDue18Month, 0)))
 	
 	--Update the scores for the program
 	UPDATE @tblResults SET HFScore6Month = CASE WHEN HFPercentMeeting6Month >= 0.90 THEN '3' 
