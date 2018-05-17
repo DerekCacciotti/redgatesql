@@ -40,9 +40,47 @@ begin
 									else @CaseFiltersPositive
 							   end;
 
-	with cteHVRecords
-	as
-	(select distinct rtrim(firstname)+' '+rtrim(lastname) as workername
+	declare @cteHVRecords as table (
+	workername char(51)
+	,workerfk	int
+	,casecount	int
+	,pc1id	char(15)
+	,startdate	date
+	,enddate	date
+	,levelname	char(50)
+	,levelstart	date
+	,expvisitcount	float
+	,actvisitcount	int
+	,inhomevisitcount	 int
+	,attvisitcount	int
+	,DirectServiceTime	datetime
+	,visitlengthminute	int
+	,visitlengthhour	 int
+	,dischargedate date	
+	,pc1wrkfk	char(25)
+	,casefk int
+)
+	insert into @cteHVRecords(
+	workername
+	,workerfk	
+	,casecount	
+	,pc1id	
+	,startdate	
+	,enddate	
+	,levelname	
+	,levelstart
+	,expvisitcount	
+	,actvisitcount	
+	,inhomevisitcount	 
+	,attvisitcount	
+	,DirectServiceTime	
+	,visitlengthminute	
+	,visitlengthhour	 
+	,dischargedate 	
+	,pc1wrkfk	
+	,casefk 
+	)
+	select distinct rtrim(firstname)+' '+rtrim(lastname) as workername
 					,hvr.workerfk
 					,count(distinct casefk) as casecount
 					,pc1id
@@ -53,7 +91,7 @@ begin
 						  from hvleveldetail hld
 						  where hvr.casefk = hld.hvcasefk
 							   and StartLevelDate <= @edate
-							   and hvr.programfk = hld.programfk) as levelstart
+							   and hvr.programfk = hld.programfk) 
 					,(reqvisit) as expvisitcount
 					,sum(case
 							 when SUBSTRING(VisitType, 4, 1) <> '1' then
@@ -73,11 +111,11 @@ begin
 							 else
 								 0
 						 end) as attvisitcount
-					,(dateadd(mi,sum(visitlengthminute),dateadd(hh,sum(visitlengthhour),'01/01/2001'))) DirectServiceTime
-					,sum(visitlengthminute)+sum(visitlengthhour)*60 as visitlengthminute
-					,sum(visitlengthhour) as visitlengthhour
+					,(dateadd(mi,sum(visitlengthminute),dateadd(hh,sum(visitlengthhour),'01/01/2001'))) 
+					,sum(visitlengthminute)+sum(visitlengthhour)*60 
+					,sum(visitlengthhour) 
 					,dischargedate
-					,pc1id+convert(char(10),hvr.workerfk) as pc1wrkfk --use for a distinct unique field for the OVER(PARTITION BY) above	
+					,pc1id+convert(char(10),hvr.workerfk) --use for a distinct unique field for the OVER(PARTITION BY) above	
 					 ,hvr.casefk
 		 from [dbo].[udfHVRecords](@programfk,@sdate,@edate) hvr
 			inner join worker on workerpk = hvr.workerfk
@@ -102,13 +140,13 @@ begin
 				 ,dischargedate
 				 ,hvr.casefk
 				 ,hvr.programfk --,hld.StartLevelDate
-	)
-	,
-	cteLevelChanges
+
+	
+	;with cteLevelChanges
 	as
 	(select casefk
 		   ,count(casefk)-1 as LevelChanges
-		 from cteHVRecords
+		 from @cteHVRecords
 		 group by casefk
 	)
 	,
@@ -135,7 +173,7 @@ begin
 						  else TCDOB
 					end as TCDOB
 					,LevelChanges
-		 from cteHVRecords hvr
+		 from @cteHVRecords hvr
 			 inner join cteLevelChanges on cteLevelChanges.casefk = hvr.casefk
 			 inner join HVCase c on hvr.casefk = c.HVCasePK
 )
@@ -224,7 +262,6 @@ begin
 			) a 
 	)
 	
-	
 	select *
 		  ,case
 			   when expvisitcount = 0
@@ -244,5 +281,7 @@ begin
 		order by WorkerName
 				,pc1id
 
+
 end
+
 GO
