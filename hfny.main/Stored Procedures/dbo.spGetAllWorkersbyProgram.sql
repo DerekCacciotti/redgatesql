@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Jay Robohn
 -- Create date: July 18, 2012
@@ -70,7 +68,7 @@ if @AllWorkers = 0 or @AllWorkers is null
 		select distinct rtrim(LastName) + ', ' + rtrim(FirstName) + case when TerminationDate is not null then ' *' else '' end as WorkerName
 						, LastName
 						, FirstName
-						, TerminationDate
+						, convert(varchar(10), TerminationDate, 126) as TerminationDate
 						, WorkerPK 
 						, case when TerminationDate is null then 0 else 1 end
 		from cteAllWorkers aw
@@ -85,7 +83,7 @@ else
 		select distinct rtrim(LastName) + ', ' + rtrim(FirstName) + case when TerminationDate is not null then ' *' else '' end as WorkerName
 						, LastName
 						, FirstName
-						, convert(varchar(12),TerminationDate,101) as TerminationDate
+						, convert(varchar(10), TerminationDate, 126) as TerminationDate
 						, WorkerPK 
 						, case when TerminationDate is null then 0 else 1 end
 		from WorkerProgram wp
