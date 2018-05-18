@@ -2,14 +2,12 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
 -- =============================================
 -- Author:		Benjamin Simmons
 -- Create date: 3/13/18
 -- Description:	This report stored procedure is used to populate the OBP Demographics Report
 -- =============================================
-CREATE PROCEDURE [dbo].[rspOBPDemographics]
+CREATE procedure [dbo].[rspOBPDemographics]
 	@ProgramFK	VARCHAR(MAX) = NULL,
 	@StartDate	DATETIME = NULL,
 	@EndDate	DATETIME = NULL
@@ -188,7 +186,7 @@ BEGIN
 												(SELECT TOP 1 CommonAttributesPK 
 												FROM dbo.CommonAttributes ca2 			
 												INNER JOIN dbo.SplitString(@ProgramFK, ',') ON ca2.ProgramFK = ListItem
-												WHERE ca2.HVCaseFK = c.HVCasePK AND (ca2.FormType = 'FU-OBP' OR ca2.FormType = 'ID')
+												WHERE ca2.HVCaseFK = c.HVCasePK AND (ca2.FormType = 'FU-OBP' OR ca2.FormType = 'IN-OBP')
 												ORDER BY ca2.FormDate DESC)
 
 	INSERT INTO @tblInvolvedOBPInfo
