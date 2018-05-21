@@ -142,17 +142,39 @@ begin
 				 ,hvr.programfk --,hld.StartLevelDate
 
 	
-	;with cteLevelChanges
-	as
-	(select casefk
-		   ,count(casefk)-1 as LevelChanges
-		 from @cteHVRecords
-		 group by casefk
+	declare @cteLevelChanges table(
+		casefk int,
+		LevelChanges int
 	)
-	,
-	cteSummary
-	as
-	(select distinct workername
+
+	insert into @cteLevelChanges 
+	select casefk
+		  ,count(casefk)-1 as LevelChanges
+    from @cteHVRecords
+	group by casefk
+	
+	declare @cteSummary table (
+		workername char(51)
+	    , workerfk int
+		, pc1id char(15)
+		, casefk int
+		, casecount int
+		, [Minutes] int
+		, expvisitcount int
+		, startdate datetime
+		, enddate datetime
+		, levelname char(50)
+		, levelstart datetime
+		, actvisitcount int
+		, inhomevisitcount int
+		, attvisitcount int
+		, dischargedate datetime
+		, IntakeDate datetime
+		, TCDOB datetime
+		, LevelChanges int
+	)
+	insert into @cteSummary
+	select distinct workername
 					,workerfk
 					,pc1id
 					,hvr.casefk
@@ -174,18 +196,38 @@ begin
 					end as TCDOB
 					,LevelChanges
 		 from @cteHVRecords hvr
-			 inner join cteLevelChanges on cteLevelChanges.casefk = hvr.casefk
+			 inner join @cteLevelChanges lc on lc.casefk = hvr.casefk
 			 inner join HVCase c on hvr.casefk = c.HVCasePK
-)
+
 	--07/10/2013 [Chris Papas], continual errors with getting the correct Level.
 	-- both ,max(levelname) over (partition by pc1id) as levelname
 	--and (SELECT TOP 1 levelname ORDER BY enddate) AS levelname, were returning the wrong levels in certain circumstances.
 	--FIX is below and as follows: Row_Number() OVER (Partition By casefk ORDER BY [levelstart] DESC) as RowNum
 	--END 7/10/2013 fix
 	
-	, cteMain as
-	-- make the aggregate table
-	(select workername
+	declare @cteMain table (
+		workername char(51)
+		,workerfk int
+		,pc1id char(15)
+		,casecount int
+		,DirectServiceTime datetime
+		,expvisitcount float
+		,startdate datetime
+		,enddate datetime
+		,levelname char(50)
+		,levelstart datetime
+		,actvisitcount int
+		,inhomevisitcount int
+		,attvisitcount int
+		,VisitRate int
+		,InHomeRate int
+		,dischargedate datetime
+		,IntakeDate datetime
+		,TCDOB datetime
+		,LevelChanges int
+	)
+	insert into @cteMain
+	select workername
 			,workerfk
 			,pc1id
 			,casecount
@@ -209,14 +251,14 @@ begin
 					,workerfk
 					,pc1id
 					,casecount
-					,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,minutes,0) as DirectServiceTime
+					,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,[Minutes],0) as DirectServiceTime
 					,FLOOR(expvisitcount) AS expvisitcount
 					,startdate
 					,enddate
 					,(select top 1 levelname
 						  from hvleveldetail hld
-						  where hld.hvcasefk = cteSummary.casefk
-							   and hld.StartLevelDate = cteSummary.levelstart
+						  where hld.hvcasefk = cteSum.casefk
+							   and hld.StartLevelDate = cteSum.levelstart
 							   ) as levelname
 					,levelstart
 					,actvisitcount
@@ -258,10 +300,9 @@ begin
 					,IntakeDate
 					,TCDOB
 					,LevelChanges
-				from cteSummary
-			) a 
-	)
-	
+				from @cteSummary cteSum
+				)a
+			
 	select *
 		  ,case
 			   when expvisitcount = 0
@@ -276,7 +317,7 @@ begin
 			   else
 				   1
 		   end as ScoreForCase
-		from cteMain
+		from @cteMain
 		where isnull(dischargedate, getdate()) > @sdate
 		order by WorkerName
 				,pc1id
