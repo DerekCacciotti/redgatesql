@@ -33,9 +33,29 @@ begin
 	set @posclause = case when @posclause = '' then null else @posclause end;
 	set @negclause = case when @negclause = '' then null else @negclause end;
 
-	with cteHVRecords
-	as
-	(select distinct rtrim(firstname)+' '+rtrim(lastname) as workername
+	declare @cteHVRecords table (
+		workername char(50)
+		,workerfk int
+		,casecount int
+		,pc1id char(15)
+		,hvlevelpk int
+		,startdate datetime
+		,enddate datetime
+		,levelname char(51)
+		,levelstart datetime
+		,expvisitcount float
+		,actvisitcount int
+		,inhomevisitcount int
+		,attvisitcount int
+		,DirectServiceTime datetime
+		,visitlengthminute int
+		,visitlengthhour int
+		,dischargedate datetime
+		,pc1wrkfk char(25)
+		,casefk int
+	)
+	insert into @cteHVRecords
+	select distinct rtrim(firstname)+' '+rtrim(lastname) as workername
 					,hvr.workerfk
 					,count(distinct casefk) as casecount
 					,pc1id
@@ -94,13 +114,13 @@ begin
 				 ,hvr.casefk
 				 ,hvr.programfk
 				, hvlevelpk
-	)
-	,
+	
+	; with
 	cteLevelChanges
 	as
 	(select casefk
 		   ,count(casefk)-1 as LevelChanges
-		 from cteHVRecords
+		 from @cteHVRecords
 		 group by casefk
 	)
 	,
@@ -138,7 +158,7 @@ begin
 						  else TCDOB
 					end as TCDOB
 					,LevelChanges
-		 from cteHVRecords hvr
+		 from @cteHVRecords hvr
 			 inner join cteLevelChanges on cteLevelChanges.casefk = hvr.casefk
 			 inner join HVCase c on hvr.casefk = c.HVCasePK
 	)
@@ -221,4 +241,5 @@ begin
 				,pc1id
 
 end
+
 GO
