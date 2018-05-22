@@ -13,7 +13,7 @@ CREATE PROCEDURE [dbo].[rspImmunizations_7-2B]
 	@PointInTime DATETIME = NULL
 AS
 BEGIN
-	IF @ProgramFK IS NULL
+	 IF @ProgramFK IS NULL
 	BEGIN
 		SELECT @ProgramFK = SUBSTRING((SELECT ',' + LTRIM(RTRIM(STR(HVProgramPK)))
 											FROM HVProgram
@@ -281,6 +281,7 @@ BEGIN
 		FROM @tblReceivedImmunizations18Month 
 		GROUP BY HVCasePK, TCIDFK
 
+
 	INSERT INTO @tblMeeting6Month
 		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN TRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
 		FROM
@@ -373,9 +374,9 @@ BEGIN
 	UPDATE @tblResults SET HFNumReceived18Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND GroupBy = 18)
 	
 	--Update the percent of cases that meet
-	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived6Month + HFNumExceptions6Month)) /  NULLIF(@NumDue6Month, 0)))
-	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived18Month + HFNumExceptions18Month)) / NULLIF(@NumDue18Month, 0)))
-	
+	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, HFNumReceived6Month) /  NULLIF((@NumDue6Month - @NumExceptions6Month), 0)))
+	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, HFNumReceived18Month) / NULLIF((@NumDue18Month - @NumExceptions18Month), 0)))
+
 	--Update the scores for the program
 	UPDATE @tblResults SET HFScore6Month = CASE WHEN HFPercentMeeting6Month >= 0.90 THEN '3' 
 												WHEN HFPercentMeeting6Month < 0.90 AND HFPercentMeeting6Month >= 0.75 THEN '2'

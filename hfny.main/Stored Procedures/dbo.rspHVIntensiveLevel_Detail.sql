@@ -37,9 +37,7 @@ set @programfk = REPLACE(@programfk,'"','')
 set @sitefk = case when dbo.IsNullOrEmpty(@sitefk) = 1 then 0 else @sitefk end
 set @posclause = case when @posclause = '' then null else @posclause end
 
-if object_id('tempdb..#cteCohort') is not null drop table #cteCohort
-
-	create table #cteCohort (
+	declare @cteCohort table (
 		PC1ID char(13)
 		, [Name] varchar(450)
 		, [edc_dob] datetime
@@ -56,7 +54,7 @@ if object_id('tempdb..#cteCohort') is not null drop table #cteCohort
 		, EndLevelDate datetime
 	)
 
-	insert into #cteCohort 
+	insert into @cteCohort 
 	SELECT 
 	b.PC1ID
 	, rtrim(p.PCFirstName) + ' ' + rtrim(p.PCLastName) [Name]
@@ -95,17 +93,29 @@ if object_id('tempdb..#cteCohort') is not null drop table #cteCohort
 		, c.EndLevelDate
 		, b.DischargeDate
 
-;WITH level2 AS (
+declare @level2 table (
+	hvcasefk int,
+	[StartLevelDate_Level2] datetime
+)
+insert into @level2
 SELECT a.hvcasefk, min(a.StartLevelDate) [StartLevelDate_Level2]
 FROM dbo.HVLevelDetail AS a
 join dbo.SplitString(@programfk,',') on a.programfk = listitem
 WHERE a.Levelfk IN (16, 18, 20) --AND ProgramFK = @programfk 
 AND a.StartLevelDate <= @edate
 GROUP BY a.hvcasefk
-)
-,
 
-xxx AS (
+declare @xxx table (
+	PC1ID char(15)
+	,[Name] varchar(450)
+	,[edc_dob] datetime
+	,IntakeDate datetime
+	,[days_length_total] int
+	,[WorkerName] varchar(450)
+	,[n] int
+	,HVCaseFK int
+)
+insert into @xxx
 SELECT 
 	PC1ID
 	, [Name]
@@ -116,9 +126,9 @@ SELECT
 	ELSE EndLevelDate END + 1))) [days_length_total]
 	, [WorkerName]
 	, count(*) [n]
-	,#cteCohort.HVCaseFK
-FROM #cteCohort
-left outer join level2 on level2.HVCaseFK = #cteCohort.HVCaseFK
+	,cohort.HVCaseFK
+FROM @cteCohort cohort
+left outer join @level2 l2 on l2.HVCaseFK = cohort.HVCaseFK
 WHERE --b.ProgramFK = @programfk AND 
 caseprogress >= 9
 AND IntakeDate <= @edate
@@ -127,46 +137,50 @@ AND (case when @SiteFK = 0 then 1 when SiteFK = @SiteFK then 1 else 0 end = 1)
 AND Levelfk IN (12, 14)
 AND (StartLevelDate_Level2 IS NULL OR StartLevelDate < StartLevelDate_Level2)
 GROUP BY
-#cteCohort.HVCaseFK
+cohort.HVCaseFK
 , PC1ID
 , [Name]
 , [edc_dob]
 , IntakeDate
 , WorkerName
-)
-,
 
-yyy AS (
+declare @yyy table (
+	HVCaseFK int
+)
+insert into @yyy 
 SELECT DISTINCT HVCaseFK
-FROM #cteCohort
+FROM @cteCohort
 WHERE --b.ProgramFK = @programfk AND 
 caseprogress >= 9
 AND IntakeDate <= @edate
 AND (dischargedate is NULL or dischargedate >= @sdate)
 AND (case when @SiteFK = 0 then 1 when SiteFK = @SiteFK then 1 else 0 end = 1)
 AND Levelfk IN (16,18,20)
-),
 
-zzz AS (
-SELECT 
-sum(CASE WHEN a.days_length_total >= 183 THEN 1 ELSE 0 END) [more_than_6mo]
-, sum(CASE WHEN a.days_length_total >= 183 THEN 0 ELSE 1 END) [less_than_6mo]
-, count(*) [total_number]
-FROM xxx AS a
-LEFT OUTER JOIN yyy AS b ON a.HVCaseFK = b.HVCaseFK
-WHERE b.HVCaseFK IS NOT NULL OR a.[days_length_total] >= 183
+declare @zzz table (
+	[more_than_6mo] int,
+	[less_than_6mo] int,
+	[total_number] int
 )
+insert into @zzz
+SELECT 
+sum(CASE WHEN a.days_length_total >= 183 THEN 1 ELSE 0 END) 
+, sum(CASE WHEN a.days_length_total >= 183 THEN 0 ELSE 1 END) 
+, count(*) 
+FROM @xxx AS a
+LEFT OUTER JOIN @yyy AS b ON a.HVCaseFK = b.HVCaseFK
+WHERE b.HVCaseFK IS NOT NULL OR a.[days_length_total] >= 183
 
 SELECT 
 CASE WHEN a.days_length_total >= 183 THEN 2 ELSE 1 END [level1_less_183],
 a.*,
 c.*,
 CASE WHEN b.HVCaseFK IS NOT NULL THEN 'Yes' ELSE 'No' END [Level2_3_4]
-FROM xxx AS a
-JOIN zzz AS c ON 1 = 1
-LEFT OUTER JOIN yyy AS b ON a.HVCaseFK = b.HVCaseFK
+FROM @xxx AS a
+JOIN @zzz AS c ON 1 = 1
+LEFT OUTER JOIN @yyy AS b ON a.HVCaseFK = b.HVCaseFK
 WHERE b.HVCaseFK IS NOT NULL OR a.[days_length_total] >= 183
 ORDER BY level1_less_183, PC1ID
 
-drop table #cteCohort
+
 GO

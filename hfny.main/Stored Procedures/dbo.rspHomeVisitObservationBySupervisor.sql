@@ -26,50 +26,73 @@ as
 	set @programfk = REPLACE(@programfk,'"','')
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
 
-	with cteWorkerCohort
-	as (select distinct FSWFK
+	declare @cteWorkerCohort table (
+		FSWFK int
+	)
+	insert into @cteWorkerCohort
+	select distinct FSWFK
 			from HVLog
 				inner join dbo.SplitString(@programfk,',') on HVLog.programfk = listitem
 			where datediff(month,cast(VisitStartTime AS DATE),getdate()) <= 12
-	),
-	cteHvlogs (VisitStartTime,hvcasepk,visitType,FSWFK)
-	as (select VisitStartTime
+	
+
+	declare @cteHvlogs table (
+		VisitStartTime datetime
+		,hvcasepk int
+		,visitType char(6)
+		,FSWFK int
+	)
+	insert into @cteHvlogs
+	select VisitStartTime
 			  ,hvcasepk
 			  ,visitType
 			  ,hvlog.FSWFK
 			from hvlog
 				left join HVCase on HVCase.HVCasePK = hvlog.hvcasefk
-				inner join cteWorkerCohort on hvlog.FSWFK = cteWorkerCohort.FSWFK
+				inner join @cteWorkerCohort wc on hvlog.FSWFK = wc.FSWFK
 				inner join dbo.SplitString(@programfk,',') on hvlog.programfk = listitem
 			where -- datediff(year,VisitStartTime,getdate()) <= 1 and 
 				SupervisorObservation = 1
-	),
+	
 	--Filter the observed hvlogs
-	cteFilteredHvLogs
-	as(select cp.PC1ID
-			  ,VisitStartTime
-			  ,hvcasepk
-			  ,visitType
-			  ,FSWFK
-			  ,w.WorkerPK workerPK
-			  ,w.FirstName workerFirstName
-			  ,w.LastName workerLastName
-			  ,supervisor.FirstName supervisorFirstName
-			  ,supervisor.LastName supervisorLastName
-			  ,RowNumber = row_number() over (partition by FSWFK order by VisitStartTime desc)
-			from cteHvlogs observed
+	declare @cteFilteredHvLogs table (
+	    PC1ID char(15)
+		,VisitStartTime datetime
+		,hvcasepk int
+		,visitType char(6)
+		,FSWFK int
+		,workerPK int
+		,workerFirstName char(20)
+		,workerLastName char(30)
+		,supervisorFirstName char(20)
+		,supervisorLastName char(30)
+		,RowNumber int
+	)
+	insert into @cteFilteredHvLogs 
+	select	cp.PC1ID
+			,VisitStartTime
+			,hvcasepk
+			,visitType
+			,FSWFK
+			,w.WorkerPK
+			,w.FirstName
+			,w.LastName
+			,supervisor.FirstName
+			,supervisor.LastName
+			,row_number() over (partition by FSWFK order by VisitStartTime desc)
+			from @cteHvlogs observed
 			inner join CaseProgram cp on cp.HVCaseFK = observed.hvcasepk     --and cp.CurrentFSWFK = top7.FSWFK
 			inner join dbo.SplitString(@programfk,',') on cp.programfk = ListItem --Restrict to the programs selected
 			right join Worker w on w.WorkerPK = observed.FSWFK --Include workers who do not have observed home visits
 			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK --and wp.ProgramFK = ListItem
 			left outer join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
-			where w.WorkerPK in (select FSWFK from cteWorkerCohort)
+			where w.WorkerPK in (select FSWFK from @cteWorkerCohort)
 				and wp.TerminationDate is null
 				and w.LastName <> 'Transfer Worker'
 				and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 				and (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK <> ListItem) --Eliminate transfer cases
 
-	)
+	
 	select coalesce(pc1id,'No Home Visit Observations') pc1id
 		  ,VisitStartTime
 		  ,hvcasepk
@@ -93,7 +116,7 @@ as
 				else
 					'Attempted - Family not home or unable to meet after visit to home'
 				end as visitType
-		from cteFilteredHvLogs allHvLogs
+		from @cteFilteredHvLogs allHvLogs
 		where allHvLogs.RowNumber <= 7 --select only 7
 		order by supervisorLastName
 				,workerLastName
