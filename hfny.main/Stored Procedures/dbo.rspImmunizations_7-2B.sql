@@ -6,6 +6,9 @@ GO
 -- Author:		Ben Simmons
 -- Create date: 04/17/18
 -- Description:	This stored procedure will return the values to populate the immunization report
+-- EDIT DATE: 05/22/18
+-- EDITED BY: Benjamin Simmons
+-- EDIT DESCRIPTION: Added Azure/SQL Server 17 specific code to be uncommented when HFNY moves to Azure (See lines 314-326 and lines 346-353)
 -- =============================================
 CREATE PROCEDURE [dbo].[rspImmunizations_7-2B] 
 	-- Add the parameters for the stored procedure here
@@ -13,7 +16,7 @@ CREATE PROCEDURE [dbo].[rspImmunizations_7-2B]
 	@PointInTime DATETIME = NULL
 AS
 BEGIN
-	IF @ProgramFK IS NULL
+	 IF @ProgramFK IS NULL
 	BEGIN
 		SELECT @ProgramFK = SUBSTRING((SELECT ',' + LTRIM(RTRIM(STR(HVProgramPK)))
 											FROM HVProgram
@@ -281,7 +284,6 @@ BEGIN
 		FROM @tblReceivedImmunizations18Month 
 		GROUP BY HVCasePK, TCIDPK
 
-
 	INSERT INTO @tblMeeting6Month
 		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN TRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
 		FROM
@@ -298,14 +300,27 @@ BEGIN
 		@tblReceivedImmunizations18Month rec
 		ON req.HVCasePK = rec.HVCasePK AND req.TCIDPK = rec.TCIDPK AND MedicalItemCode = TCMedicalItem
 
-	
 	INSERT INTO @tblMeetingReason
-		SELECT HVCasePK, TCIDPK, STUFF((SELECT ', ' + Meeting AS [text()] FROM @tblMeeting6Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.TCIDPK = mt2.TCIDPK AND mt.Meeting <> 'Meeting' FOR XML PATH('')), 1, 2, ''), 6 
+		SELECT HVCasePK, TCIDPK, STUFF((SELECT NULLIF(', ' + Meeting, ', Meeting') AS [text()] FROM @tblMeeting6Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.TCIDPK = mt2.TCIDPK FOR XML PATH('')), 1, 2, ''), 6 
 		FROM @tblMeeting6Month mt2
 
 	INSERT INTO @tblMeetingReason
-		SELECT HVCasePK, TCIDPK, STUFF((SELECT ', ' + Meeting AS [text()] FROM @tblMeeting18Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.TCIDPK = mt2.TCIDPK AND mt.Meeting <> 'Meeting' FOR XML PATH('')), 1, 2, ''), 18
+		SELECT HVCasePK, TCIDPK, STUFF((SELECT NULLIF(', ' + Meeting, ', Meeting') AS [text()] FROM @tblMeeting18Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.TCIDPK = mt2.TCIDPK FOR XML PATH('')), 1, 2, ''), 18
 		FROM @tblMeeting18Month mt2
+
+	/* 
+	====== UNCOMMENT THESE INSERTS WHEN ON AZURE OR ANY SQL SERVER VERSION OVER 17 AND REMOVE THE SIMILAR INSERTS ABOVE ^ ======
+	
+	INSERT INTO @tblMeetingReason
+		SELECT HVCasePK, TCIDPK, STRING_AGG(NULLIF(mt.Meeting, 'Meeting'), ', ') AS meeting, 6
+		FROM @tblMeeting6Month mt
+		GROUP BY mt.HVCasePK, mt.TCIDPK
+
+	INSERT INTO @tblMeetingReason
+		SELECT HVCasePK, TCIDPK, STRING_AGG(NULLIF(mt.Meeting, 'Meeting'), ', ') AS meeting, 18
+		FROM @tblMeeting18Month mt
+		GROUP BY mt.HVCasePK, mt.TCIDPK
+	*/
 
 	INSERT INTO @tblCreativeOutreachDates
 		SELECT coh.HVCasePK, hvl.StartLevelDate, hvl.EndLevelDate, 6
@@ -322,8 +337,17 @@ BEGIN
 		WHERE hvl.LevelName LIKE '%Level X%'
 
 	INSERT INTO @tblCreativeOutreachDatesCombined
-		SELECT DISTINCT mt2.HVCasePK, STUFF((SELECT ' | ' + CONVERT(VARCHAR(10), mt.StartDate, 101) + ' - ' + CONVERT(VARCHAR(10), mt.EndDate, 101) AS [text()] FROM @tblCreativeOutreachDates mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Cohort = mt2.Cohort FOR XML PATH('')), 1, 2, ''), mt2.Cohort
+		SELECT DISTINCT mt2.HVCasePK, STUFF((SELECT ' | ' + CONVERT(VARCHAR(10), mt.StartDate, 101) + ' - ' + CONVERT(VARCHAR(10), mt.EndDate, 101) AS [text()] FROM @tblCreativeOutreachDates mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Cohort = mt2.Cohort FOR XML PATH('')), 1, 3, ''), mt2.Cohort
 		FROM @tblCreativeOutreachDates mt2
+
+	/* 
+	====== UNCOMMENT THIS INSERT WHEN ON AZURE OR ANY SQL SERVER VERSION OVER 17 AND REMOVE THE SIMILAR INSERT ABOVE ^ ======
+
+	INSERT INTO @tblCreativeOutreachDatesCombined
+		SELECT DISTINCT mt.HVCasePK, STRING_AGG(CONVERT(VARCHAR(10), mt.StartDate, 101) + ' - ' + CONVERT(VARCHAR(10), mt.EndDate, 101), ' | ') AS dates, mt.Cohort
+		FROM @tblCreativeOutreachDates mt
+		GROUP BY mt.HVCasePK, mt.Cohort
+	*/
 
 	--Insert the 6 month cohort into the results table
 	INSERT INTO @tblResults
