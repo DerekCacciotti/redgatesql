@@ -87,7 +87,7 @@ BEGIN
 
 	DECLARE @tblReceivedImmunizations TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
-		TCIDFK INT,
+		TCIDPK INT,
 		TCItemDate DATETIME,
 		TCMedicalPK INT,
 		TCMedicalItem CHAR(2),
@@ -97,7 +97,7 @@ BEGIN
 
 	DECLARE @tblReceivedImmunizations6Month TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
-		TCIDFK INT,
+		TCIDPK INT,
 		TCMedicalItem CHAR(2),
 		TCMedicalItemTitle CHAR(20),
 		NumImmunizationsReceived INT
@@ -105,7 +105,7 @@ BEGIN
 
 	DECLARE @tblReceivedImmunizations18Month TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
-		TCIDFK INT,
+		TCIDPK INT,
 		TCMedicalItem CHAR(2),
 		TCMedicalItemTitle CHAR(20),
 		NumImmunizationsReceived INT
@@ -113,31 +113,31 @@ BEGIN
 
 	DECLARE @tblNumImmunizations6Month TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
-		TCIDFK INT,
+		TCIDPK INT,
 		NumImmunizationsReceived INT
 	)
 
 	DECLARE @tblNumImmunizations18Month TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
-		TCIDFK INT,
+		TCIDPK INT,
 		NumImmunizationsReceived INT
 	)
 
 	DECLARE @tblMeeting6Month TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
-		TCIDFK INT,
+		TCIDPK INT,
 		Meeting VARCHAR(MAX)
 	)
 
 	DECLARE @tblMeeting18Month TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
-		TCIDFK INT,
+		TCIDPK INT,
 		Meeting VARCHAR(MAX)
 	)
 
 	DECLARE @tblMeetingReason TABLE (
 		HVCasePK INT INDEX ixHVCasePK CLUSTERED,
-		TCIDFK INT,
+		TCIDPK INT,
 		Meeting VARCHAR(MAX),
 		GroupNum INT
 	)
@@ -168,7 +168,7 @@ BEGIN
 		HFNumExceptions18Month INT,
 		HFPercentMeeting18Month DECIMAL(4,2),
 		HFScore18Month CHAR(1),
-		GroupBy INT, --6 for 6 month cohort 18 for 18 month cohort
+		Cohort INT, --6 for 6 month cohort 18 for 18 month cohort
 		PC1ID CHAR(13),
 		HomeVisitorName VARCHAR(60),
 		TCIDPK INT,
@@ -260,26 +260,27 @@ BEGIN
 		WHERE med.TCMedicalItem IN (SELECT MedicalItemCode FROM @ImmunizationCount18Month)
 
 	INSERT INTO @tblReceivedImmunizations6Month
-		SELECT HVCasePK, TCIDFK, TCMedicalItem, TCMedicalItemTitle, COUNT(TCMedicalItem) numImmunizations 
+		SELECT HVCasePK, TCIDPK, TCMedicalItem, TCMedicalItemTitle, COUNT(TCMedicalItem) numImmunizations 
 		FROM @tblReceivedImmunizations 
 		WHERE Cohort = 6 
-		GROUP BY HVCasePK, TCIDFK, TCMedicalItem, TCMedicalItemTitle
+		GROUP BY HVCasePK, TCIDPK, TCMedicalItem, TCMedicalItemTitle
 
 	INSERT INTO @tblReceivedImmunizations18Month
-		SELECT HVCasePK, TCIDFK, TCMedicalItem, TCMedicalItemTitle, COUNT(TCMedicalItem) numImmunizations 
+		SELECT HVCasePK, TCIDPK, TCMedicalItem, TCMedicalItemTitle, COUNT(TCMedicalItem) numImmunizations 
 		FROM @tblReceivedImmunizations 
 		WHERE Cohort = 18
-		GROUP BY HVCasePK, TCIDFK, TCMedicalItem, TCMedicalItemTitle
+		GROUP BY HVCasePK, TCIDPK, TCMedicalItem, TCMedicalItemTitle
 
 	INSERT INTO @tblNumImmunizations6Month
-		SELECT HVCasePK, TCIDFK, SUM(NumImmunizationsReceived) numImmunizationsReceived 
+		SELECT HVCasePK, TCIDPK, SUM(NumImmunizationsReceived) numImmunizationsReceived 
 		FROM @tblReceivedImmunizations6Month 
-		GROUP BY HVCasePK, TCIDFK
+		GROUP BY HVCasePK, TCIDPK
 
 	INSERT INTO @tblNumImmunizations18Month
-		SELECT HVCasePK, TCIDFK, SUM(NumImmunizationsReceived) numImmunizationsReceived 
+		SELECT HVCasePK, TCIDPK, SUM(NumImmunizationsReceived) numImmunizationsReceived 
 		FROM @tblReceivedImmunizations18Month 
-		GROUP BY HVCasePK, TCIDFK
+		GROUP BY HVCasePK, TCIDPK
+
 
 	INSERT INTO @tblMeeting6Month
 		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN TRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
@@ -287,7 +288,7 @@ BEGIN
 		@tblRequiredImmunizations6Month req
 		LEFT JOIN 
 		@tblReceivedImmunizations6Month rec
-		ON req.HVCasePK = rec.HVCasePK AND MedicalItemCode = TCMedicalItem
+		ON req.HVCasePK = rec.HVCasePK AND req.TCIDPK = rec.TCIDPK AND MedicalItemCode = TCMedicalItem
 
 	INSERT INTO @tblMeeting18Month
 		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN TRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
@@ -295,15 +296,15 @@ BEGIN
 		@tblRequiredImmunizations18Month req
 		LEFT JOIN 
 		@tblReceivedImmunizations18Month rec
-		ON req.HVCasePK = rec.HVCasePK AND MedicalItemCode = TCMedicalItem
+		ON req.HVCasePK = rec.HVCasePK AND req.TCIDPK = rec.TCIDPK AND MedicalItemCode = TCMedicalItem
 
 	
 	INSERT INTO @tblMeetingReason
-		SELECT HVCasePK, TCIDFK, STUFF((SELECT ', ' + Meeting AS [text()] FROM @tblMeeting6Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Meeting <> 'Meeting' FOR XML PATH('')), 1, 2, ''), 6 
+		SELECT HVCasePK, TCIDPK, STUFF((SELECT ', ' + Meeting AS [text()] FROM @tblMeeting6Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.TCIDPK = mt2.TCIDPK AND mt.Meeting <> 'Meeting' FOR XML PATH('')), 1, 2, ''), 6 
 		FROM @tblMeeting6Month mt2
 
 	INSERT INTO @tblMeetingReason
-		SELECT HVCasePK, TCIDFK, STUFF((SELECT ', ' + Meeting AS [text()] FROM @tblMeeting18Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Meeting <> 'Meeting' FOR XML PATH('')), 1, 2, ''), 18
+		SELECT HVCasePK, TCIDPK, STUFF((SELECT ', ' + Meeting AS [text()] FROM @tblMeeting18Month mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.TCIDPK = mt2.TCIDPK AND mt.Meeting <> 'Meeting' FOR XML PATH('')), 1, 2, ''), 18
 		FROM @tblMeeting18Month mt2
 
 	INSERT INTO @tblCreativeOutreachDates
@@ -326,30 +327,29 @@ BEGIN
 
 	--Insert the 6 month cohort into the results table
 	INSERT INTO @tblResults
-		(HVCasePK, GroupBy, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt, CreativeOutreachDates)
-		SELECT DISTINCT coh.HVCasePK, 6, coh.PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
+		(HVCasePK, Cohort, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt, CreativeOutreachDates)
+		SELECT DISTINCT coh.HVCasePK, 6, coh.PC1ID, HomeVisitorName, IntakeDate, imm.TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
 		FROM @tblCohort6Month coh
-		INNER JOIN @tblNumImmunizations6Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDFK = coh.TCIDPK
-		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDFK = coh.TCIDPK AND reason.GroupNum = 6
+		INNER JOIN @tblNumImmunizations6Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDPK = coh.TCIDPK
+		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDPK = coh.TCIDPK AND reason.GroupNum = 6
 		LEFT JOIN @tblCreativeOutreachDatesCombined levelx ON levelx.HVCasePK = coh.HVCasePK AND levelx.Cohort = 6
-		
 
 	--Insert the 18 month cohort into the results table
 	INSERT INTO @tblResults
-		(HVCasePK, GroupBy, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt, CreativeOutreachDates)
-		SELECT DISTINCT coh.HVCasePK, 18, coh.PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
+		(HVCasePK, Cohort, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt, CreativeOutreachDates)
+		SELECT DISTINCT coh.HVCasePK, 18, coh.PC1ID, HomeVisitorName, IntakeDate, imm.TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
 		FROM @tblCohort18Month coh
-		INNER JOIN @tblNumImmunizations18Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDFK = coh.TCIDPK
-		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDFK = coh.TCIDPK AND reason.GroupNum = 18
+		INNER JOIN @tblNumImmunizations18Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDPK = coh.TCIDPK
+		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDPK = coh.TCIDPK AND reason.GroupNum = 18
 		LEFT JOIN @tblCreativeOutreachDatesCombined levelx ON levelx.HVCasePK = coh.HVCasePK AND levelx.Cohort = 18
 	
 	--Update the number of shots required
 	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumRequired) 
 		FROM @ImmunizationCount6Month) --Get the required number of immunizations for one case
-		WHERE GroupBy = 6
+		WHERE Cohort = 6
 	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumRequired) 
 		FROM @ImmunizationCount18Month) 
-		WHERE GroupBy = 18
+		WHERE Cohort = 18
 
 	--Update exempt cases
 	UPDATE @tblResults SET Meeting = 'N/A', NumShotsRequired = 0, ReasonNotMeeting = 'Exempt' WHERE Exempt = 1
@@ -363,19 +363,19 @@ BEGIN
 	UPDATE @tblResults SET HFNumExceptions18Month = @NumExceptions18Month
 
 	--Update the number of cases due for immunizations
-	SET @NumDue6Month = (SELECT COUNT(*) FROM @tblResults WHERE GroupBy = 6)
-	SET @NumDue18Month = (SELECT COUNT(*) FROM @tblResults WHERE GroupBy = 18)
+	SET @NumDue6Month = (SELECT COUNT(*) FROM @tblResults WHERE Cohort = 6)
+	SET @NumDue18Month = (SELECT COUNT(*) FROM @tblResults WHERE Cohort = 18)
 	UPDATE @tblResults SET HFNumDueFor6Month = @NumDue6Month
 	UPDATE @tblResults SET HFNumDueFor18Month = @NumDue18Month
 
 	--Update the number of cases that received all immunizations
-	UPDATE @tblResults SET HFNumReceived6Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND GroupBy = 6)
-	UPDATE @tblResults SET HFNumReceived18Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND GroupBy = 18)
+	UPDATE @tblResults SET HFNumReceived6Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND Cohort = 6)
+	UPDATE @tblResults SET HFNumReceived18Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND Cohort = 18)
 	
 	--Update the percent of cases that meet
-	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived6Month + HFNumExceptions6Month)) /  NULLIF(@NumDue6Month, 0)))
-	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, (HFNumReceived18Month + HFNumExceptions18Month)) / NULLIF(@NumDue18Month, 0)))
-	
+	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, HFNumReceived6Month) /  NULLIF((@NumDue6Month - @NumExceptions6Month), 0)))
+	UPDATE @tblResults SET HFPercentMeeting18Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, HFNumReceived18Month) / NULLIF((@NumDue18Month - @NumExceptions18Month), 0)))
+
 	--Update the scores for the program
 	UPDATE @tblResults SET HFScore6Month = CASE WHEN HFPercentMeeting6Month >= 0.90 THEN '3' 
 												WHEN HFPercentMeeting6Month < 0.90 AND HFPercentMeeting6Month >= 0.75 THEN '2'
@@ -389,6 +389,6 @@ BEGIN
 												END
 
 	--Get all the results
-	SELECT * FROM @tblResults ORDER BY GroupBy, HVCasePK
+	SELECT * FROM @tblResults ORDER BY Cohort, HomeVisitorName, TCName
 END
 GO

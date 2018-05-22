@@ -189,6 +189,12 @@ BEGIN
 												WHERE ca2.HVCaseFK = c.HVCasePK AND (ca2.FormType = 'FU-OBP' OR ca2.FormType = 'IN-OBP')
 												ORDER BY ca2.FormDate DESC)
 
+	UPDATE @tblOBPInfo
+	SET OBPInHome = toi.OBPInHome
+	FROM (select HVCaseFK, ca.OBPInHome from @tblOBPInfo toi
+			left JOIN dbo.CommonAttributes ca ON ca.HVCaseFK = toi.HVCasePK and ca.FormType = 'ID') as toi			
+	WHERE [@tblOBPInfo].OBPInHome is null and [@tblOBPInfo].HVCasePK = toi.HVCaseFK	
+	
 	INSERT INTO @tblInvolvedOBPInfo
 	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome,
            obp.Race, obp.MaritalStatus, obp.HighestGrade, obp.EducationalEnrollment,
