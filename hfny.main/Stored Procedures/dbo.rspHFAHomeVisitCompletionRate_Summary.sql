@@ -34,11 +34,30 @@ begin
 	set @posclause = case when @posclause = '' then null else @posclause end;
 	set @negclause = case when @negclause = '' then null else @negclause end;
 
-	with cteHVRecords
-	as
-	(select distinct rtrim(firstname)+' '+rtrim(lastname) as workername
+	declare @cteHVRecords table (
+		workername char(50)
+		,workerfk int
+		,casecount int
+		,pc1id char(15)
+		,startdate datetime
+		,enddate datetime
+		,levelname char(50)
+		,levelstart datetime
+		,expvisitcount int
+		,actvisitcount int
+		,inhomevisitcount int
+		,attvisitcount int
+		,DirectServiceTime datetime
+		,visitlengthminute int
+		,visitlengthhour int
+		,dischargedate datetime
+		,pc1wrkfk char(25)
+		,casefk int
+	)
+	insert into @cteHVRecords
+	select distinct rtrim(firstname)+' '+rtrim(lastname)
 					,hvr.workerfk
-					,count(distinct casefk) as casecount
+					,count(distinct casefk)
 					,pc1id
 					,startdate
 					,enddate
@@ -47,7 +66,7 @@ begin
 						  from hvleveldetail hld
 						  where hvr.casefk = hld.hvcasefk
 							   and StartLevelDate <= @edate
-							   and hvr.programfk = hld.programfk) as levelstart
+							   and hvr.programfk = hld.programfk)
 					,floor(reqvisit) as expvisitcount
 					,sum(case
 							 when SUBSTRING(VisitType, 4, 1) <> '1' then
@@ -66,12 +85,12 @@ begin
 								 1
 							 else
 								 0
-						 end) as attvisitcount
-					,(dateadd(mi,sum(visitlengthminute),dateadd(hh,sum(visitlengthhour),'01/01/2001'))) DirectServiceTime
-					,sum(visitlengthminute)+sum(visitlengthhour)*60 as visitlengthminute
-					,sum(visitlengthhour) as visitlengthhour
+						 end)
+					,(dateadd(mi,sum(visitlengthminute),dateadd(hh,sum(visitlengthhour),'01/01/2001')))
+					,sum(visitlengthminute)+sum(visitlengthhour)*60
+					,sum(visitlengthhour)
 					,dischargedate
-					,pc1id+convert(char(10),hvr.workerfk) as pc1wrkfk --use for a distinct unique field for the OVER(PARTITION BY) above	
+					,pc1id+convert(char(10),hvr.workerfk)  --use for a distinct unique field for the OVER(PARTITION BY) above	
 					 ,hvr.casefk
 		 from [dbo].[udfHVRecords](@programfk,@sdate,@edate) hvr
 			 inner join worker on workerpk = hvr.workerfk
@@ -93,55 +112,93 @@ begin
 				 ,dischargedate
 				 ,hvr.casefk
 				 ,hvr.programfk --,hld.StartLevelDate
+	
+	declare @cteLevelChanges table (
+		casefk int
+		,LevelChanges int
 	)
-	,
-	cteLevelChanges
-	as
-	(select casefk
+	insert into @cteLevelChanges 
+	select casefk
 		   ,count(casefk)-1 as LevelChanges
-		 from cteHVRecords
+		 from @cteHVRecords
 		 group by casefk
+	
+	declare @cteSummary table (
+		workername char(50)
+		,workerfk int
+		,pc1id char(15)
+		,casecount int
+		,[Minutes] int
+		,expvisitcount int
+		,startdate datetime
+		,enddate datetime
+		,levelname char(50)
+		,levelstart datetime
+		,actvisitcount int
+		,inhomevisitcount int
+		,attvisitcount int
+		,dischargedate datetime
+		,IntakeDate datetime
+		,TCDOB datetime
+		,LevelChanges int
 	)
-	,
-	cteSummary
-	as
-	(select distinct workername
+	insert into @cteSummary
+	select distinct workername
 					,workerfk
 					,pc1id
 					,casecount
-					,sum(visitlengthminute) over (partition by pc1wrkfk) as 'Minutes'
-					,sum(expvisitcount) over (partition by pc1wrkfk) as expvisitcount
-					,min(startdate) over (partition by pc1wrkfk) as 'startdate'
-					,max(enddate) over (partition by pc1wrkfk) as 'enddate'
+					,sum(visitlengthminute) over (partition by pc1wrkfk)
+					,sum(expvisitcount) over (partition by pc1wrkfk)
+					,min(startdate) over (partition by pc1wrkfk)
+					,max(enddate) over (partition by pc1wrkfk)
 					,levelname
-					,max(levelstart) over (partition by pc1wrkfk) as 'levelstart'
-					,sum(actvisitcount) over (partition by pc1wrkfk) as actvisitcount
-					,sum(inhomevisitcount) over (partition by pc1wrkfk) as inhomevisitcount
-					,sum(attvisitcount) over (partition by pc1wrkfk) as attvisitcount
-					,max(dischargedate) over (partition by pc1wrkfk) as 'dischargedate'
+					,max(levelstart) over (partition by pc1wrkfk)
+					,sum(actvisitcount) over (partition by pc1wrkfk)
+					,sum(inhomevisitcount) over (partition by pc1wrkfk)
+					,sum(attvisitcount) over (partition by pc1wrkfk)
+					,max(dischargedate) over (partition by pc1wrkfk)
 					,IntakeDate
 					,case when TCDOB is null
 							then EDC
 						  else TCDOB
 					end as TCDOB
 					,LevelChanges
-		 from cteHVRecords hvr
-			 inner join cteLevelChanges on cteLevelChanges.casefk = hvr.casefk
+		 from @cteHVRecords hvr
+			 inner join @cteLevelChanges lc on lc.casefk = hvr.casefk
 			 inner join HVCase c on hvr.casefk = c.HVCasePK
+
+	declare @cteMain table (
+		workername char(50)
+		,workerfk int
+		,pc1id char(15)
+		,casecount int
+		,DirectServiceTime datetime
+		,expvisitcount int
+		,startdate datetime
+		,enddate datetime
+		,levelname char(50)
+		,levelstart datetime
+		,actvisitcount int
+		,inhomevisitcount int
+		,attvisitcount int
+		,VisitRate float
+		,InHomeRate float
+		,dischargedate datetime
+		,IntakeDate datetime
+		,TCDOB datetime
+		,LevelChanges int
 	)
-	,
-	cteMain
-	as
 	-- make the aggregate table
-	(select distinct workername
+	insert into @cteMain
+	select distinct workername
 					,workerfk
 					,pc1id
 					,casecount
-					,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,minutes,0) as DirectServiceTime
+					,dateadd(yy,(2003-1900),0)+dateadd(mm,11-1,0)+6-1+dateadd(mi,minutes,0) 
 					,expvisitcount
 					,startdate
 					,enddate
-					,max(levelname) over (partition by pc1id) as levelname
+					,max(levelname) over (partition by pc1id)
 					--CHRIS PAPAS - below line was bringing in duplicates (ex. AL8713016704 for July 2010 - June 2011)
 					 --, (SELECT TOP 1 levelname ORDER BY enddate) AS levelname
 					 ,levelstart
@@ -163,7 +220,7 @@ begin
 								 else
 									 actvisitcount/(expvisitcount*1.000)
 							 end
-					 end as VisitRate
+					 end
 					,case
 						 when inhomevisitcount is null or inhomevisitcount = 0
 							 then
@@ -179,15 +236,37 @@ begin
 								 else
 									 inhomevisitcount/(case when expvisitcount>=actvisitcount then actvisitcount else expvisitcount end*1.000)
 							 end
-					 end as InHomeRate
+					 end
 					,dischargedate
 					,IntakeDate
 					,TCDOB
 					,LevelChanges
-		 from cteSummary
-	), 
-	cteMainWithScores as 
-	(select *
+		 from @cteSummary
+	
+	declare @cteMainWithScores table (
+	    workername char(50)
+		,workerfk int
+		,pc1id char(15)
+		,casecount int
+		,DirectServiceTime datetime
+		,expvisitcount int
+		,startdate datetime
+		,enddate datetime
+		,levelname char(50)
+		,levelstart datetime
+		,actvisitcount int
+		,inhomevisitcount int
+		,attvisitcount int
+		,VisitRate float
+		,InHomeRate float
+		,dischargedate datetime
+		,IntakeDate datetime
+		,TCDOB datetime
+		,LevelChanges int
+		,ScoreForCase int
+	) 
+	insert into @cteMainWithScores 
+	select *
 		  ,case
 			   when expvisitcount = 0
 				   then
@@ -201,17 +280,18 @@ begin
 			   else
 				   1
 		   end as ScoreForCase
-		from cteMain
-	)
+		from @cteMain
+	
 	select *
 			,case when ScoreForCase=1 then 1 else 0 end as ScoreForCase1
 			,case when ScoreForCase=2 then 1 else 0 end as ScoreForCase2
 			,case when ScoreForCase=3 then 1 else 0 end as ScoreForCase3
-		from cteMainWithScores
+		from @cteMainWithScores
 		where expvisitcount > 0
 				and not (levelname = 'Level X' and levelstart < @sdate)
 		order by WorkerName
 				,pc1id
 
 end
+
 GO
