@@ -216,7 +216,7 @@ declare @cteFinal table (
 	, [TCAgeCode] char(2)
 	, ASQTCReceiving int
 	, AdjTCDOB varchar(12)
-	, Age datetime
+	, Age int
 	, AgeMonth int
 	,AgeAtDateCompleted int
 	,AgeAtDateCompletedMonth int
@@ -274,7 +274,7 @@ insert into @cteFinal
 	, [TCAgeCode] char(2)
 	, ASQTCReceiving int
 	, AdjTCDOB varchar(12)
-	, Age datetime
+	, Age int
 	, AgeMonth int
 	,AgeAtDateCompleted int
 	,AgeAtDateCompletedMonth int
