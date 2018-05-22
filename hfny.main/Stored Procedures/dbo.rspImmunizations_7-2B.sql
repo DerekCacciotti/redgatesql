@@ -393,8 +393,8 @@ BEGIN
 	UPDATE @tblResults SET HFNumDueFor18Month = @NumDue18Month
 
 	--Update the number of cases that received all immunizations
-	UPDATE @tblResults SET HFNumReceived6Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND Cohort = 6)
-	UPDATE @tblResults SET HFNumReceived18Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting IN('Yes', 'N/A') AND Cohort = 18)
+	UPDATE @tblResults SET HFNumReceived6Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting = 'Yes' AND Cohort = 6)
+	UPDATE @tblResults SET HFNumReceived18Month = (SELECT COUNT(*) FROM @tblResults WHERE Meeting = 'Yes' AND Cohort = 18)
 	
 	--Update the percent of cases that meet
 	UPDATE @tblResults SET HFPercentMeeting6Month = CONVERT(DECIMAL(4,2), (CONVERT(DECIMAL, HFNumReceived6Month) /  NULLIF((@NumDue6Month - @NumExceptions6Month), 0)))
