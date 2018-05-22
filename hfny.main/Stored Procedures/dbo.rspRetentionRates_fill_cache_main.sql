@@ -18,6 +18,7 @@ GO
 -- exec rspRetentionRates 1, '03/01/10', '02/29/12', null, 1, '' 1 = Children Youth & Families
 -- exec rspRetentionRates 1, '03/01/10', '02/29/12', null, null, ''
 -- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
+-- exec rspRetentionRates_fill_cache_main 1, '03/01/10', '02/29/12', null, null, ''
 -- =============================================
 -- =============================================
 CREATE procedure [dbo].[rspRetentionRates_fill_cache_main]
@@ -41,141 +42,107 @@ SET NOCOUNT ON;
 	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
 									else @CaseFiltersPositive
 							   end
-	declare @tblResults table (
-		LineDescription varchar(50)
-		, LineGroupingLevel int
-		, DisplayPercentages bit
-		, TotalEnrolledParticipants int
-		, RetentionRateSixMonths decimal(5,3)
-		, RetentionRateOneYear decimal(5,3)
-		, RetentionRateEighteenMonths decimal(5,3)
-		, RetentionRateTwoYears decimal(5,3)
-		, EnrolledParticipantsSixMonths int
-		, EnrolledParticipantsOneYear int
-		, EnrolledParticipantsEighteenMonths int
-		, EnrolledParticipantsTwoYears int
-		, RunningTotalDischargedSixMonths int
-		, RunningTotalDischargedOneYear int
-		, RunningTotalDischargedEighteenMonths int
-		, RunningTotalDischargedTwoYears int
-		, TotalNSixMonths int
-		, TotalNOneYear int
-		, TotalNEighteenMonths int
-		, TotalNTwoYears int
-		, AllParticipants int
-		, SixMonthsIntake int
-		, SixMonthsDischarge int
-		, OneYearIntake int 
-		, OneYearDischarge int
-		, EighteenMonthsIntake int
-		, EighteenMonthsDischarge int
-		, TwoYearsIntake int
-		, TwoYearsDischarge int);
+	--declare @tblResults table (
+	--	LineDescription varchar(50)
+	--	, LineGroupingLevel int
+	--	, DisplayPercentages bit
+	--	, TotalEnrolledParticipants int
+	--	, RetentionRateThreeMonths decimal(5,3)
+	--	, RetentionRateSixMonths decimal(5,3)
+	--	, RetentionRateOneYear decimal(5,3)
+	--	, RetentionRateEighteenMonths decimal(5,3)
+	--	, RetentionRateTwoYears decimal(5,3)
+	--	, RetentionRateThreeYears decimal(5,3)
+	--	, EnrolledParticipantsThreeMonths int
+	--	, EnrolledParticipantsSixMonths int
+	--	, EnrolledParticipantsOneYear int
+	--	, EnrolledParticipantsEighteenMonths int
+	--	, EnrolledParticipantsTwoYears int
+	--	, EnrolledParticipantsThreeYears int
+	--	, RunningTotalDischargedThreeMonths int
+	--	, RunningTotalDischargedSixMonths int
+	--	, RunningTotalDischargedOneYear int
+	--	, RunningTotalDischargedEighteenMonths int
+	--	, RunningTotalDischargedTwoYears int
+	--	, RunningTotalDischargedThreeYears int
+	--	, TotalNThreeMonths int
+	--	, TotalNSixMonths int
+	--	, TotalNOneYear int
+	--	, TotalNEighteenMonths int
+	--	, TotalNTwoYears int
+	--	, TotalNThreeYears int
+	--	, AllParticipants int
+	--	, ThreeMonthsIntake int
+	--	, SixMonthsIntake int
+	--	, OneYearIntake int 
+	--	, EighteenMonthsIntake int
+	--	, TwoYearsIntake int
+	--	, ThreeYearsIntake int);
 
-	declare @tblPC1withStats table (
-		PC1ID char(13)
-		, IntakeDate datetime
-		, DischargeDate datetime
-		, LastHomeVisit datetime
-		, RetentionMonths int
-		, ActiveAt6Months int
-		, ActiveAt12Months int
-		, ActiveAt18Months int
-		, ActiveAt24Months int
-		, AgeAtIntake_Under18 int
-		, AgeAtIntake_18UpTo20 int
-		, AgeAtIntake_20UpTo30 int
-		, AgeAtIntake_Over30 int
-		, RaceWhite int
-		, RaceBlack int
-		, RaceHispanic int
-		, RaceOther int
-		, RaceUnknownMissing int
-		, MarriedAtIntake int
-		, MarriedAtDischarge int
-		, NeverMarriedAtIntake int
-		, NeverMarriedAtDischarge int
-		, SeparatedAtIntake int
-		, SeparatedAtDischarge int
-		, DivorcedAtIntake int
-		, DivorcedAtDischarge int
-		, WidowedAtIntake int
-		, WidowedAtDischarge int
-		, MarriedUnknownMissingAtIntake int
-		, MarriedUnknownMissingAtDischarge int
-		, OtherChildrenInHouseholdAtIntake int
-		, OtherChildrenInHouseholdAtDischarge int
-		, NoOtherChildrenInHouseholdAtIntake int
-		, NoOtherChildrenInHouseholdAtDischarge int
-		, ReceivingTANFAtIntake int
-		, ReceivingTANFAtDischarge int
-		, NotReceivingTANFAtIntake int
-		, NotReceivingTANFAtDischarge int
-		, MomScore int
-		, DadScore int
-		, PartnerScore int
-		, PC1EducationAtIntakeLessThan12 int
-		, PC1EducationAtDischargeLessThan12 int
-		, PC1EducationAtIntakeHSGED int
-		, PC1EducationAtDischargeHSGED int
-		, PC1EducationAtIntakeMoreThan12 int
-		, PC1EducationAtDischargeMoreThan12 int
-		, PC1EducationAtIntakeUnknownMissing int
-		, PC1EducationAtDischargeUnknownMissing int
-		, PC1EducationalEnrollmentAtIntakeYes int
-		, PC1EducationalEnrollmentAtDischargeYes int
-		, PC1EducationalEnrollmentAtIntakeNo int
-		, PC1EducationalEnrollmentAtDischargeNo int
-		, PC1EducationalEnrollmentAtIntakeUnknownMissing int
-		, PC1EducationalEnrollmentAtDischargeUnknownMissing int
-		, PC1EmploymentAtIntakeYes int
-		, PC1EmploymentAtDischargeYes int
-		, PC1EmploymentAtIntakeNo int
-		, PC1EmploymentAtDischargeNo int
-		, PC1EmploymentAtIntakeUnknownMissing int
-		, PC1EmploymentAtDischargeUnknownMissing int
-		, OBPInHouseholdAtIntake int
-		, OBPInHouseholdAtDischarge int
-		, OBPEmploymentAtIntakeYes int
-		, OBPEmploymentAtDischargeYes int
-		, OBPEmploymentAtIntakeNo int
-		, OBPEmploymentAtDischargeNo int
-		, OBPEmploymentAtIntakeNoOBP int
-		, OBPEmploymentAtDischargeNoOBP int
-		, OBPEmploymentAtIntakeUnknownMissing int
-		, OBPEmploymentAtDischargeUnknownMissing int
-		, PC2InHouseholdAtIntake int
-		, PC2InHouseholdAtDischarge int
-		, PC2EmploymentAtIntakeYes int
-		, PC2EmploymentAtDischargeYes int
-		, PC2EmploymentAtIntakeNo int
-		, PC2EmploymentAtDischargeNo int
-		, PC2EmploymentAtIntakeNoPC2 int
-		, PC2EmploymentAtDischargeNoPC2 int
-		, PC2EmploymentAtIntakeUnknownMissing int
-		, PC2EmploymentAtDischargeUnknownMissing int
-		, PC1OrPC2OrOBPEmployedAtIntakeYes int
-		, PC1OrPC2OrOBPEmployedAtDischargeYes int
-		, PC1OrPC2OrOBPEmployedAtIntakeNo int
-		, PC1OrPC2OrOBPEmployedAtDischargeNo int
-		, PC1OrPC2OrOBPEmployedAtIntakeUnknownMissing int
-		, PC1OrPC2OrOBPEmployedAtDischargeUnknownMissing int
-		, CountOfHomeVisits int
-		, DischargedOnLevelX int
-		, PC1DVAtIntake int
-		, PC1DVAtDischarge int
-		, PC1MHAtIntake int
-		, PC1MHAtDischarge int
-		, PC1SAAtIntake int
-		, PC1SAAtDischarge int
-		, PC1PrimaryLanguageAtIntakeEnglish int
-		, PC1PrimaryLanguageAtIntakeSpanish int
-		, PC1PrimaryLanguageAtIntakeOtherUnknown int
-		, TrimesterAtIntakePostnatal int
-		, TrimesterAtIntake3rd int
-		, TrimesterAtIntake2nd int
-		, TrimesterAtIntake1st int
-		, CountOfFSWs int);
+	--declare @tblPC1withStats table (
+	--	PC1ID char(13)
+	--  , ScreenDate datetime
+	--  , KempeDate datetime
+	--	, DaysBetween int
+	--	, IntakeDate datetime
+	--	, DischargeDate datetime
+	--	, LastHomeVisit datetime
+	--	, RetentionMonths int
+	--	, ActiveAt3Months int
+	--	, ActiveAt6Months int
+	--	, ActiveAt12Months int
+	--	, ActiveAt18Months int
+	--	, ActiveAt24Months int
+	--	, ActiveAt36Months int
+	--	, AgeAtIntake_Under18 int
+	--	, AgeAtIntake_18UpTo20 int
+	--	, AgeAtIntake_20UpTo30 int
+	--	, AgeAtIntake_Over30 int
+	--	, RaceWhite int
+	--	, RaceBlack int
+	--	, RaceHispanic int
+	--	, RaceAsian int
+	--	, RaceNativeAmerican int
+	--	, RaceMultiracial int
+	--	, RaceOther int
+	--	, RaceUnknownMissing int
+	--	, MarriedAtIntake int
+	--	, NeverMarriedAtIntake int
+	--	, SeparatedAtIntake int
+	--	, DivorcedAtIntake int
+	--	, WidowedAtIntake int
+	--	, MarriedUnknownMissingAtIntake int
+	--	, OtherChildrenInHouseholdAtIntake int
+	--	, NoOtherChildrenInHouseholdAtIntake int
+	--	, ReceivingTANFAtIntake int
+	--	, NotReceivingTANFAtIntake int
+	--	, MomScore int
+	--	, DadScore int
+	--	, PartnerScore int
+	--	, PC1EducationAtIntakeLessThan12 int
+	--	, PC1EducationAtIntakeHSGED int
+	--	, PC1EducationAtIntakeMoreThan12 int
+	--	, PC1EducationAtIntakeUnknownMissing int
+	--	, PC1EmploymentAtIntakeYes int
+	--	, PC1EmploymentAtIntakeNo int
+	--	, PC1EmploymentAtIntakeUnknownMissing int
+	--	, CountOfHomeVisits int
+	--	, CurrentLevelAtDischarge1 int
+	--	, CurrentLevelAtDischarge2 int
+	--	, CurrentLevelAtDischarge3 int
+	--	, CurrentLevelAtDischarge4 int
+	--	, CurrentLevelAtDischargeX int
+	--	, PC1DVAtIntake int
+	--	, PC1MHAtIntake int
+	--	, PC1SAAtIntake int
+	--	, PC1PrimaryLanguageAtIntakeEnglish int
+	--	, PC1PrimaryLanguageAtIntakeSpanish int
+	--	, PC1PrimaryLanguageAtIntakeOtherUnknown int
+	--	, TrimesterAtIntakePostnatal int
+	--	, TrimesterAtIntake3rd int
+	--	, TrimesterAtIntake2nd int
+	--	, TrimesterAtIntake1st int
+	--	, CountOfFSWs int);
 
 if exists(select * from tempdb.dbo.sysobjects where id=object_id(N'tempdb..#tmpCohort'))
 	-- where charindex('#',name)>0 order by name
@@ -185,6 +152,8 @@ create table #tmpCohort
 	(HVCasePK int
 		, PC1ID char(13)
 		, PC1FK int
+		, ScreenDate date
+		, KempeDate date
 		, IntakeDate date
 		, EDC date
 		, TCDOB date
@@ -202,17 +171,11 @@ create table #tmpDischargeData
 	,MaritalStatusAtDischarge char(100)
 	,PC1EducationAtDischarge char(100)
 	,PC1EmploymentAtDischarge char(1)
-	,EducationalEnrollmentAtDischarge char(1)
-	,OtherChildrenInHouseholdAtDischarge bit
 	,AlcoholAbuseAtDischarge bit
 	,SubstanceAbuseAtDischarge bit
 	,DomesticViolenceAtDischarge bit
 	,MentalIllnessAtDischarge bit
 	,DepressionAtDischarge bit
-	,OBPInHomeAtDischarge char(1)
-	,PC2InHomeAtDischarge char(1)
-	,PC2EmploymentAtDischarge char(1)
-	,OBPEmploymentAtDischarge char(1)
 );
 
 --#endregion
@@ -229,7 +192,9 @@ with cteCohort as
 		select HVCasePK
 				, PC1ID
 				, PC1FK
-				, IntakeDate
+				, cast(hc.ScreenDate as date) as ScreenDate
+				, cast(hc.KempeDate as date) as KempeDate
+				, cast(hc.IntakeDate as date) as IntakeDate
 				, EDC
 				, TCDOB
 				, OBPinHomeIntake
@@ -302,15 +267,6 @@ with cteCohort as
 				,MaritalStatusAtDischarge
 				,PC1EducationAtDischarge
 				,PC1EmploymentAtDischarge
-				,EducationalEnrollmentAtDischarge
-			   	,case
-
-					when cp.HVCaseFK IN (SELECT oc.HVCaseFK FROM OtherChild oc WHERE oc.HVCaseFK=cp.HVCaseFK and 
-																						((oc.FormType = 'IN' and oc.LivingArrangement = '01')
-																							or oc.FormType = 'FU'))
- 						then 1
-					else 0
-				end as OtherChildrenInHouseholdAtDischarge
 				,case 
 					when pc1is.AlcoholAbuse = '1'
 						then 1
@@ -336,10 +292,6 @@ with cteCohort as
 						then 1
 					else 0
 				end as DepressionAtDischarge
-				,OBPInHomeAtDischarge
-				,PC2inHome as PC2InHomeAtDischarge
-				,PC2EmploymentAtDischarge
-				,OBPEmploymentAtDischarge
 		from #tmpCohort co
 		inner join CaseProgram cp on cp.PC1ID = co.PC1ID
 		inner join Kempe k on k.HVCaseFK = co.HVCasePK
@@ -398,13 +350,69 @@ with cteCohort as
 			inner join HVCase c on c.HVCasePK = co.HVCasePK
 			group by t.HVCaseFK
 		)
+	, cteParity as 
+	----------------------
+		(select cp.HVCaseFK
+				, max(case when ca.Parity is null
+					then 0
+					else convert(int, ca.Parity)
+				end) as MaxParity
+			from #tmpCohort tc
+			inner join CaseProgram cp on cp.PC1ID = tc.PC1ID
+			inner join CommonAttributes ca on ca.HVCaseFK = cp.HVCaseFK and ca.FormType in ('KE', 'TC')
+			group by cp.HVCaseFK
+		)
 --#endregion
 --#region cteMain - get data at intake, join to data at discharge and add to report cache table
 	insert into __Temp_Retention_Rates_Main
+           ([ProgramFK]
+           ,[PC1ID]
+           ,[HVCaseFK]
+		   ,[ScreenDate]
+		   ,[KempeDate]
+           ,[IntakeDate]
+           ,[LastHomeVisit]
+           ,[CountOfFSWs]
+           ,[CountOfHomeVisits]
+           ,[DischargeDate]
+           ,[LevelName]
+           ,[DischargeReasonCode]
+           ,[DischargeReason]
+           ,[PC1AgeAtIntake]
+           ,[ActiveAt3Months]
+           ,[ActiveAt6Months]
+           ,[ActiveAt12Months]
+           ,[ActiveAt18Months]
+           ,[ActiveAt24Months]
+           ,[ActiveAt36Months]
+           ,[Race]
+           ,[RaceText]
+		   ,[MaxParity]
+           ,[MaritalStatus]
+           ,[MaritalStatusAtIntake]
+           ,[MomScore]
+           ,[DadScore]
+           ,[PartnerScore]
+		   ,[EffectiveKempeScore]
+           ,[HighestGrade]
+           ,[PC1EducationAtIntake]
+           ,[PC1EmploymentAtIntake]
+           ,[PC1PrimaryLanguageAtIntake]
+           ,[TCDOB]
+           ,[PrenatalEnrollment]
+           ,[AlcoholAbuseAtIntake]
+           ,[SubstanceAbuseAtIntake]
+           ,[DomesticViolenceAtIntake]
+           ,[MentalIllnessAtIntake]
+           ,[DepressionAtIntake]
+           ,[PC1TANFAtIntake]
+           ,[ConceptionDate])
 		select @ProgramFK as ProgramFK
 			   ,c.PC1ID
 			   ,c.HVCasePK as HVCaseFK
-			   ,IntakeDate
+			   ,c.ScreenDate
+			   ,c.KempeDate
+			   ,c.IntakeDate
 			   ,LastHomeVisit
 			   ,CountOfFSWs
 			   ,CountOfHomeVisits
@@ -413,6 +421,11 @@ with cteCohort as
 			   ,cp.DischargeReason AS DischargeReasonCode
                ,dd.DischargeReason
 			   ,PC1AgeAtIntake
+			   ,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 3 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 3 then 1
+					else 0
+				end	as ActiveAt3Months
 			   ,case
 				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 6 then 1
 				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 6 then 1
@@ -433,17 +446,26 @@ with cteCohort as
 				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 24 then 1
 					else 0
 				end as ActiveAt24Months
+				,case
+				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 36 then 1
+				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 36 then 1
+					else 0
+				end as ActiveAt36Months
 			   ,Race
 			   ,carace.AppCodeText as RaceText
+			   ,p.MaxParity
 			   ,MaritalStatus
 			   ,MaritalStatusAtIntake
 			   ,case when MomScore = 'U' then 0 else cast(MomScore as int) end as MomScore
 			   ,case when DadScore = 'U' then 0 else cast(DadScore as int) end as DadScore
 			   ,case when PartnerScore = 'U' then 0 else cast(PartnerScore as int) end as PartnerScore
+			   ,case when cast(MomScore as int) > cast(DadScore as int) 
+						then cast(MomScore as int) 
+						else cast(DadScore as int)
+					end as EffectiveKempeScore
 			   ,HighestGrade
 			   ,PC1EducationAtIntake
 			   ,PC1EmploymentAtIntake
-			   ,EducationalEnrollment AS EducationalEnrollmentAtIntake
 			   ,PrimaryLanguage as PC1PrimaryLanguageAtIntake
 			   ,case 
 			   		when c.TCDOB is NULL then EDC
@@ -455,12 +477,6 @@ with cteCohort as
 					when c.TCDOB is not null and c.TCDOB <= IntakeDate then 0
 				end
 				as PrenatalEnrollment
-				,case
-					when cp.HVCaseFK IN (SELECT oc.HVCaseFK FROM OtherChild oc WHERE oc.HVCaseFK=cp.HVCaseFK AND 
-																						oc.FormType='IN' and oc.LivingArrangement = '01') 
- 						then 1
-					else 0
-				end as OtherChildrenInHouseholdAtIntake
 				,case 
 					when pc1i.AlcoholAbuse = '1'
 						then 1
@@ -486,25 +502,6 @@ with cteCohort as
 						then 1
 					else 0
 				end as DepressionAtIntake
-				,c.OBPInHomeIntake as OBPInHomeAtIntake
-				,c.PC2InHomeIntake as PC2InHomeAtIntake
-				,MaritalStatusAtDischarge
-				,PC1EducationAtDischarge
-				,PC1EmploymentAtDischarge
-				,EducationalEnrollmentAtDischarge
-		   		,OtherChildrenInHouseholdAtDischarge
-				,AlcoholAbuseAtDischarge
-				,SubstanceAbuseAtDischarge
-				,DomesticViolenceAtDischarge
-				,MentalIllnessAtDischarge
-				,DepressionAtDischarge
-				,OBPInHomeAtDischarge
-				,OBPEmploymentAtDischarge
-				,OBPEmploymentAtIntake
-				,PC2InHomeAtDischarge
-				,PC2EmploymentAtIntake
-				,PC2EmploymentAtDischarge
-				,PC1TANFAtDischarge
 				,PC1TANFAtIntake
 				, case when c.TCDOB is null then dateadd(week, -40, c.EDC) 
 						when tci.HVCaseFK is null and c.TCDOB is not null
@@ -524,6 +521,7 @@ with cteCohort as
 			inner join codeLevel cl ON cl.codeLevelPK = CurrentLevelFK
 			left outer join cteTCInformation tci on tci.HVCaseFK = c.HVCasePK
 			left outer join codeApp carace on carace.AppCode=Race and AppCodeGroup='Race'
+			left outer join cteParity p on p.HVCaseFK = cp.HVCaseFK
 			left outer join (select PBTANF as PC1TANFAtIntake
 									,HVCaseFK 
 							   from CommonAttributes ca
@@ -554,4 +552,5 @@ with cteCohort as
 --#endregion
 
 end
+
 GO
