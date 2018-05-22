@@ -189,7 +189,7 @@ BEGIN
 	)
 
 	INSERT INTO @tblCohort
-	SELECT h.HVCasePK, h.IntakeDate, cp.PC1ID, (TRIM('test') + ' ' + TRIM('test')) AS WorkerName, t.TCIDPK, t.TCDOB, (t.TCFirstName + ' ' + t.TCLastName) AS TCName, t.NoImmunization
+	SELECT h.HVCasePK, h.IntakeDate, cp.PC1ID, (TRIM(w.FirstName) + ' ' + TRIM(w.LastName)) AS WorkerName, t.TCIDPK, t.TCDOB, (t.TCFirstName + ' ' + t.TCLastName) AS TCName, t.NoImmunization
 		FROM dbo.HVCase h
 		INNER JOIN dbo.TCID t ON t.HVCaseFK = h.HVCasePK
 		INNER JOIN dbo.CaseProgram cp on cp.HVCaseFK = h.HVCasePK
