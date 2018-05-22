@@ -10,10 +10,6 @@ CREATE TABLE [dbo].[HVLevel]
 [LevelFK] [int] NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
-CREATE NONCLUSTERED INDEX [IX_FK_HVLevel_HVCaseFK] ON [dbo].[HVLevel] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_HVLevel_LevelFK] ON [dbo].[HVLevel] ([LevelFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -97,6 +93,12 @@ Update HVLevel Set HVLevel.HVLevelEditDate= getdate()
 From [HVLevel] INNER JOIN Inserted ON [HVLevel].[HVLevelPK]= Inserted.[HVLevelPK]
 GO
 ALTER TABLE [dbo].[HVLevel] ADD CONSTRAINT [PK__HVLevel__929D7A180E6E26BF] PRIMARY KEY CLUSTERED  ([HVLevelPK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVLevel_HVCaseFK] ON [dbo].[HVLevel] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_HVLevel_LvlAssDate_LevelFK] ON [dbo].[HVLevel] ([LevelAssignDate], [LevelFK]) INCLUDE ([HVCaseFK], [ProgramFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVLevel_LevelFK] ON [dbo].[HVLevel] ([LevelFK]) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[HVLevel] WITH NOCHECK ADD CONSTRAINT [FK_HVLevel_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
