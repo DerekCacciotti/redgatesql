@@ -217,13 +217,6 @@ BEGIN
 		WHERE @PointInTime >= DATEADD(MONTH, 18, TCDOB)
 		ORDER BY PC1ID
 
-	--Remove(?) exceptions from the cohort after recording the number of exceptions
-	SET @NumExceptions6Month = (SELECT ISNULL(COUNT(HVCasePK), 0) FROM @tblCohort6Month WHERE Exempt = 1)
-	SET @NumExceptions18Month = (SELECT ISNULL(COUNT(HVCasePK), 0) FROM @tblCohort18Month WHERE Exempt = 1)
-	--DELETE FROM @tblCohort6Month WHERE Exempt = 1
-	--DELETE FROM @tblCohort18Month WHERE Exempt = 1
-
-
 	--Get the required immunizations for both cohorts
 	INSERT INTO @tblRequiredImmunizations6Month
 		SELECT DISTINCT HVCasePK, TCIDPK, item.MedicalItemCode, due.ScheduledEvent, MAX(due.frequency) numRequired
@@ -352,20 +345,24 @@ BEGIN
 	--Insert the 6 month cohort into the results table
 	INSERT INTO @tblResults
 		(HVCasePK, Cohort, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt, CreativeOutreachDates)
-		SELECT DISTINCT coh.HVCasePK, 6, coh.PC1ID, HomeVisitorName, IntakeDate, imm.TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
+		SELECT DISTINCT coh.HVCasePK, 6, coh.PC1ID, HomeVisitorName, IntakeDate, reason.TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
 		FROM @tblCohort6Month coh
-		INNER JOIN @tblNumImmunizations6Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDPK = coh.TCIDPK
 		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDPK = coh.TCIDPK AND reason.GroupNum = 6
+		LEFT JOIN @tblNumImmunizations6Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDPK = coh.TCIDPK
 		LEFT JOIN @tblCreativeOutreachDatesCombined levelx ON levelx.HVCasePK = coh.HVCasePK AND levelx.Cohort = 6
 
 	--Insert the 18 month cohort into the results table
 	INSERT INTO @tblResults
 		(HVCasePK, Cohort, PC1ID, HomeVisitorName, IntakeDate, TCIDPK, TCDOB,  TCAgeMonths, TCName, NumShotsReceived, Meeting, ReasonNotMeeting, Exempt, CreativeOutreachDates)
-		SELECT DISTINCT coh.HVCasePK, 18, coh.PC1ID, HomeVisitorName, IntakeDate, imm.TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
+		SELECT DISTINCT coh.HVCasePK, 18, coh.PC1ID, HomeVisitorName, IntakeDate, reason.TCIDPK, TCDOB, DATEDIFF(M, TCDOB, @PointInTime) TCAgeMonths, TCName, ISNULL(imm.NumImmunizationsReceived, 0), CASE WHEN reason.Meeting IS NULL THEN 'Yes' ELSE 'No' END AS Meeting, reason.Meeting, coh.Exempt, levelx.Dates
 		FROM @tblCohort18Month coh
-		INNER JOIN @tblNumImmunizations18Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDPK = coh.TCIDPK
 		INNER JOIN @tblMeetingReason reason ON reason.HVCasePK = coh.HVCasePK AND reason.TCIDPK = coh.TCIDPK AND reason.GroupNum = 18
-		LEFT JOIN @tblCreativeOutreachDatesCombined levelx ON levelx.HVCasePK = coh.HVCasePK AND levelx.Cohort = 18
+		LEFT JOIN @tblNumImmunizations18Month imm ON imm.HVCasePK = coh.HVCasePK AND imm.TCIDPK = coh.TCIDPK
+		LEFT JOIN @tblCreativeOutreachDatesCombined levelx ON levelx.HVCasePK = coh.HVCasePK AND levelx.Cohort = 18	
+
+	--Record the number of exceptions for each cohort
+	SET @NumExceptions6Month = (SELECT ISNULL(COUNT(HVCasePK), 0) FROM @tblCohort6Month WHERE Exempt = 1)
+	SET @NumExceptions18Month = (SELECT ISNULL(COUNT(HVCasePK), 0) FROM @tblCohort18Month WHERE Exempt = 1)
 	
 	--Update the number of shots required
 	UPDATE @tblResults SET NumShotsRequired = (SELECT SUM(NumRequired) 
