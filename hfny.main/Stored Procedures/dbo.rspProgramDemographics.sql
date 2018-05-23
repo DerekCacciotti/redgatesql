@@ -35,10 +35,8 @@ as
 	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
 									else @CaseFiltersPositive
 							   end
-							 
-	if object_id('tempdb..#x') is not null drop table #x 
-
-	create table #x (
+						 
+	declare @x table (
 		HVCasePK int
 		, [Race] char(2)
 		, [Age] int
@@ -61,10 +59,8 @@ as
 		, [PrenatalStatus] bit
 		, [NeedInterpreter] bit
 	)
-
-							   
 	
-	insert into #x
+	insert into @x
 	select distinct a.HVCasePK
 					   ,c.Race [Race]
 					   ,cast(datediff(dd,c.PCDOB,a.IntakeDate)/365.25 as int) [Age]
@@ -135,10 +131,12 @@ as
 				 and a.IntakeDate <= @EndDt
 				 --and b.ProgramFK = @programfk
 				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-	;
-
-	with MotherWithOtherChildren
-	as (select count(distinct a.HVCasePK) [PD08MotherWithOtherChild]
+	
+	declare @MotherWithOtherChildren table (
+		[PD08MotherWithOtherChild] int
+	)
+	insert into @MotherWithOtherChildren
+	select count(distinct a.HVCasePK) 
 			from
 				dbo.HVCase as a 
 				join dbo.CaseProgram as b on a.HVCasePK = b.HVCaseFK
@@ -155,13 +153,20 @@ as
 				 and a.IntakeDate <= @EndDt
 				 --and b.ProgramFK = @programfk
 				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-	),
-	TCMedicaid_5
-	as (select a.HVCasePK
-			  ,tc.MultipleBirth [MultipleBirth]
-			  ,tc.NumberofChildren [NumberofChildren]
-			  ,caTC.TCReceivingMedicaid [TCMedicaid]
-			  ,caTC.CommonAttributesPK [TCIDStatus]
+	
+	declare @TCMedicaid_5 table (
+		HVCasePK int
+		,[MultipleBirth] bit
+		,[NumberofChildren] int
+		,[TCMedicaid] char(2)
+		,[TCIDStatus] int
+	)
+	insert into @TCMedicaid_5
+	select a.HVCasePK
+			  ,tc.MultipleBirth 
+			  ,tc.NumberofChildren 
+			  ,caTC.TCReceivingMedicaid 
+			  ,caTC.CommonAttributesPK 
 			from
 				dbo.HVCase as a
 				join dbo.CaseProgram as b on a.HVCasePK = b.HVCaseFK
@@ -179,207 +184,95 @@ as
 				 and a.IntakeDate <= @EndDt
 				 --and b.ProgramFK = @programfk
 				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-	),
-	TCMedicaid
-	as (select sum(case
+	
+	declare @TCMedicaid table (
+		[PD05TCMedicaid] int
+		,[PD05TC] int
+	)
+	insert into @TCMedicaid
+	select sum(case
 				   when TCMedicaid = 1 then
 					   1
 				   else
 					   0
-			   end) [PD05TCMedicaid]
-			  ,count(*) [PD05TC]
+			   end) 
+			  ,count(*) 
 			from
-				TCMedicaid_5
-	),
+				@TCMedicaid_5
 
-	 y
-	as (select count(*) [n]
-			  ,sum(case
-				   when x.Race = '01' then
-					   1
-				   else
-					   0
-			   end) [PD01White]
-			  ,sum(case
-				   when x.Race = '02' then
-					   1
-				   else
-					   0
-			   end) [PD01Black]
-			  ,sum(case
-				   when x.Race = '03' then
-					   1
-				   else
-					   0
-			   end) [PD01Hispanic]
-			  ,sum(case
-				   when x.Race = '04' then
-					   1
-				   else
-					   0
-			   end) [PD01Asian]
-			  ,sum(case
-				   when x.Race = '05' then
-					   1
-				   else
-					   0
-			   end) [PD01NativeAmerican]
-			  ,sum(case
-				   when x.Race = '06' then
-					   1
-				   else
-					   0
-			   end) [PD01Multiracial]
-			  ,sum(case
-				   when x.Race = '07' then
-					   1
-				   else
-					   0
-			   end) [PD01Other]
-			  ,sum(case
-				   when x.Age < 18 then
-					   1
-				   else
-					   0
-			   end) [PD02Age_17]
-			  ,sum(case
-				   when x.Age between 18 and 19 then
-					   1
-				   else
-					   0
-			   end) [PD02Age_18_20]
-			  ,sum(case
-				   when x.Age between 20 and 29 then
-					   1
-				   else
-					   0
-			   end) [PD02Age_21_30]
-			  ,sum(case
-				   when x.Age >= 30 then
-					   1
-				   else
-					   0
-			   end) [PD02Age_30Plus]
-			  ,sum(case
-				   when x.Edu in ('01','02') then
-					   1
-				   else
-					   0
-			   end) [PD03Less12Yr]
-			  ,sum(case
-				   when x.Edu in ('03','04') then
-					   1
-				   else
-					   0
-			   end) [PD03HighSchool]
-			  ,sum(case
-				   when x.Edu in ('05','06','07','08') then
-					   1
-				   else
-					   0
-			   end) [PD03PostSecondary]
-			  ,sum(case
-				   when x.pc1Employed = 1 then
-					   1
-				   else
-					   0
-			   end) [PD04PC1Employed]
-			  ,sum(case
-				   when x.pc2Employed = 1 or x.obpEmployed = 1 then
-					   1
-				   else
-					   0
-			   end) [PD04PC2Employed]
-			  ,sum(case
-				   when x.pc1Employed = 1 or x.pc2Employed = 1 or x.obpEmployed = 1 then
-					   1
-				   else
-					   0
-			   end) [PD04PC1orPC2Employed]
-			  ,sum(case
-				   when x.pc1TrainingProgram = 1 then
-					   1
-				   else
-					   0
-			   end) [PD04PC1TrainingProgram]
-			  ,sum(case
-				   when x.pc2TrainingProgram = 1 or x.obpTrainingProgram = 1 then
-					   1
-				   else
-					   0
-			   end) [PD04PC2TrainingProgram]
-			  ,sum(case
-				   when x.pc1Medicaid = '1' then
-					   1
-				   else
-					   0
-			   end) [PD05PC1Medicaid]
-			  ,sum(case
-				   when x.TANF = 1 then
-					   1
-				   else
-					   0
-			   end) [PD05TANF]
-			  ,sum(case
-				   when x.WIC = 1 then
-					   1
-				   else
-					   0
-			   end) [PD05WIC]
-			  ,sum(case
-				   when x.FoodStamps = 1 then
-					   1
-				   else
-					   0
-			   end) [PD05FoodStamps]
-			  ,sum(case
-				   when x.pc1MaritalStatus = '01' then
-					   1
-				   else
-					   0
-			   end) [PD06Married]
-			  ,sum(convert(int, x.OBPInHousehold)) as [PD07OBPInHousehold]
-			  ,sum(convert(int, x.PC2InHousehold)) [PD07PC2InHousehold]
-			  ,sum(case
-				   when x.yrEnrolled < 1 then
-					   1
-				   else
-					   0
-			   end) [PD09LessThan1Yr]
-			  ,sum(case
-				   when x.yrEnrolled = 1 then
-					   1
-				   else
-					   0
-			   end) [PD09UpTo2Yr]
-			  ,sum(case
-				   when x.yrEnrolled = 2 then
-					   1
-				   else
-					   0
-			   end) [PD09UpTo3Yr]
-			  ,sum(case
-				   when x.yrEnrolled >= 3 then
-					   1
-				   else
-					   0
-			   end) [PD09Over3Yr]
-			  ,sum(case
-				   when x.PrenatalStatus = 1 then
-					   1
-				   else
-					   0
-			   end) [PD10PrenatalAtEnrolled]
-			  ,sum(case
-				   when x.NeedInterpreter = 1 then
-					   1
-				   else
-					   0
-			   end) [PD11NeedInterpreter]
+	declare @y table (
+	    [n] int
+		,[PD01White] int
+		,[PD01Black] int
+		,[PD01Hispanic] int
+		,[PD01Asian] int
+		,[PD01NativeAmerican] int
+		,[PD01Multiracial] int
+		,[PD01Other] int
+		,[PD02Age_17] int
+		,[PD02Age_18_20] int
+		,[PD02Age_21_30] int
+		,[PD02Age_30Plus] int
+		,[PD03Less12Yr] int
+		,[PD03HighSchool] int
+		,[PD03PostSecondary] int
+		,[PD04PC1Employed] int
+		,[PD04PC2Employed] int
+		,[PD04PC1orPC2Employed] int
+		,[PD04PC1TrainingProgram] int
+		,[PD04PC2TrainingProgram] int
+		,[PD05PC1Medicaid] int
+		,[PD05TANF] int
+		,[PD05WIC] int
+		,[PD05FoodStamps] int
+		,[PD06Married] int
+		,[PD07OBPInHousehold] int
+		,[PD07PC2InHousehold] int
+		,[PD09LessThan1Yr] int
+		,[PD09UpTo2Yr] int
+		,[PD09UpTo3Yr] int
+		,[PD09Over3Yr] int
+		,[PD10PrenatalAtEnrolled] int
+		,[PD11NeedInterpreter] int
+	)
+	insert into @y
+	select count(*) [n]
+		,sum(case when x.Race = '01' then 1 else 0 end) 
+		,sum(case when x.Race = '02' then 1 else 0 end) 
+		,sum(case when x.Race = '03' then 1 else 0 end) 
+		,sum(case when x.Race = '04' then 1 else 0 end) 
+		,sum(case when x.Race = '05' then 1 else 0 end) 
+		,sum(case when x.Race = '06' then 1 else 0 end) 
+		,sum(case when x.Race = '07' then 1 else 0 end)				 
+		,sum(case when x.Age < 18 then 1 else 0 end) 
+		,sum(case when x.Age between 18 and 19 then 1 else 0 end) 
+		,sum(case when x.Age between 20 and 29 then 1 else 0 end) 
+		,sum(case when x.Age >= 30 then 1 else 0 end) 
+		,sum(case when x.Edu in ('01','02') then 1 else 0 end) 
+		,sum(case when x.Edu in ('03','04') then 1 else 0 end) 
+		,sum(case when x.Edu in ('05','06','07','08') then 1 else 0 end) 
+		,sum(case when x.pc1Employed = 1 then 1 else 0 end) 
+		,sum(case when x.pc2Employed = 1 or x.obpEmployed = 1 then 1 else 0 end) 
+		,sum(case when x.pc1Employed = 1 or x.pc2Employed = 1 or x.obpEmployed = 1 then 1 else 0 end) 
+		,sum(case when x.pc1TrainingProgram = 1 then 1 else 0 end) 
+		,sum(case when x.pc2TrainingProgram = 1 or x.obpTrainingProgram = 1 then 1 else 0 end) 
+		,sum(case when x.pc1Medicaid = '1' then 1 else 0 end) 
+		,sum(case when x.TANF = 1 then 1 else 0 end) 
+		,sum(case when x.WIC = 1 then 1 else 0 end) 
+		,sum(case when x.FoodStamps = 1 then 1 else 0 end) 
+		,sum(case when x.pc1MaritalStatus = '01' then 1 else 0 end) 
+		,sum(convert(int, x.OBPInHousehold))
+		,sum(convert(int, x.PC2InHousehold)) 
+		,sum(case when x.yrEnrolled < 1 then 1 else 0 end) 
+		,sum(case when x.yrEnrolled = 1 then 1 else 0 end) 
+		,sum(case when x.yrEnrolled = 2 then 1 else 0 end) 
+		,sum(case when x.yrEnrolled >= 3 then 1 else 0 end) 
+		,sum(case when x.PrenatalStatus = 1 then 1 else 0 end) 
+		,sum(case when x.NeedInterpreter = 1 then 1 else  0 end) 
 			from
-				#x as x
-	),
-	z
+				@x as x
+	
+	;with z
 	as (select y.*
 			  ,case
 				   when y.[n] = 0 then
@@ -397,9 +290,9 @@ as
 			   end [PD05TCm]
 			  ,g.[PD05TC]
 			from
-				y
-				join MotherWithOtherChildren as f on 1 = 1
-				join TCMedicaid as g on 1 = 1
+				@y y
+				join @MotherWithOtherChildren as f on 1 = 1
+				join @TCMedicaid as g on 1 = 1
 
 	)
 	select n
@@ -443,5 +336,4 @@ as
 		from
 			z
 
-drop table #x
 GO
