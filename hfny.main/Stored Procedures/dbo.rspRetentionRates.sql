@@ -1016,846 +1016,6 @@ values ('Demographic Factors'
 		, @TwentyFourMonthsAtIntake
 		, @ThirtySixMonthsAtIntake)
 --#endregion
---#region Education
--- Education
---		Less than 12
---		HS / GED
---		More than 12
---		Unknown / Missing
-set @LineGroupingLevel = @LineGroupingLevel + 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears)
-values ('Demographic Factors'
-		, 'PC1 Education'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1withStats
-where PC1EducationAtIntakeLessThan12 = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 0 and PC1EducationAtIntakeLessThan12 = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EducationAtIntakeLessThan12 = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeLessThan12 = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EducationAtIntakeLessThan12 = 1
-
-select @TwentyFourMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EducationAtIntakeLessThan12 = 1
-
-select @ThirtySixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EducationAtIntakeLessThan12 = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    Less than 12'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1withStats
-where PC1EducationAtIntakeHSGED = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 0 and PC1EducationAtIntakeHSGED = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EducationAtIntakeHSGED = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeHSGED = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EducationAtIntakeHSGED = 1
-
-select @TwentyFourMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EducationAtIntakeHSGED = 1
-
-select @ThirtySixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EducationAtIntakeHSGED = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    HS / GED'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1withStats
-where PC1EducationAtIntakeMoreThan12 = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
-
-select @TwentyFourMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
-
-select @ThirtySixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    More Than 12'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1withStats
-where PC1EducationAtIntakeUnknownMissing = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
-
-select @TwentyFourMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
-
-select @ThirtySixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    Missing / Unknown'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
---#endregion
---#region PC1 Employed
--- PC1 Employed
---		Yes
---		No
---		Unknown / Missing
-set @LineGroupingLevel = @LineGroupingLevel + 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears)
-values ('Demographic Factors'
-		, 'PC1 Employed'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1withStats
-where PC1EmploymentAtIntakeYes = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 0 and PC1EmploymentAtIntakeYes = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EmploymentAtIntakeYes = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeYes = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EmploymentAtIntakeYes = 1
-
-select @TwentyFourMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EmploymentAtIntakeYes = 1
-
-select @ThirtySixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EmploymentAtIntakeYes = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    Yes'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1withStats
-where PC1EmploymentAtIntakeNo = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 0 and PC1EmploymentAtIntakeNo = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EmploymentAtIntakeNo = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeNo = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EmploymentAtIntakeNo = 1
-
-select @TwentyFourMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EmploymentAtIntakeNo = 1
-
-select @ThirtySixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EmploymentAtIntakeNo = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    No'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1withStats
-where PC1EmploymentAtIntakeUnknownMissing = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
-
-select @TwentyFourMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
-
-select @ThirtySixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    Missing / Unknown'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
---#endregion
 --#region Marital Status
 --			Married
 --			Not Married
@@ -3202,6 +2362,846 @@ values ('Demographic Factors'
 		, @TwentyFourMonthsAtIntake
 		, @ThirtySixMonthsAtIntake)
 --#endregion
+--#region Education
+-- Education
+--		Less than 12
+--		HS / GED
+--		More than 12
+--		Unknown / Missing
+set @LineGroupingLevel = @LineGroupingLevel + 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears)
+values ('Demographic Factors'
+		, 'PC1 Education'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where PC1EducationAtIntakeLessThan12 = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 0 and PC1EducationAtIntakeLessThan12 = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EducationAtIntakeLessThan12 = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeLessThan12 = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EducationAtIntakeLessThan12 = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EducationAtIntakeLessThan12 = 1
+
+select @ThirtySixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EducationAtIntakeLessThan12 = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Demographic Factors'
+		, '    Less than 12'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where PC1EducationAtIntakeHSGED = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 0 and PC1EducationAtIntakeHSGED = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EducationAtIntakeHSGED = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeHSGED = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EducationAtIntakeHSGED = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EducationAtIntakeHSGED = 1
+
+select @ThirtySixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EducationAtIntakeHSGED = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Demographic Factors'
+		, '    HS / GED'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where PC1EducationAtIntakeMoreThan12 = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
+
+select @ThirtySixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EducationAtIntakeMoreThan12 = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Demographic Factors'
+		, '    More Than 12'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where PC1EducationAtIntakeUnknownMissing = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
+
+select @ThirtySixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EducationAtIntakeUnknownMissing = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Demographic Factors'
+		, '    Missing / Unknown'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+--#endregion
+--#region PC1 Employed
+-- PC1 Employed
+--		Yes
+--		No
+--		Unknown / Missing
+set @LineGroupingLevel = @LineGroupingLevel + 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears)
+values ('Demographic Factors'
+		, 'PC1 Employed'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where PC1EmploymentAtIntakeYes = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 0 and PC1EmploymentAtIntakeYes = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EmploymentAtIntakeYes = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeYes = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EmploymentAtIntakeYes = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EmploymentAtIntakeYes = 1
+
+select @ThirtySixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EmploymentAtIntakeYes = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Demographic Factors'
+		, '    Yes'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where PC1EmploymentAtIntakeNo = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 0 and PC1EmploymentAtIntakeNo = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EmploymentAtIntakeNo = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeNo = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EmploymentAtIntakeNo = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EmploymentAtIntakeNo = 1
+
+select @ThirtySixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EmploymentAtIntakeNo = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Demographic Factors'
+		, '    No'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1withStats
+where PC1EmploymentAtIntakeUnknownMissing = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
+
+select @TwentyFourMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
+
+select @ThirtySixMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and PC1EmploymentAtIntakeUnknownMissing = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Demographic Factors'
+		, '    Missing / Unknown'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+--#endregion
 --#region Primary Language @ Intake
 -- Primary Language @ Intake
 --		English
@@ -3238,7 +3238,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Programmatic Factors'
+values ('Demographic Factors'
 		, 'Primary Language @ Intake'
 		, @LineGroupingLevel
 		, 1
@@ -3332,7 +3332,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Programmatic Factors'
+values ('Demographic Factors'
 		, '    English'
 		, @LineGroupingLevel
 		, 1
@@ -3433,7 +3433,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Programmatic Factors'
+values ('Demographic Factors'
 		, '    Spanish'
 		, @LineGroupingLevel
 		, 1
@@ -3534,8 +3534,8 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Programmatic Factors'
-		, '    Other/Missing/Unknown'
+values ('Demographic Factors'
+		, '    Other/Missing/Unk.'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount
