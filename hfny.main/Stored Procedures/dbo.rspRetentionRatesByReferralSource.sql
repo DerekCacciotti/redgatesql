@@ -6,18 +6,14 @@ GO
 -- Author:		jrobohn
 -- Create date: 03/31/11
 -- Description:	Main storedproc for Retention Rate report
--- exec rspRetentionRatesByDischargeReason 19, '04/01/09', '03/31/11'
-
--- exec rspRetentionRatesByDischargeReason 1, '03/01/10', '02/29/12'
--- exec rspRetentionRatesByDischargeReason 1, '10/01/12', '02/28/13'
-
-
--- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
+-- exec rspRetentionRatesByReferralSource 19, '04/01/09', '03/31/11', null, null, ''
+-- exec rspRetentionRatesByReferralSource 1, '03/01/10', '02/29/12', null, null, ''
+-- exec rspRetentionRatesByReferralSource 1, '10/01/12', '02/28/13', null, null, '' 
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
 -- =============================================
-CREATE procedure [dbo].[rspRetentionRatesByDischargeReason]
+CREATE procedure [dbo].[rspRetentionRatesByReferralSource]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @StartDate datetime
@@ -83,7 +79,7 @@ begin
 		PC1ID char(13)
 		, IntakeDate datetime
 		, DischargeDate datetime
-		, ReportDischargeText char(80)
+		, ReferralSourceText char(80)
 		, LastHomeVisit datetime
 		, RetentionMonths int
 		, ActiveAt3Months int
@@ -151,7 +147,8 @@ begin
 		   ,LastHomeVisit
 		   ,DischargeDate
 		   ,cp.DischargeReason as DischargeReasonCode
-			,cd.ReportDischargeText
+		   ,hs.ReferralSource as ReferralSourceCode
+		   ,ca.AppCodeText as ReferralSourceText
 			,case
 				when DischargeDate is null and datediff(month, IntakeDate, current_timestamp) > 3 then 1
 				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 3 then 1
@@ -183,10 +180,11 @@ begin
 					else 0
 				end as ActiveAt36Months
 	 from HVCase c
+		inner join HVScreen hs on hs.HVCaseFK = c.HVCasePK
 		inner join cteCaseLastHomeVisit lhv on lhv.HVCaseFK = c.HVCasePK
 		inner join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
 		inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
-		 left outer join dbo.codeDischarge cd on cd.DischargeCode = cp.DischargeReason and DischargeUsedWhere like '%DS%'
+		left outer join dbo.codeApp ca on hs.ReferralSource = ca.AppCode and ca.AppCodeGroup = 'TypeOfReferral'
 	 where (IntakeDate is not null
 		  and IntakeDate between @StartDate and @EndDate)
 		  --and cp.ProgramFK = @ProgramFK
@@ -203,7 +201,7 @@ insert into @tblPC1withStats
 	select distinct pc1id
 				   ,IntakeDate
 				   ,DischargeDate
-				   ,d.ReportDischargeText
+				   ,m.ReferralSourceText
 				   ,LastHomeVisit
 				   ,case when DischargeDate is not null then 
 						datediff(mm,IntakeDate,LastHomeVisit)
@@ -216,12 +214,10 @@ insert into @tblPC1withStats
 				   ,ActiveAt18Months
 				   ,ActiveAt24Months
 				   ,ActiveAt36Months
-		from cteMain
-			left outer join codeDischarge d on cteMain.DischargeReasonCode = DischargeCode -- and 
-		-- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
+		from cteMain m
 		where DischargeReasonCode is null
 			 or DischargeReasonCode not in ('07', '17', '18', '20', '21', '23', '25', '37') 
-		order by ReportDischargeText
+		order by m.ReferralSourceText
 				,PC1ID
 				,IntakeDate
 --#endregion
@@ -480,7 +476,7 @@ select @LineGroupingLevel as LineGroupingLevel
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @EighteenMonthsAtDischarge else null end as EighteenMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @TwentyFourMonthsAtDischarge else null end as TwentyFourMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 130 then @ThirtySixMonthsAtDischarge else null end as ThirtySixMonthsAtDischarge
-		, ReportDischargeText
+		, ReferralSourceText	
 		
 		,case when datediff(ww,@enddate,getdate()) >= 13 then 
 					sum(case when ActiveAt3Months = 0 then 1 else 0 end) 
@@ -513,12 +509,12 @@ select @LineGroupingLevel as LineGroupingLevel
 		 as SumDischargedBefore36Months
 
 from @tblPC1withStats
-where ReportDischargeText is not null
+where ReferralSourceText is not null
 		and case when ActiveAt6Months = 0 or ActiveAt12Months = 0 
 						or ActiveAt18Months = 0 or ActiveAt24Months = 0 
 						or ActiveAt36Months = 0
 					then 1 else 0 end > 0
-group by ReportDischargeText
+group by ReferralSourceText
 )
 
 select LineGroupingLevel
@@ -561,7 +557,7 @@ select LineGroupingLevel
 	  ,EighteenMonthsAtDischarge
 	  ,TwentyFourMonthsAtDischarge
 	  ,ThirtySixMonthsAtDischarge
-	  ,ReportDischargeText
+	  ,ReferralSourceText
 	  ,SumDischargedBefore3Months
 	  ,SumDischargedBetween3And6Months
 	  ,SumDischargedBetween6And12Months
@@ -570,7 +566,6 @@ select LineGroupingLevel
 	  ,SumDischargedBetween24And36Months 
 	  ,SumDischargedBefore36Months
 from cteLast
-
 --select @LineGroupingLevel as LineGroupingLevel
 --		,@TotalCohortCount as TotalEnrolledParticipants
 --		,@RetentionRateSixMonths as RetentionRateSixMonths
@@ -598,13 +593,13 @@ from cteLast
 --		,@EighteenMonthsAtDischarge as EighteenMonthsAtDischarge
 --		,@TwentyFourMonthsAtDischarge as TwentyFourMonthsAtDischarge
 		
---select ReportDischargeText
+--select ReferralSourceText
 --	  ,sum(ActiveAt6Months) as SumActiveAt6Months
 --	  ,sum(ActiveAt12Months) as SumActiveAt12Months
 --	  ,sum(ActiveAt18Months) as SumActiveAt18Months
 --	  ,sum(ActiveAt24Months) as SumActiveAt24Months
 --from @tblPC1withStats
---group by ReportDischargeText
+--group by ReferralSourceText
 
 --select *
 --from @tblResults
