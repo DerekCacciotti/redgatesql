@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -41,17 +40,25 @@ begin
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end;
 
-	with cteKempeIssues
-	as
-	(
+	declare @cteKempeIssues table (
+		HVCaseFK int
+		,pc1id char (15)
+		,SubstanceAbuse int
+		,MentalIllness int
+		,DomesticViolence int
+		,AlcoholAbuse int
+		,Depression int
+		,OtherIssue int
+	)
+	insert into @cteKempeIssues
 	select pc1i.HVCaseFK
 			, pc1id
-		  ,case when sum(case when SubstanceAbuse = 1 then 1 else 0 end) > 0 then 1 else 0 end SubstanceAbuse
-		  ,case when sum(case when MentalIllness = 1 then 1 else 0 end) > 0 then 1 else 0 end MentalIllness
-		  ,case when sum(case when DomesticViolence = 1 then 1 else 0 end) > 0 then 1 else 0 end DomesticViolence
-		  ,case when sum(case when AlcoholAbuse = 1 then 1 else 0 end) > 0 then 1 else 0 end AlcoholAbuse
-		  ,case when sum(case when Depression = 1 then 1 else 0 end) > 0 then 1 else 0 end Depression
-		  ,case when sum(case when OtherIssue = 1 then 1 else 0 end) > 0 then 1 else 0 end OtherIssue
+		  ,case when sum(case when SubstanceAbuse = 1 then 1 else 0 end) > 0 then 1 else 0 end 
+		  ,case when sum(case when MentalIllness = 1 then 1 else 0 end) > 0 then 1 else 0 end 
+		  ,case when sum(case when DomesticViolence = 1 then 1 else 0 end) > 0 then 1 else 0 end 
+		  ,case when sum(case when AlcoholAbuse = 1 then 1 else 0 end) > 0 then 1 else 0 end 
+		  ,case when sum(case when Depression = 1 then 1 else 0 end) > 0 then 1 else 0 end 
+		  ,case when sum(case when OtherIssue = 1 then 1 else 0 end) > 0 then 1 else 0 end 
 		from PC1Issues pc1i
 		inner join caseprogram cp on cp.HVCaseFK = pc1i.HVCaseFK
 		inner join Kempe k on k.PC1IssuesFK = pc1i.PC1IssuesPK
@@ -62,14 +69,19 @@ begin
 				and Interval='1'
 				and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		group by pc1i.HVCaseFK, PC1ID
-	),
-	cteReferrals 
-	as
-	(
+	
+	declare @cteReferrals table (
+		HVCasePK int
+		,MentalHealthServices int
+		,DomesticViolenceServices int
+		,SubstanceAbuseServices int
+		,pc1id char(15)
+	)
+	insert into @cteReferrals
 	select c.HVCasePK
-		  ,sum(case when sr.servicecode in ('49','50') and sr.FamilyCode = '01' then 1 else 0 end) MentalHealthServices
-		  ,sum(case when sr.servicecode = '51' and sr.FamilyCode = '01' then 1 else 0 end) DomesticViolenceServices
-		  ,sum(case when sr.servicecode = '52' and sr.FamilyCode = '01' then 1 else 0 end) SubstanceAbuseServices
+		  ,sum(case when sr.servicecode in ('49','50') and sr.FamilyCode = '01' then 1 else 0 end) 
+		  ,sum(case when sr.servicecode = '51' and sr.FamilyCode = '01' then 1 else 0 end) 
+		  ,sum(case when sr.servicecode = '52' and sr.FamilyCode = '01' then 1 else 0 end) 
 			, pc1id
 		from HVCase c
 			join ServiceReferral sr on sr.HVCaseFK = c.HVCasePK
@@ -81,7 +93,7 @@ begin
 			 and sr.ReferralDate-c.IntakeDate < 183
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 		group by c.HVCasePK, PC1ID
-	)
+	
 
 	select distinct cp.PC1ID
 				   ,convert(varchar(12),c.KempeDate,101) KempDate
@@ -99,10 +111,10 @@ begin
 				   ,ltrim(rtrim(fsw.firstname))+' '+ltrim(rtrim(fsw.lastname)) fswname
 				   ,ltrim(rtrim(sup.firstname))+' '+ltrim(rtrim(sup.lastname)) supervisor
 		from HVCase c
-			join cteKempeIssues as pc1i on c.HVCasePK = pc1i.HVCaseFK
+			join @cteKempeIssues as pc1i on c.HVCasePK = pc1i.HVCaseFK
 			join CaseProgram cp on cp.HVCaseFK = c.HVCasePK
 			join codeLevel l on cp.CurrentLevelFK = l.codeLevelPK
-			left outer join cteReferrals sr on sr.HVCasePK = c.HVCasePK
+			left outer join @cteReferrals sr on sr.HVCasePK = c.HVCasePK
 			inner join worker fsw on fsw.workerpk = cp.currentfswfk
 			inner join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk AND wp.programfk = listitem
