@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -32,6 +31,29 @@ set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
 
 DECLARE @n INT = 0
 SELECT @n = CASE WHEN @Over85Percent = 'Y' THEN 1 ELSE 0 END
+
+declare @caseScores table (
+	HVCaseFK int
+	,flag int
+)
+insert into @caseScores
+SELECT HVCaseFK, 
+SUM(
+CASE WHEN DefensiveRespondingScore <= 10 THEN 1 ELSE 0 END +
+CASE WHEN ParentalDistressScore >= 33 THEN 1 ELSE 0 END +
+CASE WHEN ParentChildDisfunctionalInteractionScore >= 26 THEN 1 ELSE 0 END +
+CASE WHEN DifficultChildScore >= 33 THEN 1 ELSE 0 END +
+CASE WHEN PSITotalScore >= 86 THEN 1 ELSE 0 END 
+)
+FROM PSI 
+GROUP BY HVCaseFK
+HAVING SUM(
+CASE WHEN DefensiveRespondingScore <= 10 THEN 1 ELSE 0 END +
+CASE WHEN ParentalDistressScore >= 33 THEN 1 ELSE 0 END +
+CASE WHEN ParentChildDisfunctionalInteractionScore >= 26 THEN 1 ELSE 0 END +
+CASE WHEN DifficultChildScore >= 33 THEN 1 ELSE 0 END +
+CASE WHEN PSITotalScore >= 86 THEN 1 ELSE 0 END 
+) >= @n
 
 SELECT 
 LTRIM(RTRIM(supervisor.firstname)) + ' ' + LTRIM(RTRIM(supervisor.lastname)) supervisor,
@@ -67,26 +89,7 @@ INNER JOIN worker fsw ON d.CurrentFSWFK = fsw.workerpk
 INNER JOIN workerprogram wp ON wp.workerfk = fsw.workerpk AND wp.ProgramFK=ListItem
 INNER JOIN worker supervisor ON wp.supervisorfk = supervisor.workerpk
 inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @programfk) cf on cf.HVCaseFK = d.HVCaseFK
-
-INNER JOIN 
-(SELECT HVCaseFK, 
-SUM(
-CASE WHEN DefensiveRespondingScore <= 10 THEN 1 ELSE 0 END +
-CASE WHEN ParentalDistressScore >= 33 THEN 1 ELSE 0 END +
-CASE WHEN ParentChildDisfunctionalInteractionScore >= 26 THEN 1 ELSE 0 END +
-CASE WHEN DifficultChildScore >= 33 THEN 1 ELSE 0 END +
-CASE WHEN PSITotalScore >= 86 THEN 1 ELSE 0 END 
-) flag
-FROM PSI 
-GROUP BY HVCaseFK
-HAVING SUM(
-CASE WHEN DefensiveRespondingScore <= 10 THEN 1 ELSE 0 END +
-CASE WHEN ParentalDistressScore >= 33 THEN 1 ELSE 0 END +
-CASE WHEN ParentChildDisfunctionalInteractionScore >= 26 THEN 1 ELSE 0 END +
-CASE WHEN DifficultChildScore >= 33 THEN 1 ELSE 0 END +
-CASE WHEN PSITotalScore >= 86 THEN 1 ELSE 0 END 
-) >= @n) x 
-ON x.HVCaseFK = a.HVCaseFK
+INNER JOIN @caseScores x ON x.HVCaseFK = a.HVCaseFK
 
 WHERE 
 d.DischargeDate IS NULL
