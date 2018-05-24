@@ -33,7 +33,7 @@ DECLARE @n INT = 0
 SELECT @n = CASE WHEN @Over85Percent = 'Y' THEN 1 ELSE 0 END
 
 declare @caseScores table (
-	HVCaseFK int
+	HVCaseFK int INDEX ixHVCasePK CLUSTERED
 	,flag int
 )
 insert into @caseScores
