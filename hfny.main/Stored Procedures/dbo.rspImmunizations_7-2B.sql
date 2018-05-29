@@ -189,7 +189,7 @@ BEGIN
 	)
 
 	INSERT INTO @tblCohort
-	SELECT h.HVCasePK, h.IntakeDate, cp.PC1ID, (TRIM(w.FirstName) + ' ' + TRIM(w.LastName)) AS WorkerName, t.TCIDPK, t.TCDOB, (t.TCFirstName + ' ' + t.TCLastName) AS TCName, t.NoImmunization
+	SELECT h.HVCasePK, h.IntakeDate, cp.PC1ID, (RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName)) AS WorkerName, t.TCIDPK, t.TCDOB, (t.TCFirstName + ' ' + t.TCLastName) AS TCName, t.NoImmunization
 		FROM dbo.HVCase h
 		INNER JOIN dbo.TCID t ON t.HVCaseFK = h.HVCasePK
 		INNER JOIN dbo.CaseProgram cp on cp.HVCaseFK = h.HVCasePK
@@ -278,7 +278,7 @@ BEGIN
 		GROUP BY HVCasePK, TCIDPK
 
 	INSERT INTO @tblMeeting6Month
-		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN TRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
+		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN RTRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
 		FROM
 		@tblRequiredImmunizations6Month req
 		LEFT JOIN 
@@ -286,7 +286,7 @@ BEGIN
 		ON req.HVCasePK = rec.HVCasePK AND req.TCIDPK = rec.TCIDPK AND MedicalItemCode = TCMedicalItem
 
 	INSERT INTO @tblMeeting18Month
-		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN TRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
+		SELECT req.HVCasePK, req.TCIDPK, CASE WHEN rec.NumImmunizationsReceived IS NULL OR rec.NumImmunizationsReceived < req.NumImmunizationsRequired THEN RTRIM(ScheduledEvent) + ' Missing' ELSE 'Meeting' END AS Meeting
 		FROM
 		@tblRequiredImmunizations18Month req
 		LEFT JOIN 
@@ -320,14 +320,14 @@ BEGIN
 		FROM @tblCohort6Month coh
 		INNER JOIN dbo.HVLevelDetail hvl ON coh.HVCasePK = hvl.HVCaseFK
 		INNER JOIN dbo.SplitString(@ProgramFK,',') on hvl.ProgramFK = listitem
-		WHERE hvl.LevelName LIKE '%Level X%'
+		WHERE hvl.LevelFK BETWEEN 22 AND 29
 
 	INSERT INTO @tblCreativeOutreachDates
 		SELECT coh.HVCasePK, hvl.StartLevelDate, hvl.EndLevelDate, 18
 		FROM @tblCohort18Month coh
 		INNER JOIN dbo.HVLevelDetail hvl ON coh.HVCasePK = hvl.HVCaseFK
 		INNER JOIN dbo.SplitString(@ProgramFK,',') on hvl.ProgramFK = listitem
-		WHERE hvl.LevelName LIKE '%Level X%'
+		WHERE hvl.LevelFK BETWEEN 22 AND 29
 
 	INSERT INTO @tblCreativeOutreachDatesCombined
 		SELECT DISTINCT mt2.HVCasePK, STUFF((SELECT ' | ' + CONVERT(VARCHAR(10), mt.StartDate, 101) + ' - ' + CONVERT(VARCHAR(10), mt.EndDate, 101) AS [text()] FROM @tblCreativeOutreachDates mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Cohort = mt2.Cohort FOR XML PATH('')), 1, 3, ''), mt2.Cohort
