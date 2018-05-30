@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -146,7 +145,7 @@ begin
 				left outer join Kempe k on k.HVCaseFK = c.HVCasePK
 				left outer join Worker wk on wk.WorkerPK = k.FAWFK
 				left outer join Worker w on w.WorkerPK = cp.CurrentFSWFK
-				left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+				left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK AND wp.ProgramFK = cp.ProgramFK
 				left outer join Worker sup on sup.WorkerPK = wp.SupervisorFK
 				left outer join TCID t on t.HVCaseFK = c.HVCasePK AND t.TCDOD IS NULL
 				left outer join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
