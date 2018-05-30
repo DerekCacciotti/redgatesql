@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -44,36 +43,56 @@ AS
 	declare @n int = 0
 	select @n = case when @UnderCutoffOnly = 'Y' then 1 else 0 end
 
+	declare @TCUnder table (
+		TCIDFK int
+		,flag int
+	)
+	insert into @TCUnder
+	select TCIDFK
+		,SUM(
+		 case when UnderCommunication = 1 then 1 else 0 end+
+		 case when UnderFineMotor = 1 then 1 else 0 end+
+		 case when UnderGrossMotor = 1 then 1 else 0 end+
+		 case when UnderPersonalSocial = 1 then 1 else 0 end+
+		 case when UnderProblemSolving = 1 then 1 else 0 end
+		 )
+		from ASQ
+		group by TCIDFK
+		having SUM(
+			 case when UnderCommunication = 1 then 1 else 0 end+
+			 case when UnderFineMotor = 1 then 1 else 0 end+
+			 case when UnderGrossMotor = 1 then 1 else 0 end+
+			 case when UnderPersonalSocial = 1 then 1 else 0 end+
+			 case when UnderProblemSolving = 1 then 1 else 0 end
+			 ) >= @n
 
-;with cteMain
-	as (
 	select
-		  LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
-		 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
+		  LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) 
+		 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) 
 		 ,d.PC1ID
-		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) TCName
-		 ,convert(varchar(12),c.TCDOB,101) TCDOB
+		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) 
+		 ,convert(varchar(12),c.TCDOB,101) 
 		 ,c.GestationalAge
 		 ,ltrim(rtrim(replace(b.[AppCodeText],'(optional)',''))) TCAge
 		 ,convert(varchar(12),a.DateCompleted,101) DateCompleted
 		 ,a.ASQCommunicationScore
-		 ,case when UnderCommunication = 1 then '*' else '' end UnderCommunication
+		 ,case when UnderCommunication = 1 then '*' else '' end 
 		 ,ASQGrossMotorScore
-		 ,case when UnderGrossMotor = 1 then '*' else '' end UnderGrossMotor
+		 ,case when UnderGrossMotor = 1 then '*' else '' end 
 		 ,ASQFineMotorScore
-		 ,case when UnderFineMotor = 1 then '*' else '' end UnderFineMotor
+		 ,case when UnderFineMotor = 1 then '*' else '' end 
 		 ,ASQProblemSolvingScore
-		 ,case when UnderProblemSolving = 1 then '*' else '' end UnderProblemSolving
+		 ,case when UnderProblemSolving = 1 then '*' else '' end 
 		 ,ASQPersonalSocialScore
-		 ,case when UnderPersonalSocial = 1 then '*' else '' end UnderPersonalSocial
+		 ,case when UnderPersonalSocial = 1 then '*' else '' end 
 		 ,case when TCReferred is null then 'Unknown'
-			  when TCReferred = 1 then 'Yes' else 'No' end TCReferred
-		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end ReviewCDS
+			  when TCReferred = 1 then 'Yes' else 'No' end 
+		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end 
 		 ,case when ASQInWindow is null then 'Unknown'
-			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end InWindow
+			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end 
 		 ,case when DiscussedWithPC1 is null then 'Blank'
-			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end DiscussedWithPC1			  
-		 ,a.TCAge [TCAgeCode]
+			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end 			  
+		 ,a.TCAge 
 
 		from ASQ a
 			inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
@@ -84,26 +103,8 @@ AS
 			inner join worker fsw ON d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
-			inner join
-					  (select TCIDFK
-							 ,SUM(
-							  case when UnderCommunication = 1 then 1 else 0 end+
-							  case when UnderFineMotor = 1 then 1 else 0 end+
-							  case when UnderGrossMotor = 1 then 1 else 0 end+
-							  case when UnderPersonalSocial = 1 then 1 else 0 end+
-							  case when UnderProblemSolving = 1 then 1 else 0 end
-							  ) flag
-						   from ASQ
-						   group by TCIDFK
-						   having SUM(
-								 case when UnderCommunication = 1 then 1 else 0 end+
-								 case when UnderFineMotor = 1 then 1 else 0 end+
-								 case when UnderGrossMotor = 1 then 1 else 0 end+
-								 case when UnderPersonalSocial = 1 then 1 else 0 end+
-								 case when UnderProblemSolving = 1 then 1 else 0 end
-								 ) >= @n) x
-					  on x.TCIDFK = a.TCIDFK
-
+			inner join @TCUnder x on x.TCIDFK = a.TCIDFK
+					  
 		where
 			 d.DischargeDate is null
 			 and d.currentFSWFK = ISNULL(@workerfk,d.currentFSWFK)
@@ -112,15 +113,9 @@ AS
 			 and d.PC1ID = case when @pc1ID = '' then d.PC1ID else @pc1ID end
 			 --and SiteFK = isnull(@sitefk,SiteFK)
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-		--order by supervisor
-		--		,worker
-		--		,PC1ID
-		--		,TCAgeCode
-),
 
+UNION all
 
-cteNone
-	as (
 	select
 		  LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
 		 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
@@ -171,16 +166,7 @@ cteNone
 			 AND a.HVCaseFK IS NULL
 			 AND c.TCDOB IS NOT NULL 
 			 AND (CASE WHEN @UnderCutoffOnly = 'Y' THEN 1 ELSE 0 END = 0)
-		--order by supervisor
-		--		,worker
-		--		,PC1ID
-		--		,TCAgeCode
-)
 
-	  SELECT * FROM cteMain
-	  UNION all
-	  SELECT * FROM cteNone 
-	  order by worker, PC1ID, TCAgeCode
 	
 	
 GO
