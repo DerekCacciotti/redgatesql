@@ -537,8 +537,12 @@ select LineGroupingLevel
 	  ,RunningTotalDischargedEighteenMonths
 	  ,RunningTotalDischargedTwoYears
 	  ,RunningTotalDischargedThreeYears
-	  ,(isnull(TotalNSixMonths,0) + isnull(TotalNOneYear,0) + isnull(TotalNEighteenMonths,0) + isnull(TotalNTwoYears,0)) as RunningTotalDischarged
-
+	  ,(isnull(TotalNThreeMonths,0) + 
+		isnull(TotalNSixMonths,0) + 
+		isnull(TotalNOneYear,0) + 
+		isnull(TotalNEighteenMonths,0) + 
+		isnull(TotalNTwoYears,0) + 
+		isnull(TotalNThreeYears,0)) as RunningTotalDischarged
 	  ,TotalNThreeMonths
 	  ,TotalNSixMonths
 	  ,TotalNOneYear
