@@ -880,13 +880,13 @@ begin
 			, sum(case when a.Status = '1' and a.PrimaryLanguage = '02' then 1 else 0 end) as PrimaryLanguageSpanishG1
 			, sum(case when a.Status = '2' and a.PrimaryLanguage = '02' then 1 else 0 end) as PrimaryLanguageSpanishG2
 			, sum(case when a.Status = '3' and a.PrimaryLanguage = '02' then 1 else 0 end) as PrimaryLanguageSpanishG3
-			, sum(case when a.PrimaryLanguage = '03' or PrimaryLanguage is null or PrimaryLanguage = null
+			, sum(case when a.PrimaryLanguage = '03' or PrimaryLanguage is null or PrimaryLanguage = ''
 						then 1 else 0 end) as PrimaryLanguageOtherUnknown
-			, sum(case when a.Status = '1' and PrimaryLanguage = '03' or PrimaryLanguage is null or PrimaryLanguage = null 
+			, sum(case when a.Status = '1' and (PrimaryLanguage = '03' or PrimaryLanguage is null or PrimaryLanguage = '')
 						then 1 else 0 end) as PrimaryLanguageOtherUnknownG1
-			, sum(case when a.Status = '2' and PrimaryLanguage = '03' or PrimaryLanguage is null or PrimaryLanguage = null 
+			, sum(case when a.Status = '2' and (PrimaryLanguage = '03' or PrimaryLanguage is null or PrimaryLanguage = '')
 						then 1 else 0 end) as PrimaryLanguageOtherUnknownG2
-			, sum(case when a.Status = '3' and PrimaryLanguage = '03' or PrimaryLanguage is null or PrimaryLanguage = null 
+			, sum(case when a.Status = '3' and (PrimaryLanguage = '03' or PrimaryLanguage is null or PrimaryLanguage = '')
 						then 1 else 0 end) as PrimaryLanguageOtherUnknownG3
 		from	#cteMain1 as a
 	)
@@ -1713,7 +1713,7 @@ begin
 				, null as AcceptedFirstVisitEnrolled
 				, null as AcceptedFirstVisitNotEnrolled
 				, null as Refused
-				, '2' as GroupID
+				, '3' as GroupID
 	)
 	,	refused1
 	as (
