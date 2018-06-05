@@ -53,7 +53,7 @@ begin
 		from @tblPTCases ptc
 			inner join HVCase h WITH (NOLOCK) on ptc.hvcaseFK = h.HVCasePK
 			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
-			inner join TCID t WITH (NOLOCK) on t.HVCaseFK = h.HVCasePK
+			inner join TCID t WITH (NOLOCK) on t.HVCaseFK = h.HVCasePK and t.TCIDPK = ptc.TCIDPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 		where t.NoImmunization is null or t.NoImmunization <> 1
 	)
@@ -191,6 +191,7 @@ begin
 	--SELECT * FROM cteImmunizations
 	-- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
 	
-
+	
+				OPTION (OPTIMIZE FOR (@StartDate UNKNOWN, @EndDate UNKNOWN))
 end
 GO
