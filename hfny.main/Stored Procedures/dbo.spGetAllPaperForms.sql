@@ -17,7 +17,7 @@ as
 
     -- Insert statements for procedure here
 		select	AttachmentPK
-			  , replace(AttachmentTitle, '.pdf', '') as AttachmentTitle
+			  , AttachmentTitle
 			  , AttachmentDescription
 			  , convert(varchar(10), FormDate, 126) as FormDate
 			  , convert(varchar(10), AttachmentCreateDate, 126) as AttachmentCreateDate

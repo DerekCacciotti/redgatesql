@@ -2,14 +2,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Jay Robohn>
 -- Create date: <Sep. 16, 2016>
 -- Description:	<Gets all CA documents from the Attachment table>
 -- =============================================
 
-create procedure [dbo].[spGetAllCADocuments]
+CREATE procedure [dbo].[spGetAllCADocuments]
 as
 	begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -18,10 +17,10 @@ as
 
     -- Insert statements for procedure here
 		select	AttachmentPK
-			  , replace(AttachmentTitle, '.pdf', '') as AttachmentTitle
+			  , AttachmentTitle
 			  , AttachmentDescription
-			  , convert(varchar(10), FormDate, 101) as FormDate
-			  , AttachmentCreateDate
+			  , convert(varchar(10), FormDate, 126) as FormDate
+			  , convert(varchar(10), AttachmentCreateDate, 126) as AttachmentCreateDate
 			  , AttachmentCreator
 		from	Attachment a 
 		where	FormType = 'CA'
