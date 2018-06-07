@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -13,22 +12,11 @@ GO
 -- =============================================
 
 
-CREATE procedure [dbo].[rspQAReport17] (@programfk varchar(max) = null
-								 , @ReportType char(7) = null 
-
-								  )
+CREATE procedure [dbo].[rspQAReport17]
+ (   @programfk int = null
+    ,@ReportType char(7) = null 
+ )
 as
-	if @programfk is null
-		begin
-			select	@programfk = substring((select	',' + ltrim(rtrim(str(HVProgramPK)))
-											from	HVProgram
-										   for
-											xml	path('')
-										   ), 2, 8000);
-		end;
-
-	set @programfk = replace(@programfk, '"', '');
-
 	-- Last Day of Previous Month 
 	declare	@LastDayofPreviousMonth datetime; 
 	set @LastDayofPreviousMonth = dateadd(s, -1, dateadd(mm, datediff(m, 0, getdate()), 0)); -- analysis point

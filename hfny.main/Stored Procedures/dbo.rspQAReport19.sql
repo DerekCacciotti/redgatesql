@@ -10,22 +10,15 @@ GO
 -- exec rspQAReport19 1, 'summary'
 -- exec rspQAReport19 1, 'detail'
 -- =============================================
-CREATE PROCEDURE [dbo].[rspQAReport19](
-@programfk    varchar(max)    = NULL,
+CREATE procedure [dbo].[rspQAReport19](
+@programfk    int    = NULL,
 @ReportType char(7) = NULL 
 
 )
 as
 declare @CutOffDate date
 set @CutOffDate = '2015-05-01'
-if @programfk is null
-	begin
-		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
-										   from HVProgram
-										   for xml path ('')),2,8000)
-	end
 
-	set @programfk = REPLACE(@programfk,'"','')
 	
 	-- Last Day of Previous Month 
 Declare @LastDayofPreviousMonth DateTime 
@@ -115,5 +108,6 @@ else
 		where a.AttachmentPK is null
 		order by qarc.PC1ID, qarc.VisitStartTime
 	end		
+
 
 GO

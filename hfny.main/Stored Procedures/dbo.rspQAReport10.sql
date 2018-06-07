@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <November 6th, 2012>
@@ -13,21 +11,11 @@ GO
 -- rspQAReport10 null			--- for main report for all locations
 -- =============================================
 
-
 CREATE procedure [dbo].[rspQAReport10](
-@programfk    varchar(max)    = NULL,
+@programfk int = NULL,
 @ReportType char(7) = NULL 
-
 )
 AS
-	if @programfk is null
-	begin
-		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
-										   from HVProgram
-										   for xml path ('')),2,8000)
-	end
-
-	set @programfk = REPLACE(@programfk,'"','')
 
 -- Last Day of Previous Month 
 Declare @LastDayofPreviousMonth DateTime 

@@ -13,21 +13,11 @@ GO
 -- =============================================
 
 
-CREATE PROCEDURE [dbo].[rspQAReport14](
-@programfk    varchar(max)    = NULL,
+CREATE procedure [dbo].[rspQAReport14](
+@programfk int = NULL,
 @ReportType char(7) = NULL 
-
 )
 AS
-	if @programfk is null
-	begin
-		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
-										   from HVProgram
-										   for xml path ('')),2,8000)
-	end
-
-	set @programfk = REPLACE(@programfk,'"','')
-
 -- Last Day of Previous Month 
 Declare @LastDayofPreviousMonth DateTime 
 Set @LastDayofPreviousMonth = DATEADD(s,-1,DATEADD(mm, DATEDIFF(m,0,GETDATE()),0)) -- analysis point
@@ -283,4 +273,5 @@ SELECT
 --- rspQAReport14 31 ,'summary'
 
 END
+
 GO

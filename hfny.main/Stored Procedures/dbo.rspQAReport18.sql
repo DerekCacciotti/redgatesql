@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -12,23 +11,12 @@ GO
 -- exec rspQAReport18 1, 'detail'
 -- =============================================
 CREATE procedure [dbo].[rspQAReport18](
-@programfk    varchar(max)    = NULL,
+@programfk int = NULL,
 @ReportType char(7) = NULL 
-
 )
 AS
 declare @CutOffDate date
 set @CutOffDate = '2015-05-01'
-
-
-	if @programfk is null
-	begin
-		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
-										   from HVProgram
-										   for xml path ('')),2,8000)
-	end
-
-	set @programfk = REPLACE(@programfk,'"','')
 	
 	-- Last Day of Previous Month 
 Declare @LastDayofPreviousMonth DateTime 

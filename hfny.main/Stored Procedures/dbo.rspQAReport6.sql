@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -14,23 +13,12 @@ GO
 -- Because of transfer cases, JH said that don't consider ProgramFK for medical forms ... Khalsa 1/27/2014
 -- =============================================
 
-
-CREATE procedure [dbo].[rspQAReport6] (@programfk varchar(max) = null
-								, @ReportType char(7) = null 
-
-								 )
+CREATE procedure [dbo].[rspQAReport6]
+ (    @programfk int = null
+	, @ReportType char(7) = null 
+ )
 	with recompile
 as
-	if @programfk is null
-		begin
-			select	@programfk = substring((select	',' + ltrim(rtrim(str(HVProgramPK)))
-											from	HVProgram
-										   for
-											xml	path('')
-										   ), 2, 8000);
-		end;
-
-	set @programfk = replace(@programfk, '"', '');
 
 -- Last Day of Previous Month 
 	declare	@LastDayofPreviousMonth datetime; 
