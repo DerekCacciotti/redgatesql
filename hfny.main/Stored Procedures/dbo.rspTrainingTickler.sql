@@ -15,7 +15,7 @@ GO
 -- Edit Date: 08-15-2017
 -- Edit Reason: Report was running slowly on Azure.  (Removed unnecessary CTEs and implemented a temp table)
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTrainingTickler]
+CREATE procedure [dbo].[rspTrainingTickler]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
 	@workerfk AS INT,
@@ -298,11 +298,11 @@ insert into #cteEverythingRequired
 					WHEN SATCompareDateField = 'date_hired' THEN
 						CONVERT(VARCHAR(10), DATEADD(dd, daysafter, hiredate), 101)
 					WHEN SATCompareDateField = 'faworig' THEN
-						CASE WHEN FAWInitialStart IS NULL THEN 'FAW Start'
+						CASE WHEN FAWInitialStart IS NULL THEN 'FRS Start'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, FAWInitialStart), 101)
 						END
 					WHEN SATCompareDateField = 'fsworig' THEN
-						CASE WHEN FSWInitialStart IS NULL THEN 'FSW Start'
+						CASE WHEN FSWInitialStart IS NULL THEN 'FSS Start'
 						ELSE CONVERT(VARCHAR(10), DATEADD(dd, daysafter, FSWInitialStart), 101)
 						END
 					WHEN SATCompareDateField = 'suporig' THEN

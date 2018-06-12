@@ -799,10 +799,10 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q2			
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Kempes this Period', @TotalNumberOfKempesThisPeriodQuarterly, @TotalNumberOfKempesContractPeriod)
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive, assigned to FSW', @nQ2a, @nQ2CPa)
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, not assigned to FSW', @nQ2b, @nQ2CPb)
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, pending assignment to FSW', @nQ2c, @nQ2CPc)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Parent Surveys this Period', @TotalNumberOfKempesThisPeriodQuarterly, @TotalNumberOfKempesContractPeriod)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive, assigned to FSS', @nQ2a, @nQ2CPa)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, not assigned to FSS', @nQ2b, @nQ2CPb)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, pending assignment to FSS', @nQ2c, @nQ2CPc)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Negative', @nQ2d, @nQ2CPd)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Positive average score - Mother', @nQ2e, @nQ2CPe)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    f. Positive average score - Father', @nQ2f, @nQ2CPf)
@@ -814,7 +814,7 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q3
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Kempe Assessments from Previous Periods Assigned this Period', @nQ3, @nQCP3)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Parent Surveys from Previous Periods Assigned this Period', @nQ3, @nQCP3)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q4
@@ -858,10 +858,10 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q2			
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Kempes this Period', @TotalNumberOfKempesThisPeriodQuarterly, '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive, assigned to FSW', @nQ2a, '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, not assigned to FSW', @nQ2b, '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, pending assignment to FSW', @nQ2c, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Parent Surveys this Period', @TotalNumberOfKempesThisPeriodQuarterly, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive, assigned to FSS', @nQ2a, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, not assigned to FSS', @nQ2b, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, pending assignment to FSS', @nQ2c, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Negative', @nQ2d, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Positive average score - Mother', @nQ2e, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    f. Positive average score - Father', @nQ2f, '')
@@ -873,7 +873,7 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q3
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Kempe Assessments from Previous Periods Assigned this Period', @nQ3, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('3. Parent Surveys from Previous Periods Assigned this Period', @nQ3, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Q4
@@ -933,4 +933,5 @@ IF (@CustomQuarterlyDates = 0)
 	--SELECT * FROM @tblPreIntakeEngagement
 
 END
+
 GO

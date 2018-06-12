@@ -7,7 +7,7 @@ GO
 -- Create date: 04/15/2013
 -- Description:	Training [NYS 3 IFSP] New York State Required Trainings
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTraining_NYS1Shadowing]
+CREATE procedure [dbo].[rspTraining_NYS1Shadowing]
 	-- Add the parameters for the stored procedure here
 	@sdate AS DATETIME,
 	@edate AS DATETIME,
@@ -137,12 +137,12 @@ set @progfk2 = @progfk
 	when totalmeetingcount = 0 then '1'
 	END AS Rating
 ,	CASE cteFinal.Workertype 
-		WHEN 'FAW' THEN 'NYS1b. Assessment workers shadow experienced staff prior to direct work with families.'
-		WHEN 'FSW' THEN 'NYS1a. Home visitors shadow experienced staff prior to direct work with families.'
+		WHEN 'FAW' THEN 'NYS1b. Resource specialists shadow experienced staff prior to direct work with families.'
+		WHEN 'FSW' THEN 'NYS1a. Support specialists shadow experienced staff prior to direct work with families.'
 		WHEN 'Supervisor' THEN 'NYS1c. Supervisors shadow experienced staff prior to direct work with families.'
 	END AS CSST
 ,	CASE cteFinal.Workertype 
-		WHEN 'FAW' THEN 'First Kempe Assessment'
+		WHEN 'FAW' THEN 'First Parent Survey'
 		WHEN 'FSW' THEN 'First Home Visit'
 		WHEN 'Supervisor' THEN 'First Supervisor Event'
 	END AS FirstEventDateType
