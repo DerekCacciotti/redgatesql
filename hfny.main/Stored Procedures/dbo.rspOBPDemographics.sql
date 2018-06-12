@@ -229,13 +229,13 @@ BEGIN
 		, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsOBP
 		, SUM(CASE WHEN (d.OBPRelationToTC IS NULL OR d.OBPGender = '') AND d.PC1Gender <> '02' THEN 1 ELSE 0 END) AS NumDadsOther
 		--DADS AS OBPS, ACTIVE IN PERIOD: INVOLVEMENT AS OF INTAKE/LAST FU SECTION
-		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '01') AS NumFinanciallyInvolved
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '01') AS NumFinanciallyAndEmotionallyInvolved
 		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '02') AS NumEmotionallyInvolved
-		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '03') AS NumFinanciallyAndEmotionallyInvolved
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '03') AS NumFinanciallyInvolved
 		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '04') AS NumNotInvolved
 		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '05') AS NumDoesNotKnow
-		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '06' OR sc.OBPInvolvement IS NULL) AS NumOtherMissing
-		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '07') AS NumDeceased
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '06') AS NumDeceased
+		, (SELECT COUNT(DISTINCT sc.HVCasePK) FROM @tblSecondaryCohort sc WHERE sc.OBPInvolvement = '07' OR sc.OBPInvolvement IS NULL) AS NumOtherMissing
 		--DADS AS OBPS, ACTIVE IN PERIOD, NOT DECEASED: ANSWERS AS OF INTAKE/LAST FU SECTION
 		, (SELECT COUNT(DISTINCT io.HVCasePK) FROM @tblInvolvedOBPs io) AS NumTotalInvolved
 		, (SELECT COUNT(DISTINCT nio.HVCasePK) FROM @tblNotInvolvedOBPs nio) AS NumTotalNotInvolved
