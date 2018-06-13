@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 11, 2013>
@@ -600,21 +599,21 @@ as
 				(ReportTitle
 			   , Total
 				)
-		values	('3.  Kempe Assessments this Period'
+		values	('3.  Parent Surveys this Period'
 			   , @n3
 				)
 		insert	into @tbl4DataReport
 				(ReportTitle
 			   , Total
 				)
-		values	('    3a. Positive Kempe Assigned ( or Pending Assignment) to FSW'
+		values	('    3a. Positive Parent Survey Assigned ( or Pending Assignment) to FSS'
 			   , @n3a
 				)
 		insert	into @tbl4DataReport
 				(ReportTitle
 			   , Total
 				)
-		values	('    3b. Positive Kempe Assessments Not Assigned to FSW - Terminated'
+		values	('    3b. Positive Parent Survey Not Assigned to FSS - Terminated'
 			   , (select	count(HVCasePK)
 				  from		@tbl4DataReportRow3
 				  where		CaseStatus = '04'
@@ -624,7 +623,7 @@ as
 				(ReportTitle
 			   , Total
 				)
-		values	('    3c. Negative Kempe Assessment'
+		values	('    3c. Negative Parent Survey'
 			   , (select	count(HVCasePK)
 				  from		@tbl4DataReportRow3
 				  where		CaseStatus = '02'

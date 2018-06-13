@@ -958,9 +958,9 @@ SELECT WorkerName
 		  ,cr.firstevent
 		  ,cr.workerpk
 		  ,case 
-				when w.FAWInitialStart is not null and w.FSWInitialStart is not null then 'FAW, FSW'
-				when w.FAWInitialStart is not null then 'FAW'
-			    when w.FSWInitialStart is not null then 'FSW'			    
+				when w.FAWInitialStart is not null and w.FSWInitialStart is not null then 'FRS, FSS'
+				when w.FAWInitialStart is not null then 'FRS'
+			    when w.FSWInitialStart is not null then 'FSS'			    
 			    else
 			    ''
 			    end as workerRole

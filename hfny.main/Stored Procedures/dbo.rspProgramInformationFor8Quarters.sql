@@ -212,7 +212,7 @@ as
 
 -- Initially, get the subset of data that we are interested in ... Good Practice ... Khalsa 
 -- We will use this cohort starting item # 3
-		create table #tblInitial_cohort  ([HVCasePK] [int]
+		create table #tblInitial_cohort ([HVCasePK] [int]
 									   , [CaseProgress] [numeric](3, 1) null
 									   , [Confidentiality] [bit] null
 									   , [CPFK] [int] null
@@ -1373,7 +1373,7 @@ as
 				select	99
 					  , 'Last day of Quarter'
 					  , '1. Total Screens'
-					  , '2. Total Kempe Assessments'
+					  , '2. Total Parent Surveys'
 					  , '    a. % Positive'
 					  , '        1. % Positive Enrolled'
 					  , '        2. % Positive Pending Enrollment'
@@ -1701,6 +1701,7 @@ as
 		inner join @tblcol6 c6 on c6.Q8Columns = c99.Q8Columns
 		inner join @tblcol7 c7 on c7.Q8Columns = c99.Q8Columns
 		inner join @tblcol8 c8 on c8.Q8Columns = c99.Q8Columns
+
 
 		drop table #tblQ8ReportMain
 		drop table #tblMake8Quarter

@@ -6528,7 +6528,7 @@ insert into @tblResults (FactorType
 						, TotalNTwoYears
 						, TotalNThreeYears)
 values ('Social Factors'
-		, 'Kempe Score'
+		, 'Parent Survey Score'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount
@@ -6894,7 +6894,7 @@ insert into @tblResults (FactorType
 						, TotalNTwoYears
 						, TotalNThreeYears)
 values ('Social Factors'
-		, 'Whose Kempe Score Qualifies'
+		, 'Whose Parent Survey Score Qualifies'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount

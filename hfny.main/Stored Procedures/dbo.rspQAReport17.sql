@@ -89,7 +89,7 @@ as
 				   , [SummaryTotal]
 					)
 			values	(17
-				   , 'Kempe assessment completed in last three months but not data entered (N='
+				   , 'Parent Survey completed in last three months but not data entered (N='
 					 + convert(varchar, @numOfAllKempes) + ')'
 				   , convert(varchar, @numOfKempesNotEntered) + ' ('
 					 + convert(varchar, round(coalesce(cast(@numOfKempesNotEntered as float) * 100

@@ -81,7 +81,7 @@ if @ReportType = 'summary'
 		          SummaryTotal
 		        )
 		values  ( 18 , -- SummaryId - int
-		          'Number of Kempe forms since ' + CONVERT(VARCHAR(8), @CutOffDate, 1) + ' without an attachment (N=' + CONVERT(varchar,@cohortCount) + ')', -- SummaryText - varchar(200)
+		          'Number of Parent Survey forms since ' + CONVERT(VARCHAR(8), @CutOffDate, 1) + ' without an attachment (N=' + CONVERT(varchar,@cohortCount) + ')', -- SummaryText - varchar(200)
 		          CONVERT(varchar,@missingAttachCount) + ' (' + 
 		          convert(varchar,round(coalesce(cast(@missingAttachCount as float) * 100 / nullif(@cohortCount,0),0),0)) + '%)' -- SummaryTotal - varchar(100)
 		        )
@@ -96,7 +96,7 @@ else
                convert(varchar(10), KempeDate, 101) as [Kempe Date] ,
                CurrentWorkerName as [FAW Name],
                CurrentLevel, 
-               Link = '<a href="/Pages/Kempe.aspx?pc1id=' + PC1ID + '&kempepk=' + rtrim(convert(varchar(12), qarc.KempePK)) + '" target="_blank" alt="Kempe form">'
+               Link = '<a href="/Pages/Kempe.aspx?pc1id=' + PC1ID + '&kempepk=' + rtrim(convert(varchar(12), qarc.KempePK)) + '" target="_blank" alt="Parent Survey form">'
 		from @tbl4QAReportCohort qarc
 	    left outer join Attachment a on a.HVCaseFK = qarc.HVCaseFK and a.FormType = 'KE'
 		where a.AttachmentPK is null

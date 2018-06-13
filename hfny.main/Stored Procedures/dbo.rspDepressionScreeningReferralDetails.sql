@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:	  <jrobohn>
 -- Create date: <Feb. 17, 2016>
@@ -130,11 +129,7 @@ with	cteMain
 		  , TCDOB
 		  , IntakeDate
 		  , @CutoffDate as CutoffDate
-		  , case when FormType = 'KE' then 'Kempe'
-					when FormType = 'IN' then 'Intake'
-					when FormType = 'TC' then 'TC ID'
-					when FormType = 'FU' then 'Follow Up'
-			end as FormName
+		  , FormType
 		  , DateAdministered
 		  , TotalScore
 		  , case when DepressionReferralMade is null or DepressionReferralMade = 0 then 'N' else 'Y' end as ReferralMade

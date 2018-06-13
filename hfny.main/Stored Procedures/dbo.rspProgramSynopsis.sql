@@ -835,7 +835,7 @@ VALUES(2,3,'', '', '', '', '', '', '', '','')
 
 -- Kempe Assessments (no filter)
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(3,1,'Kempe Assessments (no filter)', 'Total', 'Positive', 'Negative', 'Prenatal Positive', 'Prenatal Negative', 'Postnatal Positive', 'Postnatal Negative','')
+VALUES(3,1,'Parent Surveys (no filter)', 'Total', 'Positive', 'Negative', 'Prenatal Positive', 'Prenatal Negative', 'Postnatal Positive', 'Postnatal Negative','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -895,7 +895,7 @@ VALUES(9,3,'', '', '', '', '', '', '', '','')
 -- Details section
 -- ASQ Details
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(10,1,'ASQ Due, but not completed', 'PC1ID', 'Child Name', 'Birth Date', 'Interval', 'Due Date', 'FSW Name', '','')
+VALUES(10,1,'ASQ Due, but not completed', 'PC1ID', 'Child Name', 'Birth Date', 'Interval', 'Due Date', 'FSS Name', '','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -903,7 +903,7 @@ VALUES(10,3,'', '', '', '', '', '', '', '','')
 
 -- ASQSE Details
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(11,1,'ASQSE Due, but not completed', 'PC1ID', 'Child Name', 'Birth Date', 'Interval', 'Due Date', 'FSW Name', '','')
+VALUES(11,1,'ASQSE Due, but not completed', 'PC1ID', 'Child Name', 'Birth Date', 'Interval', 'Due Date', 'FSS Name', '','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -912,7 +912,7 @@ VALUES(11,3,'', '', '', '', '', '', '', '','')
 
 -- Follow Up Details
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(12,1,'Follow Up Due, but not completed', 'PC1ID', 'Child Name', 'Birth Date', 'Interval', 'Due Date', 'FSW Name', '','')
+VALUES(12,1,'Follow Up Due, but not completed', 'PC1ID', 'Child Name', 'Birth Date', 'Interval', 'Due Date', 'FSS Name', '','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -920,7 +920,7 @@ VALUES(12,3,'', '', '', '', '', '', '', '','')
 
 -- PSI Details
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(13,1,'PSI Due, but not completed', 'PC1ID', 'Child Name', 'Birth Date', 'Interval', 'Due Date', 'FSW Name', '','')
+VALUES(13,1,'PSI Due, but not completed', 'PC1ID', 'Child Name', 'Birth Date', 'Interval', 'Due Date', 'FSS Name', '','')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -928,7 +928,7 @@ VALUES(13,3,'', '', '', '', '', '', '', '','')
 
 -- New Admission at Enrollment Details
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(14,1,'New Admission at Enrollment', 'PC1ID','Participant', 'FSW Name', 'Kempe Date', 'Date FSW Assigned', 'Intake Date', 'TANF Services Eligibility', '')
+VALUES(14,1,'New Admission at Enrollment', 'PC1ID','Participant', 'FSS Name', 'Parent Survey Date', 'Date FSS Assigned', 'Intake Date', 'TANF Services Eligibility', '')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -936,7 +936,7 @@ VALUES(14,3,'', '', '', '', '', '', '', '','')
 
 -- Discharges at Preintake Stage Details
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(15,1,'Discharges at Preintake Stage', 'PC1ID', 'Participant', 'FSW Name', 'Kempe Date', 'Date FSW Assigned', 'Close Date', 'Reason', '')
+VALUES(15,1,'Discharges at Preintake Stage', 'PC1ID', 'Participant', 'FSS Name', 'Parent Survey Date', 'Date FSS Assigned', 'Close Date', 'Reason', '')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -965,7 +965,7 @@ set @AvgServiceLength = (select strAverageServiceLength from @tblAverageService)
 
 -- Discharges after Enrollment
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(16,1,'Discharges after Enrollment Average Length of Service: ' + @AvgServiceLength + ' days' , 'Participant','FSW Name', '# of FSWs', 'Length Of Service (days)', 'Intake Date','TANF Services Eligibility', 'Close Date', 'Reason')
+VALUES(16,1,'Discharges after Enrollment Average Length of Service: ' + @AvgServiceLength + ' days' , 'Participant','FSS Name', '# of FSSs', 'Length Of Service (days)', 'Intake Date','TANF Services Eligibility', 'Close Date', 'Reason')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -973,7 +973,7 @@ VALUES(16,3,'', '', '', '', '', '', '', '','')
 
 -- Families on Creative Outreach (Level X)
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
-VALUES(17,1,'Families on Creative Outreach (Level X)', 'PC1ID', 'Participant','FSW Name', 'Days on Level X', 'Level Start Date', 'Period End Date','Level Name', '')
+VALUES(17,1,'Families on Creative Outreach (Level X)', 'PC1ID', 'Participant','FSS Name', 'Days on Level X', 'Level Start Date', 'Period End Date','Level Name', '')
 
 -- add a blank line
 INSERT INTO @tblProgramSynopsisReportTitle(rowNumber,rowOrder,strTotals,psrCol0, psrCol1, psrCol2, psrCol3, psrCol4, psrCol5, psrCol6, psrCol7)
@@ -1453,7 +1453,7 @@ SELECT 	'17','2', ''
 		   lr.LevelName
 		  ,CASE when levelCount IS NOT NULL THEN 1 ELSE 0 END AS levelCount
 		  FROM cteDataReportRow14RestOfIt	t14Rest
-	RIGHT JOIN (SELECT DISTINCT [LevelName] FROM [codeLevel] WHERE ((LevelName LIKE 'level%' AND Enrolled = 1) OR LevelName LIKE 'Preintake-enroll'))  lr ON lr.LevelName = t14Rest.LevelName  -- add missing levelnames
+	RIGHT JOIN (select distinct [LevelName] FROM [codeLevel] WHERE ((LevelName LIKE 'level%' AND Enrolled = 1) OR LevelName LIKE 'Preintake-enroll'))  lr ON lr.LevelName = t14Rest.LevelName  -- add missing levelnames
 	ORDER BY LevelName 
 
 
