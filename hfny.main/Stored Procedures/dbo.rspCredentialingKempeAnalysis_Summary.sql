@@ -11,7 +11,7 @@ GO
 -- Description:	<This Credentialing report gets you 'Summary for 1-2.A Acceptance Rates and 1-2.B Refusal Rates Analysis'>
 -- rspCredentialingKempeAnalysis_Summary 2, '01/01/2011', '12/31/2011'
 -- rspCredentialingKempeAnalysis_Summary 1, '04/01/2012', '03/31/2013'
--- rspCredentialingKempeAnalysis_Summary 6, '04/01/2017', '03/31/2018'
+-- rspCredentialingKempeAnalysis_Summary 6, '05/01/2017', '04/30/2018'
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Summary] (@programfk varchar(max) = null, @StartDate datetime, @EndDate datetime)
 as
@@ -31,6 +31,7 @@ begin
 	declare @StartDateX datetime = @StartDate ;
 	declare @EndDateX datetime = @EndDate ;
 	declare @TotalRefused int
+	declare @GrandTotalN int
 
 	if @programfk is null
 		begin
@@ -316,9 +317,12 @@ begin
 	--inner join CaseProgram cp on cm.HVCasePK = cp.HVCaseFK
 	
 	select @TotalRefused = count(HVCasePK)
-	from #ctemain1
+	from #ctemain1 m
 	where Status = '3' ;
 
+	select	@GrandTotalN = count(*)
+	from	#cteMain1 m ;
+	
 	with total1
 	as (
 		select	count(*) as total
@@ -337,7 +341,7 @@ begin
 				, '0' as GroupID
 		union all
 		select	'Totals (N = '+convert(varchar, total)+')' as [title]
-			, null as TotalN
+			, total as TotalN
 			, totalG1 as AcceptedFirstVisitEnrolled
 			--, round(coalesce(cast(totalG1 as float)* 100 / nullif(total, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
 			, totalG2 as AcceptedFirstVisitNotEnrolled
@@ -1841,6 +1845,10 @@ begin
 
 	select	title
 			, TotalN
+			, case when rpt1.TotalN is null 
+					then null 
+					else round(coalesce(cast(TotalN as float) / nullif(@GrandTotalN, 0), 0), 2) 					
+				end as TotalNPercent
 			, @TotalRefused as TotalRefused
 			, AcceptedFirstVisitEnrolled
 			, case when rpt1.TotalN is null then null 
