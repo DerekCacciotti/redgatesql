@@ -216,6 +216,7 @@ SET @TotalNumberOfKempesThisPeriodQuarterly =
 
 )
 
+-- Positive, Assigned
 SET @nQ2a = 
 (
 	SELECT count(irq.HVCasePK)
@@ -229,7 +230,7 @@ SET @nQ2a =
 
 )
 
--- Positive not assigned to FSW
+-- Positive, Pending Assignment
 SET @nQ2b = 
 (
 	SELECT count(irq.HVCasePK)
@@ -238,11 +239,12 @@ SET @nQ2b =
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
 	AND p.CaseStatus = '02'
-	AND	(p.FSWAssignDate IS NULL)	
+	AND	p.FSWAssignDate > @eDate
 	AND irq.KempeResult = '1'
 
 )
 
+-- Positive, not assigned to FSS (Discharged)
 SET @nQ2c = 
 (
 	SELECT count(irq.HVCasePK)
@@ -250,12 +252,13 @@ SET @nQ2c =
 	INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 	WHERE 
 	irq.KempeDate BETWEEN @sDate AND @edate
-	AND p.CaseStatus in ('02','04')
-	AND	(p.FSWAssignDate IS NULL Or p.FSWAssignDate > @eDate)		
+	AND p.CaseStatus = '02'
+	AND	p.FSWAssignDate IS NULL
 	AND irq.KempeResult = '1'
 
 )
 
+-- Negative
 SET @nQ2d = 
 (
 	SELECT count(irq.HVCasePK)
@@ -268,7 +271,6 @@ SET @nQ2d =
 	AND irq.KempeResult = '0'
 
 )
-
 
 SET @nQ2e = 
 (
@@ -376,7 +378,7 @@ IF (@CustomQuarterlyDates = 0)
 
 		)
 
-
+		-- Positive, Assigned
 		SET @nQ2CPa = 
 		(
 			SELECT count(irq.HVCasePK)
@@ -390,7 +392,7 @@ IF (@CustomQuarterlyDates = 0)
 
 		)
 
-		-- Positive not assigned to FSW
+		-- Positive, Pending Assignment
 		SET @nQ2CPb = 
 		(
 			SELECT count(irq.HVCasePK)
@@ -398,12 +400,12 @@ IF (@CustomQuarterlyDates = 0)
 			INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 			WHERE 
 			irq.KempeDate BETWEEN @ContractStartDate AND @edate
-			AND p.CaseStatus in ('02','04')
-			AND	(p.FSWAssignDate IS NULL)	
+			AND p.CaseStatus = '02'
+			AND	p.FSWAssignDate > @eDate
 			AND irq.KempeResult = '1'
-
 		)
 
+		-- Positive, not assigned to FSS (Discharged)
 		SET @nQ2CPc = 
 		(
 			SELECT count(irq.HVCasePK)
@@ -411,10 +413,9 @@ IF (@CustomQuarterlyDates = 0)
 			INNER JOIN Preassessment p ON irq.HVCasePK = p.HVCaseFK
 			WHERE 
 			irq.KempeDate BETWEEN @ContractStartDate AND @edate
-			AND p.CaseStatus in ('02','04')
-			AND	(p.FSWAssignDate IS NULL Or p.FSWAssignDate > @eDate)		
+			AND p.CaseStatus = '04'
+			AND	p.FSWAssignDate IS NULL
 			AND irq.KempeResult = '1'
-
 		)
 
 		SET @nQ2CPd = 
@@ -427,7 +428,6 @@ IF (@CustomQuarterlyDates = 0)
 			AND p.CaseStatus = '02'
 			--AND	(p.FSWAssignDate IS NOT NULL AND p.FSWAssignDate <= @eDate)	
 			AND irq.KempeResult = '0'
-
 		)
 
 
@@ -605,7 +605,7 @@ SET @nQ5c =
 -- Original
 -- SET @nQ5d =(@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a + @nQ3) - (@nQ5a + @nQ5b + @nQ5c) 
 
--- Note: added @nQ2c -  Positive Pending Assignment to FSW
+-- Note: added @nQ2c -  Positive, Pending Assignment to FSS
  SET @nQ5d =(@TotalNumberOfPreIntakeCasesQuarterly + @nQ2a +      @nQ2c      + @nQ3) - (@nQ5a + @nQ5b + @nQ5c) 
 
 -- Note: Taken out @nQ5a - because Data report considers only Enrolled and Terminated
@@ -801,8 +801,8 @@ IF (@CustomQuarterlyDates = 0)
 			-- Q2			
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Parent Surveys this Period', @TotalNumberOfKempesThisPeriodQuarterly, @TotalNumberOfKempesContractPeriod)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive, assigned to FSS', @nQ2a, @nQ2CPa)
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, not assigned to FSS', @nQ2b, @nQ2CPb)
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, pending assignment to FSS', @nQ2c, @nQ2CPc)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, pending assignment to FSS', @nQ2b, @nQ2CPb)
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, not assigned to FSS (Discharged)', @nQ2c, @nQ2CPc)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Negative', @nQ2d, @nQ2CPd)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Positive average score - Mother', @nQ2e, @nQ2CPe)
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    f. Positive average score - Father', @nQ2f, @nQ2CPf)
@@ -860,8 +860,8 @@ IF (@CustomQuarterlyDates = 0)
 			-- Q2			
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('2. Parent Surveys this Period', @TotalNumberOfKempesThisPeriodQuarterly, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    a. Positive, assigned to FSS', @nQ2a, '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, not assigned to FSS', @nQ2b, '')
-			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, pending assignment to FSS', @nQ2c, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    b. Positive, pending assignment to FSS', @nQ2b, '')
+			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    c. Positive, not assigned to FSS (Discharged)', @nQ2c, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    d. Negative', @nQ2d, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    e. Positive average score - Mother', @nQ2e, '')
 			INSERT INTO @tblMainResult([Text],[QuarterlyData],[ContractPeriodData])VALUES('    f. Positive average score - Father', @nQ2f, '')
