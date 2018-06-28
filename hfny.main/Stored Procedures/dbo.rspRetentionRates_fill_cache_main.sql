@@ -354,7 +354,7 @@ with cteCohort as
 	----------------------
 		(select cp.HVCaseFK
 				, max(case when ca.Parity is null
-					then 0
+					then -1
 					else convert(int, ca.Parity)
 				end) as MaxParity
 			from #tmpCohort tc
