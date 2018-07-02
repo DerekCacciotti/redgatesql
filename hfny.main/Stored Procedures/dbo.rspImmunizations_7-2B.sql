@@ -197,7 +197,7 @@ BEGIN
 		INNER JOIN dbo.SplitString(@ProgramFK,',') on cp.ProgramFK = listitem
 		INNER JOIN dbo.Worker w ON w.WorkerPK = cp.CurrentFSWFK
 		WHERE (cp.DischargeDate IS NULL OR cp.DischargeDate > @PointInTime)
-		AND h.IntakeDate < DATEADD(MONTH, 6, t.TCDOB)
+		AND h.IntakeDate < DATEADD(MONTH, 12, t.TCDOB)
 		AND @PointInTime >= DATEADD(MONTH, 12, t.TCDOB)
 		ORDER BY cp.PC1ID
 
