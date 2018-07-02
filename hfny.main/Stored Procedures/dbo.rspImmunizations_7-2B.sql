@@ -2,15 +2,16 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 -- =============================================
 -- Author:		Ben Simmons
 -- Create date: 04/17/18
 -- Description:	This stored procedure will return the values to populate the immunization report
--- EDIT DATE: 05/22/18
+-- EDIT DATE: 07/02/18
 -- EDITED BY: Benjamin Simmons
--- EDIT DESCRIPTION: Added Azure/SQL Server 17 specific code to be uncommented when HFNY moves to Azure (See lines 314-326 and lines 346-353)
+-- EDIT DESCRIPTION: Updated score calculations to meet BPS and updated cohorts to meet BPS
 -- =============================================
-CREATE PROCEDURE [dbo].[rspImmunizations_7-2B] 
+CREATE PROC [dbo].[rspImmunizations_7-2B] 
 	-- Add the parameters for the stored procedure here
 	@ProgramFK	VARCHAR(MAX) = NULL,
 	@PointInTime DATETIME = NULL
@@ -197,24 +198,23 @@ BEGIN
 		INNER JOIN dbo.Worker w ON w.WorkerPK = cp.CurrentFSWFK
 		WHERE (cp.DischargeDate IS NULL OR cp.DischargeDate > @PointInTime)
 		AND h.IntakeDate < DATEADD(MONTH, 6, t.TCDOB)
-		AND @PointInTime >= DATEADD(MONTH, 6, t.TCDOB)
-		--AND @PointInTime < DATEADD(YEAR, 3, t.TCDOB)
+		AND @PointInTime >= DATEADD(MONTH, 12, t.TCDOB)
 		ORDER BY cp.PC1ID
 
 
-	--Get the 6 month cohort (children between 6 months and 23 months old)
+	--Get the 6 month cohort (children between 12 months and 23 months old)
 	INSERT INTO	@tblCohort6Month
 		SELECT HVCasePK, IntakeDate, PC1ID, HomeVisitorName, TCIDPK, TCDOB, TCName, Exempt
 		FROM @tblCohort
-		WHERE @PointInTime >= DATEADD(MONTH, 6, TCDOB)
+		WHERE @PointInTime >= DATEADD(MONTH, 12, TCDOB)
 		AND @PointInTime <= DATEADD(MONTH, 23, TCDOB)
 		ORDER BY PC1ID
 
-	--Get the 18 month cohort (children older than 18 months)
+	--Get the 18 month cohort (children older than 24 months)
 	INSERT INTO	@tblCohort18Month
 		SELECT HVCasePK, IntakeDate, PC1ID, HomeVisitorName, TCIDPK, TCDOB, TCName, Exempt
 		FROM @tblCohort
-		WHERE @PointInTime >= DATEADD(MONTH, 18, TCDOB)
+		WHERE @PointInTime >= DATEADD(MONTH, 24, TCDOB)
 		ORDER BY PC1ID
 
 	--Get the required immunizations for both cohorts
@@ -375,10 +375,6 @@ BEGIN
 	--Update exempt cases
 	UPDATE @tblResults SET Meeting = 'N/A', NumShotsRequired = 0, ReasonNotMeeting = 'Exempt' WHERE Exempt = 1
 
-	--Remove certain cases
-	DELETE FROM @tblResults WHERE TCAgeMonths > 6 AND TCAgeMonths < 12 AND Meeting = 'No'
-	DELETE FROM @tblResults WHERE TCAgeMonths > 12 AND TCAgeMonths < 24 AND Meeting = 'No'
-
 	--Update the number of exceptions in the results table
 	UPDATE @tblResults SET HFNumExceptions6Month = @NumExceptions6Month
 	UPDATE @tblResults SET HFNumExceptions18Month = @NumExceptions18Month
@@ -399,13 +395,13 @@ BEGIN
 
 	--Update the scores for the program
 	UPDATE @tblResults SET HFScore6Month = CASE WHEN HFPercentMeeting6Month >= 0.90 THEN '3' 
-												WHEN HFPercentMeeting6Month < 0.90 AND HFPercentMeeting6Month >= 0.75 THEN '2'
-												WHEN HFPercentMeeting6Month < 0.75 THEN '1'
+												WHEN HFPercentMeeting6Month < 0.90 AND HFPercentMeeting6Month >= 0.80 THEN '2'
+												WHEN HFPercentMeeting6Month < 0.80 THEN '1'
 												ELSE 'E'
 												END
 	UPDATE @tblResults SET HFScore18Month = CASE WHEN HFPercentMeeting18Month >= 0.90 THEN '3' 
-												WHEN HFPercentMeeting18Month < 0.90 AND HFPercentMeeting18Month >= 0.75 THEN '2'
-												WHEN HFPercentMeeting18Month < 0.75 THEN '1'
+												WHEN HFPercentMeeting18Month < 0.90 AND HFPercentMeeting18Month >= 0.80 THEN '2'
+												WHEN HFPercentMeeting18Month < 0.80 THEN '1'
 												ELSE 'E'
 												END
 
