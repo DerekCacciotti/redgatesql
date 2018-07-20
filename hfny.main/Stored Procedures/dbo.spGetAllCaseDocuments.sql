@@ -8,7 +8,7 @@ GO
 -- Description:	<Gets all case documents for the passed Case FK from the Attachment table>
 -- =============================================
 
-CREATE procedure [dbo].[spGetAllCaseDocuments] (@ProgramFK int = null
+CREATE PROC [dbo].[spGetAllCaseDocuments] (@ProgramFK int = null
 									 , @PC1ID char(13) = null
 									  )
 as
@@ -19,7 +19,7 @@ as
 
     -- Insert statements for procedure here
 		select	AttachmentPK
-			  , replace(AttachmentTitle, '.pdf', '') as AttachmentTitle
+			  , AttachmentTitle
 			  , AttachmentDescription
 			  , convert(varchar(10), FormDate, 126) as FormDate
 			  , convert(varchar(10), AttachmentCreateDate, 126) as AttachmentCreateDate
