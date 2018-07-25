@@ -235,7 +235,7 @@ begin
 					end presentCode
 				, convert(int, case when catc.Parity is not null then catc.Parity
 									when catc.Parity is null and ca.Parity is not null then ca.Parity
-									else '0'
+									else '-1'
 								end) as MaxParity
 				, cain.PrimaryLanguage
 				, datediff(day, h.ScreenDate, h.KempeDate) as DaysBetween
@@ -763,30 +763,22 @@ begin
 		select	sum(case when a.Status = '1' then 1 else 0 end) as totalG1
 			, sum(case when a.Status = '2' then 1 else 0 end) as totalG2
 			, sum(case when a.Status = '3' then 1 else 0 end) as totalG3
-			, sum(case when a.MaxParity = 0 then 1 else 0 end) as parity0
-			, sum(case when a.Status = '1' and a.MaxParity = 0 then 1 else 0 end) as parity0G1
-			, sum(case when a.Status = '2' and a.MaxParity = 0 then 1 else 0 end) as parity0G2
-			, sum(case when a.Status = '3' and a.MaxParity = 0 then 1 else 0 end) as parity0G3
-			, sum(case when a.MaxParity = 1 then 1 else 0 end) as parity1
-			, sum(case when a.Status = '1' and a.MaxParity = 1 then 1 else 0 end) as parity1G1
-			, sum(case when a.Status = '2' and a.MaxParity = 1 then 1 else 0 end) as parity1G2
-			, sum(case when a.Status = '3' and a.MaxParity = 1 then 1 else 0 end) as parity1G3
-			, sum(case when a.MaxParity = 2 then 1 else 0 end) as parity2
-			, sum(case when a.Status = '1' and a.MaxParity = 2 then 1 else 0 end) as parity2G1
-			, sum(case when a.Status = '2' and a.MaxParity = 2 then 1 else 0 end) as parity2G2
-			, sum(case when a.Status = '3' and a.MaxParity = 2 then 1 else 0 end) as parity2G3
-			, sum(case when a.MaxParity = 3 then 1 else 0 end) as parity3
-			, sum(case when a.Status = '1' and a.MaxParity = 3 then 1 else 0 end) as parity3G1
-			, sum(case when a.Status = '2' and a.MaxParity = 3 then 1 else 0 end) as parity3G2
-			, sum(case when a.Status = '3' and a.MaxParity = 3 then 1 else 0 end) as parity3G3
-			, sum(case when a.MaxParity = 4 then 1 else 0 end) as parity4
-			, sum(case when a.Status = '1' and a.MaxParity = 4 then 1 else 0 end) as parity4G1
-			, sum(case when a.Status = '2' and a.MaxParity = 4 then 1 else 0 end) as parity4G2
-			, sum(case when a.Status = '3' and a.MaxParity = 4 then 1 else 0 end) as parity4G3
-			, sum(case when a.MaxParity >= 5 then 1 else 0 end) as parity5
-			, sum(case when a.Status = '1' and a.MaxParity >= 5 then 1 else 0 end) as parity5PG1
-			, sum(case when a.Status = '2' and a.MaxParity >= 5 then 1 else 0 end) as parity5PG2
-			, sum(case when a.Status = '3' and a.MaxParity >= 5 then 1 else 0 end) as parity5PG3
+			, sum(case when a.MaxParity = 0 then 1 else 0 end) as parityfirsttime
+			, sum(case when a.Status = '1' and a.MaxParity = 0 then 1 else 0 end) as parityfirsttimeG1
+			, sum(case when a.Status = '2' and a.MaxParity = 0 then 1 else 0 end) as parityfirsttimeG2
+			, sum(case when a.Status = '3' and a.MaxParity = 0 then 1 else 0 end) as parityfirsttimeG3
+			, sum(case when a.MaxParity = 1 then 1 else 0 end) as parity1prior
+			, sum(case when a.Status = '1' and a.MaxParity = 1 then 1 else 0 end) as parity1priorG1
+			, sum(case when a.Status = '2' and a.MaxParity = 1 then 1 else 0 end) as parity1priorG2
+			, sum(case when a.Status = '3' and a.MaxParity = 1 then 1 else 0 end) as parity1priorG3
+			, sum(case when a.MaxParity >= 2 then 1 else 0 end) as parity2ormoreprior
+			, sum(case when a.Status = '1' and a.MaxParity >= 2 then 1 else 0 end) as parity2ormorepriorG1
+			, sum(case when a.Status = '2' and a.MaxParity >= 2 then 1 else 0 end) as parity2ormorepriorG2
+			, sum(case when a.Status = '3' and a.MaxParity >= 2 then 1 else 0 end) as parity2ormorepriorG3
+			, sum(case when a.MaxParity = -1 then 1 else 0 end) as parityunknownmissing
+			, sum(case when a.Status = '1' and a.MaxParity = -1 then 1 else 0 end) as parityunknownmissingG1
+			, sum(case when a.Status = '2' and a.MaxParity = -1 then 1 else 0 end) as parityunknownmissingG2
+			, sum(case when a.Status = '3' and a.MaxParity = -1 then 1 else 0 end) as parityunknownmissingG3
 		from	#cteMain1 as a
 	)
 	,	parity2
@@ -798,69 +790,47 @@ begin
 				, null as Refused
 				, '1' as GroupID
 		union all
-		select	'  0' as [title]
-			, parity0 as TotalN 
-			, parity0G1 as AcceptedFirstVisitEnrolled
+		select	'  First-time parent' as [title]
+			, parityfirsttime as TotalN 
+			, parityfirsttimeG1 as AcceptedFirstVisitEnrolled
 			-- , round(coalesce(cast(parity0G1 as float)* 100 / nullif(parity0, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
-			, parity0G2 as AcceptedFirstVisitNotEnrolled
+			, parityfirsttimeG2 as AcceptedFirstVisitNotEnrolled
 			-- , round(coalesce(cast(parity0G2 as float)* 100 / nullif(parity0, 0), 0), 0) as AcceptedFirstVisitNotEnrolledPercent
-			, parity0G3 as Refused
+			, parityfirsttimeG3 as Refused
 			-- , round(coalesce(cast(parity0G3 as float)* 100 / nullif(parity0, 0), 0), 0) as RefusedPercent
 			, '1' as GroupID
 		from	parity1
 		union all
-		select	'  1' as [title]
-			, parity1 as TotalN 
-			, parity1G1 as AcceptedFirstVisitEnrolled
+		select	'  1 prior child' as [title]
+			, parity1prior as TotalN 
+			, parity1priorG1 as AcceptedFirstVisitEnrolled
 			-- , round(coalesce(cast(parity1G1 as float)* 100 / nullif(parity1, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
-			, parity1G2 as AcceptedFirstVisitNotEnrolled
+			, parity1priorG2 as AcceptedFirstVisitNotEnrolled
 			-- , round(coalesce(cast(parity1G2 as float)* 100 / nullif(parity1, 0), 0), 0) as AcceptedFirstVisitNotEnrolledPercent
-			, parity1G3 as Refused
+			, parity1priorG3 as Refused
 			-- , round(coalesce(cast(parity1G3 as float)* 100 / nullif(parity1, 0), 0), 0) as RefusedPercent
 			, '1' as GroupID
 		from	parity1
 		union all
-		select	'  2' as [title]
-			, parity2 as TotalN 
-			, parity2G1 as AcceptedFirstVisitEnrolled
+		select	'  2 or more prior children' as [title]
+			, parity2ormoreprior as TotalN 
+			, parity2ormorepriorG1 as AcceptedFirstVisitEnrolled
 			-- , round(coalesce(cast(parity2G1 as float)* 100 / nullif(parity2, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
-			, parity2G2 as AcceptedFirstVisitNotEnrolled
+			, parity2ormorepriorG2 as AcceptedFirstVisitNotEnrolled
 			-- , round(coalesce(cast(parity2G2 as float)* 100 / nullif(parity2, 0), 0), 0) as AcceptedFirstVisitNotEnrolledPercent
-			, parity2G3 as Refused
+			, parity2ormorepriorG3 as Refused
 			-- , round(coalesce(cast(parity2G3 as float)* 100 / nullif(parity2, 0), 0), 0) as RefusedPercent
 			, '1' as GroupID
 		from	parity1
 		union all
-		select	'  3' as [title]
-			, parity3 as TotalN 
-			, parity3G1 as AcceptedFirstVisitEnrolled
+		select	'  Missing/Unknown' as [title]
+			, parityunknownmissing as TotalN 
+			, parityunknownmissingG1 as AcceptedFirstVisitEnrolled
 			-- , round(coalesce(cast(parity3G1 as float)* 100 / nullif(parity3, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
-			, parity3G2 as AcceptedFirstVisitNotEnrolled
+			, parityunknownmissingG2 as AcceptedFirstVisitNotEnrolled
 			-- , round(coalesce(cast(parity3G2 as float)* 100 / nullif(parity3, 0), 0), 0) as AcceptedFirstVisitNotEnrolledPercent
-			, parity3G3 as Refused
+			, parityunknownmissingG3 as Refused
 			-- , round(coalesce(cast(parity3G3 as float)* 100 / nullif(parity3, 0), 0), 0) as RefusedPercent
-			, '1' as GroupID
-		from	parity1
-		union all
-		select	'  4' as [title]
-			, parity4 as TotalN 
-			, parity4G1 as AcceptedFirstVisitEnrolled
-			-- , round(coalesce(cast(parity4G1 as float)* 100 / nullif(parity4, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
-			, parity4G2 as AcceptedFirstVisitNotEnrolled
-			-- , round(coalesce(cast(parity4G2 as float)* 100 / nullif(parity4, 0), 0), 0) as AcceptedFirstVisitNotEnrolledPercent
-			, parity4G3 as Refused
-			-- , round(coalesce(cast(parity4G3 as float)* 100 / nullif(parity4, 0), 0), 0) as RefusedPercent
-			, '1' as GroupID
-		from	parity1
-		union all
-		select	'  5+' as [title]
-			, parity5 as TotalN 
-			, parity5PG1 as AcceptedFirstVisitEnrolled
-			-- , round(coalesce(cast(parity5PG1 as float)* 100 / nullif(parity5, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
-			, parity5PG2 as AcceptedFirstVisitNotEnrolled
-			-- , round(coalesce(cast(parity5PG2 as float)* 100 / nullif(parity5, 0), 0), 0) as AcceptedFirstVisitNotEnrolledPercent
-			, parity5PG3 as Refused
-			-- , round(coalesce(cast(parity5PG3 as float)* 100 / nullif(parity5, 0), 0), 0) as RefusedPercent
 			, '1' as GroupID
 		from	parity1
 		union all
@@ -1672,7 +1642,7 @@ begin
 	)
 	,	issues2
 	as (
-		select	'PC1 Issues' as [title]
+		select	'PC1 Issues at Parent Survey' as [title]
 			, null as TotalN
 			, null as AcceptedFirstVisitEnrolled
 			, null as AcceptedFirstVisitNotEnrolled
@@ -1871,10 +1841,10 @@ begin
 			--, cast(Refused as float) / TotalN as RefusedPercent
 			, GroupID
 			, case groupID when '0' then 'Summary'
-					when '1' then 'Demographic' 
-					when '2' then 'Programmatic'
-					else 'Social'
-				end + case when groupID <> '0' then ' Factors' else '' end
+					when '1' then 'Demographic Factors at Intake' 
+					when '2' then 'Programmatic Factors'
+					else 'Social Factors at Intake'
+				end
 				as FactorType
 	from	rpt1 ;
 
