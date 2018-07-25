@@ -10,7 +10,7 @@ GO
 -- rspPerformanceTargetReportSummary 5 ,'01/01/2012' ,'03/31/2012'
 
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetHD6]
+CREATE PROC [dbo].[rspPerformanceTargetHD6]
 (
     @StartDate	datetime,
     @EndDate	datetime,
@@ -86,7 +86,7 @@ begin
 			, coh.TCIDPK
 			, MedicalItemTitle
 			, count(coh.TCIDPK) as WBVCount
-			, count(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
+			, sum(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
 					then 1 
 					else 0 
 					end) as FormReviewedCountWBV
