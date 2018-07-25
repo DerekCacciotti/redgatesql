@@ -710,12 +710,9 @@ with cteCohort as
 		, TrimesterAtIntake2nd int
 		, TrimesterAtIntake1st int
 		, CountOfFSWs int
-		, Parity0 int
-		, Parity1 int
-		, Parity2 int
-		, Parity3 int
-		, Parity4 int
-		, Parity5Plus int
+		, ParityFirstTime int
+		, Parity1Prior int
+		, Parity2OrMorePrior int
 		, ParityUnknownMissing int);
 
 --#endregion
@@ -854,12 +851,9 @@ insert into @tblPC1WithStats
 		, TrimesterAtIntake2nd
 		, TrimesterAtIntake1st
 		, CountOfFSWs
-		, Parity0
-		, Parity1
-		, Parity2
-		, Parity3
-		, Parity4
-		, Parity5Plus
+		, ParityFirstTime
+		, Parity1Prior
+		, Parity2OrMorePrior
 		, ParityUnknownMissing)
 select distinct PC1ID
 		, ScreenDate
@@ -927,12 +921,9 @@ select distinct PC1ID
 		, case when IntakeDate < TCDOB and datediff(dd, ConceptionDate, IntakeDate) between round(30.44*3,0)+1 and round(30.44*6,0) then 1 else 0 end as TrimesterAtIntake2nd
 		, case when IntakeDate < TCDOB and datediff(dd, ConceptionDate, IntakeDate) < 3*30.44  then 1 else 0 end as TrimesterAtIntake1st
 		, CountOfFSWs
-		, case when MaxParity = 0 then 1 else 0 end as Parity0
-		, case when MaxParity = 1 then 1 else 0 end as Parity1
-		, case when MaxParity = 2 then 1 else 0 end as Parity2
-		, case when MaxParity = 3 then 1 else 0 end as Parity3
-		, case when MaxParity = 4 then 1 else 0 end as Parity4
-		, case when MaxParity >= 5 then 1 else 0 end as Parity5Plus
+		, case when MaxParity = 0 then 1 else 0 end as ParityFirstTime
+		, case when MaxParity = 1 then 1 else 0 end as Parity1Prior
+		, case when MaxParity >= 2 then 1 else 0 end as Parity2OrMorePrior
 		, case when MaxParity = -1 then 1 else 0 end as ParityUnknownMissing
 from cteMain
 -- where DischargeReason not in ('Out of Geographical Target Area','Miscarriage/Pregnancy Terminated','Target Child Died')
@@ -1150,7 +1141,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, 'Age @ Intake'
 		, @LineGroupingLevel
 		, 1
@@ -1244,7 +1235,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Under 18'
 		, @LineGroupingLevel
 		, 1
@@ -1345,7 +1336,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    18 up to 20'
 		, @LineGroupingLevel
 		, 1
@@ -1446,7 +1437,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    20 up to 30'
 		, @LineGroupingLevel
 		, 1
@@ -1547,7 +1538,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    30 and Over'
 		, @LineGroupingLevel
 		, 1
@@ -1619,7 +1610,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, 'Marital Status'
 		, @LineGroupingLevel
 		, 1
@@ -1713,7 +1704,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Married'
 		, @LineGroupingLevel
 		, 1
@@ -1814,7 +1805,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Never Married'
 		, @LineGroupingLevel
 		, 1
@@ -1915,7 +1906,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Separated'
 		, @LineGroupingLevel
 		, 1
@@ -2016,7 +2007,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Divorced'
 		, @LineGroupingLevel
 		, 1
@@ -2117,7 +2108,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Widowed'
 		, @LineGroupingLevel
 		, 1
@@ -2218,7 +2209,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Missing / Unknown'
 		, @LineGroupingLevel
 		, 1
@@ -2257,12 +2248,9 @@ values ('Demographic Factors'
 --#endregion
 --#region Parity
 -- Parity
---		0
---		1
---		2
---		3
---		4
---		5+
+--		First-time parent
+--		1 prior child
+--		2 or more prior children
 --		Unknown/Missing
 set @LineGroupingLevel = @LineGroupingLevel + 1
 
@@ -2295,7 +2283,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, 'Parity'
 		, @LineGroupingLevel
 		, 1
@@ -2327,31 +2315,31 @@ values ('Demographic Factors'
 
 select @AllEnrolledParticipants = count(*)
 from @tblPC1WithStats
-where Parity0 = 1
+where ParityFirstTime = 1
 
 select @ThreeMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 0 and Parity0 = 1
+where ActiveAt3Months = 0 and ParityFirstTime = 1
 
 select @SixMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Parity0 = 1
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and ParityFirstTime = 1
 
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and Parity0 = 1
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and ParityFirstTime = 1
 
 select @EighteenMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and Parity0 = 1
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and ParityFirstTime = 1
 
 select @TwentyFourMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and Parity0 = 1
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and ParityFirstTime = 1
 
 select @ThirtySixMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and Parity0 = 1
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and ParityFirstTime = 1
 
 insert into @tblResults (FactorType
 						, LineDescription
@@ -2389,8 +2377,8 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    0'
+values ('Demographic Factors at Intake'
+		, '    First-time parent'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount
@@ -2428,31 +2416,31 @@ values ('Demographic Factors'
 
 select @AllEnrolledParticipants = count(*)
 from @tblPC1WithStats
-where Parity1 = 1
+where Parity1Prior = 1
 
 select @ThreeMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 0 and Parity1 = 1
+where ActiveAt3Months = 0 and Parity1Prior = 1
 
 select @SixMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Parity1 = 1
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Parity1Prior = 1
 
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and Parity1 = 1
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and Parity1Prior = 1
 
 select @EighteenMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and Parity1 = 1
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and Parity1Prior = 1
 
 select @TwentyFourMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and Parity1 = 1
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and Parity1Prior = 1
 
 select @ThirtySixMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and Parity1 = 1
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and Parity1Prior = 1
 
 insert into @tblResults (FactorType
 						, LineDescription
@@ -2490,8 +2478,8 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    1'
+values ('Demographic Factors at Intake'
+		, '    1 prior child'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount
@@ -2529,31 +2517,31 @@ values ('Demographic Factors'
 
 select @AllEnrolledParticipants = count(*)
 from @tblPC1WithStats
-where Parity2 = 1
+where Parity2OrMorePrior = 1
 
 select @ThreeMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 0 and Parity2 = 1
+where ActiveAt3Months = 0 and Parity2OrMorePrior = 1
 
 select @SixMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Parity2 = 1
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Parity2OrMorePrior = 1
 
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and Parity2 = 1
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and Parity2OrMorePrior = 1
 
 select @EighteenMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and Parity2 = 1
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and Parity2OrMorePrior = 1
 
 select @TwentyFourMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and Parity2 = 1
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and Parity2OrMorePrior = 1
 
 select @ThirtySixMonthsAtIntake = count(*)
 from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and Parity2 = 1
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and Parity2OrMorePrior = 1
 
 insert into @tblResults (FactorType
 						, LineDescription
@@ -2591,311 +2579,8 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    2'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1WithStats
-where Parity3 = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 0 and Parity3 = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Parity3 = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and Parity3 = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and Parity3 = 1
-
-select @TwentyFourMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and Parity3 = 1
-
-select @ThirtySixMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and Parity3 = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    3'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1WithStats
-where Parity4 = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 0 and Parity4 = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Parity4 = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and Parity4 = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and Parity4 = 1
-                                                        
-select @TwentyFourMonthsAtIntake = count(*)             
-from @tblPC1withStats                                   
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and Parity4 = 1
-                                                        
-select @ThirtySixMonthsAtIntake = count(*)              
-from @tblPC1withStats                                   
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and Parity4 = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    4'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateOneYear
-		, @RetentionRateEighteenMonths
-		, @RetentionRateTwoYears
-		, @RetentionRateThreeYears
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsOneYear
-		, @EnrolledParticipantsEighteenMonths
-		, @EnrolledParticipantsTwoYears
-		, @EnrolledParticipantsThreeYears
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedOneYear
-		, @RunningTotalDischargedEighteenMonths
-		, @RunningTotalDischargedTwoYears
-		, @RunningTotalDischargedThreeYears
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNOneYear
-		, @TotalNEighteenMonths
-		, @TotalNTwoYears
-		, @TotalNThreeYears
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @TwelveMonthsAtIntake
-		, @EighteenMonthsAtIntake
-		, @TwentyFourMonthsAtIntake
-		, @ThirtySixMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1WithStats
-where Parity5Plus = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 0 and Parity5Plus = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Parity5Plus = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt12Months = 0 and Parity5Plus = 1
-
-select @EighteenMonthsAtIntake = count(*)
-from @tblPC1withStats
-where ActiveAt12Months = 1 and ActiveAt18Months = 0 and Parity5Plus = 1
-                                                        
-select @TwentyFourMonthsAtIntake = count(*)             
-from @tblPC1withStats                                   
-where ActiveAt18Months = 1 and ActiveAt24Months = 0 and Parity5Plus = 1
-                                                        
-select @ThirtySixMonthsAtIntake = count(*)              
-from @tblPC1withStats                                   
-where ActiveAt24Months = 1 and ActiveAt36Months = 0 and Parity5Plus = 1
-
-insert into @tblResults (FactorType
-						, LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateOneYear
-						, RetentionRateEighteenMonths
-						, RetentionRateTwoYears
-						, RetentionRateThreeYears
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsOneYear
-						, EnrolledParticipantsEighteenMonths
-						, EnrolledParticipantsTwoYears
-						, EnrolledParticipantsThreeYears
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedOneYear
-						, RunningTotalDischargedEighteenMonths
-						, RunningTotalDischargedTwoYears
-						, RunningTotalDischargedThreeYears
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNOneYear
-						, TotalNEighteenMonths
-						, TotalNTwoYears
-						, TotalNThreeYears
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, OneYearIntake
-						, EighteenMonthsIntake
-						, TwoYearsIntake
-						, ThreeYearsIntake)
-values ('Demographic Factors'
-		, '    5+'
+values ('Demographic Factors at Intake'
+		, '    2 or more prior children'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount
@@ -2995,7 +2680,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Unknown/Missing'
 		, @LineGroupingLevel
 		, 1
@@ -3069,7 +2754,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, 'PC1 Education'
 		, @LineGroupingLevel
 		, 1
@@ -3163,7 +2848,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Less than 12'
 		, @LineGroupingLevel
 		, 1
@@ -3264,7 +2949,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    HS / GED'
 		, @LineGroupingLevel
 		, 1
@@ -3365,7 +3050,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    More Than 12'
 		, @LineGroupingLevel
 		, 1
@@ -3466,7 +3151,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Missing / Unknown'
 		, @LineGroupingLevel
 		, 1
@@ -3539,7 +3224,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, 'PC1 Employed'
 		, @LineGroupingLevel
 		, 1
@@ -3633,7 +3318,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Yes'
 		, @LineGroupingLevel
 		, 1
@@ -3734,7 +3419,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    No'
 		, @LineGroupingLevel
 		, 1
@@ -3835,7 +3520,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Missing / Unknown'
 		, @LineGroupingLevel
 		, 1
@@ -3908,7 +3593,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, 'Primary Language @ Intake'
 		, @LineGroupingLevel
 		, 1
@@ -4002,7 +3687,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    English'
 		, @LineGroupingLevel
 		, 1
@@ -4103,7 +3788,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Spanish'
 		, @LineGroupingLevel
 		, 1
@@ -4204,7 +3889,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Other/Missing/Unk.'
 		, @LineGroupingLevel
 		, 1
@@ -4281,7 +3966,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, 'Race'
 		, @LineGroupingLevel
 		, 1
@@ -4375,7 +4060,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    White'
 		, @LineGroupingLevel
 		, 1
@@ -4476,7 +4161,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Black'
 		, @LineGroupingLevel
 		, 1
@@ -4577,7 +4262,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Hispanic'
 		, @LineGroupingLevel
 		, 1
@@ -4678,7 +4363,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Asian'
 		, @LineGroupingLevel
 		, 1
@@ -4779,7 +4464,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Native American'
 		, @LineGroupingLevel
 		, 1
@@ -4880,7 +4565,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Multi-Racial'
 		, @LineGroupingLevel
 		, 1
@@ -4981,7 +4666,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Other'
 		, @LineGroupingLevel
 		, 1
@@ -5082,7 +4767,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Demographic Factors'
+values ('Demographic Factors at Intake'
 		, '    Unknown / Missing'
 		, @LineGroupingLevel
 		, 1
@@ -6092,7 +5777,7 @@ insert into @tblResults (FactorType
 						, TotalNTwoYears
 						, TotalNThreeYears)
 values ('Programmatic Factors'
-		, 'More than 1 Home Visitor'
+		, 'More than 1 Home Visitor Since Intake'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount
@@ -7197,7 +6882,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, 'Parent Survey Score'
 		, @LineGroupingLevel
 		, 1
@@ -7291,7 +6976,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    25-49'
 		, @LineGroupingLevel
 		, 1
@@ -7392,7 +7077,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    50-74'
 		, @LineGroupingLevel
 		, 1
@@ -7493,7 +7178,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    75+'
 		, @LineGroupingLevel
 		, 1
@@ -7563,7 +7248,7 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, 'Whose Parent Survey Score Qualifies'
 		, @LineGroupingLevel
 		, 1
@@ -7657,7 +7342,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    Mother Only'
 		, @LineGroupingLevel
 		, 1
@@ -7757,7 +7442,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    Father Only'
 		, @LineGroupingLevel
 		, 1
@@ -7858,7 +7543,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    Both Parents'
 		, @LineGroupingLevel
 		, 1
@@ -7931,8 +7616,8 @@ insert into @tblResults (FactorType
 						, TotalNEighteenMonths
 						, TotalNTwoYears
 						, TotalNThreeYears)
-values ('Social Factors'
-		, 'PC1 Current Issues'
+values ('Social Factors at Intake'
+		, 'PC1 Current Issues at Parent Survey'
 		, @LineGroupingLevel
 		, 1
         , @TotalCohortCount
@@ -8025,7 +7710,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    DV'
 		, @LineGroupingLevel
 		, 1
@@ -8126,7 +7811,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    MH'
 		, @LineGroupingLevel
 		, 1
@@ -8227,7 +7912,7 @@ insert into @tblResults (FactorType
 						, EighteenMonthsIntake
 						, TwoYearsIntake
 						, ThreeYearsIntake)
-values ('Social Factors'
+values ('Social Factors at Intake'
 		, '    SA'
 		, @LineGroupingLevel
 		, 1
