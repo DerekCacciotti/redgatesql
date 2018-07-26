@@ -28,6 +28,7 @@ BEGIN
 	END
 	SET @ProgramFK = REPLACE(@ProgramFK,'"','')
 	set @CaseFiltersPositive = case when @CaseFiltersPositive = '' then null else @CaseFiltersPositive end
+	SET @SiteFK = isnull(@SiteFK, 0)
 
 	DECLARE @NumExceptions6Month INT = 0
 	, @NumExceptions18Month INT = 0
@@ -206,7 +207,7 @@ BEGIN
 		AND h.IntakeDate < DATEADD(MONTH, 12, t.TCDOB)
 		AND @PointInTime >= DATEADD(MONTH, 12, t.TCDOB)
 		AND cp.CurrentFSWFK = ISNULL(@FSWFK, cp.CurrentFSWFK)
-		AND wp.SiteFK = ISNULL(@SiteFK, wp.SiteFK)
+		AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN wp.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
 		ORDER BY cp.PC1ID
 
 
