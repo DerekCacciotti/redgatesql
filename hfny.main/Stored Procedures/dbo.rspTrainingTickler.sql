@@ -184,7 +184,8 @@ insert into #cteEverythingRequired
 			, SubTopicName
 			, SubTopicPK
 			, TrainingTickler
-			, (SELECT MIN(TrainingDate) FROM dbo.Training
+			, CASE WHEN topiccode <> 42.0 THEN
+					(SELECT MIN(TrainingDate) FROM dbo.Training
 					INNER JOIN TrainingAttendee ta ON dbo.Training.TrainingPK = ta.TrainingFK
 					INNER JOIN TrainingDetail td ON ta.TrainingFK = td.TrainingFK
 					WHERE TopicFK = er.TopicFK AND ta.WorkerFK=er.workerpk
@@ -192,12 +193,21 @@ insert into #cteEverythingRequired
 								when td.SubTopicFK = ER.SubTopicPK then 1
 								else 0 end = 1)
 						
-					) AS TrainingDate
-			--, t.TrainingDate
+					) 
+					ELSE
+						 (SELECT MAX(TrainingDate) FROM dbo.Training --42.0 is an on-going training, we need to know if they got the training in the last year
+						INNER JOIN TrainingAttendee ta ON dbo.Training.TrainingPK = ta.TrainingFK
+						INNER JOIN TrainingDetail td ON ta.TrainingFK = td.TrainingFK
+						WHERE TopicFK = er.TopicFK AND ta.WorkerFK=er.workerpk
+									AND (case when er.SubTopicPK IS NULL then 1
+									when td.SubTopicFK = ER.SubTopicPK then 1
+									else 0 end = 1)
+									)
+					END AS TrainingDate
 		FROM #cteEverythingRequired ER
 		)
 		
-	
+
 , cteRemovals AS(		
 	SELECT workerpk
 			, CASE 
@@ -251,7 +261,6 @@ insert into #cteEverythingRequired
 			, SubTopicPK
 			, TrainingTickler
 			, TrainingDate
-			--, (SELECT TrainingDate FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=2124) AS testdate
 			, CASE WHEN TopicCode<6.0 THEN '      Orientation (Prior to direct work with Families)'
 				WHEN TopicCode<10.0 THEN '    Other HFA and State Requirements'
 				WHEN TopicCode=13.0 THEN '    Other HFA and State Requirements'
@@ -268,14 +277,6 @@ insert into #cteEverythingRequired
 				Else ' Wraparound Trainings by 12 months of hire'
 				END AS [theGrouping]
 			, CASE  
-					--HW997 Training Tickler and Required Topics - Remove Subtopic 82
-					--WHEN SubTopicPK = 82 then
-					----this first case determines if the initial FAW Core Training is taken, if not then it will simply add the text the training is due 3 months after, otherwise, it adds the 91 days
-					--	CASE WHEN (SELECT distinct min(TrainingDate) FROM cteReadyForRemoval WHERE rfr.TopicFK = 10 AND workerpk=rfr.workerpk) IS NULL THEN 'FAW 3 month Follow-up Assessment Review'
-					--	ELSE CONVERT(VARCHAR(10)
-					--	, DATEADD(dd, 91, (select min(TrainingDate) FROM cteReadyForRemoval WHERE Topicfk = 10 AND workerpk=rfr.workerpk)), 101)
-					--	END
-					--END HW997
 					WHEN [TopicCode] = '14.0' AND [SubTopicCode] IS NULL THEN NULL
 					WHEN [TopicCode] = '15.0' AND [SubTopicCode] IS NULL THEN NULL
 					WHEN [TopicCode] = '16.0' AND [SubTopicCode] IS NULL THEN NULL
@@ -311,6 +312,11 @@ insert into #cteEverythingRequired
 						END
 					WHEN SATCompareDateField = 'firstPHQ9' THEN 'First PHQ'
 					WHEN SATCompareDateField = 'firstPSI' THEN 'First PSI'
+					WHEN SATCompareDateField = 'On-going' THEN CASE WHEN TrainingDate IS NULL THEN 
+							CONVERT(VARCHAR(10), DATEADD(dd, 365, rfr.hiredate), 101) --on-going are due annually. Give them one year from hire date if they never had the training
+						ELSE 
+							CONVERT(VARCHAR(10), DATEADD(dd, 365, rfr.TrainingDate), 101) --on-going are due annually. Give them one year from last training
+						END
 			  END AS [DateDue]
 			, CASE  
 					WHEN SATCompareDateField = 'firstevent' THEN
@@ -337,6 +343,7 @@ insert into #cteEverythingRequired
 			  END AS 'Removals'
 			FROM cteReadyForRemoval rfr
 			)
+
 
 
 , cteFinal AS (		

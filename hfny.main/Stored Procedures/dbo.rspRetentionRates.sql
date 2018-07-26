@@ -608,7 +608,7 @@ with cteCohort as
 							   end
 
 	declare @tblResults table (
-		FactorType varchar(20)
+		FactorType varchar(30)
 		, LineDescription varchar(50)
 		, LineGroupingLevel int
 		, DisplayPercentages bit

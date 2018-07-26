@@ -12,7 +12,7 @@ GO
 -- added: How to handle some special url redirections - bug# HW946 ... Khalsa 3/7/2014
 -- 
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetAllFormsForSupervisorReview]
+CREATE procedure [dbo].[spGetAllFormsForSupervisorReview]
 	(
 	@ProgramFK int
 	, @DaysToLoad int=30
@@ -51,7 +51,7 @@ begin
 	(	
 		select FormReviewPK
 			  ,PC1ID
-			  ,codeFormName
+			  ,case when codeFormName = 'Kempe' then 'Parent Survey' else f.codeFormName end as codeFormName
 			  ,convert(varchar(10),FormDate,101) as FormDate
 			  ,FormFK
 			  --,FormReviewCreateDate
@@ -242,4 +242,5 @@ begin
 				  --when fr.FormType='TR' then 20
 				  --when fr.FormType='VL' then 7	
 end
+
 GO
