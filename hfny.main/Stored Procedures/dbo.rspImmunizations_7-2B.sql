@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Ben Simmons
 -- Create date: 04/17/18
@@ -14,7 +13,11 @@ GO
 CREATE PROC [dbo].[rspImmunizations_7-2B] 
 	-- Add the parameters for the stored procedure here
 	@ProgramFK	VARCHAR(MAX) = NULL,
-	@PointInTime DATETIME = NULL
+	@PointInTime DATETIME = NULL,
+	@SiteFK INT = NULL,
+    @CaseFiltersPositive varchar(100) = '',
+	@FSWFK INT = NULL
+
 AS
 BEGIN
 	 IF @ProgramFK IS NULL
@@ -24,6 +27,7 @@ BEGIN
 											FOR XML PATH ('')),2,8000);
 	END
 	SET @ProgramFK = REPLACE(@ProgramFK,'"','')
+	set @CaseFiltersPositive = case when @CaseFiltersPositive = '' then null else @CaseFiltersPositive end
 
 	DECLARE @NumExceptions6Month INT = 0
 	, @NumExceptions18Month INT = 0
@@ -196,9 +200,13 @@ BEGIN
 		INNER JOIN dbo.CaseProgram cp on cp.HVCaseFK = h.HVCasePK
 		INNER JOIN dbo.SplitString(@ProgramFK,',') on cp.ProgramFK = listitem
 		INNER JOIN dbo.Worker w ON w.WorkerPK = cp.CurrentFSWFK
+		INNER JOIN dbo.WorkerProgram wp ON wp.WorkerFK = w.WorkerPK AND wp.ProgramFK = cp.ProgramFK
+		INNER JOIN dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFK) cf ON cf.HVCaseFK = h.HVCasePK
 		WHERE (cp.DischargeDate IS NULL OR cp.DischargeDate > @PointInTime)
 		AND h.IntakeDate < DATEADD(MONTH, 12, t.TCDOB)
 		AND @PointInTime >= DATEADD(MONTH, 12, t.TCDOB)
+		AND cp.CurrentFSWFK = ISNULL(@FSWFK, cp.CurrentFSWFK)
+		AND wp.SiteFK = ISNULL(@SiteFK, wp.SiteFK)
 		ORDER BY cp.PC1ID
 
 
