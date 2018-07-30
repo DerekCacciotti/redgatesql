@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		jrobohn
 -- Create date: 2013Mar05
@@ -10,7 +9,7 @@ GO
 -- rspPerformanceTargetReportDetails 5 ,'10/01/2012' ,'12/31/2012'
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetReportDetails]
+CREATE PROC [dbo].[rspPerformanceTargetReportDetails]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartDate				datetime,
@@ -139,9 +138,15 @@ begin
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1a]') and type in (N'P', N'PC'))
+		insert into @tblPTDetails
+			exec rspPerformanceTargetHD1a @StartDate,@EndDate,@tblPTCohort 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2a]') and type in (N'P', N'PC'))
+		insert into @tblPTDetails
+			exec rspPerformanceTargetHD2a @StartDate,@EndDate,@tblPTCohort 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD3]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetHD3 @StartDate,@EndDate,@tblPTCohort 

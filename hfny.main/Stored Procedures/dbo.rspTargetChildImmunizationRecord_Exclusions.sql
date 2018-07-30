@@ -7,9 +7,11 @@ GO
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
 -- =============================================
-CREATE procedure [dbo].[rspTargetChildImmunizationRecord_Exclusions]
+CREATE PROC [dbo].[rspTargetChildImmunizationRecord_Exclusions]
 (
     @programfk varchar(max)    = null,
+	@SiteFK	   INT			   = NULL,
+    @CaseFiltersPositive varchar(100) = '',
     @rdate     datetime
 )
 as
@@ -21,6 +23,8 @@ as
 	end
 
 	set @programfk = REPLACE(@programfk,'"','')
+	set @CaseFiltersPositive = case when @CaseFiltersPositive = '' then null else @CaseFiltersPositive END
+    set @SiteFK = isnull(@SiteFK, 0)
 
 	---- TCMedical
 	select distinct pc1id
@@ -33,6 +37,7 @@ as
 			--inner join TCMedical on TCMedical.hvcasefk = hvcasepk and TCMedical.programfk = caseprogram.programfk and TCMedical.TCIDFK = TCID.TCIDPK and @rdate >= TCItemDate
 			--inner join codeMedicalItem cmi on MedicalItemCode = TCMedical.TCMedicalItem and MedicalItemCode <= 13
 			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+			INNER JOIN dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFK) cf ON cf.HVCaseFK = HVCasePK
 			inner join (select hvcasefk
 							  ,programfk
 							  ,max(HVlevelpk) HVlevelpk
@@ -42,6 +47,8 @@ as
 							group by hvcasefk
 									,programfk) hl2 on hvcasepk = hl2.hvcasefk and caseprogram.programfk = hl2.programfk
 			inner join HVLevelDetail hl1 on hl2.HVlevelpk = hl1.HVlevelpk
+			INNER join worker fsw on CurrentFSWFK = fsw.workerpk
+			INNER join workerprogram on workerprogram.workerfk = fsw.workerpk
 		where (hvcase.tcdob is not null
 			 and hvcase.tcdob <= dateadd(dd,-30.44,@rdate)) -- caseprogress >= 11
 			 and intakedate <= @rdate
@@ -49,7 +56,8 @@ as
 			 or dischargedate > @rdate)
 			 and (TCID.NoImmunization <> 0
 			 and TCID.NoImmunization is not null)
-			 and levelname <> 'Level X'
+			 and levelname <> 'Level X'	
+			 AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
 		order by pc1id
 				,TargetChild
 				,hvcase.TCDOB

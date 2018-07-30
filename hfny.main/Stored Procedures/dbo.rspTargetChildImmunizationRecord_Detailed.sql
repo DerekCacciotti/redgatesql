@@ -2,15 +2,16 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Create date: <Feb 20, 2012>
 -- Description: <copied from FamSys - see header below>
 -- =============================================
-CREATE procedure [dbo].[rspTargetChildImmunizationRecord_Detailed]
+CREATE PROC [dbo].[rspTargetChildImmunizationRecord_Detailed]
 (
     @programfk    varchar(max)    = null,
+	@SiteFK		  INT			  = NULL,
+    @CaseFiltersPositive varchar(100) = '',
     @supervisorfk int             = null,
     @workerfk     int             = null,
     @pc1id        varchar(13)     = null,
@@ -25,6 +26,9 @@ as
 	end
 
 	set @programfk = replace(@programfk,'"','')
+	set @CaseFiltersPositive = case when @CaseFiltersPositive = '' then null else @CaseFiltersPositive end
+	SET @SiteFK = isnull(@SiteFK, 0)
+
 
 	---- TCMedical
 	select pc1id
@@ -65,6 +69,7 @@ as
 									  from codeduebydates
 										  inner join codeMedicalItem cmi on ScheduledEvent = cmi.MedicalItemTitle and MedicalItemCode <= 13) codeduebydates on codeduebydates.interval = datediff(M,dateadd(dd,-30.44,HVCase.TCDOB),@rdate)
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+					  INNER JOIN dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFK) cf ON cf.HVCaseFK = HVCasePK
 				  where caseprogress >= 11
 					   and intakedate <= @rdate
 					   and (dischargedate is null)
@@ -86,6 +91,7 @@ as
 					  inner join TCMedical on TCMedical.hvcasefk = hvcasepk and TCMedical.programfk = caseprogram.programfk and TCMedical.TCIDFK = TCID.TCIDPK and @rdate >= TCItemDate
 					  inner join codeMedicalItem cmi on MedicalItemCode = TCMedical.TCMedicalItem and MedicalItemCode <= 13
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+					  INNER JOIN dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFK) cf ON cf.HVCaseFK = HVCasePK
 				  where caseprogress >= 11
 					   and intakedate <= @rdate
 					   and (dischargedate is null)
@@ -106,6 +112,7 @@ as
 		where currentFSWFK = isnull(@workerfk,currentFSWFK)
 			 and supervisorfk = isnull(@supervisorfk,supervisorfk)
 			 and PC1ID = isnull(@pc1id,PC1ID)
+			 AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN workerprogram.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
 			 and levelname <> 'Level X'
 		order by PC1ID
 				,case when TCItemDate is null then 1 else 0 end

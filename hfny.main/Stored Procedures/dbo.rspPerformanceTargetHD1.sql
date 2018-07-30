@@ -2,6 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 /*
 exec alter-procedure-rspPerformanceTargetHD1
 */
@@ -15,7 +16,7 @@ exec alter-procedure-rspPerformanceTargetHD1
 -- rspPerformanceTargetReportSummary 1 ,'10/01/2012' ,'12/31/2012', null,1
 -- mods by jrobohn 20130222 - clean up names, code and layout
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetHD1]
+CREATE PROC [dbo].[rspPerformanceTargetHD1]
 (
     @StartDate	datetime,
     @EndDate	datetime,
@@ -90,7 +91,7 @@ begin
 			, coh.TCIDPK
 			, MedicalItemTitle
 			, count(coh.TCIDPK) as ImmunizationCountPolio
-			, count(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
+			, sum(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
 					then 1 
 					else 0 
 					end) as FormReviewedCountPolio
@@ -102,7 +103,7 @@ begin
 		group by coh.HVCaseFK
 				, coh.TCIDPK
 				, MedicalItemTitle
-				
+
 	)
 	,
 	cteImmunizationsDTaP
@@ -112,7 +113,7 @@ begin
 			, coh.TCIDPK
 			, MedicalItemTitle
 			, count(coh.TCIDPK) as ImmunizationCountDTaP
-			, count(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
+			, sum(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
 					then 1 
 					else 0 
 					end) as FormReviewedCountDTaP
@@ -124,7 +125,7 @@ begin
 				 group by coh.HVCaseFK
 				, coh.TCIDPK
 				, MedicalItemTitle
-				
+
 	)	
 	,
 	cteImmunizationCounts
@@ -158,7 +159,7 @@ begin
 	)
 
 	select * from cteImmunizationCounts 
-	
+
 				OPTION (OPTIMIZE FOR (@StartDate UNKNOWN, @EndDate UNKNOWN))
 end
 GO

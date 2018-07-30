@@ -2,6 +2,8 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- Stored Procedure
+
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 13, 2013>
@@ -12,7 +14,7 @@ GO
 -- rspPerformanceTargetReportSummary 1 ,'10/01/2012' ,'12/31/2012', null,1
 -- mods by jrobohn 20130222 - clean up names, code and layout
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetHD2]
+CREATE PROC [dbo].[rspPerformanceTargetHD2]
 (
     @StartDate	datetime,
     @EndDate	datetime,
@@ -87,7 +89,7 @@ begin
 			, coh.TCIDPK
 			, MedicalItemTitle
 			, count(coh.TCIDPK) as ImmunizationCountPolio
-			, count(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
+			, sum(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
 					then 1 
 					else 0 
 					end) as FormReviewedCountPolio
@@ -99,9 +101,9 @@ begin
 		group by coh.HVCaseFK
 				, coh.TCIDPK
 				, MedicalItemTitle
-				
+
 	)
-	
+
 	,
 	cteImmunizationsDTaP
 	as
@@ -110,7 +112,7 @@ begin
 			, coh.TCIDPK
 			, MedicalItemTitle
 			, count(coh.TCIDPK) as ImmunizationCountDTaP
-			, count(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
+			, sum(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
 					then 1 
 					else 0 
 					end) as FormReviewedCountDTaP
@@ -122,9 +124,9 @@ begin
 				 group by coh.HVCaseFK
 				, coh.TCIDPK
 				, MedicalItemTitle
-				
+
 	)	
-	
+
 	,
 	cteImmunizationsMMR
 	as
@@ -133,7 +135,7 @@ begin
 			, coh.TCIDPK
 			, MedicalItemTitle
 			, count(coh.TCIDPK) as ImmunizationCountMMR
-			, count(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
+			, sum(case when dbo.IsFormReviewed(TCItemDate,'TM',TCMedicalPK) = 1 
 					then 1 
 					else 0 
 					end) as FormReviewedCountMMR
@@ -145,9 +147,9 @@ begin
 				 group by coh.HVCaseFK
 				, coh.TCIDPK
 				, MedicalItemTitle
-				
+
 	)	
-		
+
 	-- SELECT * FROM cteImmunizationsMMR
 	,
 	cteImmunizationCounts
@@ -180,18 +182,18 @@ begin
 	 LEFT join cteImmunizationsPolio immPolio on immPolio.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immPolio.TCIDPK 
 	 LEFT join cteImmunizationsDTaP immDTaP on immDTaP.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immDTaP.TCIDPK 
 	 LEFT join cteImmunizationsMMR immMMR on immMMR.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immMMR.TCIDPK 
-	 
+
 	)
-	
-	
+
+
 	--SELECT * FROM cteCohort
-	
+
 	SELECT * FROM cteImmunizationCounts 
 	--SELECT * FROM cteImmunizationsMMR 
 	--SELECT * FROM cteImmunizations
 	-- rspPerformanceTargetReportSummary 5 ,'10/01/2012' ,'12/31/2012'	
-	
-	
+
+
 				OPTION (OPTIMIZE FOR (@StartDate UNKNOWN, @EndDate UNKNOWN))
 end
 GO
