@@ -45,6 +45,7 @@ insert into #cteEventDates
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName
 	, HireDate FROM [dbo].[fnGetWorkerEventDates](@progfk2, NULL, NULL)
 	WHERE TerminationDate IS NULL
+	AND (FSWInitialStart IS NOT NULL OR FAWInitialStart IS NOT NULL OR SupervisorInitialStart IS NOT NULL)
 	AND DATEDIFF(d,HireDate, @edate2) > 365
 
 ;with cteCultureSensitive as (

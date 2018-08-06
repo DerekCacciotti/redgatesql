@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -26,6 +25,7 @@ BEGIN
 	FROM Worker
 	INNER JOIN WorkerProgram wp ON dbo.Worker.WorkerPK = wp.WorkerFK
 	WHERE wp.ProgramFK=@progfk
+	AND (FSWInitialStart IS NOT NULL OR FAWInitialStart IS NOT NULL OR SupervisorInitialStart IS NOT NULL)
 	AND (wp.HireDate >=  @sdate and wp.HireDate < DATEADD(d, -181, GETDATE()))
 	AND TerminationDate IS NULL
 	
