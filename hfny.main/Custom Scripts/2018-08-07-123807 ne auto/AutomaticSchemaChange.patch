@@ -1,0 +1,311 @@
+diff --git a/RedGateDatabaseInfo.xml b/RedGateDatabaseInfo.xml
+index 18222ec..c2ea64e 100644
+--- a/RedGateDatabaseInfo.xml
++++ b/RedGateDatabaseInfo.xml
+@@ -5,7 +5,7 @@
+   <DefaultSchema>dbo</DefaultSchema>
+   <DefaultUser>dbo</DefaultUser>
+   <DefaultFilegroup>PRIMARY</DefaultFilegroup>
+-  <DatabaseVersion>12</DatabaseVersion>
++  <DatabaseVersion>14</DatabaseVersion>
+   <IsAzure>False</IsAzure>
+   <MaxDataFileSize>10485760</MaxDataFileSize>
+   <WriteToFileOptions>
+diff --git a/Stored Procedures/dbo.spGetOptionItem.sql b/Stored Procedures/dbo.spGetOptionItem.sql
+new file mode 100644
+index 0000000..c6f65ae
+--- /dev/null
++++ b/Stored Procedures/dbo.spGetOptionItem.sql
+@@ -0,0 +1,29 @@
++SET QUOTED_IDENTIFIER ON
++GO
++SET ANSI_NULLS ON
++GO
++
++-- =============================================
++-- Author:		<Dorothy Baum>
++-- Create date: <June 19,2009>
++-- Description:	<Return the OptionValue for OptionItem, ProgramCode, for specify date>
++-- =============================================
++create PROCEDURE [dbo].[spGetOptionItem]
++	(@OptionItem varchar(50),@ProgramFK int,@CompareDate datetime, @OptionValue varchar(200) output)
++	
++AS
++BEGIN
++	-- SET NOCOUNT ON added to prevent extra result sets from
++	-- interfering with SELECT statements.
++	SET NOCOUNT ON;
++
++    -- Insert statements for procedure here
++	SELECT @OptionValue = OptionValue FROM appOptions 
++    WHERE OptionItem  = @OptionItem and 
++		  ProgramFK = @ProgramFK and 
++		  @CompareDate between 
++		  OptionStart and isnull(OptionEnd,getdate())
++
++END
++
++GO
+diff --git a/Tables/dbo.ASQSE.sql b/Tables/dbo.ASQSE.sql
+new file mode 100644
+index 0000000..37e8235
+--- /dev/null
++++ b/Tables/dbo.ASQSE.sql
+@@ -0,0 +1,163 @@
++CREATE TABLE [dbo].[ASQSE]
++(
++[ASQSEPK] [int] NOT NULL IDENTITY(1, 1),
++[ASQSECreateDate] [datetime] NOT NULL CONSTRAINT [DF_ASQSE_ASQSECreateDate] DEFAULT (getdate()),
++[ASQSECreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
++[ASQSEDateCompleted] [datetime] NOT NULL,
++[ASQSEEditDate] [datetime] NULL,
++[ASQSEEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
++[ASQSEInWindow] [bit] NOT NULL,
++[ASQSEOverCutOff] [bit] NOT NULL,
++[ASQSEReceiving] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
++[ASQSEReferred] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
++[ASQSETCAge] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
++[ASQSETotalScore] [numeric] (4, 1) NOT NULL,
++[ASQSEVersion] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
++[DiscussedWithPC1] [bit] NULL,
++[FSWFK] [int] NOT NULL,
++[ReviewCDS] [bit] NOT NULL CONSTRAINT [DF_ASQSE_ReviewCDS] DEFAULT ((0)),
++[HVCaseFK] [int] NOT NULL,
++[ProgramFK] [int] NOT NULL,
++[TCIDFK] [int] NOT NULL
++) ON [PRIMARY]
++GO
++SET QUOTED_IDENTIFIER ON
++GO
++SET ANSI_NULLS ON
++GO
++CREATE TRIGGER [dbo].[fr_asqse]
++on [dbo].[ASQSE]
++After insert
++
++AS
++
++Declare @PK int
++
++set @PK = (SELECT ASQSEPK from inserted)
++
++BEGIN
++	EXEC spAddFormReview_userTrigger @FormFK=@PK, @FormTypeValue='AS'
++END
++GO
++SET QUOTED_IDENTIFIER ON
++GO
++SET ANSI_NULLS ON
++GO
++-- =============================================
++-- Author:		Chris Papas
++-- Create date: 08/18/2010
++-- Description:	Updates FormReview Table with form date on Supervisor Review of Form
++-- =============================================
++CREATE TRIGGER [dbo].[fr_ASQSE_Edit]
++on [dbo].[ASQSE]
++AFTER UPDATE
++
++AS
++
++Declare @PK int
++Declare @UpdatedFormDate datetime 
++Declare @FormTypeValue varchar(2)
++
++select @PK = ASQSEPK FROM inserted
++select @UpdatedFormDate = ASQSEDateCompleted FROM inserted
++set @FormTypeValue = 'AS'
++
++BEGIN
++	UPDATE FormReview
++	SET 
++	FormDate=@UpdatedFormDate
++	WHERE FormFK=@PK 
++	AND FormType=@FormTypeValue
++
++END
++GO
++SET QUOTED_IDENTIFIER ON
++GO
++SET ANSI_NULLS ON
++GO
++CREATE TRIGGER [dbo].[fr_delete_asqse]
++on [dbo].[ASQSE]
++After DELETE
++
++AS
++
++Declare @PK int
++
++set @PK = (SELECT ASQSEPK from deleted)
++
++BEGIN
++	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='AS'
++
++	INSERT INTO	asqsedeleted ([ASQSEPK]
++      ,[ASQSECreateDate]
++      ,[ASQSECreator]
++      ,[ASQSEDateCompleted]
++      ,[ASQSEEditDate]
++      ,[ASQSEEditor]
++      ,[ASQSEInWindow]
++      ,[ASQSEOverCutOff]
++      ,[ASQSEReceiving]
++      ,[ASQSEReferred]
++      ,[ASQSETCAge]
++      ,[ASQSETotalScore]
++      ,[ASQSEVersion]
++      ,[DiscussedWithPC1]
++      ,[FSWFK]
++      ,[ReviewCDS]
++      ,[HVCaseFK]
++      ,[ProgramFK]
++      ,[TCIDFK])
++	  SELECT Deleted.ASQSEPK
++		   , Deleted.ASQSECreateDate
++		   , Deleted.ASQSECreator
++		   , Deleted.ASQSEDateCompleted
++		   , Deleted.ASQSEEditDate
++		   , Deleted.ASQSEEditor
++		   , Deleted.ASQSEInWindow
++		   , Deleted.ASQSEOverCutOff
++		   , Deleted.ASQSEReceiving
++		   , Deleted.ASQSEReferred
++		   , Deleted.ASQSETCAge
++		   , Deleted.ASQSETotalScore
++		   , Deleted.ASQSEVersion
++		   , Deleted.DiscussedWithPC1
++		   , Deleted.FSWFK
++		   , Deleted.ReviewCDS
++		   , Deleted.HVCaseFK
++		   , Deleted.ProgramFK
++		   , Deleted.TCIDFK FROM Deleted WHERE deleted.ASQSEPK=@PK
++END
++GO
++SET QUOTED_IDENTIFIER ON
++GO
++SET ANSI_NULLS ON
++GO
++-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
++-- create trigger TR_ASQSEEditDate ON ASQSE
++-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
++CREATE TRIGGER [dbo].[TR_ASQSEEditDate] ON [dbo].[ASQSE]
++For Update 
++AS
++Update ASQSE Set ASQSE.ASQSEEditDate= getdate()
++From [ASQSE] INNER JOIN Inserted ON [ASQSE].[ASQSEPK]= Inserted.[ASQSEPK]
++GO
++ALTER TABLE [dbo].[ASQSE] ADD CONSTRAINT [PK__ASQSE__CEF50C3C07F6335A] PRIMARY KEY CLUSTERED  ([ASQSEPK]) ON [PRIMARY]
++GO
++CREATE NONCLUSTERED INDEX [IX_FK_ASQSE_FSWFK] ON [dbo].[ASQSE] ([FSWFK]) ON [PRIMARY]
++GO
++CREATE NONCLUSTERED INDEX [IX_FK_ASQSE_HVCaseFK] ON [dbo].[ASQSE] ([HVCaseFK]) ON [PRIMARY]
++GO
++CREATE NONCLUSTERED INDEX [IX_FK_ASQSE_ProgramFK] ON [dbo].[ASQSE] ([ProgramFK]) ON [PRIMARY]
++GO
++CREATE NONCLUSTERED INDEX [IX_FK_ASQSE_TCIDFK] ON [dbo].[ASQSE] ([TCIDFK]) ON [PRIMARY]
++GO
++ALTER TABLE [dbo].[ASQSE] WITH NOCHECK ADD CONSTRAINT [FK_ASQSE_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
++GO
++ALTER TABLE [dbo].[ASQSE] WITH NOCHECK ADD CONSTRAINT [FK_ASQSE_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
++GO
++ALTER TABLE [dbo].[ASQSE] WITH NOCHECK ADD CONSTRAINT [FK_ASQSE_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
++GO
++ALTER TABLE [dbo].[ASQSE] WITH NOCHECK ADD CONSTRAINT [FK_ASQSE_TCIDFK] FOREIGN KEY ([TCIDFK]) REFERENCES [dbo].[TCID] ([TCIDPK])
++GO
++EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'ASQSE', 'COLUMN', N'ASQSEPK'
++GO
+diff --git a/Tables/dbo.HVCase.sql b/Tables/dbo.HVCase.sql
+index d10abcd..43d91da 100644
+--- a/Tables/dbo.HVCase.sql
++++ b/Tables/dbo.HVCase.sql
+@@ -34,7 +34,8 @@
+ [ScreenDate] [datetime] NOT NULL,
+ [TCDOB] [datetime] NULL,
+ [TCDOD] [datetime] NULL,
+-[TCNumber] [int] NULL
++[TCNumber] [int] NULL,
++[KempeDate2] [datetime] NULL
+ ) ON [PRIMARY]
+ GO
+ SET QUOTED_IDENTIFIER ON
+@@ -207,10 +208,10 @@
+ GO
+ CREATE NONCLUSTERED INDEX [IX_FK_HVCase_PC1FK] ON [dbo].[HVCase] ([PC1FK]) ON [PRIMARY]
+ GO
+-CREATE NONCLUSTERED INDEX [IX_HVCase_PC1FK] ON [dbo].[HVCase] ([PC1FK]) ON [PRIMARY]
+-GO
+ CREATE NONCLUSTERED INDEX [IX_FK_HVCase_PC2FK] ON [dbo].[HVCase] ([PC2FK]) ON [PRIMARY]
+ GO
++CREATE NONCLUSTERED INDEX [ixHVCaseScreenDate] ON [dbo].[HVCase] ([ScreenDate]) INCLUDE ([CaseProgress], [EDC], [HVCasePK], [IntakeDate], [KempeDate], [PC1FK], [TCDOB]) ON [PRIMARY]
++GO
+ CREATE STATISTICS [_dta_stat_165575628_2_33] ON [dbo].[HVCase] ([CaseProgress], [TCDOB])
+ GO
+ CREATE STATISTICS [_dta_stat_165575628_1_2_24] ON [dbo].[HVCase] ([HVCasePK], [CaseProgress], [PC1FK])
+diff --git a/Tables/dbo.TCID.sql b/Tables/dbo.TCID.sql
+index 787b3e2..132a994 100644
+--- a/Tables/dbo.TCID.sql
++++ b/Tables/dbo.TCID.sql
+@@ -130,6 +130,8 @@
+ GO
+ CREATE NONCLUSTERED INDEX [IX_TCID_TCDOB_TCFname_TCLName] ON [dbo].[TCID] ([TCDOB], [TCFirstName], [TCLastName]) ON [PRIMARY]
+ GO
++CREATE NONCLUSTERED INDEX [IX_TCID_TCDOD] ON [dbo].[TCID] ([TCDOD]) INCLUDE ([GestationalAge], [HVCaseFK], [ProgramFK]) ON [PRIMARY]
++GO
+ CREATE STATISTICS [_dta_stat_197575742_10_21] ON [dbo].[TCID] ([HVCaseFK], [TCFirstName])
+ GO
+ CREATE STATISTICS [_dta_stat_197575742_21_29_10] ON [dbo].[TCID] ([TCFirstName], [TCLastName], [HVCaseFK])
+diff --git a/Tables/dbo.Worker.sql b/Tables/dbo.Worker.sql
+index d1d5a6b..c574a8c 100644
+--- a/Tables/dbo.Worker.sql
++++ b/Tables/dbo.Worker.sql
+@@ -39,21 +39,23 @@
+ [YearsHVExperience] [int] NULL,
+ [YearsEarlyChildhoodExperience] [int] NULL,
+ [YearsChildAbuseClasses] [int] NULL,
+-[SupervisionScheduledDay] [int] NULL
++[SupervisionScheduledDay] [int] NULL,
++[UserName] [varchar] (256) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+ ) ON [PRIMARY]
+ GO
+ SET QUOTED_IDENTIFIER ON
+ GO
+ SET ANSI_NULLS ON
+ GO
+--- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+--- create trigger TR_WorkerEditDate ON Worker
+--- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-CREATE TRIGGER [dbo].[TR_WorkerEditDate] ON [dbo].[Worker]
+-For Update 
+-AS
+-Update Worker Set Worker.WorkerEditDate= getdate()
+-From [Worker] INNER JOIN Inserted ON [Worker].[WorkerPK]= Inserted.[WorkerPK]
++-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
++-- create trigger TR_WorkerEditDate ON Worker
++-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
++CREATE TRIGGER [dbo].[TR_WorkerEditDate] ON [dbo].[Worker]
++For Update 
++AS
++Update Worker Set Worker.WorkerEditDate= getdate()
++From [Worker] INNER JOIN Inserted ON [Worker].[WorkerPK]= Inserted.[WorkerPK]
++
+ GO
+ ALTER TABLE [dbo].[Worker] ADD CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
+ GO
+diff --git a/Tables/dbo.scoreASQSE.sql b/Tables/dbo.scoreASQSE.sql
+new file mode 100644
+index 0000000..4c20375
+--- /dev/null
++++ b/Tables/dbo.scoreASQSE.sql
+@@ -0,0 +1,11 @@
++CREATE TABLE [dbo].[scoreASQSE]
++(
++[scoreASQSEPK] [int] NOT NULL IDENTITY(1, 1),
++[ASQSEVersion] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
++[MaximumASQSEScore] [numeric] (3, 0) NOT NULL,
++[SocialEmotionalScore] [numeric] (6, 2) NOT NULL,
++[TCAge] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
++) ON [PRIMARY]
++GO
++ALTER TABLE [dbo].[scoreASQSE] ADD CONSTRAINT [PK_scoreASQSE] PRIMARY KEY CLUSTERED  ([scoreASQSEPK]) ON [PRIMARY]
++GO
