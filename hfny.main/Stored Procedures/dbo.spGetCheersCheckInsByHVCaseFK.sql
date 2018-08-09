@@ -49,6 +49,7 @@ BEGIN
 			TotalScore
 	FROM	dbo.CheersCheckIn cci
 	WHERE cci.HVCaseFK = @HVCaseFK
-		AND cci.ProgramFK = @ProgramFK;
+		AND cci.ProgramFK = @ProgramFK
+	ORDER BY cci.ObservationDate DESC
 END;
 GO
