@@ -2,13 +2,35 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spGetcodeReportCatalogbyPK]
+CREATE procedure [dbo].[spGetcodeReportCatalogbyPK]
 
 (@codeReportCatalogPK int)
-AS
-SET NOCOUNT ON;
+as
+set noCount on ;
 
-SELECT * 
-FROM codeReportCatalog
-WHERE codeReportCatalogPK = @codeReportCatalogPK
+select	crc.codeReportCatalogPK
+		, crc.CriteriaOptions
+		, crc.Defaults
+		, crc.Keywords
+		, crc.OldReportFK
+		, crc.OldReportID
+		, crc.ReportCategory
+		, crc.ReportClass
+		, crc.ReportDescription
+		, crc.ReportName
+		, a.AttachmentPK
+		, a.Attachment
+		, a.AttachmentCreateDate
+		, a.AttachmentCreator
+		, a.AttachmentDescription
+		, a.AttachmentFilePath
+		, a.AttachmentTitle
+		, a.FormDate
+		, a.FormFK
+		, a.FormType
+		, a.HVCaseFK
+		, a.ProgramFK
+from	codeReportCatalog crc
+left outer join Attachment a on a.FormFK = crc.codeReportCatalogPK and a.FormType = 'RC'
+where	codeReportCatalogPK = @codeReportCatalogPK ;
 GO

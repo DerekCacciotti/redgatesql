@@ -2,36 +2,33 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+CREATE procedure [dbo].[spGetAttachmentPK] (@FormType varchar(2)
+								, @FormFK int
+								, @HVCaseFK int
+								, @ProgramFK int
+								, @AttachmentPK int output
+								)
 
-CREATE PROCEDURE [dbo].[spGetAttachmentPK]
-	(
-	@FormType varchar(2),
-	@FormFK int,
-	@HVCaseFK int,
-	@ProgramFK int,
-	@AttachmentPK int OUTPUT
-	)
+as
+set noCount on ;
+	begin
 
-AS
-	SET NOCOUNT ON
-	BEGIN 
-	
-		BEGIN TRANSACTION
-		SET TRANSACTION ISOLATION LEVEL Read uncommitted;
-		
-		SELECT @AttachmentPK = AttachmentPK
-		FROM dbo.Attachment
-		WHERE FormType = @FormType
-		AND FormFK = @FormFK
+		begin transaction ;
+		set transaction isolation level read uncommitted ;
+
+		select	@AttachmentPK = AttachmentPK
+		from	dbo.Attachment
+		where	FormType = @FormType and FormFK = @FormFK ;
 		--AND HVCaseFK = @HVCaseFK
 		--AND FormReview.ProgramFK = @ProgramFK
 
-		SET @AttachmentPK = ISNULL(@AttachmentPK, 0)
-		
-		COMMIT TRANSACTION
-	
-	 END 
-	
-	RETURN
+		set @AttachmentPK = isnull(@AttachmentPK, 0) ;
+
+		commit transaction ;
+
+	end ;
+
+return ;
+
 
 GO
