@@ -1,4 +1,7 @@
 SET IDENTITY_INSERT [dbo].[codeForm] ON
+INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (30, 'CheersCheckInPK', 1, 'CC', 'CHEERS Check-In', 'CheersCheckInCreator', 'ObservationDate', 'CheersCheckIn')
+SET IDENTITY_INSERT [dbo].[codeForm] OFF
+SET IDENTITY_INSERT [dbo].[codeForm] ON
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (1, 'HVScreenPK', 1, 'SC', 'HVScreen', 'ScreenCreator', 'ScreenDate', 'HVScreen')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (2, 'PreassessmentPK', 1, 'PA', 'Preassessment', 'PACreator', 'PADate', 'Preassessment')
 INSERT INTO [dbo].[codeForm] ([codeFormPK], [FormPKName], [canBeReviewed], [codeFormAbbreviation], [codeFormName], [CreatorFieldName], [FormDateName], [MainTableName]) VALUES (3, 'KempePK', 1, 'KE', 'Kempe', 'KempeCreator', 'KempeDate', 'Kempe')
