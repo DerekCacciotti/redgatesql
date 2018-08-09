@@ -8,7 +8,7 @@ GO
 -- Description:	Gets all the data needed to display the Case Home Page
 -- exec spGetAllDataForCaseHomePage 'CD97050257617' 'VB84010244287' 'EG81010218386' 'DS90010007908' 'AB77050250139' 'MC79140216559' 'JC79010253576'
 -- =============================================
-CREATE procedure [dbo].[spGetAllDataForCaseHomePage]
+CREATE PROC [dbo].[spGetAllDataForCaseHomePage]
 (
 	@PC1ID char(13),
 	@Username varchar(MAX) 
@@ -96,6 +96,13 @@ begin
 		select count(FollowUpPK) as CountOfFollowUps
 			from FollowUp fu
 			where HVCaseFK = @HVCaseFK
+		)
+	, cteCheersCheckInCount
+	AS
+		(
+			SELECT COUNT(cci.CheersCheckInPK) AS CountOfCheersCheckIns 
+			FROM dbo.CheersCheckIn cci
+			WHERE cci.HVCaseFK = @HVCaseFK
 		)
 	, cteTargetChildren
 	as
@@ -471,6 +478,8 @@ begin
 				, ASQSE_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'AS')
 				, FollowUp_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'FU')
 				, FollowUp_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'FU')
+				, CheersCheckIn_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'CC')
+				, CheersCheckIn_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'CC')
 				, PC1Medical_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PM')
 				, PC1Medical_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PM')
 				, Discharge_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'DS')
@@ -561,6 +570,7 @@ begin
 			, isnull(CountOfTCIDs, 0) as CountOfTCIDs
 			, isnull(CountOfPSIs, 0) as CountOfPSIs
 			, isnull(CountOfFollowUps, 0) as CountOfFollowUps
+			, isnull(CountOfCheersCheckIns, 0) as CountOfCheersCheckIns
 			, isnull(case when charindex('/', CountOfASQs) > 0 
 						then CountOfASQs 
 						else substring(CountOfASQs, 2, 10) end, 0) as CountOfASQs
@@ -627,6 +637,8 @@ begin
 			, cfa.ASQSE_FormsReviewed
 			, cfa.FollowUp_ReviewOn
 			, cfa.FollowUp_FormsReviewed
+			, cfa.CheersCheckIn_ReviewOn
+			, cfa.CheersCheckIn_FormsReviewed
 			, cfa.PC1Medical_ReviewOn
 			, cfa.PC1Medical_FormsReviewed
 			, cfa.Discharge_ReviewOn
@@ -671,6 +683,7 @@ begin
 		inner join cteTCIDCount on 1 = 1
 		inner join ctePSICount on 1 = 1
 		inner join cteFollowUpCount on 1 = 1
+		INNER JOIN cteCheersCheckInCount ON 1 = 1
 		inner join cteTargetChildFormCompleteDate on 1=1
 		inner join cteTargetChildren_Flattened on 1=1
 		inner join cteASQCount on 1 = 1
