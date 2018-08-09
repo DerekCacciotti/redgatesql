@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE procedure [dbo].[pr_DeleteCompleteCase]
+CREATE PROC [dbo].[pr_DeleteCompleteCase]
 (
     @hvcasefk          int,
     @programfk         int,
@@ -588,6 +588,26 @@ begin try
 	while @@FETCH_STATUS = 0
 	begin
 		exec spDelHVScreen @HVScreenPK = @PK
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	--CheersCheckIn
+	declare del_cursor cursor for
+	select cci.CheersCheckInPK
+		from dbo.CheersCheckIn cci
+		where cci.HVCaseFK = @hvcasefk
+			 and cci.ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC dbo.spDelCheersCheckIn @CheersCheckInPK = @pk
 
 		fetch next from del_cursor into @PK
 
