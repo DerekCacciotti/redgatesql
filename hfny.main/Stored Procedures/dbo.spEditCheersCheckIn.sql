@@ -3,12 +3,13 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditCheersCheckIn](@CheersCheckInPK int=NULL,
-@AvereageCuesScore numeric(5, 2)=NULL,
+@AverageCuesScore numeric(5, 2)=NULL,
 @AverageEmpathyScore numeric(5, 2)=NULL,
 @AverageExpressionScore numeric(5, 2)=NULL,
 @AverageHoldingScore numeric(5, 2)=NULL,
 @AverageRhythmScore numeric(5, 2)=NULL,
 @AverageSmilesScore numeric(5, 2)=NULL,
+@CheersCheckInEditor varchar(10)=NULL,
 @Cues1Score int=NULL,
 @Cues2Score int=NULL,
 @Empathy1Score int=NULL,
@@ -29,16 +30,17 @@ CREATE PROCEDURE [dbo].[spEditCheersCheckIn](@CheersCheckInPK int=NULL,
 @Smiles1Score int=NULL,
 @Smiles2Score int=NULL,
 @Smiles3Score int=NULL,
-@TotalScore numeric(5, 2)=NULL)
+@TotalScore int=NULL)
 AS
 UPDATE CheersCheckIn
 SET 
-AvereageCuesScore = @AvereageCuesScore, 
+AverageCuesScore = @AverageCuesScore, 
 AverageEmpathyScore = @AverageEmpathyScore, 
 AverageExpressionScore = @AverageExpressionScore, 
 AverageHoldingScore = @AverageHoldingScore, 
 AverageRhythmScore = @AverageRhythmScore, 
 AverageSmilesScore = @AverageSmilesScore, 
+CheersCheckInEditor = @CheersCheckInEditor, 
 Cues1Score = @Cues1Score, 
 Cues2Score = @Cues2Score, 
 Empathy1Score = @Empathy1Score, 
