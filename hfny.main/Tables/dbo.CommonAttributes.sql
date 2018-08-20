@@ -38,7 +38,7 @@ CREATE TABLE [dbo].[CommonAttributes]
 [OBPInHome] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OBPInvolvement] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OBPInvolvementSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[Parity] [int] NULL,
+[Parity] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PBEmergencyAssistance] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PBEmergencyAssistanceAmount] [numeric] (4, 0) NULL,
 [PBFoodStamps] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -96,10 +96,9 @@ For Update
 AS
 Update CommonAttributes Set CommonAttributes.CommonAttributesEditDate= getdate()
 From [CommonAttributes] INNER JOIN Inserted ON [CommonAttributes].[CommonAttributesPK]= Inserted.[CommonAttributesPK]
+
 GO
 ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [PK__CommonAt__14761E7359FA5E80] PRIMARY KEY CLUSTERED  ([CommonAttributesPK]) ON [PRIMARY]
-GO
-CREATE NONCLUSTERED INDEX [IX_CommonAttributes_FormType] ON [dbo].[CommonAttributes] ([FormType]) INCLUDE ([EducationalEnrollment], [FormFK], [HighestGrade], [IsCurrentlyEmployed], [PrimaryLanguage]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_HVCaseFK] ON [dbo].[CommonAttributes] ([HVCaseFK]) ON [PRIMARY]
 GO
