@@ -36,6 +36,7 @@ as
 		 , datediff(day,  b.ScreenDate, a.IntakeDate) [Screen to Family Visit (C - A)]
 		 , datediff(day,  a.IntakeDate, a.KempeDate2) [Welcome Visit to Real Kempe Date (D - C)]
 		 , datediff(day,   b.ScreenDate,a.KempeDate2) [Screen To Real Kempe (D - A)]
+		 , e.DischargeDate
 		from HVCase as a
 			left join HVScreen as b on a.HVCasePK = b.HVCaseFK
 			left join Preassessment as c on c.HVCaseFK = a.HVCasePK and c.CaseStatus = '02'
@@ -48,6 +49,6 @@ as
 
 		where
 			a.IntakeDate between @StartDt and @EndDt
-		GROUP BY e.PC1ID, fsw.LastName,fsw.FirstName, b.ScreenDate, c.FSWAssignDate, a.IntakeDate, a.KempeDate2
+		GROUP BY e.PC1ID, fsw.LastName,fsw.FirstName, b.ScreenDate, c.FSWAssignDate, a.IntakeDate, a.KempeDate2, e.DischargeDate
 		order by e.PC1ID
 GO
