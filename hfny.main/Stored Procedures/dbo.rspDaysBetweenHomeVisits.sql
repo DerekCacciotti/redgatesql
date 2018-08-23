@@ -43,7 +43,7 @@ as
 							   max(VisitStartTime) over ( partition by m.HVCaseFK ) as HVDATE2
 					from	   HVLog hl
 					inner join #cteMAIN m on hl.HVCaseFK = m.HVCaseFK
-					where	   left(VisitType, 1) = '1'
+					where	   left(VisitType, 1) in ('1', '2', '3')
 				) ,
 		--now get the most recent HVLOGPK from the list above
 		cteLastVisitPlusHVLOGPK
@@ -57,7 +57,7 @@ as
 					from	   HVLog hl
 					inner join cteLastVisit lv on hl.HVCaseFK = lv.HVCaseFK
 											   and hl.VisitStartTime = lv.HVDATE2
-					where	   left(VisitType, 1) = '1'
+					where	   left(VisitType, 1) in ('1', '2', '3')
 				) ,
 		cteSecondToLastVisit
 			as
@@ -67,7 +67,7 @@ as
 					from	   HVLog hl
 					inner join cteLastVisitPlusHVLOGPK lvp on lvp.HVLogPK <> hl.HVLogPK
 															  and lvp.HVCaseFK = hl.HVCaseFK
-					where	   left(VisitType, 1) = '1'
+					where	   left(VisitType, 1) in ('1', '2', '3')
 					group by   hl.HVCaseFK
 				) ,
 		cteDatesBetween
