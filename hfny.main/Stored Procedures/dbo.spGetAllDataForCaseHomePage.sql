@@ -425,7 +425,7 @@ begin
 			 , frfl.FormFK
 			 , frfl.IsReviewRequired
 			 , frfl.IsFormReviewed
-		from  FormReviewFormList(@HVCaseFK) frfl
+		from  FormReviewFormList(@HVCaseFK, @ProgramFK) frfl
 		)
 
 --select * from cteFormReview

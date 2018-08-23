@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Jay Robohn
 -- Create date: 09/15/14
@@ -11,7 +9,7 @@ GO
 --				This is a modification of the FormReviewedTableList() function, 
 --				which loads a specific form's FormReview rows for a ProgramFK
 -- =============================================
-CREATE function [dbo].[FormReviewFormList] (@HVCaseFK int)
+CREATE FUNCTION [dbo].[FormReviewFormList] (@HVCaseFK INT, @ProgramFK INT)
 
 returns @results table (FormType char(2)
 						, FormFK int
@@ -25,7 +23,7 @@ as
 			(
 				select	fr.FormType
 						  , FormFK
-						  , dbo.IsFormReviewTurnedOn(fr.FormDate, fr.FormType, fr.ProgramFK) as IsReviewRequired
+						  , dbo.IsFormReviewTurnedOn(fr.FormDate, fr.FormType, @ProgramFK) as IsReviewRequired
 						  , dbo.IsFormReviewed(fr.FormDate, fr.FormType, fr.FormFK) as IsFormReviewed
 					from FormReview fr
 					inner join FormReviewOptions fro on fro.ProgramFK = fr.ProgramFK and fro.FormType = fr.FormType
