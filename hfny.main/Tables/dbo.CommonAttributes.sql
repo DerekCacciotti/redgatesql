@@ -99,6 +99,8 @@ From [CommonAttributes] INNER JOIN Inserted ON [CommonAttributes].[CommonAttribu
 GO
 ALTER TABLE [dbo].[CommonAttributes] ADD CONSTRAINT [PK__CommonAt__14761E7359FA5E80] PRIMARY KEY CLUSTERED  ([CommonAttributesPK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_FormFK] ON [dbo].[CommonAttributes] ([FormFK]) ON [PRIMARY]
+GO
 CREATE NONCLUSTERED INDEX [IX_CommonAttributes_FormType] ON [dbo].[CommonAttributes] ([FormType]) INCLUDE ([EducationalEnrollment], [FormFK], [HighestGrade], [IsCurrentlyEmployed], [PrimaryLanguage]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_HVCaseFK] ON [dbo].[CommonAttributes] ([HVCaseFK]) ON [PRIMARY]
