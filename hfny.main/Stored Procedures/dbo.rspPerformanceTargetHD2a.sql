@@ -75,7 +75,7 @@ BEGIN
 		  , tcAgeDays
 		  , lastdate
 		FROM cteTotalCases
-		WHERE DATEDIFF(DAY, tcdob, lastdate) >= 730
+		WHERE DATEDIFF(DAY, tcdob, @StartDate) >= 730
 	)
 	,
 	cteImmunizations
