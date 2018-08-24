@@ -2,6 +2,9 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+/*
+alter procedure rspQAReport20
+*/
 -- =============================================
 -- Author:		<jrobohn>
 -- Create date: <2017-03-23>
@@ -9,8 +12,10 @@ GO
 --exec rspQAReport20 @ProgramFK = '1', @ReportType = 'Detail', @DupType = null
 --exec rspQAReport20 @ProgramFK = '1', @ReportType = 'Detail', @DupType = 'Audit-C'
 --exec rspQAReport20 @ProgramFK = '1', @ReportType = 'Summary', @DupType = null
+--exec rspQAReport20 @ProgramFK = '9', @ReportType = 'Summary', @DupType = null
+--exec rspQAReport20 @ProgramFK = null, @ReportType = 'Summary', @DupType = null
 -- =============================================
-CREATE PROC [dbo].[rspQAReport20]
+CREATE procedure [dbo].[rspQAReport20]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @ReportType char(7) = null 
@@ -103,7 +108,7 @@ begin
 				)
   
 			select PC1ID 
-					, 'Attachment-' + FormType  as FormType
+					, 'Attachment' as FormType
 					, FormDate
 					, AttachmentCreateDate as CreateDate
 					, AttachmentCreator as Creator
@@ -368,7 +373,7 @@ begin
 						having count(*) > 1)
 			union
 			select PC1ID
-				 , 'Common Attributes-' + FormType as FormType
+				 , 'Common Attributes' as FormType
 				 , FormDate
 				 , CommonAttributesCreateDate as CreateDate
 				 , CommonAttributesCreator as Creator
@@ -448,7 +453,7 @@ begin
 						having count(*) > 1)
 			union
 			select PC1ID
-					, 'Education-' + FormType as FormType
+					, 'Education' as FormType
 					, FormDate
 					, EducationCreateDate as CreateDate
 					, EducationCreator as Creator
@@ -481,7 +486,7 @@ begin
 						having count(*) > 1)
 			union
 			select PC1ID
-					, 'Employment-' + FormType as FormType
+					, 'Employment' as FormType
 					, FormDate
 					, EmploymentCreateDate as CreateDate
 					, EmploymentCreator as Creator
@@ -517,7 +522,7 @@ begin
 						having count(*) > 1)
 			union
 			select PC1ID
-					, 'HITS-' + FormType as FormType
+					, 'HITS' as FormType
 					, KempeDate as FormDate
 					, HITSCreateDate as CreateDate
 					, HITSCreator as Creator
@@ -632,7 +637,7 @@ begin
 										INNER join SplitString(@ProgramFK, ',') ss on ListItem = k.ProgramFK)
 			union
 			select PC1ID
-					, 'PHQ9-' + FormType as FormType
+					, 'PHQ9' as FormType
 					, DateAdministered as FormDate
 					, PHQ9CreateDate as CreateDate
 					, PHQ9Creator as Creator 
@@ -1294,7 +1299,9 @@ begin
 							Creator
 						)
 						select PC1ID
-								, 'Follow-Up' as FormType
+								, 'Follow-Up-' +
+									case when dbo.IsNullOrEmpty(fu.FollowUpInterval) = 1 then '' else '-' + fu.FollowUpInterval end 
+									 as FormType
 								, FollowUpDate as FormDate
 								, FollowUpCreateDate as CreateDate
 								, FollowUpCreator as Creator
@@ -1319,7 +1326,9 @@ begin
 							Creator
 						)
 						select PC1ID
-							 , 'Common Attributes-' + FormType as FormType
+							 , 'Common Attributes-' + rtrim(FormType) +  
+								case when dbo.IsNullOrEmpty(FormInterval) = 1 then '' else '-' + FormInterval end 
+								as FormType
 							 , FormDate
 							 , CommonAttributesCreateDate as CreateDate
 							 , CommonAttributesCreator as Creator
@@ -1439,7 +1448,9 @@ begin
 							Creator
 						)
 						select PC1ID
-								, 'Education-' + FormType as FormType
+								, 'Education-' + rtrim(FormType) +  
+									case when dbo.IsNullOrEmpty(Interval) = 1 then '' else '-' + Interval end 
+									as FormType
 								, FormDate
 								, EducationCreateDate as CreateDate
 								, EducationCreator as Creator
@@ -1482,7 +1493,9 @@ begin
 							Creator
 						)
 						select PC1ID
-								, 'Employment-' + FormType as FormType
+								, 'Employment-' + rtrim(FormType) +  
+									case when dbo.IsNullOrEmpty(Interval) = 1 then '' else '-' + Interval end 
+									as FormType
 								, FormDate
 								, EmploymentCreateDate as CreateDate
 								, EmploymentCreator as Creator
@@ -1703,7 +1716,9 @@ begin
 							Creator
 						)
 						select PC1ID
-								, 'PHQ9-' + FormType as FormType
+								, 'PHQ9-' + rtrim(FormType) +  
+									case when dbo.IsNullOrEmpty(FormInterval) = 1 then '' else '-' + FormInterval end 
+									as FormType
 								, DateAdministered as FormDate
 								, PHQ9CreateDate as CreateDate
 								, PHQ9Creator as Creator 
