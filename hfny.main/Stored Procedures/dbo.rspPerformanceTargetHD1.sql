@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 /*
 exec alter-procedure-rspPerformanceTargetHD1
 */
@@ -149,10 +148,14 @@ begin
 					end as FormReviewed				
 			, 0 as FormOutOfWindow -- not out of window
 			, 0 as FormMissing
-			, case when ((ImmunizationCountDTaP >= 3) AND (ImmunizationCountPolio >= 2)) then 1 
+			, case when ((ImmunizationCountDTaP >= 3) AND (ImmunizationCountPolio >= 2))
+						AND ((ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
+							AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP)) then 1 
 					else 0 end as FormMeetsTarget
-			, case when ((ImmunizationCountDTaP >= 3) AND (ImmunizationCountPolio >= 2)) then '' 
-					else 'Missing Shots or Not on Time' end as NotMeetingReason
+			, case when NOT ((ImmunizationCountDTaP >= 3) AND (ImmunizationCountPolio >= 2)) then 'Missing Shots or Not on Time'
+					WHEN NOT ((ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
+						AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP)) THEN 'Immunization form(s) not reviewed'
+					else '' end as NotMeetingReason
 	 from cteCohort coh
 	 left join cteImmunizationsPolio immPolio on immPolio.HVCaseFK = coh.HVCaseFK and coh.TCIDPK = immPolio.TCIDPK 
 	 left join cteImmunizationsDTaP immDTaP on immDTaP.HVCaseFK = coh.HVCaseFK and coh.TCIDPK = immDTaP.TCIDPK 

@@ -14,7 +14,7 @@ GO
 -- rspPerformanceTargetReportSummary 1 ,'10/01/2012' ,'12/31/2012', null,1
 -- mods by jrobohn 20130222 - clean up names, code and layout
 -- =============================================
-CREATE PROC [dbo].[rspPerformanceTargetHD2]
+CREATE PROCEDURE [dbo].[rspPerformanceTargetHD2]
 (
     @StartDate	datetime,
     @EndDate	datetime,
@@ -174,10 +174,16 @@ begin
 						end as FormReviewed		
 				, 0 as FormOutOfWindow
 				, 0 as FormMissing
-				, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) and (ImmunizationCountMMR >= 1)) then 1 
+				, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) and (ImmunizationCountMMR >= 1)
+							AND ((ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
+							AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP) 
+							AND (ImmunizationCountMMR IS NULL OR ImmunizationCountMMR = FormReviewedCountMMR))) then 1 
 						else 0 end as FormMeetsTarget
-				, case when ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) and (ImmunizationCountMMR >= 1)) then '' 
-						else 'Missing Shots or Not on Time' end as NotMeetingReason
+				, case when NOT ((ImmunizationCountDTaP >= 4) AND (ImmunizationCountPolio >= 3) AND (ImmunizationCountMMR >= 1)) then 'Missing Shots or Not on Time' 
+					   WHEN NOT ((ImmunizationCountPolio is null or ImmunizationCountPolio = FormReviewedCountPolio) 
+							AND (ImmunizationCountDTaP IS NULL OR ImmunizationCountDTaP = FormReviewedCountDTaP) 
+							AND (ImmunizationCountMMR IS NULL OR ImmunizationCountMMR = FormReviewedCountMMR)) THEN 'Immunization form(s) not reviewed'
+						else '' end as NotMeetingReason
 	 from cteCohort coh
 	 LEFT join cteImmunizationsPolio immPolio on immPolio.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immPolio.TCIDPK 
 	 LEFT join cteImmunizationsDTaP immDTaP on immDTaP.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = immDTaP.TCIDPK 
