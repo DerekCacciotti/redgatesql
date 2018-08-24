@@ -113,7 +113,7 @@ BEGIN
 	LEFT JOIN dbo.FormReviewOptions fro ON fro.FormType = 'TM' 
 		AND fro.ProgramFK = tm.ProgramFK 
 		AND tm.TCItemDate BETWEEN fro.FormReviewStartDate AND ISNULL(fro.FormReviewEndDate, tm.TCItemDate)
-	WHERE TCItemDate between TCDOB and dateadd(dd,183,TCDOB) 
+	WHERE TCItemDate between TCDOB and dateadd(MONTH,12,TCDOB) 
 	GROUP BY tm.HVCaseFK, tm.TCIDFK
 				
 	)

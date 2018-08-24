@@ -256,6 +256,7 @@ BEGIN
 		INNER JOIN dbo.TCMedical med ON coh.HVCasePK = med.HVCaseFK
 		INNER JOIN dbo.codeMedicalItem item ON med.TCMedicalItem = item.MedicalItemCode
 		WHERE med.TCMedicalItem IN (SELECT MedicalItemCode FROM @ImmunizationCount6Month)
+		AND med.TCItemDate BETWEEN coh.TCDOB AND DATEADD(MONTH, 12, coh.TCDOB)
 
 	INSERT INTO @tblReceivedImmunizations
 		SELECT DISTINCT coh.HVCasePK, med.TCIDFK, med.TCItemDate, med.TCMedicalPK, med.TCMedicalItem, item.MedicalItemTitle,  18
@@ -263,6 +264,7 @@ BEGIN
 		INNER JOIN dbo.TCMedical med ON coh.HVCasePK = med.HVCaseFK
 		INNER JOIN dbo.codeMedicalItem item ON med.TCMedicalItem = item.MedicalItemCode
 		WHERE med.TCMedicalItem IN (SELECT MedicalItemCode FROM @ImmunizationCount18Month)
+		AND med.TCItemDate BETWEEN coh.TCDOB AND DATEADD(MONTH, 24, coh.TCDOB)
 
 	INSERT INTO @tblReceivedImmunizations6Month
 		SELECT HVCasePK, TCIDPK, TCMedicalItem, TCMedicalItemTitle, COUNT(TCMedicalItem) numImmunizations 
