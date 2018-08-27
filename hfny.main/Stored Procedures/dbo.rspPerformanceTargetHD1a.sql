@@ -113,7 +113,7 @@ BEGIN
 	LEFT JOIN dbo.FormReviewOptions fro ON fro.FormType = 'TM' 
 		AND fro.ProgramFK = tm.ProgramFK 
 		AND tm.TCItemDate BETWEEN fro.FormReviewStartDate AND ISNULL(fro.FormReviewEndDate, tm.TCItemDate)
-	WHERE TCItemDate between TCDOB and dateadd(dd,183,TCDOB) 
+	WHERE TCItemDate between TCDOB and dateadd(MONTH,12,TCDOB) 
 	GROUP BY tm.HVCaseFK, tm.TCIDFK
 				
 	)
@@ -140,12 +140,14 @@ BEGIN
 			, 0 AS FormMissing
 			, CASE WHEN ((imm.DTAPCount >= 3) AND (imm.HIBCount >= 3) AND (imm.PCVCount >= 3) 
 					AND (imm.PolioCount >= 2) AND (imm.MMRCount >= 0) AND (imm.HEPBCount >= 2)
-					AND (imm.VZCount >= 0) AND (imm.FluCount >= 0) AND (imm.RotoCount >= 3) AND (imm.HEPACount >= 0)) THEN 1 
+					AND (imm.VZCount >= 0) AND (imm.FluCount >= 0) AND (imm.RotoCount >= 3) AND (imm.HEPACount >= 0))
+					AND (imm.TotalImmunizations = imm.FormReviewedCount) THEN 1 
 					ELSE 0 END AS FormMeetsTarget
-			, CASE WHEN ((imm.DTAPCount >= 3) AND (imm.HIBCount >= 3) AND (imm.PCVCount >= 3) 
+			, CASE WHEN NOT ((imm.DTAPCount >= 3) AND (imm.HIBCount >= 3) AND (imm.PCVCount >= 3) 
 					AND (imm.PolioCount >= 2) AND (imm.MMRCount >= 0) AND (imm.HEPBCount >= 2)
-					AND (imm.VZCount >= 0) AND (imm.FluCount >= 0) AND (imm.RotoCount >= 3) AND (imm.HEPACount >= 0)) THEN '' 
-					ELSE 'Missing Shots or Not on Time' END AS NotMeetingReason
+					AND (imm.VZCount >= 0) AND (imm.FluCount >= 0) AND (imm.RotoCount >= 3) AND (imm.HEPACount >= 0)) THEN 'Missing Shots or Not on Time' 
+					WHEN (imm.TotalImmunizations <> imm.FormReviewedCount) THEN 'Immunization form(s) not reviewed'
+					ELSE '' END AS NotMeetingReason
 	 FROM cteCohort coh
 	 LEFT JOIN cteImmunizations imm ON imm.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = imm.TCIDFK
 	)
