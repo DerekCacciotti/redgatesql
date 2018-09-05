@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- rspASQHistory 1
 
 CREATE procedure [dbo].[rspASQHistory]
@@ -86,13 +85,13 @@ AS
 		 ,ASQPersonalSocialScore
 		 ,case when UnderPersonalSocial = 1 then '*' else '' end 
 		 ,case when TCReferred is null then 'Unknown'
-			  when TCReferred = 1 then 'Yes' else 'No' end 
-		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end 
+			  when TCReferred = 1 then 'Yes' else 'No' end as TCReferred
+		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end as ASQTCReceiving
 		 ,case when ASQInWindow is null then 'Unknown'
-			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end 
+			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end as ASQInWindow
 		 ,case when DiscussedWithPC1 is null then 'Blank'
-			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end 			  
-		 ,a.TCAge 
+			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end as DiscussedWithPC1
+		 --,a.TCAge 
 
 		from ASQ a
 			inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
@@ -135,11 +134,11 @@ UNION all
 		 ,case when UnderProblemSolving = 1 then '*' else '' end UnderProblemSolving
 		 ,ASQPersonalSocialScore
 		 ,case when UnderPersonalSocial = 1 then '*' else '' end UnderPersonalSocial
-		 ,'' TCReferred
-		 ,'' DiscussedWithPC1
-		 ,'' ReviewCDS
-		 ,'' InWindow
-		 ,'' [TCAgeCode]
+		 ,a.TCReferred
+		 ,a.DiscussedWithPC1
+		 ,a.ReviewCDS
+		 ,a.ASQInWindow
+		 --,TCAge
 
 		from --ASQ a
 			--inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
