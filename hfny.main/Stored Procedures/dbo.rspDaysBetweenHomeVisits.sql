@@ -4,8 +4,9 @@ SET ANSI_NULLS ON
 GO
 CREATE procedure [dbo].[rspDaysBetweenHomeVisits]
 	(
-		@programfk as int
+		@programfk as int		
 	)
+
 as
 	begin
 
@@ -34,18 +35,20 @@ as
 							   and DischargeDate is null
 
 		--get the most recent HV Visit from cohort above
-		;
-		with
-		cteLastVisit
-			as
-				(
-					select	   distinct m.HVCaseFK ,
+		create table #cteLastVisit
+			(
+				HVCaseFK int, 
+				HVDate2 datetime
+			)
+		
+		insert into #cteLastVisit (HVCaseFK, HVDate2)
+			select	   distinct m.HVCaseFK ,
 							   max(VisitStartTime) over ( partition by m.HVCaseFK ) as HVDATE2
 					from	   HVLog hl
 					inner join #cteMAIN m on hl.HVCaseFK = m.HVCaseFK
 					where	   left(VisitType, 1) in ('1', '2', '3')
-				) ,
-		--now get the most recent HVLOGPK from the list above
+		;
+		with
 		cteLastVisitPlusHVLOGPK
 			as
 				(
@@ -55,9 +58,9 @@ as
 							   HVDATE2 ,
 							   HVLogPK
 					from	   HVLog hl
-					inner join cteLastVisit lv on hl.HVCaseFK = lv.HVCaseFK
+					inner join #cteLastVisit lv on hl.HVCaseFK = lv.HVCaseFK
 											   and hl.VisitStartTime = lv.HVDATE2
-					where	   left(VisitType, 1) in ('1', '2', '3')
+					--where	   left(VisitType, 1) in ('1', '2', '3')
 				) ,
 		cteSecondToLastVisit
 			as
