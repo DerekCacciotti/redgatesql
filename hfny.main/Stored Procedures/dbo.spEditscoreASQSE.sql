@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditscoreASQSE](@scoreASQSEPK int=NULL,
 @ASQSEVersion varchar(10)=NULL,
 @MaximumASQSEScore numeric(3, 0)=NULL,
-@SocialEmotionalScore numeric(6, 2)=NULL,
+@SocialEmotionalScore numeric(3, 0)=NULL,
 @TCAge char(4)=NULL)
 AS
 UPDATE scoreASQSE
