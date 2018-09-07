@@ -66,29 +66,29 @@ AS
 			 ) >= @n
 
 	select
-		  LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) 
-		 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) 
+		  LTRIM(RTRIM(supervisor.lastname))+', '+LTRIM(RTRIM(supervisor.firstname)) as supervisor
+		 ,LTRIM(RTRIM(fsw.lastname))+', '+LTRIM(RTRIM(fsw.firstname)) as worker
 		 ,d.PC1ID
-		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) 
-		 ,convert(varchar(12),c.TCDOB,101) 
+		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) as TCName
+		 ,convert(varchar(12),c.TCDOB,101) as TCDOB
 		 ,c.GestationalAge
-		 ,ltrim(rtrim(replace(b.[AppCodeText],'(optional)',''))) TCAge
-		 ,convert(varchar(12),a.DateCompleted,101) DateCompleted
+		 ,ltrim(rtrim(replace(b.[AppCodeText],'(optional)',''))) as TCAge
+		 ,convert(varchar(12),a.DateCompleted,101) as DateCompleted
 		 ,a.ASQCommunicationScore
-		 ,case when UnderCommunication = 1 then '*' else '' end 
+		 ,case when UnderCommunication = 1 then '*' else '' end as UnderCommunication
 		 ,ASQGrossMotorScore
-		 ,case when UnderGrossMotor = 1 then '*' else '' end 
+		 ,case when UnderGrossMotor = 1 then '*' else '' end as UnderGrossMotor
 		 ,ASQFineMotorScore
-		 ,case when UnderFineMotor = 1 then '*' else '' end 
+		 ,case when UnderFineMotor = 1 then '*' else '' end as UnderFineMotor
 		 ,ASQProblemSolvingScore
-		 ,case when UnderProblemSolving = 1 then '*' else '' end 
+		 ,case when UnderProblemSolving = 1 then '*' else '' end as UnderProblemSolving
 		 ,ASQPersonalSocialScore
-		 ,case when UnderPersonalSocial = 1 then '*' else '' end 
+		 ,case when UnderPersonalSocial = 1 then '*' else '' end as UnderPersonalSocial
 		 ,case when TCReferred is null then 'Unknown'
 			  when TCReferred = 1 then 'Yes' else 'No' end as TCReferred
 		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end as ASQTCReceiving
 		 ,case when ASQInWindow is null then 'Unknown'
-			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end as ASQInWindow
+			  when ASQInWindow = 1 then 'In' else 'Out' end as ASQInWindow
 		 ,case when DiscussedWithPC1 is null then 'Blank'
 			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end as DiscussedWithPC1
 		 --,a.TCAge 
@@ -116,14 +116,14 @@ AS
 UNION all
 
 	select
-		  LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
-		 ,LTRIM(RTRIM(fsw.firstname))+' '+LTRIM(RTRIM(fsw.lastname)) worker
+		  LTRIM(RTRIM(supervisor.lastname))+', '+LTRIM(RTRIM(supervisor.firstname)) as supervisor
+		 ,LTRIM(RTRIM(fsw.lastname))+', '+LTRIM(RTRIM(fsw.firstname)) as worker
 		 ,d.PC1ID
-		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) TCName
-		 ,CASE WHEN c.TCDOB IS NOT NULL THEN convert(varchar(12),c.TCDOB,101) ELSE convert(varchar(12),h.EDC,101) END TCDOB
+		 ,LTRIM(RTRIM(c.TCFirstName))+' '+LTRIM(RTRIM(c.TCLastName)) as TCName
+		 ,CASE WHEN c.TCDOB IS NOT NULL THEN convert(varchar(12),c.TCDOB,101) ELSE convert(varchar(12),h.EDC,101) END as TCDOB
 		 ,c.GestationalAge
-		 ,'[None]' TCAge
-		 ,'' DateCompleted
+		 ,ltrim(rtrim(replace(b.AppCodeText,'(optional)',''))) as TCAge
+		 ,convert(varchar(12),a.DateCompleted,101) as DateCompleted
 		 ,a.ASQCommunicationScore
 		 ,case when UnderCommunication = 1 then '*' else '' end UnderCommunication
 		 ,ASQGrossMotorScore
@@ -134,24 +134,32 @@ UNION all
 		 ,case when UnderProblemSolving = 1 then '*' else '' end UnderProblemSolving
 		 ,ASQPersonalSocialScore
 		 ,case when UnderPersonalSocial = 1 then '*' else '' end UnderPersonalSocial
-		 ,a.TCReferred
-		 ,a.DiscussedWithPC1
-		 ,a.ReviewCDS
-		 ,a.ASQInWindow
+		 ,case when TCReferred is null then 'Unknown'
+			  when TCReferred = 1 then 'Yes' else 'No' end as TCReferred
+		 ,case when ASQTCReceiving = '1' then 'Yes' else 'No' end as ASQTCReceiving
+		 ,case when ASQInWindow is null then 'Unknown'
+			  when ASQInWindow = 1 then 'In' else 'Out' end as ASQInWindow
+		 ,case when DiscussedWithPC1 is null then 'Blank'
+			  when DiscussedWithPC1 = 1 then 'Yes' else 'No' end as DiscussedWithPC1
+		 --,a.TCReferred
+		 --,a.DiscussedWithPC1
+		 --,a.ReviewCDS
+		 --,a.ASQInWindow
 		 --,TCAge
 
 		from --ASQ a
 			--inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
 			--inner join TCID c on c.TCIDPK = a.TCIDFK
 			CaseProgram d 
-			INNER JOIN HVCase AS h ON h.HVCasePK = d.HVCaseFK
+			inner join HVCase AS h ON h.HVCasePK = d.HVCaseFK
 			inner join dbo.SplitString(@programfk,',') on d.programfk = listitem
 			inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = h.HVCasePK
 			inner join worker fsw ON d.CurrentFSWFK = fsw.workerpk
 			inner join workerprogram wp on wp.workerfk = fsw.workerpk  AND wp.programfk = listitem
 			inner join worker supervisor on wp.supervisorfk = supervisor.workerpk
-			LEFT OUTER JOIN TCID c on c.HVCaseFK = d.HVCaseFK
-			LEFT OUTER JOIN ASQ AS a ON d.HVCaseFK = a.HVCaseFK
+			left outer join TCID c on c.HVCaseFK = d.HVCaseFK
+			left outer join ASQ AS a ON d.HVCaseFK = a.HVCaseFK
+			inner join codeApp b on a.TCAge = b.AppCode and b.AppCodeGroup = 'TCAge' and b.AppCodeUsedWhere like '%AQ%'
 			
 		where 
 		h.CaseProgress > 8 AND
@@ -166,6 +174,6 @@ UNION all
 			 AND c.TCDOB IS NOT NULL 
 			 AND (CASE WHEN @UnderCutoffOnly = 'Y' THEN 1 ELSE 0 END = 0)
 
-	
+	--order by fsw.LastName, fsw.FirstName, d.PC1ID, a.DateCompleted	
 	
 GO
