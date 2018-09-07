@@ -28,9 +28,11 @@ DECLARE @edate AS DATE = GETDATE()
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName, hiredate
 	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent 
 	, '1' AS TotalCounter --used to get a count of all workers in this report towards the end
-	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
+	--FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
+	FROM [dbo].[fnGetWorkerEventDatesALL](@progfk, NULL, NULL)
 	WHERE (HireDate BETWEEN @sdate and DATEADD(DAY, -182, @edate))
-	AND (FSWInitialStart IS NOT NULL OR FAWInitialStart IS NOT NULL OR SupervisorInitialStart IS NOT NULL)
+	AND (FSWInitialStart IS NOT NULL OR FAWInitialStart IS NOT NULL OR SupervisorInitialStart IS NOT NULL OR ProgramManagerStartDate IS NOT NULL)
+	AND TerminationDate IS NULL
 	
 )
 
@@ -64,9 +66,16 @@ GROUP BY workerpk, cteEventDates.HireDate, t.IsExempt
 				END AS ContentCompleted
 			, CASE WHEN [StopGapTrainingDt] <= dateadd(day, 182, cteEventDates.HireDate) THEN 1 
 					WHEN [FormalTrainingDt] <= dateadd(day, 182, cteEventDates.HireDate) THEN 1 
-					WHEN [StopGapExempt]='1' then '1'
-					WHEN [FormalTrainingExempt]='1' then '1'
+					WHEN [StopGapExempt]='1' then 1
+					WHEN [FormalTrainingExempt]='1' then 1
 					ELSE 0 END AS [Meets Target]
+			, CASE WHEN [FormalTrainingExempt]='1' then 3
+				WHEN [cteStopGap].[StopGapExempt]='1' THEN 3
+				WHEN [StopGapTrainingDt] <= dateadd(day, 182, cteEventDates.HireDate) THEN 3 
+				WHEN [FormalTrainingDt] <= dateadd(day, 182, cteEventDates.HireDate) THEN 3
+				WHEN [StopGapTrainingDt] > dateadd(day, 182, cteEventDates.HireDate)  AND DATEDIFF(DAY,  cteEventDates.HireDate, GETDATE()) > 546 THEN 2  
+				WHEN [FormalTrainingDt] > dateadd(day, 182, cteEventDates.HireDate)  AND DATEDIFF(DAY,  cteEventDates.HireDate, GETDATE()) > 546 THEN 2  
+				ELSE 1	END AS 'IndividualRating'
 					, TotalCounter
 		FROM cteEventDates 
 		LEFT JOIN cteFormal ON cteFormal.WorkerPK = cteEventDates.WorkerPK
@@ -78,21 +87,15 @@ GROUP BY workerpk, cteEventDates.HireDate, t.IsExempt
 
 	SELECT WorkerName, workerpk, HireDate, [StopGapTrainingDt], [FormalTrainingDt]
 			, ContentCompleted
-			,  CASE [cteFinal].[Meets Target]
-				WHEN '1' THEN 'T'
-				ELSE 'F'
-				END AS [Meets Target]
+			,  IndividualRating AS [Meets Target]
 	, count([TotalCounter]) OVER(PARTITION BY TotalCounter) AS TotalWorkers
 	, SUM([cteFinal].[ContentCompleted]) OVER(PARTITION BY TotalCounter) AS MeetTarget
 	, SUM([Meets Target]) OVER(PARTITION BY TotalCounter) AS MeetTargetOnTime
-	,	CASE WHEN count([TotalCounter]) OVER(PARTITION BY TotalCounter) = SUM([Meets Target]) OVER(PARTITION BY TotalCounter) THEN '3' 
-			WHEN count([TotalCounter]) OVER(PARTITION BY TotalCounter) = SUM([cteFinal].[ContentCompleted]) OVER(PARTITION BY TotalCounter) THEN '2'
-			ELSE '1'
-			END AS Rating
+	,	(SELECT TOP 1 IndividualRating FROM cteFinal ORDER BY IndividualRating) AS TopicRatingBySite
 	FROM cteFinal
 	GROUP BY WorkerName, workerpk, HireDate, [StopGapTrainingDt], [FormalTrainingDt]
 			, ContentCompleted
-			, [Meets Target], TotalCounter
+			, [Meets Target], TotalCounter, IndividualRating
 	
 END
 GO

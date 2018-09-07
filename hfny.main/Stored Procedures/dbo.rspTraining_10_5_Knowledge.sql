@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -22,6 +21,7 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
+	
 
 
 ;WITH  cteMain AS (
@@ -150,9 +150,18 @@ SELECT [TopicName]
 	, subtopiccode
 	, TrainingDate
 	, CASE WHEN TrainingDate IS NOT NULL THEN 1 END AS ContentCompleted
-	, CASE WHEN TrainingDate <= dateadd(day, 365, HireDate) THEN 1 
-		when IsExempt='1' then '1'
-			ELSE 0 END AS 'Meets Target'
+	, CASE WHEN IsExempt='1' then 1
+		WHEN TrainingDate IS NULL THEN 0
+		WHEN TrainingDate <= dateadd(day, 365, HireDate) THEN 1 
+		WHEN TrainingDate > dateadd(day, 183, HireDate) AND DATEDIFF(DAY,  HireDate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		ELSE 0
+		END AS 'Meets Target'
+	, CASE WHEN IsExempt='1' then 3
+		WHEN TrainingDate IS NULL THEN 1
+		WHEN TrainingDate <= dateadd(day, 365, HireDate) THEN 3 
+		WHEN TrainingDate > dateadd(day, 183, HireDate) AND DATEDIFF(DAY,  HireDate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		ELSE 1
+		END AS 'IndividualRating'
 	FROM cteAddMissingWorkers
 	GROUP BY WorkerPK
 	, WorkerName
@@ -177,6 +186,7 @@ SELECT [TopicName]
 		WHERE [Meets Target]=1
 		GROUP BY TopicCode, subtopiccode, workerpk
 )
+
 
 --SELECT * FROM cteCountMeeting ORDER BY workerpk, topiccode, subtopiccode
 , cteAlmostFinal AS (
@@ -234,6 +244,7 @@ SELECT [TopicName]
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT)
 				= 1 then 1
 				END AS TotalCompletedToDate
+		, IndividualRating
 		FROM cteMeetTarget
 		LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode AND ctecountmeeting.subtopiccode=cteMeetTarget.subtopiccode AND ctecountmeeting.workerpk=cteMeetTarget.workerpk
 		GROUP BY TotalWorkers
@@ -251,19 +262,27 @@ SELECT [TopicName]
 		, cteMeetTarget.TrainingDate
 		, cteMeetTarget.Hiredate
 		, cteCountMeeting.totalmeetingcount
+		, IndividualRating
 )
 
 
+, cteSETMeetingByTopic AS (
+	--one subtopic can be different than the others (in terms of meeting) take the lowest value and use it to update the rest
+	SELECT DISTINCT workerpk, topiccode, MIN(IndividualRating) AS LowestIndivRating
+	FROM cteAlmostFinal
+	GROUP BY workerpk, TopicCode
+
+	)
 		
 	SELECT DISTINCT TotalWorkers
-		, WorkerPK
+		, cteAlmostFinal.WorkerPK
 		, WorkerName
 		, Supervisor
 		, FSW
 		, FAW
 		, ProgramManager
 		, FatherAdvocate
-		, topiccode
+		, cteAlmostFinal.topiccode
 		, ContentCompleted AS IndivContentCompleted
 		, CAMeetingTarget AS IndivContentMeeting
 		, CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) AS IndivPercByTopic
@@ -273,28 +292,23 @@ SELECT [TopicName]
 		
 		
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
-		,	CASE WHEN CAMeetingTarget = TotalContentAreasByTopicAndWorker THEN '3' 
-			WHEN CAST(ContentCompleted AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) = 1 THEN '2'
-			ELSE '1'
-			END AS TopicRatingByWorker
-		, topiccode, TotalContentAreasByTopicAndWorker
-		,	CASE WHEN SUM(CompletedAllOnTime) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
-			WHEN SUM(isnull(cteAlmostFinal.CompletedALL, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '2' 
-				ELSE '1'
-			END AS TopicRatingBySite
-		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
-		, CASE WHEN SUM(CompletedAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > 0
-			   THEN SUM(CompletedAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker 
+		,	LowestIndivRating AS TopicRatingByWorker
+		, cteAlmostFinal.topiccode, TotalContentAreasByTopicAndWorker
+		,	(SELECT TOP 1 IndividualRating FROM cteAlmostFinal ORDER BY IndividualRating) AS TopicRatingBySite
+		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
+		, CASE WHEN SUM(CompletedAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker > 0
+			   THEN SUM(CompletedAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker 
 	      ELSE 0
 	      END AS TotalCompletedToDate		
-		, CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
+		, CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker
 		  ELSE '0'
 		  END AS TotalMeetsTargetForAll
-		, CASE WHEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForMajority) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker
+		, CASE WHEN SUM(MeetsTargetForMajority) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForMajority) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker
 		  ELSE '0'
 		  END AS TotalMeetsTargetForMajority
 		, cteAlmostFinal.OrderCategory
 		FROM cteAlmostFinal
+		INNER JOIN cteSETMeetingByTopic ON cteSETMeetingByTopic.WorkerPK = cteAlmostFinal.WorkerPK AND cteSETMeetingByTopic.TopicCode = cteAlmostFinal.TopicCode
 		Order BY cteAlmostFinal.OrderCategory
 END
 GO

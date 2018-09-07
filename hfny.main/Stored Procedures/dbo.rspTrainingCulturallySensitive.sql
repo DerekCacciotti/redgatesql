@@ -43,9 +43,9 @@ insert into #cteEventDates
 	SELECT workerpk, wrkrLName
 	, '1' AS MyWrkrCount
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName
-	, HireDate FROM [dbo].[fnGetWorkerEventDates](@progfk2, NULL, NULL)
+	, HireDate FROM [dbo].[fnGetWorkerEventDatesALL](@progfk2, NULL, NULL)
 	WHERE TerminationDate IS NULL
-	AND (FSWInitialStart IS NOT NULL OR FAWInitialStart IS NOT NULL OR SupervisorInitialStart IS NOT NULL)
+	AND (FSWInitialStart IS NOT NULL OR FAWInitialStart IS NOT NULL OR SupervisorInitialStart IS NOT NULL OR ProgramManagerStartDate IS NOT Null)
 	AND DATEDIFF(d,HireDate, @edate2) > 365
 
 ;with cteCultureSensitive as (
@@ -159,8 +159,7 @@ insert into #cteEventDates
 
  SELECT cteFinal.workername, HireDate, CulturallySensitiveDate, MeetsTarget, cteCountMeeting.workercount, totalmeetingcount, TrainingTitle
  ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteCountMeeting.workercount AS DECIMAL) = 1 THEN '3' 
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteCountMeeting.workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteCountMeeting.workercount AS DECIMAL) < .9 THEN '1'
+	ELSE '1' --New standards, everyone needs it or you get a 1 rating
 	END AS Rating
 ,	'5.3 - All Staff receive training related to the unique characteristics of the service population at least annually.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(cteCountMeeting.workercount AS DECIMAL) AS PercentMeeting
