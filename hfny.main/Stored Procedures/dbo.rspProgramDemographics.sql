@@ -6,35 +6,64 @@ GO
 -- Author:		Dar Chen
 -- Create date: 06/18/2010
 -- Description:	FAW Monthly Report
--- exec rspProgramDemographics @programfk = 18, @StartDt = N'12/01/11', @EndDt = N'11/30/12', @SiteFK = 21 
+-- exec rspProgramDemographics @programfk2 = 18, @startdt2 = N'12/01/11', @enddt2 = N'11/30/12', @SiteFK2 = 21 
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- Edited by Benjamin Simmons
 -- Edit Date: 8/17/17
 -- Edit Reason: Optimized report so that it works better on Azure
 -- =============================================
 CREATE procedure [dbo].[rspProgramDemographics]
-    --@programfk int = null,
-    @programfk varchar(max)    = null,
-    @StartDt   datetime,
-    @EndDt     datetime,
+    --@programfk2 int = null,
+    @programfk varchar(250)    = null,
+    @startdt   date,
+    @enddt    date,
     @SiteFK    int = 0, 
-    @CaseFiltersPositive varchar(100) = ''
+    @casefilterspositive varchar(100) = ''
+
+	WITH RECOMPILE
 as
 
-	--DECLARE @programfk INT = 6 
-	--DECLARE @StartDt DATETIME = '06/01/2012'
-	--DECLARE @EndDt DATETIME = '06/30/2012'
-    if @programfk is null
+	DECLARE @programfk2 INT = @programfk
+	DECLARE @startdt2 DATETIME = @startdt
+	DECLARE @enddt2 DATETIME = @enddt
+	DECLARE @SiteFK2 INT = @SiteFK
+	DECLARE @casefilterspositive2 VARCHAR(100) = @casefilterspositive
+
+    if @programfk2 is null
 	begin
-		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
+		select @programfk2 = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
 										   from HVProgram
 										   for xml path ('')),2,8000)
 	end
-	set @programfk = replace(@programfk,'"','')
-	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end;
-	set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
-									else @CaseFiltersPositive
+	set @programfk2 = replace(@programfk2,'"','')
+	set @SiteFK2 = case when dbo.IsNullOrEmpty(@SiteFK2) = 1 then 0 else @SiteFK2 end;
+	set @casefilterspositive2 = case	when @casefilterspositive2 = '' then null
+									else @casefilterspositive2
 							   end
+	
+	declare @MotherWithOtherChildren table (
+		[PD08MotherWithOtherChild] int
+	)
+	insert into @MotherWithOtherChildren
+	select count(distinct a.HVCasePK) 
+			from
+				dbo.HVCase as a 
+				join dbo.CaseProgram as b on a.HVCasePK = b.HVCaseFK
+				join PC as c on c.PCPK = a.PC1FK 
+				join Intake as d on d.HVCaseFK = a.HVCasePK
+				join OtherChild as oc on oc.FormFK = d.IntakePK and oc.FormType = 'IN' and oc.Relation2PC1 = '01'
+				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
+				inner join workerprogram wp on wp.workerfk = fsw.workerpk
+				inner join dbo.SplitString(@programfk2,',') on b.programfk = listitem
+				inner join dbo.udfCaseFilters(@casefilterspositive2, '', @programfk2) cf on cf.HVCaseFK = a.HVCasePK
+			where
+				 (b.DischargeDate is null
+				 or b.DischargeDate >= @startdt2)
+				 and a.IntakeDate <= @enddt2
+				 --and b.ProgramFK = @programfk2
+				 and (case when @SiteFK2 = 0 then 1 when wp.SiteFK = @SiteFK2 then 1 else 0 end = 1)
+	
+
 						 
 	declare @x table (
 		HVCasePK int
@@ -65,10 +94,10 @@ as
 					   ,c.Race [Race]
 					   ,cast(datediff(dd,c.PCDOB,a.IntakeDate)/365.25 as int) [Age]
 					   ,cast(datediff(dd,a.IntakeDate,case
-							when b.DischargeDate is not null and b.DischargeDate <= @EndDt then
+							when b.DischargeDate is not null and b.DischargeDate <= @enddt2 then
 								b.DischargeDate
 							else
-								@EndDt
+								@enddt2
 						end)/365.25 as int) [yrEnrolled]
 					   ,ca1.HighestGrade [Edu]
 					   ,ca1.IsCurrentlyEmployed [pc1Employed]
@@ -85,10 +114,10 @@ as
 					   ,ca1.MaritalStatus [pc1MaritalStatus]
 					   ,PC2inHomeIntake [PC2InHousehold]
 					   ,case
-							when b.DischargeDate is not null and b.DischargeDate <= @EndDt then
+							when b.DischargeDate is not null and b.DischargeDate <= @enddt2 then
 								b.DischargeDate
 							else
-								@EndDt
+								@enddt2
 						end [lastdate]
 					   ,case
 							when isnull(t.TCDOB,a.EDC) > a.IntakeDate then
@@ -110,7 +139,7 @@ as
 				inner join Intake as d on d.HVCaseFK = a.HVCasePK
 				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
 				inner join workerprogram wp on wp.workerfk = fsw.workerpk
-				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
+				inner join dbo.SplitString(@programfk2,',') on b.programfk = listitem
 				left outer join CommonAttributes as ca on ca.FormFK = d.IntakePK and ca.FormType = 'IN'
 				left outer join CommonAttributes as ca1 on ca1.FormFK = d.IntakePK and ca1.FormType = 'IN-PC1'
 				left outer join CommonAttributes as ca2 on ca2.FormFK = d.IntakePK and ca2.FormType = 'IN-PC2'
@@ -124,36 +153,15 @@ as
 									 group by
 											 HVCaseFK) as t
 							   on t.HVCaseFK = a.HVCasePK
-				inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = a.HVCasePK
+				inner join dbo.udfCaseFilters(@casefilterspositive2, '', @programfk2) cf on cf.HVCaseFK = a.HVCasePK
 			where
 				 (b.DischargeDate is null
-				 or b.DischargeDate >= @StartDt)
-				 and a.IntakeDate <= @EndDt
-				 --and b.ProgramFK = @programfk
-				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+				 or b.DischargeDate >= @startdt2)
+				 and a.IntakeDate <= @enddt2
+				 --and b.ProgramFK = @programfk2
+				 and (case when @SiteFK2 = 0 then 1 when wp.SiteFK = @SiteFK2 then 1 else 0 end = 1)
 	
-	declare @MotherWithOtherChildren table (
-		[PD08MotherWithOtherChild] int
-	)
-	insert into @MotherWithOtherChildren
-	select count(distinct a.HVCasePK) 
-			from
-				dbo.HVCase as a 
-				join dbo.CaseProgram as b on a.HVCasePK = b.HVCaseFK
-				join PC as c on c.PCPK = a.PC1FK 
-				join Intake as d on d.HVCaseFK = a.HVCasePK
-				join OtherChild as oc on oc.FormFK = d.IntakePK and oc.FormType = 'IN' and oc.Relation2PC1 = '01'
-				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
-				inner join workerprogram wp on wp.workerfk = fsw.workerpk
-				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
-				inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = a.HVCasePK
-			where
-				 (b.DischargeDate is null
-				 or b.DischargeDate >= @StartDt)
-				 and a.IntakeDate <= @EndDt
-				 --and b.ProgramFK = @programfk
-				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-	
+
 	declare @TCMedicaid_5 table (
 		HVCasePK int
 		,[MultipleBirth] bit
@@ -172,18 +180,18 @@ as
 				join dbo.CaseProgram as b on a.HVCasePK = b.HVCaseFK
 				join PC as c on c.PCPK = a.PC1FK
 				join Intake as d on d.HVCaseFK = a.HVCasePK
-				join TCID as tc on tc.HVCaseFK = a.HVCasePK and tc.TCDOB <= @EndDt
+				join TCID as tc on tc.HVCaseFK = a.HVCasePK and tc.TCDOB <= @enddt2
 				join CommonAttributes as caTC on caTC.FormFK = tc.TCIDPK and caTC.FormType = 'TC'
 				inner join worker fsw on b.CurrentFSWFK = fsw.workerpk
 				inner join workerprogram wp on wp.workerfk = fsw.workerpk
-				inner join dbo.SplitString(@programfk,',') on b.programfk = listitem
-				inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = a.HVCasePK
+				inner join dbo.SplitString(@programfk2,',') on b.programfk = listitem
+				inner join dbo.udfCaseFilters(@casefilterspositive2, '', @programfk2) cf on cf.HVCaseFK = a.HVCasePK
 			where
 				 (b.DischargeDate is null
-				 or b.DischargeDate >= @StartDt)
-				 and a.IntakeDate <= @EndDt
-				 --and b.ProgramFK = @programfk
-				 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+				 or b.DischargeDate >= @startdt2)
+				 and a.IntakeDate <= @enddt2
+				 --and b.ProgramFK = @programfk2
+				 and (case when @SiteFK2 = 0 then 1 when wp.SiteFK = @SiteFK2 then 1 else 0 end = 1)
 	
 	declare @TCMedicaid table (
 		[PD05TCMedicaid] int
@@ -199,6 +207,11 @@ as
 			  ,count(*) 
 			from
 				@TCMedicaid_5
+
+
+
+
+
 
 	declare @y table (
 	    [n] int
@@ -335,5 +348,5 @@ as
 
 		from
 			z
-
+			
 GO
