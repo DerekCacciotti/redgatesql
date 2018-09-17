@@ -192,6 +192,7 @@ begin
     and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
     --and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
     and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)	
+	and wrkr.FTE <> '03'
 	order by w.workername	
 	
 	
