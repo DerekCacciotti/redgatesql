@@ -173,14 +173,16 @@ BEGIN
 	--	WHEN TrainingDate < FirstEvent THEN 'T' 
 	--	WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN 'T'
 	--	else 'F' END AS 'Meets Target'
-	, CASE WHEN  FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN '3' 
+	, CASE  WHEN TrainingDate IS NOT NULL AND TrainingDate <= FirstEvent THEN '3'
+		WHEN  FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN '3' 
 		WHEN TrainingDate IS NULL THEN '1' 
 		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN '3'
 		WHEN TopicCode = 3.0 and TrainingDate <= FirstHomeVisitDate THEN '3'
 		WHEN TopicCode = 3.0 and TrainingDate > FirstHomeVisitDate AND DATEDIFF(DAY, @sdate, HireDate) > 546 THEN '2'	
 		WHEN DATEADD(DAY, 546, cte10_2b.HireDate) <= GETDATE() AND cte10_2b.TrainingDate IS NOT NULL THEN '2'
 			ELSE '1' END AS 'Meets Target'
-	, CASE WHEN TrainingDate IS NULL THEN '1' 
+	, CASE  WHEN TrainingDate IS NOT NULL AND TrainingDate <= FirstEvent THEN '3'
+		WHEN TrainingDate IS NULL THEN '1' 
 		WHEN  FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 3 
 		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN 3
 		WHEN TopicCode = 3.0 and TrainingDate <= FirstHomeVisitDate THEN 3
@@ -243,12 +245,12 @@ SELECT
 , FAW
 , cteMeetTarget.topiccode
 , cteCountMeeting.TopicCode
-, CASE WHEN cteMeetTarget.topiccode = 1.0 THEN '10-1a. Staff (assessment workers, home visitors and supervisors) are oriented to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting/family support prior to direct work with children and families' 
-	WHEN cteMeetTarget.topiccode = 2.0 THEN '10-1b. Staff (assessment workers, home visitors and supervisors) are oriented to the programs relationship with other community resources prior to direct work with children and families'  
-	WHEN cteMeetTarget.topiccode = 3.0 THEN '10-1c. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
-	WHEN cteMeetTarget.topiccode = 4.0 THEN '10-1d. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
-	WHEN cteMeetTarget.topiccode = 5.0 THEN '10-1e. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
-	WHEN ctemeettarget.topiccode = 5.5 THEN '10-1f. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to the personal safety of staff' 
+, CASE WHEN cteMeetTarget.topiccode = 1.0 THEN '10-2a-b. Staff (assessment workers, home visitors and supervisors) are oriented to their roles as they relate to the programs goals, services policies and operating procedures and philosophy of home visiting/family support prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 2.0 THEN '10-2c. Staff (assessment workers, home visitors and supervisors) are oriented to the programs relationship with other community resources prior to direct work with children and families'  
+	WHEN cteMeetTarget.topiccode = 3.0 THEN '10-2d. Staff (assessment workers, home visitors and supervisors) are oriented to child abuse and neglect indicators and reporting requirements prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 4.0 THEN '10-2e. Staff (assessment workers, home visitors and supervisors) are oriented to issues of confidentiality prior to direct work with children and families' 
+	WHEN cteMeetTarget.topiccode = 5.0 THEN '10-2f. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to boundaries prior to direct work with children and families' 
+	WHEN ctemeettarget.topiccode = 5.5 THEN '10-2g. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to the personal safety of staff' 
 	END AS TopicName
 , TrainingDate
 , FirstHomeVisitDate

@@ -16,6 +16,7 @@ CREATE procedure [dbo].[rspHomeVisitObservationBySupervisor]
     @sitefk		 int		   = null
 )
 as
+
 	if @programfk is null
 	begin
 		select @programfk = substring((select ','+LTRIM(RTRIM(STR(HVProgramPK)))
@@ -104,6 +105,18 @@ as
 				from hvlog
 				where FSWFK = workerPK
 				group by fswfk) hvdate_max
+		  ,		
+				(SELECT TOP 1 cp.PC1ID 
+				FROM hvlog 
+				INNER JOIN CaseProgram cp ON cp.HVCaseFK = HVLog.HVCaseFK
+					WHERE VisitStartTime = 
+						(select max(VisitStartTime) VisitStartTime
+						from hvlog
+						where FSWFK = workerPK
+						group by fswfk)
+				)
+
+			AS hvdate_max_pc1id
 		  ,RTRIM(workerFirstName)+' '+RTRIM(workerLastName) fsw
 		  ,RTRIM(supervisorFirstName)+' '+RTRIM(supervisorLastName) supervisor
 		  ,case

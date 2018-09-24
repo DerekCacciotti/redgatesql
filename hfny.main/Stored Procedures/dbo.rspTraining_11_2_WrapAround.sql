@@ -109,8 +109,38 @@ INSERT INTO @cteCodesSubtopics ( TopicFK ,
 		  INNER JOIN subtopic on subtopic.topicfk=codetopic.codetopicPK
 		  where topiccode between 14.0 and 16.0 AND requiredby='HFA'
   
-  
-; WITH cteWorkersTopics AS (
+ 
+ DECLARE @cteWorkersTopics AS TABLE(
+		  workerpk INT
+		, WorkerName VARCHAR(50)
+		, Supervisor INT
+		, HireDate DATE
+		, FSW INT
+		, FAW INT
+		, ProgramManager INT
+		, FatherAdvocate INT 
+		, RowNumber INT
+		, [TopicName] VARCHAR(150)
+		, [TopicCode] NUMERIC(4,1)
+		, [SATName] VARCHAR(10)
+		, [SubTopicCode] VARCHAR(1)
+		, [SubTopicName] VARCHAR(100)
+
+ )
+INSERT INTO @cteWorkersTopics ( workerpk ,
+                                WorkerName ,
+                                Supervisor ,
+                                HireDate ,
+                                FSW ,
+                                FAW ,
+                                ProgramManager ,
+                                FatherAdvocate ,
+                                RowNumber ,
+                                TopicName ,
+                                TopicCode ,
+                                SATName ,
+                                SubTopicCode ,
+                                SubTopicName )
 	 Select workerpk
 		, WorkerName
 		, Supervisor
@@ -126,11 +156,26 @@ INSERT INTO @cteCodesSubtopics ( TopicFK ,
 		, [SubTopicCode]
 		, [SubTopicName]
 	  from @cteMain, @cteCodesSubtopics
- )
+ 
  
  
 --Now we get the trainings (or lack thereof) for topic code 1.0
-, cte10_4a AS (
+DECLARE @cte10_4a AS TABLE (
+		  workerfk INT
+		, TopicCode  NUMERIC(4,1)
+		, topicname VARCHAR(150)
+		, subtopiccode VARCHAR(1)
+		, TrainingDate DATE
+		, HireDate DATE
+		, IsExempt INT
+)
+INSERT INTO	@cte10_4a ( workerfk ,
+                        TopicCode ,
+                        topicname ,
+                        subtopiccode ,
+                        TrainingDate ,
+                        HireDate ,
+                        IsExempt )
 	SELECT workerfk
 		, t1.TopicCode
 		, t1.topicname
@@ -151,42 +196,67 @@ INSERT INTO @cteCodesSubtopics ( TopicFK ,
 			, [@cteMain].HireDate
 			, s.subtopiccode
 
-)
+DECLARE @cteAddMissingWorkers AS TABLE (
+		  workerfk INT
+		, TrainingDate DATE
+		, workerpk INT
+		, WorkerName VARCHAR(50)
+		, HireDate DATE
+		, Supervisor INT
+		, FSW INT
+		, FAW INT
+		, ProgramManager INT
+		, FatherAdvocate INT
+		, RowNumber INT
+		, [TopicName] VARCHAR(150)
+		, [TopicCode] NUMERIC(4,1)
+		, [SATName] VARCHAR(10)
+		, [SubTopicCode] VARCHAR(1)
+		, [SubTopicName] VARCHAR(100)
+		, IsExempt INT
 
-, cteAddMissingWorkers AS (
-	--if a worker has NO trainings, they won't appear at all, so add them back
+)
+INSERT INTO @cteAddMissingWorkers ( workerfk ,
+                                    TrainingDate ,
+                                    workerpk ,
+                                    WorkerName ,
+                                    HireDate ,
+                                    Supervisor ,
+                                    FSW ,
+                                    FAW ,
+                                    ProgramManager ,
+                                    FatherAdvocate ,
+                                    RowNumber ,
+                                    TopicName ,
+                                    TopicCode ,
+                                    SATName ,
+                                    SubTopicCode ,
+                                    SubTopicName ,
+                                    IsExempt )
 		SELECT DISTINCT  workerfk
 		, TrainingDate
 		, workerpk
 		, WorkerName
-		, cteWorkersTopics.HireDate
+		, [@cteWorkersTopics].HireDate
 		, Supervisor
 		, FSW
 		, FAW
 		, ProgramManager
 		, FatherAdvocate
 		, RowNumber
-		, cteWorkersTopics.[TopicName]
-		, cteWorkersTopics.[TopicCode]
+		, [@cteWorkersTopics].[TopicName]
+		, [@cteWorkersTopics].[TopicCode]
 		, [SATName]
-		, cteWorkersTopics.[SubTopicCode]
+		, [@cteWorkersTopics].[SubTopicCode]
 		, [SubTopicName]
 		, IsExempt
-		FROM cte10_4a
-		right JOIN cteWorkersTopics ON cteWorkersTopics.workerpk = cte10_4a.workerfk 
-		AND cte10_4a.TopicCode = cteWorkersTopics.TopicCode AND cte10_4a.SubTopicCode = cteWorkersTopics.SubTopicCode
-		)
-
-
-
-
-
-
-
-
-, cteMeetTarget AS (
+		FROM @cte10_4a
+		right JOIN @cteWorkersTopics ON [@cteWorkersTopics].workerpk = [@cte10_4a].workerfk 
+		AND [@cte10_4a].TopicCode = [@cteWorkersTopics].TopicCode AND [@cte10_4a].SubTopicCode = [@cteWorkersTopics].SubTopicCode
+		
+;WITH cteMeetTarget AS (
 	SELECT MAX(RowNumber) OVER(PARTITION BY TopicCode) as TotalWorkers
-	, cteAddMissingWorkers.WorkerPK
+	, [@cteAddMissingWorkers].WorkerPK
 	, WorkerName
 	, HireDate
 	, Supervisor
@@ -210,7 +280,7 @@ INSERT INTO @cteCodesSubtopics ( TopicFK ,
 
 	,  DATEDIFF(DAY, GETDATE(), HireDate) AS recenthiredate
 
-	FROM cteAddMissingWorkers
+	FROM @cteAddMissingWorkers
 	GROUP BY WorkerPK
 	, WorkerName
 	, HireDate
@@ -251,9 +321,9 @@ INSERT INTO @cteCodesSubtopics ( TopicFK ,
 		, cteMeetTarget.IndividualRating
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
-		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '11-1a. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Infant Care within six months of the date of hire' 
-			WHEN cteMeetTarget.TopicCode = 15.0 THEN '11-1b. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Child Health and Safety within six months of the date of hire'  
-			WHEN cteMeetTarget.TopicCode = 16.0 THEN '11-1c. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Maternal and Family Health within six months of the date of hire' 
+		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '11-1a. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Infant Care within three months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 15.0 THEN '11-1b. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Child Health and Safety within three months of the date of hire'  
+			WHEN cteMeetTarget.TopicCode = 16.0 THEN '11-1c. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Maternal and Family Health within three months of the date of hire' 
 			END AS TopicName
 		, TrainingDate
 		, HireDate

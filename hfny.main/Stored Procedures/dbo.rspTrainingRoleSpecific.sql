@@ -262,16 +262,20 @@ INSERT INTO @cteDetails ( RowNumber ,
                           TrainingDate )
 	SELECT RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
 				, [@cteMAIN].TopicCode
-				, topicname
+				, t1.topicname
 				, TrainingDate
 		FROM @cteMAIN
 		LEFT JOIN @cteMAINTraining ON [@cteMAINTraining].WorkerFK = [@cteMAIN].WorkerFK AND [@cteMAINTraining].TopicCode = [@cteMAIN].TopicCode
+		INNER JOIN codeTopic t1 ON [@cteMAIN].TopicCode=t1.TopicCode
 
 
 		
 		UPDATE @cteDetails SET TopicCode=10.0 WHERE CurrentRole='FAW' AND TopicCode IS NULL
 		UPDATE @cteDetails SET TopicCode=11.0 WHERE CurrentRole='FSW' AND TopicCode IS NULL
 		UPDATE @cteDetails SET TopicCode=12.0 WHERE CurrentRole='Supervisor' AND TopicCode IS NULL
+
+
+		
 
 
 		
@@ -317,7 +321,11 @@ SELECT cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerf
 		WHEN 'FAW' THEN '10-4a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
 		WHEN 'FSW' THEN '10-4b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
 		WHEN 'Supervisor' THEN '10-4c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
-		
+		WHEN 'Program Manager' THEN
+			CASE WHEN cteAggregates.TopicCode = '10.0' THEN '10-4a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
+				WHEN cteAggregates.TopicCode = '11.0' THEN '10-4b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
+				WHEN cteAggregates.TopicCode = '12.0' THEN '10-4c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
+			END	
 	END AS CSST
 FROM cteAggregates
 LEFT JOIN cteCountMeeting ON cteCountMeeting.CurrentRole = cteAggregates.CurrentRole
@@ -326,5 +334,6 @@ group by cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.worke
 , cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers, cteCountMeeting.CurrentRole
 , cteCountMeeting.totalmeetingcount
 ORDER BY cteAggregates.CurrentRole, RowNumber
+
 END
 GO

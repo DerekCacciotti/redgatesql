@@ -21,24 +21,38 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-
---Get Workers in time period
-;WITH  cteEventDates AS (
+DECLARE @cteEventDates AS TABLE (
+	workerpk INT
+	, wrkrLName VARCHAR(50)
+	, WorkerName VARCHAR(75)
+	, hiredate DATE
+	, FirstKempeDate DATE
+	, FirstHomeVisitDate DATE
+	, SupervisorFirstEvent DATE
+	, TotalCounter CHAR(1)
+)
+INSERT INTO @cteEventDates ( workerpk ,
+							 wrkrLName ,
+                             WorkerName ,
+                             hiredate ,
+                             FirstKempeDate ,
+                             FirstHomeVisitDate ,
+                             SupervisorFirstEvent ,
+                             TotalCounter )
 	SELECT workerpk, wrkrLName
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName, hiredate
 	, FirstKempeDate, FirstHomeVisitDate, SupervisorFirstEvent 
 	, '1' AS TotalCounter --used to get a count of all workers in this report towards the end
 	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
 	WHERE (HireDate < DATEADD(DAY, -365, @edate))
-	
-)
 
-, cteAbuseTraining AS (
+
+;WITH cteAbuseTraining AS (
 --this is an annual requirement.  
 Select t.TrainingDate AS [AbuseTrainingDt], ROW_NUMBER() OVER (PARTITION BY workerpk ORDER BY t.TrainingDate DESC) as Corr
-, workerpk, cteEventDates.HireDate, t.IsExempt AS [TrainingExempt] , t.TrainingPK, t.TrainingTitle
-from cteEventDates
-INNER JOIN TrainingAttendee ta ON ta.WorkerFK=cteEventDates.WorkerPK
+, workerpk, [@cteEventDates].HireDate, t.IsExempt AS [TrainingExempt] , t.TrainingPK, t.TrainingTitle
+from @cteEventDates
+INNER JOIN TrainingAttendee ta ON ta.WorkerFK=[@cteEventDates].WorkerPK
 LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
 LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
 LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
@@ -48,7 +62,7 @@ AND t.TrainingDate BETWEEN @sdate AND @edate
 
 , cteFinal AS (
 
-		SELECT DISTINCT WorkerName, cteEventDates.workerpk, cteEventDates.HireDate, [AbuseTrainingDt]
+		SELECT DISTINCT WorkerName, [@cteEventDates].workerpk, [@cteEventDates].HireDate, [AbuseTrainingDt]
 			, CASE WHEN [AbuseTrainingDt] IS NOT NULL THEN 1 
 				END AS ContentCompleted
 			, CASE WHEN [AbuseTrainingDt] >= dateadd(day, -365, @edate) THEN 1 
@@ -56,9 +70,9 @@ AND t.TrainingDate BETWEEN @sdate AND @edate
 					ELSE 0 END AS [Meets Target]
 			, TotalCounter
 			, cteAbuseTraining.TrainingTitle
-		FROM cteEventDates 
-		LEFT JOIN cteAbuseTraining ON cteAbuseTraining.WorkerPK = cteEventDates.WorkerPK and Corr=1
-		GROUP BY cteEventDates.WorkerName, cteEventDates.HireDate, [AbuseTrainingDt], cteEventDates.workerpk
+		FROM @cteEventDates 
+		LEFT JOIN cteAbuseTraining ON cteAbuseTraining.WorkerPK = [@cteEventDates].WorkerPK and Corr=1
+		GROUP BY [@cteEventDates].WorkerName, [@cteEventDates].HireDate, [AbuseTrainingDt], [@cteEventDates].workerpk
 		,  [TrainingExempt], TotalCounter, cteAbuseTraining.TrainingTitle
 )
 
