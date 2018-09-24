@@ -2,12 +2,12 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddCheersCheckIn](@AverageCuesScore decimal(5, 2)=NULL,
-@AverageEmpathyScore decimal(5, 2)=NULL,
-@AverageExpressionScore decimal(5, 2)=NULL,
-@AverageHoldingScore decimal(5, 2)=NULL,
-@AverageRhythmScore decimal(5, 2)=NULL,
-@AverageSmilesScore decimal(5, 2)=NULL,
+CREATE PROCEDURE [dbo].[spAddCheersCheckIn](@AverageCuesScore numeric(5, 2)=NULL,
+@AverageEmpathyScore numeric(5, 2)=NULL,
+@AverageExpressionScore numeric(5, 2)=NULL,
+@AverageHoldingScore numeric(5, 2)=NULL,
+@AverageRhythmScore numeric(5, 2)=NULL,
+@AverageSmilesScore numeric(5, 2)=NULL,
 @CheersCheckInCreator varchar(10)=NULL,
 @Cues1Score int=NULL,
 @Cues2Score int=NULL,
@@ -29,7 +29,7 @@ CREATE PROCEDURE [dbo].[spAddCheersCheckIn](@AverageCuesScore decimal(5, 2)=NULL
 @Smiles1Score int=NULL,
 @Smiles2Score int=NULL,
 @Smiles3Score int=NULL,
-@TotalScore decimal(5, 2)=NULL)
+@TotalScore numeric(5, 2)=NULL)
 AS
 INSERT INTO CheersCheckIn(
 AverageCuesScore,
