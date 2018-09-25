@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Devinder Singh Khalsa>
 -- Create date: <Febu. 28, 2013>
@@ -120,7 +119,7 @@ begin
 					end as FormReviewed				
 			, 0 as FormOutOfWindow -- not out of window
 			, 0 as FormMissing
-			, case when WBVCount >= 5 then 1 else 0 end as FormMeetsTarget
+			, case when WBVCount >= 5 AND wbv.WBVCount = wbv.FormReviewedCountWBV then 1 else 0 end as FormMeetsTarget
 	 from cteCohort coh
 	 LEFT join cteWBV wbv on wbv.HVCaseFK = coh.HVCaseFK AND coh.TCIDPK = wbv.TCIDPK 
 	 
