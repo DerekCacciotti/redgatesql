@@ -231,7 +231,7 @@ CREATE TABLE [dbo].[HVLog]
 [VisitStartTime] [datetime] NOT NULL,
 [VisitType] [char] (6) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [VisitTypeComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -785,11 +785,11 @@ CREATE NONCLUSTERED INDEX [IX_FK_HVLog_HVCaseFK] ON [dbo].[HVLog] ([HVCaseFK]) O
 GO
 CREATE NONCLUSTERED INDEX [HVCase_ProgramFK] ON [dbo].[HVLog] ([HVCaseFK], [ProgramFK]) ON [PRIMARY]
 GO
-CREATE NONCLUSTERED INDEX [IX_FK_HVLog_ProgramFK] ON [dbo].[HVLog] ([ProgramFK]) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_FK_HVLog_ProgramFK] ON [dbo].[HVLog] ([ProgramFK]) INCLUDE ([FatherFigureParticipated], [HVCaseFK], [VisitStartTime], [VisitType]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_HVLog_ProgramFK_FSWFK_VisitStart] ON [dbo].[HVLog] ([ProgramFK]) INCLUDE ([FSWFK], [VisitStartTime]) ON [PRIMARY]
 GO
-CREATE NONCLUSTERED INDEX [IX_HVLog_VisitStartTime] ON [dbo].[HVLog] ([VisitStartTime]) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [IX_HVLog_VisitStartTime] ON [dbo].[HVLog] ([VisitStartTime]) INCLUDE ([HVCaseFK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_HVLog_VisitType] ON [dbo].[HVLog] ([VisitType]) ON [PRIMARY]
 GO
