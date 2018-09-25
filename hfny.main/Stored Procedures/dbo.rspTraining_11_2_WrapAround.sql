@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -22,8 +21,27 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
+DECLARE @cteMain AS TABLE(
+	WorkerPK INT
+	, WorkerName VARCHAR(50)
+	, HireDate DATE
+	, Supervisor INT
+	, FSW INT
+	, FAW INT
+	, ProgramManager INT
+	, FatherAdvocate INT
+	, RowNumber INT
+)
 
-;WITH  cteMain AS (
+INSERT INTO @cteMain ( WorkerPK ,
+                       WorkerName ,
+                       HireDate ,
+                       Supervisor ,
+                       FSW ,
+                       FAW ,
+                       ProgramManager ,
+                       FatherAdvocate ,
+                       RowNumber )
 	SELECT w.WorkerPK
 		, RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName) AS WorkerName
 		, wp.HireDate
@@ -36,7 +54,7 @@ BEGIN
 	FROM Worker w 
 	INNER JOIN WorkerProgram wp ON w.WorkerPK = wp.WorkerFK	and wp.ProgramFK = @progfk
 	WHERE (wp.HireDate >=  @sdate and 
-	cast(wp.HireDate as date) < DATEADD(d, -91, CAST(GETDATE() AS DATE))
+	cast(wp.HireDate as date) < DATEADD(d, -181, CAST(GETDATE() AS DATE))
 	)
 	AND ((wp.FAWStartDate > @sdate AND wp.FAWEndDate IS NULL)
 	OR (wp.FSWStartDate > @sdate AND wp.FSWEndDate IS NULL)
@@ -45,32 +63,88 @@ BEGIN
 	AND wp.TerminationDate IS NULL
 	AND wp.ProgramFK=@progfk
 	
-)
 
 --GetAll TrainingCodes/subtopics required for this report
-, cteCodesSubtopics AS (
-SELECT [TopicName]
-      ,[TopicCode]
-      ,[SATInterval]
-      ,[SATName]
-      ,[SATReqBy]
-      ,[SubTopicPK]
-      ,[ProgramFK]
-      ,[RequiredBy]
-      ,[SATFK]
-      ,[SubTopicCode]
-      ,[SubTopicName]
-      ,[TopicFK]
-  FROM codeTopic
-  INNER JOIN subtopic on subtopic.topicfk=codetopic.codetopicPK
-  where topiccode between 14.0 and 16.0 AND requiredby='HFA'
-  )
+DECLARE @cteCodesSubtopics AS TABLE(
+	TopicFK INT INDEX IDX1 NONCLUSTERED
+	,  [TopicName] VARCHAR(150)
+      ,[TopicCode] NUMERIC(4,1)
+      ,[SATInterval] VARCHAR(50)
+      ,[SATName] VARCHAR(10)
+      ,[SATReqBy] VARCHAR(50)
+      ,[SubTopicPK] INT
+      ,[ProgramFK] INT
+      ,[RequiredBy] VARCHAR(4)
+      ,[SATFK] MONEY
+      ,[SubTopicCode] VARCHAR(1)
+      ,[SubTopicName] VARCHAR(100)
+
+)
+INSERT INTO @cteCodesSubtopics ( TopicFK ,
+                                 TopicName ,
+                                 TopicCode ,
+                                 SATInterval ,
+                                 SATName ,
+                                 SATReqBy ,
+                                 SubTopicPK ,
+                                 ProgramFK ,
+                                 RequiredBy ,
+                                 SATFK ,
+                                 SubTopicCode ,
+                                 SubTopicName )
+		SELECT [TopicFK]
+			  ,[TopicName]
+			  ,[TopicCode]
+			  ,[SATInterval]
+			  ,[SATName]
+			  ,[SATReqBy]
+			  ,[SubTopicPK]
+			  ,[ProgramFK]
+			  ,[RequiredBy]
+			  ,[SATFK]
+			  ,[SubTopicCode]
+			  ,[SubTopicName]
+			  
+		  FROM codeTopic
+		  INNER JOIN subtopic on subtopic.topicfk=codetopic.codetopicPK
+		  where topiccode between 14.0 and 16.0 AND requiredby='HFA'
   
-, cteWorkersTopics AS (
+ 
+ DECLARE @cteWorkersTopics AS TABLE(
+		  workerpk INT
+		, WorkerName VARCHAR(50)
+		, Supervisor INT
+		, HireDate DATE
+		, FSW INT
+		, FAW INT
+		, ProgramManager INT
+		, FatherAdvocate INT 
+		, RowNumber INT
+		, [TopicName] VARCHAR(150)
+		, [TopicCode] NUMERIC(4,1)
+		, [SATName] VARCHAR(10)
+		, [SubTopicCode] VARCHAR(1)
+		, [SubTopicName] VARCHAR(100)
+
+ )
+INSERT INTO @cteWorkersTopics ( workerpk ,
+                                WorkerName ,
+                                Supervisor ,
+                                HireDate ,
+                                FSW ,
+                                FAW ,
+                                ProgramManager ,
+                                FatherAdvocate ,
+                                RowNumber ,
+                                TopicName ,
+                                TopicCode ,
+                                SATName ,
+                                SubTopicCode ,
+                                SubTopicName )
 	 Select workerpk
 		, WorkerName
 		, Supervisor
-		, cteMain.HireDate
+		, [@cteMain].HireDate
 		, FSW
 		, FAW
 		, ProgramManager
@@ -81,62 +155,108 @@ SELECT [TopicName]
 		, [SATName]
 		, [SubTopicCode]
 		, [SubTopicName]
-	  from cteMain, cteCodesSubtopics
- )
+	  from @cteMain, @cteCodesSubtopics
+ 
  
  
 --Now we get the trainings (or lack thereof) for topic code 1.0
-, cte10_4a AS (
+DECLARE @cte10_4a AS TABLE (
+		  workerfk INT
+		, TopicCode  NUMERIC(4,1)
+		, topicname VARCHAR(150)
+		, subtopiccode VARCHAR(1)
+		, TrainingDate DATE
+		, HireDate DATE
+		, IsExempt INT
+)
+INSERT INTO	@cte10_4a ( workerfk ,
+                        TopicCode ,
+                        topicname ,
+                        subtopiccode ,
+                        TrainingDate ,
+                        HireDate ,
+                        IsExempt )
 	SELECT workerfk
 		, t1.TopicCode
 		, t1.topicname
 		, s.subtopiccode
 		, MIN(trainingdate) AS TrainingDate
-		, cteMain.HireDate
+		, [@cteMain].HireDate
 		, MAX(CAST(IsExempt as INT)) as IsExempt
 	FROM TrainingAttendee ta 
 			INNER JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			INNER JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			INNER JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
 			INNER JOIN Subtopic s ON s.TopicFK=t1.codeTopicPK AND s.SubTopicPK=td.SubTopicFK
-			INNER JOIN cteMain on cteMain.WorkerPK = ta.workerfk
+			INNER JOIN @cteMain on [@cteMain].WorkerPK = ta.workerfk
 	WHERE t1.TopicCode between 14.0 and 19.0 AND requiredby='HFA'
 	GROUP BY  workerfk
 			, t1.TopicCode
 			, t1.topicname
-			, HireDate
+			, [@cteMain].HireDate
 			, s.subtopiccode
 
-)
+DECLARE @cteAddMissingWorkers AS TABLE (
+		  workerfk INT
+		, TrainingDate DATE
+		, workerpk INT
+		, WorkerName VARCHAR(50)
+		, HireDate DATE
+		, Supervisor INT
+		, FSW INT
+		, FAW INT
+		, ProgramManager INT
+		, FatherAdvocate INT
+		, RowNumber INT
+		, [TopicName] VARCHAR(150)
+		, [TopicCode] NUMERIC(4,1)
+		, [SATName] VARCHAR(10)
+		, [SubTopicCode] VARCHAR(1)
+		, [SubTopicName] VARCHAR(100)
+		, IsExempt INT
 
-, cteAddMissingWorkers AS (
-	--if a worker has NO trainings, they won't appear at all, so add them back
+)
+INSERT INTO @cteAddMissingWorkers ( workerfk ,
+                                    TrainingDate ,
+                                    workerpk ,
+                                    WorkerName ,
+                                    HireDate ,
+                                    Supervisor ,
+                                    FSW ,
+                                    FAW ,
+                                    ProgramManager ,
+                                    FatherAdvocate ,
+                                    RowNumber ,
+                                    TopicName ,
+                                    TopicCode ,
+                                    SATName ,
+                                    SubTopicCode ,
+                                    SubTopicName ,
+                                    IsExempt )
 		SELECT DISTINCT  workerfk
 		, TrainingDate
 		, workerpk
 		, WorkerName
-		, cteWorkersTopics.HireDate
+		, [@cteWorkersTopics].HireDate
 		, Supervisor
 		, FSW
 		, FAW
 		, ProgramManager
 		, FatherAdvocate
 		, RowNumber
-		, cteWorkersTopics.[TopicName]
-		, cteWorkersTopics.[TopicCode]
+		, [@cteWorkersTopics].[TopicName]
+		, [@cteWorkersTopics].[TopicCode]
 		, [SATName]
-		, cteWorkersTopics.[SubTopicCode]
+		, [@cteWorkersTopics].[SubTopicCode]
 		, [SubTopicName]
 		, IsExempt
-		FROM cte10_4a
-		right JOIN cteWorkersTopics ON cteWorkersTopics.workerpk = cte10_4a.workerfk 
-		AND cte10_4a.TopicCode = cteWorkersTopics.TopicCode AND cte10_4a.SubTopicCode = cteWorkersTopics.SubTopicCode
-		)
-
-
-, cteMeetTarget AS (
+		FROM @cte10_4a
+		right JOIN @cteWorkersTopics ON [@cteWorkersTopics].workerpk = [@cte10_4a].workerfk 
+		AND [@cte10_4a].TopicCode = [@cteWorkersTopics].TopicCode AND [@cte10_4a].SubTopicCode = [@cteWorkersTopics].SubTopicCode
+		
+;WITH cteMeetTarget AS (
 	SELECT MAX(RowNumber) OVER(PARTITION BY TopicCode) as TotalWorkers
-	, cteAddMissingWorkers.WorkerPK
+	, [@cteAddMissingWorkers].WorkerPK
 	, WorkerName
 	, HireDate
 	, Supervisor
@@ -148,11 +268,19 @@ SELECT [TopicName]
 	, subtopiccode
 	, TrainingDate
 	, CASE WHEN TrainingDate IS NOT NULL THEN 1 END AS ContentCompleted
-	, CASE WHEN TrainingDate <= dateadd(day, 91, HireDate) THEN 1 
-			WHEN IsExempt='1' then '1'
-			WHEN TrainingDate IS NOT NULL AND HireDate < '07/01/2014' THEN 1 --Those hired prior to 7/1/2014 must only complete training since this best practice went into effect on 7/1/2014
+	, CASE WHEN TrainingDate <= dateadd(day, 183, HireDate) THEN 1 
+		when IsExempt='1' then '1'
 			ELSE 0 END AS 'Meets Target'
-	FROM cteAddMissingWorkers
+	, CASE WHEN IsExempt='1' then 3
+		WHEN TrainingDate IS NULL THEN 1
+		WHEN TrainingDate <= dateadd(day, 183, HireDate) THEN 3 
+		WHEN TrainingDate > dateadd(day, 183, HireDate) AND DATEDIFF(DAY,  HireDate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		ELSE 1
+		END AS 'IndividualRating'
+
+	,  DATEDIFF(DAY, GETDATE(), HireDate) AS recenthiredate
+
+	FROM @cteAddMissingWorkers
 	GROUP BY WorkerPK
 	, WorkerName
 	, HireDate
@@ -169,11 +297,12 @@ SELECT [TopicName]
 	, IsExempt
 )
 
+
 --Now calculate the number meeting count
 , cteCountMeeting AS (
 		SELECT TopicCode, subtopiccode, workerpk, count(*) OVER (PARTITION BY TopicCode, subtopiccode) AS totalmeetingcount
 		FROM cteMeetTarget
-		WHERE [Meets Target]=1
+		WHERE [IndividualRating]>1
 		GROUP BY TopicCode, subtopiccode, workerpk
 )
 
@@ -189,12 +318,12 @@ SELECT [TopicName]
 		, FatherAdvocate
 		, cteMeetTarget.topiccode
 		, cteMeetTarget.subtopiccode
-		, cteMeetTarget.ContentCompleted AS ContentCompletedforPartition
+		, cteMeetTarget.IndividualRating
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
 		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
-		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '11-2a. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Infant Care within three months of hire' 
-			WHEN cteMeetTarget.TopicCode = 15.0 THEN '11-2b. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Child Health and Safety within three months of hire'   
-			WHEN cteMeetTarget.TopicCode = 16.0 THEN '11-2c. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Maternal and Family Health within three months of hire' 
+		, CASE WHEN cteMeetTarget.TopicCode = 14.0 THEN '11-1a. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Infant Care within three months of the date of hire' 
+			WHEN cteMeetTarget.TopicCode = 15.0 THEN '11-1b. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Child Health and Safety within three months of the date of hire'  
+			WHEN cteMeetTarget.TopicCode = 16.0 THEN '11-1c. Staff (assessment workers, home visitors, supervisors and program managers) demonstrate knowledge of Maternal and Family Health within three months of the date of hire' 
 			END AS TopicName
 		, TrainingDate
 		, HireDate
@@ -204,13 +333,18 @@ SELECT [TopicName]
 				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 				= 1 THEN 1
-			END AS CompletedAllOnTime
+			END AS MeetsTargetForAll
+		, CASE WHEN 
+				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
+					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
+				BETWEEN .5 AND .99 THEN 1
+			END AS MeetsTargetForMajority
 		, CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT) AS TotalContentAreasByTopicAndWorker
 		, CASE WHEN 
 				CAST(SUM([ContentCompleted]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT)
 				= 1 then 1
-				END AS CompletedALL
+				END AS TotalCompletedToDate
 		FROM cteMeetTarget
 		LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode AND ctecountmeeting.subtopiccode=cteMeetTarget.subtopiccode AND ctecountmeeting.workerpk=cteMeetTarget.workerpk
 		GROUP BY TotalWorkers
@@ -228,39 +362,48 @@ SELECT [TopicName]
 		, cteMeetTarget.TrainingDate
 		, cteMeetTarget.Hiredate
 		, cteCountMeeting.totalmeetingcount
+		, cteMeetTarget.IndividualRating
 )
 
+, cteSETMeetingByTopic AS (
+	--one subtopic can be different than the others (in terms of meeting) take the lowest value and use it to update the rest
+	SELECT DISTINCT workerpk, topiccode, MIN(IndividualRating) AS LowestIndivRating
+	FROM cteAlmostFinal
+	GROUP BY workerpk, TopicCode
 
+	)
+
+
+	--SELECT * FROM cteSETMeetingByTopic
+	--WHERE workerpk=2067
 		
-		SELECT DISTINCT TotalWorkers
-		, WorkerPK
+	SELECT DISTINCT TotalWorkers
+		, cteAlmostFinal.WorkerPK
 		, WorkerName
 		, Supervisor
 		, FSW
 		, FAW
 		, ProgramManager
 		, FatherAdvocate
-		, topiccode
-		, ISNULL(ContentCompleted, '0') AS IndivContentCompleted
-		, ISNULL(CAMeetingTarget, '0') AS IndivContentMeeting
+		, cteAlmostFinal.topiccode
+		, ContentCompleted AS IndivContentCompleted
+		, LowestIndivRating AS IndivContentMeeting
 		, CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) AS IndivPercByTopic
 		, TopicName
 		, HireDate
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
-		,	CASE WHEN CAMeetingTarget = TotalContentAreasByTopicAndWorker THEN '3' 
-			WHEN CAST(ContentCompleted AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) = 1 THEN '2'
-			ELSE '1'
-			END AS TopicRatingByWorker
-		, topiccode, TotalContentAreasByTopicAndWorker
-		,	CASE WHEN SUM(cteAlmostFinal.CompletedAllOnTime) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '3' 
-			WHEN SUM(isnull(cteAlmostFinal.ContentCompletedforPartition, 0)) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker = TotalWorkers THEN '2' 
-				ELSE '1'
-			END AS TopicRatingBySite
-		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
-		, CASE WHEN SUM(CompletedAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker > 0
-			   THEN SUM(CompletedAll) OVER (PARTITION BY topiccode) / TotalContentAreasByTopicAndWorker 
-	      ELSE 0
-	      END AS TotalCompletedToDate
+		,	LowestIndivRating AS TopicRatingByWorker
+		,	(SELECT TOP 1 IndividualRating FROM cteAlmostFinal ORDER BY IndividualRating) AS TopicRatingBySite
+		, CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker
+		  ELSE 0
+		  END AS TotalMeetsTargetForAll
+		, CASE WHEN SUM(MeetsTargetForMajority) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForMajority) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker
+		  ELSE 0
+		  END AS TotalMeetsTargetForMajority
+		, SUM(TotalCompletedToDate) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker AS TotalCompletedToDate
 		FROM cteAlmostFinal
+		INNER JOIN cteSETMeetingByTopic ON cteSETMeetingByTopic.WorkerPK = cteAlmostFinal.WorkerPK AND cteSETMeetingByTopic.TopicCode = cteAlmostFinal.TopicCode
+
+
 END
 GO

@@ -30,7 +30,7 @@ CREATE PROCEDURE [dbo].[spEditCheersCheckIn](@CheersCheckInPK int=NULL,
 @Smiles1Score int=NULL,
 @Smiles2Score int=NULL,
 @Smiles3Score int=NULL,
-@TotalScore int=NULL)
+@TotalScore numeric(5, 2)=NULL)
 AS
 UPDATE CheersCheckIn
 SET 

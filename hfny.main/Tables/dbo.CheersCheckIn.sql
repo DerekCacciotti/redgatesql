@@ -31,7 +31,7 @@ CREATE TABLE [dbo].[CheersCheckIn]
 [Smiles1Score] [int] NOT NULL,
 [Smiles2Score] [int] NOT NULL,
 [Smiles3Score] [int] NOT NULL,
-[TotalScore] [int] NOT NULL
+[TotalScore] [numeric] (5, 2) NOT NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

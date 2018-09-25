@@ -36,7 +36,7 @@ CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyBenefits numeric
 @OBPInHome char(1)=NULL,
 @OBPInvolvement char(2)=NULL,
 @OBPInvolvementSpecify varchar(500)=NULL,
-@Parity char(2)=NULL,
+@Parity int=NULL,
 @PBEmergencyAssistance char(1)=NULL,
 @PBEmergencyAssistanceAmount numeric(4, 0)=NULL,
 @PBFoodStamps char(1)=NULL,

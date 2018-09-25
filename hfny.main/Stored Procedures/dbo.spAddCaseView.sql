@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddCaseView](@PC1ID nchar(13)=NULL,
-@Username varchar(max)=NULL,
+@Username char(10)=NULL,
 @ViewDate datetime=NULL)
 AS
 INSERT INTO CaseView(
