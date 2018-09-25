@@ -1,12 +1,12 @@
 CREATE TABLE [dbo].[CheersCheckIn]
 (
 [CheersCheckInPK] [int] NOT NULL IDENTITY(1, 1),
-[AverageCuesScore] [decimal] (5, 2) NOT NULL,
-[AverageEmpathyScore] [decimal] (5, 2) NOT NULL,
-[AverageExpressionScore] [decimal] (5, 2) NOT NULL,
-[AverageHoldingScore] [decimal] (5, 2) NOT NULL,
-[AverageRhythmScore] [decimal] (5, 2) NOT NULL,
-[AverageSmilesScore] [decimal] (5, 2) NOT NULL,
+[AverageCuesScore] [numeric] (5, 2) NOT NULL,
+[AverageEmpathyScore] [numeric] (5, 2) NOT NULL,
+[AverageExpressionScore] [numeric] (5, 2) NOT NULL,
+[AverageHoldingScore] [numeric] (5, 2) NOT NULL,
+[AverageRhythmScore] [numeric] (5, 2) NOT NULL,
+[AverageSmilesScore] [numeric] (5, 2) NOT NULL,
 [CheersCheckInCreateDate] [datetime] NOT NULL CONSTRAINT [DF_CheersCheckIn_CheersCheckInCreateDate] DEFAULT (getdate()),
 [CheersCheckInCreator] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [CheersCheckInEditDate] [datetime] NULL,
@@ -31,7 +31,7 @@ CREATE TABLE [dbo].[CheersCheckIn]
 [Smiles1Score] [int] NOT NULL,
 [Smiles2Score] [int] NOT NULL,
 [Smiles3Score] [int] NOT NULL,
-[TotalScore] [decimal] (5, 2) NOT NULL
+[TotalScore] [numeric] (5, 2) NOT NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

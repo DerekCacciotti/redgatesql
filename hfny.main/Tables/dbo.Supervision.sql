@@ -3,43 +3,147 @@ CREATE TABLE [dbo].[Supervision]
 [SupervisionPK] [int] NOT NULL IDENTITY(1, 1),
 [ActivitiesOther] [bit] NULL,
 [ActivitiesOtherSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ActivitiesOtherStatus] [bit] NULL,
 [AreasGrowth] [bit] NULL,
+[AreasGrowthComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[AreasGrowthStatus] [bit] NULL,
 [AssessmentIssues] [bit] NULL,
+[AssessmentIssuesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[AssessmentIssuesStatus] [bit] NULL,
 [AssessmentRate] [bit] NULL,
+[AssessmentRateComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[AssessmentRateStatus] [bit] NULL,
+[AssessmentScreens] [bit] NULL,
+[AssessmentScreensComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[AssessmentScreensStatus] [bit] NULL,
 [Boundaries] [bit] NULL,
+[BoundariesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[BoundariesStatus] [bit] NULL,
 [Caseload] [bit] NULL,
+[CaseloadComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CaseloadStatus] [bit] NULL,
+[CHEERSFeedback] [bit] NULL,
+[CHEERSFeedbackComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSFeedbackStatus] [bit] NULL,
+[ChallengingIssues] [bit] NULL,
+[ChallengingIssuesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ChallengingIssuesStatus] [bit] NULL,
 [Coaching] [bit] NULL,
+[CoachingComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CoachingStatus] [bit] NULL,
 [CommunityResources] [bit] NULL,
+[CommunityResourcesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CommunityResourcesStatus] [bit] NULL,
+[Concerns] [bit] NULL,
+[ConcernsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ConcernsStatus] [bit] NULL,
+[CPS] [bit] NULL,
+[CPSComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CPSStatus] [bit] NULL,
 [CulturalSensitivity] [bit] NULL,
+[CulturalSensitivityComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CulturalSensitivityStatus] [bit] NULL,
 [Curriculum] [bit] NULL,
+[CurriculumComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CurriculumStatus] [bit] NULL,
+[FamilyGrievance] [bit] NULL,
+[FamilyGrievanceComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[FamilyGrievanceStatus] [bit] NULL,
 [FamilyProgress] [bit] NULL,
+[FamilyProgressComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[FamilyProgressStatus] [bit] NULL,
+[FGPProgress] [bit] NULL,
+[FGPProgressComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[FGPProgressStatus] [bit] NULL,
+[FormComplete] [bit] NULL,
 [HomeVisitLogActivities] [bit] NULL,
+[HomeVisitLogActivitiesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HomeVisitLogActivitiesStatus] [bit] NULL,
 [HomeVisitRate] [bit] NULL,
+[HomeVisitRateComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HomeVisitRateStatus] [bit] NULL,
+[HVCulturalSensitivity] [bit] NULL,
+[HVCulturalSensitivityComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HVCulturalSensitivityStatus] [bit] NULL,
+[HVHomeVisitRate] [bit] NULL,
+[HVHomeVisitRateComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HVHomeVisitRateStatus] [bit] NULL,
+[HVReferralSources] [bit] NULL,
+[HVReferralSourcesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HVReferralSourcesStatus] [bit] NULL,
 [IFSP] [bit] NULL,
+[IFSPComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[IFSPStatus] [bit] NULL,
+[ImpactOfWork] [bit] NULL,
+[ImpactOfWorkComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ImpactOfWorkStatus] [bit] NULL,
 [ImplementTraining] [bit] NULL,
+[ImplementTrainingComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ImplementTrainingStatus] [bit] NULL,
+[InterRaterReliability] [bit] NULL,
+[InterRaterReliabilityComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[InterRaterReliabilityStatus] [bit] NULL,
 [LevelChange] [bit] NULL,
+[LevelChangeComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LevelChangeStatus] [bit] NULL,
+[Medical] [bit] NULL,
+[MedicalComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[MedicalStatus] [bit] NULL,
 [Outreach] [bit] NULL,
-[ParticipantEmergency] [bit] NULL,
+[OutreachComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[OutreachStatus] [bit] NULL,
 [PersonalGrowth] [bit] NULL,
+[PersonalGrowthComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PersonalGrowthStatus] [bit] NULL,
+[Personnel] [bit] NULL,
+[PersonnelComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PersonnelStatus] [bit] NULL,
+[PIP] [bit] NULL,
+[PIPComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PIPStatus] [bit] NULL,
 [ProfessionalGrowth] [bit] NULL,
+[ProfessionalGrowthComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ProfessionalGrowthStatus] [bit] NULL,
 [ProgramFK] [int] NULL,
-[ReasonOther] [bit] NULL,
-[ReasonOtherSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ProtectiveFactors] [bit] NULL,
+[ProtectiveFactorsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ProtectiveFactorsStatus] [bit] NULL,
 [RecordDocumentation] [bit] NULL,
+[RecordDocumentationComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RecordDocumentationStatus] [bit] NULL,
 [Referrals] [bit] NULL,
+[ReferralsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ReferralsStatus] [bit] NULL,
+[Reflection] [bit] NULL,
+[ReflectionComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ReflectionStatus] [bit] NULL,
 [Retention] [bit] NULL,
+[RetentionComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RetentionStatus] [bit] NULL,
+[RiskFactors] [bit] NULL,
+[RiskFactorsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RiskFactorsStatus] [bit] NULL,
 [RolePlaying] [bit] NULL,
+[RolePlayingComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[RolePlayingStatus] [bit] NULL,
 [Safety] [bit] NULL,
-[ShortWeek] [bit] NULL,
-[StaffCourt] [bit] NULL,
-[StaffFamilyEmergency] [bit] NULL,
-[StaffForgot] [bit] NULL,
-[StaffIll] [bit] NULL,
-[StaffTraining] [bit] NULL,
-[StaffVacation] [bit] NULL,
-[StaffOutAllWeek] [bit] NULL,
+[SafetyComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SafetyStatus] [bit] NULL,
+[SiteDocumentation] [bit] NULL,
+[SiteDocumentationComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SiteDocumentationStatus] [bit] NULL,
+[Shadow] [bit] NULL,
+[ShadowComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShadowStatus] [bit] NULL,
 [StrengthBasedApproach] [bit] NULL,
+[StrengthBasedApproachComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[StrengthBasedApproachStatus] [bit] NULL,
 [Strengths] [bit] NULL,
+[StrengthsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[StrengthsStatus] [bit] NULL,
+[Successes] [bit] NULL,
+[SuccessesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SuccessesStatus] [bit] NULL,
 [SupervisionCreateDate] [datetime] NOT NULL CONSTRAINT [DF_Supervision_SupervisionCreateDate] DEFAULT (getdate()),
 [SupervisionCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisionDate] [datetime] NOT NULL,
@@ -50,281 +154,61 @@ CREATE TABLE [dbo].[Supervision]
 [SupervisionMinutes] [int] NULL,
 [SupervisionNotes] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisionStartTime] [char] (8) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[SupervisorFamilyEmergency] [bit] NULL,
 [SupervisorFK] [int] NOT NULL,
+[SupervisorObservationAssessment] [bit] NULL,
+[SupervisorObservationAssessmentComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisorObservationAssessmentStatus] [bit] NULL,
+[SupervisorObservationHomeVisit] [bit] NULL,
+[SupervisorObservationHomeVisitComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisorObservationHomeVisitStatus] [bit] NULL,
+[TakePlace] [bit] NULL,
+[TeamDevelopment] [bit] NULL,
+[TeamDevelopmentComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TeamDevelopmentStatus] [bit] NULL,
+[TechniquesApproaches] [bit] NULL,
+[TechniquesApproachesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TechniquesApproachesStatus] [bit] NULL,
+[Tools] [bit] NULL,
+[ToolsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ToolsStatus] [bit] NULL,
+[TrackingData] [bit] NULL,
+[TrackingDataComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TrackingDataStatus] [bit] NULL,
+[TrainingNeeds] [bit] NULL,
+[TrainingNeedsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TrainingNeedsStatus] [bit] NULL,
+[TransitionPlanning] [bit] NULL,
+[TransitionPlanningComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TransitionPlanningStatus] [bit] NULL,
+[WorkerFK] [int] NOT NULL,
+[ParticipantEmergency] [bit] NULL,
+[ReasonOther] [bit] NULL,
+[ReasonOtherSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ShortWeek] [bit] NULL,
+[StaffCourt] [bit] NULL,
+[StaffFamilyEmergency] [bit] NULL,
+[StaffForgot] [bit] NULL,
+[StaffIll] [bit] NULL,
+[StaffOnLeave] [bit] NULL,
+[StaffTraining] [bit] NULL,
+[StaffVacation] [bit] NULL,
+[StaffOutAllWeek] [bit] NULL,
+[SupervisorFamilyEmergency] [bit] NULL,
 [SupervisorForgot] [bit] NULL,
 [SupervisorHoliday] [bit] NULL,
 [SupervisorIll] [bit] NULL,
-[SupervisorObservationAssessment] [bit] NULL,
-[SupervisorObservationHomeVisit] [bit] NULL,
 [SupervisorTraining] [bit] NULL,
 [SupervisorVacation] [bit] NULL,
-[TakePlace] [bit] NULL,
-[TechniquesApproaches] [bit] NULL,
-[Tools] [bit] NULL,
-[TrainingNeeds] [bit] NULL,
-[Weather] [bit] NULL,
-[WorkerFK] [int] NOT NULL
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-ALTER TABLE [dbo].[Supervision] ADD 
-CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
-CREATE NONCLUSTERED INDEX [IX_FK_Supervision_SupervisorFK] ON [dbo].[Supervision] ([SupervisorFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Supervision_WorkerFK] ON [dbo].[Supervision] ([WorkerFK]) ON [PRIMARY]
-
+[Weather] [bit] NULL
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD CONSTRAINT [FK_Supervision_HVProgram] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD CONSTRAINT [FK_Supervision_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
+ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD CONSTRAINT [FK_Supervision_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO
 EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Supervision', 'COLUMN', N'SupervisionPK'
-GO
-
-ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD
-CONSTRAINT [FK_Supervision_HVProgram] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
--- =============================================
--- Author:		jrobohn
--- Create date: 2014Feb24
--- Description:	Delete FormReview row when  
---				the Supervision row deleted
--- =============================================
-CREATE trigger [dbo].[fr_delete_Supervision]
-on [dbo].[Supervision]
-After DELETE
-AS
-Declare @PK int
-
-set @PK = (SELECT SupervisionPK from deleted)
-
-BEGIN
-	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='SU'
-
-	INSERT INTO	supervisiondeleted ([SupervisionPK]
-      ,[ActivitiesOther]
-      ,[ActivitiesOtherSpecify]
-      ,[AreasGrowth]
-      ,[AssessmentIssues]
-      ,[AssessmentRate]
-      ,[Boundaries]
-      ,[Caseload]
-      ,[Coaching]
-      ,[CommunityResources]
-      ,[CulturalSensitivity]
-      ,[Curriculum]
-      ,[FamilyProgress]
-      ,[HomeVisitLogActivities]
-      ,[HomeVisitRate]
-      ,[IFSP]
-      ,[ImplementTraining]
-      ,[LevelChange]
-      ,[Outreach]
-      ,[ParticipantEmergency]
-      ,[PersonalGrowth]
-      ,[ProfessionalGrowth]
-      ,[ProgramFK]
-      ,[ReasonOther]
-      ,[ReasonOtherSpecify]
-      ,[RecordDocumentation]
-      ,[Referrals]
-      ,[Retention]
-      ,[RolePlaying]
-      ,[Safety]
-      ,[ShortWeek]
-      ,[StaffCourt]
-      ,[StaffFamilyEmergency]
-      ,[StaffForgot]
-      ,[StaffIll]
-      ,[StaffTraining]
-      ,[StaffVacation]
-      ,[StaffOutAllWeek]
-      ,[StrengthBasedApproach]
-      ,[Strengths]
-      ,[SupervisionCreateDate]
-      ,[SupervisionCreator]
-      ,[SupervisionDate]
-      ,[SupervisionEditDate]
-      ,[SupervisionEditor]
-      ,[SupervisionEndTime]
-      ,[SupervisionHours]
-      ,[SupervisionMinutes]
-      ,[SupervisionNotes]
-      ,[SupervisionStartTime]
-      ,[SupervisorFamilyEmergency]
-      ,[SupervisorFK]
-      ,[SupervisorForgot]
-      ,[SupervisorHoliday]
-      ,[SupervisorIll]
-      ,[SupervisorObservationAssessment]
-      ,[SupervisorObservationHomeVisit]
-      ,[SupervisorTraining]
-      ,[SupervisorVacation]
-      ,[TakePlace]
-      ,[TechniquesApproaches]
-      ,[Tools]
-      ,[TrainingNeeds]
-      ,[Weather]
-      ,[WorkerFK])
-	  select Deleted.SupervisionPK ,
-             Deleted.ActivitiesOther ,
-             Deleted.ActivitiesOtherSpecify ,
-             Deleted.AreasGrowth ,
-             Deleted.AssessmentIssues ,
-             Deleted.AssessmentRate ,
-             Deleted.Boundaries ,
-             Deleted.Caseload ,
-             Deleted.Coaching ,
-             Deleted.CommunityResources ,
-             Deleted.CulturalSensitivity ,
-             Deleted.Curriculum ,
-             Deleted.FamilyProgress ,
-             Deleted.HomeVisitLogActivities ,
-             Deleted.HomeVisitRate ,
-             Deleted.IFSP ,
-             Deleted.ImplementTraining ,
-             Deleted.LevelChange ,
-             Deleted.Outreach ,
-             Deleted.ParticipantEmergency ,
-             Deleted.PersonalGrowth ,
-             Deleted.ProfessionalGrowth ,
-             Deleted.ProgramFK ,
-             Deleted.ReasonOther ,
-             Deleted.ReasonOtherSpecify ,
-             Deleted.RecordDocumentation ,
-             Deleted.Referrals ,
-             Deleted.Retention ,
-             Deleted.RolePlaying ,
-             Deleted.Safety ,
-             Deleted.ShortWeek ,
-             Deleted.StaffCourt ,
-             Deleted.StaffFamilyEmergency ,
-             Deleted.StaffForgot ,
-             Deleted.StaffIll ,
-             Deleted.StaffTraining ,
-             Deleted.StaffVacation ,
-             Deleted.StaffOutAllWeek ,
-             Deleted.StrengthBasedApproach ,
-             Deleted.Strengths ,
-             Deleted.SupervisionCreateDate ,
-             Deleted.SupervisionCreator ,
-             Deleted.SupervisionDate ,
-             Deleted.SupervisionEditDate ,
-             Deleted.SupervisionEditor ,
-             Deleted.SupervisionEndTime ,
-             Deleted.SupervisionHours ,
-             Deleted.SupervisionMinutes ,
-             Deleted.SupervisionNotes ,
-             Deleted.SupervisionStartTime ,
-             Deleted.SupervisorFamilyEmergency ,
-             Deleted.SupervisorFK ,
-             Deleted.SupervisorForgot ,
-             Deleted.SupervisorHoliday ,
-             Deleted.SupervisorIll ,
-             Deleted.SupervisorObservationAssessment ,
-             Deleted.SupervisorObservationHomeVisit ,
-             Deleted.SupervisorTraining ,
-             Deleted.SupervisorVacation ,
-             Deleted.TakePlace ,
-             Deleted.TechniquesApproaches ,
-             Deleted.Tools ,
-             Deleted.TrainingNeeds ,
-             Deleted.Weather ,
-             Deleted.WorkerFK
-	  from Deleted WHERE Deleted.SupervisionPK= @pk
-
-END
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
-
-
--- =============================================
--- Author:		jrobohn
--- Create date: 2014Feb24
--- Description:	Add FormReview row when 
---				inserting Supervision row
--- =============================================
-CREATE TRIGGER [dbo].[fr_Supervision]
-on [dbo].[Supervision]
-After insert
-
-AS
-
-Declare @PK int
-
-set @PK = (SELECT SupervisionPK from inserted)
-
-BEGIN
-	EXEC spAddFormReview_userTriggernoHVCaseFK @FormFK=@PK, @FormTypeValue='SU'
-END
-GO
-
-
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
-
--- =============================================
--- Author:		jrobohn
--- Create date: 2014Feb24
--- Description:	Change FormReview's formdate if 
---				the Supervision date changed
--- =============================================
-CREATE trigger [dbo].[fr_Supervision_Edit]
-on [dbo].[Supervision]
-after update
-
-AS
-
-declare @PK int
-declare @UpdatedFormDate datetime 
-declare @FormTypeValue varchar(2)
-
-select @PK = SupervisionPK FROM inserted
-select @UpdatedFormDate = SupervisionDate FROM inserted
-set @FormTypeValue = 'SU'
-
-begin
-	update FormReview
-	set FormDate=@UpdatedFormDate
-	where FormFK=@PK 
-			and FormType=@FormTypeValue
-
-END
-
-GO
-
-SET QUOTED_IDENTIFIER ON
-GO
-SET ANSI_NULLS ON
-GO
--- -- -- -- -- -- -- -- -- -- -- -- -- -- --
--- create trigger TR_SupervisionEditDate ON Supervision
--- -- -- -- -- -- -- -- -- -- -- -- -- -- --
--- =============================================
--- Author:		jrobohn
--- Create date: 2014Feb24
--- Description:	Change FormReview's editdate if 
---				Supervision row has been edited
--- =============================================
-CREATE trigger [dbo].[TR_SupervisionEditDate] ON [dbo].[Supervision]
-For Update 
-AS
-Update Supervision Set Supervision.SupervisionEditDate= getdate()
-From [Supervision] INNER JOIN Inserted ON [Supervision].[SupervisionPK]= Inserted.[SupervisionPK]
-GO
-
-
-ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD
-CONSTRAINT [FK_Supervision_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD
-CONSTRAINT [FK_Supervision_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-
-
-
-
 GO

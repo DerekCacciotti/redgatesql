@@ -220,7 +220,7 @@ SELECT [TopicName]
 					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT)
 				= 1 then 1
 				END AS CompletedALL
-		, IndividualRating
+		, cteMeetTarget.IndividualRating
 		FROM cteMeetTarget
 		LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode AND ctecountmeeting.subtopiccode=cteMeetTarget.subtopiccode AND ctecountmeeting.workerpk=cteMeetTarget.workerpk
 		GROUP BY TotalWorkers
@@ -238,8 +238,9 @@ SELECT [TopicName]
 		, cteMeetTarget.TrainingDate
 		, cteMeetTarget.Hiredate
 		, cteCountMeeting.totalmeetingcount
-		, IndividualRating
+		, cteMeetTarget.IndividualRating
 )
+
 
 
 , cteSETMeetingByTopic AS (
@@ -260,12 +261,11 @@ SELECT [TopicName]
 		, FatherAdvocate
 		, cteAlmostFinal.topiccode
 		, ISNULL(ContentCompleted, 0) AS IndivContentCompleted
-		, CAMeetingTarget AS IndivContentMeeting
 		, CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) AS IndivPercByTopic
 		, TopicName
 		, HireDate
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
-		, LowestIndivRating AS IndivContentMeeting
+		, IndividualRating AS IndivContentMeeting
 		, cteAlmostFinal.topiccode, TotalContentAreasByTopicAndWorker
 		,	(SELECT TOP 1 IndividualRating FROM cteAlmostFinal ORDER BY IndividualRating) AS TopicRatingBySite
 		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
@@ -275,5 +275,6 @@ SELECT [TopicName]
 	      END AS TotalCompletedToDate
 		FROM cteAlmostFinal
 		INNER JOIN cteSETMeetingByTopic ON cteSETMeetingByTopic.WorkerPK = cteAlmostFinal.WorkerPK AND cteSETMeetingByTopic.TopicCode = cteAlmostFinal.TopicCode
+
 END
 GO

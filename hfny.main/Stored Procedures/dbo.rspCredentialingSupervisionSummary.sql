@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Devinder Singh Khalsa
 -- Create date: September 16th, 2013
@@ -164,9 +163,8 @@ END
     and wp.supervisorfk = isnull(@supervisorfk,wp.supervisorfk)
     --and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
     and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)	
-	
-	
-	order by w.workername	
+	and wrkr.FTE <> '03'
+	order by w.workername
 	
 	
 	
