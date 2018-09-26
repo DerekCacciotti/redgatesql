@@ -18,12 +18,6 @@ CREATE TABLE [dbo].[Employment]
 [ProgramFK] [int] NOT NULL,
 [StillWorking] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[Employment] WITH NOCHECK ADD
-CONSTRAINT [FK_Employment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-CREATE NONCLUSTERED INDEX [IX_FK_Employment_HVCaseFK] ON [dbo].[Employment] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Employment_ProgramFK] ON [dbo].[Employment] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -40,5 +34,13 @@ From [Employment] INNER JOIN Inserted ON [Employment].[EmploymentPK]= Inserted.[
 GO
 ALTER TABLE [dbo].[Employment] ADD CONSTRAINT [PK__Employme__FDF531DC68487DD7] PRIMARY KEY CLUSTERED  ([EmploymentPK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_FormFK] ON [dbo].[Employment] ([FormFK]) INCLUDE ([EmploymentMonthlyHours]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Employment_HVCaseFK] ON [dbo].[Employment] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Employment_ProgramFK] ON [dbo].[Employment] ([ProgramFK]) ON [PRIMARY]
+GO
 ALTER TABLE [dbo].[Employment] WITH NOCHECK ADD CONSTRAINT [FK_Employment_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+GO
+ALTER TABLE [dbo].[Employment] WITH NOCHECK ADD CONSTRAINT [FK_Employment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
