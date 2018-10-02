@@ -22,7 +22,7 @@ as begin
 		);
 
 	insert into #CaseViews (PC1ID, ViewDateMax)
-	select		top 1000 cv.PC1ID
+	select		top 100 cv.PC1ID
 						, max(cv.ViewDate) as ViewDateMax
 		from		CaseView cv
 		inner join	CaseProgram cp on cp.PC1ID = cv.PC1ID

@@ -18,12 +18,12 @@ as begin
 	-- interfering with SELECT statements.
 	set noCount on ;
 
-	select top 10 t.TrainingPK
+	select top 20 t.TrainingPK
 		 , t.ProgramFK
 		 , t.TrainerFK
 		 , t.TrainingMethodFK
 		 , 'TrainingSummary' as TrainingSummary
-		 , t2.TrainerFirstName + ' ' + t2.TrainerLastName as TrainerName
+		 , rtrim(t2.TrainerFirstName) + ' ' + rtrim(t2.TrainerLastName) as TrainerName
 		 , t.TrainingCreateDate
 		 , t.TrainingCreator
 		 , t.TrainingDate
@@ -50,6 +50,19 @@ as begin
 		 , td.TrainingFK
 		 , td.ExemptDescription
 		 , td.ExemptType
+		 , st.SubTopicPK
+		 , st.ProgramFK
+		 , st.RequiredBy
+		 , st.SATFK
+		 , st.SubTopicCode
+		 , st.SubTopicCreateDate
+		 , st.SubTopicCreator
+		 , st.SubTopicEditDate
+		 , st.SubTopicEditor
+		 , st.SubTopicName
+		 , st.SubTopicPK_old
+		 , st.TopicFK
+		 , st.TrainingTickler
 		 , ta.TrainingAttendeePK
 		 , ta.TrainingAttendeeCreateDate
 		 , ta.TrainingAttendeeCreator
@@ -61,7 +74,9 @@ as begin
 	inner join TrainingDetail td on td.TrainingFK = t.TrainingPK
 	inner join TrainingAttendee ta on ta.TrainingFK = t.TrainingPK
 	inner join  Trainer t2 on t2.TrainerPK = t.TrainerFK
+	inner join SubTopic st on st.SubTopicPK = td.SubTopicFK
 	where ta.WorkerFK = @WorkerFK
 	order by t.TrainingDate desc
 end ;
+
 GO
