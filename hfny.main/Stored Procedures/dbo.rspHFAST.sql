@@ -26,16 +26,17 @@ begin
 	, ItemNumber varchar(4)
 	, Item varchar(max)
 	, Response varchar(max)
+	, PCID_Response char(13)
 	, Header bit
 	, Detail bit
 	)
 
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(1, 'B2', 'Number of home visits completed in 2017', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(2, 'B3', 'How many PEOPLE worked in Assessment role at the end of last year?', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(2, 'B3', 'How many PEOPLE worked in Assessment role at the end of last year?', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(3, 'B4', 'What was your total FTEs in Family Assessment Worker?', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(4, 'B5', 'How many PEOPLE worked in Home Visitor role at the end?', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(5, 'B6', 'What was your total FTEs in Home Visitor role?', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(6, 'B8', 'Etnnicity: Number of Home Visitors who are:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(6, 'B8', 'Etnnicity: Number of Home Visitors who are:', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(7, 'B8', 'Hispanic', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(8, 'B8', 'Non-Hispanic', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(9, 'B8', 'Ethnicity Unknown', 0, 0)
@@ -769,7 +770,7 @@ begin
 --end B9
 
 --B10 row 20					
-    insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+    insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
     select 20, tpid.PC1ID, 0, 1
 	 from @tblPC1IDs tpid where tpid.hvcasefk in 
 	 ( select distinct hvcasefk from @tblHomeVisits thv
@@ -781,7 +782,7 @@ begin
 --end B10
 	
 --B12 row 22
-    insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+    insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 22, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in 
 	(select hvcasefk from @tblHomeVisits
@@ -792,7 +793,7 @@ begin
 --end B12
 
 --B13 row 23
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 23, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in
 	(select hvcasefk from @tblHomeVisits
@@ -805,7 +806,7 @@ begin
 --end B13
 
 --B14 row 24
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 24, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in
 	 (select hvcasefk from @tblHomeVisits
@@ -819,7 +820,7 @@ begin
 --end B14
 
 --B15 row 25
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 25, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in
 	( select sub.hvcasefk from
@@ -883,7 +884,7 @@ begin
 --end B20
 
 --B21 row 32
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 32, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		 select distinct hvcasefk from @tblParity
@@ -897,7 +898,7 @@ begin
 --end B21
 
 --B22 row 33
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 33, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in ( 
 		select hvcasefk from @tblThisYearsCases
@@ -909,7 +910,7 @@ begin
 --end B22
 
 --B23 row 34
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 34, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblIntakeInfo
@@ -921,7 +922,7 @@ begin
 --end B23
 
 --B24 row 35
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 35, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in ( 
 		select distinct hvcasefk from @tblIntakeInfo
@@ -933,7 +934,7 @@ begin
 --end B24
 
 --B25 row 36
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 36, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in ( 
 		select distinct hvcasefk from @tblIntakeInfo
@@ -945,7 +946,7 @@ begin
 --end B25
 
 --B26 row 37
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 37, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in ( 
 		select distinct hvcasefk from @tblFollowUpInfo
@@ -962,7 +963,7 @@ begin
 	
 
 --B28 row 39
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 39, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in ( 
 		select distinct hvcasefk from @tblFollowUpInfo
@@ -974,7 +975,7 @@ begin
 --end B28
 
 --B29 row 40
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 40, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in ( 
 		select distinct hvcasefk from @tblFollowUpInfo
@@ -990,7 +991,7 @@ begin
 --end B30
 
 --B31 row 42
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 42, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in ( 
 		select distinct hvcasefk from @tblKempeInfo
@@ -1007,7 +1008,7 @@ begin
 
 --B33 
 	--row 44
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 44, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblIntakeInfo
@@ -1019,7 +1020,7 @@ begin
 	--end B33
 
 	--B34 row 45
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 45, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from phq9 
@@ -1032,7 +1033,7 @@ begin
 
 --B35 
 --	--row 47
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 47, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblPC1Insurance
@@ -1044,7 +1045,7 @@ begin
 --	--end row 47
 
 	--row 48
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 48, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblPC1Insurance
@@ -1056,7 +1057,7 @@ begin
 	--end row 48
 
 	--row 49
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 49, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblPC1Insurance
@@ -1069,7 +1070,7 @@ begin
 	--end row 49
 
 	--row 50
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 50, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblPC1Insurance
@@ -1081,7 +1082,7 @@ begin
 	--end row 50
 
 	--row 52
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 52, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblTCInsurance
@@ -1095,7 +1096,7 @@ begin
 	--end row 52
 
 	--row 53
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 53, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblTCInsurance
@@ -1109,7 +1110,7 @@ begin
 	--end row 53
 
 	--row 54
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 54, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblTCInsurance
@@ -1125,7 +1126,7 @@ begin
 	--end row 54
 
 	--row 55
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 55, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblTCInsurance
@@ -1146,7 +1147,7 @@ begin
 	--end row 57
 
 	--row 58
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 58, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLivingArrangement
@@ -1163,7 +1164,7 @@ begin
 	--end row 59
 
 	--row 60
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 60, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLivingArrangement
@@ -1175,7 +1176,7 @@ begin
 	--end row 60
 
 	--row 61
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 61, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLivingArrangement
@@ -1189,7 +1190,7 @@ begin
 
 --B37
 	--row 63
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 63, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblEmployment
@@ -1201,7 +1202,7 @@ begin
 	--end row 63
 
 	--row 64
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 64, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblEmployment
@@ -1213,7 +1214,7 @@ begin
 	--end row 64 
 
 	--row 65
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 65, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblEmployment
@@ -1226,7 +1227,7 @@ begin
 
 	--row 66
 	--cases with no employment data
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 66, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1240,7 +1241,7 @@ begin
 
 --B40 Parent Survey Scores
 	--row 68
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 68, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1254,7 +1255,7 @@ begin
 	--end row 68
 	
 	--row 69
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 69, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1268,7 +1269,7 @@ begin
 	--end row 69
 	
 	--row 70
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 70, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1284,7 +1285,7 @@ begin
 
 --B41
 	--row 72
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 72, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1301,7 +1302,7 @@ begin
 	--end row 72
 
 	--row 73
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 73, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1320,7 +1321,7 @@ begin
 	--end 73
 
 	--row 74
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 74, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1339,7 +1340,7 @@ begin
 	--end 74
 
 	--row 75
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 75, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1358,7 +1359,7 @@ begin
 	--end 75
 
 	--row 76
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 76, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1375,7 +1376,7 @@ begin
 	--end 76
 
 	--row 77
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 77, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
@@ -1393,7 +1394,7 @@ begin
 
 --B42
 	--row 79
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 79, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1408,7 +1409,7 @@ begin
 	--end row 79
 
 	--row 80
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 80, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1433,7 +1434,7 @@ begin
 
 --B43 PC1 Age at Enrollment
 	--row 84
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 84, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1446,7 +1447,7 @@ begin
 	--end row 84
 
 	--row 85
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 85, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1459,7 +1460,7 @@ begin
 	--end row 85
 
 	--row 86
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 86, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1472,7 +1473,7 @@ begin
 	--end row 86
 	
 	--row 87
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 87, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1485,7 +1486,7 @@ begin
 	--end row 87
 
 	--row 88
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 88, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1498,7 +1499,7 @@ begin
 	--end row 88
 
 	--row 89
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 89, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1511,7 +1512,7 @@ begin
 	--end row 89
 
 	--row 90
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 90, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1524,7 +1525,7 @@ begin
 	--end row 90
 
 	--row 91
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 91, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1539,7 +1540,7 @@ begin
 
 --B44 PC1 Ethnicity
 	--row 93
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 93, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1552,7 +1553,7 @@ begin
 	--end row 93
 
 	--row 94
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 94, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1565,7 +1566,7 @@ begin
 	--end row 94
 
 	--row 95
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 95, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1580,7 +1581,7 @@ begin
 
 --B45 PC1 Race
 	--row 97
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 97, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1593,7 +1594,7 @@ begin
 	--end row 97
 
 	--row 98
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 98, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1606,7 +1607,7 @@ begin
 	--end row 98
 	
 	--row 99
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 99, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1619,7 +1620,7 @@ begin
 	--end row 99
 
 	--row 100
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 100, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1636,7 +1637,7 @@ begin
 	--end row 101
 
 	--row 102
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 102, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1649,7 +1650,7 @@ begin
 	--end row 102
 
 	--row 103
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 103, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1662,7 +1663,7 @@ begin
 	--end row 103
 	
 	--row 104
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 104, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1680,7 +1681,7 @@ begin
 
 --B46
 	--row 107
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 107, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1693,7 +1694,7 @@ begin
 	--end row 107
 
 	--row 108
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 108, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1706,7 +1707,7 @@ begin
 	--end row 108
 
 	--row 109
-	insert into @tblFinalExport (RowNumber, Response, Header, Detail)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 109, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
@@ -1719,7 +1720,7 @@ begin
 --	end row 109
 --end B46
 					
-select * from @tblFinalExport 
+select * from @tblFinalExport order by RowNumber asc, Detail asc
 end
 
 GO
