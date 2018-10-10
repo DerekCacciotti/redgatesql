@@ -441,6 +441,8 @@ begin
 	   , HIUninsured bit
 	   , HIUnknown bit
 	   , HVCaseFK int
+	   , NumberInHouse int
+	   , AvailableMonthlyIncome numeric(5,0)
 	   , PC1ReceivingMedicaid bit
 	   , RowNum int
 	)
@@ -453,6 +455,8 @@ begin
 	   , HIUninsured
 	   , HIUnknown
 	   , HVCaseFK
+	   , NumberInHouse
+	   , AvailableMonthlyIncome
 	   , PC1ReceivingMedicaid
 	   , RowNum 
 	)
@@ -464,6 +468,8 @@ begin
 	   , ca.HIUninsured
 	   , ca.HIUnknown
 	   , ca.HVCaseFK
+	   , ca.NumberInHouse
+	   , ca.AvailableMonthlyIncome
 	   , ca2.PC1ReceivingMedicaid
 	   , row_number() over (partition by ca.hvcasefk order by ca.FormDate desc) as [row]  
 	   from commonattributes ca
@@ -769,7 +775,7 @@ begin
 	--end row 18
 --end B9
 
---B10 row 20					
+--B10 row 20 Received at least one home visit					
     insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
     select 20, tpid.PC1ID, 0, 1
 	 from @tblPC1IDs tpid where tpid.hvcasefk in 
@@ -780,8 +786,10 @@ begin
 	set @visitReceived = (select count(*) from @tblFinalExport tfe where RowNumber = 20 and Detail = 1)
 	update @tblFinalExport set Response = @visitReceived where RowNumber = 20 and Detail = 0
 --end B10
+
+--B11 MIECHV funded
 	
---B12 row 22
+--B12 row 22 Received first home visit in time period
     insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 22, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in 
@@ -792,7 +800,7 @@ begin
 	update @tblFinalExport set Response = @firstHomeVisit where RowNumber = 22 and Detail = 0
 --end B12
 
---B13 row 23
+--B13 row 23 Received first home visit prenatally
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 23, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in
@@ -805,7 +813,7 @@ begin
 	update @tblFinalExport set Response = @firstHomeVisitPrenatal where RowNumber = 23 and Detail = 0
 --end B13
 
---B14 row 24
+--B14 row 24 Received first home visit prenatally before 31 weeks
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 24, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in
@@ -958,7 +966,15 @@ begin
 --end B26
 
 --B27 row 38
-	--medicare elgibility
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 38, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblPC1Insurance 
+				where AvailableMonthlyIncome <= 1397 + ((NumberInHouse - 1) * 497)  
+	)
+	declare @mcEligible int
+	set @mcEligible = (select count(*) from @tblFinalExport tfe where tfe.RowNumber = 38 and Detail = 1)
+	update @tblFinalExport set Response = @mcEligible where RowNumber = 38 and Detail = 0
 --end B27
 	
 
@@ -1424,13 +1440,24 @@ begin
 	--end row 80
 
 	-- row 81
-	-- Developmentally delayed or disalbed (known or suspected)
+	-- Developmentally delayed or disabled (known or suspected)
 	-- End row 81
 
---	--row 82
---	--Medicaid eligible
---	--end row 82
-----end B42
+	--row 82
+	-- TC Medicaid eligible
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 82, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblPC1Insurance 
+				where AvailableMonthlyIncome <= 1558 + ((NumberInHouse - 1) * 555) --children to 18
+				
+				--where AvailableMonthlyIncome <= 2257 + ((NumberInHouse - 1) * 803)  --children up to one year
+	)
+	declare @tcMcEligible int
+	set @tcMcEligible = (select count(*) from @tblFinalExport tfe where tfe.RowNumber = 82 and Detail = 1)
+	update @tblFinalExport set Response = @mcEligible where RowNumber = 82 and Detail = 0
+	--end row 82
+--end B42
 
 --B43 PC1 Age at Enrollment
 	--row 84
