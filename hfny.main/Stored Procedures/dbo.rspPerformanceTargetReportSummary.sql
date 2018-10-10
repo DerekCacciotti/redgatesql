@@ -15,7 +15,7 @@ GO
 -- mods by jrobohn 20130223 - added PCI1 report
 -- =============================================
 
-CREATE PROC [dbo].[rspPerformanceTargetReportSummary]
+CREATE procedure [dbo].[rspPerformanceTargetReportSummary]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartDate				datetime,
@@ -245,8 +245,9 @@ begin
 			, ptt.PerformanceTargetSection
 			, ptt.PerformanceTargetTitle
 			, case when ValidCases = 0 then '**        '
-					when (cast(ValidCases as float)/ cast(TotalCases as float)) < .75 then '*         ' 
+					when (cast(ValidCases as float) / cast(TotalCases as float)) < .75 then '*         ' 
 					-- else convert(varchar(10), round((FormMeetsTarget / (ValidCases * 100.0000)), 0)) + '%'
+					when (cast(ValidCases as float) / cast(TotalCases as float)) > 1.00 then '100%'
 					else cast(round(cast(FormMeetsTarget as float) / cast(ValidCases as float), 2) * 100 as varchar(10)) + '%'
 				end as PercentageMeeting
 			, ValidCases
