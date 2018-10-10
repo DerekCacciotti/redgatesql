@@ -94,7 +94,7 @@ as
 				and (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK <> ListItem) --Eliminate transfer cases
 
 	
-	select coalesce(pc1id,'No Home Visit Observations') pc1id
+	select DISTINCT COALESCE(pc1id,'No Home Visit Observations') pc1id
 		  ,VisitStartTime
 		  ,hvcasepk
 		  ,(select min(VisitStartTime) VisitStartTime
@@ -106,12 +106,12 @@ as
 				where FSWFK = workerPK
 				group by fswfk) hvdate_max
 		  ,		
-				(SELECT TOP 1 cp.PC1ID 
+			(SELECT TOP 1 cp.PC1ID 
 				FROM hvlog 
 				INNER JOIN CaseProgram cp ON cp.HVCaseFK = HVLog.HVCaseFK
-				inner join dbo.SplitString(@programfk,',') on HVLog.programfk = ListItem --Restrict to the programs selected
-					WHERE VisitStartTime = 
-						(select max(VisitStartTime) VisitStartTime
+				inner join dbo.SplitString(@programfk,',') on HVLog.ProgramFK = ListItem --Restrict to the programs selected
+				WHERE CONVERT(VARCHAR(30), VisitStartTime) + CONVERT(VARCHAR(5),FSWFK) = 
+						(select CONVERT(VARCHAR(30), MAX(VisitStartTime)) + CONVERT(VARCHAR(5),FSWFK) VisitStartTime
 						from hvlog
 						where FSWFK = workerPK
 						group by fswfk)
@@ -130,6 +130,7 @@ as
 				else
 					'Attempted - Family not home or unable to meet after visit to home'
 				end as visitType
+		, supervisorLastName,workerLastName
 		from @cteFilteredHvLogs allHvLogs
 		where allHvLogs.RowNumber <= 7 --select only 7
 		order by supervisorLastName

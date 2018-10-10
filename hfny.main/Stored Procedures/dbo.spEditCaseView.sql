@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditCaseView](@CaseViewPK int=NULL,
 @PC1ID nchar(13)=NULL,
-@Username char(10)=NULL,
+@Username varchar(max)=NULL,
 @ViewDate datetime=NULL)
 AS
 UPDATE CaseView

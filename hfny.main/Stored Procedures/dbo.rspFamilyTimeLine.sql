@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -144,7 +143,8 @@ as
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
-				inner join codeduebydates on scheduledevent = 'HIB'
+				inner join codeduebydates on scheduledevent = 'HIB' AND codeDueByDates.optional = NULL
+
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
 				 and caseprogress >= 11
@@ -235,7 +235,7 @@ as
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
-				inner join codeduebydates on scheduledevent = 'Roto'
+				inner join codeduebydates on scheduledevent = 'Roto' AND codeDueByDates.optional = NULL
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
 				 and caseprogress >= 11
