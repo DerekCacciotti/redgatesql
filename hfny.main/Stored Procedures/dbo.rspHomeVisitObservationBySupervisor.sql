@@ -106,12 +106,12 @@ as
 				where FSWFK = workerPK
 				group by fswfk) hvdate_max
 		  ,		
-				(SELECT TOP 1 cp.PC1ID 
+			(SELECT TOP 1 cp.PC1ID 
 				FROM hvlog 
 				INNER JOIN CaseProgram cp ON cp.HVCaseFK = HVLog.HVCaseFK
-				inner join dbo.SplitString(@programfk,',') on HVLog.programfk = ListItem --Restrict to the programs selected
-				WHERE VisitStartTime+FSWFK = 
-						(select max(VisitStartTime)+FSWFK VisitStartTime
+				inner join dbo.SplitString(@programfk,',') on HVLog.ProgramFK = ListItem --Restrict to the programs selected
+				WHERE CONVERT(VARCHAR(30), VisitStartTime) + CONVERT(VARCHAR(5),FSWFK) = 
+						(select CONVERT(VARCHAR(30), MAX(VisitStartTime)) + CONVERT(VARCHAR(5),FSWFK) VisitStartTime
 						from hvlog
 						where FSWFK = workerPK
 						group by fswfk)

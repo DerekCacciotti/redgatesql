@@ -125,8 +125,6 @@ CREATE PROCEDURE [dbo].[spEditHVLogDeleted](@HVLogDeletedPK int=NULL,
 @HouseholdChangesLeft bit=NULL,
 @HouseholdChangesNew bit=NULL,
 @HVCaseFK int=NULL,
-@HVLogDeleteDate datetime=NULL,
-@HVLogDeleter char(10)=NULL,
 @HVLogEditor char(10)=NULL,
 @HVSupervisorParticipated bit=NULL,
 @NextScheduledVisit datetime=NULL,
@@ -232,7 +230,9 @@ CREATE PROCEDURE [dbo].[spEditHVLogDeleted](@HVLogDeletedPK int=NULL,
 @VisitLocation char(5)=NULL,
 @VisitStartTime datetime=NULL,
 @VisitType char(6)=NULL,
-@VisitTypeComments varchar(max)=NULL)
+@VisitTypeComments varchar(max)=NULL,
+@HVLogDeleteDate datetime=NULL,
+@HVLogDeleter char(10)=NULL)
 AS
 UPDATE HVLogDeleted
 SET 
@@ -358,8 +358,6 @@ HouseholdChangesComments = @HouseholdChangesComments,
 HouseholdChangesLeft = @HouseholdChangesLeft, 
 HouseholdChangesNew = @HouseholdChangesNew, 
 HVCaseFK = @HVCaseFK, 
-HVLogDeleteDate = @HVLogDeleteDate, 
-HVLogDeleter = @HVLogDeleter, 
 HVLogEditor = @HVLogEditor, 
 HVSupervisorParticipated = @HVSupervisorParticipated, 
 NextScheduledVisit = @NextScheduledVisit, 
@@ -465,6 +463,8 @@ VisitLengthMinute = @VisitLengthMinute,
 VisitLocation = @VisitLocation, 
 VisitStartTime = @VisitStartTime, 
 VisitType = @VisitType, 
-VisitTypeComments = @VisitTypeComments
+VisitTypeComments = @VisitTypeComments, 
+HVLogDeleteDate = @HVLogDeleteDate, 
+HVLogDeleter = @HVLogDeleter
 WHERE HVLogDeletedPK = @HVLogDeletedPK
 GO
