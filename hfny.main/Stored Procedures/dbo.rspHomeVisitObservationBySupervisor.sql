@@ -94,7 +94,7 @@ as
 				and (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK <> ListItem) --Eliminate transfer cases
 
 	
-	select coalesce(pc1id,'No Home Visit Observations') pc1id
+	select DISTINCT COALESCE(pc1id,'No Home Visit Observations') pc1id
 		  ,VisitStartTime
 		  ,hvcasepk
 		  ,(select min(VisitStartTime) VisitStartTime
@@ -130,6 +130,7 @@ as
 				else
 					'Attempted - Family not home or unable to meet after visit to home'
 				end as visitType
+		, supervisorLastName,workerLastName
 		from @cteFilteredHvLogs allHvLogs
 		where allHvLogs.RowNumber <= 7 --select only 7
 		order by supervisorLastName
