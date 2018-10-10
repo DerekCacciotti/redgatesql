@@ -110,8 +110,8 @@ as
 				FROM hvlog 
 				INNER JOIN CaseProgram cp ON cp.HVCaseFK = HVLog.HVCaseFK
 				inner join dbo.SplitString(@programfk,',') on HVLog.programfk = ListItem --Restrict to the programs selected
-					WHERE VisitStartTime = 
-						(select max(VisitStartTime) VisitStartTime
+				WHERE VisitStartTime+FSWFK = 
+						(select max(VisitStartTime)+FSWFK VisitStartTime
 						from hvlog
 						where FSWFK = workerPK
 						group by fswfk)
