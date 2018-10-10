@@ -69,6 +69,7 @@ begin
 		  ,Defaults
 		  --,'O:'+rtrim(CriteriaOptions)+' D(calc):'+rtrim(dbo.CalculateReportDefaults([Defaults]))+' D(raw):'+rtrim([Defaults]) as DefaultsBag
 		  ,Keywords
+		  ,a.AttachmentPK
 		  ,convert(varchar(10), UserLastRun, 126) as UserLastRun
 		  ,convert(varchar(10), ProgramLastRun, 126) as ProgramLastRun
 		  ,UserRank
@@ -76,6 +77,7 @@ begin
 		  ,ProgramRank
 		  ,ProgramCount
 		from codeReportCatalog rc
+			left outer join Attachment a on a.FormFK = rc.codeReportCatalogPK and a.FormType = 'RC'
 			left outer join cteLastRunByUser lrbu on lrbu.ReportFK = rc.codeReportCatalogPK
 			left outer join cteLastRunByProgram lrbp on lrbp.ReportFK = rc.codeReportCatalogPK
 			left outer join cteFrequencyByUser fbu on fbu.ReportFK = rc.codeReportCatalogPK
