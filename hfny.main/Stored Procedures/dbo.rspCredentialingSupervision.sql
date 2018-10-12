@@ -102,6 +102,13 @@ begin
 	-- CP 12-21-2017 we have no way of removing a Supervisor from this report based on the current system.  
 	-- Lillian Caban is no longer a supervisor, but does not appear on this report since there is no END DATE for supervisors
 	delete from #tblSUPPMWorkers where LastName='Caban' and FirstName = 'Lillian' 
+	
+	--CP 10-12-2018 per ticket #5212 These Supervisors are dual role so keep them in the report
+	delete from #tblSUPPMWorkers where LastName='Drenth' and FirstName = 'Patricia' 
+	delete from #tblSUPPMWorkers where LastName='Wolosonowich' and FirstName = 'Ashley' 
+	delete from #tblSUPPMWorkers where LastName='Reynolds' and FirstName = 'Ashley' 
+	delete from #tblSUPPMWorkers where LastName='Lieberman' and FirstName = 'Bethany' 
+	delete from #tblSUPPMWorkers where LastName='Southerton' and FirstName = 'Amber' 
 
 		-- List of workers i.e. FAW, FSW minus 	SUP,PM
 		-- List of workers who are not supervisor or program manager
