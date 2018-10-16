@@ -30,9 +30,9 @@ set @programfk = replace(@programfk,'"','')
 set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
 
 ; WITH 
-fsw AS (
-SELECT a.WorkerFK, 1 AS [FSW]
-, CASE WHEN a.FSWEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [FSW_T]
+fss AS (
+SELECT a.WorkerFK, 1 AS [FSS]
+, CASE WHEN a.FSWEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [FSS_T]
 FROM WorkerProgram AS a
 INNER JOIN dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
 WHERE (a.FSWStartDate IS NOT NULL AND a.FSWStartDate <= @EndDt) 
@@ -41,9 +41,9 @@ AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
-faw AS (
-SELECT a.WorkerFK, 1 AS [FAW]
-, CASE WHEN a.FAWEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [FAW_T]
+frs AS (
+SELECT a.WorkerFK, 1 AS [FRS]
+, CASE WHEN a.FAWEndDate BETWEEN @StartDt AND @EndDt THEN 1 ELSE 0 END [FRS_T]
 FROM WorkerProgram AS a
 INNER JOIN dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
 WHERE (a.FAWStartDate IS NOT NULL AND a.FAWStartDate <= @EndDt) 
@@ -52,14 +52,14 @@ AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
-fsw_faw AS (
+fss_frs AS (
 SELECT isnull(a.WorkerFK, b.WorkerFK) [WorkerFK]
-, isnull(a.FSW, 0) [FSW]
-, isnull(a.FSW_T, 0) [FSW_T]
-, isnull(b.FAW, 0) [FAW]
-, isnull(b.FAW_T, 0) [FAW_T]
-FROM fsw AS a
-FULL JOIN faw AS b ON a.WorkerFK = b.WorkerFK
+, isnull(a.FSS, 0) [FSS]
+, isnull(a.FSS_T, 0) [FSS_T]
+, isnull(b.FRS, 0) [FRS]
+, isnull(b.FRS_T, 0) [FRS_T]
+FROM fss AS a
+FULL JOIN frs as b ON a.WorkerFK = b.WorkerFK
 ),
 
 
@@ -74,15 +74,15 @@ AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
-fsw_faw_fadv AS (
+fss_frs_fadv AS (
 SELECT isnull(a.WorkerFK, b.WorkerFK) [WorkerFK]
-, isnull(a.FSW, 0) [FSW]
-, isnull(a.FSW_T, 0) [FSW_T]
-, isnull(a.FAW, 0) [FAW]
-, isnull(a.FAW_T, 0) [FAW_T]
+, isnull(a.FSS, 0) [FSS]
+, isnull(a.FSS_T, 0) [FSS_T]
+, isnull(a.FRS, 0) [FRS]
+, isnull(a.FRS_T, 0) [FRS_T]
 , isnull(b.FAdv, 0) [FAdv]
 , isnull(b.FAdv_T, 0) [FAdv_T]
-FROM fsw_faw AS a
+FROM fss_frs AS a
 FULL JOIN fadv AS b ON a.WorkerFK = b.WorkerFK
 ),
 
@@ -98,17 +98,17 @@ AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
 
-fsw_faw_fadv_supervisor AS (
+fss_frs_fadv_supervisor AS (
 SELECT isnull(a.WorkerFK, b.WorkerFK) [WorkerFK]
-, isnull(a.FSW, 0) [FSW]
-, isnull(a.FSW_T, 0) [FSW_T]
-, isnull(a.FAW, 0) [FAW]
-, isnull(a.FAW_T, 0) [FAW_T]
+, isnull(a.FSS, 0) [FSS]
+, isnull(a.FSS_T, 0) [FSS_T]
+, isnull(a.FRS, 0) [FRS]
+, isnull(a.FRS_T, 0) [FRS_T]
 , isnull(a.FAdv, 0) [FAdv]
 , isnull(a.FAdv_T, 0) [FAdv_T]
 , isnull(b.Supervisor, 0) [Supervisor]
 , isnull(b.Supervisor_T, 0) [Supervisor_T]
-FROM fsw_faw_fadv AS a
+FROM fss_frs_fadv AS a
 FULL JOIN Supervisor AS b ON a.WorkerFK = b.WorkerFK
 ),
 
@@ -123,27 +123,27 @@ AND (a.TerminationDate IS NULL OR a.TerminationDate > @StartDt)
 AND (case when @SiteFK = 0 then 1 when a.SiteFK = @SiteFK then 1 else 0 end = 1)
 ),
 
-fsw_faw_fadv_supervisor_manager AS (
+fss_frs_fadv_supervisor_manager AS (
 SELECT isnull(a.WorkerFK, b.WorkerFK) [WorkerFK]
-, isnull(a.FSW, 0) [FSW]
-, isnull(a.FSW_T, 0) [FSW_T]
-, isnull(a.FAW, 0) [FAW]
-, isnull(a.FAW_T, 0) [FAW_T]
+, isnull(a.FSS, 0) [FSS]
+, isnull(a.FSS_T, 0) [FSS_T]
+, isnull(a.FRS, 0) [FRS]
+, isnull(a.FRS_T, 0) [FRS_T]
 , isnull(a.FAdv, 0) [FAdv]
 , isnull(a.FAdv_T, 0) [FAdv_T]
 , isnull(a.Supervisor, 0) [Supervisor]
 , isnull(a.Supervisor_T, 0) [Supervisor_T]
 , isnull(b.Manager, 0) [Manager]
 , isnull(b.Manager_T, 0) [Manager_T]
-FROM fsw_faw_fadv_supervisor AS a
+FROM fss_frs_fadv_supervisor AS a
 FULL JOIN Manager AS b ON a.WorkerFK = b.WorkerFK
 ),
 
 xxx AS (
 SELECT a.WorkerFK,
 rtrim(FirstName) + ' ' + rtrim(LastName) [Name]
-, CASE WHEN a.FSW = 1 THEN 'FSW ' ELSE '' END +
-CASE WHEN a.FAW = 1 THEN 'FAW ' ELSE '' END +
+, CASE WHEN a.FSS = 1 THEN 'FSS ' ELSE '' END +
+CASE WHEN a.FRS = 1 THEN 'FRS ' ELSE '' END +
 CASE WHEN a.FAdv = 1 THEN 'FADV ' ELSE '' END +
 CASE WHEN a.Supervisor = 1 THEN 'SUP ' ELSE '' END +
 CASE WHEN a.Manager = 1 THEN 'PM' ELSE '' END [Func]
@@ -154,7 +154,7 @@ CASE WHEN a.Manager = 1 THEN 'PM' ELSE '' END [Func]
 , CASE WHEN Children = 1 THEN 'Yes' ELSE 'No' END [Parents]
 , CASE WHEN wp.LivesTargetArea = 1 THEN 'Yes' ELSE 'No' END [LivingInTargetArea]
 , LastName
-FROM fsw_faw_fadv_supervisor_manager AS a
+FROM FSS_frs_fadv_supervisor_manager AS a
 JOIN Worker AS w ON a.WorkerFK = w.WorkerPK
 JOIN WorkerProgram AS wp ON wp.WorkerFK = a.WorkerFK 
 INNER JOIN dbo.SplitString(@programfk,',') on wp.ProgramFK = listitem
