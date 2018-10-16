@@ -18,9 +18,10 @@ begin
 
     -- Insert statements for procedure here
 	select HVCaseFK
+			, 'HV' as CaseType
 			, PC1ID
 			, cl.LevelName as CurrentLevelName
-			, case when CurrentFSWFK = @WorkerFK then 0 else 1 end as Assigned
+			, case when CurrentFSWFK = @WorkerFK then 1 else 0 end as Assigned
 			, case when DischargeDate is null then 0 else 1 end as Discharged
 	from CaseProgram cp
 	inner join HVCase hc on hc.HVCasePK = cp.HVCaseFK
@@ -29,8 +30,23 @@ begin
 			and IntakeDate is not null
 			and (DischargeDate is null or 
 					cp.DischargeDate > dateadd(month, -6, current_Timestamp))
-	order by Assigned
+	union all
+	select HVCaseFK
+			, 'PS' as CaseType
+			, PC1ID
+			, cl.LevelName as CurrentLevelName
+			, case when CurrentFAWFK = @WorkerFK then 1 else 0 end as Assigned
+			, case when DischargeDate is null then 0 else 1 end as Discharged
+	from CaseProgram cp
+	inner join HVCase hc on hc.HVCasePK = cp.HVCaseFK
+	inner join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
+	where cp.ProgramFK = @ProgramFK
+			and IntakeDate is not null
+			and (DischargeDate is null or 
+					cp.DischargeDate > dateadd(month, -6, current_Timestamp))
+	order by Assigned desc
 				, Discharged
+				, CaseType
 				, cp.PC1ID
 end
 GO
