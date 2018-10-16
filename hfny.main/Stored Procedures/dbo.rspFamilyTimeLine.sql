@@ -1,10 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
 -- =============================================
 -- Author:		Jay Robohn
 -- Create date: 
@@ -13,7 +10,7 @@ GO
 --mod by dar
 --exec rspFamilyTimeline null,1
 -- =============================================
-CREATE procedure [dbo].[rspFamilyTimeLine]
+CREATE PROC [dbo].[rspFamilyTimeLine]
 (
     @pc1id     varchar(13),
     @programfk varchar(max)
@@ -118,6 +115,19 @@ as
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Follow Up'
+				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+			where pc1id = @pc1id
+				 and caseprogress >= 11
+
+		UNION
+        
+		--CHEERS Check-In
+		select IIF(DATEADD(dd,dueby,hvcase.tcdob) < '12/01/2018', (EventDescription + ' (N/A)'), EventDescription)
+			  ,dateadd(dd,dueby,hvcase.tcdob) DueDate
+			from caseprogram
+				inner join hvcase on hvcasepk = caseprogram.hvcasefk
+				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
+				inner join codeduebydates on scheduledevent = 'CHEERS'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
 				 and caseprogress >= 11
