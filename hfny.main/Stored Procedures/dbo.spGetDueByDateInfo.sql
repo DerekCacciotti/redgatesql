@@ -1,16 +1,14 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Dorothy Baum
 -- Create date: 3, 12, 2012
 -- Description:	Procedure to return dueby (duedate), minimumdue, maximumdue, &
 --     eventdescription
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetDueByDateInfo] @ScheduledEvent varchar(20), @interval char(2)
+CREATE PROC [dbo].[spGetDueByDateInfo] @ScheduledEvent varchar(20), @interval char(2)
 
 AS
 BEGIN
@@ -27,6 +25,7 @@ SELECT codeDueByDatesPK
 	  ,MinimumDue
 	  ,ScheduledEvent
 	  ,Frequency
+	  ,Optional
   FROM [dbo].[codeDueByDates]
   WHERE [ScheduledEvent] = @ScheduledEvent and [Interval] = @Interval
 END
