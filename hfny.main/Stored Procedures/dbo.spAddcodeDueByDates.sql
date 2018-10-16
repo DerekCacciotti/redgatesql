@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,7 +8,8 @@ CREATE PROCEDURE [dbo].[spAddcodeDueByDates](@DueBy int=NULL,
 @MaximumDue int=NULL,
 @MinimumDue int=NULL,
 @ScheduledEvent varchar(20)=NULL,
-@Frequency int=NULL)
+@Frequency int=NULL,
+@Optional bit=NULL)
 AS
 INSERT INTO codeDueByDates(
 DueBy,
@@ -18,7 +18,8 @@ Interval,
 MaximumDue,
 MinimumDue,
 ScheduledEvent,
-Frequency
+Frequency,
+Optional
 )
 VALUES(
 @DueBy,
@@ -27,7 +28,8 @@ VALUES(
 @MaximumDue,
 @MinimumDue,
 @ScheduledEvent,
-@Frequency
+@Frequency,
+@Optional
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
