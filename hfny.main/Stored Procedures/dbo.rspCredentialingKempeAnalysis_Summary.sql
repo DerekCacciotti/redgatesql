@@ -1620,7 +1620,45 @@ begin
 				, null as AcceptedFirstVisitNotEnrolled
 				, null as Refused
 				, '3' as GroupID
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		UNION ALL
+        SELECT 'MOM Present' AS [title]
+		,  CASE WHEN presentCode = 1 THEN COUNT(presentCode) END AS TotalN
+
+		FROM #cteMain1
 	)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	,	issues1
 	as (
 		select	sum(case when a.Status = '1' then 1 else 0 end) as totalG1

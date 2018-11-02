@@ -33,7 +33,8 @@ as
 	declare @ClosedOnXLess3NoMove int
 
 	select @ClosedOnXLess3NoMove = count(distinct case
-			  when datediff(day,e4.LevelAssignDate,dischargedate) < 92 and CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029) -- level X-term
+			  when datediff(day,e4.LevelAssignDate,dischargedate) < 92 and CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029,1058,1062, -- level CO-term
+																							1082,1084,1085,1088,1089,1091,1093,1095,1096) -- level TO-term
 				  and (dischargedate is not null or dischargedate < @edate) and DischargeCode not in (7,17,18,20,21,23,25,36,37) then
 				  PC1ID
 		  end)
@@ -47,8 +48,10 @@ as
 							 ,levelname
 							 ,caseweight
 					   from hvlevel
-					    inner join codelevel on codelevelpk = levelfk
-						where LevelFK IN (22,24,25,26,27,28,29)) e4 on e4.hvcasefk = caseprogram.hvcasefk and e4.programfk = caseprogram.programfk
+					    inner join codelevel on codelevelpk = levelfk						
+						where LevelFK IN (22,24,25,26,27,28,29, 1056, 1060 --these are all the LEVEL CO (X) levels (excluding termed)
+												, 1097, 1080,1081,1083,1086,1087,1090,1092,1094) --these are all the LEVEL TO levels (excluding termed)
+						) e4 on e4.hvcasefk = caseprogram.hvcasefk and e4.programfk = caseprogram.programfk
 		   left join codeDischarge on DischargeCode = caseprogram.DischargeReason
 		   inner join WorkerProgram wp on CurrentFSWFK = WorkerFK
 		   inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = HVCasePK
@@ -75,7 +78,9 @@ as
 							  ,caseweight
 			from hvlevel
 				inner join codelevel on codelevelpk = levelfk
-			where LevelFK IN (22,24,25,26,27,28,29)) e3 on e3.hvcasefk = caseprogram.hvcasefk and e3.programfk = caseprogram.programfk
+			where LevelFK IN (22,24,25,26,27,28,29, 1056, 1060 --these are all the LEVEL CO (X) levels (excluding termed)
+							, 1097, 1080,1081,1083,1086,1087,1090,1092,1094) --these are all the LEVEL TO levels (excluding termed)
+							) e3 on e3.hvcasefk = caseprogram.hvcasefk and e3.programfk = caseprogram.programfk
 			inner join codeDischarge on DischargeCode = caseprogram.DischargeReason
 			inner join Worker on Worker.WorkerPK = CaseProgram.CurrentFSWFK
 		    inner join WorkerProgram wp on CurrentFSWFK = WorkerFK AND wp.programfk = listitem
@@ -83,7 +88,8 @@ as
 		where caseprogress >= 9
 			 and intakedate <= @edate
 			 and datediff(day,e3.LevelAssignDate,dischargedate) < 92
-			 and CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029) -- level X-term
+			 and CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029,1058,1062, -- level CO-term
+									1082,1084,1085,1088,1089,1091,1093,1095,1096) -- level TO-term
 			 and (dischargedate is not null
 			 or dischargedate < @edate)
 			 and DischargeCode not in (7,17,18,20,21,23,25,36,37)
