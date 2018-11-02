@@ -341,6 +341,9 @@ BEGIN
 		INNER JOIN dbo.HVLevelDetail hvl ON coh.HVCasePK = hvl.HVCaseFK
 		INNER JOIN dbo.SplitString(@ProgramFK,',') on hvl.ProgramFK = listitem
 		WHERE hvl.LevelFK BETWEEN 22 AND 29
+		--Now for the new levels that HFA added for 2018 Best Practice Standards
+		OR hvl.levelfk = 1056 OR hvl.LevelFK=1060
+		OR hvl.LevelFK BETWEEN 1080 AND 1097
 
 	INSERT INTO @tblCreativeOutreachDatesCombined
 		SELECT DISTINCT mt2.HVCasePK, STUFF((SELECT ' | ' + CONVERT(VARCHAR(10), mt.StartDate, 101) + ' - ' + CONVERT(VARCHAR(10), mt.EndDate, 101) AS [text()] FROM @tblCreativeOutreachDates mt WHERE mt.HVCasePK = mt2.HVCasePK AND mt.Cohort = mt2.Cohort FOR XML PATH('')), 1, 3, ''), mt2.Cohort
