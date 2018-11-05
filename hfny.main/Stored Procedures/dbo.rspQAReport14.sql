@@ -134,7 +134,7 @@ select
 	
 	where   ((h.IntakeDate <= dateadd(M, -1, @LastDayofPreviousMonth)) AND (h.IntakeDate IS NOT NULL))	 		  
 			AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @LastDayofPreviousMonth)
-			AND codeLevel.LevelName NOT IN ('Level 4', 'Level X', 'Level X-term')
+			AND codeLevel.LevelName NOT IN ('Level 4', 'Level CO', 'Level CO-term', 'Level TO', 'Level TO-term')
 			AND cp.CaseStartDate <= @Back2MonthsFromAnalysisPoint  -- new 			
 			order by h.HVCasePK -- h.IntakeDate 
 
@@ -237,7 +237,7 @@ DECLARE @tbl4QAReport14Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport14Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(14 ,'No Home Visits since ' + convert(VARCHAR(12),@Back2MonthsFromAnalysisPoint, 101) + ' for Active Cases Excludes Level X and Level 4 Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(14 ,'No Home Visits since ' + convert(VARCHAR(12),@Back2MonthsFromAnalysisPoint, 101) + ' for Active Cases Excludes Level TO/CO and Level 4 Cases (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfActiveIntakeCases) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfActiveIntakeCases AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 

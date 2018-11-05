@@ -1620,6 +1620,7 @@ begin
 				, null as AcceptedFirstVisitNotEnrolled
 				, null as Refused
 				, '3' as GroupID
+		FROM #cteMain1
 	)
 	,	issues1
 	as (
