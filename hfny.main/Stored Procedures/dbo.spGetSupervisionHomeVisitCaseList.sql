@@ -40,7 +40,7 @@ as begin
 		, FGPProgress
 		, FGPProgressComments
 		, FGPProgressStatus
-		, HVCaseFK
+		, sc.HVCaseFK
 		, HVCulturalSensitivity
 		, HVCulturalSensitivityComments
 		, HVCulturalSensitivityStatus
@@ -56,7 +56,8 @@ as begin
 		, Medical
 		, MedicalComments
 		, MedicalStatus
-		, ProgramFK
+		, cp.PC1ID
+		, sc.ProgramFK
 		, Successes
 		, SuccessesComments
 		, SuccessesStatus
@@ -68,6 +69,7 @@ as begin
 		, TransitionPlanningComments
 		, TransitionPlanningStatus
 	from	SupervisionHomeVisitCase sc
+	inner join CaseProgram cp on cp.HVCaseFK = sc.HVCaseFK
 	where	sc.SupervisionFK = @SupervisionFK ;
 end ;
 GO

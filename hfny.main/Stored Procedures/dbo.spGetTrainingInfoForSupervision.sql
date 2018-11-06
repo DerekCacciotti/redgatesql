@@ -29,7 +29,44 @@ as begin
 		 , t.TrainingDate
 		 , t.TrainingDays
 		 , t.TrainingDescription
-		 , t.TrainingDuration
+		 , case when t.TrainingDays is not null and t.TrainingDays > 0 
+				then convert(char(2), t.TrainingDays) + ' Day' +
+						case when TrainingDays > 1 then 's' else '' end + ' '
+				else ''
+				end +
+			case when t.TrainingHours is not null and t.TrainingHours > 0 
+				then convert(char(2), t.TrainingHours) + ' Hour' + 
+						case when t.TrainingHours > 1 then 's' else '' end + ' '
+				else ''
+				end +
+			case when t.TrainingMinutes is not null and t.TrainingMinutes > 0 
+				then convert(char(2), t.TrainingMinutes) + ' Min' +
+						case when t.TrainingMinutes > 1 then 's' else '' end
+				else ''
+				end as TrainingDuration		 
+			-- above was left(..., 25) then replaced 25 with
+				--convert(int, len(case when t.TrainingDays is not null and t.TrainingDays > 0 
+				--	then convert(char(2), t.TrainingDays) + ' Day' +
+				--			case when TrainingDays > 1 then 's' else '' end + ', '
+				--	else ''
+				--	end +
+				--case when t.TrainingHours is not null and t.TrainingHours > 0 
+				--	then convert(char(2), t.TrainingHours) + ' Hour' + 
+				--			case when t.TrainingHours > 1 then 's' else '' end + ', '
+				--	else ''
+				--	end +
+				--case when t.TrainingMinutes is not null and t.TrainingMinutes > 0 
+				--	then convert(char(2), t.TrainingMinutes) + ' Minute' +
+				--			case when t.TrainingMinutes > 1 then 's' else '' end + ', '
+				--	else ''
+				--	end) - 2)
+		 , SubTopicDescription = 
+					substring((select	', ' + st.SubTopicCode + '-' + st.SubTopicName
+		 						from	SubTopic st
+								where	st.SubTopicPK = td.SubTopicFK
+							   for
+								xml	path('')
+							   ), 3, 1000)
 		 , t.TrainingEditDate
 		 , t.TrainingEditor
 		 , t.TrainingHours
@@ -50,31 +87,10 @@ as begin
 		 , td.TrainingFK
 		 , td.ExemptDescription
 		 , td.ExemptType
-		 , st.SubTopicPK
-		 , st.ProgramFK
-		 , st.RequiredBy
-		 , st.SATFK
-		 , st.SubTopicCode
-		 , st.SubTopicCreateDate
-		 , st.SubTopicCreator
-		 , st.SubTopicEditDate
-		 , st.SubTopicEditor
-		 , st.SubTopicName
-		 , st.SubTopicPK_old
-		 , st.TopicFK
-		 , st.TrainingTickler
-		 , ta.TrainingAttendeePK
-		 , ta.TrainingAttendeeCreateDate
-		 , ta.TrainingAttendeeCreator
-		 , ta.TrainingAttendeeEditDate
-		 , ta.TrainingAttendeeEditor
-		 , ta.TrainingFK
-		 , ta.WorkerFK
 	from Training t
 	inner join TrainingDetail td on td.TrainingFK = t.TrainingPK
 	inner join TrainingAttendee ta on ta.TrainingFK = t.TrainingPK
 	inner join  Trainer t2 on t2.TrainerPK = t.TrainerFK
-	inner join SubTopic st on st.SubTopicPK = td.SubTopicFK
 	where ta.WorkerFK = @WorkerFK
 	order by t.TrainingDate desc
 end ;
