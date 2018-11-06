@@ -116,7 +116,7 @@ select
 	
 	where   ((h.IntakeDate <= dateadd(M, -1, @LastDayofPreviousMonth)) AND (h.IntakeDate IS NOT NULL))	 		  
 			AND (cp.DischargeDate IS NULL OR cp.DischargeDate > @LastDayofPreviousMonth)
-			AND codeLevel.LevelName IN ('Level X')			
+			AND codeLevel.LevelName IN ('Level CO','Level TO')			
 			order by h.HVCasePK
 	
 -- rspQAReport15 34 ,'summary'
@@ -150,7 +150,7 @@ DECLARE @tbl4QAReport15Summary TABLE(
 )
 
 INSERT INTO @tbl4QAReport15Summary([SummaryId],[SummaryText],[SummaryTotal])
-VALUES(15 ,'Cases on Level X for more than 91 days (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
+VALUES(15 ,'Cases on Level CO/TO for more than 91 days (N=' + CONVERT(VARCHAR,@numOfALLScreens) + ')' 
 ,CONVERT(VARCHAR,@numOfCasesOnLevelX) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfCasesOnLevelX AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 )
 

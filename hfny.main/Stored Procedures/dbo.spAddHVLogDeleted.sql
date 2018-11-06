@@ -125,6 +125,8 @@ CREATE PROCEDURE [dbo].[spAddHVLogDeleted](@HVLogPK int=NULL,
 @HouseholdChangesNew bit=NULL,
 @HVCaseFK int=NULL,
 @HVLogCreator char(10)=NULL,
+@HVLogDeleteDate datetime=NULL,
+@HVLogDeleter char(10)=NULL,
 @HVSupervisorParticipated bit=NULL,
 @NextScheduledVisit datetime=NULL,
 @NextVisitNotes varchar(max)=NULL,
@@ -229,9 +231,7 @@ CREATE PROCEDURE [dbo].[spAddHVLogDeleted](@HVLogPK int=NULL,
 @VisitLocation char(5)=NULL,
 @VisitStartTime datetime=NULL,
 @VisitType char(6)=NULL,
-@VisitTypeComments varchar(max)=NULL,
-@HVLogDeleteDate datetime=NULL,
-@HVLogDeleter char(10)=NULL)
+@VisitTypeComments varchar(max)=NULL)
 AS
 INSERT INTO HVLogDeleted(
 HVLogPK,
@@ -357,6 +357,8 @@ HouseholdChangesLeft,
 HouseholdChangesNew,
 HVCaseFK,
 HVLogCreator,
+HVLogDeleteDate,
+HVLogDeleter,
 HVSupervisorParticipated,
 NextScheduledVisit,
 NextVisitNotes,
@@ -461,9 +463,7 @@ VisitLengthMinute,
 VisitLocation,
 VisitStartTime,
 VisitType,
-VisitTypeComments,
-HVLogDeleteDate,
-HVLogDeleter
+VisitTypeComments
 )
 VALUES(
 @HVLogPK,
@@ -589,6 +589,8 @@ VALUES(
 @HouseholdChangesNew,
 @HVCaseFK,
 @HVLogCreator,
+@HVLogDeleteDate,
+@HVLogDeleter,
 @HVSupervisorParticipated,
 @NextScheduledVisit,
 @NextVisitNotes,
@@ -693,9 +695,7 @@ VALUES(
 @VisitLocation,
 @VisitStartTime,
 @VisitType,
-@VisitTypeComments,
-@HVLogDeleteDate,
-@HVLogDeleter
+@VisitTypeComments
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

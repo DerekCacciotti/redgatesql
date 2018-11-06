@@ -50,27 +50,44 @@ as
 	    	select families_served = count(distinct pc1id)
 			,x = count(distinct e4.HVCaseFK)
 			,XAndOpen = count(distinct case
-				     when (dischargedate is null or DischargeDate > @edate) and CurrentLevelFK IN (22,24,25,26,27,28,29) then
+				     when (dischargedate is null or DischargeDate > @edate) 
+					 AND CurrentLevelFK IN  (22,24,25,26,27,28,29,1056,1060 --these are all the LEVEL CO (X) levels (excluding termed)
+											,1097,1080,1081,1083,1086,1087,1090,1092,1094) --these are all the LEVEL TO levels (excluding termed)
+					 THEN
 					 PC1ID end)*1.0
 			,ClosedOnXLess3 = count(distinct case
-					 when datediff(day,e4.LevelAssignDate,dischargedate) < 92 and CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029) -- level X-term
+					 when datediff(day,e4.LevelAssignDate,dischargedate) < 92 
+										AND CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029,1058,1062 -- level CO (X)-term
+										,1082,1084,1085,1088,1089,1091,1093,1095,1096  --ALL LEVEL TO TERM
+										)  -- level X-term
 					 and (dischargedate is not null or dischargedate <= @edate) and DischargeCode in (7,17,18,20,21,23,25,36,37) then
 					 PC1ID end)*1.0
 			,ClosedOnXGreater3 = count(distinct case
-	                 when datediff(day,e4.LevelAssignDate,dischargedate) >= 92 and CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029) -- level X-term
+	                 when datediff(day,e4.LevelAssignDate,dischargedate) >= 92 
+										AND CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029,1058,1062 -- level CO (X)-term
+										,1082,1084,1085,1088,1089,1091,1093,1095,1096  --ALL LEVEL TO TERM
+										) 
 					 and (dischargedate is not null or dischargedate <= @edate) then
 					 PC1ID end)*1.0
 			,ClosedOnXLess3NoMove = count(distinct case
-				     when datediff(day,e4.LevelAssignDate,dischargedate) < 92 and CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029) -- level X-term
+				     when datediff(day,e4.LevelAssignDate,dischargedate) < 92 
+										AND CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029,1058,1062 -- level CO (X)-term
+										,1082,1084,1085,1088,1089,1091,1093,1095,1096  --ALL LEVEL TO TERM
+										) 
 					 and (dischargedate is not null and dischargedate <= @edate) and DischargeCode not in (7,17,18,20,21,23,25,36,37) then
 					 PC1ID end)*1.0
 			,ReXOpen = count(distinct case
 				     when (dischargedate is null or DischargeDate > @edate) and CaseProgram.CurrentLevelDate > e4.LevelAssignDate 
-				     and CaseProgram.CurrentLevelFK not in (22,24,25,26,27,28,29,23,1024,1025,1026,1027,1028,1029) then
+				     and CaseProgram.CurrentLevelFK not in (22,24,25,26,27,28,29,23,1024,1025,1026,1027,1028,1029,1056,1058,1060,1062  --ALL LEVEL CO (X)
+								,1080,1081,1082,1083,1084,1085,1086,1087,1088,1089,1090,1091,1092,1093,1094,1095,1096,1097  --ALL LEVEL TO)
+							) then
 				     PC1ID end)*1.0
 			,ReXClosed = count(distinct case
 					 when (dischargedate is not null and dischargedate < @edate) and 
-					 CaseProgram.CurrentLevelDate > e4.LevelAssignDate and CaseProgram.CurrentLevelFK not in (22,24,25,26,27,28,29,23,1024,1025,1026,1027,1028,1029) then
+					 CaseProgram.CurrentLevelDate > e4.LevelAssignDate and CaseProgram.CurrentLevelFK 
+							NOT in (22,24,25,26,27,28,29,23,1024,1025,1026,1027,1028,1029,1056,1058,1060  --ALL LEVEL CO (X)
+								,1080,1081,1082,1083,1084,1085,1086,1087,1088,1089,1090,1091,1092,1093,1094,1095,1096,1097  --ALL LEVEL TO
+							) then
 					 PC1ID end)*1.0
 
 			  from hvcase
@@ -83,7 +100,8 @@ as
 								   ,max(hvlevel.levelassigndate) [levelassigndate]
 								 from hvlevel
 									 inner join codelevel on codelevelpk = levelfk
-								 where LevelFK IN (22,24,25,26,27,28,29)
+								 where LevelFK IN (22,24,25,26,27,28,29, 1056, 1060 --these are all the LEVEL CO (X) levels (excluding termed)
+												, 1097, 1080,1081,1083,1086,1087,1090,1092,1094) --these are all the LEVEL TO levels (excluding termed)
 								 group by hvlevel.hvcasefk
 										 ,hvlevel.programfk
 										 ,codelevel.levelname

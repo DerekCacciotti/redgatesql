@@ -1,8 +1,6 @@
 CREATE TABLE [dbo].[HVScreen]
 (
 [HVScreenPK] [int] NOT NULL IDENTITY(1, 1),
-[DischargeReason] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[DischargeReasonSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [FAWFK] [int] NULL,
 [HVCaseFK] [int] NOT NULL,
 [ProgramFK] [int] NOT NULL,

@@ -787,7 +787,15 @@ begin
 	update @tblFinalExport set Response = @visitReceived where RowNumber = 20 and Detail = 0
 --end B10
 
---B11 MIECHV funded
+--B11 row 21 MIECHV funded
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 21, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid where tpid.PC1ID in 
+	( select distinct me.PC1ID from MIECHVEligible me )
+	declare @miechv int
+	set @miechv = (select count(*) from @tblFinalExport tfe where RowNumber = 21 and Detail = 1)
+	update @tblFinalExport set Response = @miechv where RowNumber = 21 and Detail = 0
+--End B11
 	
 --B12 row 22 Received first home visit in time period
     insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
