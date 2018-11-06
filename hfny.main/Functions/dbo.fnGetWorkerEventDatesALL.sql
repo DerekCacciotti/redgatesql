@@ -58,6 +58,13 @@ RETURN
 		GROUP BY FSWFK
 		)
 
+		, ctCheers AS
+		(SELECT DISTINCT FSWFK, min(ObservationDate) AS ObservationDate
+		FROM CheersCheckIn cci
+		WHERE cci.programfk = @prgfk
+		GROUP BY FSWFK, programfk
+		)
+
 		SELECT DISTINCT w.WorkerPK
 			 , w.LastName AS 'WrkrLName'
 			 , w.FirstName AS 'WrkrFName'
@@ -82,6 +89,7 @@ RETURN
 					ELSE ctk.KempeDate END		
 				END AS 'FirstEvent'
 			, MIN(ctPSI.PSIDate) AS 'FirstPSIDate'
+			, MIN(ctCheers.ObservationDate) AS 'FirstCHEERSDate'
 		FROM Worker w
 		INNER JOIN workerprogram wp ON wp.WorkerFK= w.workerpk
 		INNER JOIN worker supervisor on supervisorfk = supervisor.workerpk
@@ -90,6 +98,7 @@ RETURN
 		LEFT OUTER JOIN ctKempe ctk ON ctk.FAWFK = w.workerpk
 		LEFT OUTER JOIN ctSuper ON ctsuper.SupervisorFK=w.WorkerPK
 		LEFT OUTER JOIN ctPSI ON ctpsi.fswfk = w.WorkerPK
+		LEFT OUTER JOIN ctCheers ON ctCheers.fswfk = w.WorkerPK
 		GROUP BY wp.programfk, w.WorkerPK, w.LastName, w.firstname
 		,wp.supervisorfk
 		,wp.SupervisorStartDate, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate
