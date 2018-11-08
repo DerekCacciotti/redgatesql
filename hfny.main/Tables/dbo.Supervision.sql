@@ -4,9 +4,6 @@ CREATE TABLE [dbo].[Supervision]
 [AreasGrowth] [bit] NULL,
 [AreasGrowthComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [AreasGrowthStatus] [bit] NULL,
-[AssessmentRate] [bit] NULL,
-[AssessmentRateComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[AssessmentRateStatus] [bit] NULL,
 [Boundaries] [bit] NULL,
 [BoundariesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [BoundariesStatus] [bit] NULL,
@@ -126,6 +123,359 @@ CREATE TABLE [dbo].[Supervision]
 [SupervisorVacation] [bit] NULL,
 [Weather] [bit] NULL
 ) ON [PRIMARY]
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2014Feb24
+-- Description:	Delete FormReview row when  
+--				the Supervision row deleted
+-- =============================================
+CREATE trigger [dbo].[fr_delete_Supervision]
+on [dbo].[Supervision]
+after delete
+as
+declare @PK int ;
+
+set @PK = (select SupervisionPK from deleted) ;
+
+begin
+	execute spDeleteFormReview_Trigger @FormFK = @PK, @FormTypeValue = 'SU' ;
+	
+insert into [dbo].[SupervisionDeleted]
+           ([SupervisionPK]
+		   ,[AreasGrowth]
+           ,[AreasGrowthComments]
+           ,[AreasGrowthStatus]
+           ,[Boundaries]
+           ,[BoundariesComments]
+           ,[BoundariesStatus]
+           ,[Caseload]
+           ,[CaseloadComments]
+           ,[CaseloadStatus]
+           ,[Coaching]
+           ,[CoachingComments]
+           ,[CoachingStatus]
+           ,[CPS]
+           ,[CPSComments]
+           ,[CPSStatus]
+           ,[FamilyProgress]
+           ,[FamilyProgressComments]
+           ,[FamilyProgressStatus]
+           ,[FormComplete]
+           ,[HomeVisitLogActivities]
+           ,[HomeVisitLogActivitiesComments]
+           ,[HomeVisitLogActivitiesStatus]
+           ,[HomeVisitRate]
+           ,[HomeVisitRateComments]
+           ,[HomeVisitRateStatus]
+           ,[IFSP]
+           ,[IFSPComments]
+           ,[IFSPStatus]
+           ,[ImpactOfWork]
+           ,[ImpactOfWorkComments]
+           ,[ImpactOfWorkStatus]
+           ,[ImplementTraining]
+           ,[ImplementTrainingComments]
+           ,[ImplementTrainingStatus]
+           ,[Outreach]
+           ,[OutreachComments]
+           ,[OutreachStatus]
+           ,[PersonalGrowth]
+           ,[PersonalGrowthComments]
+           ,[PersonalGrowthStatus]
+           ,[Personnel]
+           ,[PersonnelComments]
+           ,[PersonnelStatus]
+           ,[PIP]
+           ,[PIPComments]
+           ,[PIPStatus]
+           ,[ProfessionalGrowth]
+           ,[ProfessionalGrowthComments]
+           ,[ProfessionalGrowthStatus]
+           ,[ProgramFK]
+           ,[RecordDocumentation]
+           ,[RecordDocumentationComments]
+           ,[RecordDocumentationStatus]
+           ,[Retention]
+           ,[RetentionComments]
+           ,[RetentionStatus]
+           ,[RolePlaying]
+           ,[RolePlayingComments]
+           ,[RolePlayingStatus]
+           ,[Safety]
+           ,[SafetyComments]
+           ,[SafetyStatus]
+           ,[SiteDocumentation]
+           ,[SiteDocumentationComments]
+           ,[SiteDocumentationStatus]
+           ,[Shadow]
+           ,[ShadowComments]
+           ,[ShadowStatus]
+           ,[StrengthBasedApproach]
+           ,[StrengthBasedApproachComments]
+           ,[StrengthBasedApproachStatus]
+           ,[Strengths]
+           ,[StrengthsComments]
+           ,[StrengthsStatus]
+           ,[SupervisionCreateDate]
+           ,[SupervisionCreator]
+           ,[SupervisionDate]
+           ,[SupervisionEditDate]
+           ,[SupervisionEditor]
+           ,[SupervisionEndTime]
+           ,[SupervisionHours]
+           ,[SupervisionMinutes]
+           ,[SupervisionNotes]
+           ,[SupervisionStartTime]
+           ,[SupervisorFK]
+           ,[SupervisorObservationAssessment]
+           ,[SupervisorObservationAssessmentComments]
+           ,[SupervisorObservationAssessmentStatus]
+           ,[SupervisorObservationHomeVisit]
+           ,[SupervisorObservationHomeVisitComments]
+           ,[SupervisorObservationHomeVisitStatus]
+           ,[TakePlace]
+           ,[TeamDevelopment]
+           ,[TeamDevelopmentComments]
+           ,[TeamDevelopmentStatus]
+           ,[TechniquesApproaches]
+           ,[TechniquesApproachesComments]
+           ,[TechniquesApproachesStatus]
+           ,[TrainingNeeds]
+           ,[TrainingNeedsComments]
+           ,[TrainingNeedsStatus]
+           ,[WorkerFK]
+           ,[ParticipantEmergency]
+           ,[ReasonOther]
+           ,[ReasonOtherSpecify]
+           ,[ShortWeek]
+           ,[StaffCourt]
+           ,[StaffFamilyEmergency]
+           ,[StaffForgot]
+           ,[StaffIll]
+           ,[StaffOnLeave]
+           ,[StaffTraining]
+           ,[StaffVacation]
+           ,[StaffOutAllWeek]
+           ,[SupervisorFamilyEmergency]
+           ,[SupervisorForgot]
+           ,[SupervisorHoliday]
+           ,[SupervisorIll]
+           ,[SupervisorTraining]
+           ,[SupervisorVacation]
+           ,[Weather])
+select [SupervisionPK]
+		   ,[AreasGrowth]
+           ,[AreasGrowthComments]
+           ,[AreasGrowthStatus]
+           ,[Boundaries]
+           ,[BoundariesComments]
+           ,[BoundariesStatus]
+           ,[Caseload]
+           ,[CaseloadComments]
+           ,[CaseloadStatus]
+           ,[Coaching]
+           ,[CoachingComments]
+           ,[CoachingStatus]
+           ,[CPS]
+           ,[CPSComments]
+           ,[CPSStatus]
+           ,[FamilyProgress]
+           ,[FamilyProgressComments]
+           ,[FamilyProgressStatus]
+           ,[FormComplete]
+           ,[HomeVisitLogActivities]
+           ,[HomeVisitLogActivitiesComments]
+           ,[HomeVisitLogActivitiesStatus]
+           ,[HomeVisitRate]
+           ,[HomeVisitRateComments]
+           ,[HomeVisitRateStatus]
+           ,[IFSP]
+           ,[IFSPComments]
+           ,[IFSPStatus]
+           ,[ImpactOfWork]
+           ,[ImpactOfWorkComments]
+           ,[ImpactOfWorkStatus]
+           ,[ImplementTraining]
+           ,[ImplementTrainingComments]
+           ,[ImplementTrainingStatus]
+           ,[Outreach]
+           ,[OutreachComments]
+           ,[OutreachStatus]
+           ,[PersonalGrowth]
+           ,[PersonalGrowthComments]
+           ,[PersonalGrowthStatus]
+           ,[Personnel]
+           ,[PersonnelComments]
+           ,[PersonnelStatus]
+           ,[PIP]
+           ,[PIPComments]
+           ,[PIPStatus]
+           ,[ProfessionalGrowth]
+           ,[ProfessionalGrowthComments]
+           ,[ProfessionalGrowthStatus]
+           ,[ProgramFK]
+           ,[RecordDocumentation]
+           ,[RecordDocumentationComments]
+           ,[RecordDocumentationStatus]
+           ,[Retention]
+           ,[RetentionComments]
+           ,[RetentionStatus]
+           ,[RolePlaying]
+           ,[RolePlayingComments]
+           ,[RolePlayingStatus]
+           ,[Safety]
+           ,[SafetyComments]
+           ,[SafetyStatus]
+           ,[SiteDocumentation]
+           ,[SiteDocumentationComments]
+           ,[SiteDocumentationStatus]
+           ,[Shadow]
+           ,[ShadowComments]
+           ,[ShadowStatus]
+           ,[StrengthBasedApproach]
+           ,[StrengthBasedApproachComments]
+           ,[StrengthBasedApproachStatus]
+           ,[Strengths]
+           ,[StrengthsComments]
+           ,[StrengthsStatus]
+           ,[SupervisionCreateDate]
+           ,[SupervisionCreator]
+           ,[SupervisionDate]
+           ,[SupervisionEditDate]
+           ,[SupervisionEditor]
+           ,[SupervisionEndTime]
+           ,[SupervisionHours]
+           ,[SupervisionMinutes]
+           ,[SupervisionNotes]
+           ,[SupervisionStartTime]
+           ,[SupervisorFK]
+           ,[SupervisorObservationAssessment]
+           ,[SupervisorObservationAssessmentComments]
+           ,[SupervisorObservationAssessmentStatus]
+           ,[SupervisorObservationHomeVisit]
+           ,[SupervisorObservationHomeVisitComments]
+           ,[SupervisorObservationHomeVisitStatus]
+           ,[TakePlace]
+           ,[TeamDevelopment]
+           ,[TeamDevelopmentComments]
+           ,[TeamDevelopmentStatus]
+           ,[TechniquesApproaches]
+           ,[TechniquesApproachesComments]
+           ,[TechniquesApproachesStatus]
+           ,[TrainingNeeds]
+           ,[TrainingNeedsComments]
+           ,[TrainingNeedsStatus]
+           ,[WorkerFK]
+           ,[ParticipantEmergency]
+           ,[ReasonOther]
+           ,[ReasonOtherSpecify]
+           ,[ShortWeek]
+           ,[StaffCourt]
+           ,[StaffFamilyEmergency]
+           ,[StaffForgot]
+           ,[StaffIll]
+           ,[StaffOnLeave]
+           ,[StaffTraining]
+           ,[StaffVacation]
+           ,[StaffOutAllWeek]
+           ,[SupervisorFamilyEmergency]
+           ,[SupervisorForgot]
+           ,[SupervisorHoliday]
+           ,[SupervisorIll]
+           ,[SupervisorTraining]
+           ,[SupervisorVacation]
+           ,[Weather]
+from	Deleted d
+where	d.SupervisionPK = @PK ;
+
+end ;
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+
+
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2014Feb24
+-- Description:	Add FormReview row when 
+--				inserting Supervision row
+-- =============================================
+create TRIGGER [dbo].[fr_Supervision]
+on [dbo].[Supervision]
+After insert
+
+AS
+
+Declare @PK int
+
+set @PK = (SELECT SupervisionPK from inserted)
+
+BEGIN
+	EXEC spAddFormReview_userTriggernoHVCaseFK @FormFK=@PK, @FormTypeValue='SU'
+END
+
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2014Feb24
+-- Description:	Change FormReview's formdate if 
+--				the Supervision date changed
+-- =============================================
+create trigger [dbo].[fr_Supervision_Edit]
+on [dbo].[Supervision]
+after update
+
+AS
+
+declare @PK int
+declare @UpdatedFormDate datetime 
+declare @FormTypeValue varchar(2)
+
+select @PK = SupervisionPK FROM inserted
+select @UpdatedFormDate = SupervisionDate FROM inserted
+set @FormTypeValue = 'SU'
+
+begin
+	update FormReview
+	set FormDate=@UpdatedFormDate
+	where FormFK=@PK 
+			and FormType=@FormTypeValue
+
+END
+
+
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- create trigger TR_SupervisionEditDate ON Supervision
+-- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2014Feb24
+-- Description:	Change FormReview's editdate if 
+--				Supervision row has been edited
+-- =============================================
+create trigger [dbo].[TR_SupervisionEditDate] ON [dbo].[Supervision]
+For Update 
+AS
+Update Supervision Set Supervision.SupervisionEditDate= getdate()
+From [Supervision] INNER JOIN Inserted ON [Supervision].[SupervisionPK]= Inserted.[SupervisionPK]
+
 GO
 ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
 GO

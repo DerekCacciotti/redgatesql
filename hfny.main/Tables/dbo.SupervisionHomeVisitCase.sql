@@ -23,6 +23,7 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCase]
 [FGPProgress] [bit] NULL,
 [FGPProgressComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [FGPProgressStatus] [bit] NULL,
+[FollowUpHVCase] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
 [HVCulturalSensitivity] [bit] NULL,
 [HVCulturalSensitivityComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,

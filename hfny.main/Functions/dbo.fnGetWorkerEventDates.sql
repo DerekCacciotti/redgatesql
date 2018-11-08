@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -82,6 +81,13 @@ RETURN
 			GROUP BY FAWFK
 		  )
 
+		, ctCheers AS
+		(SELECT DISTINCT FSWFK, MIN(ObservationDate) AS ObservationDate
+		FROM CheersCheckIn cci
+		WHERE cci.ProgramFK = @prgfk
+		GROUP BY FSWFK, ProgramFK
+		)
+
 		SELECT DISTINCT w.WorkerPK
 			 , w.LastName AS 'WrkrLName'
 			 , w.FirstName AS 'WrkrFName'
@@ -108,6 +114,7 @@ RETURN
 			, MIN(ctphq.PHQDate) AS 'FirstPHQDate'
 			, MIN(ctHITSDate.HITSDate) AS 'FirstHITSDate'
 			, MIN(ctAuditC.AudtCDate) AS 'FirstAuditCDate'
+			, MIN(ctCheers.ObservationDate) AS 'FirstCHEERSDate'
 		FROM Worker w
 		INNER JOIN workerprogram wp ON wp.WorkerFK= w.workerpk
 		INNER JOIN worker supervisor on supervisorfk = supervisor.workerpk
@@ -119,6 +126,7 @@ RETURN
 		LEFT OUTER JOIN ctPHQ ON ctPHQ.FSWFK = w.WorkerPK
 		LEFT OUTER JOIN ctHITSDate ON ctHITSDate.FSWFK = w.WorkerPK
 		LEFT OUTER JOIN ctAuditC ON ctAuditC.FSWFK = w.WorkerPK
+		LEFT OUTER JOIN ctCheers ON ctCheers.FSWFK = w.WorkerPK
 		GROUP BY wp.programfk, w.WorkerPK, w.LastName, w.FirstName
 		,wp.supervisorfk
 		, wp.SupervisorStartDate, wp.TerminationDate, wp.HireDate, ctASQ.DateCompleted, w.SupervisorFirstEvent, ctSuper.SuperDate
