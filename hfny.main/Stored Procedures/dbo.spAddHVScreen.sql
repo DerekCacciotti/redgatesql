@@ -1,11 +1,8 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddHVScreen](@DischargeReason char(2)=NULL,
-@DischargeReasonSpecify varchar(500)=NULL,
-@FAWFK int=NULL,
+CREATE PROCEDURE [dbo].[spAddHVScreen](@FAWFK int=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL,
 @ReferralMade char(1)=NULL,
@@ -42,8 +39,6 @@ CREATE PROCEDURE [dbo].[spAddHVScreen](@DischargeReason char(2)=NULL,
 @TransferredtoProgram varchar(50)=NULL)
 AS
 INSERT INTO HVScreen(
-DischargeReason,
-DischargeReasonSpecify,
 FAWFK,
 HVCaseFK,
 ProgramFK,
@@ -81,8 +76,6 @@ TargetArea,
 TransferredtoProgram
 )
 VALUES(
-@DischargeReason,
-@DischargeReasonSpecify,
 @FAWFK,
 @HVCaseFK,
 @ProgramFK,

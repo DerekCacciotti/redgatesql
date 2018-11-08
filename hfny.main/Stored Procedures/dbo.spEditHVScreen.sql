@@ -1,11 +1,8 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditHVScreen](@HVScreenPK int=NULL,
-@DischargeReason char(2)=NULL,
-@DischargeReasonSpecify varchar(500)=NULL,
 @FAWFK int=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL,
@@ -44,8 +41,6 @@ CREATE PROCEDURE [dbo].[spEditHVScreen](@HVScreenPK int=NULL,
 AS
 UPDATE HVScreen
 SET 
-DischargeReason = @DischargeReason, 
-DischargeReasonSpecify = @DischargeReasonSpecify, 
 FAWFK = @FAWFK, 
 HVCaseFK = @HVCaseFK, 
 ProgramFK = @ProgramFK, 
