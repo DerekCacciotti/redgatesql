@@ -43,7 +43,7 @@ INNER JOIN TrainingAttendee ta ON ta.WorkerFK=cteEventDates.WorkerPK
 LEFT JOIN Training t on ta.TrainingFK = t.TrainingPK
 LEFT JOIN TrainingDetail td on td.TrainingFK=t.TrainingPK
 LEFT join codeTopic cdT on cdT.codeTopicPK=td.TopicFK
-where (cdT.TopicCode = 40.0) 
+where (cdT.TopicCode = 40.0) OR (cdT.TopicCode = 38.0)
 GROUP BY workerpk, cteEventDates.HireDate, t.IsExempt
 )
 
