@@ -31,12 +31,12 @@ begin
 	, Detail bit
 	)
 
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(1, 'B2', 'Number of home visits completed in 2017', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(1, 'B2', 'Number of home visits completed:', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(2, 'B3', 'How many PEOPLE worked in Assessment role at the end of last year?', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(3, 'B4', 'What was your total FTEs in Family Assessment Worker?', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(4, 'B5', 'How many PEOPLE worked in Home Visitor role at the end?', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(5, 'B6', 'What was your total FTEs in Home Visitor role?', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(6, 'B8', 'Etnnicity: Number of Home Visitors who are:', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(6, 'B8', 'Ethnicity: Number of Home Visitors who are:', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(7, 'B8', 'Hispanic', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(8, 'B8', 'Non-Hispanic', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(9, 'B8', 'Ethnicity Unknown', 0, 0)
@@ -372,8 +372,9 @@ begin
 	    hvcasefk
 		,HighestGrade
 		,MaritalStatus
-		,PrimaryLanguage
+		,PrimaryLanguage	
 	)
+
 	select hvcasefk
 		, HighestGrade
 		, MaritalStatus
@@ -443,6 +444,11 @@ begin
 	   , HVCaseFK int
 	   , NumberInHouse int
 	   , AvailableMonthlyIncome numeric(5,0)
+	   , PBEmergencyAssistance char(1)
+	   , PBFoodStamps char(1)
+	   , PBSSI char(1)
+	   , PBTANF char(1)
+	   , PBWIC char(1)
 	   , PC1ReceivingMedicaid bit
 	   , RowNum int
 	)
@@ -457,6 +463,11 @@ begin
 	   , HVCaseFK
 	   , NumberInHouse
 	   , AvailableMonthlyIncome
+	   , PBEmergencyAssistance
+	   , PBFoodStamps
+	   , PBSSI
+	   , PBTANF
+	   , PBWIC
 	   , PC1ReceivingMedicaid
 	   , RowNum 
 	)
@@ -470,6 +481,11 @@ begin
 	   , ca.HVCaseFK
 	   , ca.NumberInHouse
 	   , ca.AvailableMonthlyIncome
+	   , ca.PBEmergencyAssistance
+	   , ca.PBFoodStamps
+	   , ca.PBSSI
+	   , ca.PBTANF
+	   , ca.PBWIC
 	   , ca2.PC1ReceivingMedicaid
 	   , row_number() over (partition by ca.hvcasefk order by ca.FormDate desc) as [row]  
 	   from commonattributes ca
@@ -1027,7 +1043,15 @@ begin
 --end B31
 
 --B32 row 43
-	--PC1 involved in Child Welfare as a caregiver
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 43, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblPC1Insurance
+		where PBTANF = '1' or PBEmergencyAssistance = '1' or PBFoodStamps = '1' or PBSSI = '1' or PBWIC = '1'
+	)
+	declare @welfare int
+	set @welfare = (select count(*) from @tblFinalExport where RowNumber = 43 and Detail = 1)
+	update @tblFinalExport set Response = @welfare where RowNumber = 43 and Detail = 0
 --end B32
 
 --B33 
