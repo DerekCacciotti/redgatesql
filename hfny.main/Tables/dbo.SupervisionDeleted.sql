@@ -79,7 +79,7 @@ CREATE TABLE [dbo].[SupervisionDeleted]
 [SupervisionCreateDate] [datetime] NOT NULL,
 [SupervisionCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisionDate] [datetime] NOT NULL,
-[SupervisionDeleteDate] [datetime] NOT NULL,
+[SupervisionDeleteDate] [datetime] NULL,
 [SupervisionDeleter] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisionEditDate] [datetime] NULL,
 [SupervisionEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
