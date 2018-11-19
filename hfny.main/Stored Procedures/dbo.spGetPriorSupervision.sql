@@ -25,7 +25,6 @@ begin
 		)
 	select			s.SupervisionPK
 				, s.AreasGrowthStatus
-				, s.AssessmentRateStatus
 				, s.BoundariesStatus
 				, s.CaseloadStatus
 				, s.CoachingStatus

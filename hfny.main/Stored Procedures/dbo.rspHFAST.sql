@@ -31,16 +31,16 @@ begin
 	, Detail bit
 	)
 
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(1, 'B2', 'Number of home visits completed in 2017', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(1, 'B2', 'Number of home visits completed:', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(2, 'B3', 'How many PEOPLE worked in Assessment role at the end of last year?', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(3, 'B4', 'What was your total FTEs in Family Assessment Worker?', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(4, 'B5', 'How many PEOPLE worked in Home Visitor role at the end?', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(5, 'B6', 'What was your total FTEs in Home Visitor role?', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(6, 'B8', 'Etnnicity: Number of Home Visitors who are:', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(6, 'B8', 'Ethnicity: Number of Home Visitors who are:', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(7, 'B8', 'Hispanic', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(8, 'B8', 'Non-Hispanic', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(9, 'B8', 'Ethnicity Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(10, 'B9', 'Race: Number of Home Visitors who are:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(10, NULL, 'Race: Number of Home Visitors who are:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(11, 'B9', 'White', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(12, 'B9', 'African-American', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(13, 'B9', 'Asian', 0, 0)
@@ -76,44 +76,44 @@ begin
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(43, 'B32', 'Involved in Child Welfare System as caregiver', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(44, 'B33', 'Single parent', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(45, 'B34', 'Over cutoff on depression screen', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(46, 'B35', 'Insurance Status of PC1 (when last assessed)', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(46, NULL, 'Insurance Status of PC1 (when last assessed):', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(47, 'B35', 'No insurance', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(48, 'B35', 'Title XIX (Meicaid) / Title XXI (SCHIP) or Tri-Care', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(49, 'B35', 'Private or other insurance', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(50, 'B35', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(51, 'B35', 'Insurance Status of TC (when last assessed)', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(51, NULL, 'Insurance Status of TC (when last assessed):', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(52, 'B35', 'No insurance', 0, 0)	
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(53, 'B35', 'Title XIX (Medicaid) / Title XXI (SCHIP) or Tri-Care', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(54, 'B35', 'Private or other insurance', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(55, 'B35', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(56, 'B36', 'Housing Status of PC1 (when last assessed)', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(56, NULL, 'Housing Status of PC1 (when last assessed):', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(57, 'B36', 'renting or own home', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(58, 'B36', 'living with parent or family member', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(59, 'B36', 'sharing housing', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(60, 'B36', 'homeless', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(61, 'B36', 'unknown housing situation', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(62, 'B37', 'PC1 employment status', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(62, NULL, 'PC1 employment status:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(63, 'B37', 'employed full time', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(64, 'B37', 'employed part time', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(65, 'B37', 'not employed (whether seeking work or not)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(66, 'B37', 'unknown employment situation', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(67, 'B40', 'How many PC1s were', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(67, NULL, 'How many PC1s were:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(68, 'B40', 'Low risk on Initial Assessment(Parent Survey < 25', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(69, 'B40', 'Medium risk on Initial Assessment(Parent Survey 25-35)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(70, 'B40', 'Higher risk on Initial Assessment(Parent Survey 40+)', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(71, 'B41', 'TC age at Last Home Visit', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(71, NULL, 'TC age at Last Home Visit:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(72, 'B41', '0-5 months', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(73, 'B41', '6-11 months', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(74, 'B41', '12-23 months', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(75, 'B41', '24-35 months', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(76, 'B41', '36 months or older', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(77, 'B41', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(78, 'B42', 'Child Issues: Number of children who were', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(78, NULL, 'Child Issues: Number of children who were:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(79, 'B42', 'Born at low birth weight, less than 2500 grams or 5lbs 8oz', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(80, 'B42', 'Born premature, born before 37 weeks completed', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(81, 'B42', 'Developmentally delayed or disabled (known or suspected)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(82, 'B42', 'Medicaid eligible', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(83, 'B43', 'PC1 Age at Enrollment', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(83, NULL, 'PC1 Age at Enrollment:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(84, 'B43', 'Less than 18', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(85, 'B43', '18-19', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(86, 'B43', '20-21', 0, 0)
@@ -122,11 +122,11 @@ begin
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(89, 'B43', '35-54', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(90, 'B43', '55 or more', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(91, 'B43', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(92, 'B44', 'Ethnicity: Number of Primary Participants who are:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(92, NULL, 'Ethnicity: Number of Primary Participants who are:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(93, 'B44', 'Hispanic', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(94, 'B44', 'Non-Hispanic', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(95, 'B44', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(96, 'B45', 'Race: Number of Primary Participants who are:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(96, NULL, 'Race: Number of Primary Participants who are:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(97, 'B45', 'White', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(98, 'B45', 'African-American', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(99, 'B45', 'Asian', 0, 0)
@@ -136,7 +136,7 @@ begin
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(103, 'B45', 'Unknown', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(104, 'B45', 'Other race', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(105, 'B45', 'Other race specify', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(106, 'B46', 'Primary Participant Language', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(106, NULL, 'Primary Participant Language:', 1, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(107, 'B46', 'Primary Language English', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(108, 'B46', 'Primary Language Spanish', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(109, 'B46', 'Primary Language not English nor Spanish', 0, 0)
@@ -372,8 +372,9 @@ begin
 	    hvcasefk
 		,HighestGrade
 		,MaritalStatus
-		,PrimaryLanguage
+		,PrimaryLanguage	
 	)
+
 	select hvcasefk
 		, HighestGrade
 		, MaritalStatus
@@ -443,6 +444,11 @@ begin
 	   , HVCaseFK int
 	   , NumberInHouse int
 	   , AvailableMonthlyIncome numeric(5,0)
+	   , PBEmergencyAssistance char(1)
+	   , PBFoodStamps char(1)
+	   , PBSSI char(1)
+	   , PBTANF char(1)
+	   , PBWIC char(1)
 	   , PC1ReceivingMedicaid bit
 	   , RowNum int
 	)
@@ -457,6 +463,11 @@ begin
 	   , HVCaseFK
 	   , NumberInHouse
 	   , AvailableMonthlyIncome
+	   , PBEmergencyAssistance
+	   , PBFoodStamps
+	   , PBSSI
+	   , PBTANF
+	   , PBWIC
 	   , PC1ReceivingMedicaid
 	   , RowNum 
 	)
@@ -470,6 +481,11 @@ begin
 	   , ca.HVCaseFK
 	   , ca.NumberInHouse
 	   , ca.AvailableMonthlyIncome
+	   , ca.PBEmergencyAssistance
+	   , ca.PBFoodStamps
+	   , ca.PBSSI
+	   , ca.PBTANF
+	   , ca.PBWIC
 	   , ca2.PC1ReceivingMedicaid
 	   , row_number() over (partition by ca.hvcasefk order by ca.FormDate desc) as [row]  
 	   from commonattributes ca
@@ -1027,7 +1043,15 @@ begin
 --end B31
 
 --B32 row 43
-	--PC1 involved in Child Welfare as a caregiver
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 43, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblPC1Insurance
+		where PBTANF = '1' or PBEmergencyAssistance = '1' or PBFoodStamps = '1' or PBSSI = '1' or PBWIC = '1'
+	)
+	declare @welfare int
+	set @welfare = (select count(*) from @tblFinalExport where RowNumber = 43 and Detail = 1)
+	update @tblFinalExport set Response = @welfare where RowNumber = 43 and Detail = 0
 --end B32
 
 --B33 
