@@ -226,23 +226,31 @@ INSERT INTO @cteMAINTraining ( workerfk ,
 SELECT workerfk ,  TopicCode ,  topicname ,  TrainingDate
 FROM cteFSWMainTraining
 
-; with cteSuperMainTraining AS (
+; with cteSuperMainTraining2 AS (
 	SELECT [@cteMAIN].workerfk
 		, t1.TopicCode
 		, t1.topicname
 		, MIN(t.TrainingDate) AS TrainingDate
+		, ROW_NUMBER() OVER (PARTITION BY [@cteMAIN].workerfk ORDER BY TrainingDate) AS myrow
 	FROM @cteMAIN
 			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = [@cteMAIN].WorkerFK
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=12.0 AND (CurrentRole='FSW' OR CurrentRole ='Program Mgr')
-	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
+	WHERE (t1.TopicCode=12.0 OR t1.TopicCode=12.1) AND (CurrentRole='FSW' OR CurrentRole ='Program Mgr')
+	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate, t.TrainingDate
 			, t1.TopicCode
 			, t1.topicname
 )
 
-
+, cteSuperMainTraining AS (
+	SELECT workerfk
+		,TopicCode
+		, topicname
+		, TrainingDate
+	FROM cteSuperMainTraining2
+	WHERE cteSuperMainTraining2.myrow = 1
+)
 
 INSERT INTO @cteMAINTraining ( workerfk ,
                                TopicCode ,
