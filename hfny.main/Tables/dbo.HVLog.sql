@@ -248,8 +248,19 @@ Declare @PK int
 set @PK = (SELECT HVLOGPK from deleted)
 
 BEGIN
-	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='VL'
+	exec spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='VL'
+	
+	declare @AttachmentPKToBeDeleted int
+	select @AttachmentPKToBeDeleted  = AttachmentPK
+	from Attachment a
+	inner join Deleted d on d.HVCaseFK = a.HVCaseFK and
+							d.ProgramFK = a.ProgramFK and
+							a.FormType = 'VL' and
+							a.FormFK = d.HVLogPK	
 
+	if @AttachmentPKToBeDeleted is not null and @AttachmentPKToBeDeleted > 0	
+		exec spDelAttachment @AttachmentPK = @AttachmentPKToBeDeleted -- int
+	
 	INSERT INTO HVLogDeleted ([HVLogPK]
       ,[AdditionalComments]
       ,[CAAdvocacy]
