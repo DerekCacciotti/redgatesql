@@ -84,6 +84,7 @@ CREATE TABLE [dbo].[Supervision]
 [SupervisionHours] [int] NULL,
 [SupervisionMinutes] [int] NULL,
 [SupervisionNotes] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisionSessionType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisionStartTime] [char] (8) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisorFK] [int] NOT NULL,
 [SupervisorObservationAssessment] [bit] NULL,
@@ -230,6 +231,7 @@ insert into [dbo].[SupervisionDeleted]
            ,[SupervisionHours]
            ,[SupervisionMinutes]
            ,[SupervisionNotes]
+		   ,[SupervisionSessionType]
            ,[SupervisionStartTime]
            ,[SupervisorFK]
            ,[SupervisorObservationAssessment]
@@ -352,6 +354,7 @@ select [SupervisionPK]
            ,[SupervisionHours]
            ,[SupervisionMinutes]
            ,[SupervisionNotes]
+		   ,[SupervisionSessionType]
            ,[SupervisionStartTime]
            ,[SupervisorFK]
            ,[SupervisorObservationAssessment]
@@ -372,7 +375,7 @@ select [SupervisionPK]
            ,[TrainingNeedsStatus]
            ,[WorkerFK]
            ,[ParticipantEmergency]
-           ,[ReasonOther]
+		   ,[ReasonOther]
            ,[ReasonOtherSpecify]
            ,[ShortWeek]
            ,[StaffCourt]
@@ -399,8 +402,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
 -- =============================================
 -- Author:		jrobohn
 -- Create date: 2014Feb24
@@ -420,13 +421,11 @@ set @PK = (SELECT SupervisionPK from inserted)
 BEGIN
 	EXEC spAddFormReview_userTriggernoHVCaseFK @FormFK=@PK, @FormTypeValue='SU'
 END
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		jrobohn
 -- Create date: 2014Feb24
@@ -454,8 +453,6 @@ begin
 			and FormType=@FormTypeValue
 
 END
-
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -475,7 +472,6 @@ For Update
 AS
 Update Supervision Set Supervision.SupervisionEditDate= getdate()
 From [Supervision] INNER JOIN Inserted ON [Supervision].[SupervisionPK]= Inserted.[SupervisionPK]
-
 GO
 ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
 GO

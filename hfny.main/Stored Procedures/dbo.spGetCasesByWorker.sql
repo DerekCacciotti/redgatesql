@@ -54,7 +54,7 @@ begin
 		inner join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
 		where cp.ProgramFK = @ProgramFK
 				--and IntakeDate is not null
-				and (hc.KempeDate is null or hc.KempeDate > dateadd(month, -2, current_Timestamp))
+				and (hc.KempeDate is null or hc.KempeDate > dateadd(month, -3, current_Timestamp))
 				and (DischargeDate is null or 
 						cp.DischargeDate > dateadd(month, -6, current_Timestamp))
 	)
