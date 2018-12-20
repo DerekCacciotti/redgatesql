@@ -392,6 +392,7 @@ INSERT INTO @cteAddMissingWorkers ( workerfk ,
 		, FatherAdvocate
 		, cteAlmostFinal.topiccode
 		, ContentCompleted AS IndivContentCompleted
+		, CAMeetingTarget AS SubtopicsCompletedOnTime
 		, LowestIndivRating AS IndivContentMeeting
 		, CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) AS IndivPercByTopic
 		, TopicName
