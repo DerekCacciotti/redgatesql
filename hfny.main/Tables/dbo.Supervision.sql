@@ -84,7 +84,7 @@ CREATE TABLE [dbo].[Supervision]
 [SupervisionHours] [int] NULL,
 [SupervisionMinutes] [int] NULL,
 [SupervisionNotes] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[SupervisionSessionType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisionSessionType] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisionStartTime] [char] (8) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisorFK] [int] NOT NULL,
 [SupervisorObservationAssessment] [bit] NULL,
@@ -93,7 +93,6 @@ CREATE TABLE [dbo].[Supervision]
 [SupervisorObservationHomeVisit] [bit] NULL,
 [SupervisorObservationHomeVisitComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisorObservationHomeVisitStatus] [bit] NULL,
-[TakePlace] [bit] NULL,
 [TeamDevelopment] [bit] NULL,
 [TeamDevelopmentComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TeamDevelopmentStatus] [bit] NULL,
@@ -240,7 +239,6 @@ insert into [dbo].[SupervisionDeleted]
            ,[SupervisorObservationHomeVisit]
            ,[SupervisorObservationHomeVisitComments]
            ,[SupervisorObservationHomeVisitStatus]
-           ,[TakePlace]
            ,[TeamDevelopment]
            ,[TeamDevelopmentComments]
            ,[TeamDevelopmentStatus]
@@ -252,7 +250,7 @@ insert into [dbo].[SupervisionDeleted]
            ,[TrainingNeedsStatus]
            ,[WorkerFK]
            ,[ParticipantEmergency]
-           ,[ReasonOther]
+ ,[ReasonOther]
            ,[ReasonOtherSpecify]
            ,[ShortWeek]
            ,[StaffCourt]
@@ -363,7 +361,6 @@ select [SupervisionPK]
            ,[SupervisorObservationHomeVisit]
            ,[SupervisorObservationHomeVisitComments]
            ,[SupervisorObservationHomeVisitStatus]
-           ,[TakePlace]
            ,[TeamDevelopment]
            ,[TeamDevelopmentComments]
            ,[TeamDevelopmentStatus]

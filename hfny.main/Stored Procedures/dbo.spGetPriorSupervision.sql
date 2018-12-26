@@ -62,7 +62,6 @@ begin
 				, s.SupervisorFK
 				, s.SupervisorObservationAssessmentStatus
 				, s.SupervisorObservationHomeVisitStatus
-				, s.TakePlace
 				, s.TeamDevelopmentStatus
 				, s.TechniquesApproachesStatus
 				, s.TrainingNeedsStatus

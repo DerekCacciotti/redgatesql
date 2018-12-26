@@ -22,7 +22,7 @@ begin
 			from	Supervision s
 			where	s.WorkerFK = @WorkerFK
 					and s.SupervisionDate < @SupervisionDate
-					and s.TakePlace = 1
+					and s.SupervisionSessionType = '1'
 		)
 	select			s.SupervisionPK
 				, s.AreasGrowthComments
@@ -83,13 +83,13 @@ begin
 				, s.SupervisionHours
 				, s.SupervisionMinutes
 				, s.SupervisionNotes
+				, s.SupervisionSessionType
 				, s.SupervisionStartTime
 				, s.SupervisorFK
 				, s.SupervisorObservationAssessmentComments
 				, s.SupervisorObservationAssessmentStatus
 				, s.SupervisorObservationHomeVisitComments
 				, s.SupervisorObservationHomeVisitStatus
-				, s.TakePlace
 				, s.TeamDevelopmentComments
 				, s.TeamDevelopmentStatus
 				, s.TechniquesApproachesComments

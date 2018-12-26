@@ -96,7 +96,6 @@ CREATE TABLE [dbo].[SupervisionDeleted]
 [SupervisorObservationHomeVisit] [bit] NULL,
 [SupervisorObservationHomeVisitComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisorObservationHomeVisitStatus] [bit] NULL,
-[TakePlace] [bit] NULL,
 [TeamDevelopment] [bit] NULL,
 [TeamDevelopmentComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TeamDevelopmentStatus] [bit] NULL,

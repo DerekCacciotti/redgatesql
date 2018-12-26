@@ -26,7 +26,17 @@ select		IsApproved
 		, rtrim(w.LastName)+', '+rtrim(w.FirstName) as SupervisorName
 		, convert(varchar(10), s.SupervisionDate, 111) as SupervisionDate
 		, s.SupervisionPK
-		, case when s.TakePlace = 1 then 'Yes' else 'No' end as TakePlace
+		, case s.SupervisionSessionType 
+				when '0' 
+				then 'Missed Session'
+				when '1'
+				then 'Scheduled Session'
+				when '2'
+				then 'Planning'
+				when '3'
+				then 'Group Session'
+			end as SessionType
+		-- TakePlace = 1 then 'Yes' else 'No' end as TakePlace
 		, case -- convert into to string
 			when s.SupervisionHours > 0 and s.SupervisionMinutes > 0 then
 				convert(varchar(10), s.SupervisionHours) + 
@@ -55,8 +65,5 @@ where		s.WorkerFK = case when @WorkerFK = -1
 								then s.WorkerFK
 								else @WorkerFK
 								end 
-			and (s.GroupSupervision is null or
-					s.GroupSupervision = 
-					case when @WorkerFK = -1 then 1 else 0 end)
 order by	SupervisionDate desc ;
 GO
