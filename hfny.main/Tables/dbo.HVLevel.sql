@@ -15,7 +15,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-Create TRIGGER [dbo].[fr_delete_hvlevel]
+CREATE TRIGGER [dbo].[fr_delete_hvlevel]
 on [dbo].[HVLevel]
 After DELETE
 
@@ -27,7 +27,30 @@ set @PK = (SELECT HVLevelPK from deleted)
 
 BEGIN
 	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='LV'
+
+	INSERT INTO	HVLevelDeleted (
+	HVLevelPK ,
+	HVCaseFK ,
+	HVLevelCreateDate,
+	HVLevelCreator,
+	HVLevelEditDate,
+	HVLevelEditor,
+	LevelAssignDate,
+	LevelFK,
+	ProgramFK 
+	)
+	  SELECT Deleted.HVLevelPK
+		   , Deleted.HVCaseFK
+		   , Deleted.HVLevelCreateDate
+		   , Deleted.HVLevelCreator
+		   , Deleted.HVLevelEditDate
+		   , Deleted.HVLevelEditor
+		   , Deleted.LevelAssignDate
+		   , Deleted.LevelFK
+		   , Deleted.ProgramFK
+	 FROM Deleted WHERE Deleted.HVLevelPK= @pk
 END
+
 GO
 SET QUOTED_IDENTIFIER ON
 GO
