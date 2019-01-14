@@ -138,13 +138,13 @@ BEGIN
 			, 0 AS FormOutOfWindow -- not out of window
 			, 0 AS FormMissing
 			, CASE WHEN ((imm.TotalImmunizations = imm.FormReviewedCount)
-				    AND (imm.DTAPCount >= 4) AND (imm.HIBCount >= 4) AND (imm.PCVCount >= 4) 
+				    AND (imm.DTAPCount >= 4) AND (imm.HIBCount >= 3) AND (imm.PCVCount >= 4) 
 					AND (imm.PolioCount >= 3) AND (imm.MMRCount >= 1) AND (imm.HEPBCount >= 3)
-					AND (imm.VZCount >= 1) AND (imm.FluCount >= 1) AND (imm.RotoCount >= 3) AND (imm.HEPACount >= 0)) THEN 1 
+					AND (imm.VZCount >= 1) AND (imm.FluCount >= 1) AND (imm.RotoCount >= 2) AND (imm.HEPACount >= 0)) THEN 1 
 					ELSE 0 END AS FormMeetsTarget
-			, CASE WHEN NOT ((imm.DTAPCount >= 4) AND (imm.HIBCount >= 4) AND (imm.PCVCount >= 4) 
+			, CASE WHEN NOT ((imm.DTAPCount >= 4) AND (imm.HIBCount >= 3) AND (imm.PCVCount >= 4) 
 					AND (imm.PolioCount >= 3) AND (imm.MMRCount >= 1) AND (imm.HEPBCount >= 3)
-					AND (imm.VZCount >= 1) AND (imm.FluCount >= 1) AND (imm.RotoCount >= 3) AND (imm.HEPACount >= 0)) THEN 'Missing Shots or Not on Time' 
+					AND (imm.VZCount >= 1) AND (imm.FluCount >= 1) AND (imm.RotoCount >= 2) AND (imm.HEPACount >= 0)) THEN 'Missing Shots or Not on Time' 
 					WHEN (imm.TotalImmunizations <> imm.FormReviewedCount) THEN 'Immunization form(s) not reviewed'
 					ELSE '' END AS NotMeetingReason
 	 FROM cteCohort coh

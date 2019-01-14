@@ -8,6 +8,7 @@ GO
 -- Description:	Training [10-3] Credential Evidence (Intensive Role Specific Training)
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- Edit date: 10/23/2017 CP - Removed WHERE clause in CTECountMeeting - this was removing
+-- Edit date: 12/19/2018 CP - HFA updated the Best Practice standards
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingRoleSpecific]
 	-- Add the parameters for the stored procedure here
@@ -40,13 +41,13 @@ INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
                        WorkerName ,
-                       RowNumber ,
+                      -- RowNumber ,
 					   TopicCode )
 	SELECT DISTINCT wp.workerfk
 	, 'FAW' AS CurrentRole
 	, FAWInitialStart 
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-    , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
+   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
 	, 10.0
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
@@ -63,12 +64,12 @@ INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
                        WorkerName ,
-                       RowNumber ,
+                     --  RowNumber ,
 					   TopicCode )
 	SELECT DISTINCT wp.workerfk, 'FSW' 
     , FSWInitialStart 
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-    , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
+   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
 	, 11.0
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
@@ -84,13 +85,13 @@ INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
                        WorkerName ,
-                       RowNumber ,
+                      -- RowNumber ,
 					   TopicCode )
 	SELECT DISTINCT wp.workerfk
 	, 'Supervisor' 
 	, w.SupervisorInitialStart 
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-    , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
+   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
 	, 12.0
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
@@ -107,13 +108,13 @@ INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
                        WorkerName ,
-                       RowNumber ,
+                      -- RowNumber ,
 					   TopicCode )
 	SELECT DISTINCT wp.workerfk
 	, 'Program Manager' AS CurrentRole
 	, wp.ProgramManagerStartDate
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-    , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
+   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
 	, 10.0
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
@@ -130,13 +131,13 @@ INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
                        WorkerName ,
-                       RowNumber ,
+                      -- RowNumber ,
 					   TopicCode )
 	SELECT DISTINCT wp.workerfk
 	, 'Program Manager' AS CurrentRole
 	, wp.ProgramManagerStartDate
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-    , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
+   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
 	, 11.0
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
@@ -153,13 +154,13 @@ INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
                        WorkerName ,
-                       RowNumber ,
+                       --RowNumber ,
 					   TopicCode )
 	SELECT DISTINCT wp.workerfk
 	, 'Program Manager' AS CurrentRole
 	, wp.ProgramManagerStartDate
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-    , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
+   -- , ROW_NUMBER() OVER(ORDER BY TopicCode DESC) 
 	, 12.0
 	FROM WorkerProgram wp
 	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
@@ -169,6 +170,18 @@ INSERT INTO @cteMAIN ( workerfk ,
 	AND wp.ProgramFK = @progfk
 	GROUP BY wp.WorkerFK, LastName, FirstName, wp.ProgramManagerStartDate
 
+
+DECLARE @topiccodecount AS TABLE (
+	TotalWorkers INT
+	, topiccode DECIMAL(3,1)
+	)
+
+INSERT INTO @topiccodecount ( TotalWorkers ,
+                              topiccode )
+SELECT COUNT([@cteMAIN].TopicCode), [@cteMAIN].TopicCode FROM @cteMAIN  GROUP BY TopicCode
+
+UPDATE @cteMAIN SET RowNumber=TotalWorkers
+FROM @cteMAIN INNER JOIN @topiccodecount ON [@topiccodecount].topiccode = [@cteMAIN].TopicCode
 
 --Now we get the trainings (or lack thereof)
 DECLARE @cteMAINTraining AS TABLE(
@@ -237,7 +250,7 @@ FROM cteFSWMainTraining
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE (t1.TopicCode=12.0 OR t1.TopicCode=12.1) AND (CurrentRole='FSW' OR CurrentRole ='Program Mgr')
+	WHERE (t1.TopicCode=12.0 OR t1.TopicCode=12.1) AND (CurrentRole='Supervisor' OR CurrentRole ='Program Mgr')
 	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate, t.TrainingDate
 			, t1.TopicCode
 			, t1.topicname
@@ -278,13 +291,9 @@ INSERT INTO @cteDetails ( RowNumber ,
 
 
 		
-		UPDATE @cteDetails SET TopicCode=10.0 WHERE CurrentRole='FAW' AND TopicCode IS NULL
-		UPDATE @cteDetails SET TopicCode=11.0 WHERE CurrentRole='FSW' AND TopicCode IS NULL
-		UPDATE @cteDetails SET TopicCode=12.0 WHERE CurrentRole='Supervisor' AND TopicCode IS NULL
-
-
-		
-
+		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FAW' OR CurrentRole='Program Manager') AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=11.0 WHERE (CurrentRole='FSW' OR CurrentRole='Program Manager')  AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=12.0 WHERE (CurrentRole='Supervisor' OR CurrentRole='Program Manager')  AND TopicCode IS NULL
 
 		
 --add in the "MEETING" Target and Total workers.  Basically each training must occur within 6 months of start
@@ -300,7 +309,7 @@ INSERT INTO @cteDetails ( RowNumber ,
 					ELSE 1 END AS 'IndividualRating'
 
 
-				, MAX(RowNumber) OVER(PARTITION BY CurrentRole) as TotalWorkers
+				, MAX(RowNumber) OVER(PARTITION BY TopicCode) as TotalWorkers
 		FROM @cteDetails
 		GROUP BY RowNumber, CurrentRole, workerfk, WorkerName, StartDate
 				, TopicCode
@@ -309,22 +318,26 @@ INSERT INTO @cteDetails ( RowNumber ,
 				, StartDate
 )
 
+
+
 --Now calculate the number meeting count, by currentrole
 , cteCountMeeting AS (
-		SELECT CurrentRole, count(*) AS totalmeetingcount
+		SELECT TopicCode, count(*) AS totalmeetingcount
 		FROM cteAggregates
 		WHERE [Meets Target]='Meeting'
-		GROUP BY CurrentRole
+		GROUP BY cteAggregates.TopicCode
 )
+
 
 ----now put it all together
 SELECT cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerfk
 , cteAggregates.WorkerName, cteAggregates.StartDate, cteAggregates.TopicCode, cteAggregates.topicname
 , cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers
-,  case when cteCountMeeting.CurrentRole is null then cteAggregates.CurrentRole else cteCountMeeting.CurrentRole end as CurrentRole
+,  case when cteAggregates.CurrentRole is null then cteAggregates.CurrentRole else cteAggregates.CurrentRole end as CurrentRole
 ,  case when cteCountMeeting.totalmeetingcount is null then 0 else cteCountMeeting.totalmeetingcount end as [totalmeetingcount]
 ,  case when totalmeetingcount is null then 0 else cast(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)) end AS MeetingPercent
 , 	(SELECT TOP 1 IndividualRating FROM cteAggregates cte WHERE cteAggregates.TopicCode = cte.TopicCode ORDER BY IndividualRating) AS Rating
+, IndividualRating
 ,	CASE cteAggregates.CurrentRole 
 		WHEN 'FAW' THEN '10-4a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
 		WHEN 'FSW' THEN '10-4b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
@@ -336,12 +349,14 @@ SELECT cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerf
 			END	
 	END AS CSST
 FROM cteAggregates
-LEFT JOIN cteCountMeeting ON cteCountMeeting.CurrentRole = cteAggregates.CurrentRole
+LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteAggregates.TopicCode
 group by cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerfk
 , cteAggregates.WorkerName, cteAggregates.StartDate, cteAggregates.TopicCode, cteAggregates.topicname
-, cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers, cteCountMeeting.CurrentRole
-, cteCountMeeting.totalmeetingcount
-ORDER BY cteAggregates.CurrentRole, RowNumber
+, cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers, cteCountMeeting.TopicCode
+, cteCountMeeting.totalmeetingcount, IndividualRating
+ORDER BY cteAggregates.CurrentRole,RowNumber
+
+
 
 END
 GO
