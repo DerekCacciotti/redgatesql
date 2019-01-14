@@ -9,7 +9,7 @@ GO
 -- Edited by:   Chris Papas
 -- Edit date:   09/30/2015
 -- EXEMPT WORKERS HIRED PRIOR TO 07/01/2014 (they must have completed trainings, but date does not matter)
--- EXEC rspTraining_11_2_WrapAround @progfk = 30, @sdate = '07/01/2008'
+-- EXEC rspTraining_11_2_WrapAround @progfk = 17, @sdate = '07/01/2012'
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTraining_11_2_WrapAround]
 	-- Add the parameters for the stored procedure here
@@ -374,8 +374,13 @@ INSERT INTO @cteAddMissingWorkers ( workerfk ,
 	)
 
 
-	--SELECT * FROM cteSETMeetingByTopic
-	--WHERE workerpk=2067
+, cteRatingBySite AS (
+	select top 1 with ties
+	   IndividualRating AS SiteRating
+	  ,TopicCode
+	from ctealmostfinal
+	order by row_number() over (partition by TopicCode order by IndividualRating)
+)
 		
 	SELECT DISTINCT TotalWorkers
 		, cteAlmostFinal.WorkerPK
@@ -387,13 +392,14 @@ INSERT INTO @cteAddMissingWorkers ( workerfk ,
 		, FatherAdvocate
 		, cteAlmostFinal.topiccode
 		, ContentCompleted AS IndivContentCompleted
+		, CAMeetingTarget AS SubtopicsCompletedOnTime
 		, LowestIndivRating AS IndivContentMeeting
 		, CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) AS IndivPercByTopic
 		, TopicName
 		, HireDate
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
 		,	LowestIndivRating AS TopicRatingByWorker
-		,	(SELECT TOP 1 IndividualRating FROM cteAlmostFinal ORDER BY IndividualRating) AS TopicRatingBySite
+		,	SiteRating AS TopicRatingBySite
 		, CASE WHEN SUM(MeetsTargetForAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker > .9 THEN SUM(MeetsTargetForAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker
 		  ELSE 0
 		  END AS TotalMeetsTargetForAll
@@ -403,7 +409,7 @@ INSERT INTO @cteAddMissingWorkers ( workerfk ,
 		, SUM(TotalCompletedToDate) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker AS TotalCompletedToDate
 		FROM cteAlmostFinal
 		INNER JOIN cteSETMeetingByTopic ON cteSETMeetingByTopic.WorkerPK = cteAlmostFinal.WorkerPK AND cteSETMeetingByTopic.TopicCode = cteAlmostFinal.TopicCode
-
+		INNER JOIN cteRatingBySite ON cteRatingBySite.TopicCode = cteAlmostFinal.TopicCode
 
 END
 GO

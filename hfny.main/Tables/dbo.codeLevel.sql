@@ -4,7 +4,7 @@ CREATE TABLE [dbo].[codeLevel]
 [CaseWeight] [numeric] (4, 2) NOT NULL,
 [ConstantName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Enrolled] [bit] NULL,
-[LevelGroup] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[LevelGroup] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [LevelName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [MaximumVisit] [numeric] (4, 2) NULL,
 [MinimumVisit] [numeric] (4, 2) NULL,

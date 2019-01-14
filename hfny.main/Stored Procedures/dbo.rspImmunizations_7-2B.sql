@@ -232,7 +232,7 @@ BEGIN
 		FROM @tblCohort6Month, dbo.codeDueByDates due 
 		INNER JOIN dbo.codeMedicalItem item ON due.ScheduledEvent = item.MedicalItemTitle
 		WHERE due.ScheduledEvent IN ('DTaP', 'HEP-B', 'HIB', 'PCV', 'Polio', 'Roto', 'Flu', 'MMR', 'HEP-A', 'VZ')
-		AND due.optional = NULL
+		AND due.optional IS NULL
 		AND CONVERT(INT, due.Interval) <= 6
 		GROUP BY HVCasePK, TCIDPK, MedicalItemCode, ScheduledEvent
 
@@ -242,7 +242,7 @@ BEGIN
 		FROM @tblCohort18Month, dbo.codeDueByDates due 
 		INNER JOIN dbo.codeMedicalItem item ON due.ScheduledEvent = item.MedicalItemTitle
 		WHERE due.ScheduledEvent IN ('DTaP', 'HEP-B', 'HIB', 'PCV', 'Polio', 'Roto', 'Flu', 'MMR', 'HEP-A', 'VZ')
-		AND due.optional = NULL
+		AND due.optional IS NULL
 		AND CONVERT(INT, due.Interval) <= 18
 		GROUP BY HVCasePK, TCIDPK, MedicalItemCode, ScheduledEvent
 

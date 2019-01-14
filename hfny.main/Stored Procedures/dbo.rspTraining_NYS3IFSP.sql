@@ -82,7 +82,7 @@ BEGIN
 ,	'NYS3. Staff (Supervisors and Home Visitors) receive FGP/IFSP training within three months of hire to a HFNY position.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) AS PercentMeeting
 FROM cteFinal
-INNER JOIN cteCountMeeting ON cteCountMeeting.GenericColumn = cteFinal.GenericColumn
+LEFT JOIN cteCountMeeting ON cteCountMeeting.GenericColumn = cteFinal.GenericColumn
 ORDER BY cteFinal.workername
 
 END

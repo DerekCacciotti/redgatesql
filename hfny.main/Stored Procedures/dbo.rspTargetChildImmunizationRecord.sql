@@ -62,7 +62,8 @@ as
 							 ,(select count(*)
 								   from codeduebydates
 									   inner join codeMedicalItem cmi on ScheduledEvent = cmi.MedicalItemTitle and MedicalItemCode <= 13
-								   where dateadd(dd,dueby,tcdob) <= @rdate) ShotsRequired
+								   where dateadd(dd,dueby,tcdob) <= @rdate
+								   AND Optional IS NULL) ShotsRequired
 							 ,levelname
 				  from (select distinct pc1id
 									   ,rtrim(tcfirstname)+' '+rtrim(tclastname) TargetChild
@@ -81,7 +82,8 @@ as
 												  ,DueBy
 												  ,MedicalItemCode
 												from codeduebydates
-													inner join codeMedicalItem cmi on ScheduledEvent = cmi.MedicalItemTitle and MedicalItemCode <= 13) codeduebydates on codeduebydates.interval = datediff(M,dateadd(dd,-30.44,HVCase.TCDOB),@rdate)
+													inner join codeMedicalItem cmi on ScheduledEvent = cmi.MedicalItemTitle and MedicalItemCode <= 13
+													WHERE Optional IS NULL) codeduebydates on codeduebydates.interval = datediff(M,dateadd(dd,-30.44,HVCase.TCDOB),@rdate)
 								inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 								INNER JOIN dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFK) cf ON cf.HVCaseFK = HVCasePK
 							where (hvcase.tcdob is not null

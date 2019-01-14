@@ -5,8 +5,8 @@ GO
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 01/08/2015
--- Description:	rspTraining_11_3_Knowledge (was 10_4) Training by 6 Months
--- EXEC rspTraining_11_3_Knowledge @progfk = 30, @sdate = '07/01/2008'
+-- Description: The NEW 11-2 Wraparound (after HFA renamed it) was rspTraining_11_3_Knowledge (was 10_4) Training by 6 Months
+-- EXEC rspTraining_11_3_Knowledge @progfk = 17, @sdate = '07/01/2012'
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 -- Edit date: 10/11/2013 CP - the bit values in workerprogram table (FSW, FAW, Supervisor, FatherAdvocate, Program Manager)
 --				are no longer being populated based on the latest workerform changes by Dar, so I've modified this report.
@@ -242,6 +242,13 @@ SELECT [TopicName]
 )
 
 
+, cteRatingBySite AS (
+	select top 1 with ties
+	   IndividualRating AS SiteRating
+	  ,TopicCode
+	from ctealmostfinal
+	order by row_number() over (partition by TopicCode order by IndividualRating)
+)
 
 , cteSETMeetingByTopic AS (
 	--one subtopic can be different than the others (in terms of meeting) take the lowest value and use it to update the rest
@@ -267,7 +274,7 @@ SELECT [TopicName]
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
 		, IndividualRating AS IndivContentMeeting
 		, cteAlmostFinal.topiccode, TotalContentAreasByTopicAndWorker
-		,	(SELECT TOP 1 IndividualRating FROM cteAlmostFinal ORDER BY IndividualRating) AS TopicRatingBySite
+		, SiteRating AS TopicRatingBySite
 		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
 		, CASE WHEN SUM(CompletedAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker > 0
 			   THEN SUM(CompletedAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker 
@@ -275,6 +282,7 @@ SELECT [TopicName]
 	      END AS TotalCompletedToDate
 		FROM cteAlmostFinal
 		INNER JOIN cteSETMeetingByTopic ON cteSETMeetingByTopic.WorkerPK = cteAlmostFinal.WorkerPK AND cteSETMeetingByTopic.TopicCode = cteAlmostFinal.TopicCode
+		INNER JOIN cteRatingBySite ON cteRatingBySite.TopicCode = cteAlmostFinal.TopicCode
 
 END
 GO

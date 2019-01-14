@@ -26,7 +26,7 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-;WITH  cteMain AS (
+	;WITH  cteMain AS (
 	SELECT g.WorkerPK, g.WrkrLName, g.FirstHomeVisitDate
 	, g.FirstKempeDate, g.SupervisorFirstEvent
 	, g.FirstEvent
@@ -47,7 +47,8 @@ BEGIN
 	AND wp.HireDate > @sdate
 )
 
- 
+
+
 --Now we get the trainings (or lack thereof) for topic code 1.0
 , cte10_2a AS (
 	SELECT RowNumber
@@ -96,6 +97,7 @@ BEGIN
 	, FirstHomeVisitDate
 	, FirstKempeDate
 	, SupervisorFirstEvent
+		,HireDate
 	FROM cteMain, codetopic
 	WHERE (codetopic.TopicCode BETWEEN 1.0 AND 5.5)
 )
@@ -119,7 +121,7 @@ BEGIN
 		, b.Supervisor
 		, b.FSW
 		, b.FAW
-		, t.HireDate
+		, b.HireDate
 	FROM cte10_2a t
 	RIGHT JOIN cteAddMissingWorkers_cte10_2a b
 	ON b.WorkerPK = t.WorkerPK
@@ -168,11 +170,8 @@ BEGIN
 	, FirstKempeDate
 	, cte10_2b.SupervisorFirstEvent
 	, FirstEvent
-	--, CASE WHEN FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 'T'
-	--	when TopicCode = 3.0 and TrainingDate < FirstHomeVisitDate then 'T'
-	--	WHEN TrainingDate < FirstEvent THEN 'T' 
-	--	WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN 'T'
-	--	else 'F' END AS 'Meets Target'
+		,HireDate
+	, CASE  WHEN TrainingDate IS NOT NULL THEN 1 ELSE 0 END AS ReceivedTraining
 	, CASE  WHEN TrainingDate IS NOT NULL AND TrainingDate <= FirstEvent THEN '3'
 		WHEN  FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN '3' 
 		WHEN TrainingDate IS NULL THEN '1' 
@@ -223,9 +222,12 @@ BEGIN
 	, FirstEvent
 	, [Meets Target]
 	, IndividualRating
+		,HireDate
+	, SUM(receivedtraining) over (PARTITION BY TopicCode) as receivedtraining
 	FROM cteMeetTarget1	
 
 )
+
 
 --Now calculate the number meeting count, by currentrole
 , cteCountMeeting AS (
@@ -253,6 +255,7 @@ SELECT
 	WHEN ctemeettarget.topiccode = 5.5 THEN '10-2g. Staff (assessment workers, home visitors and supervisors) are oriented to issues related to the personal safety of staff' 
 	END AS TopicName
 , TrainingDate
+		,HireDate
 , FirstHomeVisitDate
 , FirstKempeDate
 , SupervisorFirstEvent
@@ -264,7 +267,7 @@ SELECT
   ELSE CONVERT(VARCHAR(MAX), CONVERT(INT,100*(CAST(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)))))+ '%'  
   end as MeetingPercent
 , 	(SELECT TOP 1 IndividualRating FROM cteMeetTarget cte WHERE cteMeetTarget.TopicCode = cte.TopicCode ORDER BY IndividualRating) AS Rating
-
+, receivedtraining
 FROM cteMeetTarget
 LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode
 ORDER BY cteMeetTarget.topiccode

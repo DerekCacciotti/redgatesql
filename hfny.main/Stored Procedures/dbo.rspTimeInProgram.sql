@@ -74,5 +74,5 @@ as
 	, ROW_NUMBER() OVER(ORDER BY hvcasefk) AS 'RowNumber'
 	FROM @clientlist
 	LEFT JOIN listsite ON ProgSite=listSitePK
-	ORDER BY lengthinprogram DESC
+	ORDER BY DATEDIFF(dd, IntakeDate, ISNULL(DischargeDate, GETDATE())) DESC
 GO
