@@ -8,7 +8,7 @@ GO
 -- Description:	This stored procedure gets the list of prior 
 --				supervision variables' follow-up status
 -- =============================================
-create procedure [dbo].[spGetPriorSupervisionInfo]
+CREATE procedure [dbo].[spGetPriorSupervisionInfo]
 	(
 		@WorkerFK int, 
 		@SupervisorFK int, 
@@ -22,6 +22,7 @@ begin
 			from	Supervision s
 			where	s.WorkerFK = @WorkerFK
 					and s.SupervisionDate < @SupervisionDate
+					and s.SupervisionSessionType = '1'
 		)
 	select			s.SupervisionPK
 				, s.AreasGrowthComments
@@ -82,13 +83,13 @@ begin
 				, s.SupervisionHours
 				, s.SupervisionMinutes
 				, s.SupervisionNotes
+				, s.SupervisionSessionType
 				, s.SupervisionStartTime
 				, s.SupervisorFK
 				, s.SupervisorObservationAssessmentComments
 				, s.SupervisorObservationAssessmentStatus
 				, s.SupervisorObservationHomeVisitComments
 				, s.SupervisorObservationHomeVisitStatus
-				, s.TakePlace
 				, s.TeamDevelopmentComments
 				, s.TeamDevelopmentStatus
 				, s.TechniquesApproachesComments
