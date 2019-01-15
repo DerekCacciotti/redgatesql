@@ -272,7 +272,7 @@ SELECT [TopicName]
 		, TopicName
 		, HireDate
 		, TotalContentAreasByTopicAndWorker AS SubtopicCA_PerTopic
-		, IndividualRating AS IndivContentMeeting
+		, cteSETMeetingByTopic.LowestIndivRating AS IndivContentMeeting
 		, cteAlmostFinal.topiccode, TotalContentAreasByTopicAndWorker
 		, SiteRating AS TopicRatingBySite
 		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
