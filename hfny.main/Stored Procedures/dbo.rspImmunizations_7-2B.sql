@@ -228,22 +228,22 @@ BEGIN
 
 	--Get the required immunizations for both cohorts
 	INSERT INTO @tblRequiredImmunizations6Month
-		SELECT DISTINCT HVCasePK, TCIDPK, item.MedicalItemCode, due.ScheduledEvent, MAX(due.frequency) numRequired
+		SELECT DISTINCT HVCasePK, TCIDPK, item.MedicalItemCode, due.ScheduledEvent, MAX(due.Frequency) numRequired
 		FROM @tblCohort6Month, dbo.codeDueByDates due 
 		INNER JOIN dbo.codeMedicalItem item ON due.ScheduledEvent = item.MedicalItemTitle
 		WHERE due.ScheduledEvent IN ('DTaP', 'HEP-B', 'HIB', 'PCV', 'Polio', 'Roto', 'Flu', 'MMR', 'HEP-A', 'VZ')
-		AND due.optional IS NULL
-		AND CONVERT(INT, due.Interval) <= 6
+		AND due.Optional IS NULL
+		AND CONVERT(INT, due.MaximumDue) <= 183
 		GROUP BY HVCasePK, TCIDPK, MedicalItemCode, ScheduledEvent
 
 		--Get the required immunizations for both cohorts
 	INSERT INTO @tblRequiredImmunizations18Month
-		SELECT DISTINCT HVCasePK, TCIDPK, item.MedicalItemCode, due.ScheduledEvent, MAX(due.frequency) numRequired
+		SELECT DISTINCT HVCasePK, TCIDPK, item.MedicalItemCode, due.ScheduledEvent, MAX(due.Frequency) numRequired
 		FROM @tblCohort18Month, dbo.codeDueByDates due 
 		INNER JOIN dbo.codeMedicalItem item ON due.ScheduledEvent = item.MedicalItemTitle
 		WHERE due.ScheduledEvent IN ('DTaP', 'HEP-B', 'HIB', 'PCV', 'Polio', 'Roto', 'Flu', 'MMR', 'HEP-A', 'VZ')
-		AND due.optional IS NULL
-		AND CONVERT(INT, due.Interval) <= 18
+		AND due.Optional IS NULL
+		AND CONVERT(INT, due.MaximumDue) <= 548
 		GROUP BY HVCasePK, TCIDPK, MedicalItemCode, ScheduledEvent
 
 	INSERT INTO @ImmunizationCount6Month
