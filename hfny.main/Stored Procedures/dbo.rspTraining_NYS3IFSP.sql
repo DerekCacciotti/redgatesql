@@ -19,7 +19,6 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
-
 ;WITH  cteEventDates AS (
 	SELECT workerpk, wrkrLName
 	, rtrim(wrkrFname) + ' ' + rtrim(wrkrLName) as WorkerName
@@ -61,6 +60,11 @@ BEGIN
 		,CASE WHEN FirstIFSPDate Is Null THEN 'F'
 		WHEN dateadd(dd, 91, DateStartedPos) < FirstIFSPDate THEN 'F'		
 		ELSE 'T' END AS MeetsTarget
+		,  CASE WHEN FirstIFSPDate IS NULL THEN 1
+		WHEN FirstIFSPDate <= dateadd(day, 183, DateStartedPos) THEN 3 
+		WHEN FirstIFSPDate > dateadd(day, 183, DateStartedPos) AND DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		ELSE 1
+		END AS 'IndividualRating'
 		, '1' AS GenericColumn --used for next cte cteCountMeeting
 	From cteGetShadowDate
  )
@@ -75,14 +79,12 @@ BEGIN
 )
 
  SELECT cteFinal.workername, DateStartedPos as FirstEventDate, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
- ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) = 1 THEN '3' 
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) < .9 THEN '1'
-	END AS Rating
+  ,  MIN(IndividualRating) as Rating
 ,	'NYS3. Staff (Supervisors and Home Visitors) receive FGP/IFSP training within three months of hire to a HFNY position.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) AS PercentMeeting
 FROM cteFinal
 LEFT JOIN cteCountMeeting ON cteCountMeeting.GenericColumn = cteFinal.GenericColumn
+GROUP BY cteFinal.workername, DateStartedPos, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
 ORDER BY cteFinal.workername
 
 END
