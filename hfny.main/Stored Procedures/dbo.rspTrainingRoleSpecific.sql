@@ -290,7 +290,8 @@ INSERT INTO @cteMAINTraining ( workerfk ,
                                TopicCode ,
                                topicname ,
                                TrainingDate )
-SELECT workerfk ,  TopicCode ,  topicname ,  TrainingDate
+SELECT workerfk ,  CASE WHEN TopicCode = 12.1 THEN 12.0 ELSE TopicCode END  -- 12.1 is stop gap and counts towards 12.0, the topic codes must match in @cteDetails to count 
+,  topicname ,  TrainingDate
 FROM cteSuperMainTraining
 
 
