@@ -231,13 +231,34 @@ FROM cteFAWMainTraining
 			, t1.topicname
 )
 
-
 INSERT INTO @cteMAINTraining ( workerfk ,
                                TopicCode ,
                                topicname ,
                                TrainingDate )
 SELECT workerfk ,  TopicCode ,  topicname ,  TrainingDate
 FROM cteFSWMainTraining
+
+
+--Now add Program Managers for topic code 11
+INSERT INTO @cteMAINTraining ( workerfk ,
+                               TopicCode ,
+                               topicname ,
+                               TrainingDate )
+SELECT [@cteMAIN].workerfk
+		, t1.TopicCode
+		, t1.topicname
+		, MIN(t.TrainingDate) AS TrainingDate
+	FROM @cteMAIN
+			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = [@cteMAIN].WorkerFK
+			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
+			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
+			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
+	WHERE t1.TopicCode=11.0 AND CurrentRole='Program Manager'
+	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
+			, t1.TopicCode
+			, t1.topicname
+
+
 
 ; with cteSuperMainTraining2 AS (
 	SELECT [@cteMAIN].workerfk
