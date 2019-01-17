@@ -103,6 +103,11 @@ set @progfk2 = @progfk
 		,CASE WHEN FirstShadowDate Is Null THEN 'F'
 		WHEN FirstEventDate < FirstShadowDate THEN 'F'
 		ELSE 'T' END AS MeetsTarget
+		,  CASE WHEN FirstShadowDate IS NULL THEN 1
+		WHEN FirstShadowDate <= dateadd(day, 183, firsteventdate) THEN 3 
+		WHEN FirstShadowDate > dateadd(day, 183, firsteventdate) AND DATEDIFF(DAY,  firsteventdate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		ELSE 1
+		END AS 'IndividualRating'
 	From cteGetShadowDate
  )
  
@@ -130,12 +135,9 @@ set @progfk2 = @progfk
 	FROM cteCountMeeting2
 )
 
+
  SELECT cteFinal.Workertype, workername, firsteventdate, FirstShadowDate, MeetsTarget, workercounter, totalmeetingcount
- ,  CASE WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) = 1 THEN '3' 
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
-	WHEN cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) < .9 THEN '1'
-	when totalmeetingcount = 0 then '1'
-	END AS Rating
+ ,  MIN(IndividualRating) as Rating
 ,	CASE cteFinal.Workertype 
 		WHEN 'FAW' THEN 'NYS1b. Resource specialists shadow experienced staff prior to direct work with families.'
 		WHEN 'FSW' THEN 'NYS1a. Support specialists shadow experienced staff prior to direct work with families.'
@@ -149,6 +151,7 @@ set @progfk2 = @progfk
 , cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) AS PercentMeeting
  FROM cteFinal
 INNER JOIN cteCountMeeting ON cteCountMeeting.Workertype = cteFinal.Workertype
+GROUP BY cteFinal.Workertype, workername, firsteventdate, FirstShadowDate, MeetsTarget, workercounter, totalmeetingcount
 ORDER BY cteFinal.Workertype
 
 
