@@ -20,7 +20,7 @@ GO
 
 -- exec [rspProgramInformationFor8Quarters] '31','2012-06-30'
 -- =============================================
-CREATE PROCEDURE [dbo].[rspProgramInformationFor8Quarters]
+CREATE PROC [dbo].[rspProgramInformationFor8Quarters]
 (
     @programfk VARCHAR(300) = NULL,
     @edate DATETIME,
@@ -1420,7 +1420,7 @@ BEGIN
 
          -- 6b
     INSERT INTO @tblFamiliesActiveAtEndOfThisQuarter6Again2
-       -- "    b. % on Level X at end of Quarter"
+       -- "    b. % on Level CO at end of Quarter"
        SELECT DISTINCT
               QuarterNumber,
               COUNT(h.HVCasePK) OVER (PARTITION BY [QuarterNumber]) AS 'FamiliesActiveAtEndOfThisQuarter'
@@ -1435,7 +1435,7 @@ BEGIN
              )
 
     INSERT INTO @tblFamiliesActiveAtEndOfThisQuarter6b
-       -- "    b. % on Level X at end of Quarter"
+       -- "    b. % on Level CO at end of Quarter"
        SELECT DISTINCT
               q8.QuarterNumber,
               COUNT(h.HVCasePK) OVER (PARTITION BY q8.[QuarterNumber]) AS 'FamiliesActiveAtEndOfThisQuarterOnLevelX',
@@ -1455,12 +1455,12 @@ BEGIN
                  h.DischargeDate IS NULL
                  OR h.DischargeDate > QuarterEndDate
              )
-             AND e3.levelname LIKE 'Level X'
+             AND e3.levelname LIKE 'Level CO'
              AND e3.hvcasefk = h.HVCasePK
              AND e3.programfk = h.ProgramFK
 
     INSERT INTO @tblFamiliesActiveAtEndOfThisQuarter6bHandlingMissingQuarters
-       -- "    b. % on Level X at end of Quarter"
+       -- "    b. % on Level CO at end of Quarter"
        SELECT ISNULL(f6bmissing.QuarterNumber, q8.QuarterNumber) AS QuarterNumber,
               ISNULL(FamiliesActiveAtEndOfThisQuarterOnLevelX, 0) AS FamiliesActiveAtEndOfThisQuarterOnLevelX,
               ISNULL(FamiliesActiveAtEndOfThisQuarter, 0) AS FamiliesActiveAtEndOfThisQuarter
@@ -2147,7 +2147,7 @@ BEGIN
            '    a. Families completing the program',
            '6. Families Active at end of this Quarter',
            '    a. % on Level 1 at end of Quarter',
-           '    b. % on Level X at end of Quarter',
+           '    b. % on Level CO at end of Quarter',
            '    c. % Families with no Service Referrals',
            '7. Average Visits per Month per Case on Level 1 or Level 1-SS',
            '8. Total Served in Quarter(includes closed cases)',
