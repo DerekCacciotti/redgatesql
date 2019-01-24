@@ -62,5 +62,5 @@ INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enr
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1098, 0.50, 'LEVELTR', 1, '          ', 'Level TR', 0.00, 0.00, NULL, 'TR')
 SET IDENTITY_INSERT [dbo].[codeLevel] OFF
 SET IDENTITY_INSERT [dbo].[codeLevel] ON
-INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1059, 2.50, 'LEVELM', 1, '          ', 'Level 1M', 1.00, 1.00, NULL, NULL)
+INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1059, 2.50, 'LEVELM', 1, '          ', 'Level 1M', 1.00, 1.00, NULL, '1M')
 SET IDENTITY_INSERT [dbo].[codeLevel] OFF
