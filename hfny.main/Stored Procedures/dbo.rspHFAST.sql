@@ -188,6 +188,7 @@ begin
 			or
 			(wp.FSWStartDate < @eDate and (wp.FSWEndDate is null or wp.FSWEndDate > @eDate))
 		)
+		and (wp.TerminationDate is null or wp.TerminationDate > @eDate)
 
 	--Cohort All home visit logs for cases that had a home visit in given year
 	declare @tblHomeVisits as table (
