@@ -15,7 +15,6 @@ CREATE procedure [dbo].[rspPilotDates] -- Add the parameters for the stored proc
     
 as
 
-
 	if @ProgramFK is null
 	begin
 		select @ProgramFK = substring((select ',' + ltrim(rtrim(str(HVProgramPK)))
@@ -23,6 +22,38 @@ as
 										   for xml path ('')), 2, 8000)
 	end
 	set @ProgramFK = replace(@ProgramFK, '"', '')
+
+	DECLARE @cohortTable AS TABLE (
+		PC1ID varchar(14)
+		, EXV int
+		, Worker varchar(50)
+		, [Screen Date A] DATE
+		, [Welcome Phone Call B] DATE
+		 ,[Welcome Family Visit Date C] DATE
+		 , [Real Kempe Date D] DATE
+		 , [Screen to Phone (B - A)] INT
+		 , [Welcome Phone to Family Visit (C - B)] INT
+		 , [Screen to Family Visit (C - A)] INT
+		 , [Welcome Visit to Real Kempe Date (D - C)] INT
+		 , [Screen To Real Kempe (D - A)] INT
+		 , DischargeDate DATE
+	)
+	
+
+
+	INSERT INTO @cohortTable ( PC1ID ,
+	                        EXV ,
+	                        Worker ,
+	                        [Screen Date A] ,
+	                        [Welcome Phone Call B] ,
+	                        [Welcome Family Visit Date C] ,
+	                        [Real Kempe Date D] ,
+	                        [Screen to Phone (B - A)] ,
+	                        [Welcome Phone to Family Visit (C - B)] ,
+	                        [Screen to Family Visit (C - A)] ,
+	                        [Welcome Visit to Real Kempe Date (D - C)] ,
+	                        [Screen To Real Kempe (D - A)] ,
+	                        DischargeDate )
 	
 	SELECT DISTINCT e.PC1ID
 		 , SUM(CASE WHEN CHARINDEX('EXV', cn.CaseNoteContents, 1)>0 THEN 1 ELSE 0 END) AS EXV
@@ -51,4 +82,22 @@ as
 			a.IntakeDate between @StartDt and @EndDt
 		GROUP BY e.PC1ID, fsw.LastName,fsw.FirstName, b.ScreenDate, c.FSWAssignDate, a.IntakeDate, a.KempeDate2, e.DischargeDate
 		order by e.PC1ID
+
+
+		INSERT INTO @cohortTable ( PC1ID,
+		                        [Screen to Phone (B - A)] 
+		                        , [Welcome Phone to Family Visit (C - B)] ,
+		                        [Screen to Family Visit (C - A)] ,
+		                        [Welcome Visit to Real Kempe Date (D - C)] ,
+		                        [Screen To Real Kempe (D - A)] 
+								)
+		SELECT 'Averages'
+		, SUM([Screen to Phone (B - A)]) / COUNT([Screen to Phone (B - A)])
+		, SUM([Welcome Phone to Family Visit (C - B)]) / COUNT([Welcome Phone to Family Visit (C - B)])
+		, SUM([Screen to Family Visit (C - A)] ) / COUNT([Screen to Family Visit (C - A)] )
+		, SUM([Welcome Visit to Real Kempe Date (D - C)] ) / COUNT([Welcome Visit to Real Kempe Date (D - C)] )
+		, SUM([Screen To Real Kempe (D - A)] ) / COUNT([Screen To Real Kempe (D - A)] )
+		FROM @cohortTable
+
+		SELECT * FROM @cohortTable
 GO
