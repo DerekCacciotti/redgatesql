@@ -188,6 +188,7 @@ begin
 			or
 			(wp.FSWStartDate < @eDate and (wp.FSWEndDate is null or wp.FSWEndDate > @eDate))
 		)
+		and (wp.TerminationDate is null or wp.TerminationDate > @eDate)
 
 	--Cohort All home visit logs for cases that had a home visit in given year
 	declare @tblHomeVisits as table (
@@ -369,21 +370,25 @@ begin
 		,HighestGrade char(2)
 		,MaritalStatus char(2)
 		,PrimaryLanguage char(2)
+		,PC1FamilyArmedForces char(1)
 	)
 	insert into @tblIntakeInfo (
 	    hvcasefk
 		,HighestGrade
 		,MaritalStatus
-		,PrimaryLanguage	
+		,PrimaryLanguage
+		,PC1FamilyArmedForces	
 	)
 
-	select hvcasefk
+	select intake.hvcasefk
 		, HighestGrade
 		, MaritalStatus
 		, PrimaryLanguage
+		, PC1FamilyArmedForces
     from dbo.CommonAttributes
+	inner join intake on Intake.HVCaseFK = CommonAttributes.HVCaseFK and Intake.IntakePK = CommonAttributes.FormFK
 	where formtype = 'IN-PC1'
-	and hvcasefk in (select hvcasefk from @tblThisYearsCases) 
+	and intake.hvcasefk in (select hvcasefk from @tblThisYearsCases) 
 
 	--Cohort followups for this years cases
 	declare @tblFollowUpInfo as table (
@@ -1008,8 +1013,9 @@ begin
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 39, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in ( 
-		select distinct hvcasefk from @tblFollowUpInfo
-		where PC1FamilyArmedForces = '1'
+		select distinct fui.hvcasefk from @tblFollowUpInfo fui
+		inner join @tblIntakeInfo ii on ii.hvcasefk = fui.hvcasefk
+		where fui.PC1FamilyArmedForces = '1' or ii.PC1FamilyArmedForces = '1'
 	)
 	declare @militaryFam int
 	set @militaryFam = (select count(*) from @tblFinalExport tfe where RowNumber = 39 and Detail = 1)
