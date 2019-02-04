@@ -1080,7 +1080,7 @@ begin
 	select 43, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblReferrals tr
-		where tr.ReferralSource = '04' or tr.ReferralSource = '05'
+		where tr.ReferralSource = '05'
 	)
 	declare @welfare int
 	set @welfare = (select count(*) from @tblFinalExport where RowNumber = 43 and Detail = 1)
