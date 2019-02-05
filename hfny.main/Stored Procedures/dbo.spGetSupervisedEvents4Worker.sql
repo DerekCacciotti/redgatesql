@@ -37,7 +37,7 @@ select		IsApproved
 				then 'Group Session'
 			end as SessionType
 		-- TakePlace = 1 then 'Yes' else 'No' end as TakePlace
-		, case -- convert into to string
+		, case -- convert to string
 			when s.SupervisionHours > 0 and s.SupervisionMinutes > 0 then
 				convert(varchar(10), s.SupervisionHours) + 
 				':' + 

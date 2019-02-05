@@ -18,43 +18,35 @@ as
 begin
 	with cteLastSupervision
 		as (
-			select	max(SupervisionPK) as SupervisionPK
+			select	max(SupervisionDate) as SupervisionDate
 			from	Supervision s
 			where	s.WorkerFK = @WorkerFK
 					and s.SupervisionDate < @SupervisionDate
 					and s.SupervisionSessionType = '1'
 		)
 	select			s.SupervisionPK
-				, s.AreasGrowthComments
-				, s.AreasGrowthStatus
 				, s.BoundariesComments
 				, s.BoundariesStatus
-				, s.CPSComments
-				, s.CPSStatus
 				, s.CaseloadComments
 				, s.CaseloadStatus
 				, s.CoachingComments
 				, s.CoachingStatus
-				, s.FamilyProgressComments
-				, s.FamilyProgressStatus
-				, s.HomeVisitLogActivitiesComments
-				, s.HomeVisitLogActivitiesStatus
-				, s.HomeVisitRateComments
-				, s.HomeVisitRateStatus
-				, s.IFSPComments
-				, s.IFSPStatus
+				, s.CPSComments
+				, s.CPSStatus
+				, s.CurriculumComments
+				, s.CurriculumStatus
+				, s.FamilyReviewComments
+				, s.FamilyReviewStatus
 				, s.ImpactOfWorkComments
 				, s.ImpactOfWorkStatus
 				, s.ImplementTrainingComments
 				, s.ImplementTrainingStatus
 				, s.OutreachComments
 				, s.OutreachStatus
-				, s.PIPComments
-				, s.PIPStatus
-				, s.PersonalGrowthComments
-				, s.PersonalGrowthStatus
 				, s.PersonnelComments
 				, s.PersonnelStatus
+				, s.PIPComments
+				, s.PIPStatus
 				, s.ProfessionalGrowthComments
 				, s.ProfessionalGrowthStatus
 				, s.ProgramFK
@@ -66,12 +58,8 @@ begin
 				, s.RolePlayingStatus
 				, s.SafetyComments
 				, s.SafetyStatus
-				, s.ShadowComments
-				, s.ShadowStatus
 				, s.SiteDocumentationComments
 				, s.SiteDocumentationStatus
-				, s.StrengthBasedApproachComments
-				, s.StrengthBasedApproachStatus
 				, s.StrengthsComments
 				, s.StrengthsStatus
 				, s.SupervisionCreateDate
@@ -90,15 +78,19 @@ begin
 				, s.SupervisorObservationAssessmentStatus
 				, s.SupervisorObservationHomeVisitComments
 				, s.SupervisorObservationHomeVisitStatus
+				, s.SupervisorObservationSupervisionComments
+				, s.SupervisorObservationSupervisionStatus
+				, s.SupportHFAModelComments
+				, s.SupportHFAModelStatus
 				, s.TeamDevelopmentComments
 				, s.TeamDevelopmentStatus
-				, s.TechniquesApproachesComments
-				, s.TechniquesApproachesStatus
-				, s.TrainingNeedsComments
-				, s.TrainingNeedsStatus
 				, s.WorkerFK
+				, s.WorkplaceEnvironment
+				, s.WorkplaceEnvironmentComments
+				, s.WorkplaceEnvironmentStatus
 	from			Supervision s
-	inner join		cteLastSupervision ls on s.SupervisionPK = ls.SupervisionPK
+	inner join		cteLastSupervision ls on s.SupervisionDate = ls.SupervisionDate
+	where s.WorkerFK = @WorkerFK
 
 end
 

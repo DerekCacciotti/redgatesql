@@ -8,7 +8,7 @@ GO
 -- Description:	This stored procedure gets the list of parent survey 
 --				supervision cases for the passed Supervision FK
 -- =============================================
-create procedure [dbo].[spGetSupervisionParentSurveyCaseList] (@SupervisionFK int)
+CREATE procedure [dbo].[spGetSupervisionParentSurveyCaseList] (@SupervisionFK int)
 as begin
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
@@ -18,38 +18,28 @@ as begin
 		, AssessmentIssues
 		, AssessmentIssuesComments
 		, AssessmentIssuesStatus
-		, AssessmentScreens
-		, AssessmentScreensComments
-		, AssessmentScreensStatus
 		, CaseComments
-		, CommunityResources
-		, CommunityResourcesComments
-		, CommunityResourcesStatus
-		, CulturalSensitivity
-		, CulturalSensitivityComments
-		, CulturalSensitivityStatus
-		, HVCaseFK
-		, InterRaterReliability
-		, InterRaterReliabilityComments
-		, InterRaterReliabilityStatus
-		, ProgramFK
+		, sc.HVCaseFK
+		, cp.PC1ID
+		, sc.ProgramFK
 		, ProtectiveFactors
 		, ProtectiveFactorsComments
 		, ProtectiveFactorsStatus
 		, Referrals
 		, ReferralsComments
 		, ReferralsStatus
-		, Reflection
-		, ReflectionComments
-		, ReflectionStatus
 		, RiskFactors
 		, RiskFactorsComments
 		, RiskFactorsStatus
 		, SupervisionFK
-		, TrackingData
-		, TrackingDataComments
-		, TrackingDataStatus
 	from	SupervisionParentSurveyCase sc
-	where	sc.SupervisionFK = @SupervisionFK ;
+	inner join CaseProgram cp on cp.HVCaseFK = sc.HVCaseFK
+	where	sc.SupervisionFK = @SupervisionFK and
+			cp.CaseProgramPK = (select top 1 cp.CaseProgramPK
+								from CaseProgram cp 
+								where cp.HVCaseFK = sc.HVCaseFK
+										and cp.ProgramFK = sc.ProgramFK
+								order by cp.CaseProgramCreateDate desc)
+	order by cp.PC1ID
 end ;
 GO
