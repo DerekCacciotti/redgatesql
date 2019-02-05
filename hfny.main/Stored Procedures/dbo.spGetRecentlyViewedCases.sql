@@ -9,28 +9,42 @@ GO
 -- viewed cases for a specific user and filters those results by program.
 -- The @ProgramFK parameter is now optional.
 -- =============================================
-CREATE procedure [dbo].[spGetRecentlyViewedCases] (@UserName varchar(255), @ProgramFK int)
-as begin
+CREATE PROC [dbo].[spGetRecentlyViewedCases]
+(
+	@UserName VARCHAR(255),
+	@ProgramFK INT
+)
+AS
+BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
-	set noCount on ;
+	SET NOCOUNT ON;
 
-	create table #CaseViews 
-		(
-			PC1ID char(13), 
-			ViewDateMax datetime
-		);
+	DECLARE @CaseViews TABLE
+	(
+		PC1ID CHAR(13),
+		ViewDateMax DATETIME
+	);
 
-	insert into #CaseViews (PC1ID, ViewDateMax)
-	select		top 100 cv.PC1ID
-						, max(cv.ViewDate) as ViewDateMax
-		from		CaseView cv
-		inner join	CaseProgram cp on cp.PC1ID = cv.PC1ID
-		where		cv.Username = @UserName and cp.ProgramFK = isnull(@ProgramFK, cp.ProgramFK)
-		group by	cv.PC1ID
-		order by	ViewDateMax desc
+	INSERT	INTO @CaseViews
+	(
+		PC1ID,
+		ViewDateMax
+	)
+	SELECT	TOP 100
+			cv.PC1ID,
+			MAX(cv.ViewDate) AS ViewDateMax
+	FROM	CaseView cv
+		INNER JOIN CaseProgram cp
+			ON cp.PC1ID = cv.PC1ID
+	WHERE cv.Username = @UserName
+		AND cp.ProgramFK = ISNULL(@ProgramFK, cp.ProgramFK)
+	GROUP BY cv.PC1ID
+	ORDER BY ViewDateMax DESC;
 
-	select top 20 PC1ID from #CaseViews 
-	order by ViewDateMax desc;
-end ;
+	SELECT	TOP 20
+			PC1ID
+	FROM	@CaseViews
+	ORDER BY ViewDateMax DESC;
+END;
 GO
