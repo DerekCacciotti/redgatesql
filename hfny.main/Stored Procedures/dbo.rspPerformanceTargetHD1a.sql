@@ -138,12 +138,12 @@ BEGIN
 					END AS FormReviewed				
 			, 0 AS FormOutOfWindow -- not out of window
 			, 0 AS FormMissing
-			, CASE WHEN ((imm.DTAPCount >= 3) AND (imm.HIBCount >= 3) AND (imm.PCVCount >= 3) 
+			, CASE WHEN ((imm.DTAPCount >= 3) AND (imm.HIBCount >= 2) AND (imm.PCVCount >= 3) 
 					AND (imm.PolioCount >= 2) AND (imm.MMRCount >= 0) AND (imm.HEPBCount >= 2)
 					AND (imm.VZCount >= 0) AND (imm.FluCount >= 0) AND (imm.RotoCount >= 2) AND (imm.HEPACount >= 0))
 					AND (imm.TotalImmunizations = imm.FormReviewedCount) THEN 1 
 					ELSE 0 END AS FormMeetsTarget
-			, CASE WHEN NOT ((imm.DTAPCount >= 3) AND (imm.HIBCount >= 3) AND (imm.PCVCount >= 3) 
+			, CASE WHEN NOT ((imm.DTAPCount >= 3) AND (imm.HIBCount >= 2) AND (imm.PCVCount >= 3) 
 					AND (imm.PolioCount >= 2) AND (imm.MMRCount >= 0) AND (imm.HEPBCount >= 2)
 					AND (imm.VZCount >= 0) AND (imm.FluCount >= 0) AND (imm.RotoCount >= 2) AND (imm.HEPACount >= 0)) THEN 'Missing Shots or Not on Time' 
 					WHEN (imm.TotalImmunizations <> imm.FormReviewedCount) THEN 'Immunization form(s) not reviewed'
