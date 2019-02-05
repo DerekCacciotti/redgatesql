@@ -73,7 +73,7 @@ begin
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(40, 'B29', 'Have substance abuse history', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(41, 'B30', 'In need of substance abuse treatment', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(42, 'B31', 'Abused or neglected as a child', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(43, 'B32', 'Involved in Child Welfare System as caregiver', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(43, 'B32', 'Referred by Child Welfare as a caregiver.', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(44, 'B33', 'Single parent', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(45, 'B34', 'Over cutoff on depression screen', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(46, NULL, 'Insurance Status of PC1 (when last assessed):', 1, 0)
@@ -102,46 +102,51 @@ begin
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(69, 'B40', 'Medium risk on Initial Assessment(Parent Survey 25-35)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(70, 'B40', 'Higher risk on Initial Assessment(Parent Survey 40+)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(71, NULL, 'TC age at Last Home Visit:', 1, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(72, 'B41', 'Under 1 Year', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(73, 'B41', '1-2 Years', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(74, 'B41', '3-4 Years', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(75, 'B41', '5-6 Years', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(76, 'B41', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(77, NULL, 'Child Issues: Number of children who were:', 1, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(78, 'B42', 'Born at low birth weight, less than 2500 grams or 5lbs 8oz', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(79, 'B42', 'Born premature, born before 37 weeks completed', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(80, 'B42', 'Developmentally delayed or disabled (known or suspected)', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(81, 'B42', 'Medicaid eligible', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(82, NULL, 'PC1 Age at Enrollment:', 1, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(83, 'B43', 'Less than 18', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(84, 'B43', '18-19', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(85, 'B43', '20-21', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(86, 'B43', '22-24', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(87, 'B43', '25-29', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(88, 'B43', '30-34', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(89, 'B43', '35-44', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(90, 'B43', '45-54', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(91, 'B43', '55-65', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(92, 'B43', '65 or more', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(93, 'B43', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(94, NULL, 'Ethnicity: Number of Primary Participants who are:', 1, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(95, 'B44', 'Hispanic', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(96, 'B44', 'Non-Hispanic', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(97, 'B44', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(98, NULL, 'Race: Number of Primary Participants who are:', 1, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(99, 'B45', 'White', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(100, 'B45', 'African-American', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(101, 'B45', 'Asian', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(102, 'B45', 'American Indian/Alaskan Native', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(103, 'B45', 'Native Hawaiian/Pacific Islander', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(104, 'B45', 'Multi-race', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(105, 'B45', 'Unknown', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(106, 'B45', 'Other race', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(107, 'B45', 'Other race specify', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(108, NULL, 'Primary Participant Language:', 1, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(109, 'B46', 'Primary Language English', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(110, 'B46', 'Primary Language Spanish', 0, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(111, 'B46', 'Primary Language not English nor Spanish', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(72, 'B41', 'Prenatal', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(73, 'B41', '0-5 months', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(74, 'B41', '6-11 months', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(75, 'B41', '12-23 months', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(76, 'B41', '24-35 months', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(77, 'B41', '36-47 months', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(78, 'B41', '48-59 months', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(79, 'B41', '60-71 months', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(80, 'B41', '72-83 months', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(81, 'B41', 'Unknown', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(82, NULL, 'Child Issues: Number of children who were:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(83, 'B42', 'Born at low birth weight, less than 2500 grams or 5lbs 8oz', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(84, 'B42', 'Born premature, born before 37 weeks completed', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(85, 'B42', 'Developmentally delayed or disabled (known or suspected)', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(86, 'B42', 'Medicaid eligible', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(87, NULL, 'PC1 Age at Enrollment:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(88, 'B43', 'Less than 18', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(89, 'B43', '18-19 years', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(90, 'B43', '20-21 years', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(91, 'B43', '22-24 years', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(92, 'B43', '25-29 years', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(93, 'B43', '30-34 years', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(94, 'B43', '35-44 years', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(95, 'B43', '45-54 years', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(96, 'B43', '55-64 years', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(97, 'B43', '65 or more', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(98, 'B43', 'Unknown', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(99, NULL, 'Ethnicity: Number of Primary Participants who are:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(100, 'B44', 'Hispanic', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(101, 'B44', 'Non-Hispanic', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(102, 'B44', 'Unknown', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(103, NULL, 'Race: Number of Primary Participants who are:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(104, 'B45', 'White', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(105, 'B45', 'African-American', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(106, 'B45', 'Asian', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(107, 'B45', 'American Indian/Alaskan Native', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(108, 'B45', 'Native Hawaiian/Pacific Islander', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(109, 'B45', 'Multi-race', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(110, 'B45', 'Unknown', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(111, 'B45', 'Other race', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(112, 'B45', 'Other race specify', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(113, NULL, 'Primary Participant Language:', 1, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(114, 'B46', 'Primary Language English', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(115, 'B46', 'Primary Language Spanish', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(116, 'B46', 'Primary Language not English nor Spanish', 0, 0)
 
 	
 
@@ -259,6 +264,7 @@ begin
 	declare @tblThisYearsCases as table (
 		hvcasefk int
 		,TCNumber int
+		,EDC date
 		,TCDOB date
 		,IntakeDate date
 		,Gender int
@@ -272,6 +278,7 @@ begin
 	insert into @tblThisYearsCases (
 	    hvcasefk
 		,TCNumber
+		,EDC
 		,TCDOB
 		,IntakeDate
 		,Gender
@@ -284,6 +291,7 @@ begin
 	)
 	select distinct hvcasefk
 		, TCNumber
+		, EDC
 		, TCDOB
 		, IntakeDate
 		, Gender
@@ -320,22 +328,26 @@ begin
 	declare @tblLastHomeVisit as table (
 		    hvcasefk int
 	      , VisitStartTime date
+		  , EDC date
 		  , TCDOB date
 		  , TCNumber int
 	)
 	insert into @tblLastHomeVisit (
 		hvcasefk
 		, VisitStartTime
+		, EDC
 		, TCDOB
 		, TCNumber
 	)
 	select sub.hvcasefk
 		   ,sub.VisitStartTime
+		   ,sub.EDC
 		   ,sub.TCDOB
 		   ,sub.TCNumber
     from(
 	select thv.hvcasefk
 	       , VisitStartTime
+		   , EDC
 		   , TCDOB
 		   , TCNumber
 		   , row_number() over (partition by thv.hvcasefk order by thv.VisitStartTime desc) [row]
@@ -612,6 +624,19 @@ begin
 	left join dbo.CommonAttributes ca on ttyc.hvcasefk = ca.HVCaseFK
 	left join Employment e on e.FormFK = ca.FormFK
 	where ca.FormType in ('FU-PC1', 'IN-PC1', 'KE')
+
+	--Referral Source
+	declare @tblReferrals as table (
+		hvcasefk int ,
+		ReferralSource char(2)
+	)
+	insert into @tblReferrals (hvcasefk, ReferralSource)
+	select hvcasefk ,
+		   ReferralSource
+	from hvscreen hv
+	inner join dbo.SplitString(@programfk,',') ON hv.programfk  = listitem 
+	where hvcasefk in (select distinct hvcasefk from @tblThisYearsCases ttyc)
+
 				
 --B2 row 1
 	--Number of home visits completed
@@ -1054,8 +1079,8 @@ begin
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 43, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
-		select distinct hvcasefk from @tblPC1Insurance
-		where PBTANF = '1' or PBEmergencyAssistance = '1' or PBFoodStamps = '1' or PBSSI = '1' or PBWIC = '1'
+		select distinct hvcasefk from @tblReferrals tr
+		where tr.ReferralSource = '05'
 	)
 	declare @welfare int
 	set @welfare = (select count(*) from @tblFinalExport where RowNumber = 43 and Detail = 1)
@@ -1346,15 +1371,11 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) < 12
-			and TCDOB < @eDate
+		where TCDOB is null or TCDOB > VisitStartTime  
 	)
-	declare @1Year int
-	set @1Year = ( select sum(isnull(TCNumber,0)) from @tblLastHomeVisit tlhv
-				  where datediff(month, TCDOB, VisitStartTime) < 12
-					and TCDOB < @eDate
-				)
-	update @tblFinalExport set Response = @1Year where RowNumber = 72 and Detail = 0
+	declare @PreNatal int
+	set @PreNatal = (select count(*) from @tblFinalExport tfe where tfe.RowNumber = 72 and Detail = 1)
+	update @tblFinalExport set Response = @PreNatal where RowNumber = 72 and Detail = 0
 	--end row 72
 
 	--row 73
@@ -1363,18 +1384,16 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 12 
-			and datediff(month, TCDOB, VisitStartTime) < 36
+		where datediff(month, TCDOB, VisitStartTime) <= 5
 			and TCDOB < @eDate
 	)
-	declare @1to2 int
-	set @1to2 = ( select sum(isnull(TCNumber,0)) from @tblLastHomeVisit tlhv
-				   where datediff(month, TCDOB, VisitStartTime) >= 12 
-					and datediff(month, TCDOB, VisitStartTime) < 36
+	declare @0to5mo int
+	set @0to5mo = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit tlhv
+				  where datediff(month, TCDOB, VisitStartTime) < 12
 					and TCDOB < @eDate
-	)
-	update @tblFinalExport set Response = @1to2 where RowNumber = 73 and Detail = 0
-	--end 73
+				)
+	update @tblFinalExport set Response = @0to5mo where RowNumber = 73 and Detail = 0
+	--end row 73
 
 	--row 74
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
@@ -1382,17 +1401,17 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 36 
-			and datediff(month, TCDOB, VisitStartTime) < 60
+		where datediff(month, TCDOB, VisitStartTime) >= 6 
+			and datediff(month, TCDOB, VisitStartTime) <= 11
 			and TCDOB < @eDate
 	)
-	declare @3to4 int
-	set @3to4 = ( select sum(isnull(TCNumber,0)) from @tblLastHomeVisit
-					where datediff(month, TCDOB, VisitStartTime) >= 36 
-						and datediff(month, TCDOB, VisitStartTime) < 60
-						and TCDOB < @eDate
+	declare @6to11mo int
+	set @6to11mo = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit tlhv
+				   where datediff(month, TCDOB, VisitStartTime) >= 6 
+					and datediff(month, TCDOB, VisitStartTime) <= 11
+					and TCDOB < @eDate
 	)
-	update @tblFinalExport set Response = @3to4 where RowNumber = 74 and Detail = 0
+	update @tblFinalExport set Response = @6to11mo where RowNumber = 74 and Detail = 0
 	--end 74
 
 	--row 75
@@ -1401,17 +1420,17 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 60 
-			and datediff(month, TCDOB, VisitStartTime) < 84
+		where datediff(month, TCDOB, VisitStartTime) >= 12 
+			and datediff(month, TCDOB, VisitStartTime) <= 23
 			and TCDOB < @eDate
 	)
-	declare @5to6 int
-	set @5to6 = ( select sum(isnull(TCNumber,0)) from @tblLastHomeVisit
-				    where datediff(month, TCDOB, VisitStartTime) >= 60 
-						and datediff(month, TCDOB, VisitStartTime) < 84
+	declare @3to4 int
+	set @3to4 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
+					where datediff(month, TCDOB, VisitStartTime) >= 12 
+						and datediff(month, TCDOB, VisitStartTime) <= 23
 						and TCDOB < @eDate
-	) 
-	update @tblFinalExport set Response = @5to6 where RowNumber = 75 and Detail = 0
+	)
+	update @tblFinalExport set Response = @3to4 where RowNumber = 75 and Detail = 0
 	--end 75
 
 	--row 76
@@ -1420,21 +1439,114 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where TCDOB is null
+		where datediff(month, TCDOB, VisitStartTime) >= 24 
+			and datediff(month, TCDOB, VisitStartTime) <= 35
+			and TCDOB < @eDate
 	)
-	declare @TCAgeUnk int
-	set @TCAgeUnk = ( select sum(isnull(TCNumber,0))
-				      from @tblLastHomeVisit
-					  where TCDOB is null
+	declare @24to35 int
+	set @24to35 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
+				    where datediff(month, TCDOB, VisitStartTime) >= 24 
+						and datediff(month, TCDOB, VisitStartTime) <= 35
+						and TCDOB < @eDate
 	) 
-	update @tblFinalExport set Response = @TCAgeUnk where RowNumber = 76 and Detail = 0
+	update @tblFinalExport set Response = @24to35 where RowNumber = 76 and Detail = 0
 	--end 76
---end B41
 
---B42
+	--row 77
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 77, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid 
+	where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblLastHomeVisit
+		where datediff(month, TCDOB, VisitStartTime) >= 36 
+			and datediff(month, TCDOB, VisitStartTime) <= 47
+			and TCDOB < @eDate
+	)
+	declare @36to47 int
+	set @36to47 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
+				    where datediff(month, TCDOB, VisitStartTime) >= 36 
+						and datediff(month, TCDOB, VisitStartTime) <= 47
+						and TCDOB < @eDate
+	) 
+	update @tblFinalExport set Response = @36to47 where RowNumber = 77 and Detail = 0
+	--end 77
+
 	--row 78
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 78, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid 
+	where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblLastHomeVisit
+		where datediff(month, TCDOB, VisitStartTime) >= 48 
+			and datediff(month, TCDOB, VisitStartTime) <= 59
+			and TCDOB < @eDate
+	)
+	declare @48to59 int
+	set @48to59 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
+				    where datediff(month, TCDOB, VisitStartTime) >= 48 
+						and datediff(month, TCDOB, VisitStartTime) <= 59
+						and TCDOB < @eDate
+	) 
+	update @tblFinalExport set Response = @48to59 where RowNumber = 78 and Detail = 0
+	--end 78
+
+	--row 79
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 79, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid 
+	where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblLastHomeVisit
+		where datediff(month, TCDOB, VisitStartTime) >= 60 
+			and datediff(month, TCDOB, VisitStartTime) <= 71
+			and TCDOB < @eDate
+	)
+	declare @60to71 int
+	set @60to71 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
+				    where datediff(month, TCDOB, VisitStartTime) >= 60 
+						and datediff(month, TCDOB, VisitStartTime) <= 71
+						and TCDOB < @eDate
+	) 
+	update @tblFinalExport set Response = @60to71 where RowNumber = 79 and Detail = 0
+	--end 79
+
+	--row 80
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 80, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid 
+	where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblLastHomeVisit
+		where datediff(month, TCDOB, VisitStartTime) >= 72 
+			and datediff(month, TCDOB, VisitStartTime) <= 83
+			and TCDOB < @eDate
+	)
+	declare @72to83 int
+	set @72to83 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
+				    where datediff(month, TCDOB, VisitStartTime) >= 72 
+						and datediff(month, TCDOB, VisitStartTime) <= 83
+						and TCDOB < @eDate
+	) 
+	update @tblFinalExport set Response = @72to83 where RowNumber = 80 and Detail = 0
+	--end 80
+
+	--row 81
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 81, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid 
+	where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblLastHomeVisit
+		where TCDOB is null and EDC is null
+	)
+	declare @TCAgeUnk int
+	set @TCAgeUnk = (select count(*) from @tblFinalExport tfe where tfe.RowNumber = 81 and tfe.Detail = 1)
+	update @tblFinalExport set Response = @TCAgeUnk where RowNumber = 81 and Detail = 0
+	--end 81
+
+--end B41
+
+--B42
+	--row 83
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 83, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblTCBirthInfo
@@ -1444,12 +1556,12 @@ begin
 	set @lowBirthWt = ( select count(*) from @tblTCBirthInfo
 						where BirthWtLbs <= 4 or (BirthWtLbs = 5 and BirthWtOz < 8)
 	)
-	update @tblFinalExport set Response = @lowBirthWt where RowNumber = 78 and Detail = 0
-	--end row 78
+	update @tblFinalExport set Response = @lowBirthWt where RowNumber = 83 and Detail = 0
+	--end row 83
 
-	--row 79
+	--row 84
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 79, tpid.PC1ID, 0, 1
+	select 84, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblTCBirthInfo
@@ -1459,17 +1571,17 @@ begin
 	set @premature = ( select count(*) from @tblTCBirthInfo
 					   where GestationalAge < 37
 	)
-	update @tblFinalExport set Response = @premature where RowNumber = 79 and Detail = 0
-	--end row 79
+	update @tblFinalExport set Response = @premature where RowNumber = 84 and Detail = 0
+	--end row 84
 
-	-- row 80
+	-- row 85
 	-- Developmentally delayed or disabled (known or suspected)
-	-- End row 80
+	-- End row 85
 
-	--row 81
+	--row 86
 	-- TC Medicaid eligible
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 81, tpid.PC1ID, 0, 1
+	select 86, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblPC1Insurance 
 				where AvailableMonthlyIncome <= 1558 + ((NumberInHouse - 1) * 555) --children to 18
@@ -1477,88 +1589,23 @@ begin
 				--where AvailableMonthlyIncome <= 2257 + ((NumberInHouse - 1) * 803)  --children up to one year
 	)
 	declare @tcMcEligible int
-	set @tcMcEligible = (select count(*) from @tblFinalExport tfe where tfe.RowNumber = 81 and Detail = 1)
-	update @tblFinalExport set Response = @mcEligible where RowNumber = 81 and Detail = 0
-	--end row 81
+	set @tcMcEligible = (select count(*) from @tblFinalExport tfe where tfe.RowNumber = 86 and Detail = 1)
+	update @tblFinalExport set Response = @mcEligible where RowNumber = 85 and Detail = 0
+	--end row 86
 --end B42
 
 --B43 PC1 Age at Enrollment
-	--row 83
-	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 83, tpid.PC1ID, 0, 1
-	from @tblPC1IDs tpid
-	where tpid.hvcasefk in (
-		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) < 18
-	)
-	declare @Under18 int
-	set @Under18 = (select count(*) from @tblFinalExport tfe where RowNumber = 83 and Detail = 1)
-	update @tblFinalExport set Response = @Under18 where RowNumber = 83 and Detail = 0
-	--end row 83
-
-	--row 84
-	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 84, tpid.PC1ID, 0, 1
-	from @tblPC1IDs tpid
-	where tpid.hvcasefk in (
-		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 18 and datediff(year, PCDOB, IntakeDate) <= 19
-	)
-	declare @18to19 int
-	set @18to19 = (select count(*) from @tblFinalExport tfe where RowNumber = 84 and Detail = 1)
-	update @tblFinalExport set Response = @18to19 where RowNumber = 84 and Detail = 0
-	--end row 84
-
-	--row 85
-	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 85, tpid.PC1ID, 0, 1
-	from @tblPC1IDs tpid
-	where tpid.hvcasefk in (
-		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 20 and datediff(year, PCDOB, IntakeDate) <= 21
-	)
-	declare @20to21 int
-	set @20to21 = (select count(*) from @tblFinalExport tfe where RowNumber = 85 and Detail = 1)
-	update @tblFinalExport set Response = @20to21 where RowNumber = 85 and Detail = 0
-	--end row 85
-	
-	--row 86
-	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 86, tpid.PC1ID, 0, 1
-	from @tblPC1IDs tpid
-	where tpid.hvcasefk in (
-		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 22 and datediff(year, PCDOB, IntakeDate) <= 24
-	)
-	declare @22to24 int
-	set @22to24 = (select count(*) from @tblFinalExport tfe where RowNumber = 86 and Detail = 1)
-	update @tblFinalExport set Response = @22to24 where RowNumber = 86 and Detail = 0
-	--end row 86
-
-	--row 87
-	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 87, tpid.PC1ID, 0, 1
-	from @tblPC1IDs tpid
-	where tpid.hvcasefk in (
-		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 25 and datediff(year, PCDOB, IntakeDate) <= 29
-	)
-	declare @25to29 int
-	set @25to29 = (select count(*) from @tblFinalExport tfe where RowNumber = 87 and Detail = 1)
-	update @tblFinalExport set Response = @25to29 where RowNumber = 87 and Detail = 0
-	--end row 87
-
 	--row 88
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 88, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 30 and datediff(year, PCDOB, IntakeDate) <= 34
+		where datediff(year, PCDOB, IntakeDate) < 18
 	)
-	declare @30to44 int
-	set @30to44 = (select count(*) from @tblFinalExport tfe where RowNumber = 88 and Detail = 1)
-	update @tblFinalExport set Response = @30to44 where RowNumber = 88 and Detail = 0
+	declare @Under18 int
+	set @Under18 = (select count(*) from @tblFinalExport tfe where RowNumber = 88 and Detail = 1)
+	update @tblFinalExport set Response = @Under18 where RowNumber = 88 and Detail = 0
 	--end row 88
 
 	--row 89
@@ -1567,11 +1614,11 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 35 and datediff(year, PCDOB, IntakeDate) <= 44
+		where datediff(year, PCDOB, IntakeDate) >= 18 and datediff(year, PCDOB, IntakeDate) <= 19
 	)
-	declare @55to65 int
-	set @55to65 = (select count(*) from @tblFinalExport tfe where RowNumber = 89 and Detail = 1)
-	update @tblFinalExport set Response = @55to65 where RowNumber = 89 and Detail = 0
+	declare @18to19 int
+	set @18to19 = (select count(*) from @tblFinalExport tfe where RowNumber = 89 and Detail = 1)
+	update @tblFinalExport set Response = @18to19 where RowNumber = 89 and Detail = 0
 	--end row 89
 
 	--row 90
@@ -1580,24 +1627,24 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 45 and datediff(year, PCDOB, IntakeDate) <= 54
+		where datediff(year, PCDOB, IntakeDate) >= 20 and datediff(year, PCDOB, IntakeDate) <= 21
 	)
-	declare @45to54 int
-	set @45to54 = (select count(*) from @tblFinalExport tfe where RowNumber = 90 and Detail = 1)
-	update @tblFinalExport set Response = @45to54 where RowNumber = 90 and Detail = 0
+	declare @20to21 int
+	set @20to21 = (select count(*) from @tblFinalExport tfe where RowNumber = 90 and Detail = 1)
+	update @tblFinalExport set Response = @20to21 where RowNumber = 90 and Detail = 0
 	--end row 90
-
+	
 	--row 91
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 91, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 55 and datediff(year, PCDOB, IntakeDate) <= 64
+		where datediff(year, PCDOB, IntakeDate) >= 22 and datediff(year, PCDOB, IntakeDate) <= 24
 	)
-	declare @55to64 int
-	set @55to64 = (select count(*) from @tblFinalExport tfe where RowNumber = 91 and Detail = 1)
-	update @tblFinalExport set Response = @55to64 where RowNumber = 91 and Detail = 0
+	declare @22to24 int
+	set @22to24 = (select count(*) from @tblFinalExport tfe where RowNumber = 91 and Detail = 1)
+	update @tblFinalExport set Response = @22to24 where RowNumber = 91 and Detail = 0
 	--end row 91
 
 	--row 92
@@ -1606,11 +1653,11 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where datediff(year, PCDOB, IntakeDate) >= 65
+		where datediff(year, PCDOB, IntakeDate) >= 25 and datediff(year, PCDOB, IntakeDate) <= 29
 	)
-	declare @Over64 int
-	set @Over64 = (select count(*) from @tblFinalExport tfe where RowNumber = 92 and Detail = 1)
-	update @tblFinalExport set Response = @Over64 where RowNumber = 92 and Detail = 0
+	declare @25to29 int
+	set @25to29 = (select count(*) from @tblFinalExport tfe where RowNumber = 92 and Detail = 1)
+	update @tblFinalExport set Response = @25to29 where RowNumber = 92 and Detail = 0
 	--end row 92
 
 	--row 93
@@ -1619,26 +1666,37 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where PCDOB is null
+		where datediff(year, PCDOB, IntakeDate) >= 30 and datediff(year, PCDOB, IntakeDate) <= 34
 	)
-	declare @PCageUnk int
-	set @PCageUnk = (select count(*) from @tblFinalExport tfe where RowNumber = 93 and Detail = 1)
-	update @tblFinalExport set Response = @PCageUnk where RowNumber = 93 and Detail = 0
+	declare @30to44 int
+	set @30to44 = (select count(*) from @tblFinalExport tfe where RowNumber = 93 and Detail = 1)
+	update @tblFinalExport set Response = @30to44 where RowNumber = 93 and Detail = 0
 	--end row 93
---end B43
 
---B44 PC1 Ethnicity
+	--row 94
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 94, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid
+	where tpid.hvcasefk in (
+		select hvcasefk from @tblThisYearsCases
+		where datediff(year, PCDOB, IntakeDate) >= 35 and datediff(year, PCDOB, IntakeDate) <= 44
+	)
+	declare @55to65 int
+	set @55to65 = (select count(*) from @tblFinalExport tfe where RowNumber = 94 and Detail = 1)
+	update @tblFinalExport set Response = @55to65 where RowNumber = 94 and Detail = 0
+	--end row 94
+
 	--row 95
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 95, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where Race = '03'
+		where datediff(year, PCDOB, IntakeDate) >= 45 and datediff(year, PCDOB, IntakeDate) <= 54
 	)
-	declare @pcHispanic int
-	set @pcHispanic = (select count(*) from @tblFinalExport tfe where RowNumber = 95 and Detail = 1)
-	update @tblFinalExport set Response = @pcHispanic where RowNumber = 95 and Detail = 0
+	declare @45to54 int
+	set @45to54 = (select count(*) from @tblFinalExport tfe where RowNumber = 95 and Detail = 1)
+	update @tblFinalExport set Response = @45to54 where RowNumber = 95 and Detail = 0
 	--end row 95
 
 	--row 96
@@ -1647,11 +1705,11 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where Race <> '03'
+		where datediff(year, PCDOB, IntakeDate) >= 55 and datediff(year, PCDOB, IntakeDate) <= 64
 	)
-	declare @pcNonHispanic int
-	set @pcNonHispanic = (select count(*) from @tblFinalExport tfe where RowNumber = 96 and Detail = 1) 
-	update @tblFinalExport set Response = @pcNonHispanic where RowNumber = 96 and Detail = 0
+	declare @55to64 int
+	set @55to64 = (select count(*) from @tblFinalExport tfe where RowNumber = 96 and Detail = 1)
+	update @tblFinalExport set Response = @55to64 where RowNumber = 96 and Detail = 0
 	--end row 96
 
 	--row 97
@@ -1660,52 +1718,52 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where Race is null and Ethnicity is null
+		where datediff(year, PCDOB, IntakeDate) >= 65
 	)
-	declare @pcEthnicityUnk int
-	set @pcEthnicityUnk = (select count(*) from @tblFinalExport tfe where RowNumber = 97 and Detail = 1) 
-    update @tblFinalExport set Response = @pcEthnicityUnk where RowNumber = 97  and Detail = 0
+	declare @Over64 int
+	set @Over64 = (select count(*) from @tblFinalExport tfe where RowNumber = 97 and Detail = 1)
+	update @tblFinalExport set Response = @Over64 where RowNumber = 97 and Detail = 0
 	--end row 97
---end B44
 
---B45 PC1 Race
-	--row 99
+	--row 98
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 99, tpid.PC1ID, 0, 1
+	select 98, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
-		 select hvcasefk from @tblThisYearsCases
-		 where Race = '01'
+		select hvcasefk from @tblThisYearsCases
+		where PCDOB is null
 	)
-	declare @pcWhite int
-	set @pcWhite = (select count(*) from @tblFinalExport tfe where RowNumber = 99 and Detail = 1) 
-	update @tblFinalExport set Response = @pcWhite where RowNumber = 99 and Detail = 0
-	--end row 99
+	declare @PCageUnk int
+	set @PCageUnk = (select count(*) from @tblFinalExport tfe where RowNumber = 98 and Detail = 1)
+	update @tblFinalExport set Response = @PCageUnk where RowNumber = 98 and Detail = 0
+	--end row 98
+--end B43
 
+--B44 PC1 Ethnicity
 	--row 100
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 100, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where Race = '02'
+		where Race = '03'
 	)
-	declare @pcBlack int
-	set @pcBlack = (select count(*) from @tblFinalExport tfe where RowNumber = 100 and Detail = 1)  
-	update @tblFinalExport set Response = @pcBlack where RowNumber = 100
+	declare @pcHispanic int
+	set @pcHispanic = (select count(*) from @tblFinalExport tfe where RowNumber = 100 and Detail = 1)
+	update @tblFinalExport set Response = @pcHispanic where RowNumber = 100 and Detail = 0
 	--end row 100
-	
+
 	--row 101
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 101, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where Race = '04'
+		where Race <> '03'
 	)
-	declare @pcAsian int
-	set @pcAsian = (select count(*) from @tblFinalExport tfe where RowNumber = 101 and Detail = 1)
-	update @tblFinalExport set Response = @pcAsian where RowNumber = 101
+	declare @pcNonHispanic int
+	set @pcNonHispanic = (select count(*) from @tblFinalExport tfe where RowNumber = 101 and Detail = 1) 
+	update @tblFinalExport set Response = @pcNonHispanic where RowNumber = 101 and Detail = 0
 	--end row 101
 
 	--row 102
@@ -1714,28 +1772,26 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where Race = '05'
+		where Race is null and Ethnicity is null
 	)
-	declare @pcAmInd int
-	set @pcAmInd = (select count(*) from @tblFinalExport tfe where RowNumber = 102 and Detail = 1) 
-	update @tblFinalExport set Response = @pcAmInd where RowNumber = 102
+	declare @pcEthnicityUnk int
+	set @pcEthnicityUnk = (select count(*) from @tblFinalExport tfe where RowNumber = 102 and Detail = 1) 
+    update @tblFinalExport set Response = @pcEthnicityUnk where RowNumber = 102  and Detail = 0
 	--end row 102
+--end B44
 
-	--row 103
-	--Hawaiian/Pacific Islander not tracked
-	--end row 103
-
+--B45 PC1 Race
 	--row 104
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 104, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
-		select hvcasefk from @tblThisYearsCases
-		where Race = '06'
+		 select hvcasefk from @tblThisYearsCases
+		 where Race = '01'
 	)
-	declare @pcMultiRace int
-	set @pcMultiRace = (select count(*) from @tblFinalExport tfe where RowNumber = 104 and Detail = 1)
-	update @tblFinalExport set Response = @pcMultiRace where RowNumber = 104
+	declare @pcWhite int
+	set @pcWhite = (select count(*) from @tblFinalExport tfe where RowNumber = 104 and Detail = 1) 
+	update @tblFinalExport set Response = @pcWhite where RowNumber = 104 and Detail = 0
 	--end row 104
 
 	--row 105
@@ -1744,11 +1800,11 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where Race is null
+		where Race = '02'
 	)
-	declare @pcRaceUnk int
-	set @pcRaceUnk = (select count(*) from @tblFinalExport tfe where RowNumber = 105 and Detail = 1) 
-	update @tblFinalExport set Response = @pcRaceUnk where RowNumber = 105
+	declare @pcBlack int
+	set @pcBlack = (select count(*) from @tblFinalExport tfe where RowNumber = 105 and Detail = 1)  
+	update @tblFinalExport set Response = @pcBlack where RowNumber = 105
 	--end row 105
 	
 	--row 106
@@ -1757,29 +1813,41 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblThisYearsCases
-		where Race = '07'
+		where Race = '04'
 	)
-	declare @pcRaceOther int
-	set @pcRaceOther = (select count(*) from @tblFinalExport tfe where RowNumber = 106 and Detail = 1)  
-	update @tblFinalExport set Response = @pcRaceOther where RowNumber = 106
+	declare @pcAsian int
+	set @pcAsian = (select count(*) from @tblFinalExport tfe where RowNumber = 106 and Detail = 1)
+	update @tblFinalExport set Response = @pcAsian where RowNumber = 106
 	--end row 106
 
 	--row 107
-	--Other race specify: How to calculate?
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 107, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid
+	where tpid.hvcasefk in (
+		select hvcasefk from @tblThisYearsCases
+		where Race = '05'
+	)
+	declare @pcAmInd int
+	set @pcAmInd = (select count(*) from @tblFinalExport tfe where RowNumber = 107 and Detail = 1) 
+	update @tblFinalExport set Response = @pcAmInd where RowNumber = 107
 	--end row 107
 
---B46
+	--row 108
+	--Hawaiian/Pacific Islander not tracked
+	--end row 108
+
 	--row 109
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	select 109, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
-		select hvcasefk from @tblIntakeInfo
-		where PrimaryLanguage = '01'
+		select hvcasefk from @tblThisYearsCases
+		where Race = '06'
 	)
-	declare @English int
-	set @English = (select count(*) from @tblFinalExport tfe where RowNumber = 109 and Detail = 1) 
-	update @tblFinalExport set Response = @English where RowNumber = 109
+	declare @pcMultiRace int
+	set @pcMultiRace = (select count(*) from @tblFinalExport tfe where RowNumber = 109 and Detail = 1)
+	update @tblFinalExport set Response = @pcMultiRace where RowNumber = 109
 	--end row 109
 
 	--row 110
@@ -1787,26 +1855,70 @@ begin
 	select 110, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
+		select hvcasefk from @tblThisYearsCases
+		where Race is null
+	)
+	declare @pcRaceUnk int
+	set @pcRaceUnk = (select count(*) from @tblFinalExport tfe where RowNumber = 110 and Detail = 1) 
+	update @tblFinalExport set Response = @pcRaceUnk where RowNumber = 110
+	--end row 110
+	
+	--row 111
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 111, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid
+	where tpid.hvcasefk in (
+		select hvcasefk from @tblThisYearsCases
+		where Race = '07'
+	)
+	declare @pcRaceOther int
+	set @pcRaceOther = (select count(*) from @tblFinalExport tfe where RowNumber = 111 and Detail = 1)  
+	update @tblFinalExport set Response = @pcRaceOther where RowNumber = 111
+	--end row 111
+
+	--row 112
+	--Other race specify: How to calculate?
+	--end row 112
+
+--B46
+	--row 114
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 114, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid
+	where tpid.hvcasefk in (
+		select hvcasefk from @tblIntakeInfo
+		where PrimaryLanguage = '01'
+	)
+	declare @English int
+	set @English = (select count(*) from @tblFinalExport tfe where RowNumber = 114 and Detail = 1) 
+	update @tblFinalExport set Response = @English where RowNumber = 114
+	--end row 114
+
+	--row 115
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 115, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid
+	where tpid.hvcasefk in (
 		select hvcasefk from @tblIntakeInfo
 		where PrimaryLanguage = '02'
 	)
 	declare @Spanish int
-	set @Spanish = (select count(*) from @tblFinalExport tfe where RowNumber = 110 and Detail = 1)
-	update @tblFinalExport set Response = @Spanish where RowNumber = 110
-	--end row 108
+	set @Spanish = (select count(*) from @tblFinalExport tfe where RowNumber = 115 and Detail = 1)
+	update @tblFinalExport set Response = @Spanish where RowNumber = 115
+	--end row 115
 
-	--row 111
+	--row 116
 	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	select 111, tpid.PC1ID, 0, 1
+	select 116, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblIntakeInfo
 		where PrimaryLanguage = '03'
 	)
 	declare @OtherLang int
-	set @OtherLang = (select count(*) from @tblFinalExport tfe where RowNumber = 111 and Detail = 1) 
-	update @tblFinalExport set Response = @OtherLang where RowNumber = 111
---	end row 111
+	set @OtherLang = (select count(*) from @tblFinalExport tfe where RowNumber = 116 and Detail = 1) 
+	update @tblFinalExport set Response = @OtherLang where RowNumber = 116
+--	end row 116
 --end B46
 					
 select * from @tblFinalExport order by RowNumber asc, Detail asc
