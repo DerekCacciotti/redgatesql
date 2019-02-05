@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[spGetHVLevelDeletedbyPK]
+
+(@HVLevelDeletedPK int)
+AS
+SET NOCOUNT ON;
+
+SELECT * 
+FROM HVLevelDeleted
+WHERE HVLevelDeletedPK = @HVLevelDeletedPK
+GO
