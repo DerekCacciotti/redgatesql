@@ -900,14 +900,21 @@ begin
 									,row_number() over (partition by hvcasefk order by VisitStartTime asc) as [row]						   
 							     from @tblHomeVisits
 							     where VisitStartTime between @sDate and @eDate
-								       and ( 
-											 (PC1Participated = 1 and PC1Relation2TC = '01' and Gender = '02')
-											or
-											 (OBPParticipated = 1 and GenderOBP = '02')
-										   )
+								       and (PC1Participated = 1 and PC1Relation2TC = '01' and Gender = '02')										 
 							   ) as sub
 							   where sub.[row] = 2
-							)
+	 union
+	 select sub.hvcasefk from
+							  (  select hvcasefk
+									,VisitStartTime
+									,row_number() over (partition by hvcasefk order by VisitStartTime asc) as [row]						   
+							     from @tblHomeVisits
+							     where VisitStartTime between @sDate and @eDate
+								       and (OBPParticipated = 1 and GenderOBP = '02')
+										   
+							   ) as sub
+							   where sub.[row] = 2
+	)
 	declare @HomeVisitsWithFF int
 	set @HomeVisitsWithFF = (select count(*) from @tblFinalExport tfe where RowNumber = 25 and Detail = 1)
 	update @tblFinalExport set Response = @HomeVisitsWithFF where RowNumber = 25 and Detail = 0
