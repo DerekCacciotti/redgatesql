@@ -528,7 +528,22 @@ as
 		declare	@n14i int 
 		set @n14i = (select	sum(levelCount) as tlevelCount
 					 from	@tbl4DataReportRow14RestOfIt
-					 where	LevelName = 'Level X'
+					 where	LevelName = 'Level CO'
+					)	
+		declare	@n14j int 
+		set @n14j = (select	sum(levelCount) as tlevelCount
+					 from	@tbl4DataReportRow14RestOfIt
+					 where	LevelName = 'Level TO'
+					)	
+		declare	@n14k int 
+		set @n14k = (select	sum(levelCount) as tlevelCount
+					 from	@tbl4DataReportRow14RestOfIt
+					 where	LevelName = 'Level 1M'
+					)	
+		declare	@n14l int 
+		set @n14l = (select	sum(levelCount) as tlevelCount
+					 from	@tbl4DataReportRow14RestOfIt
+					 where	LevelName = 'Level TR'
 					)	
 
 	
@@ -804,7 +819,16 @@ as
 		values	('       h. Level 4', @n14h)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       i. Level X', @n14i)
+		values	('       i. Level CO', @n14i)
+		insert	into @tbl4DataReport
+				(ReportTitle, Total)
+		values	('       i. Level TO', @n14j)
+		insert	into @tbl4DataReport
+				(ReportTitle, Total)
+		values	('       i. Level M', @n14k)
+		insert	into @tbl4DataReport
+				(ReportTitle, Total)
+		values	('       i. Level TR', @n14l)
 
 		insert	into @tbl4DataReport
 				(ReportTitle
