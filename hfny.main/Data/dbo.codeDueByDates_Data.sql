@@ -63,7 +63,6 @@ INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescripti
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (51, 91, '2 month HIB', '02', 61, 61, 'HIB', 1, NULL)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (52, 152, '4 month HIB', '04', 122, 122, 'HIB', 2, NULL)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (53, 213, '6 month HIB', '06', 183, 183, 'HIB', 3, 1)
-INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (54, 395, '12-15 months HIB', '12', 457, 365, 'HIB', 4, NULL)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (55, 395, '1 year Lead Screening', '12', 365, 365, 'Lead', 1, NULL)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (56, 761, '2 year Lead Screening', '24', 731, 731, 'Lead', 2, NULL)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (57, 1126, '3 year Lead Screening', '36', 1096, 1096, 'Lead', 3, NULL)
@@ -117,4 +116,7 @@ INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescripti
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (126, 1247, '41 month CHEERS Check-In (Expected Schedule)', '41', 1278, 1217, 'CHEERS', 4, NULL)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (127, 1612, '53 month CHEERS Check-In (Expected Schedule)', '53', 1643, 1582, 'CHEERS', 5, NULL)
 INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (1126, 61, '2 month ASQSE (optional)', '02', 122, 0, 'ASQSE-1', 0, NULL)
+SET IDENTITY_INSERT [dbo].[codeDueByDates] OFF
+SET IDENTITY_INSERT [dbo].[codeDueByDates] ON
+INSERT INTO [dbo].[codeDueByDates] ([codeDueByDatesPK], [DueBy], [EventDescription], [Interval], [MaximumDue], [MinimumDue], [ScheduledEvent], [Frequency], [Optional]) VALUES (54, 395, '12-15 months HIB', '12', 457, 365, 'HIB', 3, NULL)
 SET IDENTITY_INSERT [dbo].[codeDueByDates] OFF

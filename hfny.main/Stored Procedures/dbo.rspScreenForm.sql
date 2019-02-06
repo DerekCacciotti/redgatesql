@@ -63,8 +63,8 @@ select PC1ID
 		, case when ScreenResult = '1' then 'Positive' else 'Negative' end as ScreenResult
 		, case when ReferralMade = '1' then 'Yes'
 				else 'No -- Reason: ' + 
-					case when dbo.IsNullOrEmpty(s.DischargeReason) = '1' then 'Unknown / Blank' 
-							when d.DischargeReason = 'Other' then 'Other; ' + s.DischargeReasonSpecify
+					case when dbo.IsNullOrEmpty(cp.DischargeReason) = '1' then 'Unknown / Blank' 
+							when d.DischargeReason = 'Other' then 'Other; ' + cp.DischargeReasonSpecify
 							else d.DischargeReason
 						end
 				end 
@@ -79,7 +79,7 @@ inner join HVCase h on h.HVCasePK = cp.HVCaseFK
 inner join PC P on P.PCPK = h.PC1FK
 left outer join codeApp caRel on Relation2TC = AppCode and caRel.AppCodeGroup = 'PCRelationToTC'
 left outer join codeApp caRef on caRef.AppCode = ReferralSource and caRef.AppCodeGroup = 'TypeofReferral'
-left outer join codeDischarge d on d.DischargeReason = s.DischargeReason
+left outer join codeDischarge d on d.DischargeReason = cp.DischargeReason
 inner join listReferralSource rs on ReferralSourceFK = listReferralSourcePK
 left outer join Worker w on w.WorkerPK = s.FAWFK
 where PC1ID = @PC1ID

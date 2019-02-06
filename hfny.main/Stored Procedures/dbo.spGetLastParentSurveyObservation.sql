@@ -56,14 +56,16 @@ as begin
 			where FAWFK = @WorkerFK
 					and ProgramFK = @ProgramFK
 					and SupervisorObservation = 1
-			order by KempeCreateDate desc
+			order by KempeDate desc
 	)
 			
 	select	KempePK
 			, PC1ID
 			, convert(varchar(10), KempeDate, 101) as KempeDate
 			, substring(ParentSurveyParticipants, 1, 
-						len(ParentSurveyParticipants) - 1) 
+						(select top 1 
+								len(ParentSurveyParticipants) - 1 
+						from cteMain))
 				as ParentSurveyParticipants
 			, ParentSurveyScores
 			, ParentSurveyResult
