@@ -545,6 +545,11 @@ as
 					 from	@tbl4DataReportRow14RestOfIt
 					 where	LevelName = 'Level TR'
 					)	
+		declare	@n14m int 
+		set @n14m = (select	sum(levelCount) as tlevelCount
+					 from	@tbl4DataReportRow14RestOfIt
+					 where	LevelName = 'Level 2-Prenatal'
+					)	
 
 	
 
@@ -804,31 +809,35 @@ as
 				)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       d. Level 1-SS', @n14d)
+		values	('       d. Level 2-Prenatal', @n14m)
+
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       e. Level 1', @n14e)
+		values	('       e. Level 1-SS', @n14d)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       f. Level 2', @n14f)
+		values	('       f. Level 1', @n14e)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       g. Level 3', @n14g)
+		values	('       g. Level 2', @n14f)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       h. Level 4', @n14h)
+		values	('       h. Level 3', @n14g)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       i. Level CO', @n14i)
+		values	('       i. Level 4', @n14h)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       i. Level TO', @n14j)
+		values	('       j. Level CO', @n14i)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       i. Level M', @n14k)
+		values	('       k. Level TO', @n14j)
 		insert	into @tbl4DataReport
 				(ReportTitle, Total)
-		values	('       i. Level TR', @n14l)
+		values	('       l. Level M', @n14k)
+		insert	into @tbl4DataReport
+				(ReportTitle, Total)
+		values	('       m. Level TR', @n14l)
 
 		insert	into @tbl4DataReport
 				(ReportTitle
