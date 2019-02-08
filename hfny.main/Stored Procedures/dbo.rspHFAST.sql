@@ -204,9 +204,11 @@ begin
 		,EDC date
 		,TCDOB date
 		,TCNumber int
-		,FatherFigureParticipated bit
+		,PC1Participated bit
+		,OBPParticipated bit
 		,PCDOB date
-		,Gender int
+		,Gender char(2)
+		,GenderOBP char(2)
 		,Race char(2)
 		,Ethnicity varchar(max)
 		,PC1Relation2TC int
@@ -223,8 +225,10 @@ begin
 	 ,EDC
 	 ,TCDOB
 	 ,TCNumber
-	 ,FatherFigureParticipated
+	 ,PC1Participated
+	 ,OBPParticipated 
 	 ,Gender
+	 ,GenderOBP
 	 ,Race
 	 ,Ethnicity
 	 ,PCDOB
@@ -240,8 +244,10 @@ begin
 		  , hc.EDC
 		  , hc.TCDOB
 		  , hc.TCNumber
-		  , hv.FatherFigureParticipated
+		  , hv.PC1Participated
+		  , hv.OBPParticipated 
 		  , pc.Gender
+		  , obp.Gender
 		  , pc.Race
 		  , pc.Ethnicity
 		  , pc.PCDOB
@@ -252,6 +258,7 @@ begin
 	from hvlog hv
 	inner join dbo.HVCase hc on hc.HVCasePK = hv.HVCaseFK
 	inner join pc on PC.PCPK = hc.PC1FK
+	left join pc obp on obp.pcpk = hc.OBPFK
 	inner join dbo.Kempe k on k.HVCaseFK = hc.HVCasePK
 	inner join dbo.CaseProgram cp on cp.HVCaseFK = hc.HVCasePK
 	inner join dbo.SplitString(@programfk,',') on hv.programfk  = listitem
@@ -890,14 +897,24 @@ begin
 	( select sub.hvcasefk from
 							  (  select hvcasefk
 									,VisitStartTime
-									,FatherFigureParticipated
 									,row_number() over (partition by hvcasefk order by VisitStartTime asc) as [row]						   
 							     from @tblHomeVisits
 							     where VisitStartTime between @sDate and @eDate
-								       and FatherFigureParticipated = 1
+								       and (PC1Participated = 1 and PC1Relation2TC = '01' and Gender = '02')										 
 							   ) as sub
 							   where sub.[row] = 2
-							)
+	 union
+	 select sub.hvcasefk from
+							  (  select hvcasefk
+									,VisitStartTime
+									,row_number() over (partition by hvcasefk order by VisitStartTime asc) as [row]						   
+							     from @tblHomeVisits
+							     where VisitStartTime between @sDate and @eDate
+								       and (OBPParticipated = 1 and GenderOBP = '02')
+										   
+							   ) as sub
+							   where sub.[row] = 2
+	)
 	declare @HomeVisitsWithFF int
 	set @HomeVisitsWithFF = (select count(*) from @tblFinalExport tfe where RowNumber = 25 and Detail = 1)
 	update @tblFinalExport set Response = @HomeVisitsWithFF where RowNumber = 25 and Detail = 0

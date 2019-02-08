@@ -1,9 +1,6 @@
 CREATE TABLE [dbo].[Supervision]
 (
 [SupervisionPK] [int] NOT NULL IDENTITY(1, 1),
-[AreasGrowth] [bit] NULL,
-[AreasGrowthComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[AreasGrowthStatus] [bit] NULL,
 [Boundaries] [bit] NULL,
 [BoundariesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [BoundariesStatus] [bit] NULL,
@@ -16,19 +13,13 @@ CREATE TABLE [dbo].[Supervision]
 [CPS] [bit] NULL,
 [CPSComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CPSStatus] [bit] NULL,
-[FamilyProgress] [bit] NULL,
-[FamilyProgressComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[FamilyProgressStatus] [bit] NULL,
+[Curriculum] [bit] NULL,
+[CurriculumComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CurriculumStatus] [bit] NULL,
+[FamilyReview] [bit] NULL,
+[FamilyReviewComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[FamilyReviewStatus] [bit] NULL,
 [FormComplete] [bit] NULL,
-[HomeVisitLogActivities] [bit] NULL,
-[HomeVisitLogActivitiesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[HomeVisitLogActivitiesStatus] [bit] NULL,
-[HomeVisitRate] [bit] NULL,
-[HomeVisitRateComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[HomeVisitRateStatus] [bit] NULL,
-[IFSP] [bit] NULL,
-[IFSPComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[IFSPStatus] [bit] NULL,
 [ImpactOfWork] [bit] NULL,
 [ImpactOfWorkComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ImpactOfWorkStatus] [bit] NULL,
@@ -38,9 +29,6 @@ CREATE TABLE [dbo].[Supervision]
 [Outreach] [bit] NULL,
 [OutreachComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OutreachStatus] [bit] NULL,
-[PersonalGrowth] [bit] NULL,
-[PersonalGrowthComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[PersonalGrowthStatus] [bit] NULL,
 [Personnel] [bit] NULL,
 [PersonnelComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PersonnelStatus] [bit] NULL,
@@ -66,12 +54,6 @@ CREATE TABLE [dbo].[Supervision]
 [SiteDocumentation] [bit] NULL,
 [SiteDocumentationComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SiteDocumentationStatus] [bit] NULL,
-[Shadow] [bit] NULL,
-[ShadowComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[ShadowStatus] [bit] NULL,
-[StrengthBasedApproach] [bit] NULL,
-[StrengthBasedApproachComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[StrengthBasedApproachStatus] [bit] NULL,
 [Strengths] [bit] NULL,
 [StrengthsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [StrengthsStatus] [bit] NULL,
@@ -93,16 +75,19 @@ CREATE TABLE [dbo].[Supervision]
 [SupervisorObservationHomeVisit] [bit] NULL,
 [SupervisorObservationHomeVisitComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisorObservationHomeVisitStatus] [bit] NULL,
+[SupervisorObservationSupervision] [bit] NULL,
+[SupervisorObservationSupervisionComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisorObservationSupervisionStatus] [bit] NULL,
+[SupportHFAModel] [bit] NULL,
+[SupportHFAModelComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupportHFAModelStatus] [bit] NULL,
 [TeamDevelopment] [bit] NULL,
 [TeamDevelopmentComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TeamDevelopmentStatus] [bit] NULL,
-[TechniquesApproaches] [bit] NULL,
-[TechniquesApproachesComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TechniquesApproachesStatus] [bit] NULL,
-[TrainingNeeds] [bit] NULL,
-[TrainingNeedsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TrainingNeedsStatus] [bit] NULL,
 [WorkerFK] [int] NOT NULL,
+[WorkplaceEnvironment] [bit] NULL,
+[WorkplaceEnvironmentComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[WorkplaceEnvironmentStatus] [bit] NULL,
 [ParticipantEmergency] [bit] NULL,
 [ReasonOther] [bit] NULL,
 [ReasonOtherSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -134,7 +119,7 @@ GO
 -- Description:	Delete FormReview row when  
 --				the Supervision row deleted
 -- =============================================
-CREATE trigger [dbo].[fr_delete_Supervision]
+create trigger [dbo].[fr_delete_Supervision]
 on [dbo].[Supervision]
 after delete
 as
@@ -146,250 +131,214 @@ begin
 	execute spDeleteFormReview_Trigger @FormFK = @PK, @FormTypeValue = 'SU' ;
 	
 insert into [dbo].[SupervisionDeleted]
-           ([SupervisionPK]
-		   ,[AreasGrowth]
-           ,[AreasGrowthComments]
-           ,[AreasGrowthStatus]
-           ,[Boundaries]
-           ,[BoundariesComments]
-           ,[BoundariesStatus]
-           ,[Caseload]
-           ,[CaseloadComments]
-           ,[CaseloadStatus]
-           ,[Coaching]
-           ,[CoachingComments]
-           ,[CoachingStatus]
-           ,[CPS]
-           ,[CPSComments]
-           ,[CPSStatus]
-           ,[FamilyProgress]
-           ,[FamilyProgressComments]
-           ,[FamilyProgressStatus]
-           ,[FormComplete]
-           ,[HomeVisitLogActivities]
-           ,[HomeVisitLogActivitiesComments]
-           ,[HomeVisitLogActivitiesStatus]
-           ,[HomeVisitRate]
-           ,[HomeVisitRateComments]
-           ,[HomeVisitRateStatus]
-           ,[IFSP]
-           ,[IFSPComments]
-           ,[IFSPStatus]
-           ,[ImpactOfWork]
-           ,[ImpactOfWorkComments]
-           ,[ImpactOfWorkStatus]
-           ,[ImplementTraining]
-           ,[ImplementTrainingComments]
-           ,[ImplementTrainingStatus]
-           ,[Outreach]
-           ,[OutreachComments]
-           ,[OutreachStatus]
-           ,[PersonalGrowth]
-           ,[PersonalGrowthComments]
-           ,[PersonalGrowthStatus]
-           ,[Personnel]
-           ,[PersonnelComments]
-           ,[PersonnelStatus]
-           ,[PIP]
-           ,[PIPComments]
-           ,[PIPStatus]
-           ,[ProfessionalGrowth]
-           ,[ProfessionalGrowthComments]
-           ,[ProfessionalGrowthStatus]
-           ,[ProgramFK]
-           ,[RecordDocumentation]
-           ,[RecordDocumentationComments]
-           ,[RecordDocumentationStatus]
-           ,[Retention]
-           ,[RetentionComments]
-           ,[RetentionStatus]
-           ,[RolePlaying]
-           ,[RolePlayingComments]
-           ,[RolePlayingStatus]
-           ,[Safety]
-           ,[SafetyComments]
-           ,[SafetyStatus]
-           ,[SiteDocumentation]
-           ,[SiteDocumentationComments]
-           ,[SiteDocumentationStatus]
-           ,[Shadow]
-           ,[ShadowComments]
-           ,[ShadowStatus]
-           ,[StrengthBasedApproach]
-           ,[StrengthBasedApproachComments]
-           ,[StrengthBasedApproachStatus]
-           ,[Strengths]
-           ,[StrengthsComments]
-           ,[StrengthsStatus]
-           ,[SupervisionCreateDate]
-           ,[SupervisionCreator]
-           ,[SupervisionDate]
-           ,[SupervisionEditDate]
-           ,[SupervisionEditor]
-           ,[SupervisionEndTime]
-           ,[SupervisionHours]
-           ,[SupervisionMinutes]
-           ,[SupervisionNotes]
-		   ,[SupervisionSessionType]
-           ,[SupervisionStartTime]
-           ,[SupervisorFK]
-           ,[SupervisorObservationAssessment]
-           ,[SupervisorObservationAssessmentComments]
-           ,[SupervisorObservationAssessmentStatus]
-           ,[SupervisorObservationHomeVisit]
-           ,[SupervisorObservationHomeVisitComments]
-           ,[SupervisorObservationHomeVisitStatus]
-           ,[TeamDevelopment]
-           ,[TeamDevelopmentComments]
-           ,[TeamDevelopmentStatus]
-           ,[TechniquesApproaches]
-           ,[TechniquesApproachesComments]
-           ,[TechniquesApproachesStatus]
-           ,[TrainingNeeds]
-           ,[TrainingNeedsComments]
-           ,[TrainingNeedsStatus]
-           ,[WorkerFK]
-           ,[ParticipantEmergency]
- ,[ReasonOther]
-           ,[ReasonOtherSpecify]
-           ,[ShortWeek]
-           ,[StaffCourt]
-           ,[StaffFamilyEmergency]
-           ,[StaffForgot]
-           ,[StaffIll]
-           ,[StaffOnLeave]
-           ,[StaffTraining]
-           ,[StaffVacation]
-           ,[StaffOutAllWeek]
-           ,[SupervisorFamilyEmergency]
-           ,[SupervisorForgot]
-           ,[SupervisorHoliday]
-           ,[SupervisorIll]
-           ,[SupervisorTraining]
-           ,[SupervisorVacation]
-           ,[Weather])
-select [SupervisionPK]
-		   ,[AreasGrowth]
-           ,[AreasGrowthComments]
-           ,[AreasGrowthStatus]
-           ,[Boundaries]
-           ,[BoundariesComments]
-           ,[BoundariesStatus]
-           ,[Caseload]
-           ,[CaseloadComments]
-           ,[CaseloadStatus]
-           ,[Coaching]
-           ,[CoachingComments]
-           ,[CoachingStatus]
-           ,[CPS]
-           ,[CPSComments]
-           ,[CPSStatus]
-           ,[FamilyProgress]
-           ,[FamilyProgressComments]
-           ,[FamilyProgressStatus]
-           ,[FormComplete]
-           ,[HomeVisitLogActivities]
-           ,[HomeVisitLogActivitiesComments]
-           ,[HomeVisitLogActivitiesStatus]
-           ,[HomeVisitRate]
-           ,[HomeVisitRateComments]
-           ,[HomeVisitRateStatus]
-           ,[IFSP]
-           ,[IFSPComments]
-           ,[IFSPStatus]
-           ,[ImpactOfWork]
-           ,[ImpactOfWorkComments]
-           ,[ImpactOfWorkStatus]
-           ,[ImplementTraining]
-           ,[ImplementTrainingComments]
-           ,[ImplementTrainingStatus]
-           ,[Outreach]
-           ,[OutreachComments]
-           ,[OutreachStatus]
-           ,[PersonalGrowth]
-           ,[PersonalGrowthComments]
-           ,[PersonalGrowthStatus]
-           ,[Personnel]
-           ,[PersonnelComments]
-           ,[PersonnelStatus]
-           ,[PIP]
-           ,[PIPComments]
-           ,[PIPStatus]
-           ,[ProfessionalGrowth]
-           ,[ProfessionalGrowthComments]
-           ,[ProfessionalGrowthStatus]
-           ,[ProgramFK]
-           ,[RecordDocumentation]
-           ,[RecordDocumentationComments]
-           ,[RecordDocumentationStatus]
-           ,[Retention]
-           ,[RetentionComments]
-           ,[RetentionStatus]
-           ,[RolePlaying]
-           ,[RolePlayingComments]
-           ,[RolePlayingStatus]
-           ,[Safety]
-           ,[SafetyComments]
-           ,[SafetyStatus]
-           ,[SiteDocumentation]
-           ,[SiteDocumentationComments]
-           ,[SiteDocumentationStatus]
-           ,[Shadow]
-           ,[ShadowComments]
-           ,[ShadowStatus]
-           ,[StrengthBasedApproach]
-           ,[StrengthBasedApproachComments]
-           ,[StrengthBasedApproachStatus]
-           ,[Strengths]
-           ,[StrengthsComments]
-           ,[StrengthsStatus]
-           ,[SupervisionCreateDate]
-           ,[SupervisionCreator]
-           ,[SupervisionDate]
-           ,[SupervisionEditDate]
-           ,[SupervisionEditor]
-           ,[SupervisionEndTime]
-           ,[SupervisionHours]
-           ,[SupervisionMinutes]
-           ,[SupervisionNotes]
-		   ,[SupervisionSessionType]
-           ,[SupervisionStartTime]
-           ,[SupervisorFK]
-           ,[SupervisorObservationAssessment]
-           ,[SupervisorObservationAssessmentComments]
-           ,[SupervisorObservationAssessmentStatus]
-           ,[SupervisorObservationHomeVisit]
-           ,[SupervisorObservationHomeVisitComments]
-           ,[SupervisorObservationHomeVisitStatus]
-           ,[TeamDevelopment]
-           ,[TeamDevelopmentComments]
-           ,[TeamDevelopmentStatus]
-           ,[TechniquesApproaches]
-           ,[TechniquesApproachesComments]
-           ,[TechniquesApproachesStatus]
-           ,[TrainingNeeds]
-           ,[TrainingNeedsComments]
-           ,[TrainingNeedsStatus]
-           ,[WorkerFK]
-           ,[ParticipantEmergency]
-		   ,[ReasonOther]
-           ,[ReasonOtherSpecify]
-           ,[ShortWeek]
-           ,[StaffCourt]
-           ,[StaffFamilyEmergency]
-           ,[StaffForgot]
-           ,[StaffIll]
-           ,[StaffOnLeave]
-           ,[StaffTraining]
-           ,[StaffVacation]
-           ,[StaffOutAllWeek]
-           ,[SupervisorFamilyEmergency]
-           ,[SupervisorForgot]
-           ,[SupervisorHoliday]
-           ,[SupervisorIll]
-           ,[SupervisorTraining]
-           ,[SupervisorVacation]
-           ,[Weather]
+		([SupervisionPK], 
+		[Boundaries], 
+		[BoundariesComments], 
+		[BoundariesStatus], 
+		[Caseload], 
+		[CaseloadComments], 
+		[CaseloadStatus], 
+		[Coaching], 
+		[CoachingComments], 
+		[CoachingStatus], 
+		[CPS], 
+		[CPSComments], 
+		[CPSStatus], 
+		[Curriculum], 
+		[CurriculumComments], 
+		[CurriculumStatus], 
+		[FamilyReview], 			
+		[FamilyReviewComments], 
+		[FamilyReviewStatus], 
+		[FormComplete], 
+		[ImpactOfWork], 
+		[ImpactOfWorkComments], 
+		[ImpactOfWorkStatus], 
+		[ImplementTraining], 
+		[ImplementTrainingComments], 
+		[ImplementTrainingStatus], 
+		[Outreach], 
+		[OutreachComments], 
+		[OutreachStatus], 
+		[Personnel], 
+		[PersonnelComments], 
+		[PersonnelStatus], 
+		[PIP], 
+		[PIPComments], 
+		[PIPStatus], 
+		[ProfessionalGrowth], 
+		[ProfessionalGrowthComments], 
+		[ProfessionalGrowthStatus], 
+		[ProgramFK], 
+		[RecordDocumentation], 
+		[RecordDocumentationComments], 
+		[RecordDocumentationStatus], 
+		[Retention], 
+		[RetentionComments], 
+		[RetentionStatus], 
+		[RolePlaying], 
+		[RolePlayingComments], 
+		[RolePlayingStatus], 
+		[Safety], 
+		[SafetyComments], 
+		[SafetyStatus], 
+		[SiteDocumentation], 
+		[SiteDocumentationComments], 
+		[SiteDocumentationStatus], 
+		[Strengths], 
+		[StrengthsComments], 
+		[StrengthsStatus], 
+		[SupervisionCreateDate], 
+		[SupervisionCreator], 
+		[SupervisionDate], 
+		[SupervisionEditDate], 
+		[SupervisionEditor], 
+		[SupervisionEndTime], 
+		[SupervisionHours], 
+		[SupervisionMinutes], 
+		[SupervisionNotes], 
+		[SupervisionSessionType], 
+		[SupervisionStartTime], 
+		[SupervisorFK], 
+		[SupervisorObservationAssessment], 
+		[SupervisorObservationAssessmentComments], 
+		[SupervisorObservationAssessmentStatus], 
+		[SupervisorObservationHomeVisit], 
+		[SupervisorObservationHomeVisitComments], 
+		[SupervisorObservationHomeVisitStatus], 
+		[SupervisorObservationSupervision], 
+		[SupervisorObservationSupervisionComments], 
+		[SupervisorObservationSupervisionStatus], 
+		[SupportHFAModel], 
+		[SupportHFAModelComments], 
+		[SupportHFAModelStatus], 
+		[TeamDevelopment], 
+		[TeamDevelopmentComments], 
+		[TeamDevelopmentStatus], 
+		[WorkerFK], 
+		[ParticipantEmergency], 
+		[ReasonOther], 
+		[ReasonOtherSpecify], 
+		[ShortWeek], 
+		[StaffCourt], 
+		[StaffFamilyEmergency], 
+		[StaffForgot], 
+		[StaffIll], 
+		[StaffOnLeave], 
+		[StaffTraining], 
+		[StaffVacation], 
+		[StaffOutAllWeek], 
+		[SupervisorFamilyEmergency], 
+		[SupervisorForgot], 
+		[SupervisorHoliday], 
+		[SupervisorIll], 
+		[SupervisorTraining], 
+		[SupervisorVacation], 
+		[Weather])
+select [SupervisionPK], 
+		[Boundaries], 
+		[BoundariesComments], 
+		[BoundariesStatus], 
+		[Caseload], 
+		[CaseloadComments], 
+		[CaseloadStatus], 
+		[Coaching], 
+		[CoachingComments], 
+		[CoachingStatus], 
+		[CPS], 
+		[CPSComments], 
+		[CPSStatus], 
+		[Curriculum], 
+		[CurriculumComments], 
+		[CurriculumStatus], 
+		[FamilyReview], 			
+		[FamilyReviewComments], 
+		[FamilyReviewStatus], 
+		[FormComplete], 
+		[ImpactOfWork], 
+		[ImpactOfWorkComments], 
+		[ImpactOfWorkStatus], 
+		[ImplementTraining], 
+		[ImplementTrainingComments], 
+		[ImplementTrainingStatus], 
+		[Outreach], 
+		[OutreachComments], 
+		[OutreachStatus], 
+		[Personnel], 
+		[PersonnelComments], 
+		[PersonnelStatus], 
+		[PIP], 
+		[PIPComments], 
+		[PIPStatus], 
+		[ProfessionalGrowth], 
+		[ProfessionalGrowthComments], 
+		[ProfessionalGrowthStatus], 
+		[ProgramFK], 
+		[RecordDocumentation], 
+		[RecordDocumentationComments], 
+		[RecordDocumentationStatus], 
+		[Retention], 
+		[RetentionComments], 
+		[RetentionStatus], 
+		[RolePlaying], 
+		[RolePlayingComments], 
+		[RolePlayingStatus], 
+		[Safety], 
+		[SafetyComments], 
+		[SafetyStatus], 
+		[SiteDocumentation], 
+		[SiteDocumentationComments], 
+		[SiteDocumentationStatus], 
+		[Strengths], 
+		[StrengthsComments], 
+		[StrengthsStatus], 
+		[SupervisionCreateDate], 
+		[SupervisionCreator], 
+		[SupervisionDate], 
+		[SupervisionEditDate], 
+		[SupervisionEditor], 
+		[SupervisionEndTime], 
+		[SupervisionHours], 
+		[SupervisionMinutes], 
+		[SupervisionNotes], 
+		[SupervisionSessionType], 
+		[SupervisionStartTime], 
+		[SupervisorFK], 
+		[SupervisorObservationAssessment], 
+		[SupervisorObservationAssessmentComments], 
+		[SupervisorObservationAssessmentStatus], 
+		[SupervisorObservationHomeVisit], 
+		[SupervisorObservationHomeVisitComments], 
+		[SupervisorObservationHomeVisitStatus], 
+		[SupervisorObservationSupervision], 
+		[SupervisorObservationSupervisionComments], 
+		[SupervisorObservationSupervisionStatus], 
+		[SupportHFAModel], 
+		[SupportHFAModelComments], 
+		[SupportHFAModelStatus], 
+		[TeamDevelopment], 
+		[TeamDevelopmentComments], 
+		[TeamDevelopmentStatus], 
+		[WorkerFK], 
+		[ParticipantEmergency], 
+		[ReasonOther], 
+		[ReasonOtherSpecify], 
+		[ShortWeek], 
+		[StaffCourt], 
+		[StaffFamilyEmergency], 
+		[StaffForgot], 
+		[StaffIll], 
+		[StaffOnLeave], 
+		[StaffTraining], 
+		[StaffVacation], 
+		[StaffOutAllWeek], 
+		[SupervisorFamilyEmergency], 
+		[SupervisorForgot], 
+		[SupervisorHoliday], 
+		[SupervisorIll], 
+		[SupervisorTraining], 
+		[SupervisorVacation], 
+		[Weather]
 from	Deleted d
 where	d.SupervisionPK = @PK ;
 
@@ -472,11 +421,9 @@ From [Supervision] INNER JOIN Inserted ON [Supervision].[SupervisionPK]= Inserte
 GO
 ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [PK__Supervis__3AC5E6F97D0E9093] PRIMARY KEY CLUSTERED  ([SupervisionPK]) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD CONSTRAINT [FK_Supervision_HVProgram] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [FK_Supervision_HVProgram] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
-ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD CONSTRAINT [FK_Supervision_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [FK_Supervision_SupervisorFK] FOREIGN KEY ([SupervisorFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO
-ALTER TABLE [dbo].[Supervision] WITH NOCHECK ADD CONSTRAINT [FK_Supervision_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Supervision', 'COLUMN', N'SupervisionPK'
+ALTER TABLE [dbo].[Supervision] ADD CONSTRAINT [FK_Supervision_WorkerFK] FOREIGN KEY ([WorkerFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
 GO

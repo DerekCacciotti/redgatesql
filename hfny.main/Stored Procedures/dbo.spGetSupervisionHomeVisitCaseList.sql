@@ -18,9 +18,6 @@ as begin
 	set noCount on ;
 
 	select	SupervisionHomeVisitCasePK
-		, ActivitiesOther
-		, ActivitiesOtherSpecify
-		, ActivitiesOtherStatus
 		, CaseComments
 		, ChallengingIssues
 		, ChallengingIssuesComments
@@ -28,28 +25,13 @@ as begin
 		, CHEERSFeedback
 		, CHEERSFeedbackComments
 		, CHEERSFeedbackStatus
-		, Concerns
-		, ConcernsComments
-		, ConcernsStatus
-		, Curriculum
-		, CurriculumComments
-		, CurriculumStatus
-		, FamilyGrievance
-		, FamilyGrievanceComments
-		, FamilyGrievanceStatus
 		, FGPProgress
 		, FGPProgressComments
 		, FGPProgressStatus
 		, sc.HVCaseFK
-		, HVCulturalSensitivity
-		, HVCulturalSensitivityComments
-		, HVCulturalSensitivityStatus
-		, HVHomeVisitRate
-		, HVHomeVisitRateComments
-		, HVHomeVisitRateStatus
-		, HVReferralSources
-		, HVReferralSourcesComments
-		, HVReferralSourcesStatus
+		, HVReferrals
+		, HVReferralsComments
+		, HVReferralsStatus
 		, LevelChange
 		, LevelChangeComments
 		, LevelChangeStatus
@@ -58,9 +40,9 @@ as begin
 		, MedicalStatus
 		, cp.PC1ID
 		, sc.ProgramFK
-		, Successes
-		, SuccessesComments
-		, SuccessesStatus
+		, ServicePlan
+		, ServicePlanComments
+		, ServicePlanStatus
 		, SupervisionFK
 		, Tools
 		, ToolsComments
@@ -70,6 +52,12 @@ as begin
 		, TransitionPlanningStatus
 	from	SupervisionHomeVisitCase sc
 	inner join CaseProgram cp on cp.HVCaseFK = sc.HVCaseFK
-	where	sc.SupervisionFK = @SupervisionFK ;
+	where	sc.SupervisionFK = @SupervisionFK and 
+			cp.CaseProgramPK = (select top 1 cp.CaseProgramPK
+								from CaseProgram cp 
+								where cp.HVCaseFK = sc.HVCaseFK
+										and cp.ProgramFK = sc.ProgramFK
+								order by cp.CaseProgramCreateDate desc)
+	order by cp.PC1ID
 end ;
 GO
