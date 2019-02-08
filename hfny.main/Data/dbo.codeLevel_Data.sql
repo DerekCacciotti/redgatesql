@@ -1,7 +1,4 @@
 SET IDENTITY_INSERT [dbo].[codeLevel] ON
-INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1101, 0.00, 'LEVELTR_TERM', 0, '          ', 'Level TR-term', 0.00, 0.00, 0, 'TR')
-SET IDENTITY_INSERT [dbo].[codeLevel] OFF
-SET IDENTITY_INSERT [dbo].[codeLevel] ON
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1, 0.00, 'SCREEN', 0, '          ', 'Screen', NULL, NULL, NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (2, 0.00, 'SCREEN_TERM', 0, '          ', 'Screen-term', NULL, NULL, NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (3, 0.00, 'PREASSESSMENT', 0, '          ', 'Preassessment', NULL, NULL, NULL, NULL)
@@ -38,7 +35,6 @@ INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enr
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1028, 0.00, 'LEVELCO_3_TERM', 0, '          ', 'Level CO-term', NULL, NULL, NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1029, 0.00, 'LEVELCO_4_TERM', 0, '          ', 'Level CO-term', NULL, NULL, NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1055, 2.00, 'LEVEL1_PRENATAL', 1, '          ', 'Level 1-Prenatal', 1.00, 1.00, NULL, '1-Pre')
-INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1056, 2.00, 'LEVELCO_1_PRENATAL', 1, 'SUB       ', 'Level CO', 0.00, 0.00, 1081, 'CO(1-Pre)')
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1057, 0.00, 'LEVEL1_PRENATAL_TERM', 0, '          ', 'Level 1-Prenatal-term', NULL, NULL, NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1058, 0.00, 'LEVELCO_1_PRENATAL_TERM', 0, '          ', 'Level CO-term', NULL, NULL, NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1059, 2.50, 'LEVELM', 1, '          ', 'Level 1M', 1.00, 1.00, NULL, '1M')
@@ -64,4 +60,8 @@ INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enr
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1096, 0.00, 'LEVELTO_TERM', 0, '          ', 'Level TO-term', NULL, NULL, NULL, NULL)
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1097, 0.50, 'LEVELTO', 1, 'SUB BASE  ', 'Level TO', 0.00, 0.00, NULL, 'TO')
 INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1098, 0.50, 'LEVELTR', 1, '          ', 'Level TR', 0.00, 0.00, NULL, 'TR')
+INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1101, 0.00, 'LEVELTR_TERM', 0, '          ', 'Level TR-term', 0.00, 0.00, 0, 'TR')
+SET IDENTITY_INSERT [dbo].[codeLevel] OFF
+SET IDENTITY_INSERT [dbo].[codeLevel] ON
+INSERT INTO [dbo].[codeLevel] ([codeLevelPK], [CaseWeight], [ConstantName], [Enrolled], [LevelGroup], [LevelName], [MaximumVisit], [MinimumVisit], [SubLevelFK], [LevelAbbr]) VALUES (1056, 2.00, 'LEVELCO_1_PRENATAL', 1, 'SUB       ', 'Level CO', 0.00, 0.00, 1055, 'CO(1-Pre)')
 SET IDENTITY_INSERT [dbo].[codeLevel] OFF
