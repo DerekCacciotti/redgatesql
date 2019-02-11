@@ -832,6 +832,15 @@ begin
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI1]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetPCI1 @StartDate,@EndDate,@tblPTCohort 
+
+
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI1a]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetPCI1a @StartDate,@EndDate,@tblPTCohort 
+
+
+
+
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI2]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetPCI2 @StartDate,@EndDate,@tblPTCohort 
