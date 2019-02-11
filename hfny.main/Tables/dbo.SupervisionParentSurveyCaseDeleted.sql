@@ -25,7 +25,9 @@ CREATE TABLE [dbo].[SupervisionParentSurveyCaseDeleted]
 [SupervisionParentSurveyCaseCreateDate] [datetime] NULL,
 [SupervisionParentSurveyCaseCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisionParentSurveyCaseEditDate] [datetime] NULL,
-[SupervisionParentSurveyCaseEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[SupervisionParentSurveyCaseEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisionParentSurveyDeleteDate] [datetime] NOT NULL CONSTRAINT [DF_SupervisionParentSurveyCaseDeleted_SupervisionParentSurveyDeleteDate] DEFAULT (getdate()),
+[SupervisionParentSurveyCaseDeleter] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[SupervisionParentSurveyCaseDeleted] ADD CONSTRAINT [PK_SupervisionParentSurveyCaseDeleted] PRIMARY KEY CLUSTERED  ([SupervisionParentSurveyCaseDeletedPK]) ON [PRIMARY]

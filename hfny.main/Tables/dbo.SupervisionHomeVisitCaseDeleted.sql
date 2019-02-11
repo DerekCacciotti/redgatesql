@@ -37,7 +37,9 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCaseDeleted]
 [ToolsStatus] [bit] NULL,
 [TransitionPlanning] [bit] NULL,
 [TransitionPlanningComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TransitionPlanningStatus] [bit] NULL
+[TransitionPlanningStatus] [bit] NULL,
+[SupervisionHomeVisitCaseDeleteDate] [datetime] NOT NULL CONSTRAINT [DF_SupervisionHomeVisitCaseDeleted_SupervisionHomeVisitCaseDeleteDate] DEFAULT (getdate()),
+[SupervisionHomeVisitCaseDeleter] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[SupervisionHomeVisitCaseDeleted] ADD CONSTRAINT [PK_SupervisionHomeVisitCaseDeleted] PRIMARY KEY CLUSTERED  ([SupervisionHomeVisitCaseDeletedPK]) ON [PRIMARY]
