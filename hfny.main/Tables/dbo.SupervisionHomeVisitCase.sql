@@ -39,6 +39,140 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCase]
 [TransitionPlanningStatus] [bit] NULL
 ) ON [PRIMARY]
 GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+
+-- =============================================
+-- Author:		bsimmons
+-- Create date: 2/11/19
+-- Description:	Record deletions of rows from SupervisionHomeVisitCase
+-- =============================================
+CREATE TRIGGER [dbo].[fr_delete_SupervisionHomeVisitCase]
+ON [dbo].[SupervisionHomeVisitCase]
+AFTER DELETE
+AS
+DECLARE @PK INT;
+
+SET @PK =
+(
+	SELECT SupervisionHomeVisitCasePK FROM deleted
+);
+
+BEGIN
+
+	BEGIN TRY
+		INSERT	INTO dbo.SupervisionHomeVisitCaseDeleted
+		(
+			SupervisionHomeVisitCasePK,
+			CaseComments,
+			ChallengingIssues,
+			ChallengingIssuesComments,
+			ChallengingIssuesStatus,
+			CHEERSFeedback,
+			CHEERSFeedbackComments,
+			CHEERSFeedbackStatus,
+			FGPProgress,
+			FGPProgressComments,
+			FGPProgressStatus,
+			FollowUpHVCase,
+			HVCaseFK,
+			HVReferrals,
+			HVReferralsComments,
+			HVReferralsStatus,
+			LevelChange,
+			LevelChangeComments,
+			LevelChangeStatus,
+			Medical,
+			MedicalComments,
+			MedicalStatus,
+			ProgramFK,
+			ServicePlan,
+			ServicePlanComments,
+			ServicePlanStatus,
+			SupervisionFK,
+			SupervisionHomeVisitCaseCreateDate,
+			SupervisionHomeVisitCaseCreator,
+			SupervisionHomeVisitCaseEditDate,
+			SupervisionHomeVisitCaseEditor,
+			Tools,
+			ToolsComments,
+			ToolsStatus,
+			TransitionPlanning,
+			TransitionPlanningComments,
+			TransitionPlanningStatus
+		)
+		SELECT	SupervisionHomeVisitCasePK,
+				CaseComments,
+				ChallengingIssues,
+				ChallengingIssuesComments,
+				ChallengingIssuesStatus,
+				CHEERSFeedback,
+				CHEERSFeedbackComments,
+				CHEERSFeedbackStatus,
+				FGPProgress,
+				FGPProgressComments,
+				FGPProgressStatus,
+				FollowUpHVCase,
+				HVCaseFK,
+				HVReferrals,
+				HVReferralsComments,
+				HVReferralsStatus,
+				LevelChange,
+				LevelChangeComments,
+				LevelChangeStatus,
+				Medical,
+				MedicalComments,
+				MedicalStatus,
+				ProgramFK,
+				ServicePlan,
+				ServicePlanComments,
+				ServicePlanStatus,
+				SupervisionFK,
+				SupervisionHomeVisitCaseCreateDate,
+				SupervisionHomeVisitCaseCreator,
+				SupervisionHomeVisitCaseEditDate,
+				SupervisionHomeVisitCaseEditor,
+				Tools,
+				ToolsComments,
+				ToolsStatus,
+				TransitionPlanning,
+				TransitionPlanningComments,
+				TransitionPlanningStatus
+		FROM	Deleted d
+		WHERE d.SupervisionHomeVisitCasePK = @PK;
+
+	END TRY
+    BEGIN CATCH
+		INSERT INTO dbo.ELMAH_Error
+		(
+			ErrorId,
+			Application,
+			Host,
+			Type,
+			Source,
+			Message,
+			[User],
+			StatusCode,
+			TimeUtc,
+			AllXml
+		)
+		VALUES
+		(	NEWID(),		-- ErrorId - uniqueidentifier
+			N'HFNY',		-- Application - nvarchar(60)
+			N'Unknown',		-- Host - nvarchar(50)
+			N'Custom SQL Server Error',		-- Type - nvarchar(100)
+			N'fr_delete_SupervisionHomeVisitCase',		-- Source - nvarchar(60)
+			ISNULL(ERROR_MESSAGE(), 'Error occured while inserting into the SupervisionHomeVisitCaseDeleted table'),		-- Message - nvarchar(500)
+			N'CHSRUser',		-- User - nvarchar(50)
+			0,			-- StatusCode - int
+			GETDATE(),	-- TimeUtc - datetime
+			N''			-- AllXml - ntext
+			)
+	END CATCH
+END;
+GO
 ALTER TABLE [dbo].[SupervisionHomeVisitCase] ADD CONSTRAINT [PK_SupervisionHomeVisitCase] PRIMARY KEY CLUSTERED  ([SupervisionHomeVisitCasePK]) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[SupervisionHomeVisitCase] ADD CONSTRAINT [FK_SupervisionHomeVisitCase_SupervisionFK] FOREIGN KEY ([SupervisionFK]) REFERENCES [dbo].[Supervision] ([SupervisionPK])
