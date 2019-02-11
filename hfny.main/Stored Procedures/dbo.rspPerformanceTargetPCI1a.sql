@@ -24,7 +24,7 @@ CREATE procedure [dbo].[rspPerformanceTargetPCI1a]
 as
 begin
 
-	with cteTotalCases
+with cteTotalCases
 	as
 	(
 	select
@@ -62,8 +62,8 @@ begin
 		(
 		select *
 			from cteTotalCases
-			where datediff(month,tcdob,@StartDate) <= 15
-				 and datediff(month,tcdob,lastdate) >= 6
+			where datediff(day,tcdob,@StartDate) <= 457
+				 and datediff(day,tcdob,lastdate) >= 183
 		)
 	,
 	cteInterval
@@ -145,7 +145,17 @@ begin
 	from cteExpectedForm
 	-- order by OldID
 
-
-				OPTION (OPTIMIZE FOR (@StartDate UNKNOWN, @EndDate UNKNOWN))
+	--	begin
+	--		select ReportTitleText
+	--			  ,PC1ID
+	--			  ,TCDOB
+	--			  ,Reason
+	--			  ,CurrentWorker
+	--			  ,LevelAtEndOfReport
+	--			  ,Explanation
+	--			from @tblPTReportNotMeetingPT
+	--			order by CurrentWorker
+	--					,PC1ID
+	--	end
 end
 GO
