@@ -724,7 +724,7 @@ begin
 
     -- row 9 Home Visitors ethnicity unknown
 	declare @UnknownEthnicityFSW int
-	set @UnknownEthnicityFSW = ( select count(Race) 
+	set @UnknownEthnicityFSW = ( select count(*) 
 					        from @tblWorkers
 						    where Race is Null
 						    and (
@@ -805,7 +805,7 @@ begin
 
 	--row 17 Number of Multi Race FSWs
 	declare @UnknownRaceFSW int
-	set @UnknownRaceFSW = ( select count(Race) 
+	set @UnknownRaceFSW = ( select count(*) 
 					        from @tblWorkers
 						    where Race is null
 						    and (
@@ -1406,7 +1406,7 @@ begin
 	)
 	declare @0to5mo int
 	set @0to5mo = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit tlhv
-				  where datediff(month, TCDOB, VisitStartTime) < 12
+				  where datediff(month, TCDOB, VisitStartTime) <= 5
 					and TCDOB < @eDate
 				)
 	update @tblFinalExport set Response = @0to5mo where RowNumber = 73 and Detail = 0
@@ -1940,5 +1940,4 @@ begin
 					
 select * from @tblFinalExport order by RowNumber asc, Detail asc
 end
-
 GO
