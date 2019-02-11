@@ -922,10 +922,17 @@ begin
 
 --B16 row 26
 	declare @countTC int
-	set @countTC = ( select sum(TCNumber) from @tblLastHomeVisit
-					 where TCDOB < @eDate
+	--postnatal
+	set @countTC = ( select count(*) from TCID
+					 inner join @tblThisYearsCases ttyc on ttyc.hvcasefk = TCID.HVCaseFK
+					 where TCID.TCDOB < @eDate					 
 				   )
-	update @tblFinalExport set Response = @countTC where RowNumber = 26
+	--prenatal
+    declare @preTC int
+	set @preTC = (select count(*) from @tblLastHomeVisit
+		where TCDOB is null or TCDOB > VisitStartTime  
+	)
+	update @tblFinalExport set Response = @countTC + @preTC where RowNumber = 26
 --end B16
 
 --B17 row 27
@@ -1393,6 +1400,7 @@ begin
 	declare @PreNatal int
 	set @PreNatal = (select count(*) from @tblFinalExport tfe where tfe.RowNumber = 72 and Detail = 1)
 	update @tblFinalExport set Response = @PreNatal where RowNumber = 72 and Detail = 0
+
 	--end row 72
 
 	--row 73
@@ -1405,9 +1413,10 @@ begin
 			and TCDOB < @eDate
 	)
 	declare @0to5mo int
-	set @0to5mo = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit tlhv
-				  where datediff(month, TCDOB, VisitStartTime) <= 5
-					and TCDOB < @eDate
+	set @0to5mo = ( select count(*) from @tblLastHomeVisit tlhv
+					inner join TCID on TCID.HVCaseFK = tlhv.hvcasefk
+				  where datediff(month, TCID.TCDOB, VisitStartTime) <= 5
+					and TCID.TCDOB < @eDate
 				)
 	update @tblFinalExport set Response = @0to5mo where RowNumber = 73 and Detail = 0
 	--end row 73
@@ -1423,10 +1432,11 @@ begin
 			and TCDOB < @eDate
 	)
 	declare @6to11mo int
-	set @6to11mo = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit tlhv
-				   where datediff(month, TCDOB, VisitStartTime) >= 6 
-					and datediff(month, TCDOB, VisitStartTime) <= 11
-					and TCDOB < @eDate
+	set @6to11mo = ( select count(*) from @tblLastHomeVisit tlhv
+					inner join TCID on TCID.HVCaseFK = tlhv.hvcasefk
+				   where datediff(month, TCID.TCDOB, VisitStartTime) >= 6 
+					and datediff(month, TCID.TCDOB, VisitStartTime) <= 11
+					and TCID.TCDOB < @eDate
 	)
 	update @tblFinalExport set Response = @6to11mo where RowNumber = 74 and Detail = 0
 	--end 74
@@ -1442,10 +1452,11 @@ begin
 			and TCDOB < @eDate
 	)
 	declare @3to4 int
-	set @3to4 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
-					where datediff(month, TCDOB, VisitStartTime) >= 12 
-						and datediff(month, TCDOB, VisitStartTime) <= 23
-						and TCDOB < @eDate
+	set @3to4 = ( select count(*) from @tblLastHomeVisit tlhv
+					inner join TCID on TCID.HVCaseFK = tlhv.hvcasefk
+					where datediff(month, TCID.TCDOB, VisitStartTime) >= 12 
+						and datediff(month, TCID.TCDOB, VisitStartTime) <= 23
+						and TCID.TCDOB < @eDate
 	)
 	update @tblFinalExport set Response = @3to4 where RowNumber = 75 and Detail = 0
 	--end 75
