@@ -37,6 +37,8 @@ begin
 				, shvc.FGPProgressStatus
 				, shvc.FollowUpHVCase
 				, shvc.HVCaseFK
+				, shvc.HVCPSComments
+				, shvc.HVCPSStatus
 				, shvc.HVReferralsComments
 				, shvc.HVReferralsStatus
 				, shvc.LevelChangeComments

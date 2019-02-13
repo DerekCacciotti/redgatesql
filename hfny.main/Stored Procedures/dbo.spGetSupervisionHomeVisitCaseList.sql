@@ -29,6 +29,9 @@ as begin
 		, FGPProgressComments
 		, FGPProgressStatus
 		, sc.HVCaseFK
+		, HVCPS
+		, HVCPSComments
+		, HVCPSStatus
 		, HVReferrals
 		, HVReferralsComments
 		, HVReferralsStatus

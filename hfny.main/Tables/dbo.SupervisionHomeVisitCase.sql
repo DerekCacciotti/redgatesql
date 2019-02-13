@@ -13,6 +13,9 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCase]
 [FGPProgressStatus] [bit] NULL,
 [FollowUpHVCase] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
+[HVCPS] [int] NULL,
+[HVCPSComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HVCPSStatus] [bit] NULL,
 [HVReferrals] [bit] NULL,
 [HVReferralsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HVReferralsStatus] [bit] NULL,
@@ -43,7 +46,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		bsimmons
 -- Create date: 2/11/19
@@ -78,6 +80,9 @@ BEGIN
 			FGPProgressStatus,
 			FollowUpHVCase,
 			HVCaseFK,
+			HVCPS, 
+			HVCPSComments, 
+			HVCPSStatus, 
 			HVReferrals,
 			HVReferralsComments,
 			HVReferralsStatus,
@@ -116,6 +121,9 @@ BEGIN
 				FGPProgressStatus,
 				FollowUpHVCase,
 				HVCaseFK,
+				HVCPS, 
+				HVCPSComments, 
+				HVCPSStatus, 
 				HVReferrals,
 				HVReferralsComments,
 				HVReferralsStatus,
