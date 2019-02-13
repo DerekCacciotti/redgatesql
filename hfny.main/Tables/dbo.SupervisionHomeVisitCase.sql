@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCase]
 [FGPProgressStatus] [bit] NULL,
 [FollowUpHVCase] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
-[HVCPS] [int] NULL,
+[HVCPS] [bit] NULL,
 [HVCPSComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HVCPSStatus] [bit] NULL,
 [HVReferrals] [bit] NULL,
