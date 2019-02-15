@@ -98,7 +98,7 @@ begin
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(65, 'B37', 'not employed (whether seeking work or not)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(66, 'B37', 'unknown employment situation', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(67, NULL, 'How many PC1s were:', 1, 0)
-	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(68, 'B40', 'Low risk on Initial Assessment(Parent Survey < 25', 0, 0)
+	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(68, 'B40', 'Low risk on Initial Assessment(Parent Survey < 25)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(69, 'B40', 'Medium risk on Initial Assessment(Parent Survey 25-35)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(70, 'B40', 'Higher risk on Initial Assessment(Parent Survey 40+)', 0, 0)
 	insert into @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) values(71, NULL, 'TC age at Last Home Visit:', 1, 0)
@@ -212,8 +212,6 @@ begin
 		,Race char(2)
 		,Ethnicity varchar(max)
 		,PC1Relation2TC int
-		,MomScore char(3) 
-	    ,DadScore char(3)
 		,RowNum int
 	)
 
@@ -233,8 +231,6 @@ begin
 	 ,Ethnicity
 	 ,PCDOB
 	 ,PC1Relation2TC
-	 ,MomScore 
-	 ,DadScore
 	 ,RowNum
 	)
 	select hv.hvcasefk
@@ -252,21 +248,20 @@ begin
 		  , pc.Ethnicity
 		  , pc.PCDOB
 		  , hc.PC1Relation2TC
-		  , k.MomScore 
-		  , k.DadScore
 		  , row_number() over(partition by hv.hvcasefk order by hv.VisitStartTime asc)
 	from hvlog hv
 	inner join dbo.HVCase hc on hc.HVCasePK = hv.HVCaseFK
 	inner join pc on PC.PCPK = hc.PC1FK
 	left join pc obp on obp.pcpk = hc.OBPFK
-	inner join dbo.Kempe k on k.HVCaseFK = hc.HVCasePK
 	inner join dbo.CaseProgram cp on cp.HVCaseFK = hc.HVCasePK
 	inner join dbo.SplitString(@programfk,',') on hv.programfk  = listitem
 
 	WHERE substring(VisitType, 4, 1) <> '1'
 	      and hv.hvcasefk in (select hvcasefk from hvlog where VisitStartTime BETWEEN @sDate AND @eDate)
 		  and datepart(year, VisitStartTime) >= datepart(year, @sdate) - 1
-		  and datepart(year, VisitStartTime) <= datepart(year, @edate) 
+		  and datepart(year, VisitStartTime) <= datepart(year, @edate)
+		  AND cp.TransferredtoProgramFK IS NULL -- Weed out transfer cases
+		   
 	--Cohort - Cases that received a home visit in given year
 	declare @tblThisYearsCases as table (
 		hvcasefk int
@@ -279,8 +274,6 @@ begin
 		,Ethnicity varchar(max)
 		,PCDOB date
 		,PC1Relation2TC int
-		,MomScore char(3)
-		,DadScore char(3)
 	)
 	insert into @tblThisYearsCases (
 	    hvcasefk
@@ -293,8 +286,6 @@ begin
 		,Ethnicity
 		,PCDOB
 		,PC1Relation2TC
-		,MomScore 
-	    ,DadScore
 	)
 	select distinct hvcasefk
 		, TCNumber
@@ -305,9 +296,7 @@ begin
 		, Race
 		, Ethnicity
 		, PCDOB
-		, PC1Relation2TC 
-		, MomScore 
-	    , DadScore				   
+		, PC1Relation2TC 				   
     from @tblHomeVisits
 	where VisitStartTime between @sDate and @eDate
 
@@ -445,18 +434,27 @@ begin
 		,PC1Neglected char(1)
 		,PC1PhysicallyAbused char(1)
 		,PC1SexuallyAbused char(1)
+		,MomScore char(3)
+		,DadScore char(3)
+
 	)
 	insert into @tblKempeInfo (
 		hvcasefk
 		, PC1Neglected
 		, PC1PhysicallyAbused
 		, PC1SexuallyAbused
+		, MomScore
+		, DadScore 
 	)
-	select hvcasefk
+	select distinct
+	     hvcasefk
 		,PC1Neglected
 		,PC1PhysicallyAbused
 		,PC1SexuallyAbused
-	from Kempe where hvcasefk in (select hvcasefk from @tblThisYearsCases)
+		, MomScore
+		, DadScore 
+	from Kempe
+	where hvcasefk in (select hvcasefk from @tblThisYearsCases)
 	
 	--Cohort PC1 Health Insurance assessments in given year
 	declare @tblPC1Insurance as table (
@@ -1350,7 +1348,8 @@ begin
 	select 68, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
-		select distinct hvcasefk from @tblThisYearsCases
+		select distinct tki.hvcasefk from @tblKempeInfo tki
+		inner join @tblThisYearsCases on [@tblThisYearsCases].hvcasefk = tki.hvcasefk
 		where (Gender = '01' and MomScore < 25)
 		   or (Gender = '02' and DadScore < 25)
 	)
@@ -1364,7 +1363,8 @@ begin
 	select 69, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
-		select distinct hvcasefk from @tblThisYearsCases
+		select distinct tki.hvcasefk from @tblKempeInfo tki
+		inner join @tblThisYearsCases on [@tblThisYearsCases].hvcasefk = tki.hvcasefk
 		where (Gender = '01' and MomScore between 25 and 35)
 	       or (Gender = '02' and DadScore between 25 and 35)
 	)
@@ -1378,7 +1378,8 @@ begin
 	select 70, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
-		select distinct hvcasefk from @tblThisYearsCases
+		select distinct tki.hvcasefk from @tblKempeInfo tki
+		inner join @tblThisYearsCases on [@tblThisYearsCases].hvcasefk = tki.hvcasefk
 		where (Gender = '01' and MomScore >= 40)
 		   or (Gender = '02' and DadScore >= 40)
 	)
@@ -1472,10 +1473,11 @@ begin
 			and TCDOB < @eDate
 	)
 	declare @24to35 int
-	set @24to35 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
-				    where datediff(month, TCDOB, VisitStartTime) >= 24 
-						and datediff(month, TCDOB, VisitStartTime) <= 35
-						and TCDOB < @eDate
+	set @24to35 = ( select count(*) from @tblLastHomeVisit tlhv
+					inner join TCID on TCID.HVCaseFK = tlhv.hvcasefk
+				    where datediff(month, TCID.TCDOB, VisitStartTime) >= 24 
+						and datediff(month, TCID.TCDOB, VisitStartTime) <= 35
+						and TCID.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @24to35 where RowNumber = 76 and Detail = 0
 	--end 76
@@ -1491,10 +1493,11 @@ begin
 			and TCDOB < @eDate
 	)
 	declare @36to47 int
-	set @36to47 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
-				    where datediff(month, TCDOB, VisitStartTime) >= 36 
-						and datediff(month, TCDOB, VisitStartTime) <= 47
-						and TCDOB < @eDate
+	set @36to47 = ( select count(*) from @tblLastHomeVisit tlhv
+					inner join TCID on TCID.HVCaseFK = tlhv.hvcasefk
+				    where datediff(month, TCID.TCDOB, VisitStartTime) >= 36 
+						and datediff(month, TCID.TCDOB, VisitStartTime) <= 47
+						and TCID.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @36to47 where RowNumber = 77 and Detail = 0
 	--end 77
@@ -1510,10 +1513,11 @@ begin
 			and TCDOB < @eDate
 	)
 	declare @48to59 int
-	set @48to59 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
-				    where datediff(month, TCDOB, VisitStartTime) >= 48 
-						and datediff(month, TCDOB, VisitStartTime) <= 59
-						and TCDOB < @eDate
+	set @48to59 = ( select count(*) from @tblLastHomeVisit tlhv
+					inner join TCID on TCID.HVCaseFK = tlhv.hvcasefk
+				    where datediff(month, TCID.TCDOB, VisitStartTime) >= 48 
+						and datediff(month, TCID.TCDOB, VisitStartTime) <= 59
+						and TCID.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @48to59 where RowNumber = 78 and Detail = 0
 	--end 78
@@ -1529,10 +1533,11 @@ begin
 			and TCDOB < @eDate
 	)
 	declare @60to71 int
-	set @60to71 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
-				    where datediff(month, TCDOB, VisitStartTime) >= 60 
-						and datediff(month, TCDOB, VisitStartTime) <= 71
-						and TCDOB < @eDate
+	set @60to71 = ( select count(*) from @tblLastHomeVisit tlhv
+					inner join TCID on TCID.HVCaseFK = tlhv.hvcasefk
+				    where datediff(month, TCID.TCDOB, VisitStartTime) >= 60 
+						and datediff(month, TCID.TCDOB, VisitStartTime) <= 71
+						and TCID.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @60to71 where RowNumber = 79 and Detail = 0
 	--end 79
@@ -1548,10 +1553,11 @@ begin
 			and TCDOB < @eDate
 	)
 	declare @72to83 int
-	set @72to83 = ( select isnull(sum(TCNumber),0) from @tblLastHomeVisit
-				    where datediff(month, TCDOB, VisitStartTime) >= 72 
-						and datediff(month, TCDOB, VisitStartTime) <= 83
-						and TCDOB < @eDate
+	set @72to83 = ( select count(*) from @tblLastHomeVisit tlhv
+					inner join TCID on TCID.HVCaseFK = tlhv.hvcasefk
+				    where datediff(month, TCID.TCDOB, VisitStartTime) >= 72 
+						and datediff(month, TCID.TCDOB, VisitStartTime) <= 83
+						and TCID.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @72to83 where RowNumber = 80 and Detail = 0
 	--end 80
