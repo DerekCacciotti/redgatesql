@@ -55,12 +55,6 @@ CREATE TRIGGER [dbo].[fr_delete_SupervisionHomeVisitCase]
 ON [dbo].[SupervisionHomeVisitCase]
 AFTER DELETE
 AS
-DECLARE @PK INT;
-
-SET @PK =
-(
-	SELECT SupervisionHomeVisitCasePK FROM deleted
-);
 
 BEGIN
 
@@ -149,7 +143,6 @@ BEGIN
 				TransitionPlanningComments,
 				TransitionPlanningStatus
 		FROM	Deleted d
-		WHERE d.SupervisionHomeVisitCasePK = @PK;
 
 	END TRY
     BEGIN CATCH
