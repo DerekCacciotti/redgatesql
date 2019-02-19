@@ -195,7 +195,7 @@ begin
 		)
 		and (wp.TerminationDate is null or wp.TerminationDate > @eDate)
 
-	--Cohort All home visit logs for cases that had a home visit in given year
+	--Cohort All home visit logs in period
 	declare @tblHomeVisits as table (
 		hvcasefk int index idx1 nonClustered
 		,hvlogpk int
@@ -293,7 +293,7 @@ begin
 	
 	
 
-	--Cohort last home visit in year
+	--Cohort last home visit in period
 	declare @tblLastHomeVisit as table (
 		    hvcasefk int
 	      , VisitStartTime date
@@ -936,7 +936,7 @@ begin
 	declare @countGenderUnknown int
 	set @countGenderUnknown = ( select count(*)
 								from @tblLastHomeVisit
-								where Gender is null
+								where Gender is null or Gender = ''
 							  )
 	update @tblFinalExport set Response = @countGenderUnknown where RowNumber = 31
 --end B20
