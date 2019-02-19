@@ -25,6 +25,19 @@ as begin
 
 	begin catch
 		rollback transaction ;
+		
+		declare @ErrorMessage nvarchar(4000);  
+        declare @ErrorSeverity int;  
+        declare @ErrorState int;  
+  
+        select @ErrorMessage = error_message();  
+        select @ErrorSeverity = error_severity();  
+        select @ErrorState = error_state();  
+  
+        raiserror (@ErrorMessage, -- Message text.  
+                   @ErrorSeverity, -- Severity.  
+                   @ErrorState -- State.  
+                   );  
 	end catch ;
 	
 end ;

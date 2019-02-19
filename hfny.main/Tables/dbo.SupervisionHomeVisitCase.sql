@@ -13,7 +13,7 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCase]
 [FGPProgressStatus] [bit] NULL,
 [FollowUpHVCase] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
-[HVCPS] [int] NULL,
+[HVCPS] [bit] NULL,
 [HVCPSComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HVCPSStatus] [bit] NULL,
 [HVReferrals] [bit] NULL,
@@ -55,12 +55,6 @@ CREATE TRIGGER [dbo].[fr_delete_SupervisionHomeVisitCase]
 ON [dbo].[SupervisionHomeVisitCase]
 AFTER DELETE
 AS
-DECLARE @PK INT;
-
-SET @PK =
-(
-	SELECT SupervisionHomeVisitCasePK FROM deleted
-);
 
 BEGIN
 
@@ -149,7 +143,6 @@ BEGIN
 				TransitionPlanningComments,
 				TransitionPlanningStatus
 		FROM	Deleted d
-		WHERE d.SupervisionHomeVisitCasePK = @PK;
 
 	END TRY
     BEGIN CATCH

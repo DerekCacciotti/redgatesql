@@ -15,7 +15,7 @@ CREATE PROCEDURE [dbo].[spEditSupervisionHomeVisitCase](@SupervisionHomeVisitCas
 @FGPProgressStatus bit=NULL,
 @FollowUpHVCase bit=NULL,
 @HVCaseFK int=NULL,
-@HVCPS int=NULL,
+@HVCPS bit=NULL,
 @HVCPSComments varchar(max)=NULL,
 @HVCPSStatus bit=NULL,
 @HVReferrals bit=NULL,

@@ -41,12 +41,6 @@ CREATE TRIGGER [dbo].[fr_delete_SupervisionParentSurveyCase]
 ON [dbo].[SupervisionParentSurveyCase]
 AFTER DELETE
 AS
-DECLARE @PK INT;
-
-SET @PK =
-(
-	SELECT SupervisionParentSurveyCasePK FROM deleted
-);
 
 BEGIN
 
@@ -104,8 +98,8 @@ BEGIN
 				SupervisionParentSurveyCaseCreator,
 				SupervisionParentSurveyCaseEditDate,
 				SupervisionParentSurveyCaseEditor
-		FROM	Deleted d
-		WHERE d.SupervisionParentSurveyCasePK = @PK;
+		FROM	Deleted d ;
+
 	END TRY
 	BEGIN CATCH
 		INSERT INTO dbo.ELMAH_Error
