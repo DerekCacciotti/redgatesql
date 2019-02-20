@@ -291,8 +291,6 @@ begin
 	  where thv.hvcasefk not in (select hvcasefk from hvlog where hvlog.VisitStartTime < @sdate)
 	  group by hvcasefk
 	
-	
-
 	--Cohort last home visit in period
 	declare @tblLastHomeVisit as table (
 		    hvcasefk int
@@ -549,13 +547,13 @@ begin
 		, BirthWtOz
 		, GestationalAge
 	)
-	select thv.hvcasefk
+	select t.hvcasefk
 		   ,t.TCDOB
 		   , BirthWtLbs
 		   , BirthWtOz
 		   , GestationalAge
 	from dbo.TCID t 
-	right join @tblHomeVisits thv on thv.hvcasefk = t.HVCaseFK
+	inner join @tblPC1IDs tpid on tpid.hvcasefk = t.HVCaseFK
 	
 --Cohort Living Arrangement assessments in given year
 	declare @tblLivingArrangement as table (
@@ -1596,7 +1594,7 @@ begin
 	)
 	declare @tcMcEligible int
 	set @tcMcEligible = (select count(*) from @tblFinalExport tfe where tfe.RowNumber = 86 and Detail = 1)
-	update @tblFinalExport set Response = @mcEligible where RowNumber = 85 and Detail = 0
+	update @tblFinalExport set Response = @mcEligible where RowNumber = 86 and Detail = 0
 	--end row 86
 --end B42
 
