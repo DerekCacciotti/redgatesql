@@ -200,6 +200,7 @@ begin
 		hvcasefk int index idx1 nonClustered
 		,hvlogpk int
 		,VisitStartTime date
+		,FirstHomeVisit date
 		,IntakeDate date
 		,EDC date
 		,TCDOB date
@@ -262,7 +263,7 @@ begin
 
 	--Cohort - Current PC1IDs - removes duplicates eg. transfer back and forth
 	declare @tblPC1IDs as table (
-		hvcasefk int
+		hvcasefk int index idx1 nonClustered
 		,PC1ID char(13)
 	)
 	insert into @tblPC1IDs (
@@ -280,20 +281,29 @@ begin
 	) as sub
 	where sub.[row] = 1
 
-	--Cohort who had first home visit in time period
-	declare @tblFirstVisitThisYear as table (
-		hvcasefk int
-	   ,VisitStartTime date
-	)
+	--add first home visit date to cohort
+	Declare @tblFirstVisit as table (
+		hvcasefk int index idx1 nonClustered
+	  , FirstHomeVisit date
+	);
 
-	insert into  @tblFirstVisitThisYear (hvcasefk, VisitStartTime)
-     select thv.hvcasefk, min(thv.VisitStartTime) from @tblHomeVisits thv 
-	  where thv.hvcasefk not in (select hvcasefk from hvlog where hvlog.VisitStartTime < @sdate)
-	  group by hvcasefk
+	Insert Into @tblFirstVisit
+	 (hvcasefk
+	 , FirstHomeVisit
+	 )
+	SELECT DISTINCT hl.hvcasefk, MIN(hl.VisitStartTime)
+	from dbo.HVLog hl
+	inner join @tblHomeVisits thv on thv.hvcasefk = hl.HVCaseFK
+	group by hl.hvcasefk
+
+	update @tblHomeVisits
+	 set FirstHomeVisit = tfv.FirstHomeVisit
+     from @tblHomeVisits thv
+	 inner join @tblFirstVisit tfv on tfv.hvcasefk = thv.hvcasefk
 	
 	--Cohort last home visit in period
 	declare @tblLastHomeVisit as table (
-		    hvcasefk int
+		    hvcasefk int index idx1 nonClustered
 	      , VisitStartTime date
 		  , EDC date
 		  , TCDOB date
@@ -327,7 +337,7 @@ begin
 
 	--Cohort Parity
 	declare @tblParity as table (
-		hvcasefk int
+		hvcasefk int index idx1 nonClustered
 		,Parity int
 		,KempeDate date
 		,TCDOB date
@@ -348,7 +358,7 @@ begin
 	
 	--Cohort Intake Info
 	declare @tblIntakeInfo as table (
-		hvcasefk int
+		hvcasefk int index idx1 nonClustered
 		,HighestGrade char(2)
 		,MaritalStatus char(2)
 		,PrimaryLanguage char(2)
@@ -374,7 +384,7 @@ begin
 
 	--Cohort followups for this years cases
 	declare @tblFollowUpInfo as table (
-		hvcasefk int
+		hvcasefk int index idx1 nonClustered
 		,FollowUpPK int
 		,FollowUpDate date
 		,DevelopmentalDisability char(1)
@@ -404,7 +414,7 @@ begin
 
 	--Cohort Kempe Info
 	declare @tblKempeInfo as table (
-		hvcasefk int
+		hvcasefk int index idx1 nonClustered
 		,PC1Neglected char(1)
 		,PC1PhysicallyAbused char(1)
 		,PC1SexuallyAbused char(1)
@@ -494,7 +504,7 @@ begin
 
 	--Cohort TC Health insurance assessments in given year
 	declare @tblTCInsurance as table (
-		HVCaseFK int
+		HVCaseFK int index idx1 nonClustered
 		,FormDate date
 		,TCHIFamilyChildHealthPlus bit
 		,TCHIPrivateInsurance bit
@@ -534,7 +544,7 @@ begin
 
 --Cohort TC Birth Info
     declare @tblTCBirthInfo as table (
-		hvcasefk int
+		hvcasefk int index idx1 nonClustered
 		,TCDOB date
 		,BirthWtLbs int
 		,BirthWtOz int
@@ -557,7 +567,7 @@ begin
 	
 --Cohort Living Arrangement assessments in given year
 	declare @tblLivingArrangement as table (
-		hvcasefk int
+		hvcasefk int index idx1 nonClustered
 		,LivingArrangement char(2)
 		,LivingArrangementSpecific char(2)
 		,FormDate date
@@ -581,7 +591,7 @@ begin
 
 --Cohort Employment assessments in given year
 	declare @tblEmployment as table (
-		hvcasefk int
+		hvcasefk int index idx1 nonClustered
 		,EmploymentMonthlyHours int
 		,IsCurrentlyEmployed char(1)
 		,FormDate date
@@ -606,8 +616,8 @@ begin
 
 	--Referral Source
 	declare @tblReferrals as table (
-		hvcasefk int ,
-		ReferralSource char(2)
+		hvcasefk int index idx1 nonClustered
+		,ReferralSource char(2)
 	)
 	insert into @tblReferrals (hvcasefk, ReferralSource)
 	select hvcasefk ,
@@ -828,7 +838,7 @@ begin
 	select 22, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in 
 	(select thv.hvcasefk from @tblHomeVisits thv
-	   inner join @tblFirstVisitThisYear fvty on fvty.hvcasefk = thv.hvcasefk)
+	   where thv.FirstHomeVisit >= @sDate)
 						   
 	declare @firstHomeVisit int
 	set @firstHomeVisit = (select count(*) from @tblFinalExport tfe where RowNumber = 22 and Detail = 1)
@@ -840,8 +850,8 @@ begin
 	select 23, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in
 	(select thv.hvcasefk from @tblHomeVisits thv
-					inner join @tblFirstVisitThisYear fvty on fvty.hvcasefk = thv.hvcasefk
-						   and isnull(EDC, TCDOB) > fvty.VisitStartTime)
+				where thv.FirstHomeVisit >= @sDate
+				and isnull(EDC, TCDOB) > thv.FirstHomeVisit)
 	declare @firstHomeVisitPrenatal int
 	set @firstHomeVisitPrenatal = (select count(*) from @tblFinalExport tfe where RowNumber = 23 and Detail = 1)
 	update @tblFinalExport set Response = @firstHomeVisitPrenatal where RowNumber = 23 and Detail = 0
@@ -852,8 +862,8 @@ begin
 	select 24, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in
 	 (select thv.hvcasefk from @tblHomeVisits thv
-						   inner join @tblFirstVisitThisYear fvty on fvty.hvcasefk = thv.hvcasefk
-						   and dateadd(week, -9 , isnull(EDC, TCDOB)) >= fvty.VisitStartTime
+				where thv.FirstHomeVisit >= @sDate
+						   and dateadd(day, -54 , isnull(EDC, TCDOB)) >= thv.FirstHomeVisit
 						   )
 	declare @firstHomeVisitPrenatal31 int
 	set @firstHomeVisitPrenatal31 = (select count(*) from @tblFinalExport tfe where RowNumber = 24 and Detail = 1)
@@ -893,7 +903,7 @@ begin
 	--postnatal
 	set @countTC = ( select count(*) from TCID
 					 inner join @tblLastHomeVisit thv on thv.hvcasefk = TCID.HVCaseFK
-					 where TCID.TCDOB < @eDate					 
+					 where TCID.TCDOB < thv.VisitStartTime					 
 				   )
 	--prenatal
     declare @preTC int
@@ -1380,13 +1390,15 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) <= 5
+		where   datediff(day, TCDOB, VisitStartTime) >= 0
+			and	datediff(day, TCDOB, VisitStartTime) < 183
 			and TCDOB < @eDate
 	)
 	declare @0to5mo int
 	set @0to5mo = ( select count(*) from @tblLastHomeVisit tlhv
 					left join TCID on TCID.HVCaseFK = tlhv.hvcasefk
-				  where datediff(month, tlhv.TCDOB, VisitStartTime) <= 5
+				  where	datediff(day, tlhv.TCDOB, VisitStartTime) >= 0
+				    and datediff(day, tlhv.TCDOB, VisitStartTime) < 183
 					and TCID.TCDOB < @eDate
 				)
 	update @tblFinalExport set Response = @0to5mo where RowNumber = 73 and Detail = 0
@@ -1398,15 +1410,15 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 6 
-			and datediff(month, TCDOB, VisitStartTime) <= 11
+		where datediff(day, TCDOB, VisitStartTime) >= 183 
+			and datediff(day, TCDOB, VisitStartTime) < 365
 			and TCDOB < @eDate
 	)
 	declare @6to11mo int
 	set @6to11mo = ( select count(*) from @tblLastHomeVisit tlhv
 					left join TCID on TCID.HVCaseFK = tlhv.hvcasefk
-				   where datediff(month, tlhv.TCDOB, VisitStartTime) >= 6 
-					and datediff(month, tlhv.TCDOB, VisitStartTime) <= 11
+				   where datediff(day, tlhv.TCDOB, VisitStartTime) >= 183 
+					and datediff(day, tlhv.TCDOB, VisitStartTime) < 365
 					and tlhv.TCDOB < @eDate
 	)
 	update @tblFinalExport set Response = @6to11mo where RowNumber = 74 and Detail = 0
@@ -1418,18 +1430,18 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 12 
-			and datediff(month, TCDOB, VisitStartTime) <= 23
+		where datediff(day, TCDOB, VisitStartTime) >= 365 
+			and datediff(day, TCDOB, VisitStartTime) < 730
 			and TCDOB < @eDate
 	)
-	declare @3to4 int
-	set @3to4 = ( select count(*) from @tblLastHomeVisit tlhv
+	declare @12to23 int
+	set @12to23 = ( select count(*) from @tblLastHomeVisit tlhv
 					left join TCID on TCID.HVCaseFK = tlhv.hvcasefk
-					where datediff(month, tlhv.TCDOB, VisitStartTime) >= 12 
-						and datediff(month, tlhv.TCDOB, VisitStartTime) <= 23
+					where datediff(day, tlhv.TCDOB, VisitStartTime) >= 365 
+						and datediff(day, tlhv.TCDOB, VisitStartTime) < 730
 						and tlhv.TCDOB < @eDate
 	)
-	update @tblFinalExport set Response = @3to4 where RowNumber = 75 and Detail = 0
+	update @tblFinalExport set Response = @12to23 where RowNumber = 75 and Detail = 0
 	--end 75
 
 	--row 76
@@ -1438,15 +1450,15 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 24 
-			and datediff(month, TCDOB, VisitStartTime) <= 35
+		where datediff(day, TCDOB, VisitStartTime) >= 730 
+			and datediff(day, TCDOB, VisitStartTime) < 1095
 			and TCDOB < @eDate
 	)
 	declare @24to35 int
 	set @24to35 = ( select count(*) from @tblLastHomeVisit tlhv
 					left join TCID on TCID.HVCaseFK = tlhv.hvcasefk
-				    where datediff(month, tlhv.TCDOB, VisitStartTime) >= 24 
-						and datediff(month, tlhv.TCDOB, VisitStartTime) <= 35
+				    where datediff(day, tlhv.TCDOB, VisitStartTime) >= 730 
+						and datediff(day, tlhv.TCDOB, VisitStartTime) < 1095
 						and tlhv.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @24to35 where RowNumber = 76 and Detail = 0
@@ -1458,15 +1470,15 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 36 
-			and datediff(month, TCDOB, VisitStartTime) <= 47
+		where datediff(day, TCDOB, VisitStartTime) >= 1095 
+			and datediff(day, TCDOB, VisitStartTime) < 1460
 			and TCDOB < @eDate
 	)
 	declare @36to47 int
 	set @36to47 = ( select count(*) from @tblLastHomeVisit tlhv
 					left join TCID on TCID.HVCaseFK = tlhv.hvcasefk
-				    where datediff(month, tlhv.TCDOB, VisitStartTime) >= 36 
-						and datediff(month, tlhv.TCDOB, VisitStartTime) <= 47
+				    where datediff(day, tlhv.TCDOB, VisitStartTime) >= 1095 
+						and datediff(day, tlhv.TCDOB, VisitStartTime) < 1460
 						and tlhv.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @36to47 where RowNumber = 77 and Detail = 0
@@ -1478,15 +1490,15 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 48 
-			and datediff(month, TCDOB, VisitStartTime) <= 59
+		where datediff(day, TCDOB, VisitStartTime) >= 1460 
+			and datediff(day, TCDOB, VisitStartTime) < 1825
 			and TCDOB < @eDate
 	)
 	declare @48to59 int
 	set @48to59 = ( select count(*) from @tblLastHomeVisit tlhv
 					left join TCID on TCID.HVCaseFK = tlhv.hvcasefk
-				    where datediff(month, tlhv.TCDOB, VisitStartTime) >= 48 
-						and datediff(month, tlhv.TCDOB, VisitStartTime) <= 59
+				    where datediff(day, tlhv.TCDOB, VisitStartTime) >= 1460 
+						and datediff(day, tlhv.TCDOB, VisitStartTime) < 1825
 						and tlhv.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @48to59 where RowNumber = 78 and Detail = 0
@@ -1498,15 +1510,15 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 60 
-			and datediff(month, TCDOB, VisitStartTime) <= 71
+		where datediff(day, TCDOB, VisitStartTime) >= 1825 
+			and datediff(day, TCDOB, VisitStartTime) < 2190
 			and TCDOB < @eDate
 	)
 	declare @60to71 int
 	set @60to71 = ( select count(*) from @tblLastHomeVisit tlhv
 					left join TCID on TCID.HVCaseFK = tlhv.hvcasefk
-				    where datediff(month, tlhv.TCDOB, VisitStartTime) >= 60 
-						and datediff(month, tlhv.TCDOB, VisitStartTime) <= 71
+				    where datediff(day, tlhv.TCDOB, VisitStartTime) >= 1825 
+						and datediff(day, tlhv.TCDOB, VisitStartTime) < 2190
 						and tlhv.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @60to71 where RowNumber = 79 and Detail = 0
@@ -1518,15 +1530,15 @@ begin
 	from @tblPC1IDs tpid 
 	where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblLastHomeVisit
-		where datediff(month, TCDOB, VisitStartTime) >= 72 
-			and datediff(month, TCDOB, VisitStartTime) <= 83
+		where datediff(day, TCDOB, VisitStartTime) >= 2190 
+			and datediff(day, TCDOB, VisitStartTime) < 2555
 			and TCDOB < @eDate
 	)
 	declare @72to83 int
 	set @72to83 = ( select count(*) from @tblLastHomeVisit tlhv
 					left join TCID on TCID.HVCaseFK = tlhv.hvcasefk
-				    where datediff(month, tlhv.TCDOB, VisitStartTime) >= 72 
-						and datediff(month, tlhv.TCDOB, VisitStartTime) <= 83
+				    where datediff(day, tlhv.TCDOB, VisitStartTime) >= 2190  
+						and datediff(day, tlhv.TCDOB, VisitStartTime) < 2555
 						and tlhv.TCDOB < @eDate
 	) 
 	update @tblFinalExport set Response = @72to83 where RowNumber = 80 and Detail = 0
@@ -1605,7 +1617,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) < 18
+		where (datediff(dd, PCDOB, IntakeDate)/365) < 18
 	)
 	declare @Under18 int
 	set @Under18 = (select count(*) from @tblFinalExport tfe where RowNumber = 88 and Detail = 1)
@@ -1618,7 +1630,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 18 and datediff(year, PCDOB, IntakeDate) <= 19
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 18 and (datediff(dd, PCDOB, IntakeDate)/365) <= 19
 	)
 	declare @18to19 int
 	set @18to19 = (select count(*) from @tblFinalExport tfe where RowNumber = 89 and Detail = 1)
@@ -1631,7 +1643,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 20 and datediff(year, PCDOB, IntakeDate) <= 21
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 20 and (datediff(dd, PCDOB, IntakeDate)/365) <= 21
 	)
 	declare @20to21 int
 	set @20to21 = (select count(*) from @tblFinalExport tfe where RowNumber = 90 and Detail = 1)
@@ -1644,7 +1656,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 22 and datediff(year, PCDOB, IntakeDate) <= 24
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 22 and (datediff(dd, PCDOB, IntakeDate)/365) <= 24
 	)
 	declare @22to24 int
 	set @22to24 = (select count(*) from @tblFinalExport tfe where RowNumber = 91 and Detail = 1)
@@ -1657,7 +1669,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 25 and datediff(year, PCDOB, IntakeDate) <= 29
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 25 and (datediff(dd, PCDOB, IntakeDate)/365) <= 29
 	)
 	declare @25to29 int
 	set @25to29 = (select count(*) from @tblFinalExport tfe where RowNumber = 92 and Detail = 1)
@@ -1670,7 +1682,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 30 and datediff(year, PCDOB, IntakeDate) <= 34
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 30 and (datediff(dd, PCDOB, IntakeDate)/365) <= 34
 	)
 	declare @30to44 int
 	set @30to44 = (select count(*) from @tblFinalExport tfe where RowNumber = 93 and Detail = 1)
@@ -1683,7 +1695,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 35 and datediff(year, PCDOB, IntakeDate) <= 44
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 35 and (datediff(dd, PCDOB, IntakeDate)/365) <= 44
 	)
 	declare @55to65 int
 	set @55to65 = (select count(*) from @tblFinalExport tfe where RowNumber = 94 and Detail = 1)
@@ -1696,7 +1708,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 45 and datediff(year, PCDOB, IntakeDate) <= 54
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 45 and (datediff(dd, PCDOB, IntakeDate)/365) <= 54
 	)
 	declare @45to54 int
 	set @45to54 = (select count(*) from @tblFinalExport tfe where RowNumber = 95 and Detail = 1)
@@ -1709,7 +1721,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 55 and datediff(year, PCDOB, IntakeDate) <= 64
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 55 and (datediff(dd, PCDOB, IntakeDate)/365) <= 64
 	)
 	declare @55to64 int
 	set @55to64 = (select count(*) from @tblFinalExport tfe where RowNumber = 96 and Detail = 1)
@@ -1722,7 +1734,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where datediff(year, PCDOB, IntakeDate) >= 65
+		where (datediff(dd, PCDOB, IntakeDate)/365) >= 65
 	)
 	declare @Over64 int
 	set @Over64 = (select count(*) from @tblFinalExport tfe where RowNumber = 97 and Detail = 1)
