@@ -260,6 +260,7 @@ begin
 	WHERE substring(VisitType, 4, 1) <> '1'
 	      and VisitStartTime BETWEEN @sDate AND @eDate
 		  AND cp.TransferredtoProgramFK IS NULL -- Weed out transfer cases
+    option (OPTIMIZE FOR (@sDate UNKNOWN, @eDate UNKNOWN))	
 
 	--Cohort - Current PC1IDs - removes duplicates eg. transfer back and forth
 	declare @tblPC1IDs as table (
@@ -609,7 +610,7 @@ begin
 		, IsCurrentlyEmployed
 		, ca.FormDate	
 		,row_number() over(partition by thv.hvcasefk order by ca.FormDate desc)
-	from @tblHomeVisits thv	
+	from @tblPC1IDs thv	
 	left join dbo.CommonAttributes ca on thv.hvcasefk = ca.HVCaseFK
 	left join Employment e on e.FormFK = ca.FormFK
 	where ca.FormType in ('FU-PC1', 'IN-PC1', 'KE')
@@ -620,11 +621,10 @@ begin
 		,ReferralSource char(2)
 	)
 	insert into @tblReferrals (hvcasefk, ReferralSource)
-	select hvcasefk ,
+	select hv.hvcasefk ,
 		   ReferralSource
 	from hvscreen hv
-	inner join dbo.SplitString(@programfk,',') ON hv.programfk  = listitem 
-	where hvcasefk in (select distinct hvcasefk from @tblHomeVisits)
+	inner join @tblPC1IDs tpid on tpid.hvcasefk = hv.HVCaseFK
 
 				
 --B2 row 1
@@ -956,7 +956,7 @@ begin
 		 select distinct hvcasefk from @tblParity
 		 where (Parity = 0 and TCDOB is null)
 			or (Parity = 0 and KempeDate < TCDOB)
-			or (Parity = 1 and TCDOB > KempeDate)
+			or (Parity = 1 and TCDOB < KempeDate)
 	)
 	declare @firstTimeParent int
 	set @firstTimeParent = (select count(*) from @tblFinalExport tfe where RowNumber = 32 and Detail = 1)
@@ -1936,7 +1936,9 @@ begin
 	update @tblFinalExport set Response = @OtherLang where RowNumber = 116
 --	end row 116
 --end B46
-					
+				
 select * from @tblFinalExport order by RowNumber asc, Detail asc
+
+
 end
 GO
