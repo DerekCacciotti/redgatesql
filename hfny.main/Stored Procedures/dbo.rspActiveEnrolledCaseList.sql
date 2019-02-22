@@ -7,6 +7,9 @@ GO
 -- Create date: 06/11/2012
 -- Description:	Active Enrolled Case List
 -- mod 2013Jun24 jrobohn reformat and add case filter criteria
+-- Edited on:   02/22/2019
+-- Edited by:   Chris Papas
+-- Edited Reason: Date math using year returning wrong result.  Switched to days/365.25 and a float to return correct age of PC1
 -- =============================================
 CREATE procedure [dbo].[rspActiveEnrolledCaseList]-- Add the parameters for the stored procedure here
     @ProgramFK           varchar(max)    = null,
@@ -45,7 +48,7 @@ as
 		  ,convert(varchar(12),HVScreen.ScreenDate,101) [ScreenDate]
 		  ,rtrim(Worker.LastName)+', '+rtrim(Worker.FirstName) [FSW]
 		  ,convert(varchar(12),Intake.IntakeDate,101) [IntakeDate]
-		  ,CAST(DATEDIFF(year,PC.PCDOB,Intake.IntakeDate) as varchar(10))+' y' [AgeAtIntake]
+		  ,CAST(FLOOR(DATEDIFF(DAY,PC.PCDOB,Intake.IntakeDate)/365.25) as varchar(10)) +' y' [AgeAtIntake] --per ticket #6219
 		  ,case when a.DischargeDate is null then '' else convert(varchar(12),a.DischargeDate,101) end [CloseDate]
 		  ,case when a.DischargeDate is null then 'Case Open' else rtrim(codeDischarge.DischargeReason) end [CloseReason]
 
