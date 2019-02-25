@@ -9,6 +9,9 @@ GO
 -- rspQAReport8 1, 'summary'	--- for summary page
 -- rspQAReport8 1			--- for main report - location = 1
 -- rspQAReport8 null			--- for main report for all locations
+-- Edit Date:   <February 25, 2019>
+-- Edited By:   Chris Papas
+-- Edit Reason: Report was pulling older ASQ SE 1's, not 2's and getting wrong In/Out of window values
 -- =============================================
 
 
@@ -238,10 +241,10 @@ Interval
 SELECT 
 		qa1.HVCasePK
 	  , qa1.TCIDPK 	 
-	  , max(Interval) AS Interval -- given child age, this is the interval that one expect to find ASQSE-1 record in the DB
+	  , max(Interval) AS Interval -- given child age, this is the interval that one expect to find ASQSE-2 record in the DB
  
  FROM @tbl4QAReport8Detail qa1
- inner join codeduebydates on scheduledevent = 'ASQSE-1' AND AgeInDays >= DueBy  
+ inner join codeduebydates on scheduledevent = 'ASQSE-2' AND AgeInDays >= DueBy  
  WHERE dateadd(dd,DueBy,qa1.TCDOB) >= '01/01/13'
  GROUP BY HVCasePK, QA1.TCIDPK -- Must 'group by HVCasePK, TCIDPK' to bring in twins etc (twins have same hvcasepks) (not just 'group by HVCasePK')
   
@@ -336,7 +339,7 @@ INSERT INTO @tbl4QAReport8Expected(
 	  , cd.[MaximumDue]
 	  , cd.[MinimumDue]		  
 	  , ASQSEDateCompleted  AS FormDate
-	  , CASE WHEN dbo.IsFormReviewed(ASQSEDateCompleted, 'AS', ASQSEPK)=1 THEN 0 ELSE 1 END AS FormNotReviewed  -- AQ = ASQSE-1 FORM
+	  , CASE WHEN dbo.IsFormReviewed(ASQSEDateCompleted, 'AS', ASQSEPK)=1 THEN 0 ELSE 1 END AS FormNotReviewed  -- AQ = ASQSE-2 FORM
 	  , qa1.TCName
 	  , CASE WHEN 1 = 0 -- (XDateAge/30.44) < 24  do not adjust gestational age
 	  THEN   dateadd(d, ((40 - qa1.GestationalAge) * 7) + cd.[DueBy], TCDOB) 	  
@@ -356,8 +359,8 @@ INSERT INTO @tbl4QAReport8Expected(
 		  
  FROM @tbl4QAReport8Detail qa1 
  INNER JOIN @tbl4QAReport8Interval cteIn ON qa1.HVCasePK = cteIn.HVCasePK AND qa1.TCIDPK = cteIn.TCIDFK  -- we will use column 'Interval' next, which we just added
- inner join codeduebydates cd on scheduledevent = 'ASQSE-1' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
- -- The following line gets those tcid's with ASQSE-1's that are due for the Interval
+ inner join codeduebydates cd on scheduledevent = 'ASQSE-2' AND cteIn.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
+ -- The following line gets those tcid's with ASQSE-2's that are due for the Interval
  INNER JOIN ASQSE Q ON Q.TCIDFK  = qa1.TCIDPK AND Q.ASQSETCAge = cteIn.Interval -- note 'Interval' is the minimum interval 
  ORDER BY HVCasePK 
  
@@ -370,7 +373,7 @@ INSERT INTO @tbl4QAReport8Expected(
  
  -- Looking into the missing ones
  
- -- Get the the last ASQSE-1 (max ASQSETCAge) that was done for each tcid
+ -- Get the the last ASQSE-2 (max ASQSETCAge) that was done for each tcid
 DECLARE @tbl4QAReport8LastASQSE1IntervalCompleted TABLE(
 	HVCasePK INT,
 	TCIDFK INT,
@@ -531,7 +534,7 @@ INSERT INTO @tbl4QAReport8NotExpected(
  INNER JOIN @tbl4QAReport8Interval cteInExpected ON qa2.HVCasePK = cteInExpected.HVCasePK AND qa2.TCIDPK = cteInExpected.TCIDFK  -- we will use column 'Interval' next, which we just added
  LEFT JOIN @tbl4QAReport8LastASQSE1IntervalCompleted cteIn2 ON qa2.HVCasePK = cteIn2.HVCasePK -- we will use column 'Interval' next, which we just added
  LEFT JOIN @tbl4QAReport8Expected easq on easq.hvcasepk = qa2.HVCasePK 
- LEFT join codeduebydates cd on scheduledevent = 'ASQSE-1' AND cteIn2.LastASQSE1IntervalCompleted = cd.Interval -- to get dueby, max, min (given interval)
+ LEFT join codeduebydates cd on scheduledevent = 'ASQSE-2' AND cteIn2.LastASQSE1IntervalCompleted = cd.Interval -- to get dueby, max, min (given interval)
  LEFT JOIN @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 ON qa4.TCIDFK  = qa2.TCIDPK  AND ((cteIn2.LastASQSE1IntervalCompleted = qa4.Interval) OR (cteIn2.LastASQSE1IntervalCompleted IS NULL))  -- in foxpro i.e. LOCATE FOR ALLTRIM(tc_age)=ALLTRIM(STR(aqs.max_ASQSETCAge,2,0))
 WHERE 
 easq.hvcasepk IS NULL 
@@ -843,7 +846,7 @@ SELECT
 	 , IntervalExpected
 	 , LastASQSE1IntervalCompleted
  FROM @tbl4QAReport8NotExpectedModified qa5
-LEFT join codeduebydates cd on scheduledevent = 'ASQSE-1' AND qa5.IntervalExpected = cd.Interval -- to get dueby to calculate 'FormDueDate'
+LEFT join codeduebydates cd on scheduledevent = 'ASQSE-2' AND qa5.IntervalExpected = cd.Interval -- to get dueby to calculate 'FormDueDate'
 ORDER BY HVCasePK 
 --- rspQAReport8 1 ,'summary'
 
@@ -907,7 +910,7 @@ ELSE
 		currentLevel	
 
 	FROM @tbl4QAReport8Expected qam2
-	inner join codeduebydates cdd2 on scheduledevent = 'ASQSE-1' AND cdd2.Interval = qam2.Interval 
+	inner join codeduebydates cdd2 on scheduledevent = 'ASQSE-2' AND cdd2.Interval = qam2.Interval 
 	WHERE OutOfWindow = 1 OR FormNotReviewed=1
 
 UNION 	
@@ -928,11 +931,11 @@ UNION
 		currentLevel
 		 		
 	 FROM @tbl4QAReport8NotExpectedMain qam	 
-	 inner join codeduebydates cdd on scheduledevent = 'ASQSE-1' AND cdd.Interval = qam.IntervalExpected 
+	 inner join codeduebydates cdd on scheduledevent = 'ASQSE-2' AND cdd.Interval = qam.IntervalExpected 
 		WHERE (Missing = 1 or OutOfWindow = 1 OR FormNotReviewed=1)
 			ORDER BY Worker, PC1ID 
 
 
 
-	END	
+	END
 GO
