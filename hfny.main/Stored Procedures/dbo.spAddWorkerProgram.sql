@@ -47,6 +47,55 @@ CREATE PROCEDURE [dbo].[spAddWorkerProgram](@BackgroundCheckDate date=NULL,
 @WorkerProgramCreator char(10)=NULL,
 @WorkPhone char(12)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) WorkerProgramPK
+FROM WorkerProgram lastRow
+WHERE 
+@BackgroundCheckDate = lastRow.BackgroundCheckDate AND
+@CommunityOutreach = lastRow.CommunityOutreach AND
+@DirectParticipantServices = lastRow.DirectParticipantServices AND
+@FatherAdvocate = lastRow.FatherAdvocate AND
+@FatherAdvocateEndDate = lastRow.FatherAdvocateEndDate AND
+@FatherAdvocateStartDate = lastRow.FatherAdvocateStartDate AND
+@FAW = lastRow.FAW AND
+@FAWEndDate = lastRow.FAWEndDate AND
+@FAWStartDate = lastRow.FAWStartDate AND
+@FSW = lastRow.FSW AND
+@FSWEndDate = lastRow.FSWEndDate AND
+@FSWStartDate = lastRow.FSWStartDate AND
+@FundRaiser = lastRow.FundRaiser AND
+@HireDate = lastRow.HireDate AND
+@LivesTargetArea = lastRow.LivesTargetArea AND
+@ProgramFK = lastRow.ProgramFK AND
+@ProgramManager = lastRow.ProgramManager AND
+@ProgramManagerEndDate = lastRow.ProgramManagerEndDate AND
+@ProgramManagerStartDate = lastRow.ProgramManagerStartDate AND
+@SiteFK = lastRow.SiteFK AND
+@Supervisor = lastRow.Supervisor AND
+@SupervisorEndDate = lastRow.SupervisorEndDate AND
+@SupervisorFK = lastRow.SupervisorFK AND
+@SupervisorStartDate = lastRow.SupervisorStartDate AND
+@TerminationDate = lastRow.TerminationDate AND
+@TerminationReasonRetired = lastRow.TerminationReasonRetired AND
+@TerminationReasonForbetterJob = lastRow.TerminationReasonForbetterJob AND
+@TerminationReasonMoved = lastRow.TerminationReasonMoved AND
+@TerminationReasonMoney = lastRow.TerminationReasonMoney AND
+@TerminationReasonBaby = lastRow.TerminationReasonBaby AND
+@TerminationReasonPromotion = lastRow.TerminationReasonPromotion AND
+@TerminationReasonDisability = lastRow.TerminationReasonDisability AND
+@TerminationReasonNotGoodFit = lastRow.TerminationReasonNotGoodFit AND
+@TerminationReasonIncarceration = lastRow.TerminationReasonIncarceration AND
+@TerminationReasonInvoluntary = lastRow.TerminationReasonInvoluntary AND
+@TerminationReasonReassigned = lastRow.TerminationReasonReassigned AND
+@TerminationReasonLossFunding = lastRow.TerminationReasonLossFunding AND
+@TerminationReasonBackToSchool = lastRow.TerminationReasonBackToSchool AND
+@TerminationReasonOther = lastRow.TerminationReasonOther AND
+@TerminationReasonOtherSpecify = lastRow.TerminationReasonOtherSpecify AND
+@WorkerFK = lastRow.WorkerFK AND
+@WorkerNotes = lastRow.WorkerNotes AND
+@WorkerProgramCreator = lastRow.WorkerProgramCreator AND
+@WorkPhone = lastRow.WorkPhone
+ORDER BY WorkerProgramPK DESC) 
+BEGIN
 INSERT INTO WorkerProgram(
 BackgroundCheckDate,
 CommunityOutreach,
@@ -140,5 +189,6 @@ VALUES(
 @WorkPhone
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

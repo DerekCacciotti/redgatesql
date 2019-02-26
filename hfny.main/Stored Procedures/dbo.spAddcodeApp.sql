@@ -7,6 +7,15 @@ CREATE PROCEDURE [dbo].[spAddcodeApp](@AppCode char(2)=NULL,
 @AppCodeText char(100)=NULL,
 @AppCodeUsedWhere varchar(50)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) codeAppPK
+FROM codeApp lastRow
+WHERE 
+@AppCode = lastRow.AppCode AND
+@AppCodeGroup = lastRow.AppCodeGroup AND
+@AppCodeText = lastRow.AppCodeText AND
+@AppCodeUsedWhere = lastRow.AppCodeUsedWhere
+ORDER BY codeAppPK DESC) 
+BEGIN
 INSERT INTO codeApp(
 AppCode,
 AppCodeGroup,
@@ -20,5 +29,6 @@ VALUES(
 @AppCodeUsedWhere
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

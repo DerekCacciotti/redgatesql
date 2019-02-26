@@ -8,6 +8,16 @@ CREATE PROCEDURE [dbo].[spAddHVLevel](@HVCaseFK int=NULL,
 @LevelFK int=NULL,
 @ProgramFK int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) HVLevelPK
+FROM HVLevel lastRow
+WHERE 
+@HVCaseFK = lastRow.HVCaseFK AND
+@HVLevelCreator = lastRow.HVLevelCreator AND
+@LevelAssignDate = lastRow.LevelAssignDate AND
+@LevelFK = lastRow.LevelFK AND
+@ProgramFK = lastRow.ProgramFK
+ORDER BY HVLevelPK DESC) 
+BEGIN
 INSERT INTO HVLevel(
 HVCaseFK,
 HVLevelCreator,
@@ -23,5 +33,6 @@ VALUES(
 @ProgramFK
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

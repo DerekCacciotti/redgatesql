@@ -10,6 +10,18 @@ CREATE PROCEDURE [dbo].[spAddcodeForm](@FormPKName varchar(20)=NULL,
 @FormDateName varchar(20)=NULL,
 @MainTableName varchar(20)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) codeFormPK
+FROM codeForm lastRow
+WHERE 
+@FormPKName = lastRow.FormPKName AND
+@canBeReviewed = lastRow.canBeReviewed AND
+@codeFormAbbreviation = lastRow.codeFormAbbreviation AND
+@codeFormName = lastRow.codeFormName AND
+@CreatorFieldName = lastRow.CreatorFieldName AND
+@FormDateName = lastRow.FormDateName AND
+@MainTableName = lastRow.MainTableName
+ORDER BY codeFormPK DESC) 
+BEGIN
 INSERT INTO codeForm(
 FormPKName,
 canBeReviewed,
@@ -29,5 +41,6 @@ VALUES(
 @MainTableName
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

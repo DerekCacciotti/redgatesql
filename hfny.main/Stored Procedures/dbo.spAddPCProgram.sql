@@ -5,6 +5,13 @@ GO
 CREATE PROCEDURE [dbo].[spAddPCProgram](@PCFK int=NULL,
 @ProgramFK int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) PCProgramPK
+FROM PCProgram lastRow
+WHERE 
+@PCFK = lastRow.PCFK AND
+@ProgramFK = lastRow.ProgramFK
+ORDER BY PCProgramPK DESC) 
+BEGIN
 INSERT INTO PCProgram(
 PCFK,
 ProgramFK
@@ -14,5 +21,6 @@ VALUES(
 @ProgramFK
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

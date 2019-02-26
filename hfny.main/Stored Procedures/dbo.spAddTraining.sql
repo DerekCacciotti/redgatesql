@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -16,6 +15,23 @@ CREATE PROCEDURE [dbo].[spAddTraining](@ProgramFK int=NULL,
 @TrainingTitle char(70)=NULL,
 @IsExempt bit=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) TrainingPK
+FROM Training lastRow
+WHERE 
+@ProgramFK = lastRow.ProgramFK AND
+@TrainerFK = lastRow.TrainerFK AND
+@TrainingMethodFK = lastRow.TrainingMethodFK AND
+@TrainingCreator = lastRow.TrainingCreator AND
+@TrainingDate = lastRow.TrainingDate AND
+@TrainingDays = lastRow.TrainingDays AND
+@TrainingDescription = lastRow.TrainingDescription AND
+@TrainingDuration = lastRow.TrainingDuration AND
+@TrainingHours = lastRow.TrainingHours AND
+@TrainingMinutes = lastRow.TrainingMinutes AND
+@TrainingTitle = lastRow.TrainingTitle AND
+@IsExempt = lastRow.IsExempt
+ORDER BY TrainingPK DESC) 
+BEGIN
 INSERT INTO Training(
 ProgramFK,
 TrainerFK,
@@ -45,5 +61,6 @@ VALUES(
 @IsExempt
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

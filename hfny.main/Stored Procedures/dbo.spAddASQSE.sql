@@ -18,6 +18,26 @@ CREATE PROCEDURE [dbo].[spAddASQSE](@ASQSECreator char(10)=NULL,
 @ProgramFK int=NULL,
 @TCIDFK int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) ASQSEPK
+FROM ASQSE lastRow
+WHERE 
+@ASQSECreator = lastRow.ASQSECreator AND
+@ASQSEDateCompleted = lastRow.ASQSEDateCompleted AND
+@ASQSEInWindow = lastRow.ASQSEInWindow AND
+@ASQSEOverCutOff = lastRow.ASQSEOverCutOff AND
+@ASQSEReceiving = lastRow.ASQSEReceiving AND
+@ASQSEReferred = lastRow.ASQSEReferred AND
+@ASQSETCAge = lastRow.ASQSETCAge AND
+@ASQSETotalScore = lastRow.ASQSETotalScore AND
+@ASQSEVersion = lastRow.ASQSEVersion AND
+@DiscussedWithPC1 = lastRow.DiscussedWithPC1 AND
+@FSWFK = lastRow.FSWFK AND
+@ReviewCDS = lastRow.ReviewCDS AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@ProgramFK = lastRow.ProgramFK AND
+@TCIDFK = lastRow.TCIDFK
+ORDER BY ASQSEPK DESC) 
+BEGIN
 INSERT INTO ASQSE(
 ASQSECreator,
 ASQSEDateCompleted,
@@ -53,5 +73,6 @@ VALUES(
 @TCIDFK
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO
