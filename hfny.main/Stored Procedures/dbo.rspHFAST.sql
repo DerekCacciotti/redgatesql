@@ -626,6 +626,46 @@ begin
 	from hvscreen hv
 	inner join @tblPC1IDs tpid on tpid.hvcasefk = hv.HVCaseFK
 
+	--ASQ Under Cutoff
+	declare @tblASQ as table (
+		hvcasefk int index idx1 nonClustered
+		, TCIDFK int
+		, UnderCommunication bit
+		 , UnderFineMotor bit
+		 , UnderGrossMotor bit
+		 , UnderPersonalSocial bit
+		 , UnderProblemSolving bit
+	)
+	insert into @tblASQ (
+			hvcasefk
+		  , TCIDFK
+		  , UnderCommunication
+		  , UnderFineMotor
+		  , UnderGrossMotor
+		  , UnderPersonalSocial
+		  , UnderProblemSolving
+	)
+   select HVCaseFK
+	     , TCIDFK
+		 , UnderCommunication
+		 , UnderFineMotor
+		 , UnderGrossMotor
+		 , UnderPersonalSocial
+		 , UnderProblemSolving
+    from (
+	select ASQ.HVCaseFK
+	     , TCIDFK
+		 , UnderCommunication
+		 , UnderFineMotor
+		 , UnderGrossMotor
+		 , UnderPersonalSocial
+		 , UnderProblemSolving
+		 , row_number() over(partition by tcidfk order by DateCompleted desc) as [row]
+	from ASQ inner join @tblPC1IDs tpid on tpid.hvcasefk = ASQ.HVCaseFK
+	where DateCompleted < @eDate
+    ) sub
+	where sub.[row] = 1
+
 				
 --B2 row 1
 	--Number of home visits completed
@@ -1592,6 +1632,18 @@ begin
 
 	-- row 85
 	-- Developmentally delayed or disabled (known or suspected)
+	insert into @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	select 85, tpid.PC1ID, 0, 1
+	from @tblPC1IDs tpid
+	where tpid.hvcasefk in (
+		select distinct hvcasefk from @tblASQ where UnderCommunication = 1 or UnderFineMotor = 1 
+		or UnderGrossMotor = 1 or UnderPersonalSocial = 1 or UnderProblemSolving = 1
+	)
+	declare @delayed int
+	set @delayed = (select count(distinct tcidfk) from @tblASQ where UnderCommunication = 1 or UnderFineMotor = 1 
+		or UnderGrossMotor = 1 or UnderPersonalSocial = 1 or UnderProblemSolving = 1
+	)
+	update @tblFinalExport set Response = @delayed where RowNumber = 85 and Detail = 0
 	-- End row 85
 
 	--row 86
