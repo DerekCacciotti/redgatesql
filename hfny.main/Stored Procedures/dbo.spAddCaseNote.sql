@@ -8,6 +8,16 @@ CREATE PROCEDURE [dbo].[spAddCaseNote](@CaseNoteContents varchar(max)=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) CaseNotePK
+FROM CaseNote lastRow
+WHERE 
+@CaseNoteContents = lastRow.CaseNoteContents AND
+@CaseNoteCreator = lastRow.CaseNoteCreator AND
+@CaseNoteDate = lastRow.CaseNoteDate AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@ProgramFK = lastRow.ProgramFK
+ORDER BY CaseNotePK DESC) 
+BEGIN
 INSERT INTO CaseNote(
 CaseNoteContents,
 CaseNoteCreator,
@@ -23,5 +33,6 @@ VALUES(
 @ProgramFK
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

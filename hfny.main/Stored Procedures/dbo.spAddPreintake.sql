@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -32,6 +31,39 @@ CREATE PROCEDURE [dbo].[spAddPreintake](@CaseStatus char(2)=NULL,
 @ProgramFK int=NULL,
 @TransferredtoProgram varchar(50)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) PreintakePK
+FROM Preintake lastRow
+WHERE 
+@CaseStatus = lastRow.CaseStatus AND
+@DischargeReason = lastRow.DischargeReason AND
+@DischargeReasonSpecify = lastRow.DischargeReasonSpecify AND
+@DischargeSafetyReason = lastRow.DischargeSafetyReason AND
+@DischargeSafetyReasonDV = lastRow.DischargeSafetyReasonDV AND
+@DischargeSafetyReasonMH = lastRow.DischargeSafetyReasonMH AND
+@DischargeSafetyReasonOther = lastRow.DischargeSafetyReasonOther AND
+@DischargeSafetyReasonSA = lastRow.DischargeSafetyReasonSA AND
+@DischargeSafetyReasonSpecify = lastRow.DischargeSafetyReasonSpecify AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@KempeFK = lastRow.KempeFK AND
+@PIActivitySpecify = lastRow.PIActivitySpecify AND
+@PICall2Parent = lastRow.PICall2Parent AND
+@PICallFromParent = lastRow.PICallFromParent AND
+@PICaseReview = lastRow.PICaseReview AND
+@PICreator = lastRow.PICreator AND
+@PIDate = lastRow.PIDate AND
+@PIFSWFK = lastRow.PIFSWFK AND
+@PIGift = lastRow.PIGift AND
+@PIOtherActivity = lastRow.PIOtherActivity AND
+@PIOtherHVProgram = lastRow.PIOtherHVProgram AND
+@PIParent2Office = lastRow.PIParent2Office AND
+@PIParentLetter = lastRow.PIParentLetter AND
+@PIProgramMaterial = lastRow.PIProgramMaterial AND
+@PIVisitAttempt = lastRow.PIVisitAttempt AND
+@PIVisitMade = lastRow.PIVisitMade AND
+@ProgramFK = lastRow.ProgramFK AND
+@TransferredtoProgram = lastRow.TransferredtoProgram
+ORDER BY PreintakePK DESC) 
+BEGIN
 INSERT INTO Preintake(
 CaseStatus,
 DischargeReason,
@@ -93,5 +125,6 @@ VALUES(
 @TransferredtoProgram
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

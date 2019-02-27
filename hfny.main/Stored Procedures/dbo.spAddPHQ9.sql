@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -26,6 +25,33 @@ CREATE PROCEDURE [dbo].[spAddPHQ9](@Appetite char(2)=NULL,
 @Tired char(2)=NULL,
 @TotalScore int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) PHQ9PK
+FROM PHQ9 lastRow
+WHERE 
+@Appetite = lastRow.Appetite AND
+@BadSelf = lastRow.BadSelf AND
+@BetterOffDead = lastRow.BetterOffDead AND
+@Concentration = lastRow.Concentration AND
+@DateAdministered = lastRow.DateAdministered AND
+@DepressionReferralMade = lastRow.DepressionReferralMade AND
+@Difficulty = lastRow.Difficulty AND
+@Down = lastRow.Down AND
+@FormFK = lastRow.FormFK AND
+@FormInterval = lastRow.FormInterval AND
+@FormType = lastRow.FormType AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@Interest = lastRow.Interest AND
+@Invalid = lastRow.Invalid AND
+@ParticipantRefused = lastRow.ParticipantRefused AND
+@PHQ9Creator = lastRow.PHQ9Creator AND
+@Positive = lastRow.Positive AND
+@ProgramFK = lastRow.ProgramFK AND
+@Sleep = lastRow.Sleep AND
+@SlowOrFast = lastRow.SlowOrFast AND
+@Tired = lastRow.Tired AND
+@TotalScore = lastRow.TotalScore
+ORDER BY PHQ9PK DESC) 
+BEGIN
 INSERT INTO PHQ9(
 Appetite,
 BadSelf,
@@ -75,5 +101,6 @@ VALUES(
 @TotalScore
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

@@ -38,6 +38,46 @@ CREATE PROCEDURE [dbo].[spAddHVScreen](@FAWFK int=NULL,
 @TargetArea char(1)=NULL,
 @TransferredtoProgram varchar(50)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) HVScreenPK
+FROM HVScreen lastRow
+WHERE 
+@FAWFK = lastRow.FAWFK AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@ProgramFK = lastRow.ProgramFK AND
+@ReferralMade = lastRow.ReferralMade AND
+@ReferralSource = lastRow.ReferralSource AND
+@ReferralSourceFK = lastRow.ReferralSourceFK AND
+@ReferralSourceSpecify = lastRow.ReferralSourceSpecify AND
+@Relation2TC = lastRow.Relation2TC AND
+@Relation2TCSpecify = lastRow.Relation2TCSpecify AND
+@RiskAbortionHistory = lastRow.RiskAbortionHistory AND
+@RiskAbortionTry = lastRow.RiskAbortionTry AND
+@RiskAdoption = lastRow.RiskAdoption AND
+@RiskDepressionHistory = lastRow.RiskDepressionHistory AND
+@RiskEducation = lastRow.RiskEducation AND
+@RiskInadequateSupports = lastRow.RiskInadequateSupports AND
+@RiskMaritalProblems = lastRow.RiskMaritalProblems AND
+@RiskNoPhone = lastRow.RiskNoPhone AND
+@RiskNoPrenatalCare = lastRow.RiskNoPrenatalCare AND
+@RiskNotMarried = lastRow.RiskNotMarried AND
+@RiskPartnerJobless = lastRow.RiskPartnerJobless AND
+@RiskPoor = lastRow.RiskPoor AND
+@RiskPsychiatricHistory = lastRow.RiskPsychiatricHistory AND
+@RiskSubstanceAbuseHistory = lastRow.RiskSubstanceAbuseHistory AND
+@RiskUnder21 = lastRow.RiskUnder21 AND
+@RiskUnstableHousing = lastRow.RiskUnstableHousing AND
+@ScreenCreator = lastRow.ScreenCreator AND
+@ScreenDate = lastRow.ScreenDate AND
+@ScreenerFirstName = lastRow.ScreenerFirstName AND
+@ScreenerLastName = lastRow.ScreenerLastName AND
+@ScreenerMiddleInitial = lastRow.ScreenerMiddleInitial AND
+@ScreenerPhone = lastRow.ScreenerPhone AND
+@ScreenResult = lastRow.ScreenResult AND
+@ScreenVersion = lastRow.ScreenVersion AND
+@TargetArea = lastRow.TargetArea AND
+@TransferredtoProgram = lastRow.TransferredtoProgram
+ORDER BY HVScreenPK DESC) 
+BEGIN
 INSERT INTO HVScreen(
 FAWFK,
 HVCaseFK,
@@ -113,5 +153,6 @@ VALUES(
 @TransferredtoProgram
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

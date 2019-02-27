@@ -64,6 +64,72 @@ CREATE PROCEDURE [dbo].[spAddSupervisionOld](@ActivitiesOther bit=NULL,
 @Weather bit=NULL,
 @WorkerFK int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) SupervisionOldPK
+FROM SupervisionOld lastRow
+WHERE 
+@ActivitiesOther = lastRow.ActivitiesOther AND
+@ActivitiesOtherSpecify = lastRow.ActivitiesOtherSpecify AND
+@AreasGrowth = lastRow.AreasGrowth AND
+@AssessmentIssues = lastRow.AssessmentIssues AND
+@AssessmentRate = lastRow.AssessmentRate AND
+@Boundaries = lastRow.Boundaries AND
+@Caseload = lastRow.Caseload AND
+@Coaching = lastRow.Coaching AND
+@CommunityResources = lastRow.CommunityResources AND
+@CulturalSensitivity = lastRow.CulturalSensitivity AND
+@Curriculum = lastRow.Curriculum AND
+@FamilyProgress = lastRow.FamilyProgress AND
+@HomeVisitLogActivities = lastRow.HomeVisitLogActivities AND
+@HomeVisitRate = lastRow.HomeVisitRate AND
+@IFSP = lastRow.IFSP AND
+@ImplementTraining = lastRow.ImplementTraining AND
+@LevelChange = lastRow.LevelChange AND
+@Outreach = lastRow.Outreach AND
+@ParticipantEmergency = lastRow.ParticipantEmergency AND
+@PersonalGrowth = lastRow.PersonalGrowth AND
+@ProfessionalGrowth = lastRow.ProfessionalGrowth AND
+@ProgramFK = lastRow.ProgramFK AND
+@ReasonOther = lastRow.ReasonOther AND
+@ReasonOtherSpecify = lastRow.ReasonOtherSpecify AND
+@RecordDocumentation = lastRow.RecordDocumentation AND
+@Referrals = lastRow.Referrals AND
+@Retention = lastRow.Retention AND
+@RolePlaying = lastRow.RolePlaying AND
+@Safety = lastRow.Safety AND
+@ShortWeek = lastRow.ShortWeek AND
+@StaffCourt = lastRow.StaffCourt AND
+@StaffFamilyEmergency = lastRow.StaffFamilyEmergency AND
+@StaffForgot = lastRow.StaffForgot AND
+@StaffIll = lastRow.StaffIll AND
+@StaffTraining = lastRow.StaffTraining AND
+@StaffVacation = lastRow.StaffVacation AND
+@StaffOutAllWeek = lastRow.StaffOutAllWeek AND
+@StrengthBasedApproach = lastRow.StrengthBasedApproach AND
+@Strengths = lastRow.Strengths AND
+@SupervisionCreator = lastRow.SupervisionCreator AND
+@SupervisionDate = lastRow.SupervisionDate AND
+@SupervisionEndTime = lastRow.SupervisionEndTime AND
+@SupervisionHours = lastRow.SupervisionHours AND
+@SupervisionMinutes = lastRow.SupervisionMinutes AND
+@SupervisionNotes = lastRow.SupervisionNotes AND
+@SupervisionStartTime = lastRow.SupervisionStartTime AND
+@SupervisorFamilyEmergency = lastRow.SupervisorFamilyEmergency AND
+@SupervisorFK = lastRow.SupervisorFK AND
+@SupervisorForgot = lastRow.SupervisorForgot AND
+@SupervisorHoliday = lastRow.SupervisorHoliday AND
+@SupervisorIll = lastRow.SupervisorIll AND
+@SupervisorObservationAssessment = lastRow.SupervisorObservationAssessment AND
+@SupervisorObservationHomeVisit = lastRow.SupervisorObservationHomeVisit AND
+@SupervisorTraining = lastRow.SupervisorTraining AND
+@SupervisorVacation = lastRow.SupervisorVacation AND
+@TakePlace = lastRow.TakePlace AND
+@TechniquesApproaches = lastRow.TechniquesApproaches AND
+@Tools = lastRow.Tools AND
+@TrainingNeeds = lastRow.TrainingNeeds AND
+@Weather = lastRow.Weather AND
+@WorkerFK = lastRow.WorkerFK
+ORDER BY SupervisionOldPK DESC) 
+BEGIN
 INSERT INTO SupervisionOld(
 ActivitiesOther,
 ActivitiesOtherSpecify,
@@ -191,5 +257,6 @@ VALUES(
 @WorkerFK
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

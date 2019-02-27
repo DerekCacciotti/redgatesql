@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -28,6 +27,35 @@ CREATE PROCEDURE [dbo].[spAddPC1Issues](@AlcoholAbuse char(1)=NULL,
 @Stress char(1)=NULL,
 @SubstanceAbuse char(1)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) PC1IssuesPK
+FROM PC1Issues lastRow
+WHERE 
+@AlcoholAbuse = lastRow.AlcoholAbuse AND
+@CriminalActivity = lastRow.CriminalActivity AND
+@Depression = lastRow.Depression AND
+@DevelopmentalDisability = lastRow.DevelopmentalDisability AND
+@DomesticViolence = lastRow.DomesticViolence AND
+@FinancialDifficulty = lastRow.FinancialDifficulty AND
+@Homeless = lastRow.Homeless AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@InadequateBasics = lastRow.InadequateBasics AND
+@Interval = lastRow.Interval AND
+@MaritalProblems = lastRow.MaritalProblems AND
+@MentalIllness = lastRow.MentalIllness AND
+@OtherIssue = lastRow.OtherIssue AND
+@OtherIssueSpecify = lastRow.OtherIssueSpecify AND
+@OtherLegalProblems = lastRow.OtherLegalProblems AND
+@PC1IssuesCreator = lastRow.PC1IssuesCreator AND
+@PC1IssuesDate = lastRow.PC1IssuesDate AND
+@PC1IssuesPK_old = lastRow.PC1IssuesPK_old AND
+@PhysicalDisability = lastRow.PhysicalDisability AND
+@ProgramFK = lastRow.ProgramFK AND
+@Smoking = lastRow.Smoking AND
+@SocialIsolation = lastRow.SocialIsolation AND
+@Stress = lastRow.Stress AND
+@SubstanceAbuse = lastRow.SubstanceAbuse
+ORDER BY PC1IssuesPK DESC) 
+BEGIN
 INSERT INTO PC1Issues(
 AlcoholAbuse,
 CriminalActivity,
@@ -81,5 +109,6 @@ VALUES(
 @SubstanceAbuse
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

@@ -11,6 +11,19 @@ CREATE PROCEDURE [dbo].[spAddFormReview](@FormDate datetime=NULL,
 @ReviewDateTime datetime=NULL,
 @ReviewedBy varchar(10)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) FormReviewPK
+FROM FormReview lastRow
+WHERE 
+@FormDate = lastRow.FormDate AND
+@FormFK = lastRow.FormFK AND
+@FormReviewCreator = lastRow.FormReviewCreator AND
+@FormType = lastRow.FormType AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@ProgramFK = lastRow.ProgramFK AND
+@ReviewDateTime = lastRow.ReviewDateTime AND
+@ReviewedBy = lastRow.ReviewedBy
+ORDER BY FormReviewPK DESC) 
+BEGIN
 INSERT INTO FormReview(
 FormDate,
 FormFK,
@@ -32,5 +45,6 @@ VALUES(
 @ReviewedBy
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO
