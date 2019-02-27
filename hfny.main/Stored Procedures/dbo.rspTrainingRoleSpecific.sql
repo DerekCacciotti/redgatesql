@@ -5,10 +5,11 @@ GO
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 03/22/2013
--- Description:	Training [10-3] Credential Evidence (Intensive Role Specific Training)
+-- Description:	Training [10-4] Credential Evidence (Intensive Role Specific Training)
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- Edit date: 10/23/2017 CP - Removed WHERE clause in CTECountMeeting - this was removing
 -- Edit date: 12/19/2018 CP - HFA updated the Best Practice standards
+-- Edut date: 02/25/2019 CP - Remove program managers as they are being given extra time
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTrainingRoleSpecific]
 	-- Add the parameters for the stored procedure here
@@ -105,75 +106,6 @@ INSERT INTO @cteMAIN ( workerfk ,
 	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorInitialStart
 
 
-
---Get Program Manager's in time period
-INSERT INTO @cteMAIN ( workerfk ,
-                       CurrentRole ,
-                       StartDate ,
-                       WorkerName ,
-                      -- RowNumber ,
-					   TopicCode )
-	SELECT DISTINCT wp.workerfk
-	, 'Program Manager' AS CurrentRole
-	, wp.ProgramManagerStartDate
-	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
-	, 10.0
-	FROM WorkerProgram wp
-	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE wp.ProgramManagerStartDate BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
-	AND (wp.ProgramManagerEndDate IS NULL OR ProgramManagerEndDate > dateadd(day, 180, ProgramManagerStartDate))
-	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
-	AND wp.ProgramFK = @progfk
-	GROUP BY wp.WorkerFK, LastName, FirstName, wp.ProgramManagerStartDate
-
-	
-
---Do it again, this time for topiccode 11 
-INSERT INTO @cteMAIN ( workerfk ,
-                       CurrentRole ,
-                       StartDate ,
-                       WorkerName ,
-                      -- RowNumber ,
-					   TopicCode )
-	SELECT DISTINCT wp.workerfk
-	, 'Program Manager' AS CurrentRole
-	, wp.ProgramManagerStartDate
-	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
-	, 11.0
-	FROM WorkerProgram wp
-	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE wp.ProgramManagerStartDate BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
-	AND (wp.ProgramManagerEndDate IS NULL OR ProgramManagerEndDate > dateadd(day, 180, ProgramManagerStartDate))
-	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
-	AND wp.ProgramFK = @progfk
-	GROUP BY wp.WorkerFK, LastName, FirstName, wp.ProgramManagerStartDate
-
-
-
---DO IT AGAIN for TOpicCode 12
-INSERT INTO @cteMAIN ( workerfk ,
-                       CurrentRole ,
-                       StartDate ,
-                       WorkerName ,
-                       --RowNumber ,
-					   TopicCode )
-	SELECT DISTINCT wp.workerfk
-	, 'Program Manager' AS CurrentRole
-	, wp.ProgramManagerStartDate
-	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
-   -- , ROW_NUMBER() OVER(ORDER BY TopicCode DESC) 
-	, 12.0
-	FROM WorkerProgram wp
-	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
-	WHERE wp.ProgramManagerStartDate BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
-	AND (wp.ProgramManagerEndDate IS NULL OR ProgramManagerEndDate > dateadd(day, 180, ProgramManagerStartDate))
-	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
-	AND wp.ProgramFK = @progfk
-	GROUP BY wp.WorkerFK, LastName, FirstName, wp.ProgramManagerStartDate
-
-
 DECLARE @topiccodecount AS TABLE (
 	TotalWorkers INT
 	, topiccode DECIMAL(3,1)
@@ -242,65 +174,6 @@ SELECT workerfk ,  TopicCode ,  topicname ,  TrainingDate
 FROM cteFSWMainTraining
 
 
---Now add Program Managers for topic code 10
-INSERT INTO @cteMAINTraining ( workerfk ,
-                               TopicCode ,
-                               topicname ,
-                               TrainingDate )
-SELECT [@cteMAIN].workerfk
-		, t1.TopicCode
-		, t1.topicname
-		, MIN(t.TrainingDate) AS TrainingDate
-	FROM @cteMAIN
-			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = [@cteMAIN].WorkerFK
-			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
-			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=10.0 AND CurrentRole='Program Manager'
-	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
-			, t1.TopicCode
-			, t1.topicname
-
-
---Now add Program Managers for topic code 11
-INSERT INTO @cteMAINTraining ( workerfk ,
-                               TopicCode ,
-                               topicname ,
-                               TrainingDate )
-SELECT [@cteMAIN].workerfk
-		, t1.TopicCode
-		, t1.topicname
-		, MIN(t.TrainingDate) AS TrainingDate
-	FROM @cteMAIN
-			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = [@cteMAIN].WorkerFK
-			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
-			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=11.0 AND CurrentRole='Program Manager'
-	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
-			, t1.TopicCode
-			, t1.topicname
-
-
---Now add Program Managers for topic code 12
-INSERT INTO @cteMAINTraining ( workerfk ,
-                               TopicCode ,
-                               topicname ,
-                               TrainingDate )
-SELECT [@cteMAIN].workerfk
-		, t1.TopicCode
-		, t1.topicname
-		, MIN(t.TrainingDate) AS TrainingDate
-	FROM @cteMAIN
-			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = [@cteMAIN].WorkerFK
-			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
-			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=12.0 AND CurrentRole='Program Manager'
-	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
-			, t1.TopicCode
-			, t1.topicname
-
 ; with cteSuperMainTraining2 AS (
 	SELECT [@cteMAIN].workerfk
 		, t1.TopicCode
@@ -312,7 +185,7 @@ SELECT [@cteMAIN].workerfk
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE (t1.TopicCode=12.0 OR t1.TopicCode=12.1) AND (CurrentRole='Supervisor' OR CurrentRole ='Program Mgr')
+	WHERE (t1.TopicCode=12.0 OR t1.TopicCode=12.1) AND (CurrentRole='Supervisor')
 	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate, t.TrainingDate
 			, t1.TopicCode
 			, t1.topicname
@@ -354,9 +227,9 @@ INSERT INTO @cteDetails ( RowNumber ,
 
 
 		
-		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FAW' OR CurrentRole='Program Manager') AND TopicCode IS NULL
-		UPDATE @cteDetails SET TopicCode=11.0 WHERE (CurrentRole='FSW' OR CurrentRole='Program Manager')  AND TopicCode IS NULL
-		UPDATE @cteDetails SET TopicCode=12.0 WHERE (CurrentRole='Supervisor' OR CurrentRole='Program Manager')  AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FAW') AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=11.0 WHERE (CurrentRole='FSW')  AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=12.0 WHERE (CurrentRole='Supervisor')  AND TopicCode IS NULL
 
 		
 --add in the "MEETING" Target and Total workers.  Basically each training must occur within 6 months of start
@@ -405,11 +278,6 @@ SELECT cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerf
 		WHEN 'FAW' THEN '10-4a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
 		WHEN 'FSW' THEN '10-4b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
 		WHEN 'Supervisor' THEN '10-4c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
-		WHEN 'Program Manager' THEN
-			CASE WHEN cteAggregates.TopicCode = '10.0' THEN '10-4a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
-				WHEN cteAggregates.TopicCode = '11.0' THEN '10-4b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
-				WHEN cteAggregates.TopicCode = '12.0' THEN '10-4c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
-			END	
 	END AS CSST
 FROM cteAggregates
 LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteAggregates.TopicCode
