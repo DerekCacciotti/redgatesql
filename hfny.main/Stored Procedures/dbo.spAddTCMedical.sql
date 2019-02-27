@@ -18,6 +18,26 @@ CREATE PROCEDURE [dbo].[spAddTCMedical](@ChildType char(2)=NULL,
 @TCMedicalCreator char(10)=NULL,
 @TCMedicalItem char(2)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) TCMedicalPK
+FROM TCMedical lastRow
+WHERE 
+@ChildType = lastRow.ChildType AND
+@HospitalNights = lastRow.HospitalNights AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@IsDelayed = lastRow.IsDelayed AND
+@LeadLevelCode = lastRow.LeadLevelCode AND
+@MedicalReason1 = lastRow.MedicalReason1 AND
+@MedicalReason2 = lastRow.MedicalReason2 AND
+@MedicalReason3 = lastRow.MedicalReason3 AND
+@MedicalReason4 = lastRow.MedicalReason4 AND
+@MedicalReason5 = lastRow.MedicalReason5 AND
+@ProgramFK = lastRow.ProgramFK AND
+@TCIDFK = lastRow.TCIDFK AND
+@TCItemDate = lastRow.TCItemDate AND
+@TCMedicalCreator = lastRow.TCMedicalCreator AND
+@TCMedicalItem = lastRow.TCMedicalItem
+ORDER BY TCMedicalPK DESC) 
+BEGIN
 INSERT INTO TCMedical(
 ChildType,
 HospitalNights,
@@ -53,5 +73,6 @@ VALUES(
 @TCMedicalItem
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

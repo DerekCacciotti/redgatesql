@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -36,6 +35,43 @@ CREATE PROCEDURE [dbo].[spAddHVProgram](@ContractEndDate datetime=NULL,
 @RegionFK int=NULL,
 @TargetZip nvarchar(500)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) HVProgramPK
+FROM HVProgram lastRow
+WHERE 
+@ContractEndDate = lastRow.ContractEndDate AND
+@ContractManager = lastRow.ContractManager AND
+@ContractNumber = lastRow.ContractNumber AND
+@ContractStartDate = lastRow.ContractStartDate AND
+@CountyFK = lastRow.CountyFK AND
+@ExtraField1Description = lastRow.ExtraField1Description AND
+@ExtraField2Description = lastRow.ExtraField2Description AND
+@ExtraField3Description = lastRow.ExtraField3Description AND
+@ExtraField4Description = lastRow.ExtraField4Description AND
+@ExtraField5Description = lastRow.ExtraField5Description AND
+@ExtraField7Description = lastRow.ExtraField7Description AND
+@ExtraField8Description = lastRow.ExtraField8Description AND
+@ExtraField9Description = lastRow.ExtraField9Description AND
+@GrantAmount = lastRow.GrantAmount AND
+@HVProgramCreator = lastRow.HVProgramCreator AND
+@LeadAgencyCity = lastRow.LeadAgencyCity AND
+@LeadAgencyDirector = lastRow.LeadAgencyDirector AND
+@LeadAgencyName = lastRow.LeadAgencyName AND
+@LeadAgencyStreet = lastRow.LeadAgencyStreet AND
+@LeadAgencyZip = lastRow.LeadAgencyZip AND
+@ModemNumber = lastRow.ModemNumber AND
+@ProgramCapacity = lastRow.ProgramCapacity AND
+@ProgramCity = lastRow.ProgramCity AND
+@ProgramCode = lastRow.ProgramCode AND
+@ProgramFaxNumber = lastRow.ProgramFaxNumber AND
+@ProgramManager = lastRow.ProgramManager AND
+@ProgramName = lastRow.ProgramName AND
+@ProgramPhone = lastRow.ProgramPhone AND
+@ProgramStreet = lastRow.ProgramStreet AND
+@ProgramZip = lastRow.ProgramZip AND
+@RegionFK = lastRow.RegionFK AND
+@TargetZip = lastRow.TargetZip
+ORDER BY HVProgramPK DESC) 
+BEGIN
 INSERT INTO HVProgram(
 ContractEndDate,
 ContractManager,
@@ -105,5 +141,6 @@ VALUES(
 @TargetZip
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

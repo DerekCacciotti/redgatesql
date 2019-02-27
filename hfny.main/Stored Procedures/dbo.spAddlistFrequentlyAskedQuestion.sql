@@ -8,6 +8,16 @@ CREATE PROCEDURE [dbo].[spAddlistFrequentlyAskedQuestion](@Category varchar(50)=
 @CategoryPosition int=NULL,
 @QuestionPosition int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) listFrequentlyAskedQuestionPK
+FROM listFrequentlyAskedQuestion lastRow
+WHERE 
+@Category = lastRow.Category AND
+@Question = lastRow.Question AND
+@Answer = lastRow.Answer AND
+@CategoryPosition = lastRow.CategoryPosition AND
+@QuestionPosition = lastRow.QuestionPosition
+ORDER BY listFrequentlyAskedQuestionPK DESC) 
+BEGIN
 INSERT INTO listFrequentlyAskedQuestion(
 Category,
 Question,
@@ -23,5 +33,6 @@ VALUES(
 @QuestionPosition
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

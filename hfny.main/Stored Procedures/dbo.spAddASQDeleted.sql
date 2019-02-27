@@ -30,6 +30,38 @@ CREATE PROCEDURE [dbo].[spAddASQDeleted](@ASQPK int=NULL,
 @UnderProblemSolving bit=NULL,
 @VersionNumber varchar(10)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) ASQDeletedPK
+FROM ASQDeleted lastRow
+WHERE 
+@ASQPK = lastRow.ASQPK AND
+@ASQCreator = lastRow.ASQCreator AND
+@ProgramFK = lastRow.ProgramFK AND
+@ASQCommunicationScore = lastRow.ASQCommunicationScore AND
+@ASQDeleteDate = lastRow.ASQDeleteDate AND
+@ASQDeleter = lastRow.ASQDeleter AND
+@ASQFineMotorScore = lastRow.ASQFineMotorScore AND
+@ASQGrossMotorScore = lastRow.ASQGrossMotorScore AND
+@ASQInWindow = lastRow.ASQInWindow AND
+@ASQPersonalSocialScore = lastRow.ASQPersonalSocialScore AND
+@ASQProblemSolvingScore = lastRow.ASQProblemSolvingScore AND
+@ASQTCReceiving = lastRow.ASQTCReceiving AND
+@DateCompleted = lastRow.DateCompleted AND
+@DevServicesStartDate = lastRow.DevServicesStartDate AND
+@DiscussedWithPC1 = lastRow.DiscussedWithPC1 AND
+@FSWFK = lastRow.FSWFK AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@ReviewCDS = lastRow.ReviewCDS AND
+@TCAge = lastRow.TCAge AND
+@TCIDFK = lastRow.TCIDFK AND
+@TCReferred = lastRow.TCReferred AND
+@UnderCommunication = lastRow.UnderCommunication AND
+@UnderFineMotor = lastRow.UnderFineMotor AND
+@UnderGrossMotor = lastRow.UnderGrossMotor AND
+@UnderPersonalSocial = lastRow.UnderPersonalSocial AND
+@UnderProblemSolving = lastRow.UnderProblemSolving AND
+@VersionNumber = lastRow.VersionNumber
+ORDER BY ASQDeletedPK DESC) 
+BEGIN
 INSERT INTO ASQDeleted(
 ASQPK,
 ASQCreator,
@@ -89,5 +121,6 @@ VALUES(
 @VersionNumber
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

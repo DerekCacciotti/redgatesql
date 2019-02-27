@@ -8,6 +8,16 @@ CREATE PROCEDURE [dbo].[spAddWorkerAssignment](@HVCaseFK int=NULL,
 @WorkerAssignmentDate datetime=NULL,
 @WorkerFK int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) WorkerAssignmentPK
+FROM WorkerAssignment lastRow
+WHERE 
+@HVCaseFK = lastRow.HVCaseFK AND
+@ProgramFK = lastRow.ProgramFK AND
+@WorkerAssignmentCreator = lastRow.WorkerAssignmentCreator AND
+@WorkerAssignmentDate = lastRow.WorkerAssignmentDate AND
+@WorkerFK = lastRow.WorkerFK
+ORDER BY WorkerAssignmentPK DESC) 
+BEGIN
 INSERT INTO WorkerAssignment(
 HVCaseFK,
 ProgramFK,
@@ -23,5 +33,6 @@ VALUES(
 @WorkerFK
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

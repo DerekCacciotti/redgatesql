@@ -13,6 +13,21 @@ CREATE PROCEDURE [dbo].[spAddlistMedicalProvider](@MedicalProviderCreator char(1
 @MPZip char(10)=NULL,
 @ProgramFK int=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) listMedicalProviderPK
+FROM listMedicalProvider lastRow
+WHERE 
+@MedicalProviderCreator = lastRow.MedicalProviderCreator AND
+@MPAddress = lastRow.MPAddress AND
+@MPCity = lastRow.MPCity AND
+@MPFirstName = lastRow.MPFirstName AND
+@MPIsActive = lastRow.MPIsActive AND
+@MPLastName = lastRow.MPLastName AND
+@MPPhone = lastRow.MPPhone AND
+@MPState = lastRow.MPState AND
+@MPZip = lastRow.MPZip AND
+@ProgramFK = lastRow.ProgramFK
+ORDER BY listMedicalProviderPK DESC) 
+BEGIN
 INSERT INTO listMedicalProvider(
 MedicalProviderCreator,
 MPAddress,
@@ -38,5 +53,6 @@ VALUES(
 @ProgramFK
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

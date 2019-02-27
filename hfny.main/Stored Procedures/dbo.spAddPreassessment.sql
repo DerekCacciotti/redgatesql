@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -35,6 +34,42 @@ CREATE PROCEDURE [dbo].[spAddPreassessment](@CaseStatus char(2)=NULL,
 @ProgramFK int=NULL,
 @TransferredtoProgram varchar(50)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) PreassessmentPK
+FROM Preassessment lastRow
+WHERE 
+@CaseStatus = lastRow.CaseStatus AND
+@DischargeReason = lastRow.DischargeReason AND
+@DischargeReasonSpecify = lastRow.DischargeReasonSpecify AND
+@DischargeSafetyReason = lastRow.DischargeSafetyReason AND
+@DischargeSafetyReasonDV = lastRow.DischargeSafetyReasonDV AND
+@DischargeSafetyReasonMH = lastRow.DischargeSafetyReasonMH AND
+@DischargeSafetyReasonOther = lastRow.DischargeSafetyReasonOther AND
+@DischargeSafetyReasonSA = lastRow.DischargeSafetyReasonSA AND
+@DischargeSafetyReasonSpecify = lastRow.DischargeSafetyReasonSpecify AND
+@FSWAssignDate = lastRow.FSWAssignDate AND
+@HVCaseFK = lastRow.HVCaseFK AND
+@KempeDate = lastRow.KempeDate AND
+@KempeResult = lastRow.KempeResult AND
+@PAActivitySpecify = lastRow.PAActivitySpecify AND
+@PACall2Parent = lastRow.PACall2Parent AND
+@PACallFromParent = lastRow.PACallFromParent AND
+@PACaseReview = lastRow.PACaseReview AND
+@PACreator = lastRow.PACreator AND
+@PADate = lastRow.PADate AND
+@PAFAWFK = lastRow.PAFAWFK AND
+@PAFSWFK = lastRow.PAFSWFK AND
+@PAGift = lastRow.PAGift AND
+@PAOtherActivity = lastRow.PAOtherActivity AND
+@PAOtherHVProgram = lastRow.PAOtherHVProgram AND
+@PAParent2Office = lastRow.PAParent2Office AND
+@PAParentLetter = lastRow.PAParentLetter AND
+@PAProgramMaterial = lastRow.PAProgramMaterial AND
+@PAVisitAttempt = lastRow.PAVisitAttempt AND
+@PAVisitMade = lastRow.PAVisitMade AND
+@ProgramFK = lastRow.ProgramFK AND
+@TransferredtoProgram = lastRow.TransferredtoProgram
+ORDER BY PreassessmentPK DESC) 
+BEGIN
 INSERT INTO Preassessment(
 CaseStatus,
 DischargeReason,
@@ -102,5 +137,6 @@ VALUES(
 @TransferredtoProgram
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

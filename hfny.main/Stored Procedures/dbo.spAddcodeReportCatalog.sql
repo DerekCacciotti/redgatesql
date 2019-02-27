@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -13,6 +12,20 @@ CREATE PROCEDURE [dbo].[spAddcodeReportCatalog](@CriteriaOptions varchar(25)=NUL
 @ReportDescription varchar(1000)=NULL,
 @ReportName varchar(100)=NULL)
 AS
+IF NOT EXISTS (SELECT TOP(1) codeReportCatalogPK
+FROM codeReportCatalog lastRow
+WHERE 
+@CriteriaOptions = lastRow.CriteriaOptions AND
+@Defaults = lastRow.Defaults AND
+@Keywords = lastRow.Keywords AND
+@OldReportFK = lastRow.OldReportFK AND
+@OldReportID = lastRow.OldReportID AND
+@ReportCategory = lastRow.ReportCategory AND
+@ReportClass = lastRow.ReportClass AND
+@ReportDescription = lastRow.ReportDescription AND
+@ReportName = lastRow.ReportName
+ORDER BY codeReportCatalogPK DESC) 
+BEGIN
 INSERT INTO codeReportCatalog(
 CriteriaOptions,
 Defaults,
@@ -36,5 +49,6 @@ VALUES(
 @ReportName
 )
 
+END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO
