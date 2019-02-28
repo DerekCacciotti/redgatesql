@@ -611,9 +611,8 @@ begin
 		, ca.FormDate	
 		,row_number() over(partition by thv.hvcasefk order by ca.FormDate desc)
 	from @tblPC1IDs thv	
-	left join dbo.CommonAttributes ca on thv.hvcasefk = ca.HVCaseFK
-	left join Employment e on e.FormFK = ca.FormFK
-	where ca.FormType in ('FU-PC1', 'IN-PC1', 'KE')
+	left join dbo.CommonAttributes ca on thv.hvcasefk = ca.HVCaseFK and ca.FormType in ('FU-PC1', 'IN-PC1', 'KE')
+	left join Employment e on e.FormFK = ca.FormFK and e.FormType = ca.FormType
 
 	--Referral Source
 	declare @tblReferrals as table (
@@ -1212,7 +1211,8 @@ begin
 		where RowNum = 1 and TCHIUninsured = 1
 	)
 	declare @TCUninsured int
-	set @TCUninsured = (select sum(isnull(TCNumber, 0)) from @tblTCInsurance
+	set @TCUninsured = (select count(*) from @tblTCInsurance tci
+						inner join @tblTCBirthInfo ttbi on ttbi.hvcasefk = tci.HVCaseFK
 						where RowNum = 1 and TCHIUninsured = 1
 						)
 	update @tblFinalExport set Response = @TCUninsured where RowNumber = 52 and Detail = 0
@@ -1226,7 +1226,8 @@ begin
 		where RowNum = 1 and TCReceivingMedicaid = '1'
 	)
 	declare @TCMedicaid int
-	set @TCMedicaid = (select sum(TCNumber) from @tblTCInsurance
+	set @TCMedicaid = (select count(*) from @tblTCInsurance tci
+						inner join @tblTCBirthInfo ttbi on ttbi.hvcasefk = tci.HVCaseFK
 					   where RowNum = 1 and TCReceivingMedicaid = '1'
 					)
 	update @tblFinalExport set Response = @TCMedicaid where RowNumber = 53 and Detail = 0
@@ -1241,8 +1242,9 @@ begin
 		and (TCHIFamilyChildHealthPlus = 1 or TCHIOther = 1 or TCHIPrivateInsurance = 1)
 	)
 	declare @TCPrivateOther int
-	set @TCPrivateOther = (select sum(TCNumber) from @tblTCInsurance
-					   where RowNum = 1 
+	set @TCPrivateOther = (select count(*) from @tblTCInsurance tci
+							inner join @tblTCBirthInfo ttbi on ttbi.hvcasefk = tci.HVCaseFK
+							where RowNum = 1 
 					   and (TCHIFamilyChildHealthPlus = 1 or TCHIOther = 1 or TCHIPrivateInsurance = 1)
 					)
 	update @tblFinalExport set Response = @TCPrivateOther where RowNumber = 54  and Detail = 0
@@ -1256,7 +1258,8 @@ begin
 		where RowNum = 1 and TCHIUnknown = 1 
 	)
 	declare @TCInsUnk int
-	set @TCInsUnk = (select sum(TCNumber) from @tblTCInsurance
+	set @TCInsUnk = (select count(*) from @tblTCInsurance tci
+						inner join @tblTCBirthInfo ttbi on ttbi.hvcasefk = tci.HVCaseFK
 					   where RowNum = 1 and TCHIUnknown = 1 
 					)
 	update @tblFinalExport set Response = @TCInsUnk where RowNumber = 55 and Detail = 0
@@ -1840,7 +1843,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where Race is null and Ethnicity is null
+		where (Race is null or Race = '') and (Ethnicity is null or Ethnicity = '')
 	)
 	declare @pcEthnicityUnk int
 	set @pcEthnicityUnk = (select count(*) from @tblFinalExport tfe where RowNumber = 102 and Detail = 1) 
@@ -1924,7 +1927,7 @@ begin
 	from @tblPC1IDs tpid
 	where tpid.hvcasefk in (
 		select hvcasefk from @tblHomeVisits
-		where Race is null
+		where Race is null or Race = ' ' 
 	)
 	declare @pcRaceUnk int
 	set @pcRaceUnk = (select count(*) from @tblFinalExport tfe where RowNumber = 110 and Detail = 1) 
