@@ -594,6 +594,7 @@ begin
 	declare @tblEmployment as table (
 		hvcasefk int index idx1 nonClustered
 		,EmploymentMonthlyHours int
+		,HoursPerMonth int
 		,IsCurrentlyEmployed char(1)
 		,FormDate date
 		,RowNum int
@@ -601,18 +602,20 @@ begin
 	insert into @tblEmployment (
 		hvcasefk
 		, EmploymentMonthlyHours
+		, HoursPerMonth
 		, IsCurrentlyEmployed
 		, FormDate	
 		, RowNum	
 	)
 	select thv.hvcasefk
-		, EmploymentMonthlyHours
-		, IsCurrentlyEmployed
+		, e.EmploymentMonthlyHours
+		, ca.HoursPerMonth
+		, ca.IsCurrentlyEmployed
 		, ca.FormDate	
 		,row_number() over(partition by thv.hvcasefk order by ca.FormDate desc)
 	from @tblPC1IDs thv	
 	left join dbo.CommonAttributes ca on thv.hvcasefk = ca.HVCaseFK and ca.FormType in ('FU-PC1', 'IN-PC1', 'KE')
-	left join Employment e on e.FormFK = ca.FormFK and e.FormType = ca.FormType
+	left join Employment e on e.FormFK = ca.FormFK and ca.FormType like (e.FormType + '%')
 
 	--Referral Source
 	declare @tblReferrals as table (
@@ -1320,7 +1323,7 @@ begin
 	select 63, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblEmployment
-		where RowNum = 1 and IsCurrentlyEmployed = '1' and EmploymentMonthlyHours >= 140
+		where RowNum = 1 and IsCurrentlyEmployed = '1' and (EmploymentMonthlyHours >= 140 or HoursPerMonth >= 140)
 	)
 	declare @fullTime int
 	set @fullTime = (select count(*) from @tblFinalExport tfe where RowNumber = 63 and Detail = 1)
@@ -1332,7 +1335,8 @@ begin
 	select 64, tpid.PC1ID, 0, 1
 	from @tblPC1IDs tpid where tpid.hvcasefk in (
 		select distinct hvcasefk from @tblEmployment
-		where RowNum = 1 and IsCurrentlyEmployed = '1' and (EmploymentMonthlyHours < 140 or EmploymentMonthlyHours is null)
+		where RowNum = 1 and IsCurrentlyEmployed = '1' and ((EmploymentMonthlyHours < 140 or EmploymentMonthlyHours is null) or
+															(HoursPerMonth < 140 or HoursPerMonth < 140))
 	)
 	declare @partTime int
 	set @partTime = (select count(*) from @tblFinalExport tfe where RowNumber = 64 and Detail = 1)
