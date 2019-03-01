@@ -96,16 +96,16 @@ begin
 		select count(PHQ9PK) as CountOfPHQ9s
 			from PHQ9 p
 			where HVCaseFK = @HVCaseFK
-			 and Appetite is null 
-			 and BadSelf is null 
-			 and BetterOffDead is null 
-			 and Concentration is null 
-			 and Difficulty is null 
-			 and Down is null 
-			 and Interest is null 
-			 and Sleep is null 
-			 and SlowOrFast is null 
-			 and Tired is null
+			 and (Appetite is not null 
+			 or BadSelf is not null 
+			 or BetterOffDead is not null 
+			 or Concentration is not null 
+			 or Difficulty is not null 
+			 or Down is not null 
+			 or Interest is not null 
+			 or Sleep is not null 
+			 or SlowOrFast is not null 
+			 or Tired is not null)
 		)
 	, cteFollowUpCount
 	as
