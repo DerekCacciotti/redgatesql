@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -34,8 +33,15 @@ as
 	select
 		  pc1id
 		 ,hvcase.tcdob
+		 ,GestationalAge
+		 ,(((40-gestationalage)*7)+hvcase.tcdob) cdob
 		 ,eventDescription
-		 ,dateadd(dd,dueby,hvcase.tcdob) DueDate
+		 ,case
+			   when interval < 24 then
+				   dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
+			   else
+				   dateadd(dd,dueby,hvcase.tcdob)
+		   end DueDate
 		 ,rtrim(tcfirstname)+' '+rtrim(tclastname) TargetChild
 		 ,rtrim(fsw.firstname)+' '+rtrim(fsw.lastname) fswname
 		 ,LTRIM(RTRIM(supervisor.firstname))+' '+LTRIM(RTRIM(supervisor.lastname)) supervisor
@@ -49,7 +55,7 @@ as
 			--		  on caseprogram.programfk = appoptions.programfk
 			--		  and optionitem = 'asqse version'
 			inner join codeduebydates
-					  on scheduledevent = 'ASQSE-1'  --optionValue
+					  on scheduledevent = 'ASQSE-2'  --optionValue
 			inner join dbo.SplitString(@programfk,',')
 					  on caseprogram.programfk = listitem
 			inner join worker fsw
@@ -67,12 +73,20 @@ as
 			 and currentFSWFK = isnull(@workerfk,currentFSWFK)
 			 and supervisorfk = isnull(@supervisorfk,supervisorfk)
 			 and (dischargedate is null)
-			 and year(dateadd(dd,dueby,hvcase.tcdob)) = year(@rdate)
-			 and month(dateadd(dd,dueby,hvcase.tcdob)) = month(@rdate)
+			 and year(case
+						  when interval < 24 then
+							  dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
+						  else
+							  dateadd(dd,dueby,hvcase.tcdob)
+					  end) = year(@rdate)
+			 and month(case
+						   when interval < 24 then
+							   dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
+						   else
+							   dateadd(dd,dueby,hvcase.tcdob)
+					   end) = month(@rdate)
 			 AND HVCase.TCDOD IS NULL
 			 
 		order by fswname
 				,DueDate
-
-
 GO
