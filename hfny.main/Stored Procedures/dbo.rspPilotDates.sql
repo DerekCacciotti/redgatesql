@@ -56,7 +56,7 @@ as
 	                        DischargeDate )
 	
 	SELECT DISTINCT e.PC1ID
-		 , SUM(CASE WHEN CHARINDEX('EXV', cn.CaseNoteContents, 1)>0 THEN 1 ELSE 0 END) AS EXV
+		 , SUM(CASE WHEN CHARINDEX('EVC', cn.CaseNoteContents, 1)>0 THEN 1 ELSE 0 END) AS EXV
 		 , rtrim(fsw.LastName) + ', ' + rtrim(fsw.FirstName) [Worker]
 		 , b.ScreenDate AS [Screen Date A]
 		 , c.FSWAssignDate AS [Welcome Phone Call B]
