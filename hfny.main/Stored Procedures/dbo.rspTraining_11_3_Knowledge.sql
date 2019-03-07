@@ -14,7 +14,8 @@ GO
 CREATE PROCEDURE [dbo].[rspTraining_11_3_Knowledge]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
-	@sdate AS date
+	@sdate AS DATE
+    
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -283,6 +284,7 @@ SELECT [TopicName]
 		FROM cteAlmostFinal
 		INNER JOIN cteSETMeetingByTopic ON cteSETMeetingByTopic.WorkerPK = cteAlmostFinal.WorkerPK AND cteSETMeetingByTopic.TopicCode = cteAlmostFinal.TopicCode
 		INNER JOIN cteRatingBySite ON cteRatingBySite.TopicCode = cteAlmostFinal.TopicCode
+		ORDER BY cteAlmostFinal.TopicName
 
 END
 GO

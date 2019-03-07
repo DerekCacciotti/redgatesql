@@ -8,7 +8,7 @@ GO
 -- Description:	Gets all the data needed to display the Case Home Page
 -- exec spGetAllDataForCaseHomePage 'CD97050257617' 'VB84010244287' 'EG81010218386' 'DS90010007908' 'AB77050250139' 'MC79140216559' 'JC79010253576'
 -- =============================================
-CREATE PROC [dbo].[spGetAllDataForCaseHomePage]
+CREATE proc [dbo].[spGetAllDataForCaseHomePage]
 (
 	@PC1ID char(13),
 	@Username varchar(MAX) 
@@ -89,6 +89,23 @@ begin
 		select count(PSIPK) as CountOfPSIs
 			from PSI p
 			where HVCaseFK = @HVCaseFK
+		)
+	, ctePHQ9Count
+	as
+		(
+		select count(PHQ9PK) as CountOfPHQ9s
+			from PHQ9 p
+			where HVCaseFK = @HVCaseFK
+			 and (Appetite is not null 
+			 or BadSelf is not null 
+			 or BetterOffDead is not null 
+			 or Concentration is not null 
+			 or Difficulty is not null 
+			 or Down is not null 
+			 or Interest is not null 
+			 or Sleep is not null 
+			 or SlowOrFast is not null 
+			 or Tired is not null)
 		)
 	, cteFollowUpCount
 	as
@@ -486,6 +503,8 @@ begin
 				, Discharge_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'DS')
 				, LevelForm_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'LV')
 				, LevelForm_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'LV')
+				, PHQ9_ReviewOn = (select FormsReviewed from cteRawFormApprovals where FormType = 'PQ')
+				, PHQ9_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PQ')
 				, PSI_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PS')
 				, PSI_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PS')
 				, FatherFigure_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'FF')
@@ -569,6 +588,7 @@ begin
 			, isnull(CountOfFatherFigures, 0) as CountOfFatherFigures
 			, isnull(CountOfTCIDs, 0) as CountOfTCIDs
 			, isnull(CountOfPSIs, 0) as CountOfPSIs
+			, isnull(CountOfPHQ9s, 0) as CountOfPHQ9s
 			, isnull(CountOfFollowUps, 0) as CountOfFollowUps
 			, isnull(CountOfCheersCheckIns, 0) as CountOfCheersCheckIns
 			, isnull(case when charindex('/', CountOfASQs) > 0 
@@ -645,6 +665,8 @@ begin
 			, cfa.Discharge_FormsReviewed
 			, cfa.LevelForm_ReviewOn
 			, cfa.LevelForm_FormsReviewed
+			, cfa.PHQ9_ReviewOn
+			, cfa.PHQ9_FormsReviewed
 			, cfa.PSI_ReviewOn
 			, cfa.PSI_FormsReviewed
 			, cfa.FatherFigure_ReviewOn
@@ -682,6 +704,7 @@ begin
 		inner join cteFatherFigureCount on 1 = 1
 		inner join cteTCIDCount on 1 = 1
 		inner join ctePSICount on 1 = 1
+		inner join ctePHQ9Count on 1 = 1
 		inner join cteFollowUpCount on 1 = 1
 		INNER JOIN cteCheersCheckInCount ON 1 = 1
 		inner join cteTargetChildFormCompleteDate on 1=1
