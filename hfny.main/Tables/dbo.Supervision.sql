@@ -119,7 +119,7 @@ GO
 -- Description:	Delete FormReview row when  
 --				the Supervision row deleted
 -- =============================================
-create trigger [dbo].[fr_delete_Supervision]
+CREATE trigger [dbo].[fr_delete_Supervision]
 on [dbo].[Supervision]
 after delete
 as
@@ -216,6 +216,9 @@ insert into [dbo].[SupervisionDeleted]
 		[TeamDevelopmentComments], 
 		[TeamDevelopmentStatus], 
 		[WorkerFK], 
+		[WorkplaceEnvironment],
+		[WorkplaceEnvironmentComments],
+		[WorkplaceEnvironmentStatus],
 		[ParticipantEmergency], 
 		[ReasonOther], 
 		[ReasonOtherSpecify], 
@@ -320,6 +323,9 @@ select [SupervisionPK],
 		[TeamDevelopmentComments], 
 		[TeamDevelopmentStatus], 
 		[WorkerFK], 
+		[WorkplaceEnvironment],
+		[WorkplaceEnvironmentComments],
+		[WorkplaceEnvironmentStatus],
 		[ParticipantEmergency], 
 		[ReasonOther], 
 		[ReasonOtherSpecify], 
