@@ -2,6 +2,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- =============================================
+-- Author:		jrobohn
+-- Create date: 2016-06-14
+-- Description:	List cases and length of time between home visits
+--exec rspDaysBetweenHomeVisits 20
+--exec rspDaysBetweenHomeVisits 1
+-- =============================================
 CREATE procedure [dbo].[rspDaysBetweenHomeVisits]
 	(
 		@programfk as int		
@@ -46,7 +53,9 @@ as
 							   max(VisitStartTime) over ( partition by m.HVCaseFK ) as HVDATE2
 					from	   HVLog hl
 					inner join #cteMAIN m on hl.HVCaseFK = m.HVCaseFK
-					where	   left(VisitType, 1) in ('1', '2', '3')
+					where	   left(VisitType, 1) = '1' or
+								substring(VisitType, 2, 1) = '1' or
+								substring(VisitType, 3, 1) = '1' 
 		;
 		with
 		cteLastVisitPlusHVLOGPK
@@ -60,7 +69,9 @@ as
 					from	   HVLog hl
 					inner join #cteLastVisit lv on hl.HVCaseFK = lv.HVCaseFK
 											   and hl.VisitStartTime = lv.HVDATE2
-					--where	   left(VisitType, 1) in ('1', '2', '3')
+					--where	   left(VisitType, 1) = '1' or
+					--			substring(VisitType, 2, 1) = '1' or
+					--			substring(VisitType, 3, 1) = '1' 
 				) ,
 		cteSecondToLastVisit
 			as
@@ -70,7 +81,9 @@ as
 					from	   HVLog hl
 					inner join cteLastVisitPlusHVLOGPK lvp on lvp.HVLogPK <> hl.HVLogPK
 															  and lvp.HVCaseFK = hl.HVCaseFK
-					where	   left(VisitType, 1) in ('1', '2', '3')
+					where	   left(VisitType, 1) = '1' or
+								substring(VisitType, 2, 1) = '1' or
+								substring(VisitType, 3, 1) = '1' 
 					group by   hl.HVCaseFK
 				) ,
 		cteDatesBetween
