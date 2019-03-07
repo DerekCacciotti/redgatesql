@@ -96,7 +96,7 @@ set fmtOnly off ;
 								) ;
 
 	insert into #tblSUPPMWorkers
-	exec spGetAllWorkersbyProgram @ProgramFK, null, 'SUP,PM', null ;
+	exec spGetAllWorkersbyProgram @ProgramFK, null, 'PM', null ;
 
 
 	-- CP 12-21-2017 we have no way of removing a Supervisor from this report based on the current system.  
@@ -116,6 +116,7 @@ set fmtOnly off ;
 	delete from #tblSUPPMWorkers
 	where	LastName = 'Southerton' and FirstName = 'Amber' ;
 
+	
 	-- List of workers i.e. FAW, FSW minus 	SUP,PM
 	-- List of workers who are not supervisor or program manager
 	create table #tblWorkers (
@@ -222,8 +223,8 @@ set fmtOnly off ;
 	inner join	WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = @ProgramFK
 	inner join	dbo.fnGetWorkerEventDatesALL(@ProgramFK, null, null) fn on fn.WorkerPK = w.WorkerPK
 	left join	Worker wrkr on w.WorkerPK = wrkr.WorkerPK -- bring in SupervisionScheduledDay
-	where		-- w.WorkerPK not in (select WorkerPK from #tblSUPPMWorkers)
-				-- and 
+	where		w.WorkerPK not in (select WorkerPK from #tblSUPPMWorkers)
+				 and 
 				fn.FirstEvent <= @eDate -- exclude workers who are probably new and have not activity (visits) yet ... khalsa
 
 				and w.WorkerPK = isnull(@workerfk, w.WorkerPK)

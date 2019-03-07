@@ -22,7 +22,7 @@ GO
 -- max of 2 supervisions per week ... khalsa 1/29/2014
 
 -- =============================================
-CREATE procedure [dbo].[rspCredentialingSupervisionSummary] @ProgramFK int = null
+CREATE proc [dbo].[rspCredentialingSupervisionSummary] @ProgramFK int = null
 												, @sDate datetime = null
 												, @eDate datetime = null
 												, @supervisorfk int = null
@@ -74,7 +74,7 @@ create table #tblSUPPMWorkers (
 							) ;
 
 insert into #tblSUPPMWorkers
-exec spGetAllWorkersbyProgram @ProgramFK, null, 'SUP,PM', null ;
+exec spGetAllWorkersbyProgram @ProgramFK, null, 'PM', null ;
 
 -- List of workers i.e. FAW, FSW minus 	SUP,PM
 -- List of workers who are not supervisor or program manager
@@ -183,8 +183,7 @@ from		#tblStaff w
 inner join	WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = @ProgramFK
 inner join	dbo.fnGetWorkerEventDatesALL(@ProgramFK, null, null) fn on fn.WorkerPK = w.WorkerPK
 left join	Worker wrkr on w.WorkerPK = wrkr.WorkerPK -- bring in SupervisionScheduledDay
-where		--w.WorkerPK not in (select WorkerPK from #tblSUPPMWorkers)
-			--and 
+where		w.WorkerPK not in (select WorkerPK from #tblSUPPMWorkers) and 
 			fn.FirstEvent <= @eDate -- exclude workers who are probably new and have not activity (visits) yet ... khalsa
 			and w.WorkerPK = isnull(@workerfk, w.WorkerPK)
 			and wp.SupervisorFK = isnull(@supervisorfk, wp.SupervisorFK)
