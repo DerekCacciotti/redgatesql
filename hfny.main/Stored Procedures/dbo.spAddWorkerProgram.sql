@@ -16,6 +16,7 @@ CREATE PROCEDURE [dbo].[spAddWorkerProgram](@BackgroundCheckDate date=NULL,
 @FSWStartDate datetime=NULL,
 @FundRaiser bit=NULL,
 @HireDate datetime=NULL,
+@HoursPerWeek decimal(5, 2)=NULL,
 @LivesTargetArea bit=NULL,
 @ProgramFK int=NULL,
 @ProgramManager bit=NULL,
@@ -64,6 +65,7 @@ WHERE
 @FSWStartDate = lastRow.FSWStartDate AND
 @FundRaiser = lastRow.FundRaiser AND
 @HireDate = lastRow.HireDate AND
+@HoursPerWeek = lastRow.HoursPerWeek AND
 @LivesTargetArea = lastRow.LivesTargetArea AND
 @ProgramFK = lastRow.ProgramFK AND
 @ProgramManager = lastRow.ProgramManager AND
@@ -111,6 +113,7 @@ FSWEndDate,
 FSWStartDate,
 FundRaiser,
 HireDate,
+HoursPerWeek,
 LivesTargetArea,
 ProgramFK,
 ProgramManager,
@@ -157,6 +160,7 @@ VALUES(
 @FSWStartDate,
 @FundRaiser,
 @HireDate,
+@HoursPerWeek,
 @LivesTargetArea,
 @ProgramFK,
 @ProgramManager,

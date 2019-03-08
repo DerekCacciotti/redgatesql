@@ -15,6 +15,7 @@ CREATE TABLE [dbo].[WorkerProgram]
 [FSWStartDate] [datetime] NULL,
 [FundRaiser] [bit] NULL,
 [HireDate] [datetime] NOT NULL,
+[HoursPerWeek] [decimal] (5, 2) NULL,
 [LivesTargetArea] [bit] NULL,
 [ProgramFK] [int] NOT NULL,
 [ProgramManager] [bit] NULL,
