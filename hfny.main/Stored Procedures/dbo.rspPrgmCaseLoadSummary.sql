@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:    <Jay Robohn> dar chen
 -- Create date: <12/04/2012>
@@ -131,6 +130,8 @@ begin
 			, StartAssignmentDate
 			, EndAssignmentDate
 			, FSWAssignDate
+			, wp.HoursPerWeek
+			, TerminationDate
 		FROM 
 			cteData d
 			INNER JOIN CaseProgram cp ON d.HVCaseFK = cp.HVCaseFK 
@@ -139,6 +140,7 @@ begin
 				AND wad.hvcasefk = cp.HVCaseFK 
 				AND @rpdate between StartAssignmentDate AND ISNULL(EndAssignmentDate, @rpdate)
 			INNER JOIN Worker w ON WorkerPK = wad.WorkerFK
+			inner join dbo.WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 			INNER JOIN dbo.SplitString(@ProgramFK,',') ON cp.ProgramFK = ListItem
 		WHERE 
 			(DischargeDate IS NULL OR DischargeDate >= @rpdate)
