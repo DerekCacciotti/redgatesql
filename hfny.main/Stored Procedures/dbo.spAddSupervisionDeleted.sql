@@ -86,6 +86,9 @@ CREATE PROCEDURE [dbo].[spAddSupervisionDeleted](@SupervisionPK int=NULL,
 @TeamDevelopmentComments varchar(max)=NULL,
 @TeamDevelopmentStatus bit=NULL,
 @WorkerFK int=NULL,
+@WorkplaceEnvironment bit=NULL,
+@WorkplaceEnvironmentComments varchar(max)=NULL,
+@WorkplaceEnvironmentStatus bit=NULL,
 @ParticipantEmergency bit=NULL,
 @ReasonOther bit=NULL,
 @ReasonOtherSpecify varchar(500)=NULL,
@@ -193,6 +196,9 @@ WHERE
 @TeamDevelopmentComments = lastRow.TeamDevelopmentComments AND
 @TeamDevelopmentStatus = lastRow.TeamDevelopmentStatus AND
 @WorkerFK = lastRow.WorkerFK AND
+@WorkplaceEnvironment = lastRow.WorkplaceEnvironment AND
+@WorkplaceEnvironmentComments = lastRow.WorkplaceEnvironmentComments AND
+@WorkplaceEnvironmentStatus = lastRow.WorkplaceEnvironmentStatus AND
 @ParticipantEmergency = lastRow.ParticipantEmergency AND
 @ReasonOther = lastRow.ReasonOther AND
 @ReasonOtherSpecify = lastRow.ReasonOtherSpecify AND
@@ -299,6 +305,9 @@ TeamDevelopment,
 TeamDevelopmentComments,
 TeamDevelopmentStatus,
 WorkerFK,
+WorkplaceEnvironment,
+WorkplaceEnvironmentComments,
+WorkplaceEnvironmentStatus,
 ParticipantEmergency,
 ReasonOther,
 ReasonOtherSpecify,
@@ -404,6 +413,9 @@ VALUES(
 @TeamDevelopmentComments,
 @TeamDevelopmentStatus,
 @WorkerFK,
+@WorkplaceEnvironment,
+@WorkplaceEnvironmentComments,
+@WorkplaceEnvironmentStatus,
 @ParticipantEmergency,
 @ReasonOther,
 @ReasonOtherSpecify,
