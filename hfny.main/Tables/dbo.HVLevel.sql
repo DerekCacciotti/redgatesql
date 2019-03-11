@@ -3,9 +3,9 @@ CREATE TABLE [dbo].[HVLevel]
 [HVLevelPK] [int] NOT NULL IDENTITY(1, 1),
 [HVCaseFK] [int] NOT NULL,
 [HVLevelCreateDate] [datetime] NOT NULL CONSTRAINT [DF_HVLevel_HVLevelCreateDate] DEFAULT (getdate()),
-[HVLevelCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[HVLevelCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [HVLevelEditDate] [datetime] NULL,
-[HVLevelEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HVLevelEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LevelAssignDate] [datetime] NOT NULL,
 [LevelFK] [int] NULL,
 [ProgramFK] [int] NOT NULL

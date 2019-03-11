@@ -13,11 +13,11 @@ CREATE TABLE [dbo].[PC]
 [PCCellPhone] [varchar] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCCity] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCCreateDate] [datetime] NOT NULL CONSTRAINT [DF_PC_PCCreateDate] DEFAULT (getdate()),
-[PCCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[PCCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PCDOB] [datetime] NULL,
 [PCDOD] [datetime] NULL,
 [PCEditDate] [datetime] NULL,
-[PCEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PCEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCEmail] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCEmergencyPhone] [varchar] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCFirstName] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
@@ -38,12 +38,6 @@ CREATE TABLE [dbo].[PC]
 [YearsInUSA] [numeric] (4, 0) NULL
 ) ON [PRIMARY]
 GO
-
-
-
-CREATE NONCLUSTERED INDEX [_dta_index_PC_18_53575229__K14_K1_K21_K20] ON [dbo].[PC] ([PCDOB], [PCPK], [PCLastName], [PCFirstName]) ON [PRIMARY]
-
-GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -58,4 +52,6 @@ Update PC Set PC.PCEditDate= getdate()
 From [PC] INNER JOIN Inserted ON [PC].[PCPK]= Inserted.[PCPK]
 GO
 ALTER TABLE [dbo].[PC] ADD CONSTRAINT [PK__PC__5801C57647A6A41B] PRIMARY KEY CLUSTERED  ([PCPK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [_dta_index_PC_18_53575229__K14_K1_K21_K20] ON [dbo].[PC] ([PCDOB], [PCPK], [PCLastName], [PCFirstName]) ON [PRIMARY]
 GO

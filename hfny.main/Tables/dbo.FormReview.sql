@@ -4,14 +4,14 @@ CREATE TABLE [dbo].[FormReview]
 [FormDate] [datetime] NOT NULL,
 [FormFK] [int] NOT NULL,
 [FormReviewCreateDate] [datetime] NOT NULL CONSTRAINT [DF_FormReview_FormReviewCreateDate] DEFAULT (getdate()),
-[FormReviewCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[FormReviewCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [FormReviewEditDate] [datetime] NULL,
-[FormReviewEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[FormReviewEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [FormType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [HVCaseFK] [int] NULL,
 [ProgramFK] [int] NOT NULL,
 [ReviewDateTime] [datetime] NULL,
-[ReviewedBy] [varchar] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[ReviewedBy] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

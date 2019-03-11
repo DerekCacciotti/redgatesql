@@ -23,11 +23,11 @@ CREATE TABLE [dbo].[SupervisionParentSurveyCaseDeleted]
 [RiskFactorsStatus] [bit] NULL,
 [SupervisionFK] [int] NOT NULL,
 [SupervisionParentSurveyCaseCreateDate] [datetime] NULL,
-[SupervisionParentSurveyCaseCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisionParentSurveyCaseCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [SupervisionParentSurveyCaseEditDate] [datetime] NULL,
-[SupervisionParentSurveyCaseEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisionParentSurveyCaseEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SupervisionParentSurveyCaseDeleteDate] [datetime] NOT NULL CONSTRAINT [DF_SupervisionParentSurveyCaseDeleted_SupervisionParentSurveyDeleteDate] DEFAULT (getdate()),
-[SupervisionParentSurveyCaseDeleter] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[SupervisionParentSurveyCaseDeleter] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[SupervisionParentSurveyCaseDeleted] ADD CONSTRAINT [PK_SupervisionParentSurveyCaseDeleted] PRIMARY KEY CLUSTERED  ([SupervisionParentSurveyCaseDeletedPK]) ON [PRIMARY]

@@ -45,9 +45,9 @@ CREATE TABLE [dbo].[WorkerProgram]
 [WorkerFK] [int] NOT NULL,
 [WorkerNotes] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WorkerProgramCreateDate] [datetime] NOT NULL CONSTRAINT [DF_WorkerProgram_WorkerProgramCreateDate] DEFAULT (getdate()),
-[WorkerProgramCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[WorkerProgramCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [WorkerProgramEditDate] [datetime] NULL,
-[WorkerProgramEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[WorkerProgramEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WorkPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO

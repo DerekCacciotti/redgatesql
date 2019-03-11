@@ -18,10 +18,10 @@ CREATE TABLE [dbo].[Kempe]
 [GrandParentPresent] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
 [KempeCreateDate] [datetime] NOT NULL CONSTRAINT [DF_Kempe_KempeCreateDate] DEFAULT (getdate()),
-[KempeCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[KempeCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [KempeDate] [datetime] NOT NULL,
 [KempeEditDate] [datetime] NULL,
-[KempeEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[KempeEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [KempeResult] [bit] NOT NULL,
 [MOBPartnerPresent] [bit] NULL,
 [MOBPresent] [bit] NULL,
@@ -72,22 +72,6 @@ CREATE TABLE [dbo].[Kempe]
 [ProgramFK] [int] NOT NULL,
 [SupervisorObservation] [bit] NULL
 ) ON [PRIMARY]
-GO
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Kempe', 'COLUMN', N'KempePK'
-GO
-
-ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD
-CONSTRAINT [FK_Kempe_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD
-CONSTRAINT [FK_Kempe_FAWFK] FOREIGN KEY ([FAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-CREATE NONCLUSTERED INDEX [IX_FK_Kempe_FAWFK] ON [dbo].[Kempe] ([FAWFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Kempe_HVCaseFK] ON [dbo].[Kempe] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Kempe_PC1IssuesFK] ON [dbo].[Kempe] ([PC1IssuesFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Kempe_ProgramFK] ON [dbo].[Kempe] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -172,8 +156,21 @@ From [Kempe] INNER JOIN Inserted ON [Kempe].[KempePK]= Inserted.[KempePK]
 GO
 ALTER TABLE [dbo].[Kempe] ADD CONSTRAINT [PK__Kempe__309BD73525518C17] PRIMARY KEY CLUSTERED  ([KempePK]) ON [PRIMARY]
 GO
-
+CREATE NONCLUSTERED INDEX [IX_FK_Kempe_FAWFK] ON [dbo].[Kempe] ([FAWFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Kempe_HVCaseFK] ON [dbo].[Kempe] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Kempe_PC1IssuesFK] ON [dbo].[Kempe] ([PC1IssuesFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Kempe_ProgramFK] ON [dbo].[Kempe] ([ProgramFK]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD CONSTRAINT [FK_Kempe_FAWFK] FOREIGN KEY ([FAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
 ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD CONSTRAINT [FK_Kempe_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD CONSTRAINT [FK_Kempe_PC1IssuesFK] FOREIGN KEY ([PC1IssuesFK]) REFERENCES [dbo].[PC1Issues] ([PC1IssuesPK])
+GO
+ALTER TABLE [dbo].[Kempe] WITH NOCHECK ADD CONSTRAINT [FK_Kempe_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Kempe', 'COLUMN', N'KempePK'
 GO

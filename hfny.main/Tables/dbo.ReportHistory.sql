@@ -7,13 +7,13 @@ CREATE TABLE [dbo].[ReportHistory]
 [ReportName] [char] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ReportType] [char] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TimeRun] [datetime] NOT NULL,
-[UserFK] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[ReportFK_old] [int] NULL
+[ReportFK_old] [int] NULL,
+[UserName] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[ReportHistory] ADD CONSTRAINT [PK__ReportHi__488810E06BE40491] PRIMARY KEY CLUSTERED  ([ReportHistoryPK]) ON [PRIMARY]
 GO
-CREATE NONCLUSTERED INDEX [nci_wi_ReportHistory_C5E72E03EA1379792DD06BEA639AF3A5] ON [dbo].[ReportHistory] ([ProgramFK], [UserFK]) INCLUDE ([ReportFK], [TimeRun]) ON [PRIMARY]
+CREATE NONCLUSTERED INDEX [nci_wi_ReportHistory_C5E72E03EA1379792DD06BEA639AF3A5] ON [dbo].[ReportHistory] ([ProgramFK], [UserName]) INCLUDE ([ReportFK], [TimeRun]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_ReportHistory_TimeRun] ON [dbo].[ReportHistory] ([TimeRun]) ON [PRIMARY]
 GO

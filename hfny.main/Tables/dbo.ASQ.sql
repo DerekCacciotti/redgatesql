@@ -2,11 +2,11 @@ CREATE TABLE [dbo].[ASQ]
 (
 [ASQPK] [int] NOT NULL IDENTITY(1, 1),
 [ASQCreateDate] [datetime] NOT NULL CONSTRAINT [DF_ASQ_ASQCreateDate] DEFAULT (getdate()),
-[ASQCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[ASQCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProgramFK] [int] NOT NULL,
 [ASQCommunicationScore] [numeric] (4, 1) NULL,
 [ASQEditDate] [datetime] NULL,
-[ASQEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ASQEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ASQFineMotorScore] [numeric] (4, 1) NULL,
 [ASQGrossMotorScore] [numeric] (4, 1) NULL,
 [ASQInWindow] [bit] NULL,
@@ -154,7 +154,6 @@ BEGIN
 		   , Deleted.UnderProblemSolving
 		   , Deleted.VersionNumber FROM Deleted WHERE Deleted.asqpk= @pk
 END
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO

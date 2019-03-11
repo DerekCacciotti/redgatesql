@@ -1,7 +1,7 @@
 CREATE TABLE [dbo].[LoginHistory]
 (
 [LoginHistoryPK] [int] NOT NULL IDENTITY(1, 1),
-[Username] [varchar] (255) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[Username] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [LoginTime] [datetime] NOT NULL,
 [Role] [varchar] (255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NULL,

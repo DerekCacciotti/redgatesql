@@ -22,9 +22,9 @@ CREATE TABLE [dbo].[SupervisionParentSurveyCase]
 [RiskFactorsStatus] [bit] NULL,
 [SupervisionFK] [int] NOT NULL,
 [SupervisionParentSurveyCaseCreateDate] [datetime] NULL CONSTRAINT [DF_SupervisionParentSurveyCase_SupervisionParentSurveyCaseCreateDate] DEFAULT (getdate()),
-[SupervisionParentSurveyCaseCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisionParentSurveyCaseCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [SupervisionParentSurveyCaseEditDate] [datetime] NULL,
-[SupervisionParentSurveyCaseEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[SupervisionParentSurveyCaseEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

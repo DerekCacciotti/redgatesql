@@ -2,9 +2,9 @@ CREATE TABLE [dbo].[CaseProgram]
 (
 [CaseProgramPK] [int] NOT NULL IDENTITY(1, 1),
 [CaseProgramCreateDate] [datetime] NOT NULL CONSTRAINT [DF_CaseProgram_CaseProgramCreateDate] DEFAULT (getdate()),
-[CaseProgramCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[CaseProgramCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [CaseProgramEditDate] [datetime] NULL,
-[CaseProgramEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CaseProgramEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CaseStartDate] [datetime] NOT NULL,
 [CurrentFAFK] [int] NULL,
 [CurrentFAWFK] [int] NULL,

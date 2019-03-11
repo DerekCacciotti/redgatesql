@@ -32,9 +32,9 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCaseDeleted]
 [ServicePlanStatus] [bit] NULL,
 [SupervisionFK] [int] NOT NULL,
 [SupervisionHomeVisitCaseCreateDate] [datetime] NULL,
-[SupervisionHomeVisitCaseCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisionHomeVisitCaseCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [SupervisionHomeVisitCaseEditDate] [datetime] NULL,
-[SupervisionHomeVisitCaseEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[SupervisionHomeVisitCaseEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Tools] [bit] NULL,
 [ToolsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ToolsStatus] [bit] NULL,
@@ -42,7 +42,7 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCaseDeleted]
 [TransitionPlanningComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TransitionPlanningStatus] [bit] NULL,
 [SupervisionHomeVisitCaseDeleteDate] [datetime] NOT NULL CONSTRAINT [DF_SupervisionHomeVisitCaseDeleted_SupervisionHomeVisitCaseDeleteDate] DEFAULT (getdate()),
-[SupervisionHomeVisitCaseDeleter] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[SupervisionHomeVisitCaseDeleter] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[SupervisionHomeVisitCaseDeleted] ADD CONSTRAINT [PK_SupervisionHomeVisitCaseDeleted] PRIMARY KEY CLUSTERED  ([SupervisionHomeVisitCaseDeletedPK]) ON [PRIMARY]

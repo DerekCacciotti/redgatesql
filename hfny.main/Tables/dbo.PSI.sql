@@ -15,10 +15,10 @@ CREATE TABLE [dbo].[PSI]
 [ParentChildDysfunctionalInteractionValid] [bit] NULL,
 [ProgramFK] [int] NOT NULL,
 [PSICreateDate] [datetime] NOT NULL CONSTRAINT [DF_PSI_PSICreateDate] DEFAULT (getdate()),
-[PSICreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[PSICreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PSIDateComplete] [datetime] NOT NULL,
 [PSIEditDate] [datetime] NULL,
-[PSIEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PSIEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PSIInterval] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PSIInWindow] [bit] NULL,
 [PSILanguage] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
@@ -61,22 +61,6 @@ CREATE TABLE [dbo].[PSI]
 [PSITotalScore] [numeric] (4, 0) NULL,
 [PSITotalScoreValid] [bit] NULL
 ) ON [PRIMARY]
-GO
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'PSI', 'COLUMN', N'PSIPK'
-GO
-
-ALTER TABLE [dbo].[PSI] WITH NOCHECK ADD
-CONSTRAINT [FK_PSI_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[PSI] WITH NOCHECK ADD
-CONSTRAINT [FK_PSI_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-CREATE NONCLUSTERED INDEX [IX_PSIInterval] ON [dbo].[PSI] ([PSIInterval]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_PSI_FSWFK] ON [dbo].[PSI] ([FSWFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_PSI_HVCaseFK] ON [dbo].[PSI] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_PSI_ProgramFK] ON [dbo].[PSI] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -161,6 +145,19 @@ From [PSI] INNER JOIN Inserted ON [PSI].[PSIPK]= Inserted.[PSIPK]
 GO
 ALTER TABLE [dbo].[PSI] ADD CONSTRAINT [PK__PSI__134D0373671F4F74] PRIMARY KEY CLUSTERED  ([PSIPK]) ON [PRIMARY]
 GO
-
+CREATE NONCLUSTERED INDEX [IX_FK_PSI_FSWFK] ON [dbo].[PSI] ([FSWFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_PSI_HVCaseFK] ON [dbo].[PSI] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_PSI_ProgramFK] ON [dbo].[PSI] ([ProgramFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_PSIInterval] ON [dbo].[PSI] ([PSIInterval]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[PSI] WITH NOCHECK ADD CONSTRAINT [FK_PSI_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
 ALTER TABLE [dbo].[PSI] WITH NOCHECK ADD CONSTRAINT [FK_PSI_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+GO
+ALTER TABLE [dbo].[PSI] WITH NOCHECK ADD CONSTRAINT [FK_PSI_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'PSI', 'COLUMN', N'PSIPK'
 GO

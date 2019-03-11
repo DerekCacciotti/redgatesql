@@ -19,10 +19,10 @@ CREATE TABLE [dbo].[Preassessment]
 [PACallFromParent] [int] NULL,
 [PACaseReview] [int] NULL,
 [PACreateDate] [datetime] NOT NULL CONSTRAINT [DF_Preassessment_PACreateDate] DEFAULT (getdate()),
-[PACreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[PACreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PADate] [datetime] NOT NULL,
 [PAEditDate] [datetime] NULL,
-[PAEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PAEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PAFAWFK] [int] NOT NULL,
 [PAFSWFK] [int] NULL,
 [PAGift] [int] NULL,
@@ -36,20 +36,6 @@ CREATE TABLE [dbo].[Preassessment]
 [ProgramFK] [int] NOT NULL,
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-GO
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Preassessment', 'COLUMN', N'PreassessmentPK'
-GO
-
-ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD
-CONSTRAINT [FK_Preassessment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD
-CONSTRAINT [FK_Preassessment_PAFAWFK] FOREIGN KEY ([PAFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_HVCaseFK] ON [dbo].[Preassessment] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_PAFAWFK] ON [dbo].[Preassessment] ([PAFAWFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_ProgramFK] ON [dbo].[Preassessment] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -134,5 +120,17 @@ From [Preassessment] INNER JOIN Inserted ON [Preassessment].[PreassessmentPK]= I
 GO
 ALTER TABLE [dbo].[Preassessment] ADD CONSTRAINT [PK__Preasses__686E4EF65D95E53A] PRIMARY KEY CLUSTERED  ([PreassessmentPK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_HVCaseFK] ON [dbo].[Preassessment] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_PAFAWFK] ON [dbo].[Preassessment] ([PAFAWFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Preassessment_ProgramFK] ON [dbo].[Preassessment] ([ProgramFK]) ON [PRIMARY]
+GO
 ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD CONSTRAINT [FK_Preassessment_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+GO
+ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD CONSTRAINT [FK_Preassessment_PAFAWFK] FOREIGN KEY ([PAFAWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
+ALTER TABLE [dbo].[Preassessment] WITH NOCHECK ADD CONSTRAINT [FK_Preassessment_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Preassessment', 'COLUMN', N'PreassessmentPK'
 GO

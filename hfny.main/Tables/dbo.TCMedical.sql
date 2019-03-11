@@ -15,21 +15,11 @@ CREATE TABLE [dbo].[TCMedical]
 [TCIDFK] [int] NULL,
 [TCItemDate] [datetime] NOT NULL,
 [TCMedicalCreateDate] [datetime] NOT NULL CONSTRAINT [DF_TCMedical_TCMedicalCreateDate] DEFAULT (getdate()),
-[TCMedicalCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[TCMedicalCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [TCMedicalEditDate] [datetime] NULL,
-[TCMedicalEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[TCMedicalEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TCMedicalItem] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 ) ON [PRIMARY]
-CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_TCMedicalItem] ON [dbo].[TCMedical] ([TCMedicalItem]) ON [PRIMARY]
-
-ALTER TABLE [dbo].[TCMedical] WITH NOCHECK ADD
-CONSTRAINT [FK_TCMedical_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_HVCaseFK] ON [dbo].[TCMedical] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_ProgramFK] ON [dbo].[TCMedical] ([ProgramFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_TCIDFK] ON [dbo].[TCMedical] ([TCIDFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -114,8 +104,17 @@ From [TCMedical] INNER JOIN Inserted ON [TCMedical].[TCMedicalPK]= Inserted.[TCM
 GO
 ALTER TABLE [dbo].[TCMedical] ADD CONSTRAINT [PK__TCMedica__17C4102305A3D694] PRIMARY KEY CLUSTERED  ([TCMedicalPK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_HVCaseFK] ON [dbo].[TCMedical] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_ProgramFK] ON [dbo].[TCMedical] ([ProgramFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_TCIDFK] ON [dbo].[TCMedical] ([TCIDFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_TCMedical_TCMedicalItem] ON [dbo].[TCMedical] ([TCMedicalItem]) ON [PRIMARY]
+GO
 ALTER TABLE [dbo].[TCMedical] WITH NOCHECK ADD CONSTRAINT [FK_TCMedical_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
-
+ALTER TABLE [dbo].[TCMedical] WITH NOCHECK ADD CONSTRAINT [FK_TCMedical_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
 ALTER TABLE [dbo].[TCMedical] WITH NOCHECK ADD CONSTRAINT [FK_TCMedical_TCIDFK] FOREIGN KEY ([TCIDFK]) REFERENCES [dbo].[TCID] ([TCIDPK])
 GO

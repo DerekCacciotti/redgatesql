@@ -28,10 +28,10 @@ CREATE TABLE [dbo].[Worker]
 [SupervisorFirstEvent] [datetime] NULL,
 [SupervisorInitialStart] [datetime] NULL,
 [WorkerCreateDate] [datetime] NOT NULL CONSTRAINT [DF_Worker_WorkerCreateDate] DEFAULT (getdate()),
-[WorkerCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[WorkerCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [WorkerDOB] [datetime] NULL,
 [WorkerEditDate] [datetime] NULL,
-[WorkerEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[WorkerEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [WorkerPK_old] [int] NULL,
 [YoungestChild] [int] NULL,
 [Zip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -40,7 +40,7 @@ CREATE TABLE [dbo].[Worker]
 [YearsEarlyChildhoodExperience] [int] NULL,
 [YearsChildAbuseClasses] [int] NULL,
 [SupervisionScheduledDay] [int] NULL,
-[UserName] [varchar] (256) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[UserName] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
@@ -55,7 +55,6 @@ For Update
 AS
 Update Worker Set Worker.WorkerEditDate= getdate()
 From [Worker] INNER JOIN Inserted ON [Worker].[WorkerPK]= Inserted.[WorkerPK]
-
 GO
 ALTER TABLE [dbo].[Worker] ADD CONSTRAINT [PK__Worker__077F67A4251C81ED] PRIMARY KEY CLUSTERED  ([WorkerPK]) ON [PRIMARY]
 GO

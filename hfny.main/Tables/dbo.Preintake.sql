@@ -17,10 +17,10 @@ CREATE TABLE [dbo].[Preintake]
 [PICallFromParent] [int] NULL,
 [PICaseReview] [int] NULL,
 [PICreateDate] [datetime] NOT NULL CONSTRAINT [DF_Preintake_PICreateDate] DEFAULT (getdate()),
-[PICreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[PICreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PIDate] [datetime] NOT NULL,
 [PIEditDate] [datetime] NULL,
-[PIEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PIEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PIFSWFK] [int] NOT NULL,
 [PIGift] [int] NULL,
 [PIOtherActivity] [int] NULL,
@@ -33,22 +33,6 @@ CREATE TABLE [dbo].[Preintake]
 [ProgramFK] [int] NOT NULL,
 [TransferredtoProgram] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-GO
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Preintake', 'COLUMN', N'PreintakePK'
-GO
-
-ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD
-CONSTRAINT [FK_Preintake_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD
-CONSTRAINT [FK_Preintake_PIFSWFK] FOREIGN KEY ([PIFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-CREATE NONCLUSTERED INDEX [IX_FK_Preintake_HVCaseFK] ON [dbo].[Preintake] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Preintake_KempeFK] ON [dbo].[Preintake] ([KempeFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Preintake_PIFSWFK] ON [dbo].[Preintake] ([PIFSWFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Preintake_ProgramFK] ON [dbo].[Preintake] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -133,7 +117,21 @@ From [Preintake] INNER JOIN Inserted ON [Preintake].[PreintakePK]= Inserted.[Pre
 GO
 ALTER TABLE [dbo].[Preintake] ADD CONSTRAINT [PK__Preintak__0D9DD8F3625A9A57] PRIMARY KEY CLUSTERED  ([PreintakePK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_FK_Preintake_HVCaseFK] ON [dbo].[Preintake] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Preintake_KempeFK] ON [dbo].[Preintake] ([KempeFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Preintake_PIFSWFK] ON [dbo].[Preintake] ([PIFSWFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Preintake_ProgramFK] ON [dbo].[Preintake] ([ProgramFK]) ON [PRIMARY]
+GO
 ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD CONSTRAINT [FK_Preintake_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD CONSTRAINT [FK_Preintake_KempeFK] FOREIGN KEY ([KempeFK]) REFERENCES [dbo].[Kempe] ([KempePK])
+GO
+ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD CONSTRAINT [FK_Preintake_PIFSWFK] FOREIGN KEY ([PIFSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
+ALTER TABLE [dbo].[Preintake] WITH NOCHECK ADD CONSTRAINT [FK_Preintake_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'Preintake', 'COLUMN', N'PreintakePK'
 GO

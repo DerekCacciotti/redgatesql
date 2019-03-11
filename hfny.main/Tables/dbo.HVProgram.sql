@@ -16,9 +16,9 @@ CREATE TABLE [dbo].[HVProgram]
 [ExtraField9Description] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [GrantAmount] [numeric] (10, 2) NULL,
 [HVProgramCreateDate] [datetime] NOT NULL CONSTRAINT [DF_HVProgram_HVProgramCreateDate] DEFAULT (getdate()),
-[HVProgramCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[HVProgramCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [HVProgramEditDate] [datetime] NULL,
-[HVProgramEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HVProgramEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LeadAgencyCity] [char] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LeadAgencyDirector] [char] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LeadAgencyName] [char] (70) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -37,17 +37,6 @@ CREATE TABLE [dbo].[HVProgram]
 [RegionFK] [int] NULL,
 [TargetZip] [nvarchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[HVProgram] ADD 
-CONSTRAINT [PK__HVProgra__1C343B0217036CC0] PRIMARY KEY CLUSTERED  ([HVProgramPK]) ON [PRIMARY]
-CREATE NONCLUSTERED INDEX [IX_FK_HVProgram_CountyFK] ON [dbo].[HVProgram] ([CountyFK]) ON [PRIMARY]
-
-
-
-
-ALTER TABLE [dbo].[HVProgram] WITH NOCHECK ADD
-CONSTRAINT [FK_HVProgram_CountyFK] FOREIGN KEY ([CountyFK]) REFERENCES [dbo].[codeCounty] ([codeCountyPK])
-
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -61,4 +50,10 @@ For Update
 AS
 Update HVProgram Set HVProgram.HVProgramEditDate= getdate()
 From [HVProgram] INNER JOIN Inserted ON [HVProgram].[HVProgramPK]= Inserted.[HVProgramPK]
+GO
+ALTER TABLE [dbo].[HVProgram] ADD CONSTRAINT [PK__HVProgra__1C343B0217036CC0] PRIMARY KEY CLUSTERED  ([HVProgramPK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_HVProgram_CountyFK] ON [dbo].[HVProgram] ([CountyFK]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[HVProgram] WITH NOCHECK ADD CONSTRAINT [FK_HVProgram_CountyFK] FOREIGN KEY ([CountyFK]) REFERENCES [dbo].[codeCounty] ([codeCountyPK])
 GO

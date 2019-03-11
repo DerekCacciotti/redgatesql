@@ -15,27 +15,11 @@ CREATE TABLE [dbo].[ServiceReferral]
 [ServiceCode] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ServiceReceived] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ServiceReferralCreateDate] [datetime] NOT NULL CONSTRAINT [DF_ServiceReferral_ServiceReferralCreateDate] DEFAULT (getdate()),
-[ServiceReferralCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[ServiceReferralCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ServiceReferralEditDate] [datetime] NULL,
-[ServiceReferralEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ServiceReferralEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [StartDate] [datetime] NULL
 ) ON [PRIMARY]
-GO
-EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'ServiceReferral', 'COLUMN', N'ServiceReferralPK'
-GO
-
-ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD
-CONSTRAINT [FK_ServiceReferral_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD
-CONSTRAINT [FK_ServiceReferral_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_FSWFK] ON [dbo].[ServiceReferral] ([FSWFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_HVCaseFK] ON [dbo].[ServiceReferral] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_ProgramFK] ON [dbo].[ServiceReferral] ([ProgramFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_ProvidingAgencyFK] ON [dbo].[ServiceReferral] ([ProvidingAgencyFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -120,9 +104,21 @@ From [ServiceReferral] INNER JOIN Inserted ON [ServiceReferral].[ServiceReferral
 GO
 ALTER TABLE [dbo].[ServiceReferral] ADD CONSTRAINT [PK__ServiceR__9084E71E73852659] PRIMARY KEY CLUSTERED  ([ServiceReferralPK]) ON [PRIMARY]
 GO
-
+CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_FSWFK] ON [dbo].[ServiceReferral] ([FSWFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_HVCaseFK] ON [dbo].[ServiceReferral] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_ProgramFK] ON [dbo].[ServiceReferral] ([ProgramFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_ServiceReferral_ProvidingAgencyFK] ON [dbo].[ServiceReferral] ([ProvidingAgencyFK]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
+GO
 ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
-
+ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
 ALTER TABLE [dbo].[ServiceReferral] WITH NOCHECK ADD CONSTRAINT [FK_ServiceReferral_ProvidingAgencyFK] FOREIGN KEY ([ProvidingAgencyFK]) REFERENCES [dbo].[listServiceReferralAgency] ([listServiceReferralAgencyPK])
+GO
+EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'ServiceReferral', 'COLUMN', N'ServiceReferralPK'
 GO

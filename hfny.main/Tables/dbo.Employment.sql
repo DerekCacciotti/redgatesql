@@ -2,9 +2,9 @@ CREATE TABLE [dbo].[Employment]
 (
 [EmploymentPK] [int] NOT NULL IDENTITY(1, 1),
 [EmploymentCreateDate] [datetime] NOT NULL CONSTRAINT [DF_Employment_EmploymentCreateDate] DEFAULT (getdate()),
-[EmploymentCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[EmploymentCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [EmploymentEditDate] [datetime] NULL,
-[EmploymentEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[EmploymentEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [EmploymentEndDate] [datetime] NULL,
 [EmploymentMonthlyHours] [int] NULL,
 [EmploymentStartDate] [datetime] NULL,

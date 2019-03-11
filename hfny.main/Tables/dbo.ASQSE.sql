@@ -2,10 +2,10 @@ CREATE TABLE [dbo].[ASQSE]
 (
 [ASQSEPK] [int] NOT NULL IDENTITY(1, 1),
 [ASQSECreateDate] [datetime] NOT NULL CONSTRAINT [DF_ASQSE_ASQSECreateDate] DEFAULT (getdate()),
-[ASQSECreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[ASQSECreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ASQSEDateCompleted] [datetime] NOT NULL,
 [ASQSEEditDate] [datetime] NULL,
-[ASQSEEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ASQSEEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ASQSEInWindow] [bit] NOT NULL,
 [ASQSEOverCutOff] [bit] NOT NULL,
 [ASQSEReceiving] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,

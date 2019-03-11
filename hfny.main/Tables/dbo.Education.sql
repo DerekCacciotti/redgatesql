@@ -2,9 +2,9 @@ CREATE TABLE [dbo].[Education]
 (
 [EducationPK] [int] NOT NULL IDENTITY(1, 1),
 [EducationCreateDate] [datetime] NOT NULL CONSTRAINT [DF_Education_EducationCreateDate] DEFAULT (getdate()),
-[EducationCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[EducationCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [EducationEditDate] [datetime] NULL,
-[EducationEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[EducationEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [EducationMonthlyHours] [int] NULL,
 [FormDate] [datetime] NOT NULL,
 [FormFK] [int] NOT NULL,
@@ -17,12 +17,6 @@ CREATE TABLE [dbo].[Education]
 [ProgramType] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramTypeSpecify] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[Education] WITH NOCHECK ADD
-CONSTRAINT [FK_Education_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-CREATE NONCLUSTERED INDEX [IX_FK_Education_HVCaseFK] ON [dbo].[Education] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_Education_ProgramFK] ON [dbo].[Education] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -39,5 +33,11 @@ From [Education] INNER JOIN Inserted ON [Education].[EducationPK]= Inserted.[Edu
 GO
 ALTER TABLE [dbo].[Education] ADD CONSTRAINT [PK__Educatio__4BBF34CC6383C8BA] PRIMARY KEY CLUSTERED  ([EducationPK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_FK_Education_HVCaseFK] ON [dbo].[Education] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_Education_ProgramFK] ON [dbo].[Education] ([ProgramFK]) ON [PRIMARY]
+GO
 ALTER TABLE [dbo].[Education] WITH NOCHECK ADD CONSTRAINT [FK_Education_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+GO
+ALTER TABLE [dbo].[Education] WITH NOCHECK ADD CONSTRAINT [FK_Education_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO

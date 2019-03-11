@@ -124,11 +124,11 @@ CREATE TABLE [dbo].[HVLogDeleted]
 [HouseholdChangesNew] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
 [HVLogCreateDate] [datetime] NOT NULL,
-[HVLogCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[HVLogCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [HVLogDeleteDate] [datetime] NULL,
-[HVLogDeleter] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HVLogDeleter] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HVLogEditDate] [datetime] NULL,
-[HVLogEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[HVLogEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HVSupervisorParticipated] [bit] NULL,
 [NextScheduledVisit] [datetime] NULL,
 [NextVisitNotes] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -234,7 +234,7 @@ CREATE TABLE [dbo].[HVLogDeleted]
 [VisitStartTime] [datetime] NOT NULL,
 [VisitType] [char] (6) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [VisitTypeComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[HVLogDeleted] ADD CONSTRAINT [PK__HVLogDeleted] PRIMARY KEY CLUSTERED  ([HVLogDeletedPK]) ON [PRIMARY]
 GO

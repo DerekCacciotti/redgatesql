@@ -17,10 +17,10 @@ CREATE TABLE [dbo].[PC1Issues]
 [OtherIssueSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [OtherLegalProblems] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PC1IssuesCreateDate] [datetime] NOT NULL CONSTRAINT [DF_PC1Issues_PC1IssuesCreateDate] DEFAULT (getdate()),
-[PC1IssuesCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[PC1IssuesCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PC1IssuesDate] [datetime] NOT NULL,
 [PC1IssuesEditDate] [datetime] NULL,
-[PC1IssuesEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PC1IssuesEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PC1IssuesPK_old] [int] NOT NULL,
 [PhysicalDisability] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NOT NULL,
@@ -29,12 +29,6 @@ CREATE TABLE [dbo].[PC1Issues]
 [Stress] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SubstanceAbuse] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[PC1Issues] WITH NOCHECK ADD
-CONSTRAINT [FK_PC1Issues_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-CREATE NONCLUSTERED INDEX [IX_FK_PC1Issues_HVCaseFK] ON [dbo].[PC1Issues] ([HVCaseFK]) ON [PRIMARY]
-
-CREATE NONCLUSTERED INDEX [IX_FK_PC1Issues_ProgramFK] ON [dbo].[PC1Issues] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -51,5 +45,11 @@ From [PC1Issues] INNER JOIN Inserted ON [PC1Issues].[PC1IssuesPK]= Inserted.[PC1
 GO
 ALTER TABLE [dbo].[PC1Issues] ADD CONSTRAINT [PK__PC1Issue__B4E655D7503BEA1C] PRIMARY KEY CLUSTERED  ([PC1IssuesPK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [IX_FK_PC1Issues_HVCaseFK] ON [dbo].[PC1Issues] ([HVCaseFK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_PC1Issues_ProgramFK] ON [dbo].[PC1Issues] ([ProgramFK]) ON [PRIMARY]
+GO
 ALTER TABLE [dbo].[PC1Issues] WITH NOCHECK ADD CONSTRAINT [FK_PC1Issues_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
+GO
+ALTER TABLE [dbo].[PC1Issues] WITH NOCHECK ADD CONSTRAINT [FK_PC1Issues_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO

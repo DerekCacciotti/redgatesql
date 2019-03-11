@@ -2,9 +2,9 @@ CREATE TABLE [dbo].[listMedicalProvider]
 (
 [listMedicalProviderPK] [int] NOT NULL IDENTITY(1, 1),
 [MedicalProviderCreateDate] [datetime] NOT NULL CONSTRAINT [DF_listMedicalProvider_MedicalProviderCreateDate] DEFAULT (getdate()),
-[MedicalProviderCreator] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[MedicalProviderCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [MedicalProviderEditDate] [datetime] NULL,
-[MedicalProviderEditor] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[MedicalProviderEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [MPAddress] [char] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [MPCity] [char] (20) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [MPFirstName] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -15,10 +15,6 @@ CREATE TABLE [dbo].[listMedicalProvider]
 [MPZip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
-ALTER TABLE [dbo].[listMedicalProvider] WITH NOCHECK ADD
-CONSTRAINT [FK_listMedicalProvider_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
-CREATE NONCLUSTERED INDEX [IX_FK_listMedicalProvider_ProgramFK] ON [dbo].[listMedicalProvider] ([ProgramFK]) ON [PRIMARY]
-
 GO
 SET QUOTED_IDENTIFIER ON
 GO
@@ -34,4 +30,8 @@ Update listMedicalProvider Set listMedicalProvider.MedicalProviderEditDate= getd
 From [listMedicalProvider] INNER JOIN Inserted ON [listMedicalProvider].[listMedicalProviderPK]= Inserted.[listMedicalProviderPK]
 GO
 ALTER TABLE [dbo].[listMedicalProvider] ADD CONSTRAINT [PK__listMedi__EA77966F32AB8735] PRIMARY KEY CLUSTERED  ([listMedicalProviderPK]) ON [PRIMARY]
+GO
+CREATE NONCLUSTERED INDEX [IX_FK_listMedicalProvider_ProgramFK] ON [dbo].[listMedicalProvider] ([ProgramFK]) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[listMedicalProvider] WITH NOCHECK ADD CONSTRAINT [FK_listMedicalProvider_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
