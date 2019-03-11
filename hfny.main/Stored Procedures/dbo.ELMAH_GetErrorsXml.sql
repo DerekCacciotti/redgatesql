@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 CREATE PROCEDURE [dbo].[ELMAH_GetErrorsXml]
 (
     @Application NVARCHAR(60),
@@ -24,8 +23,8 @@ AS
     FROM 
         [ELMAH_Error]
     WHERE 
-        [Application] = @Application
-
+        ([Application] = @Application OR @Application = '*')
+		
     -- Get the ID of the first error for the requested page
 
     SET @StartRowIndex = @PageIndex * @PageSize + 1
@@ -41,7 +40,7 @@ AS
         FROM 
             [ELMAH_Error]
         WHERE   
-            [Application] = @Application
+               ([Application] = @Application OR @Application = '*')
         ORDER BY 
             [TimeUtc] DESC, 
             [Sequence] DESC
@@ -72,7 +71,7 @@ AS
     FROM 
         [ELMAH_Error] error
     WHERE
-        [Application] = @Application
+         ([Application] = @Application OR @Application = '*')
     AND
         [TimeUtc] <= @FirstTimeUTC
     AND 
@@ -82,5 +81,4 @@ AS
         [Sequence] DESC
     FOR
         XML AUTO
-
 GO

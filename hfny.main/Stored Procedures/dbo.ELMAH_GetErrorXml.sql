@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 CREATE PROCEDURE [dbo].[ELMAH_GetErrorXml]
 (
     @Application NVARCHAR(60),
@@ -19,6 +18,5 @@ AS
     WHERE
         [ErrorId] = @ErrorId
     AND
-        [Application] = @Application
-
+        ([Application] = @Application OR @Application = '*')
 GO
