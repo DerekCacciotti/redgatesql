@@ -26,7 +26,7 @@ begin
 			  ,max(TimeRun) as UserLastRun
 			from ReportHistory rh
 			where ProgramFK = @ProgramFK
-				 and UserFK = @UserName
+				 and UserName = @UserName
 			group by ProgramFK
 					,ReportFK
 	),
@@ -45,7 +45,7 @@ begin
 			  ,ReportFK
 			from ReportHistory rh
 			where ProgramFK = @ProgramFK
-				 and UserFK = @UserName
+				 and UserName = @UserName
 			group by ProgramFK
 					,ReportFK
 
