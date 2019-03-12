@@ -28,7 +28,7 @@ CREATE PROCEDURE [dbo].[spAddWorker](@Apt char(10)=NULL,
 @SupervisorCoreDate datetime=NULL,
 @SupervisorFirstEvent datetime=NULL,
 @SupervisorInitialStart datetime=NULL,
-@WorkerCreator char(10)=NULL,
+@WorkerCreator varchar(max)=NULL,
 @WorkerDOB datetime=NULL,
 @WorkerPK_old int=NULL,
 @YoungestChild int=NULL,
@@ -38,7 +38,7 @@ CREATE PROCEDURE [dbo].[spAddWorker](@Apt char(10)=NULL,
 @YearsEarlyChildhoodExperience int=NULL,
 @YearsChildAbuseClasses int=NULL,
 @SupervisionScheduledDay int=NULL,
-@UserName varchar(256)=NULL)
+@UserName varchar(max)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) WorkerPK
 FROM Worker lastRow

@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,7 +6,7 @@ CREATE PROCEDURE [dbo].[spEditFatherFigure](@FatherFigurePK int=NULL,
 @DateAcceptService datetime=NULL,
 @DateInactive datetime=NULL,
 @FatherAdvocateFK int=NULL,
-@FatherFigureEditor char(10)=NULL,
+@FatherFigureEditor varchar(max)=NULL,
 @HVCaseFK int=NULL,
 @IsOBP bit=NULL,
 @IsPC2 bit=NULL,

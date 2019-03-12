@@ -30,7 +30,7 @@ CREATE PROCEDURE [dbo].[spEditWorker](@WorkerPK int=NULL,
 @SupervisorFirstEvent datetime=NULL,
 @SupervisorInitialStart datetime=NULL,
 @WorkerDOB datetime=NULL,
-@WorkerEditor char(10)=NULL,
+@WorkerEditor varchar(max)=NULL,
 @WorkerPK_old int=NULL,
 @YoungestChild int=NULL,
 @Zip char(10)=NULL,
@@ -39,7 +39,7 @@ CREATE PROCEDURE [dbo].[spEditWorker](@WorkerPK int=NULL,
 @YearsEarlyChildhoodExperience int=NULL,
 @YearsChildAbuseClasses int=NULL,
 @SupervisionScheduledDay int=NULL,
-@UserName varchar(256)=NULL)
+@UserName varchar(max)=NULL)
 AS
 UPDATE Worker
 SET 

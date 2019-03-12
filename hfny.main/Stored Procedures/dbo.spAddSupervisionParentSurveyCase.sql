@@ -22,7 +22,7 @@ CREATE PROCEDURE [dbo].[spAddSupervisionParentSurveyCase](@AssessmentIssues bit=
 @RiskFactorsComments varchar(max)=NULL,
 @RiskFactorsStatus bit=NULL,
 @SupervisionFK int=NULL,
-@SupervisionParentSurveyCaseCreator char(10)=NULL)
+@SupervisionParentSurveyCaseCreator varchar(max)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) SupervisionParentSurveyCasePK
 FROM SupervisionParentSurveyCase lastRow

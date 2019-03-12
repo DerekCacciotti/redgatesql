@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddASQ](@ASQCreator char(10)=NULL,
+CREATE PROCEDURE [dbo].[spAddASQ](@ASQCreator varchar(max)=NULL,
 @ProgramFK int=NULL,
 @ASQCommunicationScore numeric(4, 1)=NULL,
 @ASQFineMotorScore numeric(4, 1)=NULL,

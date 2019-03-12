@@ -1,11 +1,10 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditCaseFilter](@CaseFilterPK int=NULL,
 @CaseFilterNameFK int=NULL,
-@CaseFilterEditor varchar(10)=NULL,
+@CaseFilterEditor varchar(max)=NULL,
 @CaseFilterNameChoice bit=NULL,
 @CaseFilterNameDate date=NULL,
 @CaseFilterNameOptionFK int=NULL,

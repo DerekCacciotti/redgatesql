@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spAddHVGroupParticipants](@HVGroupFK int=NULL,
 @GroupFatherFigureFK int=NULL,
 @HVCaseFK int=NULL,
-@HVGroupParticipantsCreator char(10)=NULL,
+@HVGroupParticipantsCreator varchar(max)=NULL,
 @ProgramFK int=NULL,
 @PCFK int=NULL,
 @RoleType char(3)=NULL)

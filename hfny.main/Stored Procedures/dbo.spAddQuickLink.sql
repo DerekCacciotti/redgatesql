@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spAddQuickLink](@LinkType char(4)=NULL,
 @LinkURL varchar(100)=NULL,
 @QuickLinkDescription varchar(50)=NULL,
-@UserName varchar(50)=NULL)
+@UserName varchar(max)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) QuickLinkPK
 FROM QuickLink lastRow

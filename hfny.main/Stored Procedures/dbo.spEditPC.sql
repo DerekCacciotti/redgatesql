@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -17,7 +16,7 @@ CREATE PROCEDURE [dbo].[spEditPC](@PCPK int=NULL,
 @PCCity varchar(200)=NULL,
 @PCDOB datetime=NULL,
 @PCDOD datetime=NULL,
-@PCEditor char(10)=NULL,
+@PCEditor varchar(max)=NULL,
 @PCEmail varchar(50)=NULL,
 @PCEmergencyPhone varchar(12)=NULL,
 @PCFirstName varchar(200)=NULL,

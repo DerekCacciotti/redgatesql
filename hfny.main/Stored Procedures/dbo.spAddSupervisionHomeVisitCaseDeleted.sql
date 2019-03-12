@@ -32,7 +32,7 @@ CREATE PROCEDURE [dbo].[spAddSupervisionHomeVisitCaseDeleted](@SupervisionHomeVi
 @ServicePlanComments varchar(max)=NULL,
 @ServicePlanStatus bit=NULL,
 @SupervisionFK int=NULL,
-@SupervisionHomeVisitCaseCreator char(10)=NULL,
+@SupervisionHomeVisitCaseCreator varchar(max)=NULL,
 @Tools bit=NULL,
 @ToolsComments varchar(max)=NULL,
 @ToolsStatus bit=NULL,
@@ -40,7 +40,7 @@ CREATE PROCEDURE [dbo].[spAddSupervisionHomeVisitCaseDeleted](@SupervisionHomeVi
 @TransitionPlanningComments varchar(max)=NULL,
 @TransitionPlanningStatus bit=NULL,
 @SupervisionHomeVisitCaseDeleteDate datetime=NULL,
-@SupervisionHomeVisitCaseDeleter char(10)=NULL)
+@SupervisionHomeVisitCaseDeleter varchar(max)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) SupervisionHomeVisitCaseDeletedPK
 FROM SupervisionHomeVisitCaseDeleted lastRow

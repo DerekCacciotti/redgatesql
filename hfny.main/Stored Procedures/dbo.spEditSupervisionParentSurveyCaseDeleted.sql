@@ -24,9 +24,9 @@ CREATE PROCEDURE [dbo].[spEditSupervisionParentSurveyCaseDeleted](@SupervisionPa
 @RiskFactorsComments varchar(max)=NULL,
 @RiskFactorsStatus bit=NULL,
 @SupervisionFK int=NULL,
-@SupervisionParentSurveyCaseEditor char(10)=NULL,
+@SupervisionParentSurveyCaseEditor varchar(max)=NULL,
 @SupervisionParentSurveyCaseDeleteDate datetime=NULL,
-@SupervisionParentSurveyCaseDeleter char(10)=NULL)
+@SupervisionParentSurveyCaseDeleter varchar(max)=NULL)
 AS
 UPDATE SupervisionParentSurveyCaseDeleted
 SET 

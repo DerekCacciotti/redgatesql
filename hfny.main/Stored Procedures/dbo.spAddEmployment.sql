@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddEmployment](@EmploymentCreator char(10)=NULL,
+CREATE PROCEDURE [dbo].[spAddEmployment](@EmploymentCreator varchar(max)=NULL,
 @EmploymentEndDate datetime=NULL,
 @EmploymentMonthlyHours int=NULL,
 @EmploymentStartDate datetime=NULL,

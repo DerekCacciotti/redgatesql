@@ -4,12 +4,12 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddFormReview](@FormDate datetime=NULL,
 @FormFK int=NULL,
-@FormReviewCreator char(10)=NULL,
+@FormReviewCreator varchar(max)=NULL,
 @FormType char(2)=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL,
 @ReviewDateTime datetime=NULL,
-@ReviewedBy varchar(10)=NULL)
+@ReviewedBy varchar(50)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) FormReviewPK
 FROM FormReview lastRow

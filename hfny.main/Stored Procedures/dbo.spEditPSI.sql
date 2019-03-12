@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -18,7 +17,7 @@ CREATE PROCEDURE [dbo].[spEditPSI](@PSIPK int=NULL,
 @ParentChildDysfunctionalInteractionValid bit=NULL,
 @ProgramFK int=NULL,
 @PSIDateComplete datetime=NULL,
-@PSIEditor char(10)=NULL,
+@PSIEditor varchar(max)=NULL,
 @PSIInterval char(2)=NULL,
 @PSIInWindow bit=NULL,
 @PSILanguage char(2)=NULL,

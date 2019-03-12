@@ -46,7 +46,7 @@ CREATE PROCEDURE [dbo].[spEditWorkerProgram](@WorkerProgramPK int=NULL,
 @TerminationReasonOtherSpecify varchar(50)=NULL,
 @WorkerFK int=NULL,
 @WorkerNotes varchar(500)=NULL,
-@WorkerProgramEditor char(10)=NULL,
+@WorkerProgramEditor varchar(max)=NULL,
 @WorkPhone char(12)=NULL)
 AS
 UPDATE WorkerProgram

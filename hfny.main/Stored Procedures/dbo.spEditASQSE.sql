@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditASQSE](@ASQSEPK int=NULL,
 @ASQSEDateCompleted datetime=NULL,
-@ASQSEEditor char(10)=NULL,
+@ASQSEEditor varchar(max)=NULL,
 @ASQSEInWindow bit=NULL,
 @ASQSEOverCutOff bit=NULL,
 @ASQSEReceiving char(1)=NULL,

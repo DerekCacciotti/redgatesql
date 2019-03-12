@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditCaseNote](@CaseNotePK int=NULL,
 @CaseNoteContents varchar(max)=NULL,
 @CaseNoteDate date=NULL,
-@CaseNoteEditor char(10)=NULL,
+@CaseNoteEditor varchar(max)=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL)
 AS

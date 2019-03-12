@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spAddHITS](@FormFK int=NULL,
 @FormInterval char(2)=NULL,
 @FormType char(2)=NULL,
-@HITSCreator char(10)=NULL,
+@HITSCreator varchar(max)=NULL,
 @Hurt char(2)=NULL,
 @HVCaseFK int=NULL,
 @Insult char(2)=NULL,

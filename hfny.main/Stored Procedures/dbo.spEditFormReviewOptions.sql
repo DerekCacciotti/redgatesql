@@ -1,11 +1,10 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditFormReviewOptions](@FormReviewOptionsPK int=NULL,
 @FormReviewEndDate datetime=NULL,
-@FormReviewOptionsEditor char(10)=NULL,
+@FormReviewOptionsEditor varchar(max)=NULL,
 @FormReviewStartDate datetime=NULL,
 @FormType char(2)=NULL,
 @ProgramFK int=NULL)

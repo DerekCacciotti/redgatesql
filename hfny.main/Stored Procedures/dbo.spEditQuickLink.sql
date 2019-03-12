@@ -6,7 +6,7 @@ CREATE PROCEDURE [dbo].[spEditQuickLink](@QuickLinkPK int=NULL,
 @LinkType char(4)=NULL,
 @LinkURL varchar(100)=NULL,
 @QuickLinkDescription varchar(50)=NULL,
-@UserName varchar(50)=NULL)
+@UserName varchar(max)=NULL)
 AS
 UPDATE QuickLink
 SET 

@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddCaseProgram](@CaseProgramCreator char(10)=NULL,
+CREATE PROCEDURE [dbo].[spAddCaseProgram](@CaseProgramCreator varchar(max)=NULL,
 @CaseStartDate datetime=NULL,
 @CurrentFAFK int=NULL,
 @CurrentFAWFK int=NULL,

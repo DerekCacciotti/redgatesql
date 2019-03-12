@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddFormReviewOptions](@FormReviewEndDate datetime=NULL,
-@FormReviewOptionsCreator char(10)=NULL,
+@FormReviewOptionsCreator varchar(max)=NULL,
 @FormReviewStartDate datetime=NULL,
 @FormType char(2)=NULL,
 @ProgramFK int=NULL)

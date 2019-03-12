@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -7,7 +6,7 @@ CREATE PROCEDURE [dbo].[spEditHVGroupParticipants](@HVGroupParticipantsPK int=NU
 @HVGroupFK int=NULL,
 @GroupFatherFigureFK int=NULL,
 @HVCaseFK int=NULL,
-@HVGroupParticipantsEditor char(10)=NULL,
+@HVGroupParticipantsEditor varchar(max)=NULL,
 @ProgramFK int=NULL,
 @PCFK int=NULL,
 @RoleType char(3)=NULL)

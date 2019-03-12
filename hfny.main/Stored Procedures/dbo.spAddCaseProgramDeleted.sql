@@ -2,9 +2,9 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddCaseProgramDeleted](@CaseProgramCreator char(10)=NULL,
+CREATE PROCEDURE [dbo].[spAddCaseProgramDeleted](@CaseProgramCreator varchar(max)=NULL,
 @CaseProgramDeleteDate datetime=NULL,
-@CaseProgramDeleter char(10)=NULL,
+@CaseProgramDeleter varchar(max)=NULL,
 @CaseStartDate datetime=NULL,
 @CurrentFAFK int=NULL,
 @CurrentFAWFK int=NULL,

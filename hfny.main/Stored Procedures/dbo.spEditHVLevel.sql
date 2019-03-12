@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditHVLevel](@HVLevelPK int=NULL,
 @HVCaseFK int=NULL,
-@HVLevelEditor char(10)=NULL,
+@HVLevelEditor varchar(max)=NULL,
 @LevelAssignDate datetime=NULL,
 @LevelFK int=NULL,
 @ProgramFK int=NULL)

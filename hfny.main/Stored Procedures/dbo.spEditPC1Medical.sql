@@ -7,7 +7,7 @@ CREATE PROCEDURE [dbo].[spEditPC1Medical](@PC1MedicalPK int=NULL,
 @HVCaseFK int=NULL,
 @MedicalIssue varchar(500)=NULL,
 @PC1ItemDate datetime=NULL,
-@PC1MedicalEditor char(10)=NULL,
+@PC1MedicalEditor varchar(max)=NULL,
 @PC1MedicalItem char(2)=NULL,
 @ProgramFK int=NULL)
 AS

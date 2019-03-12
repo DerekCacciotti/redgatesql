@@ -1,10 +1,9 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditAuditC](@AuditCPK int=NULL,
-@AuditCEditor char(10)=NULL,
+@AuditCEditor varchar(max)=NULL,
 @DailyDrinks int=NULL,
 @FormFK int=NULL,
 @FormInterval char(2)=NULL,

@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddHVLevel](@HVCaseFK int=NULL,
-@HVLevelCreator char(10)=NULL,
+@HVLevelCreator varchar(max)=NULL,
 @LevelAssignDate datetime=NULL,
 @LevelFK int=NULL,
 @ProgramFK int=NULL)

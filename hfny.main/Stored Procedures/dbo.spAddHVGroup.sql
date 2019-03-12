@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spAddHVGroup](@ActivityTopic varchar(500)=NULL,
 @FAModerator1 int=NULL,
 @FAModerator2 int=NULL,
-@GroupCreator char(10)=NULL,
+@GroupCreator varchar(max)=NULL,
 @GroupDate datetime=NULL,
 @GroupLengthHours int=NULL,
 @GroupLengthMinutes int=NULL,

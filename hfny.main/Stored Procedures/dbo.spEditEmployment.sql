@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditEmployment](@EmploymentPK int=NULL,
-@EmploymentEditor char(10)=NULL,
+@EmploymentEditor varchar(max)=NULL,
 @EmploymentEndDate datetime=NULL,
 @EmploymentMonthlyHours int=NULL,
 @EmploymentStartDate datetime=NULL,

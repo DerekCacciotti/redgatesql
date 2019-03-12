@@ -6,7 +6,7 @@ CREATE PROCEDURE [dbo].[spEditWorkerAssignment](@WorkerAssignmentPK int=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL,
 @WorkerAssignmentDate datetime=NULL,
-@WorkerAssignmentEditor char(10)=NULL,
+@WorkerAssignmentEditor varchar(max)=NULL,
 @WorkerFK int=NULL)
 AS
 UPDATE WorkerAssignment

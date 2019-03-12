@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditHVLevelDeleted](@HVLevelDeletedPK int=NULL,
 @HVLevelPK int=NULL,
 @HVCaseFK int=NULL,
-@HVLevelEditor char(10)=NULL,
+@HVLevelEditor varchar(max)=NULL,
 @LevelAssignDate datetime=NULL,
 @LevelFK int=NULL,
 @ProgramFK int=NULL)

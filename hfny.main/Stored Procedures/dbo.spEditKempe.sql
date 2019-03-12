@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -21,7 +20,7 @@ CREATE PROCEDURE [dbo].[spEditKempe](@KempePK int=NULL,
 @GrandParentPresent bit=NULL,
 @HVCaseFK int=NULL,
 @KempeDate datetime=NULL,
-@KempeEditor char(10)=NULL,
+@KempeEditor varchar(max)=NULL,
 @KempeResult bit=NULL,
 @MOBPartnerPresent bit=NULL,
 @MOBPresent bit=NULL,

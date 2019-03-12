@@ -15,7 +15,7 @@ CREATE PROCEDURE [dbo].[spAddTCMedical](@ChildType char(2)=NULL,
 @ProgramFK int=NULL,
 @TCIDFK int=NULL,
 @TCItemDate datetime=NULL,
-@TCMedicalCreator char(10)=NULL,
+@TCMedicalCreator varchar(max)=NULL,
 @TCMedicalItem char(2)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) TCMedicalPK

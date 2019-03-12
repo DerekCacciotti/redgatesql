@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditlistMedicalProvider](@listMedicalProviderPK int=NULL,
-@MedicalProviderEditor char(10)=NULL,
+@MedicalProviderEditor varchar(max)=NULL,
 @MPAddress char(40)=NULL,
 @MPCity char(20)=NULL,
 @MPFirstName varchar(200)=NULL,

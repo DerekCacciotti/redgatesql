@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -17,7 +16,7 @@ CREATE PROCEDURE [dbo].[spEditOtherChild](@OtherChildPK int=NULL,
 @LivingArrangement char(2)=NULL,
 @LivingArrangementSpecify char(100)=NULL,
 @MultiBirth int=NULL,
-@OtherChildEditor char(10)=NULL,
+@OtherChildEditor varchar(max)=NULL,
 @PregnancyOutcome char(2)=NULL,
 @PrenatalCare char(1)=NULL,
 @ProgramFK int=NULL,

@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddEducation](@EducationCreator char(10)=NULL,
+CREATE PROCEDURE [dbo].[spAddEducation](@EducationCreator varchar(max)=NULL,
 @EducationMonthlyHours int=NULL,
 @FormDate datetime=NULL,
 @FormFK int=NULL,

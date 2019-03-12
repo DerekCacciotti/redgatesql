@@ -4,8 +4,8 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditCaseProgramDeleted](@CaseProgramDeletedPK int=NULL,
 @CaseProgramDeleteDate datetime=NULL,
-@CaseProgramDeleter char(10)=NULL,
-@CaseProgramEditor char(10)=NULL,
+@CaseProgramDeleter varchar(max)=NULL,
+@CaseProgramEditor varchar(max)=NULL,
 @CaseStartDate datetime=NULL,
 @CurrentFAFK int=NULL,
 @CurrentFAWFK int=NULL,

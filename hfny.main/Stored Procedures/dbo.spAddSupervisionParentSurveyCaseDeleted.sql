@@ -23,9 +23,9 @@ CREATE PROCEDURE [dbo].[spAddSupervisionParentSurveyCaseDeleted](@SupervisionPar
 @RiskFactorsComments varchar(max)=NULL,
 @RiskFactorsStatus bit=NULL,
 @SupervisionFK int=NULL,
-@SupervisionParentSurveyCaseCreator char(10)=NULL,
+@SupervisionParentSurveyCaseCreator varchar(max)=NULL,
 @SupervisionParentSurveyCaseDeleteDate datetime=NULL,
-@SupervisionParentSurveyCaseDeleter char(10)=NULL)
+@SupervisionParentSurveyCaseDeleter varchar(max)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) SupervisionParentSurveyCaseDeletedPK
 FROM SupervisionParentSurveyCaseDeleted lastRow

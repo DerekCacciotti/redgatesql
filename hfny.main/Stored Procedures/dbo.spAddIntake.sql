@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddIntake](@FSWFK int=NULL,
 @HVCaseFK int=NULL,
-@IntakeCreator char(10)=NULL,
+@IntakeCreator varchar(max)=NULL,
 @IntakeDate datetime=NULL,
 @IntakeEditdate datetime=NULL,
 @ProgramFK int=NULL,

@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyBenefits numeric(4, 0)=NULL,
 @AvailableMonthlyBenefitsUnknown bit=NULL,
 @AvailableMonthlyIncome numeric(5, 0)=NULL,
-@CommonAttributesCreator char(10)=NULL,
+@CommonAttributesCreator varchar(max)=NULL,
 @EducationalEnrollment char(1)=NULL,
 @FormDate datetime=NULL,
 @FormFK int=NULL,

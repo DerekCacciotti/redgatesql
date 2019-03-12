@@ -6,7 +6,7 @@ CREATE PROCEDURE [dbo].[spAddPC1Medical](@HospitalNights int=NULL,
 @HVCaseFK int=NULL,
 @MedicalIssue varchar(500)=NULL,
 @PC1ItemDate datetime=NULL,
-@PC1MedicalCreator char(10)=NULL,
+@PC1MedicalCreator varchar(max)=NULL,
 @PC1MedicalItem char(2)=NULL,
 @ProgramFK int=NULL)
 AS

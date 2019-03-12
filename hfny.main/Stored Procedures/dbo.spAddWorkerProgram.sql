@@ -45,7 +45,7 @@ CREATE PROCEDURE [dbo].[spAddWorkerProgram](@BackgroundCheckDate date=NULL,
 @TerminationReasonOtherSpecify varchar(50)=NULL,
 @WorkerFK int=NULL,
 @WorkerNotes varchar(500)=NULL,
-@WorkerProgramCreator char(10)=NULL,
+@WorkerProgramCreator varchar(max)=NULL,
 @WorkPhone char(12)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) WorkerProgramPK

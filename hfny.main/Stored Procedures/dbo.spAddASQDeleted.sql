@@ -3,11 +3,11 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddASQDeleted](@ASQPK int=NULL,
-@ASQCreator char(10)=NULL,
+@ASQCreator varchar(max)=NULL,
 @ProgramFK int=NULL,
 @ASQCommunicationScore numeric(4, 1)=NULL,
 @ASQDeleteDate datetime=NULL,
-@ASQDeleter char(10)=NULL,
+@ASQDeleter varchar(max)=NULL,
 @ASQFineMotorScore numeric(4, 1)=NULL,
 @ASQGrossMotorScore numeric(4, 1)=NULL,
 @ASQInWindow bit=NULL,

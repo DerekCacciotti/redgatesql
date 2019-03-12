@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spAddFatherFigure](@DateAcceptService datetime=NULL,
 @DateInactive datetime=NULL,
 @FatherAdvocateFK int=NULL,
-@FatherFigureCreator char(10)=NULL,
+@FatherFigureCreator varchar(max)=NULL,
 @HVCaseFK int=NULL,
 @IsOBP bit=NULL,
 @IsPC2 bit=NULL,

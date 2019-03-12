@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddCaseNote](@CaseNoteContents varchar(max)=NULL,
-@CaseNoteCreator char(10)=NULL,
+@CaseNoteCreator varchar(max)=NULL,
 @CaseNoteDate date=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL)

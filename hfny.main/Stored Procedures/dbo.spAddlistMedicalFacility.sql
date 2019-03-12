@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddlistMedicalFacility](@MFAddress char(40)=NULL,
 @MFCity char(20)=NULL,
-@MFCreator char(10)=NULL,
+@MFCreator varchar(max)=NULL,
 @MFIsActive bit=NULL,
 @MFName char(50)=NULL,
 @MFPhone char(12)=NULL,

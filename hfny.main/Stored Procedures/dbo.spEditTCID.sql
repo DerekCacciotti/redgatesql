@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -25,7 +24,7 @@ CREATE PROCEDURE [dbo].[spEditTCID](@TCIDPK int=NULL,
 @TCDOD datetime=NULL,
 @TCFirstName varchar(200)=NULL,
 @TCGender char(2)=NULL,
-@TCIDEditor char(10)=NULL,
+@TCIDEditor varchar(max)=NULL,
 @TCIDFormCompleteDate datetime=NULL,
 @TCIDPK_old int=NULL,
 @TCLastName varchar(200)=NULL,

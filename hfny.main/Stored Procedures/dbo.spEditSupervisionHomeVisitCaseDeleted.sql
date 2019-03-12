@@ -33,7 +33,7 @@ CREATE PROCEDURE [dbo].[spEditSupervisionHomeVisitCaseDeleted](@SupervisionHomeV
 @ServicePlanComments varchar(max)=NULL,
 @ServicePlanStatus bit=NULL,
 @SupervisionFK int=NULL,
-@SupervisionHomeVisitCaseEditor char(10)=NULL,
+@SupervisionHomeVisitCaseEditor varchar(max)=NULL,
 @Tools bit=NULL,
 @ToolsComments varchar(max)=NULL,
 @ToolsStatus bit=NULL,
@@ -41,7 +41,7 @@ CREATE PROCEDURE [dbo].[spEditSupervisionHomeVisitCaseDeleted](@SupervisionHomeV
 @TransitionPlanningComments varchar(max)=NULL,
 @TransitionPlanningStatus bit=NULL,
 @SupervisionHomeVisitCaseDeleteDate datetime=NULL,
-@SupervisionHomeVisitCaseDeleter char(10)=NULL)
+@SupervisionHomeVisitCaseDeleter varchar(max)=NULL)
 AS
 UPDATE SupervisionHomeVisitCaseDeleted
 SET 

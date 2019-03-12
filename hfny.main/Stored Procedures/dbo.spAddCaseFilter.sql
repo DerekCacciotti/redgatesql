@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddCaseFilter](@CaseFilterNameFK int=NULL,
-@CaseFilterCreator varchar(10)=NULL,
+@CaseFilterCreator varchar(max)=NULL,
 @CaseFilterNameChoice bit=NULL,
 @CaseFilterNameDate date=NULL,
 @CaseFilterNameOptionFK int=NULL,

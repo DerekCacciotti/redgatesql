@@ -15,7 +15,7 @@ CREATE PROCEDURE [dbo].[spAddServiceReferral](@FamilyCode char(2)=NULL,
 @ReferralDate datetime=NULL,
 @ServiceCode char(2)=NULL,
 @ServiceReceived char(1)=NULL,
-@ServiceReferralCreator char(10)=NULL,
+@ServiceReferralCreator varchar(max)=NULL,
 @StartDate datetime=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) ServiceReferralPK

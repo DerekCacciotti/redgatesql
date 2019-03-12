@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddTrainer](@ProgramFK int=NULL,
-@TrainerCreator char(10)=NULL,
+@TrainerCreator varchar(max)=NULL,
 @TrainerFirstName char(20)=NULL,
 @TrainerLastName char(30)=NULL,
 @TrainerOrganization char(30)=NULL,

@@ -16,7 +16,7 @@ CREATE PROCEDURE [dbo].[spEditTCMedical](@TCMedicalPK int=NULL,
 @ProgramFK int=NULL,
 @TCIDFK int=NULL,
 @TCItemDate datetime=NULL,
-@TCMedicalEditor char(10)=NULL,
+@TCMedicalEditor varchar(max)=NULL,
 @TCMedicalItem char(2)=NULL)
 AS
 UPDATE TCMedical

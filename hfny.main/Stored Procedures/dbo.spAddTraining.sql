@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spAddTraining](@ProgramFK int=NULL,
 @TrainerFK int=NULL,
 @TrainingMethodFK int=NULL,
-@TrainingCreator char(10)=NULL,
+@TrainingCreator varchar(max)=NULL,
 @TrainingDate datetime=NULL,
 @TrainingDays int=NULL,
 @TrainingDescription varchar(500)=NULL,

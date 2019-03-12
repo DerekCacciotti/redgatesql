@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditASQ](@ASQPK int=NULL,
 @ProgramFK int=NULL,
 @ASQCommunicationScore numeric(4, 1)=NULL,
-@ASQEditor char(10)=NULL,
+@ASQEditor varchar(max)=NULL,
 @ASQFineMotorScore numeric(4, 1)=NULL,
 @ASQGrossMotorScore numeric(4, 1)=NULL,
 @ASQInWindow bit=NULL,

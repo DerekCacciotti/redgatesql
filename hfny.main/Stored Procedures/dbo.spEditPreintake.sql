@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -20,7 +19,7 @@ CREATE PROCEDURE [dbo].[spEditPreintake](@PreintakePK int=NULL,
 @PICallFromParent int=NULL,
 @PICaseReview int=NULL,
 @PIDate datetime=NULL,
-@PIEditor char(10)=NULL,
+@PIEditor varchar(max)=NULL,
 @PIFSWFK int=NULL,
 @PIGift int=NULL,
 @PIOtherActivity int=NULL,

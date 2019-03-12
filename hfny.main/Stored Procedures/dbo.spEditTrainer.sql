@@ -1,11 +1,10 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditTrainer](@TrainerPK int=NULL,
 @ProgramFK int=NULL,
-@TrainerEditor char(10)=NULL,
+@TrainerEditor varchar(max)=NULL,
 @TrainerFirstName char(20)=NULL,
 @TrainerLastName char(30)=NULL,
 @TrainerOrganization char(30)=NULL,

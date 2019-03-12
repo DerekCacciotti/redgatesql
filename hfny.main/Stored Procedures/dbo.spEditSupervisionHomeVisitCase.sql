@@ -32,7 +32,7 @@ CREATE PROCEDURE [dbo].[spEditSupervisionHomeVisitCase](@SupervisionHomeVisitCas
 @ServicePlanComments varchar(max)=NULL,
 @ServicePlanStatus bit=NULL,
 @SupervisionFK int=NULL,
-@SupervisionHomeVisitCaseEditor char(10)=NULL,
+@SupervisionHomeVisitCaseEditor varchar(max)=NULL,
 @Tools bit=NULL,
 @ToolsComments varchar(max)=NULL,
 @ToolsStatus bit=NULL,

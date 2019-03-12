@@ -31,7 +31,7 @@ CREATE PROCEDURE [dbo].[spAddSupervisionHomeVisitCase](@CaseComments varchar(max
 @ServicePlanComments varchar(max)=NULL,
 @ServicePlanStatus bit=NULL,
 @SupervisionFK int=NULL,
-@SupervisionHomeVisitCaseCreator char(10)=NULL,
+@SupervisionHomeVisitCaseCreator varchar(max)=NULL,
 @Tools bit=NULL,
 @ToolsComments varchar(max)=NULL,
 @ToolsStatus bit=NULL,

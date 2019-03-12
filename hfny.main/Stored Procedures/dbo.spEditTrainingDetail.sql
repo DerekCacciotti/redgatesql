@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,7 +8,7 @@ CREATE PROCEDURE [dbo].[spEditTrainingDetail](@TrainingDetailPK int=NULL,
 @SubTopicFK int=NULL,
 @SubTopicTime int=NULL,
 @TopicFK int=NULL,
-@TrainingDetailEditor char(10)=NULL,
+@TrainingDetailEditor varchar(max)=NULL,
 @TrainingDetailPK_old int=NULL,
 @TrainingFK int=NULL,
 @ExemptDescription varchar(500)=NULL,

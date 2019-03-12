@@ -16,7 +16,7 @@ CREATE PROCEDURE [dbo].[spEditServiceReferral](@ServiceReferralPK int=NULL,
 @ReferralDate datetime=NULL,
 @ServiceCode char(2)=NULL,
 @ServiceReceived char(1)=NULL,
-@ServiceReferralEditor char(10)=NULL,
+@ServiceReferralEditor varchar(max)=NULL,
 @StartDate datetime=NULL)
 AS
 UPDATE ServiceReferral

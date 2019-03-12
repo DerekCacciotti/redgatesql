@@ -8,8 +8,8 @@ CREATE PROCEDURE [dbo].[spAddReportHistory](@ProgramFK int=NULL,
 @ReportName char(100)=NULL,
 @ReportType char(20)=NULL,
 @TimeRun datetime=NULL,
-@UserFK char(10)=NULL,
-@ReportFK_old int=NULL)
+@ReportFK_old int=NULL,
+@UserName varchar(50)=NULL)
 AS
 IF NOT EXISTS (SELECT TOP(1) ReportHistoryPK
 FROM ReportHistory lastRow
@@ -20,8 +20,8 @@ WHERE
 @ReportName = lastRow.ReportName AND
 @ReportType = lastRow.ReportType AND
 @TimeRun = lastRow.TimeRun AND
-@UserFK = lastRow.UserFK AND
-@ReportFK_old = lastRow.ReportFK_old
+@ReportFK_old = lastRow.ReportFK_old AND
+@UserName = lastRow.UserName
 ORDER BY ReportHistoryPK DESC) 
 BEGIN
 INSERT INTO ReportHistory(
@@ -31,8 +31,8 @@ ReportFK,
 ReportName,
 ReportType,
 TimeRun,
-UserFK,
-ReportFK_old
+ReportFK_old,
+UserName
 )
 VALUES(
 @ProgramFK,
@@ -41,8 +41,8 @@ VALUES(
 @ReportName,
 @ReportType,
 @TimeRun,
-@UserFK,
-@ReportFK_old
+@ReportFK_old,
+@UserName
 )
 
 END

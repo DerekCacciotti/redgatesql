@@ -5,7 +5,7 @@ GO
 CREATE PROCEDURE [dbo].[spEditlistMedicalFacility](@listMedicalFacilityPK int=NULL,
 @MFAddress char(40)=NULL,
 @MFCity char(20)=NULL,
-@MFEditor char(10)=NULL,
+@MFEditor varchar(max)=NULL,
 @MFIsActive bit=NULL,
 @MFName char(50)=NULL,
 @MFPhone char(12)=NULL,

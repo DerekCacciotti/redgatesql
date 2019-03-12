@@ -4,7 +4,7 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddWorkerAssignment](@HVCaseFK int=NULL,
 @ProgramFK int=NULL,
-@WorkerAssignmentCreator char(10)=NULL,
+@WorkerAssignmentCreator varchar(max)=NULL,
 @WorkerAssignmentDate datetime=NULL,
 @WorkerFK int=NULL)
 AS

@@ -23,7 +23,7 @@ CREATE PROCEDURE [dbo].[spEditSupervisionParentSurveyCase](@SupervisionParentSur
 @RiskFactorsComments varchar(max)=NULL,
 @RiskFactorsStatus bit=NULL,
 @SupervisionFK int=NULL,
-@SupervisionParentSurveyCaseEditor char(10)=NULL)
+@SupervisionParentSurveyCaseEditor varchar(max)=NULL)
 AS
 UPDATE SupervisionParentSurveyCase
 SET 

@@ -5,12 +5,12 @@ GO
 CREATE PROCEDURE [dbo].[spEditFormReview](@FormReviewPK int=NULL,
 @FormDate datetime=NULL,
 @FormFK int=NULL,
-@FormReviewEditor char(10)=NULL,
+@FormReviewEditor varchar(max)=NULL,
 @FormType char(2)=NULL,
 @HVCaseFK int=NULL,
 @ProgramFK int=NULL,
 @ReviewDateTime datetime=NULL,
-@ReviewedBy varchar(10)=NULL)
+@ReviewedBy varchar(50)=NULL)
 AS
 UPDATE FormReview
 SET 

@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -22,7 +21,7 @@ CREATE PROCEDURE [dbo].[spEditPreassessment](@PreassessmentPK int=NULL,
 @PACallFromParent int=NULL,
 @PACaseReview int=NULL,
 @PADate datetime=NULL,
-@PAEditor char(10)=NULL,
+@PAEditor varchar(max)=NULL,
 @PAFAWFK int=NULL,
 @PAFSWFK int=NULL,
 @PAGift int=NULL,
