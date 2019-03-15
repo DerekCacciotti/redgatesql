@@ -11,7 +11,7 @@ GO
 -- Edit date: 10/11/2013 CP - the bit values in workerprogram table (FSW, FAW, Supervisor, FatherAdvocate, Program Manager)
 --				are no longer being populated based on the latest workerform changes by Dar, so I've modified this report.
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTraining_11_3_Knowledge]
+CREATE procedure [dbo].[rspTraining_11_3_Knowledge]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
 	@sdate AS DATE
@@ -22,7 +22,22 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-;WITH  cteMain AS (
+create table #Main6MonthWrap
+	(	WorkerPK int
+		, WorkerName varchar(100)
+		, HireDate date
+		, Supervisor int
+		, FSW int
+		, FAW int
+		, ProgramManager int
+		, FatherAdvocate int
+		, RowNumber int
+	)
+
+insert into #Main6MonthWrap (
+								WorkerPK, WorkerName, HireDate, Supervisor, FSW, FAW
+							, ProgramManager, FatherAdvocate, RowNumber
+							)
 	SELECT w.WorkerPK
 		, RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName) AS WorkerName
 		, wp.HireDate
@@ -43,11 +58,10 @@ BEGIN
 	)
 	AND wp.TerminationDate IS NULL
 	AND wp.ProgramFK=@progfk
+;
 	
-)
-
 --GetAll TrainingCodes/subtopics required for this report
-, cteCodesSubtopics AS (
+with cteCodesSubtopics AS (
 SELECT [TopicName]
       ,[TopicCode]
       ,[SATInterval]
@@ -64,15 +78,12 @@ SELECT [TopicName]
   INNER JOIN subtopic on subtopic.topicfk=codetopic.codetopicPK
 	WHERE TopicCode IN (17.0, 19.0, 23.0, 25.0) AND requiredby='HFA'
   )
-  
-  
-  
-    
+
 , cteWorkersTopics AS (
 	 Select workerpk
 		, WorkerName
 		, Supervisor
-		, cteMain.HireDate
+		, mmw.HireDate
 		, FSW
 		, FAW
 		, ProgramManager
@@ -83,7 +94,7 @@ SELECT [TopicName]
 		, [SATName]
 		, [SubTopicCode]
 		, [SubTopicName]
-	  from cteMain, cteCodesSubtopics
+	  from #Main6MonthWrap mmw, cteCodesSubtopics
  )
  
  
@@ -94,21 +105,20 @@ SELECT [TopicName]
 		, t1.topicname
 		, s.subtopiccode
 		, MIN(trainingdate) AS TrainingDate
-		, cteMain.HireDate
+		, mmw.HireDate
 		, MAX(CAST(IsExempt as INT)) as IsExempt
 	FROM TrainingAttendee ta 
 			INNER JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			INNER JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			INNER JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
 			INNER JOIN Subtopic s ON s.TopicFK=t1.codeTopicPK AND s.SubTopicPK=td.SubTopicFK
-			INNER JOIN cteMain on cteMain.WorkerPK = ta.workerfk
+			INNER JOIN #Main6MonthWrap mmw on mmw.WorkerPK = ta.workerfk
 	WHERE t1.TopicCode IN (17.0, 19.0, 23.0, 25.0) AND requiredby='HFA'
 	GROUP BY  workerfk
 			, t1.TopicCode
 			, t1.topicname
 			, HireDate
 			, s.subtopiccode
-
 )
 
 , cteAddMissingWorkers AS (
