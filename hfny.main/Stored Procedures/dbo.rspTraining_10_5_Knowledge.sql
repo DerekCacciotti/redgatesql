@@ -12,7 +12,7 @@ GO
 --				are no longer being populated based on the latest workerform changes by Dar, so I've modified this report.
 -- EDIT DATE: 01/30/2015 CP - Report is now called 11-4
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTraining_10_5_Knowledge]
+CREATE procedure [dbo].[rspTraining_10_5_Knowledge]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
 	@sdate AS date
@@ -24,7 +24,21 @@ BEGIN
 	
 
 
-;WITH  cteMain AS (
+create table #Main12MonthWrap
+	(WorkerPK int
+		, WorkerName varchar(100)
+		, HireDate date
+		, Supervisor int
+		, FSW int
+		, FAW int
+		, ProgramManager int
+		, FatherAdvocate int
+		, RowNumber int
+	)
+insert into #Main12MonthWrap (
+								WorkerPK, WorkerName, HireDate, Supervisor, FSW, FAW
+							, ProgramManager, FatherAdvocate, RowNumber
+							)
 	SELECT w.WorkerPK
 		, RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName) AS WorkerName
 		, wp.HireDate
@@ -44,13 +58,11 @@ BEGIN
 	OR (wp.SupervisorStartDate  > @sdate AND wp.SupervisorEndDate IS NULL)
 	)
 	AND wp.TerminationDate IS NULL
-	AND wp.ProgramFK=@progfk
-	
-)
-
+	AND wp.ProgramFK=@progfk	
+;
 
 --GetAll TrainingCodes/subtopics required for this report
-, cteCodesSubtopics AS (
+with cteCodesSubtopics AS (
 SELECT [TopicName]
       ,[TopicCode]
       ,[SATInterval]
@@ -72,7 +84,7 @@ SELECT [TopicName]
 	 Select workerpk
 		, WorkerName
 		, Supervisor
-		, cteMain.HireDate
+		, m.HireDate
 		, FSW
 		, FAW
 		, ProgramManager
@@ -83,7 +95,7 @@ SELECT [TopicName]
 		, [SATName]
 		, [SubTopicCode]
 		, [SubTopicName]
-	  from cteMain, cteCodesSubtopics
+	  from #Main12MonthWrap m, cteCodesSubtopics
  )
  
  
@@ -94,21 +106,20 @@ SELECT [TopicName]
 		, t1.topicname
 		, s.subtopiccode
 		, MIN(trainingdate) AS TrainingDate
-		, cteMain.HireDate
+		, m.HireDate
 		, MAX(CAST(IsExempt as INT)) as IsExempt
 	FROM TrainingAttendee ta 
 			INNER JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			INNER JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			INNER JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
 			INNER JOIN Subtopic s ON s.TopicFK=t1.codeTopicPK AND s.SubTopicPK=td.SubTopicFK
-			INNER JOIN cteMain on cteMain.WorkerPK = ta.workerfk
+			INNER JOIN #Main12MonthWrap m on m.WorkerPK = ta.workerfk
 	WHERE ((t1.TopicCode= 18.0) OR (t1.TopicCode=20.0) OR (t1.TopicCode=21.0)OR (t1.TopicCode=22.0)OR (t1.TopicCode=24.0)) AND requiredby='HFA'
 	GROUP BY  workerfk
 			, t1.TopicCode
 			, t1.topicname
 			, HireDate
 			, s.subtopiccode
-
 )
 
 , cteAddMissingWorkers AS (
@@ -310,5 +321,8 @@ SELECT [TopicName]
 		FROM cteAlmostFinal
 		INNER JOIN cteSETMeetingByTopic ON cteSETMeetingByTopic.WorkerPK = cteAlmostFinal.WorkerPK AND cteSETMeetingByTopic.TopicCode = cteAlmostFinal.TopicCode
 		Order BY cteAlmostFinal.OrderCategory
-END
+
+drop table #Main12MonthWrap
+
+end
 GO
