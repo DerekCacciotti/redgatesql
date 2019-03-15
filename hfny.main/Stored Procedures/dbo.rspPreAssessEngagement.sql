@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:      <Dar Chen>
 -- Create date: <Jul 16, 2012>
@@ -14,34 +12,37 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPreAssessEngagement] (@programfk varchar(max) = null
 										, @CustomQuarterlyDates bit
-										, @StartDt datetime = null
-										, @EndDt datetime = null
+										, @StartDate datetime = null
+										, @EndDate datetime = null
+										, @ContractStartDate datetime = null
+										, @ContractEndDate datetime = null
 										)
 as 
 
---DECLARE @StartDtT DATE = '01/01/2012'
---DECLARE @StartDt DATE = '09/01/2012'
---DECLARE @EndDt DATE = '11/30/2012'
+--DECLARE @StartDateT DATE = '01/01/2012'
+--DECLARE @StartDate DATE = '09/01/2012'
+--DECLARE @EndDate DATE = '11/30/2012'
 --DECLARE @programfk INT = 4
 
-	-- if user select a custom date range (not a specific quarter) then don't show ContractPeriod Column
+	-- if user selects a custom date range (not a specific quarter) 
+	-- then don't show ContractPeriod Column
 	
-	declare	@ContractStartDate date
-	declare	@ContractEndDate date
+	--declare	@ContractStartDate date
+	--declare	@ContractEndDate date
 
 	if ((@programfk is not null)
 		and (@CustomQuarterlyDates = 0)
 	   )
 		begin 
 			set @programfk = replace(@programfk, ',', '') -- remove comma's
-			set @ContractStartDate = (select	ContractStartDate
-									  from		HVProgram P
-									  where		HVProgramPK = @programfk
-									 )
-			set @ContractEndDate = (select	ContractEndDate
-									from	HVProgram P
-									where	HVProgramPK = @programfk
-								   )		
+			--set @ContractStartDate = (select	ContractStartDate
+			--						  from		HVProgram P
+			--						  where		HVProgramPK = @programfk
+			--						 )
+			--set @ContractEndDate = (select	ContractEndDate
+			--						from	HVProgram P
+			--						where	HVProgramPK = @programfk
+			--					   )
 		end 
 	
 	if @programfk is null
@@ -65,7 +66,7 @@ as
 				  join		CaseProgram as b on a.HVCasePK = b.HVCaseFK
 				  join		dbo.SplitString(@programfk, ',') on b.programfk = listitem
 				  join		HVScreen as c on a.HVCasePK = c.HVCaseFK
-				  where		a.ScreenDate between @StartDt and @EndDt
+				  where		a.ScreenDate between @StartDate and @EndDate
 				 ) ,
 			ScreensThisPeriod_1e
 			  as (select	HVCasePK
@@ -79,12 +80,12 @@ as
 				  from		HVCase as a
 				  join		CaseProgram as b on a.HVCasePK = b.HVCaseFK
 				  join		dbo.SplitString(@programfk, ',') on b.programfk = listitem
-				  where		(a.ScreenDate < @StartDt)
-							and (a.KempeDate >= @StartDt
+				  where		(a.ScreenDate < @StartDate)
+							and (a.KempeDate >= @StartDate
 								 or a.KempeDate is null
 								)
 							and (b.DischargeDate is null
-								 or b.DischargeDate >= @StartDt
+								 or b.DischargeDate >= @StartDate
 								)
 				 ) ,
 			section2Q
@@ -102,7 +103,7 @@ as
 						  , max(a.PADate) [max_PADATE]
 				  from		Preassessment as a
 				  join		dbo.SplitString(@programfk, ',') on a.programfk = listitem
-				  where		a.PADate between @StartDt and @EndDt
+				  where		a.PADate between @StartDate and @EndDate
 				  group by	a.HVCaseFK
 				 ) ,
 			PreAssessment_LastOneInPeriod
@@ -128,12 +129,12 @@ as
 								end) [Q4bCompleted]
 						  , sum(case when CaseStatus = '02'
 										  and KempeResult = 1
-										  and FSWAssignDate <= @EndDt then 1
+										  and FSWAssignDate <= @EndDate then 1
 									 else 0
 								end) [Q4b1PositiveAssignd]
 						  , sum(case when CaseStatus = '02'
 										  and KempeResult = 1
-										  and FSWAssignDate > @EndDt then 1
+										  and FSWAssignDate > @EndDate then 1
 									 else 0
 								end) [Q4b2PositivePendingAssignd]
 						  , sum(case when CaseStatus = '04'
@@ -149,7 +150,7 @@ as
 									 else 0
 								end) [Q4cTerminated]
 						  , sum(case when CaseStatus = '01'
-										  and datediff(d, PADate, @EndDt) <= 30 then 1
+										  and datediff(d, PADate, @EndDate) <= 30 then 1
 									 else 0
 								end) [Q4aEffortContnue]
 				  from		Outcomes
@@ -326,7 +327,7 @@ as
 						  , sum(PAOtherActivity) [Q5kPAOtherActivity]
 				  from		Preassessment
 				  join		dbo.SplitString(@programfk, ',') on programfk = listitem
-				  where		PADate between @StartDt and @EndDt
+				  where		PADate between @StartDate and @EndDate
 				 ) ,
 
 /* total */	ScreensThisPeriodT
@@ -403,12 +404,12 @@ as
 								end) [T4bCompleted]
 						  , sum(case when CaseStatus = '02'
 										  and KempeResult = 1
-										  and FSWAssignDate <= @EndDt then 1
+										  and FSWAssignDate <= @EndDate then 1
 									 else 0
 								end) [T4b1PositiveAssignd]
 						  , sum(case when CaseStatus = '02'
 										  and KempeResult = 1
-										  and FSWAssignDate > @EndDt then 1
+										  and FSWAssignDate > @EndDate then 1
 									 else 0
 								end) [T4b2PositivePendingAssignd]
 						  , sum(case when CaseStatus = '04'
@@ -424,7 +425,7 @@ as
 									 else 0
 								end) [T4cTerminated]
 						  , sum(case when CaseStatus = '01'
-										  and datediff(d, PADate, @EndDt) <= 30 then 1
+										  and datediff(d, PADate, @EndDate) <= 30 then 1
 									 else 0
 								end) [T4aEffortContnue]
 				  from		OutcomesT

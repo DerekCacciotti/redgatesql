@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:      <Dar Chen>
 -- Create date: <Aug 13, 2012>
@@ -11,8 +9,10 @@ GO
 -- =============================================
 CREATE procedure [dbo].[rspPreAssessEngagement_Part2] (@programfk varchar(max) = null
 													, @CustomQuarterlyDates bit = 1
-													, @StartDt datetime = null
-													, @EndDt datetime = null
+													, @StartDate datetime = null
+													, @EndDate datetime = null
+													, @ContractStartDate datetime = null
+													, @ContractEndDate datetime = null
 													 )
 as
 	if @programfk is null
@@ -25,24 +25,24 @@ as
 		end
 	set @programfk = replace(@programfk, '"', '')
 	
-	declare @ContractStartDate date
-	declare @ContractEndDate date
+	--declare @ContractStartDate date
+	--declare @ContractEndDate date
 
 	if ((@ProgramFK is not null) and (@CustomQuarterlyDates = 0))
 	begin
 		set @ProgramFK = replace(@ProgramFK, ',', '') -- remove comma's
-		set @ContractStartDate = (select ContractStartDate
-									  from HVProgram P
-									  where HVProgramPK = @ProgramFK)
-		set @ContractEndDate = (select ContractEndDate
-									from HVProgram P
-									where HVProgramPK = @ProgramFK)
+		--set @ContractStartDate = (select ContractStartDate
+		--							  from HVProgram P
+		--							  where HVProgramPK = @ProgramFK)
+		--set @ContractEndDate = (select ContractEndDate
+		--							from HVProgram P
+		--							where HVProgramPK = @ProgramFK)
 	end
 
 -- Pre-Assessment Engagement Quartly Report --
 --DECLARE @ContractStartDate DATE = '01/01/2011'
---DECLARE @StartDt DATE = '08/01/2011'
---DECLARE @EndDt DATE = '12/31/2011'
+--DECLARE @StartDate DATE = '08/01/2011'
+--DECLARE @EndDate DATE = '12/31/2011'
 --DECLARE @programfk INT = 6
 
 ;
@@ -73,7 +73,7 @@ as
 												  , max(p.PADate) [max_PADATE]
 											 from	Preassessment as p
 											 join	dbo.SplitString(@programfk, ',') on p.ProgramFK = ListItem
-											 where	p.PADate between @StartDt and @EndDt --AND p.ProgramFK = @programfk
+											 where	p.PADate between @StartDate and @EndDate --AND p.ProgramFK = @programfk
 													and p.CaseStatus = '03'
 											 group by p.HVCaseFK
 											) as y on x.HVCaseFK = y.HVCaseFK
@@ -88,7 +88,7 @@ as
 												  , max(p.PADate) [max_PADATE]
 											 from	Preassessment as p
 											 join	dbo.SplitString(@programfk, ',') on p.ProgramFK = ListItem
-											 where	p.PADate between @StartDt and @EndDt --AND p.ProgramFK = @programfk
+											 where	p.PADate between @StartDate and @EndDate --AND p.ProgramFK = @programfk
 													and p.CaseStatus = '04'
 											 group by p.HVCaseFK
 											) as y on x.HVCaseFK = y.HVCaseFK
