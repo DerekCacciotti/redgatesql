@@ -14,7 +14,7 @@ GO
 -- =============================================
 
 
-CREATE PROCEDURE [dbo].[rspFSWEnrolledCaseTickler](
+CREATE PROC [dbo].[rspFSWEnrolledCaseTickler](
 	@programfk    varchar(max)    = NULL,
     @edate     datetime,
     @supervisorfk int             = null,
@@ -619,6 +619,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'DTaP' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -636,6 +637,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'HEP-B' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -655,6 +657,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'HEP-A' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -672,7 +675,8 @@ insert into @tblImmunizations
 			, max(Frequency) as Frequency
 	  
  			from #tblCommonCohort cc			
-				left join codeduebydates on scheduledevent = 'Flu' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate) -- minimum interval
+				left join codeduebydates on scheduledevent = 'Flu' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0) -- minimum interval
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -690,6 +694,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'Roto' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -707,6 +712,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'PCV' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -725,6 +731,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'HIB' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -742,6 +749,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'Lead' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -759,6 +767,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'MMR' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -775,7 +784,8 @@ insert into @tblImmunizations
 			, max(Frequency) as Frequency
 	  
  			from #tblCommonCohort cc			
-				left join codeduebydates on scheduledevent = 'Polio' AND MaximumDue < cc.TCAgeDays  -- minimum interval
+				left join codeduebydates on scheduledevent = 'Polio' AND MaximumDue < cc.TCAgeDays
+			WHERE (Optional IS NULL OR Optional = 0)  -- minimum interval
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -796,6 +806,7 @@ insert into @tblImmunizations
 	  
  			from #tblCommonCohort cc			
 				left join codeduebydates on scheduledevent = 'VZ' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+			WHERE (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -812,7 +823,7 @@ insert into @tblImmunizations
 			, max(Frequency) as Frequency
 	  
  			from #tblCommonCohort cc			
-				left join codeduebydates on scheduledevent = 'WBV' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate)
+				left join codeduebydates on scheduledevent = 'WBV' AND Interval  <= datediff(M, dateadd(dd, -30.44, cc.TCDOB), @eDate) AND (Optional IS NULL OR Optional = 0)
 	 
 		GROUP BY HVCasePK, TCIDPK
  
@@ -2125,5 +2136,6 @@ drop table #CodeDueByMaxFrequencies
 drop table #tblPTDetails
 drop table #tblTCMedical
  -- rspFSWEnrolledCaseTickler 4, '09/30/2013'
+
 
 GO
