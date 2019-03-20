@@ -7,6 +7,7 @@ CREATE TABLE [dbo].[SupervisionParentSurveyCase]
 [CaseComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [FollowUpPSCase] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
+[InDepthDiscussion] [bit] NULL,
 [ProgramFK] [int] NOT NULL,
 [ProtectiveFactors] [bit] NULL,
 [ProtectiveFactorsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -31,7 +32,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		bsimmons
 -- Create date: 2/11/19
@@ -54,6 +54,7 @@ BEGIN
 			CaseComments,
 			FollowUpPSCase,
 			HVCaseFK,
+			InDepthDiscussion,
 			ProgramFK,
 			ProtectiveFactors,
 			ProtectiveFactorsComments,
@@ -80,6 +81,7 @@ BEGIN
 				CaseComments,
 				FollowUpPSCase,
 				HVCaseFK,
+				InDepthDiscussion,
 				ProgramFK,
 				ProtectiveFactors,
 				ProtectiveFactorsComments,

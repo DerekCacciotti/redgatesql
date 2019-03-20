@@ -20,6 +20,7 @@ CREATE PROCEDURE [dbo].[spAddSupervisionHomeVisitCase](@CaseComments varchar(max
 @HVReferrals bit=NULL,
 @HVReferralsComments varchar(max)=NULL,
 @HVReferralsStatus bit=NULL,
+@InDepthDiscussion bit=NULL,
 @LevelChange bit=NULL,
 @LevelChangeComments varchar(max)=NULL,
 @LevelChangeStatus bit=NULL,
@@ -60,6 +61,7 @@ WHERE
 @HVReferrals = lastRow.HVReferrals AND
 @HVReferralsComments = lastRow.HVReferralsComments AND
 @HVReferralsStatus = lastRow.HVReferralsStatus AND
+@InDepthDiscussion = lastRow.InDepthDiscussion AND
 @LevelChange = lastRow.LevelChange AND
 @LevelChangeComments = lastRow.LevelChangeComments AND
 @LevelChangeStatus = lastRow.LevelChangeStatus AND
@@ -99,6 +101,7 @@ HVCPSStatus,
 HVReferrals,
 HVReferralsComments,
 HVReferralsStatus,
+InDepthDiscussion,
 LevelChange,
 LevelChangeComments,
 LevelChangeStatus,
@@ -137,6 +140,7 @@ VALUES(
 @HVReferrals,
 @HVReferralsComments,
 @HVReferralsStatus,
+@InDepthDiscussion,
 @LevelChange,
 @LevelChangeComments,
 @LevelChangeStatus,

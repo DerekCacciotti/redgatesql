@@ -20,6 +20,7 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCaseDeleted]
 [HVReferrals] [bit] NULL,
 [HVReferralsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [HVReferralsStatus] [bit] NULL,
+[InDepthDiscussion] [bit] NULL,
 [LevelChange] [bit] NULL,
 [LevelChangeComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [LevelChangeStatus] [bit] NULL,
