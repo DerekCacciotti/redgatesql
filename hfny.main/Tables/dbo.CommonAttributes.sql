@@ -103,6 +103,8 @@ CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_FormFK] ON [dbo].[CommonAttrib
 GO
 CREATE NONCLUSTERED INDEX [IX_CommonAttributes_FormType] ON [dbo].[CommonAttributes] ([FormType]) INCLUDE ([EducationalEnrollment], [FormFK], [HighestGrade], [IsCurrentlyEmployed], [PrimaryLanguage]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [nci_wi_CommonAttributes_C2E34CA7F470A9ABF68E6C34F035A754] ON [dbo].[CommonAttributes] ([FormType], [FormFK], [FormInterval]) INCLUDE ([EducationalEnrollment], [HighestGrade], [HVCaseFK], [IsCurrentlyEmployed], [MaritalStatus], [OBPInHome], [Parity], [PBFoodStamps], [PBTANF], [PBWIC], [PC1ReceivingMedicaid], [PrimaryLanguage], [TCReceivingMedicaid]) ON [PRIMARY]
+GO
 CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_HVCaseFK] ON [dbo].[CommonAttributes] ([HVCaseFK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_CommonAttributes_PC1MedicalFacilityFK] ON [dbo].[CommonAttributes] ([PC1MedicalFacilityFK]) ON [PRIMARY]

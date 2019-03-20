@@ -10,7 +10,7 @@ GO
 CREATE procedure [dbo].[spGetAllReports]
 (
     @strProgramFK varchar(3)     = null,
-    @UserName     varchar(15)    = null
+    @UserName     varchar(50)    = null
 )
 as
 begin

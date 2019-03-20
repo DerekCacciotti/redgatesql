@@ -178,6 +178,8 @@ CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_CurrentLevelFK] ON [dbo].[CaseProgr
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_DischargeDate] ON [dbo].[CaseProgram] ([DischargeDate]) INCLUDE ([HVCaseFK], [ProgramFK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [nci_wi_CaseProgram_C1CD1612CD938F00FF622B4E5513DF94] ON [dbo].[CaseProgram] ([DischargeDate], [CaseStartDate]) INCLUDE ([CurrentFAWFK], [CurrentFSWFK], [CurrentLevelDate], [CurrentLevelFK], [HVCaseFK], [OldID], [PC1ID], [ProgramFK]) ON [PRIMARY]
+GO
 CREATE NONCLUSTERED INDEX [IX_FK_CaseProgram_HVCaseFK] ON [dbo].[CaseProgram] ([HVCaseFK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [nci_wi_CaseProgram_10DDC32CB7FBC483EA60D57385553998] ON [dbo].[CaseProgram] ([PC1ID]) ON [PRIMARY]

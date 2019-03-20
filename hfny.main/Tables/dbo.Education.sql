@@ -33,6 +33,8 @@ From [Education] INNER JOIN Inserted ON [Education].[EducationPK]= Inserted.[Edu
 GO
 ALTER TABLE [dbo].[Education] ADD CONSTRAINT [PK__Educatio__4BBF34CC6383C8BA] PRIMARY KEY CLUSTERED  ([EducationPK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [nci_wi_Education_314C75CF6F376FF99BF04649E49A742E] ON [dbo].[Education] ([FormFK], [FormType], [PCType], [ProgramType]) ON [PRIMARY]
+GO
 CREATE NONCLUSTERED INDEX [IX_FK_Education_HVCaseFK] ON [dbo].[Education] ([HVCaseFK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_FK_Education_ProgramFK] ON [dbo].[Education] ([ProgramFK]) ON [PRIMARY]
