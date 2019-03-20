@@ -503,7 +503,7 @@ begin
 				, Discharge_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'DS')
 				, LevelForm_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'LV')
 				, LevelForm_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'LV')
-				, PHQ9_ReviewOn = (select FormsReviewed from cteRawFormApprovals where FormType = 'PQ')
+				, PHQ9_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PQ')
 				, PHQ9_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PQ')
 				, PSI_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PS')
 				, PSI_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PS')
