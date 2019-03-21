@@ -8,6 +8,7 @@ CREATE PROCEDURE [dbo].[spAddSupervisionParentSurveyCase](@AssessmentIssues bit=
 @CaseComments varchar(max)=NULL,
 @FollowUpPSCase bit=NULL,
 @HVCaseFK int=NULL,
+@InDepthDiscussion bit=NULL,
 @ProgramFK int=NULL,
 @ProtectiveFactors bit=NULL,
 @ProtectiveFactorsComments varchar(max)=NULL,
@@ -33,6 +34,7 @@ WHERE
 @CaseComments = lastRow.CaseComments AND
 @FollowUpPSCase = lastRow.FollowUpPSCase AND
 @HVCaseFK = lastRow.HVCaseFK AND
+@InDepthDiscussion = lastRow.InDepthDiscussion AND
 @ProgramFK = lastRow.ProgramFK AND
 @ProtectiveFactors = lastRow.ProtectiveFactors AND
 @ProtectiveFactorsComments = lastRow.ProtectiveFactorsComments AND
@@ -57,6 +59,7 @@ AssessmentIssuesStatus,
 CaseComments,
 FollowUpPSCase,
 HVCaseFK,
+InDepthDiscussion,
 ProgramFK,
 ProtectiveFactors,
 ProtectiveFactorsComments,
@@ -80,6 +83,7 @@ VALUES(
 @CaseComments,
 @FollowUpPSCase,
 @HVCaseFK,
+@InDepthDiscussion,
 @ProgramFK,
 @ProtectiveFactors,
 @ProtectiveFactorsComments,

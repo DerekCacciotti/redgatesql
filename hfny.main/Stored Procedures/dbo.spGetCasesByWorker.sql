@@ -58,7 +58,7 @@ begin
 				and (DischargeDate is null or 
 						cp.DischargeDate > dateadd(month, -6, current_Timestamp))
 	)
-	, cteLastHomeVisitObservation as
+	, cteLastHomeVisitDiscussion as
 	(
 		select shvc.HVCaseFK
 				, max(convert(date, SupervisionDate)) as LastHVSupervisionDate
@@ -66,9 +66,10 @@ begin
 		inner join  Supervision s on s.SupervisionPK = shvc.SupervisionFK
 		inner join cteMain m on m.HVCaseFK = shvc.HVCaseFK
 		where SupervisionDate < @SupervisionDate
+				and shvc.InDepthDiscussion = 1
 		group by shvc.HVCaseFK
 	)	
-	, cteLastParentSurveyObservation as
+	, cteLastParentSurveyDiscussion as
 	(
 		select spsc.HVCaseFK
 				, max(convert(date, SupervisionDate)) as LastPSSupervisionDate
@@ -76,6 +77,7 @@ begin
 		inner join  Supervision s on s.SupervisionPK = spsc.SupervisionFK
 		inner join cteMain m on m.HVCaseFK = spsc.HVCaseFK
 		where SupervisionDate < @SupervisionDate
+				and spsc.InDepthDiscussion = 1
 		group by spsc.HVCaseFK
 	)
 	select m.HVCaseFK
@@ -87,15 +89,15 @@ begin
 			, m.WorkerName
 			, m.LastDiscussion
 			, m.DaysSince
-			, lhvo.HVCaseFK as HVHVCaseFK
-			, lhvo.LastHVSupervisionDate
-			, datediff(day, lhvo.LastHVSupervisionDate, @SupervisionDate) as LastHVDays
-			, lpso.HVCaseFK as PSHVCaseFK
-			, lpso.LastPSSupervisionDate
-			, datediff(day, lpso.LastPSSupervisionDate, @SupervisionDate) as LastPSDays
+			, lhvd.HVCaseFK as HVHVCaseFK
+			, lhvd.LastHVSupervisionDate
+			, datediff(day, lhvd.LastHVSupervisionDate, @SupervisionDate) as LastHVDays
+			, lpsd.HVCaseFK as PSHVCaseFK
+			, lpsd.LastPSSupervisionDate
+			, datediff(day, lpsd.LastPSSupervisionDate, @SupervisionDate) as LastPSDays
 	from cteMain m
-	left outer join cteLastHomeVisitObservation lhvo on lhvo.HVCaseFK = m.HVCaseFK
-	left outer join cteLastParentSurveyObservation lpso on lpso.HVCaseFK = lhvo.HVCaseFK
+	left outer join cteLastHomeVisitDiscussion lhvd on lhvd.HVCaseFK = m.HVCaseFK
+	left outer join cteLastParentSurveyDiscussion lpsd on lpsd.HVCaseFK = m.HVCaseFK
 	order by Assigned
 				, Discharged
 				, CaseType

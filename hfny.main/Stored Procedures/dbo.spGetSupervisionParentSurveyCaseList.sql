@@ -20,6 +20,7 @@ as begin
 		, AssessmentIssuesStatus
 		, CaseComments
 		, sc.HVCaseFK
+		, InDepthDiscussion
 		, cp.PC1ID
 		, sc.ProgramFK
 		, ProtectiveFactors

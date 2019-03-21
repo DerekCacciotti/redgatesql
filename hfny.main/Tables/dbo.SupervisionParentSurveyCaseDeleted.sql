@@ -8,6 +8,7 @@ CREATE TABLE [dbo].[SupervisionParentSurveyCaseDeleted]
 [CaseComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [FollowUpPSCase] [bit] NULL,
 [HVCaseFK] [int] NOT NULL,
+[InDepthDiscussion] [bit] NULL,
 [ProgramFK] [int] NOT NULL,
 [ProtectiveFactors] [bit] NULL,
 [ProtectiveFactorsComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
