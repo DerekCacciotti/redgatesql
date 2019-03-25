@@ -81,89 +81,6 @@ CREATE PROCEDURE [dbo].[spAddCommonAttributes](@AvailableMonthlyBenefits numeric
 @WasBreastFed bit=NULL,
 @WhyNotBreastFed char(2)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) CommonAttributesPK
-FROM CommonAttributes lastRow
-WHERE 
-@AvailableMonthlyBenefits = lastRow.AvailableMonthlyBenefits AND
-@AvailableMonthlyBenefitsUnknown = lastRow.AvailableMonthlyBenefitsUnknown AND
-@AvailableMonthlyIncome = lastRow.AvailableMonthlyIncome AND
-@CommonAttributesCreator = lastRow.CommonAttributesCreator AND
-@EducationalEnrollment = lastRow.EducationalEnrollment AND
-@FormDate = lastRow.FormDate AND
-@FormFK = lastRow.FormFK AND
-@FormInterval = lastRow.FormInterval AND
-@FormType = lastRow.FormType AND
-@Gravida = lastRow.Gravida AND
-@HIFamilyChildHealthPlus = lastRow.HIFamilyChildHealthPlus AND
-@HighestGrade = lastRow.HighestGrade AND
-@HIMedicaidCaseNumber = lastRow.HIMedicaidCaseNumber AND
-@HIOther = lastRow.HIOther AND
-@HIOtherSpecify = lastRow.HIOtherSpecify AND
-@HIPCAP = lastRow.HIPCAP AND
-@HIPCAPCaseNumber = lastRow.HIPCAPCaseNumber AND
-@HIPrivate = lastRow.HIPrivate AND
-@HIUninsured = lastRow.HIUninsured AND
-@HIUnknown = lastRow.HIUnknown AND
-@HoursPerMonth = lastRow.HoursPerMonth AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@IsCurrentlyEmployed = lastRow.IsCurrentlyEmployed AND
-@LanguageSpecify = lastRow.LanguageSpecify AND
-@LivingArrangement = lastRow.LivingArrangement AND
-@LivingArrangementSpecific = lastRow.LivingArrangementSpecific AND
-@Looked4Employment = lastRow.Looked4Employment AND
-@MaritalStatus = lastRow.MaritalStatus AND
-@MonthlyIncomeUnknown = lastRow.MonthlyIncomeUnknown AND
-@NumberEmployed = lastRow.NumberEmployed AND
-@NumberInHouse = lastRow.NumberInHouse AND
-@OBPInHome = lastRow.OBPInHome AND
-@OBPInvolvement = lastRow.OBPInvolvement AND
-@OBPInvolvementSpecify = lastRow.OBPInvolvementSpecify AND
-@Parity = lastRow.Parity AND
-@PBEmergencyAssistance = lastRow.PBEmergencyAssistance AND
-@PBEmergencyAssistanceAmount = lastRow.PBEmergencyAssistanceAmount AND
-@PBFoodStamps = lastRow.PBFoodStamps AND
-@PBFoodStampsAmount = lastRow.PBFoodStampsAmount AND
-@PBSSI = lastRow.PBSSI AND
-@PBSSIAmount = lastRow.PBSSIAmount AND
-@PBTANF = lastRow.PBTANF AND
-@PBTANFAmount = lastRow.PBTANFAmount AND
-@PBWIC = lastRow.PBWIC AND
-@PBWICAmount = lastRow.PBWICAmount AND
-@PC1HasMedicalProvider = lastRow.PC1HasMedicalProvider AND
-@PC1MedicalFacilityFK = lastRow.PC1MedicalFacilityFK AND
-@PC1MedicalProviderFK = lastRow.PC1MedicalProviderFK AND
-@PC1ReceivingMedicaid = lastRow.PC1ReceivingMedicaid AND
-@PCFK = lastRow.PCFK AND
-@PreviouslyEmployed = lastRow.PreviouslyEmployed AND
-@PrimaryLanguage = lastRow.PrimaryLanguage AND
-@ProgramFK = lastRow.ProgramFK AND
-@ReceivingPreNatalCare = lastRow.ReceivingPreNatalCare AND
-@ReceivingPublicBenefits = lastRow.ReceivingPublicBenefits AND
-@SIDomesticViolence = lastRow.SIDomesticViolence AND
-@SICPSACS = lastRow.SICPSACS AND
-@SIMentalHealth = lastRow.SIMentalHealth AND
-@SISubstanceAbuse = lastRow.SISubstanceAbuse AND
-@TANFServices = lastRow.TANFServices AND
-@TANFServicesNo = lastRow.TANFServicesNo AND
-@TANFServicesNoSpecify = lastRow.TANFServicesNoSpecify AND
-@TCHasMedicalProvider = lastRow.TCHasMedicalProvider AND
-@TCHIFamilyChildHealthPlus = lastRow.TCHIFamilyChildHealthPlus AND
-@TCHIMedicaidCaseNumber = lastRow.TCHIMedicaidCaseNumber AND
-@TCHIPrivateInsurance = lastRow.TCHIPrivateInsurance AND
-@TCHIOther = lastRow.TCHIOther AND
-@TCHIOtherSpecify = lastRow.TCHIOtherSpecify AND
-@TCHIUninsured = lastRow.TCHIUninsured AND
-@TCHIUnknown = lastRow.TCHIUnknown AND
-@TCMedicalCareSource = lastRow.TCMedicalCareSource AND
-@TCMedicalCareSourceOtherSpecify = lastRow.TCMedicalCareSourceOtherSpecify AND
-@TCMedicalFacilityFK = lastRow.TCMedicalFacilityFK AND
-@TCMedicalProviderFK = lastRow.TCMedicalProviderFK AND
-@TCReceivingMedicaid = lastRow.TCReceivingMedicaid AND
-@TimeBreastFed = lastRow.TimeBreastFed AND
-@WasBreastFed = lastRow.WasBreastFed AND
-@WhyNotBreastFed = lastRow.WhyNotBreastFed
-ORDER BY CommonAttributesPK DESC) 
-BEGIN
 INSERT INTO CommonAttributes(
 AvailableMonthlyBenefits,
 AvailableMonthlyBenefitsUnknown,
@@ -325,6 +242,5 @@ VALUES(
 @WhyNotBreastFed
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

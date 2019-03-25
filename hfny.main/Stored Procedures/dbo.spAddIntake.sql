@@ -19,27 +19,6 @@ CREATE PROCEDURE [dbo].[spAddIntake](@FSWFK int=NULL,
 @PC1ChildrenLowStudentAchievement char(1)=NULL,
 @PC1FamilyArmedForces char(1)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) IntakePK
-FROM Intake lastRow
-WHERE 
-@FSWFK = lastRow.FSWFK AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@IntakeCreator = lastRow.IntakeCreator AND
-@IntakeDate = lastRow.IntakeDate AND
-@IntakeEditdate = lastRow.IntakeEditdate AND
-@ProgramFK = lastRow.ProgramFK AND
-@MIECHV_Race_AmericanIndian = lastRow.MIECHV_Race_AmericanIndian AND
-@MIECHV_Race_Asian = lastRow.MIECHV_Race_Asian AND
-@MIECHV_Race_Black = lastRow.MIECHV_Race_Black AND
-@MIECHV_Race_Hawaiian = lastRow.MIECHV_Race_Hawaiian AND
-@MIECHV_Race_White = lastRow.MIECHV_Race_White AND
-@MIECHV_Hispanic = lastRow.MIECHV_Hispanic AND
-@OtherChildrenDevelopmentalDelays = lastRow.OtherChildrenDevelopmentalDelays AND
-@PC1SelfLowStudentAchievement = lastRow.PC1SelfLowStudentAchievement AND
-@PC1ChildrenLowStudentAchievement = lastRow.PC1ChildrenLowStudentAchievement AND
-@PC1FamilyArmedForces = lastRow.PC1FamilyArmedForces
-ORDER BY IntakePK DESC) 
-BEGIN
 INSERT INTO Intake(
 FSWFK,
 HVCaseFK,
@@ -77,6 +56,5 @@ VALUES(
 @PC1FamilyArmedForces
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

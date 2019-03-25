@@ -15,23 +15,6 @@ CREATE PROCEDURE [dbo].[spAddEducation](@EducationCreator varchar(max)=NULL,
 @ProgramType char(2)=NULL,
 @ProgramTypeSpecify varchar(100)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) EducationPK
-FROM Education lastRow
-WHERE 
-@EducationCreator = lastRow.EducationCreator AND
-@EducationMonthlyHours = lastRow.EducationMonthlyHours AND
-@FormDate = lastRow.FormDate AND
-@FormFK = lastRow.FormFK AND
-@FormType = lastRow.FormType AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@Interval = lastRow.Interval AND
-@PCType = lastRow.PCType AND
-@ProgramFK = lastRow.ProgramFK AND
-@ProgramName = lastRow.ProgramName AND
-@ProgramType = lastRow.ProgramType AND
-@ProgramTypeSpecify = lastRow.ProgramTypeSpecify
-ORDER BY EducationPK DESC) 
-BEGIN
 INSERT INTO Education(
 EducationCreator,
 EducationMonthlyHours,
@@ -61,6 +44,5 @@ VALUES(
 @ProgramTypeSpecify
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

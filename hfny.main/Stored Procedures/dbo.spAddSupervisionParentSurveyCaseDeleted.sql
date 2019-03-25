@@ -27,35 +27,6 @@ CREATE PROCEDURE [dbo].[spAddSupervisionParentSurveyCaseDeleted](@SupervisionPar
 @SupervisionParentSurveyCaseDeleteDate datetime=NULL,
 @SupervisionParentSurveyCaseDeleter varchar(max)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) SupervisionParentSurveyCaseDeletedPK
-FROM SupervisionParentSurveyCaseDeleted lastRow
-WHERE 
-@SupervisionParentSurveyCasePK = lastRow.SupervisionParentSurveyCasePK AND
-@AssessmentIssues = lastRow.AssessmentIssues AND
-@AssessmentIssuesComments = lastRow.AssessmentIssuesComments AND
-@AssessmentIssuesStatus = lastRow.AssessmentIssuesStatus AND
-@CaseComments = lastRow.CaseComments AND
-@FollowUpPSCase = lastRow.FollowUpPSCase AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@ProgramFK = lastRow.ProgramFK AND
-@ProtectiveFactors = lastRow.ProtectiveFactors AND
-@ProtectiveFactorsComments = lastRow.ProtectiveFactorsComments AND
-@ProtectiveFactorsStatus = lastRow.ProtectiveFactorsStatus AND
-@PSServicePlan = lastRow.PSServicePlan AND
-@PSServicePlanComments = lastRow.PSServicePlanComments AND
-@PSServicePlanStatus = lastRow.PSServicePlanStatus AND
-@Referrals = lastRow.Referrals AND
-@ReferralsComments = lastRow.ReferralsComments AND
-@ReferralsStatus = lastRow.ReferralsStatus AND
-@RiskFactors = lastRow.RiskFactors AND
-@RiskFactorsComments = lastRow.RiskFactorsComments AND
-@RiskFactorsStatus = lastRow.RiskFactorsStatus AND
-@SupervisionFK = lastRow.SupervisionFK AND
-@SupervisionParentSurveyCaseCreator = lastRow.SupervisionParentSurveyCaseCreator AND
-@SupervisionParentSurveyCaseDeleteDate = lastRow.SupervisionParentSurveyCaseDeleteDate AND
-@SupervisionParentSurveyCaseDeleter = lastRow.SupervisionParentSurveyCaseDeleter
-ORDER BY SupervisionParentSurveyCaseDeletedPK DESC) 
-BEGIN
 INSERT INTO SupervisionParentSurveyCaseDeleted(
 SupervisionParentSurveyCasePK,
 AssessmentIssues,
@@ -109,6 +80,5 @@ VALUES(
 @SupervisionParentSurveyCaseDeleter
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

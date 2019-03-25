@@ -15,23 +15,6 @@ CREATE PROCEDURE [dbo].[spAddAuditC](@AuditCCreator varchar(max)=NULL,
 @ProgramFK int=NULL,
 @TotalScore int=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) AuditCPK
-FROM AuditC lastRow
-WHERE 
-@AuditCCreator = lastRow.AuditCCreator AND
-@DailyDrinks = lastRow.DailyDrinks AND
-@FormFK = lastRow.FormFK AND
-@FormInterval = lastRow.FormInterval AND
-@FormType = lastRow.FormType AND
-@HowOften = lastRow.HowOften AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@Invalid = lastRow.Invalid AND
-@MoreThanSix = lastRow.MoreThanSix AND
-@Positive = lastRow.Positive AND
-@ProgramFK = lastRow.ProgramFK AND
-@TotalScore = lastRow.TotalScore
-ORDER BY AuditCPK DESC) 
-BEGIN
 INSERT INTO AuditC(
 AuditCCreator,
 DailyDrinks,
@@ -61,6 +44,5 @@ VALUES(
 @TotalScore
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

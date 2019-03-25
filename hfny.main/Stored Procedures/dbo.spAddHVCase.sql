@@ -35,43 +35,6 @@ CREATE PROCEDURE [dbo].[spAddHVCase](@CaseProgress numeric(3, 1)=NULL,
 @TCNumber int=NULL,
 @KempeDate2 datetime=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) HVCasePK
-FROM HVCase lastRow
-WHERE 
-@CaseProgress = lastRow.CaseProgress AND
-@Confidentiality = lastRow.Confidentiality AND
-@CPFK = lastRow.CPFK AND
-@DateOBPAdded = lastRow.DateOBPAdded AND
-@EDC = lastRow.EDC AND
-@FFFK = lastRow.FFFK AND
-@FirstChildDOB = lastRow.FirstChildDOB AND
-@FirstPrenatalCareVisit = lastRow.FirstPrenatalCareVisit AND
-@FirstPrenatalCareVisitUnknown = lastRow.FirstPrenatalCareVisitUnknown AND
-@HVCaseCreator = lastRow.HVCaseCreator AND
-@InitialZip = lastRow.InitialZip AND
-@IntakeDate = lastRow.IntakeDate AND
-@IntakeLevel = lastRow.IntakeLevel AND
-@IntakeWorkerFK = lastRow.IntakeWorkerFK AND
-@KempeDate = lastRow.KempeDate AND
-@OBPInformationAvailable = lastRow.OBPInformationAvailable AND
-@OBPFK = lastRow.OBPFK AND
-@OBPinHomeIntake = lastRow.OBPinHomeIntake AND
-@OBPRelation2TC = lastRow.OBPRelation2TC AND
-@PC1FK = lastRow.PC1FK AND
-@PC1Relation2TC = lastRow.PC1Relation2TC AND
-@PC1Relation2TCSpecify = lastRow.PC1Relation2TCSpecify AND
-@PC2FK = lastRow.PC2FK AND
-@PC2inHomeIntake = lastRow.PC2inHomeIntake AND
-@PC2Relation2TC = lastRow.PC2Relation2TC AND
-@PC2Relation2TCSpecify = lastRow.PC2Relation2TCSpecify AND
-@PrenatalCheckupsB4 = lastRow.PrenatalCheckupsB4 AND
-@ScreenDate = lastRow.ScreenDate AND
-@TCDOB = lastRow.TCDOB AND
-@TCDOD = lastRow.TCDOD AND
-@TCNumber = lastRow.TCNumber AND
-@KempeDate2 = lastRow.KempeDate2
-ORDER BY HVCasePK DESC) 
-BEGIN
 INSERT INTO HVCase(
 CaseProgress,
 Confidentiality,
@@ -141,6 +104,5 @@ VALUES(
 @KempeDate2
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

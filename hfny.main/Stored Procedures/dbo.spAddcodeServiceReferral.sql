@@ -6,14 +6,6 @@ CREATE PROCEDURE [dbo].[spAddcodeServiceReferral](@ServiceReferralCategory char(
 @ServiceReferralCode char(2)=NULL,
 @ServiceReferralType char(45)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) codeServiceReferralPK
-FROM codeServiceReferral lastRow
-WHERE 
-@ServiceReferralCategory = lastRow.ServiceReferralCategory AND
-@ServiceReferralCode = lastRow.ServiceReferralCode AND
-@ServiceReferralType = lastRow.ServiceReferralType
-ORDER BY codeServiceReferralPK DESC) 
-BEGIN
 INSERT INTO codeServiceReferral(
 ServiceReferralCategory,
 ServiceReferralCode,
@@ -25,6 +17,5 @@ VALUES(
 @ServiceReferralType
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO
