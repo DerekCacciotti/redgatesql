@@ -17,25 +17,6 @@ CREATE PROCEDURE [dbo].[spAddHITS](@FormFK int=NULL,
 @Threaten char(2)=NULL,
 @TotalScore int=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) HITSPK
-FROM HITS lastRow
-WHERE 
-@FormFK = lastRow.FormFK AND
-@FormInterval = lastRow.FormInterval AND
-@FormType = lastRow.FormType AND
-@HITSCreator = lastRow.HITSCreator AND
-@Hurt = lastRow.Hurt AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@Insult = lastRow.Insult AND
-@Invalid = lastRow.Invalid AND
-@NotDoneReason = lastRow.NotDoneReason AND
-@Positive = lastRow.Positive AND
-@ProgramFK = lastRow.ProgramFK AND
-@Scream = lastRow.Scream AND
-@Threaten = lastRow.Threaten AND
-@TotalScore = lastRow.TotalScore
-ORDER BY HITSPK DESC) 
-BEGIN
 INSERT INTO HITS(
 FormFK,
 FormInterval,
@@ -69,6 +50,5 @@ VALUES(
 @TotalScore
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

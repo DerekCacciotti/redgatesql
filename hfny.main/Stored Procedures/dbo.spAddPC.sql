@@ -35,43 +35,6 @@ CREATE PROCEDURE [dbo].[spAddPC](@BirthCountry char(30)=NULL,
 @TimesMoved int=NULL,
 @YearsInUSA numeric(4, 0)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) PCPK
-FROM PC lastRow
-WHERE 
-@BirthCountry = lastRow.BirthCountry AND
-@BornUSA = lastRow.BornUSA AND
-@CP = lastRow.CP AND
-@Ethnicity = lastRow.Ethnicity AND
-@Gender = lastRow.Gender AND
-@OBP = lastRow.OBP AND
-@PC1 = lastRow.PC1 AND
-@PC2 = lastRow.PC2 AND
-@PCApt = lastRow.PCApt AND
-@PCCellPhone = lastRow.PCCellPhone AND
-@PCCity = lastRow.PCCity AND
-@PCCreator = lastRow.PCCreator AND
-@PCDOB = lastRow.PCDOB AND
-@PCDOD = lastRow.PCDOD AND
-@PCEmail = lastRow.PCEmail AND
-@PCEmergencyPhone = lastRow.PCEmergencyPhone AND
-@PCFirstName = lastRow.PCFirstName AND
-@PCLastName = lastRow.PCLastName AND
-@PCMiddleInitial = lastRow.PCMiddleInitial AND
-@PCNoPhone = lastRow.PCNoPhone AND
-@PCOldName = lastRow.PCOldName AND
-@PCOldName2 = lastRow.PCOldName2 AND
-@PCPhone = lastRow.PCPhone AND
-@PCPK_old = lastRow.PCPK_old AND
-@PCState = lastRow.PCState AND
-@PCStreet = lastRow.PCStreet AND
-@PCZip = lastRow.PCZip AND
-@Race = lastRow.Race AND
-@RaceSpecify = lastRow.RaceSpecify AND
-@SSNo = lastRow.SSNo AND
-@TimesMoved = lastRow.TimesMoved AND
-@YearsInUSA = lastRow.YearsInUSA
-ORDER BY PCPK DESC) 
-BEGIN
 INSERT INTO PC(
 BirthCountry,
 BornUSA,
@@ -141,6 +104,5 @@ VALUES(
 @YearsInUSA
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

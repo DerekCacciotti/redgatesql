@@ -70,78 +70,6 @@ CREATE PROCEDURE [dbo].[spAddKempe](@DadBondingArea char(2)=NULL,
 @ProgramFK int=NULL,
 @SupervisorObservation bit=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) KempePK
-FROM Kempe lastRow
-WHERE 
-@DadBondingArea = lastRow.DadBondingArea AND
-@DadChildHistoryArea = lastRow.DadChildHistoryArea AND
-@DadCPSArea = lastRow.DadCPSArea AND
-@DadDisciplineArea = lastRow.DadDisciplineArea AND
-@DadExpectationArea = lastRow.DadExpectationArea AND
-@DadPerceptionArea = lastRow.DadPerceptionArea AND
-@DadSAMICHArea = lastRow.DadSAMICHArea AND
-@DadScore = lastRow.DadScore AND
-@DadSelfEsteemArea = lastRow.DadSelfEsteemArea AND
-@DadStressorArea = lastRow.DadStressorArea AND
-@DadViolentArea = lastRow.DadViolentArea AND
-@FAWFK = lastRow.FAWFK AND
-@FOBPartnerPresent = lastRow.FOBPartnerPresent AND
-@FOBPresent = lastRow.FOBPresent AND
-@GrandParentPresent = lastRow.GrandParentPresent AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@KempeCreator = lastRow.KempeCreator AND
-@KempeDate = lastRow.KempeDate AND
-@KempeResult = lastRow.KempeResult AND
-@MOBPartnerPresent = lastRow.MOBPartnerPresent AND
-@MOBPresent = lastRow.MOBPresent AND
-@MomBondingArea = lastRow.MomBondingArea AND
-@MomChildHistoryArea = lastRow.MomChildHistoryArea AND
-@MomCPSArea = lastRow.MomCPSArea AND
-@MomDisciplineArea = lastRow.MomDisciplineArea AND
-@MomExpectationArea = lastRow.MomExpectationArea AND
-@MomPerceptionArea = lastRow.MomPerceptionArea AND
-@MomSAMICHArea = lastRow.MomSAMICHArea AND
-@MomScore = lastRow.MomScore AND
-@MomSelfEsteemArea = lastRow.MomSelfEsteemArea AND
-@MomStressorArea = lastRow.MomStressorArea AND
-@MomViolentArea = lastRow.MomViolentArea AND
-@NegativeReferral = lastRow.NegativeReferral AND
-@OtherPresent = lastRow.OtherPresent AND
-@PartnerBondingArea = lastRow.PartnerBondingArea AND
-@PartnerChildHistoryArea = lastRow.PartnerChildHistoryArea AND
-@PartnerCPSArea = lastRow.PartnerCPSArea AND
-@PartnerDisciplineArea = lastRow.PartnerDisciplineArea AND
-@PartnerExpectationArea = lastRow.PartnerExpectationArea AND
-@PartnerInHome = lastRow.PartnerInHome AND
-@PartnerPerceptionArea = lastRow.PartnerPerceptionArea AND
-@PartnerSAMICHArea = lastRow.PartnerSAMICHArea AND
-@PartnerScore = lastRow.PartnerScore AND
-@PartnerSelfEsteemArea = lastRow.PartnerSelfEsteemArea AND
-@PartnerStressorArea = lastRow.PartnerStressorArea AND
-@PartnerViolentArea = lastRow.PartnerViolentArea AND
-@PC1ABadChild = lastRow.PC1ABadChild AND
-@PC1ADifficultChild = lastRow.PC1ADifficultChild AND
-@PC1AEmotionalNeeds = lastRow.PC1AEmotionalNeeds AND
-@PC1AHarsh = lastRow.PC1AHarsh AND
-@PC1ATemper = lastRow.PC1ATemper AND
-@PC1AUnrealistic = lastRow.PC1AUnrealistic AND
-@PC1AUnwanted = lastRow.PC1AUnwanted AND
-@PC1CANer = lastRow.PC1CANer AND
-@PC1Criminal = lastRow.PC1Criminal AND
-@PC1FosterChild = lastRow.PC1FosterChild AND
-@PC1IssuesFK = lastRow.PC1IssuesFK AND
-@PC1MentallyIll = lastRow.PC1MentallyIll AND
-@PC1Neglected = lastRow.PC1Neglected AND
-@PC1ParentSubAbuse = lastRow.PC1ParentSubAbuse AND
-@PC1PhysicallyAbused = lastRow.PC1PhysicallyAbused AND
-@PC1SexuallyAbused = lastRow.PC1SexuallyAbused AND
-@PC1SubAbuse = lastRow.PC1SubAbuse AND
-@PC1SuspectCANer = lastRow.PC1SuspectCANer AND
-@PresentSpecify = lastRow.PresentSpecify AND
-@ProgramFK = lastRow.ProgramFK AND
-@SupervisorObservation = lastRow.SupervisorObservation
-ORDER BY KempePK DESC) 
-BEGIN
 INSERT INTO Kempe(
 DadBondingArea,
 DadChildHistoryArea,
@@ -281,6 +209,5 @@ VALUES(
 @SupervisorObservation
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO
