@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +7,7 @@ GO
 -- Create date: 06/18/2010
 -- Description:	FAW Monthly Report
 -- =============================================
-CREATE PROCEDURE [dbo].[rspFAWMonthlyReport_Part5] 
+CREATE PROC [dbo].[rspFAWMonthlyReport_Part5] 
 	-- Add the parameters for the stored procedure here
 	@programfk INT = NULL, 
 	@StartDt datetime,
@@ -39,10 +38,10 @@ DECLARE @NoAnyPreAssessment TABLE (
 	[PACallFromParent] [int] NULL,
 	[PACaseReview] [int] NULL,
 	[PACreateDate] [datetime] NULL,
-	[PACreator] [char](10) NULL,
+	[PACreator] VARCHAR(MAX) NULL,
 	[PADate] [datetime] NULL,
 	[PAEditDate] [datetime] NULL,
-	[PAEditor] [char](10) NULL,
+	[PAEditor] VARCHAR(MAX) NULL,
 	[PAFAWFK] [int] NULL,
 	[PAFSWFK] [int] NULL,
 	[PAGift] [int] NULL,

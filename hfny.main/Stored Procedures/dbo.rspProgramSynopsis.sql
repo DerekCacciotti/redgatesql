@@ -18,7 +18,7 @@ GO
 -- =============================================
 
 
-CREATE procedure [dbo].[rspProgramSynopsis](
+CREATE PROC [dbo].[rspProgramSynopsis](
 	@programfk    varchar(max)    = NULL,
     @sdate     datetime,
     @edate     datetime,
@@ -65,9 +65,9 @@ DECLARE @tblCommonCohort TABLE(
 			[FirstPrenatalCareVisit] [datetime] NULL,
 			[FirstPrenatalCareVisitUnknown] [bit] NULL,
 			[HVCaseCreateDate] [datetime] NOT NULL,
-			[HVCaseCreator] [char](10) NOT NULL,
+			[HVCaseCreator] VARCHAR(MAX) NOT NULL,
 			[HVCaseEditDate] [datetime] NULL,
-			[HVCaseEditor] [char](10) NULL,
+			[HVCaseEditor] VARCHAR(MAX) NULL,
 			[InitialZip] [char](10) NULL,
 			[IntakeDate] [datetime] NULL,
 			[IntakeLevel] [char](1) NULL,
@@ -93,9 +93,9 @@ DECLARE @tblCommonCohort TABLE(
 
 			[CaseProgramPK] [int],
 			[CaseProgramCreateDate] [datetime] NOT NULL,
-			[CaseProgramCreator] [char](10) NOT NULL,
+			[CaseProgramCreator] VARCHAR(MAX) NOT NULL,
 			[CaseProgramEditDate] [datetime] NULL,
-			[CaseProgramEditor] [char](10) NULL,
+			[CaseProgramEditor] VARCHAR(MAX) NULL,
 			[CaseStartDate] [datetime] NOT NULL,
 			[CurrentFAFK] [int] NULL,
 			[CurrentFAWFK] [int] NULL,
