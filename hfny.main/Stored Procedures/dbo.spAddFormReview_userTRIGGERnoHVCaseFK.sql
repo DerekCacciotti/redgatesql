@@ -9,12 +9,12 @@ GO
 -- and then reads the codeForm table to get the fields needed to write query of last
 -- record rewritten and writes a record into FormReview Table.>
 -- =============================================
-CREATE PROCEDURE [dbo].[spAddFormReview_userTRIGGERnoHVCaseFK](@FormFK int, @FormTypeValue char(2))
+CREATE procedure [dbo].[spAddFormReview_userTRIGGERnoHVCaseFK](@FormFK int, @FormTypeValue char(2))
 	-- Add the parameters for the stored procedure here
 	AS
 
 Declare @TableName varchar(20), @FormDateName varchar(20), 
-        @CreatorName varchar(40), @PKName as varchar(20),
+        @CreatorName varchar(max), @PKName as varchar(20),
 		@SelectStatement nVarchar(700),
 	    @DateValue datetime, @CreatorValue varchar(20), 
 		@PrgFKValue int, 

@@ -12,7 +12,7 @@ GO
 -- =============================================
 
 
-CREATE procedure [dbo].[rspQAReport9]
+CREATE procedure	[dbo].[rspQAReport9]
 (
 @programfk int = NULL,
 @ReportType char(7) = NULL 
@@ -44,8 +44,8 @@ OldID [char](23),
 	OutOfWindow BIT,
 	RecOK BIT,
 	PSIInterval [char](2),
-	HVCaseCreator [char](10),
-	HVCaseEditor [char](10)
+	HVCaseCreator [varchar](max),
+	HVCaseEditor [varchar](max)
 )
 
 INSERT INTO @tbl4QAReport9Coheart(
