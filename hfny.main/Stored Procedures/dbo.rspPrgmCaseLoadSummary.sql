@@ -117,6 +117,21 @@ begin
 	--select * from dbo.codeLevel cl
 
 	,
+	cteCurrentWorkerPrograms as (
+		select sub.WorkerProgramPK,
+		        sub.WorkerFK,
+				sub.HoursPerWeek,
+				sub.TerminationDate from 
+		(select WorkerProgramPK,
+		       WorkerFK,
+			   HoursPerWeek,
+			   TerminationDate,
+			   row_number() over(partition by workerfk order by wp.HireDate desc) [rowNum]
+	    from dbo.WorkerProgram wp
+		inner join dbo.SplitString(@programfk, ',') on wp.ProgramFK = listitem) as sub
+		where sub.rowNum = 1
+	)
+	,
 
 	cteMain AS (
 		SELECT 
@@ -130,8 +145,8 @@ begin
 			, StartAssignmentDate
 			, EndAssignmentDate
 			, FSWAssignDate
-			, wp.HoursPerWeek
-			, TerminationDate
+			, cwp.HoursPerWeek
+			, cwp.TerminationDate
 		FROM 
 			cteData d
 			INNER JOIN CaseProgram cp ON d.HVCaseFK = cp.HVCaseFK 
@@ -140,7 +155,7 @@ begin
 				AND wad.hvcasefk = cp.HVCaseFK 
 				AND @rpdate between StartAssignmentDate AND ISNULL(EndAssignmentDate, @rpdate)
 			INNER JOIN Worker w ON WorkerPK = wad.WorkerFK
-			inner join dbo.WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+			inner join cteCurrentWorkerPrograms cwp on cwp.WorkerFK = w.WorkerPK
 			INNER JOIN dbo.SplitString(@ProgramFK,',') ON cp.ProgramFK = ListItem
 		WHERE 
 			(DischargeDate IS NULL OR DischargeDate >= @rpdate)

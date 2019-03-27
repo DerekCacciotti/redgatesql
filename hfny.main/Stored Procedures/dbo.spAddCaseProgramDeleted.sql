@@ -32,40 +32,6 @@ CREATE PROCEDURE [dbo].[spAddCaseProgramDeleted](@CaseProgramCreator varchar(max
 @TransferredtoProgramFK int=NULL,
 @TransferredStatus int=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) CaseProgramDeletedPK
-FROM CaseProgramDeleted lastRow
-WHERE 
-@CaseProgramCreator = lastRow.CaseProgramCreator AND
-@CaseProgramDeleteDate = lastRow.CaseProgramDeleteDate AND
-@CaseProgramDeleter = lastRow.CaseProgramDeleter AND
-@CaseStartDate = lastRow.CaseStartDate AND
-@CurrentFAFK = lastRow.CurrentFAFK AND
-@CurrentFAWFK = lastRow.CurrentFAWFK AND
-@CurrentFSWFK = lastRow.CurrentFSWFK AND
-@CurrentLevelDate = lastRow.CurrentLevelDate AND
-@CurrentLevelFK = lastRow.CurrentLevelFK AND
-@DischargeDate = lastRow.DischargeDate AND
-@DischargeReason = lastRow.DischargeReason AND
-@DischargeReasonSpecify = lastRow.DischargeReasonSpecify AND
-@ExtraField1 = lastRow.ExtraField1 AND
-@ExtraField2 = lastRow.ExtraField2 AND
-@ExtraField3 = lastRow.ExtraField3 AND
-@ExtraField4 = lastRow.ExtraField4 AND
-@ExtraField5 = lastRow.ExtraField5 AND
-@ExtraField6 = lastRow.ExtraField6 AND
-@ExtraField7 = lastRow.ExtraField7 AND
-@ExtraField8 = lastRow.ExtraField8 AND
-@ExtraField9 = lastRow.ExtraField9 AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@HVCaseFK_old = lastRow.HVCaseFK_old AND
-@OldID = lastRow.OldID AND
-@PC1ID = lastRow.PC1ID AND
-@ProgramFK = lastRow.ProgramFK AND
-@TransferredtoProgram = lastRow.TransferredtoProgram AND
-@TransferredtoProgramFK = lastRow.TransferredtoProgramFK AND
-@TransferredStatus = lastRow.TransferredStatus
-ORDER BY CaseProgramDeletedPK DESC) 
-BEGIN
 INSERT INTO CaseProgramDeleted(
 CaseProgramCreator,
 CaseProgramDeleteDate,
@@ -129,6 +95,5 @@ VALUES(
 @TransferredStatus
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

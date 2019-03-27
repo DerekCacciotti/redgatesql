@@ -11,19 +11,6 @@ CREATE PROCEDURE [dbo].[spAddReportHistory](@ProgramFK int=NULL,
 @ReportFK_old int=NULL,
 @UserName varchar(50)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) ReportHistoryPK
-FROM ReportHistory lastRow
-WHERE 
-@ProgramFK = lastRow.ProgramFK AND
-@ReportCategory = lastRow.ReportCategory AND
-@ReportFK = lastRow.ReportFK AND
-@ReportName = lastRow.ReportName AND
-@ReportType = lastRow.ReportType AND
-@TimeRun = lastRow.TimeRun AND
-@ReportFK_old = lastRow.ReportFK_old AND
-@UserName = lastRow.UserName
-ORDER BY ReportHistoryPK DESC) 
-BEGIN
 INSERT INTO ReportHistory(
 ProgramFK,
 ReportCategory,
@@ -45,6 +32,5 @@ VALUES(
 @UserName
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

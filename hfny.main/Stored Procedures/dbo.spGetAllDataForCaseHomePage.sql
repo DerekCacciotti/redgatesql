@@ -96,6 +96,7 @@ begin
 		select count(PHQ9PK) as CountOfPHQ9s
 			from PHQ9 p
 			where HVCaseFK = @HVCaseFK
+			 --only count if they answered at least one question or if they refused 
 			 and (Appetite is not null 
 			 or BadSelf is not null 
 			 or BetterOffDead is not null 
@@ -105,7 +106,9 @@ begin
 			 or Interest is not null 
 			 or Sleep is not null 
 			 or SlowOrFast is not null 
-			 or Tired is not null)
+			 or Tired is not null
+			 or ParticipantRefused = 1)
+			 
 		)
 	, cteFollowUpCount
 	as
@@ -503,7 +506,7 @@ begin
 				, Discharge_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'DS')
 				, LevelForm_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'LV')
 				, LevelForm_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'LV')
-				, PHQ9_ReviewOn = (select FormsReviewed from cteRawFormApprovals where FormType = 'PQ')
+				, PHQ9_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PQ')
 				, PHQ9_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PQ')
 				, PSI_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PS')
 				, PSI_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PS')

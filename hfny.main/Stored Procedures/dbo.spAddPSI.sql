@@ -59,67 +59,6 @@ CREATE PROCEDURE [dbo].[spAddPSI](@DefensiveRespondingScore numeric(4, 0)=NULL,
 @PSITotalScore numeric(4, 0)=NULL,
 @PSITotalScoreValid bit=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) PSIPK
-FROM PSI lastRow
-WHERE 
-@DefensiveRespondingScore = lastRow.DefensiveRespondingScore AND
-@DifficultChildScore = lastRow.DifficultChildScore AND
-@DifficultChildScoreMValid = lastRow.DifficultChildScoreMValid AND
-@DifficultChildValid = lastRow.DifficultChildValid AND
-@FSWFK = lastRow.FSWFK AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@ParentalDistressScore = lastRow.ParentalDistressScore AND
-@ParentalDistressScoreMValid = lastRow.ParentalDistressScoreMValid AND
-@ParentalDistressValid = lastRow.ParentalDistressValid AND
-@ParentChildDisfunctionalInteractionScore = lastRow.ParentChildDisfunctionalInteractionScore AND
-@ParentChildDysfunctionalInteractionScoreMValid = lastRow.ParentChildDysfunctionalInteractionScoreMValid AND
-@ParentChildDysfunctionalInteractionValid = lastRow.ParentChildDysfunctionalInteractionValid AND
-@ProgramFK = lastRow.ProgramFK AND
-@PSICreator = lastRow.PSICreator AND
-@PSIDateComplete = lastRow.PSIDateComplete AND
-@PSIInterval = lastRow.PSIInterval AND
-@PSIInWindow = lastRow.PSIInWindow AND
-@PSILanguage = lastRow.PSILanguage AND
-@PSIQ1 = lastRow.PSIQ1 AND
-@PSIQ2 = lastRow.PSIQ2 AND
-@PSIQ3 = lastRow.PSIQ3 AND
-@PSIQ4 = lastRow.PSIQ4 AND
-@PSIQ5 = lastRow.PSIQ5 AND
-@PSIQ6 = lastRow.PSIQ6 AND
-@PSIQ7 = lastRow.PSIQ7 AND
-@PSIQ8 = lastRow.PSIQ8 AND
-@PSIQ9 = lastRow.PSIQ9 AND
-@PSIQ10 = lastRow.PSIQ10 AND
-@PSIQ11 = lastRow.PSIQ11 AND
-@PSIQ12 = lastRow.PSIQ12 AND
-@PSIQ13 = lastRow.PSIQ13 AND
-@PSIQ14 = lastRow.PSIQ14 AND
-@PSIQ15 = lastRow.PSIQ15 AND
-@PSIQ16 = lastRow.PSIQ16 AND
-@PSIQ17 = lastRow.PSIQ17 AND
-@PSIQ18 = lastRow.PSIQ18 AND
-@PSIQ19 = lastRow.PSIQ19 AND
-@PSIQ20 = lastRow.PSIQ20 AND
-@PSIQ21 = lastRow.PSIQ21 AND
-@PSIQ22 = lastRow.PSIQ22 AND
-@PSIQ23 = lastRow.PSIQ23 AND
-@PSIQ24 = lastRow.PSIQ24 AND
-@PSIQ25 = lastRow.PSIQ25 AND
-@PSIQ26 = lastRow.PSIQ26 AND
-@PSIQ27 = lastRow.PSIQ27 AND
-@PSIQ28 = lastRow.PSIQ28 AND
-@PSIQ29 = lastRow.PSIQ29 AND
-@PSIQ30 = lastRow.PSIQ30 AND
-@PSIQ31 = lastRow.PSIQ31 AND
-@PSIQ32 = lastRow.PSIQ32 AND
-@PSIQ33 = lastRow.PSIQ33 AND
-@PSIQ34 = lastRow.PSIQ34 AND
-@PSIQ35 = lastRow.PSIQ35 AND
-@PSIQ36 = lastRow.PSIQ36 AND
-@PSITotalScore = lastRow.PSITotalScore AND
-@PSITotalScoreValid = lastRow.PSITotalScoreValid
-ORDER BY PSIPK DESC) 
-BEGIN
 INSERT INTO PSI(
 DefensiveRespondingScore,
 DifficultChildScore,
@@ -237,6 +176,5 @@ VALUES(
 @PSITotalScoreValid
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO
