@@ -39,7 +39,8 @@ CREATE TABLE [dbo].[SupervisionHomeVisitCase]
 [ToolsStatus] [bit] NULL,
 [TransitionPlanning] [bit] NULL,
 [TransitionPlanningComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[TransitionPlanningStatus] [bit] NULL
+[TransitionPlanningStatus] [bit] NULL,
+[InDepthDiscussion] [bit] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
@@ -80,6 +81,7 @@ BEGIN
 			HVReferrals,
 			HVReferralsComments,
 			HVReferralsStatus,
+			InDepthDiscussion,
 			LevelChange,
 			LevelChangeComments,
 			LevelChangeStatus,
@@ -121,6 +123,7 @@ BEGIN
 				HVReferrals,
 				HVReferralsComments,
 				HVReferralsStatus,
+				InDepthDiscussion,
 				LevelChange,
 				LevelChangeComments,
 				LevelChangeStatus,

@@ -41,6 +41,7 @@ begin
 				, shvc.HVCPSStatus
 				, shvc.HVReferralsComments
 				, shvc.HVReferralsStatus
+				, shvc.InDepthDiscussion
 				, shvc.LevelChangeComments
 				, shvc.LevelChangeStatus
 				, shvc.MedicalComments
