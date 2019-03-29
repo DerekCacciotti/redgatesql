@@ -15,7 +15,7 @@ alter procedure rspQAReport20
 --exec rspQAReport20 @ProgramFK = '9', @ReportType = 'Summary', @DupType = null
 --exec rspQAReport20 @ProgramFK = null, @ReportType = 'Summary', @DupType = null
 -- =============================================
-CREATE procedure [dbo].[rspQAReport20]
+CREATE procedure	[dbo].[rspQAReport20]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @ReportType char(7) = null 
@@ -40,7 +40,7 @@ begin
 			FormType varchar(30),
 			FormDate datetime,
 			CreateDate datetime, 
-			Creator char(10)
+			Creator varchar(max)
 		)
 
 	if @ReportType = 'summary'

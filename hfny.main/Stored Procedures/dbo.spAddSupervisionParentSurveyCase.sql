@@ -25,33 +25,6 @@ CREATE PROCEDURE [dbo].[spAddSupervisionParentSurveyCase](@AssessmentIssues bit=
 @SupervisionFK int=NULL,
 @SupervisionParentSurveyCaseCreator varchar(max)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) SupervisionParentSurveyCasePK
-FROM SupervisionParentSurveyCase lastRow
-WHERE 
-@AssessmentIssues = lastRow.AssessmentIssues AND
-@AssessmentIssuesComments = lastRow.AssessmentIssuesComments AND
-@AssessmentIssuesStatus = lastRow.AssessmentIssuesStatus AND
-@CaseComments = lastRow.CaseComments AND
-@FollowUpPSCase = lastRow.FollowUpPSCase AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@InDepthDiscussion = lastRow.InDepthDiscussion AND
-@ProgramFK = lastRow.ProgramFK AND
-@ProtectiveFactors = lastRow.ProtectiveFactors AND
-@ProtectiveFactorsComments = lastRow.ProtectiveFactorsComments AND
-@ProtectiveFactorsStatus = lastRow.ProtectiveFactorsStatus AND
-@PSServicePlan = lastRow.PSServicePlan AND
-@PSServicePlanComments = lastRow.PSServicePlanComments AND
-@PSServicePlanStatus = lastRow.PSServicePlanStatus AND
-@Referrals = lastRow.Referrals AND
-@ReferralsComments = lastRow.ReferralsComments AND
-@ReferralsStatus = lastRow.ReferralsStatus AND
-@RiskFactors = lastRow.RiskFactors AND
-@RiskFactorsComments = lastRow.RiskFactorsComments AND
-@RiskFactorsStatus = lastRow.RiskFactorsStatus AND
-@SupervisionFK = lastRow.SupervisionFK AND
-@SupervisionParentSurveyCaseCreator = lastRow.SupervisionParentSurveyCaseCreator
-ORDER BY SupervisionParentSurveyCasePK DESC) 
-BEGIN
 INSERT INTO SupervisionParentSurveyCase(
 AssessmentIssues,
 AssessmentIssuesComments,
@@ -101,6 +74,5 @@ VALUES(
 @SupervisionParentSurveyCaseCreator
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

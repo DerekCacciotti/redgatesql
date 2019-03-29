@@ -36,7 +36,7 @@ begin
 	, p.FormInterval
 	, p.FormFK
 	, p.DateAdministered
-	, case when datediff(day, DOB, p.DateAdministered) <= 93 and datediff(day, DOB, p.DateAdministered) > 0 then 'Yes'
+	, case when datediff(day, DOB, p.DateAdministered) <= 93 and datediff(day, DOB, p.DateAdministered) >= 0 then 'Yes'
 		   else 'No'
 	  end as Within3Months
 	from OtherChild 

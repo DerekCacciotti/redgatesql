@@ -40,48 +40,6 @@ CREATE PROCEDURE [dbo].[spAddSupervisionHomeVisitCase](@CaseComments varchar(max
 @TransitionPlanningComments varchar(max)=NULL,
 @TransitionPlanningStatus bit=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) SupervisionHomeVisitCasePK
-FROM SupervisionHomeVisitCase lastRow
-WHERE 
-@CaseComments = lastRow.CaseComments AND
-@ChallengingIssues = lastRow.ChallengingIssues AND
-@ChallengingIssuesComments = lastRow.ChallengingIssuesComments AND
-@ChallengingIssuesStatus = lastRow.ChallengingIssuesStatus AND
-@CHEERSFeedback = lastRow.CHEERSFeedback AND
-@CHEERSFeedbackComments = lastRow.CHEERSFeedbackComments AND
-@CHEERSFeedbackStatus = lastRow.CHEERSFeedbackStatus AND
-@FGPProgress = lastRow.FGPProgress AND
-@FGPProgressComments = lastRow.FGPProgressComments AND
-@FGPProgressStatus = lastRow.FGPProgressStatus AND
-@FollowUpHVCase = lastRow.FollowUpHVCase AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@HVCPS = lastRow.HVCPS AND
-@HVCPSComments = lastRow.HVCPSComments AND
-@HVCPSStatus = lastRow.HVCPSStatus AND
-@HVReferrals = lastRow.HVReferrals AND
-@HVReferralsComments = lastRow.HVReferralsComments AND
-@HVReferralsStatus = lastRow.HVReferralsStatus AND
-@InDepthDiscussion = lastRow.InDepthDiscussion AND
-@LevelChange = lastRow.LevelChange AND
-@LevelChangeComments = lastRow.LevelChangeComments AND
-@LevelChangeStatus = lastRow.LevelChangeStatus AND
-@Medical = lastRow.Medical AND
-@MedicalComments = lastRow.MedicalComments AND
-@MedicalStatus = lastRow.MedicalStatus AND
-@ProgramFK = lastRow.ProgramFK AND
-@ServicePlan = lastRow.ServicePlan AND
-@ServicePlanComments = lastRow.ServicePlanComments AND
-@ServicePlanStatus = lastRow.ServicePlanStatus AND
-@SupervisionFK = lastRow.SupervisionFK AND
-@SupervisionHomeVisitCaseCreator = lastRow.SupervisionHomeVisitCaseCreator AND
-@Tools = lastRow.Tools AND
-@ToolsComments = lastRow.ToolsComments AND
-@ToolsStatus = lastRow.ToolsStatus AND
-@TransitionPlanning = lastRow.TransitionPlanning AND
-@TransitionPlanningComments = lastRow.TransitionPlanningComments AND
-@TransitionPlanningStatus = lastRow.TransitionPlanningStatus
-ORDER BY SupervisionHomeVisitCasePK DESC) 
-BEGIN
 INSERT INTO SupervisionHomeVisitCase(
 CaseComments,
 ChallengingIssues,
@@ -161,6 +119,5 @@ VALUES(
 @TransitionPlanningStatus
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

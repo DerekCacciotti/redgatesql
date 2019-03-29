@@ -96,6 +96,7 @@ begin
 		select count(PHQ9PK) as CountOfPHQ9s
 			from PHQ9 p
 			where HVCaseFK = @HVCaseFK
+			 --only count if they answered at least one question or if they refused 
 			 and (Appetite is not null 
 			 or BadSelf is not null 
 			 or BetterOffDead is not null 
@@ -105,7 +106,9 @@ begin
 			 or Interest is not null 
 			 or Sleep is not null 
 			 or SlowOrFast is not null 
-			 or Tired is not null)
+			 or Tired is not null
+			 or ParticipantRefused = 1)
+			 
 		)
 	, cteFollowUpCount
 	as

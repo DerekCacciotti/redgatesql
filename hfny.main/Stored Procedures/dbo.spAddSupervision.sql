@@ -106,114 +106,6 @@ CREATE PROCEDURE [dbo].[spAddSupervision](@Boundaries bit=NULL,
 @SupervisorVacation bit=NULL,
 @Weather bit=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) SupervisionPK
-FROM Supervision lastRow
-WHERE 
-@Boundaries = lastRow.Boundaries AND
-@BoundariesComments = lastRow.BoundariesComments AND
-@BoundariesStatus = lastRow.BoundariesStatus AND
-@Caseload = lastRow.Caseload AND
-@CaseloadComments = lastRow.CaseloadComments AND
-@CaseloadStatus = lastRow.CaseloadStatus AND
-@Coaching = lastRow.Coaching AND
-@CoachingComments = lastRow.CoachingComments AND
-@CoachingStatus = lastRow.CoachingStatus AND
-@CPS = lastRow.CPS AND
-@CPSComments = lastRow.CPSComments AND
-@CPSStatus = lastRow.CPSStatus AND
-@Curriculum = lastRow.Curriculum AND
-@CurriculumComments = lastRow.CurriculumComments AND
-@CurriculumStatus = lastRow.CurriculumStatus AND
-@FamilyReview = lastRow.FamilyReview AND
-@FamilyReviewComments = lastRow.FamilyReviewComments AND
-@FamilyReviewStatus = lastRow.FamilyReviewStatus AND
-@FormComplete = lastRow.FormComplete AND
-@ImpactOfWork = lastRow.ImpactOfWork AND
-@ImpactOfWorkComments = lastRow.ImpactOfWorkComments AND
-@ImpactOfWorkStatus = lastRow.ImpactOfWorkStatus AND
-@ImplementTraining = lastRow.ImplementTraining AND
-@ImplementTrainingComments = lastRow.ImplementTrainingComments AND
-@ImplementTrainingStatus = lastRow.ImplementTrainingStatus AND
-@Outreach = lastRow.Outreach AND
-@OutreachComments = lastRow.OutreachComments AND
-@OutreachStatus = lastRow.OutreachStatus AND
-@Personnel = lastRow.Personnel AND
-@PersonnelComments = lastRow.PersonnelComments AND
-@PersonnelStatus = lastRow.PersonnelStatus AND
-@PIP = lastRow.PIP AND
-@PIPComments = lastRow.PIPComments AND
-@PIPStatus = lastRow.PIPStatus AND
-@ProfessionalGrowth = lastRow.ProfessionalGrowth AND
-@ProfessionalGrowthComments = lastRow.ProfessionalGrowthComments AND
-@ProfessionalGrowthStatus = lastRow.ProfessionalGrowthStatus AND
-@ProgramFK = lastRow.ProgramFK AND
-@RecordDocumentation = lastRow.RecordDocumentation AND
-@RecordDocumentationComments = lastRow.RecordDocumentationComments AND
-@RecordDocumentationStatus = lastRow.RecordDocumentationStatus AND
-@Retention = lastRow.Retention AND
-@RetentionComments = lastRow.RetentionComments AND
-@RetentionStatus = lastRow.RetentionStatus AND
-@RolePlaying = lastRow.RolePlaying AND
-@RolePlayingComments = lastRow.RolePlayingComments AND
-@RolePlayingStatus = lastRow.RolePlayingStatus AND
-@Safety = lastRow.Safety AND
-@SafetyComments = lastRow.SafetyComments AND
-@SafetyStatus = lastRow.SafetyStatus AND
-@SiteDocumentation = lastRow.SiteDocumentation AND
-@SiteDocumentationComments = lastRow.SiteDocumentationComments AND
-@SiteDocumentationStatus = lastRow.SiteDocumentationStatus AND
-@Strengths = lastRow.Strengths AND
-@StrengthsComments = lastRow.StrengthsComments AND
-@StrengthsStatus = lastRow.StrengthsStatus AND
-@SupervisionCreator = lastRow.SupervisionCreator AND
-@SupervisionDate = lastRow.SupervisionDate AND
-@SupervisionEndTime = lastRow.SupervisionEndTime AND
-@SupervisionHours = lastRow.SupervisionHours AND
-@SupervisionMinutes = lastRow.SupervisionMinutes AND
-@SupervisionNotes = lastRow.SupervisionNotes AND
-@SupervisionSessionType = lastRow.SupervisionSessionType AND
-@SupervisionStartTime = lastRow.SupervisionStartTime AND
-@SupervisorFK = lastRow.SupervisorFK AND
-@SupervisorObservationAssessment = lastRow.SupervisorObservationAssessment AND
-@SupervisorObservationAssessmentComments = lastRow.SupervisorObservationAssessmentComments AND
-@SupervisorObservationAssessmentStatus = lastRow.SupervisorObservationAssessmentStatus AND
-@SupervisorObservationHomeVisit = lastRow.SupervisorObservationHomeVisit AND
-@SupervisorObservationHomeVisitComments = lastRow.SupervisorObservationHomeVisitComments AND
-@SupervisorObservationHomeVisitStatus = lastRow.SupervisorObservationHomeVisitStatus AND
-@SupervisorObservationSupervision = lastRow.SupervisorObservationSupervision AND
-@SupervisorObservationSupervisionComments = lastRow.SupervisorObservationSupervisionComments AND
-@SupervisorObservationSupervisionStatus = lastRow.SupervisorObservationSupervisionStatus AND
-@SupportHFAModel = lastRow.SupportHFAModel AND
-@SupportHFAModelComments = lastRow.SupportHFAModelComments AND
-@SupportHFAModelStatus = lastRow.SupportHFAModelStatus AND
-@TeamDevelopment = lastRow.TeamDevelopment AND
-@TeamDevelopmentComments = lastRow.TeamDevelopmentComments AND
-@TeamDevelopmentStatus = lastRow.TeamDevelopmentStatus AND
-@WorkerFK = lastRow.WorkerFK AND
-@WorkplaceEnvironment = lastRow.WorkplaceEnvironment AND
-@WorkplaceEnvironmentComments = lastRow.WorkplaceEnvironmentComments AND
-@WorkplaceEnvironmentStatus = lastRow.WorkplaceEnvironmentStatus AND
-@ParticipantEmergency = lastRow.ParticipantEmergency AND
-@ReasonOther = lastRow.ReasonOther AND
-@ReasonOtherSpecify = lastRow.ReasonOtherSpecify AND
-@ShortWeek = lastRow.ShortWeek AND
-@StaffCourt = lastRow.StaffCourt AND
-@StaffFamilyEmergency = lastRow.StaffFamilyEmergency AND
-@StaffForgot = lastRow.StaffForgot AND
-@StaffIll = lastRow.StaffIll AND
-@StaffOnLeave = lastRow.StaffOnLeave AND
-@StaffTraining = lastRow.StaffTraining AND
-@StaffVacation = lastRow.StaffVacation AND
-@StaffOutAllWeek = lastRow.StaffOutAllWeek AND
-@SupervisorFamilyEmergency = lastRow.SupervisorFamilyEmergency AND
-@SupervisorForgot = lastRow.SupervisorForgot AND
-@SupervisorHoliday = lastRow.SupervisorHoliday AND
-@SupervisorIll = lastRow.SupervisorIll AND
-@SupervisorTraining = lastRow.SupervisorTraining AND
-@SupervisorVacation = lastRow.SupervisorVacation AND
-@Weather = lastRow.Weather
-ORDER BY SupervisionPK DESC) 
-BEGIN
 INSERT INTO Supervision(
 Boundaries,
 BoundariesComments,
@@ -425,6 +317,5 @@ VALUES(
 @Weather
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

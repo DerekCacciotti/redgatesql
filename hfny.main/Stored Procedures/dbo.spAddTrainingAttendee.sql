@@ -6,14 +6,6 @@ CREATE PROCEDURE [dbo].[spAddTrainingAttendee](@TrainingAttendeeCreator varchar(
 @TrainingFK int=NULL,
 @WorkerFK int=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) TrainingAttendeePK
-FROM TrainingAttendee lastRow
-WHERE 
-@TrainingAttendeeCreator = lastRow.TrainingAttendeeCreator AND
-@TrainingFK = lastRow.TrainingFK AND
-@WorkerFK = lastRow.WorkerFK
-ORDER BY TrainingAttendeePK DESC) 
-BEGIN
 INSERT INTO TrainingAttendee(
 TrainingAttendeeCreator,
 TrainingFK,
@@ -25,6 +17,5 @@ VALUES(
 @WorkerFK
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

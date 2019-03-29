@@ -27,35 +27,6 @@ CREATE PROCEDURE [dbo].[spAddASQ](@ASQCreator varchar(max)=NULL,
 @UnderProblemSolving bit=NULL,
 @VersionNumber varchar(10)=NULL)
 AS
-IF NOT EXISTS (SELECT TOP(1) ASQPK
-FROM ASQ lastRow
-WHERE 
-@ASQCreator = lastRow.ASQCreator AND
-@ProgramFK = lastRow.ProgramFK AND
-@ASQCommunicationScore = lastRow.ASQCommunicationScore AND
-@ASQFineMotorScore = lastRow.ASQFineMotorScore AND
-@ASQGrossMotorScore = lastRow.ASQGrossMotorScore AND
-@ASQInWindow = lastRow.ASQInWindow AND
-@ASQPersonalSocialScore = lastRow.ASQPersonalSocialScore AND
-@ASQProblemSolvingScore = lastRow.ASQProblemSolvingScore AND
-@ASQTCReceiving = lastRow.ASQTCReceiving AND
-@DateCompleted = lastRow.DateCompleted AND
-@DevServicesStartDate = lastRow.DevServicesStartDate AND
-@DiscussedWithPC1 = lastRow.DiscussedWithPC1 AND
-@FSWFK = lastRow.FSWFK AND
-@HVCaseFK = lastRow.HVCaseFK AND
-@ReviewCDS = lastRow.ReviewCDS AND
-@TCAge = lastRow.TCAge AND
-@TCIDFK = lastRow.TCIDFK AND
-@TCReferred = lastRow.TCReferred AND
-@UnderCommunication = lastRow.UnderCommunication AND
-@UnderFineMotor = lastRow.UnderFineMotor AND
-@UnderGrossMotor = lastRow.UnderGrossMotor AND
-@UnderPersonalSocial = lastRow.UnderPersonalSocial AND
-@UnderProblemSolving = lastRow.UnderProblemSolving AND
-@VersionNumber = lastRow.VersionNumber
-ORDER BY ASQPK DESC) 
-BEGIN
 INSERT INTO ASQ(
 ASQCreator,
 ProgramFK,
@@ -109,6 +80,5 @@ VALUES(
 @VersionNumber
 )
 
-END
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
 GO

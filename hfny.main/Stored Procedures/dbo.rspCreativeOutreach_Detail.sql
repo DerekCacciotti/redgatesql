@@ -19,6 +19,7 @@ CREATE procedure [dbo].[rspCreativeOutreach_Detail]
     @sitefk    int			   = 0
 )
 as
+
 	if @programfk is null
 	begin
 		select @programfk = substring((select ','+ltrim(rtrim(str(HVProgramPK)))
@@ -88,12 +89,14 @@ as
 		where caseprogress >= 9
 			 and intakedate <= @edate
 			 and datediff(day,e3.LevelAssignDate,dischargedate) < 92
-			 and CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029,1058,1062, -- level CO-term
-									1082,1084,1085,1088,1089,1091,1093,1095,1096) -- level TO-term
-			 and (dischargedate is not null
-			 or dischargedate < @edate)
+			 AND CurrentLevelFK IN (23,1024,1025,1026,1027,1028,1029,1058,1062 -- level CO (X)-term
+							,1082,1084,1085,1088,1089,1091,1093,1095,1096)  --ALL LEVEL TO TERM
+  and (dischargedate is null
+				   or (dischargedate between @sdate and @edate))
 			 and DischargeCode not in (7,17,18,20,21,23,25,36,37)
+
 			 and CaseProgram.DischargeDate > @sdate
 			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+
 		order by PC1ID
 GO
