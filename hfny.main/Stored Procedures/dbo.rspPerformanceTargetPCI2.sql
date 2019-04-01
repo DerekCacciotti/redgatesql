@@ -111,7 +111,7 @@ DECLARE @tblCohort TABLE (
 			  , CurrentLevelName
 			  , '6-month CHEERS Check-In' as FormName
 			  , sixMonthCCI.ObservationDate as FormDate		
-			  , case when (sixMonthCCI.CheersCheckInPK is not null and dbo.IsFormReviewed(sixMonthCCI.ObservationDate,'CC',sixMonthCCI.CheersCheckInPK) = 1) then 1 else 0 end as FormReviewed
+			  , case when (fr.ReviewedBy IS NOT NULL OR (fr.ReviewedBy IS NULL AND fro.FormReviewOptionsPK IS NULL)) then 1 else 0 end as FormReviewed
 			  , case when (sixMonthCCI.ObservationDate IS NOT NULL AND sixMonthCCI.ObservationDate NOT BETWEEN DATEADD(dd, cdbd.MinimumDue, coh.TCDOB) AND DATEADD(dd, cdbd.MaximumDue, coh.TCDOB)) THEN 1 else 0 end as FormOutOfWindow
 			  , case when sixMonthCCI.CheersCheckInPK is null then 1 else 0 end as FormMissing
 			  --, case when cci.CheersCheckInPK is not null then 1 else 0 end as FormMeetsTarget
@@ -119,6 +119,12 @@ DECLARE @tblCohort TABLE (
 			  INNER JOIN dbo.TCID t ON coh.HVCaseFK = t.HVCaseFK
 			  LEFT JOIN cte6MonthCCI sixMonthCCI ON sixMonthCCI.HVCaseFK = coh.HVCaseFK AND sixMonthCCI.TCIDFK = t.TCIDPK
 			  LEFT JOIN dbo.codeDueByDates cdbd ON cdbd.ScheduledEvent = 'CHEERS' AND cdbd.Interval = '06'
+			  LEFT JOIN dbo.FormReview fr ON fr.HVCaseFK = coh.HVCaseFK
+				AND fr.FormType = 'CC'
+				AND fr.FormFK = sixMonthCCI.CheersCheckInPK
+			  LEFT JOIN dbo.FormReviewOptions fro ON fro.FormType = 'CC' 
+				AND fro.ProgramFK = coh.ProgramFK
+				AND sixMonthCCI.ObservationDate BETWEEN fro.FormReviewStartDate AND ISNULL(fro.FormReviewEndDate, sixMonthCCI.ObservationDate)
 		)
 	select PTCode
 			  , HVCaseFK
@@ -138,9 +144,9 @@ DECLARE @tblCohort TABLE (
 							and FormReviewed = 1 then 1 
 						else 0 
 				end as FormMeetsTarget
-			  , case when FormMissing = 1 THEN 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' missing'
-						WHEN FormOutOfWindow = 1 then 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' out of window'
-						when FormReviewed = 0 then 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' not reviewed by supervisor'
+			  , case when FormMissing = 1 THEN 'Form missing for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName
+						WHEN FormOutOfWindow = 1 then 'Form out of window for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName
+						when FormReviewed = 0 then 'Form not reviewed by supervisor for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName
 						else '' end as ReasonNotMeeting
 	from cteMain
 	-- order by OldID
