@@ -8,7 +8,7 @@ GO
 -- Description:	gets data for Performance Target report - PCI2. Valid PSI assessments
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, null, 0, null
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetPCI2]
+CREATE PROC [dbo].[rspPerformanceTargetPCI2]
 (
     @StartDate      datetime,
     @EndDate		datetime,
@@ -17,7 +17,23 @@ CREATE procedure [dbo].[rspPerformanceTargetPCI2]
 )
 
 as
-begin
+BEGIN
+
+DECLARE @tblCohort TABLE (
+	HVCaseFK INT,
+	PC1ID CHAR(13),
+	OldID VARCHAR(23),
+	PC1FullName VARCHAR(MAX),
+	CurrentWorkerFK INT,
+	CurrentWorkerFullName VARCHAR(MAX),
+	CurrentLevelName VARCHAR(50),
+	ProgramFK INT,
+	TCIDPK INT,
+	TCDOB DATETIME,
+	DischargeDate DATETIME,
+	tcAgeDays INT,
+	lastDate DATETIME
+);
 
 	with cteTotalCases
 	as
@@ -51,16 +67,24 @@ begin
 			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
-	,
-	cteCohort
-	as
-		(
+	INSERT INTO @tblCohort
 		select tc.*	
 			from cteTotalCases tc
 			inner join HVCase c WITH (NOLOCK) on c.HVCasePK = tc.HVCaseFK
-			where dateadd(day, 30, case when IntakeDate > tc.tcdob then IntakeDate else tc.tcdob end) 
-					between @StartDate and @EndDate -- dateadd(day,-29,@StartDate) and dateadd(day,62,@StartDate)
-					and (DischargeDate > tc.TCDOB or DischargeDate is null or DischargeDate = '')
+			INNER JOIN dbo.codeDueByDates cdbd ON cdbd.ScheduledEvent = 'Follow Up' AND cdbd.Interval = '06'
+			where dateadd(day, cdbd.DueBy, tc.TCDOB) between @StartDate and @EndDate;
+	
+	WITH cte6MonthCCI
+	AS
+		(
+		SELECT cci.CheersCheckInPK,
+		coh.HVCaseFK,
+		cci.TCIDFK,
+		cci.ObservationDate,
+		cci.TotalScore
+		FROM dbo.CheersCheckIn cci
+		INNER JOIN @tblCohort coh ON coh.HVCaseFK = cci.HVCaseFK
+		WHERE cci.Interval = '06'
 		)
 	,
 	--cteExpectedForm
@@ -75,22 +99,26 @@ begin
 	--,
 	cteMain
 	as
-		(select distinct 'PCI2' as PTCode
+		(SELECT DISTINCT 'PCI2' as PTCode
 			  , coh.HVCaseFK
 			  , PC1ID
 			  , OldID
-			  , TCDOB
+			  , t.TCDOB
+			  , t.TCFirstName
+			  , t.TCLastName
 			  , PC1FullName
 			  , CurrentWorkerFullName
 			  , CurrentLevelName
-			  , 'Birth/Intake PSI' as FormName
-			  , PSIDateComplete as FormDate		
-			  , case when (PSIPK is not null and dbo.IsFormReviewed(PSIDateComplete,'PS',PSIPK) = 1) then 1 else 0 end as FormReviewed
-			  , case when (PSIPK is not null and PSIInWindow = 1) then 0 else 1 end as FormOutOfWindow
-			  , case when PSIPK is null then 1 else 0 end as FormMissing
-			  --, case when PSIPK is not null then 1 else 0 end as FormMeetsTarget
-			  from cteCohort coh
-			  left outer join PSI P WITH (NOLOCK) on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '00'
+			  , '6-month CHEERS Check-In' as FormName
+			  , sixMonthCCI.ObservationDate as FormDate		
+			  , case when (sixMonthCCI.CheersCheckInPK is not null and dbo.IsFormReviewed(sixMonthCCI.ObservationDate,'CC',sixMonthCCI.CheersCheckInPK) = 1) then 1 else 0 end as FormReviewed
+			  , case when (sixMonthCCI.ObservationDate IS NOT NULL AND sixMonthCCI.ObservationDate NOT BETWEEN DATEADD(dd, cdbd.MinimumDue, coh.TCDOB) AND DATEADD(dd, cdbd.MaximumDue, coh.TCDOB)) THEN 1 else 0 end as FormOutOfWindow
+			  , case when sixMonthCCI.CheersCheckInPK is null then 1 else 0 end as FormMissing
+			  --, case when cci.CheersCheckInPK is not null then 1 else 0 end as FormMeetsTarget
+			  from @tblCohort coh
+			  INNER JOIN dbo.TCID t ON coh.HVCaseFK = t.HVCaseFK
+			  LEFT JOIN cte6MonthCCI sixMonthCCI ON sixMonthCCI.HVCaseFK = coh.HVCaseFK AND sixMonthCCI.TCIDFK = t.TCIDPK
+			  LEFT JOIN dbo.codeDueByDates cdbd ON cdbd.ScheduledEvent = 'CHEERS' AND cdbd.Interval = '06'
 		)
 	select PTCode
 			  , HVCaseFK
@@ -110,9 +138,9 @@ begin
 							and FormReviewed = 1 then 1 
 						else 0 
 				end as FormMeetsTarget
-			  , case when FormMissing = 1 then 'Form missing'
-						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormReviewed = 0 then 'Form not reviewed by supervisor'
+			  , case when FormMissing = 1 THEN 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' missing'
+						WHEN FormOutOfWindow = 1 then 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' out of window'
+						when FormReviewed = 0 then 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' not reviewed by supervisor'
 						else '' end as ReasonNotMeeting
 	from cteMain
 	-- order by OldID

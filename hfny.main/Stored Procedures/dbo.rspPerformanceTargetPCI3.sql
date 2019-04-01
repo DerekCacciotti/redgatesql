@@ -9,7 +9,7 @@ GO
 --				by the target child's six month birthday
 -- rspPerformanceTargetReportSummary 19, '07/01/2012', '09/30/2012', null, null, 0, null
 -- =============================================
-CREATE procedure [dbo].[rspPerformanceTargetPCI3]
+CREATE PROC [dbo].[rspPerformanceTargetPCI3]
 (
     @StartDate      datetime,
     @EndDate		datetime,
@@ -19,6 +19,22 @@ CREATE procedure [dbo].[rspPerformanceTargetPCI3]
 
 as
 begin
+
+DECLARE @tblCohort TABLE (
+	HVCaseFK INT,
+	PC1ID CHAR(13),
+	OldID VARCHAR(23),
+	PC1FullName VARCHAR(MAX),
+	CurrentWorkerFK INT,
+	CurrentWorkerFullName VARCHAR(MAX),
+	CurrentLevelName VARCHAR(50),
+	ProgramFK INT,
+	TCIDPK INT,
+	TCDOB DATETIME,
+	DischargeDate DATETIME,
+	tcAgeDays INT,
+	lastDate DATETIME
+);
 
 	with cteTotalCases
 	as
@@ -52,19 +68,37 @@ begin
 			inner join CaseProgram cp WITH (NOLOCK) on cp.CaseProgramPK = ptc.CaseProgramPK
 			-- h.hvcasePK = cp.HVCaseFK and cp.ProgramFK = ptc.ProgramFK -- AND cp.DischargeDate IS NULL
 	)
-	,
-	cteCohort
-	as
-		(
+	INSERT INTO @tblCohort
 		select tc.*	
 			from cteTotalCases tc
 			inner join HVCase c WITH (NOLOCK) on c.HVCasePK = tc.HVCaseFK
-			inner join PSI P WITH (NOLOCK) on P.HVCaseFK = c.HVCasePK
-			where datediff(day,tc.tcdob,@StartDate) <= 365
-				 and datediff(day,tc.tcdob,lastdate) >= 183
-				 and PSIInterval = '00'
-				 and PSITotalScoreValid = 1
-				 and PSITotalScore > 85
+			INNER JOIN dbo.codeDueByDates cdbd ON cdbd.ScheduledEvent = 'Follow Up' AND cdbd.Interval = '18'
+			where dateadd(day, cdbd.DueBy, tc.TCDOB) between @StartDate and @EndDate;
+	
+	WITH cte6MonthCCI
+	AS
+		(
+		SELECT cci.CheersCheckInPK,
+		coh.HVCaseFK,
+		cci.TCIDFK,
+		cci.ObservationDate,
+		cci.TotalScore
+		FROM dbo.CheersCheckIn cci
+		INNER JOIN @tblCohort coh ON coh.HVCaseFK = cci.HVCaseFK AND coh.ProgramFK = cci.ProgramFK
+		WHERE cci.Interval = '06' AND cci.TotalScore <= 18
+		)
+	,
+	cte18MonthCCI
+	AS
+		(
+		SELECT cci.CheersCheckInPK,
+		coh.HVCaseFK,
+		cci.TCIDFK,
+		cci.ObservationDate,
+		cci.TotalScore
+		FROM dbo.CheersCheckIn cci
+		INNER JOIN @tblCohort coh ON coh.HVCaseFK = cci.HVCaseFK AND coh.ProgramFK = cci.ProgramFK
+		WHERE cci.Interval = '18'
 		)
 	,
 	--cteExpectedForm
@@ -79,24 +113,28 @@ begin
 	--,
 	cteMain
 	as
-		(select distinct 'PCI3' as PTCode
-					, coh.HVCaseFK
-					, PC1ID
-					, OldID
-					, TCDOB
-					, PC1FullName
-					, CurrentWorkerFullName
-					, CurrentLevelName
-					, '6 month PSI' as FormName
-					, PSIDateComplete as FormDate		
-					, case when (PSIPK is not null and dbo.IsFormReviewed(PSIDateComplete,'PS',PSIPK) = 1) then 1 else 0 end as FormReviewed
-					, case when (PSIPK is not null and PSIInWindow = 1) then 0 else 1 end as FormOutOfWindow
-					, case when PSIPK is null then 1 else 0 end as FormMissing
-					--, case when PSIPK is not null then 1 else 0 end as FormMeetsTarget
-					, PSITotalScoreValid
-					, PSITotalScore
-			  from cteCohort coh
-			  left outer join PSI P WITH (NOLOCK) on coh.HVCaseFK = P.HVCaseFK and PSIInterval = '01'
+		(select DISTINCT 'PCI3' as PTCode
+			  , coh.HVCaseFK
+			  , PC1ID
+			  , OldID
+			  , t.TCDOB
+			  , t.TCFirstName
+			  , t.TCLastName
+			  , PC1FullName
+			  , CurrentWorkerFullName
+			  , CurrentLevelName
+			  , '18-month Cheers Check-In' as FormName
+			  , eighteenMonthCCI.ObservationDate as FormDate		
+			  , case when (eighteenMonthCCI.CheersCheckInPK is not null and dbo.IsFormReviewed(eighteenMonthCCI.ObservationDate,'CC',eighteenMonthCCI.CheersCheckInPK) = 1) then 1 else 0 end as FormReviewed
+			  , case when (eighteenMonthCCI.ObservationDate IS NOT NULL AND eighteenMonthCCI.ObservationDate NOT BETWEEN DATEADD(dd, cdbd.MinimumDue, coh.TCDOB) AND DATEADD(dd, cdbd.MaximumDue, coh.TCDOB)) THEN 1 else 0 end as FormOutOfWindow
+			  , case when eighteenMonthCCI.CheersCheckInPK is null then 1 else 0 end as FormMissing
+			  --, case when cci.CheersCheckInPK is not null then 1 else 0 end as FormMeetsTarget
+			  , eighteenMonthCCI.TotalScore AS EighteenMonthScore
+			  from @tblCohort coh
+				INNER JOIN dbo.TCID t ON t.HVCaseFK = coh.HVCaseFK
+				INNER JOIN cte6MonthCCI sixMonthCCI ON sixMonthCCI.HVCaseFK = coh.HVCaseFK AND sixMonthCCI.TCIDFK = t.TCIDPK
+				LEFT JOIN cte18MonthCCI eighteenMonthCCI ON eighteenMonthCCI.HVCaseFK = sixMonthCCI.HVCaseFK AND eighteenMonthCCI.TCIDFK = sixMonthCCI.TCIDFK
+			    LEFT JOIN dbo.codeDueByDates cdbd ON cdbd.ScheduledEvent = 'CHEERS' AND cdbd.Interval = '18'
 		)
 	select PTCode
 				, HVCaseFK
@@ -111,15 +149,12 @@ begin
 				, FormReviewed
 				, FormOutOfWindow
 				, FormMissing
-				, case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 and
-						PSITotalScoreValid = 1 and PSITotalScore <= 85 then 1 else 0 end as FormMeetsTarget
-				, case when FormMissing = 1 then 'Form missing'
-						when FormOutOfWindow = 1 then 'Form out of window'
-						when FormReviewed = 0 then 'Form not reviewed by supervisor'
-						when PSITotalScoreValid <> 1 
-							then 'PSI total score invalid'
-						when PSITotalScore > 85
-							then 'PSI total score above cutoff'
+				, case when FormMissing = 0 and FormOutOfWindow = 0 and FormReviewed = 1 
+							AND cteMain.EighteenMonthScore > 18 then 1 else 0 end as FormMeetsTarget
+				, case when FormMissing = 1 THEN 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' missing'
+						WHEN FormOutOfWindow = 1 then 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' out of window'
+						when cteMain.EighteenMonthScore <= 18 THEN 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' total score below cutoff'
+						when FormReviewed = 0 then 'Form for child: ' + cteMain.TCFirstName + ' ' + cteMain.TCLastName + ' not reviewed by supervisor'
 						else '' end as ReasonNotMeeting
 	from cteMain
 	-- order by OldID
