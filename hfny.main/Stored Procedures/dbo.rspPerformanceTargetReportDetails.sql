@@ -132,7 +132,7 @@ begin
 		, FormOutOfWindow	int
 		, FormMissing		int
 		, FormMeetsTarget	int
-		, ReasonNotMeeting	varchar(50)
+		, ReasonNotMeeting	varchar(150)
 		)
 	
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
@@ -175,15 +175,15 @@ begin
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI3]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetPCI3 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI4]') and type in (N'P', N'PC'))
-		insert into @tblPTDetails
-			exec rspPerformanceTargetPCI4 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI5]') and type in (N'P', N'PC'))
-		insert into @tblPTDetails
-			exec rspPerformanceTargetPCI5 @StartDate,@EndDate,@tblPTCohort 
-	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI6]') and type in (N'P', N'PC'))
-		insert into @tblPTDetails
-			exec rspPerformanceTargetPCI6 @StartDate,@EndDate,@tblPTCohort 
+	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI4]') and type in (N'P', N'PC'))
+	--	insert into @tblPTDetails
+	--		exec rspPerformanceTargetPCI4 @StartDate,@EndDate,@tblPTCohort 
+	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI5]') and type in (N'P', N'PC'))
+	--	insert into @tblPTDetails
+	--		exec rspPerformanceTargetPCI5 @StartDate,@EndDate,@tblPTCohort 
+	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI6]') and type in (N'P', N'PC'))
+	--	insert into @tblPTDetails
+	--		exec rspPerformanceTargetPCI6 @StartDate,@EndDate,@tblPTCohort 
 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetFLC1]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails

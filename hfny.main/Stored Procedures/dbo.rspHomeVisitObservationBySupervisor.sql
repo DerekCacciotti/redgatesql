@@ -10,7 +10,7 @@ GO
 -- is showing home visits without observations (Benjamin Simmons)
 -- Edit date: 5/30/17 Bug fix - Supervisor not always displaying correctly for FSWs that have no home visit observations
 -- =============================================
-CREATE procedure [dbo].[rspHomeVisitObservationBySupervisor]
+CREATE PROC [dbo].[rspHomeVisitObservationBySupervisor]
 (
     @programfk varchar(max)    = null,
     @sitefk		 int		   = null
@@ -54,7 +54,38 @@ as
 				inner join dbo.SplitString(@programfk,',') on hvlog.programfk = listitem
 			where -- datediff(year,VisitStartTime,getdate()) <= 1 and 
 				SupervisorObservation = 1
-	
+
+	DECLARE @tblCaseProgramCohort TABLE (
+		CaseProgramPK INT,
+		PC1ID CHAR(13),
+		HVCaseFK INT,
+		CaseStartDate DATETIME,
+		DischargeDate DATETIME,
+		ProgramFK INT,
+		RowNum INT
+	)
+	INSERT INTO @tblCaseProgramCohort
+	(
+	    CaseProgramPK,
+	    PC1ID,
+		HVCaseFK,
+	    CaseStartDate,
+	    DischargeDate,
+	    ProgramFK,
+		RowNum
+	)
+	SELECT cp.CaseProgramPK, 
+		   cp.PC1ID,
+		   cp.HVCaseFK,
+		   cp.CaseStartDate, 
+		   cp.DischargeDate, 
+		   cp.ProgramFK, 
+		   ROW_NUMBER() OVER(PARTITION BY cp.HVCaseFK ORDER BY cp.CaseStartDate DESC)
+	FROM @cteHvlogs ch
+	inner join CaseProgram cp on cp.HVCaseFK = ch.hvcasepk
+	inner join dbo.SplitString(@programfk,',') on cp.programfk = ListItem
+	WHERE (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK <> ListItem) --Eliminate transfer cases
+
 	--Filter the observed hvlogs
 	declare @cteFilteredHvLogs table (
 	    PC1ID char(15)
@@ -70,7 +101,7 @@ as
 		,RowNumber int
 	)
 	insert into @cteFilteredHvLogs 
-	select	cp.PC1ID
+	select	tcpc.PC1ID
 			,VisitStartTime
 			,hvcasepk
 			,visitType
@@ -82,8 +113,7 @@ as
 			,supervisor.LastName
 			,row_number() over (partition by FSWFK order by VisitStartTime desc)
 			from @cteHvlogs observed
-			inner join CaseProgram cp on cp.HVCaseFK = observed.hvcasepk     --and cp.CurrentFSWFK = top7.FSWFK
-			inner join dbo.SplitString(@programfk,',') on cp.programfk = ListItem --Restrict to the programs selected
+			INNER JOIN @tblCaseProgramCohort tcpc ON observed.hvcasepk = tcpc.HVCaseFK AND tcpc.RowNum = 1
 			right join Worker w on w.WorkerPK = observed.FSWFK --Include workers who do not have observed home visits
 			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK --and wp.ProgramFK = ListItem
 			left outer join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
@@ -91,8 +121,6 @@ as
 				and wp.TerminationDate is null
 				and w.LastName <> 'Transfer Worker'
 				and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-				and (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK <> ListItem) --Eliminate transfer cases
-
 	
 	select DISTINCT COALESCE(pc1id,'No Home Visit Observations') pc1id
 		  ,VisitStartTime
