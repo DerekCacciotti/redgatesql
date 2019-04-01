@@ -24,14 +24,14 @@ CREATE TABLE [dbo].[SupervisionParentSurveyCase]
 [SupervisionParentSurveyCaseCreateDate] [datetime] NULL CONSTRAINT [DF_SupervisionParentSurveyCase_SupervisionParentSurveyCaseCreateDate] DEFAULT (getdate()),
 [SupervisionParentSurveyCaseCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [SupervisionParentSurveyCaseEditDate] [datetime] NULL,
-[SupervisionParentSurveyCaseEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[SupervisionParentSurveyCaseEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[InDepthDiscussion] [bit] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		bsimmons
 -- Create date: 2/11/19
@@ -54,6 +54,7 @@ BEGIN
 			CaseComments,
 			FollowUpPSCase,
 			HVCaseFK,
+			InDepthDiscussion,
 			ProgramFK,
 			ProtectiveFactors,
 			ProtectiveFactorsComments,
@@ -80,6 +81,7 @@ BEGIN
 				CaseComments,
 				FollowUpPSCase,
 				HVCaseFK,
+				InDepthDiscussion,
 				ProgramFK,
 				ProtectiveFactors,
 				ProtectiveFactorsComments,

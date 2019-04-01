@@ -32,6 +32,7 @@ begin
 				, spsc.AssessmentIssuesStatus
 				, spsc.CaseComments
 				, spsc.HVCaseFK
+				, spsc.InDepthDiscussion
 				, spsc.ProgramFK
 				, spsc.ProtectiveFactorsComments
 				, spsc.ProtectiveFactorsStatus

@@ -96,7 +96,7 @@ set fmtOnly off ;
 								) ;
 
 	insert into #tblSUPPMWorkers
-	exec spGetAllWorkersbyProgram @ProgramFK, null, 'PM', null ;
+	exec spGetAllWorkersbyProgram @ProgramFK, null, 'Sup,PM', null ;
 
 
 	-- CP 12-21-2017 we have no way of removing a Supervisor from this report based on the current system.  

@@ -35,6 +35,7 @@ as begin
 		, HVReferrals
 		, HVReferralsComments
 		, HVReferralsStatus
+		, InDepthDiscussion
 		, LevelChange
 		, LevelChangeComments
 		, LevelChangeStatus

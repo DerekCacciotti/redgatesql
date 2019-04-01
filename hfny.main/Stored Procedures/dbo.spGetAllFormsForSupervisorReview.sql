@@ -85,6 +85,7 @@ begin
 					when fr.FormType='SC' then 'HVScreen.aspx?pc1id='+PC1ID+ '&hvscreenpk=' + convert(varchar,FormFK)		  
 					when fr.FormType='KE' then 'Kempe.aspx?pc1id='+PC1ID+ '&kempepk=' + convert(varchar,FormFK)		  
 					when fr.FormType='TC' then 'TCIDs.aspx?pc1id='+PC1ID		  -- Note: here we use TCIDs.aspx
+					when fr.FormType='CC' then 'CHEERSTool.aspx?pc1id='+PC1ID+ '&CCIPK=' + convert(varchar,FormFK)
 				else
 					ltrim(rtrim(replace(replace(codeFormName,'-',''),' ','')))+'.aspx?pc1id='+PC1ID
 				end as FormLink
@@ -211,10 +212,11 @@ begin
 				  when FormType='AQ' then 15
 				  when FormType='AS' then 16
 				  when FormType='PS' then 17
-				  when FormType='FU' then 18
-				  when FormType='SU' then 19
-				  when FormType='TR' then 20
-				  when FormType='GR' then 21
+				  when FormType='CC' then 18
+				  when FormType='FU' then 19
+				  when FormType='SU' then 20
+				  when FormType='TR' then 21
+				  when FormType='GR' then 22
 			end
 			, convert(date,FormDate)
 			--,

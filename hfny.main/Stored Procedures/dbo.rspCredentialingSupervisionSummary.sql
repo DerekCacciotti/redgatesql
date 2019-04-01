@@ -22,7 +22,7 @@ GO
 -- max of 2 supervisions per week ... khalsa 1/29/2014
 
 -- =============================================
-CREATE proc [dbo].[rspCredentialingSupervisionSummary] @ProgramFK int = null
+CREATE procedure [dbo].[rspCredentialingSupervisionSummary] @ProgramFK int = null
 												, @sDate datetime = null
 												, @eDate datetime = null
 												, @supervisorfk int = null
@@ -74,7 +74,7 @@ create table #tblSUPPMWorkers (
 							) ;
 
 insert into #tblSUPPMWorkers
-exec spGetAllWorkersbyProgram @ProgramFK, null, 'PM', null ;
+exec spGetAllWorkersbyProgram @ProgramFK, null, 'Sup,PM', null ;
 
 -- List of workers i.e. FAW, FSW minus 	SUP,PM
 -- List of workers who are not supervisor or program manager
