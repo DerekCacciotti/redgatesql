@@ -2,14 +2,12 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
 -- =============================================
 -- Author:		Ben Simmons
 -- Create date: 08/09/18
 -- Description:	Get all CheersCheckIn rows for a specific case
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetCheersCheckInsByHVCaseFK]
+CREATE PROC [dbo].[spGetCheersCheckInsByHVCaseFK]
 	-- Add the parameters for the stored procedure here
 	@HVCaseFK INT,
 	@ProgramFK INT
@@ -50,6 +48,6 @@ BEGIN
 	FROM	dbo.CheersCheckIn cci
 	WHERE cci.HVCaseFK = @HVCaseFK
 		AND cci.ProgramFK = @ProgramFK
-	ORDER BY cci.ObservationDate DESC
+	ORDER BY cci.ObservationDate DESC, cci.TCIDFK ASC
 END;
 GO

@@ -24,6 +24,7 @@ CREATE TABLE [dbo].[CheersCheckIn]
 [Holding2Score] [int] NOT NULL,
 [Holding3Score] [int] NOT NULL,
 [HVCaseFK] [int] NOT NULL,
+[Interval] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CONSTRAINT [DF_CheersCheckIn_Interval] DEFAULT ('08'),
 [ObservationDate] [datetime] NOT NULL,
 [ProgramFK] [int] NOT NULL,
 [Rhythm1Score] [int] NOT NULL,
@@ -31,6 +32,7 @@ CREATE TABLE [dbo].[CheersCheckIn]
 [Smiles1Score] [int] NOT NULL,
 [Smiles2Score] [int] NOT NULL,
 [Smiles3Score] [int] NOT NULL,
+[TCIDFK] [int] NOT NULL,
 [TotalScore] [numeric] (5, 2) NOT NULL
 ) ON [PRIMARY]
 GO
@@ -117,4 +119,6 @@ GO
 ALTER TABLE [dbo].[CheersCheckIn] ADD CONSTRAINT [FK_CheersCheckIn_HVCase] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
 GO
 ALTER TABLE [dbo].[CheersCheckIn] ADD CONSTRAINT [FK_CheersCheckIn_HVProgram] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+ALTER TABLE [dbo].[CheersCheckIn] ADD CONSTRAINT [FK_CheersCheckIn_TCID] FOREIGN KEY ([TCIDFK]) REFERENCES [dbo].[TCID] ([TCIDPK])
 GO

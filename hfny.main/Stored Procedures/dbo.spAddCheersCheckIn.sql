@@ -22,6 +22,7 @@ CREATE PROCEDURE [dbo].[spAddCheersCheckIn](@AverageCuesScore numeric(5, 2)=NULL
 @Holding2Score int=NULL,
 @Holding3Score int=NULL,
 @HVCaseFK int=NULL,
+@Interval char(2)=NULL,
 @ObservationDate datetime=NULL,
 @ProgramFK int=NULL,
 @Rhythm1Score int=NULL,
@@ -29,6 +30,7 @@ CREATE PROCEDURE [dbo].[spAddCheersCheckIn](@AverageCuesScore numeric(5, 2)=NULL
 @Smiles1Score int=NULL,
 @Smiles2Score int=NULL,
 @Smiles3Score int=NULL,
+@TCIDFK int=NULL,
 @TotalScore numeric(5, 2)=NULL)
 AS
 INSERT INTO CheersCheckIn(
@@ -52,6 +54,7 @@ Holding1Score,
 Holding2Score,
 Holding3Score,
 HVCaseFK,
+Interval,
 ObservationDate,
 ProgramFK,
 Rhythm1Score,
@@ -59,6 +62,7 @@ Rhythm2Score,
 Smiles1Score,
 Smiles2Score,
 Smiles3Score,
+TCIDFK,
 TotalScore
 )
 VALUES(
@@ -82,6 +86,7 @@ VALUES(
 @Holding2Score,
 @Holding3Score,
 @HVCaseFK,
+@Interval,
 @ObservationDate,
 @ProgramFK,
 @Rhythm1Score,
@@ -89,6 +94,7 @@ VALUES(
 @Smiles1Score,
 @Smiles2Score,
 @Smiles3Score,
+@TCIDFK,
 @TotalScore
 )
 
