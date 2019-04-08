@@ -54,12 +54,17 @@ as
 
 		-- ASQ-SE
 		select eventDescription
-			  ,dateadd(dd,dueby,hvcase.tcdob) DueDate
+			  ,case
+				   when interval < 24 then
+					   dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
+				   else
+					   dateadd(dd,dueby,hvcase.tcdob)
+			   end DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				--inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asqse version'
-				inner join codeduebydates on scheduledevent = 'ASQSE-1'
+				inner join codeduebydates on scheduledevent = 'ASQSE-2'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 			where pc1id = @pc1id
 				 and caseprogress >= 11
