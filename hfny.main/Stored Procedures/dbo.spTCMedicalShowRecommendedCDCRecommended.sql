@@ -2,37 +2,158 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROC [dbo].[spTCMedicalShowRecommendedCDCRecommended] @TCDOB VARCHAR(128), @TCIDFK INT AS
+CREATE PROC [dbo].[spTCMedicalShowRecommendedCDCRecommended]
 
-DECLARE @numofdays INT
+    @TCIDFK INT
+AS
 
-SET @numofdays = (SELECT DATEDIFF(DAY,@TCDOB, GETDATE()))
-PRINT @numofdays
 
---red
-SELECT  EventDescription, ScheduledEvent, Optional, DueBy, MedicalItemCode, CONVERT(CHAR(10),TCItemDate,111) AS TCItemDate, TCMedicalCreator, CONVERT(CHAR(10),DATEADD(DAY,DueBy,@TCDOB),111) AS estdate, 'Past due' AS type FROM dbo.codeDueByDates INNER JOIN dbo.codeMedicalItem ON MedicalItemTitle = ScheduledEvent 
-LEFT join dbo.TCMedical ON TCMedicalItem = MedicalItemCode  AND TCIDFK = @TCIDFK
- WHERE MedicalItemGroup = 'Immunization'   AND TCItemDate IS null AND DATEADD(MONTH,-3,DATEADD(DAY,DueBy,@TCDOB)) < GETDATE()
-
- UNION
- -- yellow
- (SELECT  EventDescription, ScheduledEvent, Optional, DueBy, MedicalItemCode, CONVERT(CHAR(10),TCItemDate,111) AS TCItemDate, TCMedicalCreator, CONVERT(CHAR(10),DATEADD(DAY,DueBy,@TCDOB),111) AS estdate, 'Nearing' AS type FROM dbo.codeDueByDates INNER JOIN dbo.codeMedicalItem ON MedicalItemTitle = ScheduledEvent 
-LEFT join dbo.TCMedical ON TCMedicalItem = MedicalItemCode  AND TCIDFK = @TCIDFK
- WHERE MedicalItemGroup = 'Immunization'  AND TCItemDate IS NULL AND TCMedicalCreator IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY,DueBy,@TCDOB)) >= GETDATE())
- 
-UNION
- (SELECT  EventDescription, ScheduledEvent, Optional, DueBy, MedicalItemCode, CONVERT(CHAR(10),TCItemDate,111)  AS TCItemDate, TCMedicalCreator,CONVERT(CHAR(10),DATEADD(DAY,DueBy,@TCDOB),111) AS estdate, 'Done' AS type FROM dbo.codeDueByDates INNER JOIN dbo.codeMedicalItem ON MedicalItemTitle = ScheduledEvent 
-LEFT join dbo.TCMedical ON TCMedicalItem = MedicalItemCode  AND TCIDFK = @TCIDFK
- WHERE MedicalItemGroup = 'Immunization'  AND TCItemDate IS NOT NULL
- )
+DECLARE @TCDOB DATE
+--DECLARE @TCIDFK int 
+DECLARE @numberofrowscdcmaster INT
+DECLARE @counter int 
+DECLARE @currentscheduledevent VARCHAR(150)
+SET @counter = 0
+--SET @TCIDFK = 38719
 
 
 
 
- --(SELECT  EventDescription, ScheduledEvent, Optional, DueBy, MedicalItemCode, TCItemDate, TCMedicalCreator, MedicalItemGroup, DATEADD(DAY,DueBy,@TCDOB) AS estdate, 'upcoming' AS type FROM dbo.codeDueByDates INNER JOIN dbo.codeMedicalItem ON MedicalItemTitle = ScheduledEvent 
---LEFT join dbo.TCMedical ON TCMedicalItem = MedicalItemCode  AND TCIDFK = @TCIDFK
--- WHERE MedicalItemGroup = 'Immunization' AND TCItemDate IS NULL AND TCMedicalCreator IS NULL)
--- UNION
 
-ORDER BY type DESC
+
+
+--get the TCDOB
+SET @tcdob = (SELECT tcdob FROM dbo.TCID WHERE TCIDPK=@TCIDFK)
+
+
+--This is my CDC Master Table
+DECLARE @CDCMaster TABLE
+( ID INT IDENTITY(1,1),
+codeduebydatespk INT, 
+dueby INT,
+eventdescription VARCHAR(50),
+interval CHAR(2),
+maxdue INT,
+mindue INT,
+scheduledevent VARCHAR(20),
+frequency INT,
+optional BIT,
+DisplayDate CHAR(10),
+estdate CHAR(10)
+)
+
+
+INSERT INTO @CDCMaster
+(
+    codeduebydatespk,
+    dueby,
+    eventdescription,
+    interval,
+    maxdue,
+    mindue,
+    scheduledevent,
+    frequency,
+    optional,
+	estdate
+)
+SELECT codeduebydatespk,
+    dueby,
+    eventdescription,
+    interval,
+    MaximumDue,
+    MinimumDue,
+    scheduledevent,
+    frequency,
+    optional,
+	--DATEADD(day,DueBy, @TCDOB)
+	CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111)
+
+       FROM dbo.codeDueByDates INNER JOIN dbo.codeMedicalItem  ON MedicalItemTitle = ScheduledEvent
+       WHERE (MedicalItemGroup = 'Immunization')
+          ORDER BY codeDueByDates.DueBy
+
+
+
+       SET @numberofrowscdcmaster = (SELECT COUNT(*) FROM @CDCMaster)
+
+          
+
+DECLARE @TCIDImmunizations TABLE
+(
+ImmunizationID INT IDENTITY(1,1),
+EventDescription VARCHAR(120),
+ScheduledEvent VARCHAR(120),
+Optional BIT,
+DueBy INT,
+DisplayDate CHAR(10),
+MedicalItemTitle VARCHAR(10),
+estdate CHAR(10)
+)
+
+INSERT INTO @TCIDImmunizations
+(
+    --EventDescription,
+    --ScheduledEvent,
+    --Optional,
+    --DueBy,
+    DisplayDate,
+       MedicalItemTitle
+    --estdate
+)
+SELECT --EventDescription,
+       --ScheduledEvent,
+       --Optional,
+       --DueBy,
+       CONVERT(CHAR(10), TCItemDate, 111) AS TCItemDate
+          , MedicalItemTitle
+       --, CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111) AS estdate
+FROM TCMedical
+INNER JOIN codeMedicalItem ON MedicalItemCode = TCMedicalItem
+--INNER JOIN dbo.codeDueByDates ON MedicalItemTitle = ScheduledEvent
+WHERE (MedicalItemGroup = 'Immunization')
+AND tcidfk = @TCIDFK
+
+
+
+--set the estimated dates for when the CDC wants the immunizations in the master table
+--UPDATE @CDCMaster SET estdate = CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111) 
+
+
+--SELECT * FROM @CDCMaster ORDER BY dueby
+
+
+
+
+
+WHILE @counter <= @numberofrowscdcmaster
+BEGIN
+
+       DECLARE @immunizationdate AS DATE = NULL --this is what we get from the @TCIDImmunizations table
+       DECLARE @idDelete AS INT = NULL --this is what the TCIDImmunizations pk that we will delete once we get the immunization date
+       DECLARE @myevent AS VARCHAR(10) = (SELECT scheduledevent FROM @CDCMaster WHERE id = @counter)
+
+       PRINT @counter
+
+       SET @immunizationdate = (SELECT TOP 1 DisplayDate FROM @TCIDImmunizations WHERE MedicalItemTitle = @myevent Order BY displaydate)
+       SET @idDelete = (SELECT TOP 1 ImmunizationID FROM @TCIDImmunizations WHERE MedicalItemTitle = @myevent Order BY displaydate)
+       
+       UPDATE @CDCMaster SET DisplayDate = @immunizationdate WHERE id = @counter
+       DELETE FROM @TCIDImmunizations WHERE ImmunizationID=@idDelete
+
+SET @counter = @counter + 1
+END
+
+SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
+ AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
+
+
+ UNION 
+
+ SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE()
+
+ UNION 
+
+ SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL
+
 GO
