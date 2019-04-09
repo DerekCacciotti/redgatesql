@@ -84,7 +84,7 @@ begin
     --need to exclude empty phq9 rows that are written because follow-up always writes a row, regardless of whether the phq9 was administered.
 	--We're being as generous as possible and including phq9s that have at least one question answered. 
 	--Also need other children that have not had a phq9, so check for null phq9pk or at least one question answered.
-	and (p.Difficulty is not null or --or they did one
+	and (p.Difficulty is not null or
 			 p.Down is not null or 
 			 p.Interest is not null or 
 			 p.Sleep is not null or 
