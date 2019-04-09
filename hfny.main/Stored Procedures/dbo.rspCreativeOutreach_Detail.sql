@@ -39,28 +39,32 @@ as
 				  and (dischargedate is not null or dischargedate < @edate) and DischargeCode not in (7,17,18,20,21,23,25,36,37) then
 				  PC1ID
 		  end)
-		from hvcase
-			inner join caseprogram on caseprogram.hvcasefk = hvcasepk
-			inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			left join (select hvlevel.hvlevelpk
-							 ,hvlevel.hvcasefk
-							 ,hvlevel.programfk
-							 ,hvlevel.levelassigndate
-							 ,levelname
-							 ,caseweight
-					   from hvlevel
-					    inner join codelevel on codelevelpk = levelfk						
-						where LevelFK IN (22,24,25,26,27,28,29, 1056, 1060 --these are all the LEVEL CO (X) levels (excluding termed)
+ from hvcase
+				  inner join caseprogram on caseprogram.hvcasefk = hvcasepk
+				  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
+				  left join (
+				            select hvlevel.hvcasefk
+								   ,hvlevel.programfk
+								   ,codelevel.levelname
+								   ,max(hvlevel.levelassigndate) [levelassigndate]
+								 from hvlevel
+									 inner join codelevel on codelevelpk = levelfk
+								 where LevelFK IN (22,24,25,26,27,28,29, 1056, 1060 --these are all the LEVEL CO (X) levels (excluding termed)
 												, 1097, 1080,1081,1083,1086,1087,1090,1092,1094) --these are all the LEVEL TO levels (excluding termed)
-						) e4 on e4.hvcasefk = caseprogram.hvcasefk and e4.programfk = caseprogram.programfk
-		   left join codeDischarge on DischargeCode = caseprogram.DischargeReason
-		   inner join WorkerProgram wp on CurrentFSWFK = WorkerFK
-		   inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = HVCasePK
-		where caseprogress >= 9
-			 and intakedate <= @edate
-			 and CaseProgram.DischargeDate > @sdate
-			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+								 group by hvlevel.hvcasefk
+										 ,hvlevel.programfk
+										 ,codelevel.levelname
+							) e4 on e4.hvcasefk = caseprogram.hvcasefk and e4.programfk = caseprogram.programfk
+				  left join codeDischarge on DischargeCode = caseprogram.DischargeReason
+				  inner join dbo.udfCaseFilters(@casefilterspositive, '', @programfk) cf on cf.HVCaseFK = HVCasePK
+				  inner join WorkerProgram wp on CurrentFSWFK = WorkerFK AND wp.programfk = listitem
+			  where caseprogress >= 9
+				   and intakedate <= @edate
+				   and (dischargedate is null
+				   or (dischargedate between @sdate and @edate))
+				   and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
+				   
 	-- Length of Service on Level X at DC
 	select PC1ID
 		  ,'Closed on '+convert(varchar(12),dischargedate,101) as CurrentStatus
