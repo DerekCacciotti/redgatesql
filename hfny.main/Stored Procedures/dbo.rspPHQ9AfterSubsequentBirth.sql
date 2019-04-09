@@ -21,16 +21,45 @@ begin
 
 	set @programfk = replace(@programfk,'"','')
 
+	declare @results as table (
+		OtherChildPK int
+		,DOB datetime
+		,TCDOB datetime
+		,HVCasePK int
+		,PC1ID varchar(13)
+		,FirstName varchar(32)
+		,LastName varchar(32)
+		,FormName varchar(32)
+		,FormInterval char(2)
+		,FormFK int
+		,DateAdministered datetime
+		,Within3Months char(3)	
+	)
+	insert into @results(
+		  OtherChildPK
+		, DOB
+		, TCDOB
+		, HVCasePK
+		, PC1ID
+		, FirstName
+		, LastName
+		, FormName
+		, FormInterval
+		, FormFK
+		, DateAdministered
+		, Within3Months
+	)
+
 	select OtherChild.OtherChildPK
 	, OtherChild.DOB
 	, HVCase.TCDOB
 	, HVCase.HVCasePK
 	, cp.PC1ID
 	, case when OtherChild.FirstName <> '' then OtherChild.FirstName
-	       else 'Missing'
+	       else '<missing>'
 	  end as FirstName
 	, case when OtherChild.LastName <> '' then OtherChild.LastName
-		   else 'Missing'
+		   else '<missing>'
 	  end as LastName	
 	, cf.codeFormName as [FormName]
 	, p.FormInterval
@@ -49,7 +78,9 @@ begin
 	--must be subsequent pregnancies 
 	and DOB > TCDOB
 	and DOB <= p.DateAdministered
+	and DOB >= '01-01-2018'
 	and Relation2PC1 = '01' --biological child
+	and p.ParticipantRefused <> 1
     --need to exclude empty phq9 rows that are written because follow-up always writes a row, regardless of whether the phq9 was administered.
 	--We're being as generous as possible and including phq9s that have at least one question answered. 
 	--Also need other children that have not had a phq9, so check for null phq9pk or at least one question answered.
@@ -60,5 +91,43 @@ begin
 			 p.SlowOrFast is not null or 
 			 p.Tired is not null)
 
+
+	declare @childScreened as table(
+		OtherChildPK int
+	   ,Screened char(3)
+	   ,numScreened int
+	   ,cntOtherChildren int
+	)
+
+	--get distinct other children
+	insert into @childScreened (OtherChildPK) select distinct OtherChildPK from @results r
+
+	--they were screened if we find one phq9 that happened within 3 months
+	update @childScreened set Screened = 'Yes' where OtherChildPK in (select OtherChildPK from @results where Within3Months = 'Yes') 
+
+	--find count of those who were screened
+	update @childScreened set numScreened = (select count(*) from @childScreened where Screened = 'Yes')
+
+	--find n
+	update @childScreened set cntOtherChildren = (select count(*) from @childScreened)
+
+	--join with results table and GTFO
+	select r.OtherChildPK
+		 , r.DOB
+		 , r.TCDOB
+		 , r.HVCasePK
+		 , r.PC1ID
+		 , r.FirstName
+		 , r.LastName
+		 , r.FormName
+		 , r.FormInterval
+		 , r.FormFK
+		 , r.DateAdministered
+		 , r.Within3Months
+		 , cs.OtherChildPK
+		 , cs.numScreened
+		 , cs.cntOtherChildren 
+		 from @results r 
+		 inner join @childScreened cs on cs.OtherChildPK = r.OtherChildPK
 end
 GO
