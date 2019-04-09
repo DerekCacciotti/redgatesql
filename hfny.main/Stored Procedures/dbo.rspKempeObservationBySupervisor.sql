@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:    <Jay Robohn>
 -- Create date: <Feb 20, 2012>
@@ -10,8 +9,9 @@ GO
 -- Edit date: 5/17/17 Bug fix - Report not displaying FAWs that have Kempes and no supervisor observations (Benjamin Simmons)
 -- Edit date: 5/30/17 Bug fix - Supervisor not always displaying correctly for FAWs that have no supervisor observations
 -- Edit date: 4/23/2018 Bug fix - Ticket #3992 - Yates worker (active in two programs) was duplicating every observation (Chris Papas)
+-- Edit date: 04/09/2019 Bug Fix - Supervisor was not displaying for workers without any supervisor observations (Benjamin Simmons)
 -- =============================================
-CREATE procedure [dbo].[rspKempeObservationBySupervisor]
+CREATE PROC [dbo].[rspKempeObservationBySupervisor]
 (
     @programfk varchar(max)	= null,
     @sitefk		 int		= null
@@ -61,15 +61,16 @@ as
 			  ,RowNumber = row_number() over (partition by FAWFK order by KempeDate desc)
 			from cteKempes observed
 			inner join CaseProgram cp on cp.HVCaseFK = observed.hvcasepk --and cp.CurrentFAWFK = top5.FAWFK
-			inner join dbo.SplitString(@programfk,',') on cp.programfk = ListItem --Restrict to the programs selected
+			inner join dbo.SplitString(@programfk,',') ss1 on cp.programfk = ss1.ListItem --Restrict to the programs selected
 			right join Worker w on w.WorkerPK = observed.FAWFK --Include workers who do not have observed kempes
-			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = ListItem  --UNREMARKED 'and wp.ProgramFK = ListItem 4/23/2018 Bug fix (Chris Papas)
+			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
+			INNER join dbo.SplitString(@programfk,',') ss2 on wp.programfk = ss2.ListItem --Restrict to the programs selected  --UNREMARKED 'and wp.ProgramFK = ListItem 4/23/2018 Bug fix (Chris Papas)
 			left outer join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
 			where w.WorkerPK in (select FAWFK from cteWorkerCohort)
 				and wp.TerminationDate is null
 				and w.LastName <> 'Transfer Worker'
 				and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
-				and (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK = ListItem) --Eliminate transfer cases
+				and (cp.TransferredtoProgramFK is null or cp.TransferredtoProgramFK = ss1.ListItem) --Eliminate transfer cases
 	)
 	select coalesce(pc1id,'No Kempe Observations') pc1id
 		  ,KempeDate
