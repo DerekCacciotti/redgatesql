@@ -9,7 +9,7 @@ GO
 -- rspPerformanceTargetReportDetails 5 ,'10/01/2012' ,'12/31/2012'
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 -- =============================================
-CREATE PROC [dbo].[rspPerformanceTargetReportDetails]
+CREATE procedure [dbo].[rspPerformanceTargetReportDetails]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartDate				datetime,
@@ -169,6 +169,9 @@ begin
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI1]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetPCI1 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI1a]') and type in (N'P', N'PC'))
+		insert into @tblPTDetails
+			exec rspPerformanceTargetPCI1a @StartDate,@EndDate,@tblPTCohort 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetPCI2]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetPCI2 @StartDate,@EndDate,@tblPTCohort 
