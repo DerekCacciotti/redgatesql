@@ -13,6 +13,8 @@ DECLARE @TCDOB DATE
 DECLARE @numberofrowscdcmaster INT
 DECLARE @counter int 
 DECLARE @currentscheduledevent VARCHAR(150)
+DECLARE @chickenpoxstatus BIT
+DECLARE @immunizationstatus bit
 SET @counter = 0
 --SET @TCIDFK = 38719
 
@@ -24,6 +26,12 @@ SET @counter = 0
 
 --get the TCDOB
 SET @tcdob = (SELECT tcdob FROM dbo.TCID WHERE TCIDPK=@TCIDFK)
+--get the status of the chickenpox virus and overall immunizations
+SET @chickenpoxstatus = (SELECT VaricellaZoster FROM dbo.TCID WHERE TCIDPK = @TCIDFK)
+SET @immunizationstatus = (SELECT NoImmunization FROM dbo.TCID WHERE TCIDPK = @TCIDFK)
+
+PRINT @chickenpoxstatus
+PRINT @immunizationstatus
 
 
 --This is my CDC Master Table
@@ -143,9 +151,40 @@ BEGIN
 SET @counter = @counter + 1
 END
 
+
+IF(@chickenpoxstatus = 1)
+BEGIN 
+
+
+
 SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
 AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
  AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
+ AND scheduledevent != 'VZ'
+ 
+
+
+ UNION 
+
+ SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE()
+ AND scheduledevent != 'VZ' 
+
+ UNION 
+
+ SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL OR scheduledevent = 'VZ'
+
+
+
+
+END
+
+ELSE
+BEGIN
+
+SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
+ AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
+
 
 
  UNION 
@@ -155,5 +194,13 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
  UNION 
 
  SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL
+
+
+
+
+
+end
+
+
 
 GO
