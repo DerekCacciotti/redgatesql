@@ -164,7 +164,7 @@ caseprogress >= 9
 AND IntakeDate <= @edate
 AND (cohort.dischargedate IS NULL OR cohort.dischargedate >= @sdate)
 AND (CASE WHEN @sitefk = 0 THEN 1 WHEN SiteFK = @sitefk THEN 1 ELSE 0 END = 1)
-AND Levelfk IN (12, 14)
+AND Levelfk IN (12, 14, 1059) --CP 4-16-2019, added 1059, which is Level 1M (mulitple is level 1)
 AND (StartLevelDate_Level2 IS NULL OR StartLevelDate < StartLevelDate_Level2)
 GROUP BY
 cohort.HVCaseFK
@@ -212,6 +212,4 @@ JOIN @zzz AS c ON 1 = 1
 LEFT OUTER JOIN @yyy AS b ON a.HVCaseFK = b.HVCaseFK
 WHERE b.HVCaseFK IS NOT NULL OR a.[days_length_total] >= 183
 ORDER BY level1_less_183, PC1ID
-
-
 GO
