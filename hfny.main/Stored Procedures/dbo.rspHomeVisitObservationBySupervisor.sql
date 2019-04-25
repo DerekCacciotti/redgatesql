@@ -10,7 +10,7 @@ GO
 -- is showing home visits without observations (Benjamin Simmons)
 -- Edit date: 5/30/17 Bug fix - Supervisor not always displaying correctly for FSWs that have no home visit observations
 -- =============================================
-CREATE PROC [dbo].[rspHomeVisitObservationBySupervisor]
+CREATE proc [dbo].[rspHomeVisitObservationBySupervisor]
 (
     @programfk varchar(max)    = null,
     @sitefk		 int		   = null
@@ -115,7 +115,7 @@ as
 			from @cteHvlogs observed
 			INNER JOIN @tblCaseProgramCohort tcpc ON observed.hvcasepk = tcpc.HVCaseFK AND tcpc.RowNum = 1
 			right join Worker w on w.WorkerPK = observed.FSWFK --Include workers who do not have observed home visits
-			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK --and wp.ProgramFK = ListItem
+			left outer join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = tcpc.ProgramFK
 			left outer join Worker supervisor on wp.SupervisorFK = supervisor.WorkerPK
 			where w.WorkerPK in (select FSWFK from @cteWorkerCohort)
 				and wp.TerminationDate is null
@@ -153,6 +153,8 @@ as
 					'In Home'
 				when substring(visitType,5,1) = '1' then
 					'Out of Home'
+				when substring(visitType,6,1) = '1' then
+					'Group Visit'
 				when visitType is null then
 					''
 				else
