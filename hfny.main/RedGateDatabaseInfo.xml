@@ -9,6 +9,7 @@
   <IsAzure>False</IsAzure>
   <ScriptFolderType>Default</ScriptFolderType>
   <MaxDataFileSize>10485760</MaxDataFileSize>
+  <ProjectGuid>2cb04ac4-474b-4fc4-8b84-8b4e878c90a1</ProjectGuid>
   <WriteToFileOptions>
     <Prefixes>
       <None>
