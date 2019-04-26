@@ -17,8 +17,10 @@ CREATE PROCEDURE [dbo].[rspTraining_Orientation]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
 	@sdate AS DATE
-
+	
+WITH recompile
 as
+
 
 
 BEGIN
@@ -177,7 +179,7 @@ BEGIN
 		WHEN TrainingDate IS NULL THEN '1' 
 		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN '3'
 		WHEN TopicCode = 3.0 and TrainingDate <= FirstHomeVisitDate THEN '3'
-		WHEN TopicCode = 3.0 and TrainingDate > FirstHomeVisitDate AND DATEDIFF(DAY, @sdate, HireDate) > 546 THEN '2'	
+		WHEN TopicCode = 3.0 and TrainingDate > FirstHomeVisitDate AND DATEDIFF(DAY, GETDATE(), HireDate) > 546 THEN '2'	
 		WHEN DATEADD(DAY, 546, cte10_2b.HireDate) <= GETDATE() AND cte10_2b.TrainingDate IS NOT NULL THEN '2'
 			ELSE '1' END AS 'Meets Target'
 	, CASE  WHEN TrainingDate IS NOT NULL AND TrainingDate <= FirstEvent THEN '3'
@@ -185,7 +187,7 @@ BEGIN
 		WHEN  FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 3 
 		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN 3
 		WHEN TopicCode = 3.0 and TrainingDate <= FirstHomeVisitDate THEN 3
-		WHEN TopicCode = 3.0 and TrainingDate > FirstHomeVisitDate AND DATEDIFF(DAY, @sdate, HireDate) > 546 THEN 2	
+		WHEN TopicCode = 3.0 and TrainingDate > FirstHomeVisitDate AND DATEDIFF(DAY, GETDATE(), HireDate) > 546 THEN 2	
 		WHEN DATEADD(DAY, 546, cte10_2b.HireDate) <= GETDATE() AND cte10_2b.TrainingDate IS NOT NULL THEN 2
 			ELSE 1 END AS 'IndividualRating'
 	FROM cte10_2b
