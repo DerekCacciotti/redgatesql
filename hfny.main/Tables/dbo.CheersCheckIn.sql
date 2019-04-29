@@ -24,7 +24,7 @@ CREATE TABLE [dbo].[CheersCheckIn]
 [Holding2Score] [int] NOT NULL,
 [Holding3Score] [int] NOT NULL,
 [HVCaseFK] [int] NOT NULL,
-[Interval] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL CONSTRAINT [DF_CheersCheckIn_Interval] DEFAULT ('08'),
+[Interval] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ObservationDate] [datetime] NOT NULL,
 [ProgramFK] [int] NOT NULL,
 [Rhythm1Score] [int] NOT NULL,
