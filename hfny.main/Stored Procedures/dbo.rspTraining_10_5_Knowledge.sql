@@ -212,7 +212,7 @@ SELECT [TopicName]
 		, cteMeetTarget.topiccode
 		, cteMeetTarget.subtopiccode
 		, SUM(ContentCompleted) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS ContentCompleted	
-		, SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
+		, COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.Workerpk, cteMeetTarget.TopicCode) AS CAMeetingTarget	
 		, CASE WHEN cteMeetTarget.TopicCode = 20.0 THEN '11-3a. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Child Abuse & Neglect within twelve months of hire' 
 			WHEN cteMeetTarget.TopicCode = 21.0 THEN	'11-3b. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Family Violence within twelve months of hire'  
 			WHEN cteMeetTarget.TopicCode = 22.0 THEN	'11-3c. Staff (assessment workers, home visitors, supervisors and program managers) receives training in Substance Abuse within twelve months of hire' 
@@ -295,7 +295,7 @@ SELECT [TopicName]
 		, FatherAdvocate
 		, cteAlmostFinal.topiccode
 		, ContentCompleted AS IndivContentCompleted
-		, CAMeetingTarget AS IndivContentMeeting
+		, SUM (ISNULL(CompletedAllOnTime, 0)) OVER (PARTITION BY cteAlmostFinal.topiccode, cteAlmostFinal.WorkerPK) AS IndivContentMeeting
 		, CAST(CAMeetingTarget AS decimal(10,2))/ CAST(TotalContentAreasByTopicAndWorker AS decimal(10,2)) AS IndivPercByTopic
 		, TopicName
 		, HireDate
