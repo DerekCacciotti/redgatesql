@@ -11,7 +11,9 @@ if @ProgramFK is null
 										   for xml path ('')),2,8000)
 	end
 	set @ProgramFK = replace(@ProgramFK,'"','')
-	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end
+	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK END
+    
+
 --Parsons
 --DECLARE @BeginOfMonth AS DATE = '01/01/2019'
 --DECLARE @EndOfMonth AS DATE = '01/31/2019'
@@ -41,7 +43,7 @@ inner join CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
 inner join dbo.SplitString(@ProgramFK,',') on cp.ProgramFK = listitem
 inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
 inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
-inner join listSite ls on ls.listSitePK = wp.SiteFK
+LEFT outer JOIN listSite ls on ls.listSitePK = wp.SiteFK
 inner join PC p on p.PCPK = HVCase.PC1FK
 left outer join TCID t on t.HVCaseFK = HVCase.HVCasePK
 where cp.ProgramFK = @ProgramFK
@@ -50,7 +52,7 @@ and IntakeDate is not null
 and IntakeDate <=@EndDate
 and (cp.DischargeDate is null or cp.DischargeDate>=@StartDate)
 --and (ls.SiteName='Parsons Cohoes Site' or ls.SiteName='Parsons Albany Site ')
-AND (ls.listSitePK = @SiteFK)
+and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
 
 
