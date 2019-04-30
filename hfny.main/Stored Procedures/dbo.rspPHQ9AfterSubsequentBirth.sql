@@ -70,26 +70,27 @@ begin
 	  end as Within3Months
 	from OtherChild 
 	inner join dbo.SplitString(@programfk,',') ON OtherChild.programfk  = listitem
-	left join dbo.PHQ9 p on p.HVCaseFK = OtherChild.HVCaseFK
+	left join dbo.PHQ9 p on p.HVCaseFK = OtherChild.HVCaseFK and (p.Difficulty is not null or
+			 p.Down is not null or 
+			 p.Interest is not null or 
+			 p.Sleep is not null or 
+			 p.SlowOrFast is not null or 
+			 p.Tired is not null)
+			 and p.ParticipantRefused <> 1
 	inner join hvcase on HVCase.HVCasePK = OtherChild.HVCaseFK and HVCase.TCDOB is not null
 	inner join codeForm cf on cf.codeFormAbbreviation = p.FormType 
 	inner join dbo.CaseProgram cp on cp.HVCaseFK = HVCase.HVCasePK
 	where DOB between @sDate and @eDate
 	--must be subsequent pregnancies 
 	and DOB > TCDOB
-	and DOB <= p.DateAdministered
+	
 	and DOB >= '01-01-2018'
 	and Relation2PC1 = '01' --biological child
-	and p.ParticipantRefused <> 1
+	
     --need to exclude empty phq9 rows that are written because follow-up always writes a row, regardless of whether the phq9 was administered.
 	--We're being as generous as possible and including phq9s that have at least one question answered. 
 	--Also need other children that have not had a phq9, so check for null phq9pk or at least one question answered.
-	and (p.Difficulty is not null or
-			 p.Down is not null or 
-			 p.Interest is not null or 
-			 p.Sleep is not null or 
-			 p.SlowOrFast is not null or 
-			 p.Tired is not null)
+	
 
 
 	declare @childScreened as table(
