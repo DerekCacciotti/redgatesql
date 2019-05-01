@@ -1,0 +1,9 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROC [dbo].[spisTCMedicalApproved] @TCMedicalPK INT AS
+
+SELECT TOP 1 * FROM dbo.FormReview WHERE FormFK = @TCMedicalPK AND FormType = 'TM'
+
+GO

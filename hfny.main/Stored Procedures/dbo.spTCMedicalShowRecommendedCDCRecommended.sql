@@ -8,13 +8,16 @@ CREATE PROC [dbo].[spTCMedicalShowRecommendedCDCRecommended]
 AS
 
 
-DECLARE @TCDOB DATE
+ DECLARE @TCDOB DATE
 --DECLARE @TCIDFK int 
 DECLARE @numberofrowscdcmaster INT
 DECLARE @counter int 
 DECLARE @currentscheduledevent VARCHAR(150)
 DECLARE @chickenpoxstatus BIT
-DECLARE @immunizationstatus bit
+DECLARE @immunizationstatus BIT
+
+DECLARE @beginningofyear DATETIME =  DATEADD(yy, DATEDIFF(yy, 0, GETDATE()), 0)
+DECLARE @endofyear DATETIME = DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1)
 SET @counter = 0
 --SET @TCIDFK = 38719
 
@@ -166,7 +169,8 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
 
  UNION 
 
- SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE()
+ SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+ AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate BETWEEN @beginningofyear AND @endofyear
  AND scheduledevent != 'VZ' 
 
  UNION 
@@ -174,7 +178,8 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
  SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL OR scheduledevent = 'VZ'
 
 
-
+ UNION
+ SELECT  *, '' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate > @endofyear
 
 END
 
@@ -189,11 +194,16 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
 
  UNION 
 
- SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE()
+ SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+ AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate BETWEEN @beginningofyear AND @endofyear
 
  UNION 
 
  SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL
+
+
+ UNION
+ SELECT  *, '' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate > @endofyear
 
 
 
@@ -201,6 +211,17 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
 
 end
 
+ 
 
+ 
 
+ 
+
+ 
+
+ 
+
+ 
+
+--get the TCDOB
 GO
