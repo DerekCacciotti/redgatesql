@@ -88,12 +88,12 @@ as
 			,RTRIM(pc.pccity) + ', ' + pc.pcstate + ' ' + pc.pczip AS pccsz
 			,'PC1 Primary: '+ CASE
 				WHEN pc.pcphone IS NOT NULL AND pc.pcphone <> '' THEN
-					pc.pcphone + ','
+					+' ' + pc.pcphone
 				ELSE
-					'(None)'
+					'(None) ' + ','
 			END + CASE
 				WHEN pc.PCEmergencyPhone IS NOT NULL AND pc.PCEmergencyPhone <> '' THEN
-					', PC1 Emergency: ' + pc.PCEmergencyPhone + ','
+					'PC1 Emergency:' + pc.PCEmergencyPhone + ','
 				ELSE
 					''
 			END + CASE
@@ -106,24 +106,24 @@ as
 
 			-- pc2 phone 
 			 CASE
-			WHEN   pc2.PCPhone IS NOT NULL AND pc2.PCPhone <> '' THEN  ' PC2 Primary:' +  pc2.PCPhone + ','
+			WHEN   pc2.PCPhone IS NOT NULL AND pc2.PCPhone <> '' THEN  'PC2 Primary: ' +  pc2.PCPhone 
 			ELSE
             ''
 			END + CASE
 			WHEN pc2.PCCellPhone IS NOT NULL AND pc2.PCCellPhone <> '' THEN
-            ' PC2 Cell: ' + pc2.PCCellPhone + ','
+            'PC2 Cell: ' + pc2.PCCellPhone 
 			ELSE
             ''
 			END AS pc2phone,
 
 			-- emergency contact phone
 			 CASE 
-			WHEN  ec.PCPhone IS NOT NULL AND ec.PCPhone <> '' THEN ' Emergency Contact Primary:' + ec.PCPhone + ','
+			WHEN  ec.PCPhone IS NOT NULL AND ec.PCPhone <> '' AND ec.PCPhone != '___-___-____' THEN 'Emergency Contact Primary: ' + ec.PCPhone
 			ELSE
             ''
 			END + CASE
 			WHEN ec.PCCellPhone IS NOT NULL AND ec.PCCellPhone <> '' THEN
-           ' Emergency Contact Cell: ' + ec.PCCellPhone + ','
+           'Emergency Contact Cell: ' + ec.PCCellPhone
 			ELSE
             ''
 			END AS ecphone,
@@ -131,12 +131,12 @@ as
 
 			-- obp contact phone
 			CASE 
-			WHEN  obp.PCPhone IS NOT NULL AND ec.PCPhone <> '' THEN 'OBP Primary:' +  obp.PCPhone + ','
+			WHEN  obp.PCPhone IS NOT NULL AND obp.PCPhone <> '' AND obp.PCPhone != '___-___-____ ' THEN 'OBP Primary: ' +  obp.PCPhone + ' '
 			ELSE
             ''
 			END + CASE
 			WHEN obp.PCCellPhone IS NOT NULL AND obp.PCCellPhone <> '' THEN
-            'OBP Cell: ' + obp.PCCellPhone
+            'OBP Cell: '  + obp.PCCellPhone
 			ELSE
             ''
 			END AS obpphone
