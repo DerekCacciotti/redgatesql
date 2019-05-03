@@ -5,6 +5,8 @@ GO
 -- Edit date: 5/10/17 Benjamin Simmons  -- Added average PC1 Kempe score and individual kempe score to report
 										-- and included PCGender so that the proper kempe score is used
 
+-- Edit Date 5/3/19 Derek C. --Added Phone Numbers for Pc2, OBP and Emergency Contact
+
 
 CREATE procedure [dbo].[rspFSWCaseList](@programfk    varchar(max)    = null,
                                        @supervisorfk int             = null,
@@ -43,6 +45,9 @@ as
 		street VARCHAR(200),
 		pccsz VARCHAR(200),
 		pcphone VARCHAR(MAX),
+		pc2phone VARCHAR(max),
+		obpphone varchar(MAX),
+		ecphone VARCHAR(max),
 		tcfirstname VARCHAR(200),
 		tclastname VARCHAR(200),
 		tcdob DATETIME,
@@ -75,28 +80,77 @@ as
 					null
 				end) as pcScore
 			,rtrim(pc.pcstreet) + CASE
-				WHEN pcapt IS NULL OR pcapt = '' THEN
+				WHEN pc.PCApt IS NULL OR pc.PCApt = '' THEN
 					''
 				ELSE
-					', Apt: ' + RTRIM(pcapt)
+					', Apt: ' + RTRIM(pc.pcapt)
 			END AS street
 			,RTRIM(pc.pccity) + ', ' + pc.pcstate + ' ' + pc.pczip AS pccsz
-			,'Primary: ' + CASE
+			,'PC1 Primary: '+ CASE
 				WHEN pc.pcphone IS NOT NULL AND pc.pcphone <> '' THEN
-					pc.pcphone
+					pc.pcphone + ','
 				ELSE
 					'(None)'
 			END + CASE
 				WHEN pc.PCEmergencyPhone IS NOT NULL AND pc.PCEmergencyPhone <> '' THEN
-					', Emergency: ' + pc.PCEmergencyPhone
+					', PC1 Emergency: ' + pc.PCEmergencyPhone + ','
 				ELSE
 					''
 			END + CASE
 				WHEN pc.PCCellPhone IS NOT NULL AND pc.PCCellPhone <> '' THEN
-					', Cell: ' + pc.PCCellPhone
+					' PC1 Cell: ' + pc.PCCellPhone
 				ELSE
 					''
-			END AS pcphone
+			END AS pcphone,
+
+
+			-- pc2 phone 
+			 CASE
+			WHEN   pc2.PCPhone IS NOT NULL AND pc2.PCPhone <> '' THEN  ' PC2 Primary:' +  pc2.PCPhone + ','
+			ELSE
+            ''
+			END + CASE
+			WHEN pc2.PCCellPhone IS NOT NULL AND pc2.PCCellPhone <> '' THEN
+            ' PC2 Cell: ' + pc2.PCCellPhone + ','
+			ELSE
+            ''
+			END AS pc2phone,
+
+			-- emergency contact phone
+			 CASE 
+			WHEN  ec.PCPhone IS NOT NULL AND ec.PCPhone <> '' THEN ' Emergency Contact Primary:' + ec.PCPhone + ','
+			ELSE
+            ''
+			END + CASE
+			WHEN ec.PCCellPhone IS NOT NULL AND ec.PCCellPhone <> '' THEN
+           ' Emergency Contact Cell: ' + ec.PCCellPhone + ','
+			ELSE
+            ''
+			END AS ecphone,
+
+
+			-- obp contact phone
+			CASE 
+			WHEN  obp.PCPhone IS NOT NULL AND ec.PCPhone <> '' THEN 'OBP Primary:' +  obp.PCPhone + ','
+			ELSE
+            ''
+			END + CASE
+			WHEN obp.PCCellPhone IS NOT NULL AND obp.PCCellPhone <> '' THEN
+            'OBP Cell: ' + obp.PCCellPhone
+			ELSE
+            ''
+			END AS obpphone
+
+
+
+			
+
+
+
+
+		
+
+		
 			,LTRIM(RTRIM(tcid.tcfirstname))
 			,LTRIM(RTRIM(tcid.tclastname))
 			,hvcase.tcdob
@@ -112,6 +166,9 @@ as
 			LEFT JOIN kempe	ON kempe.hvcasefk = hvcasepk
 			INNER JOIN codelevel ON codelevelpk = currentlevelfk
 			INNER JOIN pc ON pc.pcpk = pc1fk
+			LEFT OUTER  JOIN pc pc2 ON pc2.PCPK = HVCase.PC2FK
+			LEFT OUTER JOIN pc obp ON obp.PCPK = HVCase.OBPFK
+			LEFT OUTER JOIN pc ec ON ec.PCPK = HVCase.CPFK
 			LEFT JOIN tcid ON tcid.hvcasefk = hvcasepk AND TCID.TCDOD IS NULL
 			INNER JOIN worker fsw ON CurrentFSWFK = fsw.workerpk
 			INNER JOIN workerprogram ON workerprogram.workerfk = fsw.workerpk AND workerprogram.programfk = caseprogram.programfk
@@ -141,6 +198,9 @@ as
 		street VARCHAR(200),
 		pccsz VARCHAR(200),
 		pcphone VARCHAR(200),
+		pc2phone VARCHAR(200),
+		ecphone VARCHAR(200), 
+		obpphone VARCHAR(200),
 		TargetChild VARCHAR(MAX),
 		TargetChildDOB VARCHAR(MAX),
 		worker VARCHAR(200),
@@ -180,7 +240,10 @@ as
 			,pc1KempeScore
 			,street
 			,pccsz
-			,pcphone
+			,pcphone,
+			r1.pc2phone,
+			r1.ecphone,
+			r1.obpphone
 			,CASE
 				WHEN tcdob IS NOT NULL THEN
 					SUBSTRING((
@@ -242,7 +305,19 @@ as
 		,LTRIM(RTRIM(pcfirstname)) + ' ' + LTRIM(RTRIM(pclastname)) AS PC1
 		,street
 		,PCCSZ
-		,PCPhone
+		,PCPhone,
+	CASE WHEN	dbo.IsNullOrEmpty(r1.pc2phone) = 1 THEN NULL
+	ELSE
+	r1.pc2phone
+	END AS pc2phone,
+		CASE when dbo.IsNullOrEmpty(r1.ecphone) = 1 THEN NULL
+		ELSE
+        r1.ecphone
+		END AS ecphone,
+		CASE WHEN dbo.IsNullOrEmpty(r1.obpphone) = 1 THEN NULL
+		ELSE
+        r1.obpphone
+		END AS obpphone
 		,TargetChild
 		,TargetChildDOB
 		,worker
