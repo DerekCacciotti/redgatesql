@@ -99,6 +99,24 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+CREATE TRIGGER [dbo].[fr_delete_cheers]
+on [dbo].[CheersCheckIn]
+After DELETE
+
+AS
+
+Declare @PK int
+
+set @PK = (SELECT Deleted.CheersCheckInPK from Deleted)
+
+BEGIN
+	EXEC spDeleteFormReview_Trigger @FormFK=@PK, @FormTypeValue='CC'
+END
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
 -- =============================================
 -- Author:		Ben Simmons
 -- Create date: 08/09/18
