@@ -22,7 +22,8 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-create table #Main6MonthWrap
+
+DECLARE  @Main6MonthWrap table
 	(	WorkerPK int
 		, WorkerName varchar(100)
 		, HireDate date
@@ -34,7 +35,7 @@ create table #Main6MonthWrap
 		, RowNumber int
 	)
 
-insert into #Main6MonthWrap (
+insert into @Main6MonthWrap (
 								WorkerPK, WorkerName, HireDate, Supervisor, FSW, FAW
 							, ProgramManager, FatherAdvocate, RowNumber
 							)
@@ -59,6 +60,8 @@ insert into #Main6MonthWrap (
 	AND wp.TerminationDate IS NULL
 	AND wp.ProgramFK=@progfk
 ;
+
+
 	
 --GetAll TrainingCodes/subtopics required for this report
 with cteCodesSubtopics AS (
@@ -94,7 +97,7 @@ SELECT [TopicName]
 		, [SATName]
 		, [SubTopicCode]
 		, [SubTopicName]
-	  from #Main6MonthWrap mmw, cteCodesSubtopics
+	  from @Main6MonthWrap mmw, cteCodesSubtopics
  )
  
  
@@ -112,7 +115,7 @@ SELECT [TopicName]
 			INNER JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			INNER JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
 			INNER JOIN Subtopic s ON s.TopicFK=t1.codeTopicPK AND s.SubTopicPK=td.SubTopicFK
-			INNER JOIN #Main6MonthWrap mmw on mmw.WorkerPK = ta.workerfk
+			INNER JOIN @Main6MonthWrap mmw on mmw.WorkerPK = ta.workerfk
 	WHERE t1.TopicCode IN (17.0, 19.0, 23.0, 25.0) AND requiredby='HFA'
 	GROUP BY  workerfk
 			, t1.TopicCode
@@ -125,6 +128,12 @@ SELECT [TopicName]
 	--if a worker has NO trainings, they won't appear at all, so add them back
 		SELECT DISTINCT  workerfk
 		, TrainingDate
+		, CASE WHEN  IsExempt='1' then 1
+				WHEN TrainingDate IS NULL THEN 0
+				WHEN TrainingDate <= dateadd(day, 183, cte10_4a.HireDate) THEN 1 
+				WHEN TrainingDate > dateadd(day, 183, cte10_4a.HireDate) AND DATEDIFF(DAY,  cte10_4a.HireDate, GETDATE()) > 546 THEN 0 --Workers who are late with training but hired more than 18 months ago, get a two		
+				ELSE 0
+				END AS  SubtopicCount
 		, workerpk
 		, WorkerName
 		, cteWorkersTopics.HireDate
@@ -144,6 +153,7 @@ SELECT [TopicName]
 		right JOIN cteWorkersTopics ON cteWorkersTopics.workerpk = cte10_4a.workerfk 
 		AND cte10_4a.TopicCode = cteWorkersTopics.TopicCode AND cte10_4a.SubTopicCode = cteWorkersTopics.SubTopicCode
 		)
+		
 
 
 , cteMeetTarget AS (
@@ -159,6 +169,8 @@ SELECT [TopicName]
 	, TopicCode
 	, subtopiccode
 	, TrainingDate
+	, SUM(SubtopicCount) AS CompletedAllOnTime
+	, SUM(SubtopicCount)  over (PARTITION BY TopicCode, cteAddMissingWorkers.WorkerFK) AS indivSubTopicsOnTime
 	, CASE WHEN TrainingDate IS NOT NULL THEN 1 END AS ContentCompleted	
 	, CASE WHEN IsExempt='1' then 1
 		WHEN TrainingDate IS NULL THEN 0
@@ -172,6 +184,7 @@ SELECT [TopicName]
 		WHEN TrainingDate > dateadd(day, 183, HireDate) AND DATEDIFF(DAY,  HireDate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 1
 		END AS 'IndividualRating'
+	
 	FROM cteAddMissingWorkers
 	GROUP BY WorkerPK
 	, WorkerName
@@ -187,7 +200,11 @@ SELECT [TopicName]
 	, TrainingDate
 	, rownumber
 	, IsExempt
+	,SubtopicCount
+	, cteAddMissingWorkers.WorkerFK
 )
+
+
 
 --Now calculate the number meeting count
 , cteCountMeeting AS (
@@ -219,12 +236,9 @@ SELECT [TopicName]
 		, TrainingDate
 		, HireDate
 		, [Meets Target]
-		, sum(TotalMeetingCount) as TotalMeetingCount		
-		, CASE WHEN 
-				CAST(SUM([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
-					/ CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
-				= 1 THEN 1
-			END AS CompletedAllOnTime
+		, sum(TotalMeetingCount) as TotalMeetingCount	
+		, CompletedAllOnTime
+
 		, CAST(COUNT([Meets Target]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS INT) AS TotalContentAreasByTopicAndWorker
 		, CASE WHEN 
 				CAST(SUM([ContentCompleted]) OVER (PARTITION BY cteMeetTarget.WorkerPK, cteMeetTarget.TopicCode) AS decimal(10,2))
@@ -232,6 +246,7 @@ SELECT [TopicName]
 				= 1 then 1
 				END AS CompletedALL
 		, cteMeetTarget.IndividualRating
+		, indivSubTopicsOnTime
 		FROM cteMeetTarget
 		LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteMeetTarget.TopicCode AND ctecountmeeting.subtopiccode=cteMeetTarget.subtopiccode AND ctecountmeeting.workerpk=cteMeetTarget.workerpk
 		GROUP BY TotalWorkers
@@ -250,8 +265,9 @@ SELECT [TopicName]
 		, cteMeetTarget.Hiredate
 		, cteCountMeeting.totalmeetingcount
 		, cteMeetTarget.IndividualRating
+		, CompletedAllOnTime
+		, indivSubTopicsOnTime
 )
-
 
 , cteRatingBySite AS (
 	select top 1 with ties
@@ -286,6 +302,7 @@ SELECT [TopicName]
 		, cteSETMeetingByTopic.LowestIndivRating AS IndivContentMeeting
 		, cteAlmostFinal.topiccode, TotalContentAreasByTopicAndWorker
 		, SiteRating AS TopicRatingBySite
+		, indivSubTopicsOnTime
 		, sum(isnull(CompletedAllOnTime, 0)) over (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker AS TotalMeetsTargetForAll
 		, CASE WHEN SUM(CompletedAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker > 0
 			   THEN SUM(CompletedAll) OVER (PARTITION BY cteAlmostFinal.topiccode) / TotalContentAreasByTopicAndWorker 
@@ -294,7 +311,10 @@ SELECT [TopicName]
 		FROM cteAlmostFinal
 		INNER JOIN cteSETMeetingByTopic ON cteSETMeetingByTopic.WorkerPK = cteAlmostFinal.WorkerPK AND cteSETMeetingByTopic.TopicCode = cteAlmostFinal.TopicCode
 		INNER JOIN cteRatingBySite ON cteRatingBySite.TopicCode = cteAlmostFinal.TopicCode
+
 		ORDER BY cteAlmostFinal.TopicName
+
+
 
 END
 GO
