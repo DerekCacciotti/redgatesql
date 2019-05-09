@@ -102,6 +102,7 @@ begin
 		from cteCohort co
 		inner join CaseProgram cp ON cp.CaseProgramPK = co.CaseProgramPK
 		inner join FormReview fr on fr.HVCaseFK = cp.HVCaseFK and fr.ProgramFK = cp.ProgramFK and FormDate >= CaseStartDate
+		    and FormType <> 'PQ' --exclude, need logic to determine where PHQ9 was filled out (see union below)
 		inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = isnull(@ProgramFK,fro.ProgramFK)
 		inner join codeForm f on codeFormAbbreviation = fr.FormType
 		left outer join HVLog vl on vl.ProgramFK = cp.ProgramFK and fr.FormType = 'VL' and fr.FormFK = vl.HVLogPK
@@ -116,7 +117,55 @@ begin
 				and FormDate between FormReviewStartDate and isnull(FormReviewEndDate, current_timestamp)
 				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
 				and case when fr.FormType = 'VL' then FormComplete else 1 end = 1
-		union all 
+
+		union all
+		 
+		select FormReviewPK
+			  ,PC1ID
+			  ,'PHQ9' as codeFormName
+			  ,convert(varchar(10),FormDate,101) as FormDate
+			  ,fr.FormFK
+			  ,convert(varchar(10),FormReviewCreateDate,101) as FormReviewCreateDate
+			  ,FormReviewCreator
+			  ,FormReviewEditDate
+			  ,FormReviewEditor
+			  ,fr.FormType
+			  ,fr.HVCaseFK
+			  ,fr.ProgramFK
+			  ,ReviewDateTime
+			  ,ReviewedBy
+			  ,FormReviewStartDate
+			  ,FormReviewEndDate
+			  ,'CaseHome.aspx?pc1id='+PC1ID as CaseHomeLink
+			  , 'PHQ9.aspx?pc1id='+PC1ID+'&PHQ9PK='+ convert(varchar, fr.FormFK) as FormLink
+			  ,isnull(FormReviewEndDate, current_timestamp) as EffectiveEndDate
+			  ,dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) as EffectiveStartDate
+			  ,case when cp.CurrentFSWFK is not null then ltrim(rtrim(wfsw.LastName)) + ', ' + ltrim(rtrim(wfsw.FirstName)) 
+					when cp.CurrentFAWFK is not null then ltrim(rtrim(wfaw.LastName)) + ', ' + ltrim(rtrim(wfaw.FirstName)) 
+					else '*Unassigned*'
+				end as WorkerName
+              ,case when cp.CurrentFSWFK is not null then supfsw.WorkerName
+					when cp.CurrentFAWFK is not null then supfaw.WorkerName
+					else '*Unassigned*'
+				end as SupervisorName
+		from FormReview fr
+		inner join hvcase hc on fr.HVCaseFK = hc.HVCasePK
+		inner join CaseProgram cp ON cp.HVCaseFK = hc.HVCasePK
+		inner join FormReviewOptions fro on fro.FormType = fr.FormType and fro.ProgramFK = isnull(@ProgramFK,fro.ProgramFK)
+		inner join dbo.PHQ9 p on fr.FormFK = p.PHQ9PK and p.FormType = 'PQ'
+		left outer join WorkerProgram wpfsw on wpfsw.WorkerFK = cp.CurrentFSWFK and wpfsw.ProgramFK = @ProgramFK
+		left outer join WorkerProgram wpfaw on wpfaw.WorkerFK = cp.CurrentFAWFK and wpfaw.ProgramFK = @ProgramFK
+		left outer join Worker wfsw on wfsw.WorkerPK = wpfsw.WorkerFK
+	    left outer join Worker wfaw on wfaw.WorkerPK = wpfaw.WorkerFK
+		left outer join cteSupervisors supfsw on wpfsw.SupervisorFK = supfsw.WorkerPK
+		left outer join cteSupervisors supfaw on wpfaw.SupervisorFK = supfaw.WorkerPK
+		where fr.ProgramFK = isnull(@ProgramFK, fr.ProgramFK)	
+				and ReviewedBy is null
+				and FormDate between FormReviewStartDate and isnull(FormReviewEndDate, current_timestamp)
+				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
+				and fr.FormType = 'PQ'
+		union all
+
 		select FormReviewPK
 			  ,case when len(rtrim(TrainingTitle)) <= 16 
 					then TrainingTitle
@@ -244,5 +293,4 @@ begin
 				  --when fr.FormType='TR' then 20
 				  --when fr.FormType='VL' then 7	
 end
-
 GO
