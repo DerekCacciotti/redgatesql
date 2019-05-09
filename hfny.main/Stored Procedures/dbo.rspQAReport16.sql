@@ -12,8 +12,6 @@ GO
 -- Edit date: 10/11/2013 CP - workerprogram was NOT duplicating cases when worker transferred
 --			  09/02/2014 JR remove table variable and use cte instead to alleviate performance problem
 -- =============================================
-
-
 CREATE procedure [dbo].[rspQAReport16]
 (
     @programfk int = null,
@@ -108,9 +106,15 @@ as
 								 CurrentFAWFK
 						 end
 				left join worker on worker.workerpk = workerprogram.supervisorfk and WorkerProgram.ProgramFK = @programfk
+				left join HVLog hl on fr.FormFK = hl.HVLogPK and fr.FormType = 'VL'
 				inner join dbo.SplitString(@programfk,',') on fr.programfk = listitem
 			where ReviewedBy is null
 				 and FormDate between FormReviewStartDate and isnull(FormReviewEndDate,current_timestamp)
+				 and case when fr.FormType = 'VL' 
+							then hl.FormComplete
+						else 
+							1
+						end = 1
 	),
 	cteFormsToBeReviewCount
 	as (select HVCasePK
