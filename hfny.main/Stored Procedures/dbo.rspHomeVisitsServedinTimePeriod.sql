@@ -41,6 +41,6 @@ LEFT OUTER JOIN FormReview AS d ON a.HVLogPK = d.FormFK AND a.ProgramFK = d.Prog
 LEFT OUTER JOIN Attachment AS e ON a.HVLogPK = e.FormFK AND a.ProgramFK = e.ProgramFK AND e.FormType = 'VL'
 WHERE a.ProgramFK = @ProgramFK
 AND a.VisitStartTime BETWEEN @BeginOfMonth AND @EndOfMonth
-order BY a.VisitStartTime, c.LastName,c.FirstName,PC1id
+order BY c.LastName,c.FirstName,PC1id, a.VisitStartTime
 
 GO
