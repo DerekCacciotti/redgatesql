@@ -16,10 +16,14 @@ DECLARE @currentscheduledevent VARCHAR(150)
 DECLARE @chickenpoxstatus BIT
 DECLARE @immunizationstatus BIT
 
+DECLARE @TCAgeInDays INT 
+
+DECLARE @isTCMorethan3MonthsOld BIT = 0
+
 DECLARE @beginningofyear DATETIME =  DATEADD(yy, DATEDIFF(yy, 0, GETDATE()), 0)
 DECLARE @endofyear DATETIME = DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1)
 SET @counter = 0
---SET @TCIDFK = 38719
+--SET @TCIDFK = 40494
 
 
 
@@ -29,6 +33,15 @@ SET @counter = 0
 
 --get the TCDOB
 SET @tcdob = (SELECT tcdob FROM dbo.TCID WHERE TCIDPK=@TCIDFK)
+-- get the TC age in days 
+SET @TCAgeInDays = (SELECT DATEDIFF(DAY, @TCDOB, GETDATE()))
+-- check to see if the TC is greater or equal to 90 days old 
+IF(@TCAgeInDays >= 90)
+BEGIN
+
+SET @isTCMorethan3MonthsOld = 1
+END
+
 --get the status of the chickenpox virus and overall immunizations
 SET @chickenpoxstatus = (SELECT VaricellaZoster FROM dbo.TCID WHERE TCIDPK = @TCIDFK)
 SET @immunizationstatus = (SELECT NoImmunization FROM dbo.TCID WHERE TCIDPK = @TCIDFK)
@@ -160,6 +173,42 @@ BEGIN
 
 
 
+
+
+IF(@isTCMorethan3MonthsOld = 0)
+BEGIN
+
+SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
+ AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
+ AND scheduledevent != 'VZ'
+ 
+
+
+ UNION 
+
+ SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+ --AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() 
+ AND estdate BETWEEN @beginningofyear AND @endofyear
+ AND scheduledevent != 'VZ' 
+
+ UNION 
+
+ SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL OR scheduledevent = 'VZ'
+
+
+ UNION
+ SELECT  *, '' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate > @endofyear
+
+END
+
+
+
+ELSE
+
+BEGIN
+
+
 SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
 AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
  AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
@@ -183,7 +232,28 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
 
 END
 
+
+END
+
+
+
+
+
+
+
+
+
+
+
+
+-- else for the chicken pox virus check 
 ELSE
+
+
+
+IF(@isTCMorethan3MonthsOld = 0)
+BEGIN
+
 BEGIN
 
 SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
@@ -194,6 +264,47 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
 
  UNION 
 
+ 
+ SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+ --AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() 
+ AND estdate BETWEEN @beginningofyear AND @endofyear
+
+ UNION 
+
+ SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL
+
+
+ UNION
+ SELECT  *, '' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate > @endofyear
+
+
+
+
+
+end
+
+ 
+
+END
+
+
+ELSE
+-- begin for the else 
+BEGIN
+
+
+ -- when TC is 3 months or older 
+BEGIN
+
+SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
+ AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
+
+
+
+ UNION 
+
+ 
  SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
  AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate BETWEEN @beginningofyear AND @endofyear
 
@@ -215,13 +326,13 @@ end
 
  
 
- 
+ -- end for the else 
 
- 
+END
 
- 
 
- 
 
---get the TCDOB
+
+
+
 GO
