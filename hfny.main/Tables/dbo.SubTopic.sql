@@ -5,7 +5,7 @@ CREATE TABLE [dbo].[SubTopic]
 [RequiredBy] [char] (4) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SATFK] [money] NOT NULL,
 [SubTopicCode] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[SubTopicCreateDate] [datetime] NULL,
+[SubTopicCreateDate] [datetime] NULL CONSTRAINT [DF_SubTopic_SubTopicCreateDate] DEFAULT (getdate()),
 [SubTopicCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [SubTopicEditDate] [datetime] NULL,
 [SubTopicEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
