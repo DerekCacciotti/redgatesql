@@ -10,7 +10,7 @@ GO
 --mod by dar
 --exec rspFamilyTimeline null,1
 -- =============================================
-CREATE PROC [dbo].[rspFamilyTimeLine]
+CREATE procedure [dbo].[rspFamilyTimeLine]
 (
     @pc1id     varchar(13),
     @programfk varchar(max)
@@ -47,7 +47,7 @@ as
 				--inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asq version'
 				inner join codeduebydates on scheduledevent = 'ASQ'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -66,51 +66,29 @@ as
 				--inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asqse version'
 				inner join codeduebydates on scheduledevent = 'ASQSE-2'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
-				 and caseprogress >= 11
+			where PC1ID = @pc1id
+					-- PC1ID = isnull(@pc1id, PC1ID)
+					and caseprogress >= 11
 
         union
-        -- PSI block out HOME and HOME EC, and add PSI
+		-- CHEERS Check-In
 			select eventDescription
 			  ,dateadd(dd,
-			  --dueby,
-			  Case WHEN codeDueByDates.Interval = '00' THEN 0 ELSE DueBy END,
-			  --hvcase.tcdob
-			  Case WHEN codeDueByDates.Interval = '00' and hvcase.IntakeDate > hvcase.TCDOB THEN HVCase.IntakeDate ELSE HVCase.TCDOB END) DueDate
+						--dueby,
+						case when codeDueByDates.Interval = '00' then 0 else DueBy end,
+						--hvcase.tcdob
+						case when codeDueByDates.Interval = '00' 
+								and hvcase.IntakeDate > hvcase.TCDOB 
+							then HVCase.IntakeDate 
+							else HVCase.TCDOB 
+						end) as DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
-				inner join codeduebydates on scheduledevent = 'PSI'
+				inner join codeduebydates on scheduledevent = 'CHEERS'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
-
-		--union
-
-		---- HOME
-		--select eventDescription
-		--	  ,dateadd(dd,dueby,hvcase.tcdob) DueDate
-		--	from caseprogram
-		--		inner join hvcase on hvcasepk = caseprogram.hvcasefk
-		--		inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-		--		inner join codeduebydates on scheduledevent = 'HOME'
-		--		inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-		--	where pc1id = @pc1id
-		--		 and caseprogress >= 11
-
-		--union
-
-		---- HOME EC
-		--select eventDescription
-		--	  ,dateadd(dd,dueby,hvcase.tcdob) DueDate
-		--	from caseprogram
-		--		inner join hvcase on hvcasepk = caseprogram.hvcasefk
-		--		inner join tcid on tcid.hvcasefk = hvcasepk and tcid.programfk = caseprogram.programfk
-		--		inner join codeduebydates on scheduledevent = 'HOMEEC'
-		--		inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-		--	where pc1id = @pc1id
-		--		 and caseprogress >= 11
-
 		union
 
 		-- FOLLOW UP
@@ -121,7 +99,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Follow Up'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		UNION
@@ -134,7 +112,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'CHEERS'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -148,7 +126,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'DTaP'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -162,7 +140,7 @@ as
 				inner join codeduebydates on scheduledevent = 'HIB' AND codeDueByDates.optional IS NULL
 
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -175,7 +153,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'PCV'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -188,7 +166,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Polio'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -201,7 +179,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'MMR'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -214,7 +192,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'HEP-B'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -227,7 +205,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'VZ'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -240,7 +218,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Flu'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -253,7 +231,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Roto' AND codeDueByDates.optional IS NULL
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -266,7 +244,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'HEP-A'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -279,7 +257,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'WBV'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 		union
@@ -292,7 +270,7 @@ as
 				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 				inner join codeduebydates on scheduledevent = 'Lead'
 				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where pc1id = @pc1id
+			where PC1ID = @pc1id
 				 and caseprogress >= 11
 
 	-- FINAL TIMELINE
