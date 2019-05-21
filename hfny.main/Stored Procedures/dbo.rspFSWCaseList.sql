@@ -46,8 +46,11 @@ as
 		pccsz VARCHAR(200),
 		pcphone VARCHAR(MAX),
 		pc2phone VARCHAR(max),
+		PC2Name varchar(max),
 		obpphone varchar(MAX),
+		OBPName varchar(max),
 		ecphone VARCHAR(max),
+		ECName varchar(max), 
 		tcfirstname VARCHAR(200),
 		tclastname VARCHAR(200),
 		tcdob DATETIME,
@@ -86,25 +89,24 @@ as
 					', Apt: ' + RTRIM(pc.pcapt)
 			END AS street
 			,RTRIM(pc.pccity) + ', ' + pc.pcstate + ' ' + pc.pczip AS pccsz
-			,'PC1 Primary: '+ CASE
+			,'Primary: '+ CASE
 				WHEN pc.pcphone IS NOT NULL AND pc.pcphone <> '' THEN
 					+' ' + pc.pcphone
 				ELSE
 					'(None) ' + ','
 			END + CASE
 				WHEN pc.PCEmergencyPhone IS NOT NULL AND pc.PCEmergencyPhone <> '' THEN
-					'PC1 Emergency:' + pc.PCEmergencyPhone + ','
+					' Emergency: ' + pc.PCEmergencyPhone + ','
 				ELSE
 					''
 			END + CASE
 				WHEN pc.PCCellPhone IS NOT NULL AND pc.PCCellPhone <> '' THEN
-					' PC1 Cell: ' + pc.PCCellPhone
+					' Cell: ' + pc.PCCellPhone
 				ELSE
 					''
 			END AS pcphone,
 
-
-			-- pc2 phone 
+			-- pc2
 			 CASE
 			WHEN   pc2.PCPhone IS NOT NULL AND pc2.PCPhone <> '' THEN  'PC2 Primary: ' +  pc2.PCPhone 
 			ELSE
@@ -115,21 +117,11 @@ as
 			ELSE
             ''
 			END AS pc2phone,
-
-			-- emergency contact phone
-			 CASE 
-			WHEN  ec.PCPhone IS NOT NULL AND ec.PCPhone <> '' AND ec.PCPhone != '___-___-____' THEN 'Emergency Contact Primary: ' + ec.PCPhone
-			ELSE
-            ''
-			END + CASE
-			WHEN ec.PCCellPhone IS NOT NULL AND ec.PCCellPhone <> '' THEN
-           'Emergency Contact Cell: ' + ec.PCCellPhone
-			ELSE
-            ''
-			END AS ecphone,
-
-
-			-- obp contact phone
+			case when pc2.PCFirstName is not null and pc2.PCLastName is not null
+					then pc2.PCFirstName + ' ' + pc2.PCLastName
+					else ''
+			end as PC2name,
+			-- obp contact
 			CASE 
 			WHEN  obp.PCPhone IS NOT NULL AND obp.PCPhone <> '' AND obp.PCPhone != '___-___-____ ' THEN 'OBP Primary: ' +  obp.PCPhone + ' '
 			ELSE
@@ -140,17 +132,25 @@ as
 			ELSE
             ''
 			END AS obpphone
-
-
-
-			
-
-
-
-
-		
-
-		
+			, case when obp.PCFirstName is not null and obp.PCLastName is not null
+					then obp.PCFirstName + ' ' + obp.PCLastName
+					else ''
+			end as OBPname,
+			-- emergency contact
+			 CASE 
+			WHEN  ec.PCPhone IS NOT NULL AND ec.PCPhone <> '' AND ec.PCPhone != '___-___-____' THEN 'EC Primary: ' + ec.PCPhone
+			ELSE
+            ''
+			END + CASE
+			WHEN ec.PCCellPhone IS NOT NULL AND ec.PCCellPhone <> '' THEN
+           'EC Cell: ' + ec.PCCellPhone
+			ELSE
+            ''
+			END AS ecphone,
+			case when ec.PCFirstName is not null and ec.PCLastName is not null
+					then ec.PCFirstName + ' ' + ec.PCLastName
+					else ''
+			end as ECname
 			,LTRIM(RTRIM(tcid.tcfirstname))
 			,LTRIM(RTRIM(tcid.tclastname))
 			,hvcase.tcdob
@@ -199,8 +199,11 @@ as
 		pccsz VARCHAR(200),
 		pcphone VARCHAR(200),
 		pc2phone VARCHAR(200),
-		ecphone VARCHAR(200), 
+		PC2Name VARCHAR(200),
 		obpphone VARCHAR(200),
+		OBPName VARCHAR(200),
+		ecphone VARCHAR(200), 
+		ECName VARCHAR(200), 
 		TargetChild VARCHAR(MAX),
 		TargetChildDOB VARCHAR(MAX),
 		worker VARCHAR(200),
@@ -242,8 +245,11 @@ as
 			,pccsz
 			,pcphone,
 			r1.pc2phone,
+			r1.PC2Name,
+			r1.obpphone,
+			r1.OBPName,
 			r1.ecphone,
-			r1.obpphone
+			r1.ECName
 			,CASE
 				WHEN tcdob IS NOT NULL THEN
 					SUBSTRING((
@@ -306,18 +312,24 @@ as
 		,street
 		,PCCSZ
 		,PCPhone,
-	CASE WHEN	dbo.IsNullOrEmpty(r1.pc2phone) = 1 THEN NULL
-	ELSE
-	r1.pc2phone
-	END AS pc2phone,
-		CASE when dbo.IsNullOrEmpty(r1.ecphone) = 1 THEN NULL
-		ELSE
-        r1.ecphone
-		END AS ecphone,
-		CASE WHEN dbo.IsNullOrEmpty(r1.obpphone) = 1 THEN NULL
-		ELSE
-        r1.obpphone
-		END AS obpphone
+		case when dbo.IsNullOrEmpty(r1.pc2phone) = 1 THEN NULL
+			else r1.pc2phone
+		end as pc2phone,
+		case when dbo.IsNullOrEmpty(r1.pc2name) = 1 THEN NULL
+			else r1.pc2name
+		end as pc2name,
+		case when dbo.IsNullOrEmpty(r1.obpphone) = 1 then null
+			else r1.obpphone
+		end AS obpphone,
+		case when dbo.IsNullOrEmpty(r1.obpname) = 1 THEN NULL
+			else r1.obpname
+		end as obpname,
+		case when dbo.IsNullOrEmpty(r1.ecphone) = 1 then null
+			else r1.ecphone
+		end as ecphone,
+		case when dbo.IsNullOrEmpty(r1.ecname) = 1 THEN NULL
+			else r1.ecname
+		end as ecname
 		,TargetChild
 		,TargetChildDOB
 		,worker

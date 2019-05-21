@@ -12,9 +12,7 @@ GO
 -- rspFSWEnrolledCaseTickler 1, '08/31/2013'
  -- rspFSWEnrolledCaseTickler 4, '09/30/2013'
 -- =============================================
-
-
-CREATE PROC [dbo].[rspFSWEnrolledCaseTickler](
+CREATE procedure [dbo].[rspFSWEnrolledCaseTickler](
 	@programfk    varchar(max)    = NULL,
     @edate     datetime,
     @supervisorfk int             = null,
@@ -1066,119 +1064,236 @@ select distinct cc.HVCasePK,cc.TCIDPK,A.ASQSEInWindow,A.ASQSEReceiving,A.ASQSETC
 
 
 
-
--- missing psi due
-,ctePSIIntervalAlreadyShouldHaveBeenDone
+-- missing CHEERS Check-Ins due
+,cteCHEERSIntervalAlreadyShouldHaveBeenDone
 as
 (
-SELECT 
+select 
 		cc.HVCasePK,
 		cc.TCIDPK	
 	  , max(Interval) AS Interval 
 
  		from #tblCommonCohort cc			
-			--left join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK -- you don't need it because psi test is for parent only (not for child) ( or per case)
-			left join codeduebydates on scheduledevent = 'PSI' AND cc.XDateAge >= DueBy -- minimum interval
+			--left join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK -- you don't need it because CHEERS test is for parent only (not for child) ( or per case)
+			left join codeduebydates on scheduledevent = 'CHEERS' AND cc.XDateAge >= DueBy -- minimum interval
 	 
  GROUP BY HVCasePK, TCIDPK
  
 )
 ,
-ctePSIFormDueDates
+cteCHEERSFormDueDates
 as
 (
 	select m.HVCasePK, m.TCIDPK
-		--, P.PSIInterval as PSIInterval, psim.Interval as psim_Interval,  PSIPK , tcdob,TCAgeDays
-		--,case when psim.Interval is null then ''	
-		-- ,case when psim.Interval is null and PSIPK is null then 
-		  
-		--			case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(20),  convert(varchar(12), dateadd(dd,30, tcdob), 101))  -- there is a baby
-		--			else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
-		--			end
-				
-		--when  PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
-		--else ''
-		--end as PSIDue				
-		,case when psim.Interval is null and PSIPK is null then 
+		,case when cci.Interval is null and CheersCheckInPK is null then 
 						-- there is a baby
-		  				case when Childdob is not null then 'PSI due between ' + convert(varchar(20), tcdob, 101) + 
-															' and ' + convert(varchar(12), dateadd(dd, 30, tcdob), 101)
+		  				case when Childdob is not null then 'CHEERS Check-In due between ' 
+															+ convert(varchar(20), tcdob, 101) 
+															+ ' and ' 
+															+ convert(varchar(12), dateadd(dd, 30, tcdob), 101)
 						-- baby is not born yet. it is just a EDC
-						else ' PSI due upon Baby''s Birth'
+						else ' CHEERS Check-In due upon Baby''s Birth'
 						end
-					when m.IntakeDate >= m.tcdob AND psim.Interval = '00' then
-						case when PSIPK is null then cd.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue , m.IntakeDate), 101) 
-														+ ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue , m.IntakeDate), 101)
-						else '' 
-						end
-					when  PSIPK is null then cd.EventDescription + ' Due  between ' 
-										+ convert(varchar(20), dateadd(dd, cd.MinimumDue, 
-																		case when psim.Interval = '00' and Childdob < IntakeDate 
-																				then IntakeDate 
-																				else Childdob end), 101)
+					when m.IntakeDate >= m.tcdob AND cci.Interval = '00' then
+						case when CheersCheckInPK is null 
+								then cd.EventDescription 
+										+ ' Due between ' 
+										+ convert(varchar(20), dateadd(dd,cd.MinimumDue , m.IntakeDate), 101) 
 										+ ' and ' 
-										+ convert(varchar(20), dateadd(dd, cd.MaximumDue, 
-																		case when psim.Interval = '00' and Childdob < IntakeDate 
-																				then IntakeDate 
-																				else Childdob end), 101)
+										+ convert(varchar(20), dateadd(dd,cd.MaximumDue , m.IntakeDate), 101)
+								else '' 
+						end
+					when CheersCheckInPK is null 
+						then cd.EventDescription + ' Due between ' 
+								+ convert(varchar(20), dateadd(dd, cd.MinimumDue, 
+								case when cci.Interval = '00' 
+											and Childdob < IntakeDate 
+										then IntakeDate 
+										else Childdob 
+								end), 101)
+										+ ' and ' 
+										+ convert(varchar(20), 
+													dateadd(dd, cd.MaximumDue, 
+															case when cci.Interval = '00' and Childdob < IntakeDate 
+																	then IntakeDate 
+																	else Childdob 
+															end), 101)
 					else ''
-				end as PSIDue		
-	 
+				end as CCIDue	 
 	from #tblCommonCohort m
-	left join ctePSIIntervalAlreadyShouldHaveBeenDone psim on psim.hvcasepk = m.hvcasepk and m.TCIDPK = psim.TCIDPK 
-	left join codeduebydates cd on scheduledevent = 'PSI' AND psim.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
-	-- The following line gets those tcid's with PSI's that are due for the Interval
-	left join PSI P on P.HVCaseFK = m.HVCasePK and P.PSIInterval= psim.Interval 
+	left join cteCHEERSIntervalAlreadyShouldHaveBeenDone ci on ci.hvcasepk = m.hvcasepk and m.TCIDPK = ci.TCIDPK 
+	left join codeduebydates cd on scheduledevent = 'CHEERS' 
+				and ci.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
+	-- The following line gets those tcid's with CCI's that are due for the Interval
+	left join CheersCheckIn cci on cci.HVCaseFK = m.HVCasePK and ci.Interval = cci.Interval 
 )
 
-
--- last psi that was completed
+-- last CHEERS Check-in that was completed
 ,
-cteLastPSI
+cteLastCHEERS
 as
 (
 SELECT cc.HVCasePK ,cc.TCIDPK
-	  ,max(PSIDateComplete) AS PSIMaxDate -- We mean really the last date in the database
-	  ,max(PSIInterval) as psiinterval
+	  ,max(ObservationDate) AS CHEERSMaxDate -- We mean really the last date in the database
+	  ,max(Interval) as CCIInterval
  FROM #tblCommonCohort cc
- left join PSI P on P.HVCaseFK = cc.HVCasePK  -- it is case based because it is for parent only
+ left join CheersCheckIn cci on cci.HVCaseFK = cc.HVCasePK  -- it is case based because it is for parent only
 GROUP BY cc.HVCasePK,cc.TCIDPK
 
 )
 ,
-cteLastPSIGetOtherNeededFields
+cteLastCHEERSGetOtherNeededFields
 as
-( -- to get other fields like P.PSIInterval, P.PSIInWindow,P.PSIPK 
-SELECT ls.HVCasePK ,ls.TCIDPK,ls.PSIMaxDate,P.PSIInterval, P.PSIInWindow,P.PSIPK 
- FROM cteLastPSI ls
- left join PSI P on P.HVCaseFK = ls.HVCasePK and P.PSIDateComplete = ls.PSIMaxDate and P.PSIInterval = ls.psiinterval -- adding interval eliminates if there are two psi on the same date
+( -- to get other fields like Interval, InWindow and PK 
+	select lc.HVCasePK ,lc.TCIDPK, lc.CHEERSMaxDate, cci.Interval, 
+			case when cci.Interval = 'NA' or 
+						(cci.ObservationDate >= dateadd(day, MinimumDue, cc.TCDOB) 
+						and cci.ObservationDate <= dateadd(day, MaximumDue, cc.TCDOB)) 
+					then 1
+					else 0
+			end as InWindow
+			, CheersCheckInPK
+	from cteLastCHEERS lc
+	inner join #tblCommonCohort cc on cc.HVCasePK = lc.HVCasePK and cc.TCIDPK = lc.TCIDPK
+	left join codeDueByDates cdbd on scheduledevent = 'CHEERS' AND CCIInterval = cdbd.Interval 
+	left join CheersCheckIn cci on CCI.HVCaseFK = lc.HVCasePK 
+									and cci.ObservationDate = lc.CHEERSMaxDate
+									-- adding interval eliminates if there are two CCIs on the same date
+									and cci.Interval = lc.CCIInterval 
 )
 ,
-cteLastPSIForm
+cteLastCCIForm
 as
 (
 SELECT cc.HVCasePK ,cc.TCIDPK,
---oldid,PSIPK, 
+    case 
+		when lc.Interval is null then ''	
+		when CheersCheckInPK is null then ' Missing'	
+		when CHEERSMaxDate is not null then	
+			'Last CHEERS Check-In: ' + cdbd.EventDescription +		
+				case when lc.InWindow = 1 then ' In Window on ' else ' Out of Window on ' end 		
+			   + convert(varchar(20), CHEERSMaxDate, 101)	
+		else ''
+	end  as lastCHEERS
+ FROM #tblCommonCohort cc 
+ left join cteLastCHEERSGetOtherNeededFields lc on lc.HVCasePK = cc.HVCasePK and lc.TCIDPK = cc.TCIDPK
+ -- to get dueby, max, min (given interval)
+ left join codeDueByDates cdbd on scheduledevent = 'CHEERS' AND lc.Interval = cdbd.Interval 
+)
+
+
+-- missing psi due
+--,ctePSIIntervalAlreadyShouldHaveBeenDone
+--as
+--(
+--select 
+--		cc.HVCasePK,
+--		cc.TCIDPK	
+--	  , max(Interval) AS Interval 
+
+-- 		from #tblCommonCohort cc			
+--			--left join tcid on tcid.hvcasefk = cc.hvcasepk and tcid.programfk = cc.ProgramFK -- you don't need it because psi test is for parent only (not for child) ( or per case)
+--			left join codeduebydates on scheduledevent = 'PSI' AND cc.XDateAge >= DueBy -- minimum interval
+	 
+-- GROUP BY HVCasePK, TCIDPK
+ 
+--)
+--,
+--ctePSIFormDueDates
+--as
+--(
+--	select m.HVCasePK, m.TCIDPK
+--		--, P.PSIInterval as PSIInterval, psim.Interval as psim_Interval,  PSIPK , tcdob,TCAgeDays
+--		--,case when psim.Interval is null then ''	
+--		-- ,case when psim.Interval is null and PSIPK is null then 
+		  
+--		--			case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(20),  convert(varchar(12), dateadd(dd,30, tcdob), 101))  -- there is a baby
+--		--			else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
+--		--			end
+				
+--		--when  PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
+--		--else ''
+--		--end as PSIDue				
+--		,case when psim.Interval is null and PSIPK is null then 
+--						-- there is a baby
+--		  				case when Childdob is not null then 'PSI due between ' + convert(varchar(20), tcdob, 101) + 
+--															' and ' + convert(varchar(12), dateadd(dd, 30, tcdob), 101)
+--						-- baby is not born yet. it is just a EDC
+--						else ' PSI due upon Baby''s Birth'
+--						end
+--					when m.IntakeDate >= m.tcdob AND psim.Interval = '00' then
+--						case when PSIPK is null then cd.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue , m.IntakeDate), 101) 
+--														+ ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue , m.IntakeDate), 101)
+--						else '' 
+--						end
+--					when  PSIPK is null then cd.EventDescription + ' Due  between ' 
+--										+ convert(varchar(20), dateadd(dd, cd.MinimumDue, 
+--																		case when psim.Interval = '00' and Childdob < IntakeDate 
+--																				then IntakeDate 
+--																				else Childdob end), 101)
+--										+ ' and ' 
+--										+ convert(varchar(20), dateadd(dd, cd.MaximumDue, 
+--																		case when psim.Interval = '00' and Childdob < IntakeDate 
+--																				then IntakeDate 
+--																				else Childdob end), 101)
+--					else ''
+--				end as PSIDue		
+	 
+--	from #tblCommonCohort m
+--	left join ctePSIIntervalAlreadyShouldHaveBeenDone psim on psim.hvcasepk = m.hvcasepk and m.TCIDPK = psim.TCIDPK 
+--	left join codeduebydates cd on scheduledevent = 'PSI' AND psim.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
+--	-- The following line gets those tcid's with PSI's that are due for the Interval
+--	left join PSI P on P.HVCaseFK = m.HVCasePK and P.PSIInterval= psim.Interval 
+--)
+
+
+---- last psi that was completed
+--,
+--cteLastPSI
+--as
+--(
+--SELECT cc.HVCasePK ,cc.TCIDPK
+--	  ,max(PSIDateComplete) AS PSIMaxDate -- We mean really the last date in the database
+--	  ,max(PSIInterval) as psiinterval
+-- FROM #tblCommonCohort cc
+-- left join PSI P on P.HVCaseFK = cc.HVCasePK  -- it is case based because it is for parent only
+--GROUP BY cc.HVCasePK,cc.TCIDPK
+
+--)
+--,
+--cteLastPSIGetOtherNeededFields
+--as
+--( -- to get other fields like P.PSIInterval, P.PSIInWindow,P.PSIPK 
+--SELECT ls.HVCasePK ,ls.TCIDPK,ls.PSIMaxDate,P.PSIInterval, P.PSIInWindow,P.PSIPK 
+-- FROM cteLastPSI ls
+-- left join PSI P on P.HVCaseFK = ls.HVCasePK and P.PSIDateComplete = ls.PSIMaxDate and P.PSIInterval = ls.psiinterval -- adding interval eliminates if there are two psi on the same date
+--)
+--,
+--cteLastPSIForm
+--as
+--(
+--SELECT cc.HVCasePK ,cc.TCIDPK,
+----oldid,PSIPK, 
 
     
-    case 
-    when PSIInterval is null then ''	
-    when PSIPK is null then ' Missing'	
-	when PSIMaxDate is not null then	
-		'Last PSI: ' + cd.EventDescription +
+--    case 
+--    when PSIInterval is null then ''	
+--    when PSIPK is null then ' Missing'	
+--	when PSIMaxDate is not null then	
+--		'Last PSI: ' + cd.EventDescription +
 		
-			case when lpsi.PSIInWindow = 1 then ' In Window on ' else ' Out of Window on ' end 
+--			case when lpsi.PSIInWindow = 1 then ' In Window on ' else ' Out of Window on ' end 
 		
-		   + convert(varchar(20), PSIMaxDate, 101)	
+--		   + convert(varchar(20), PSIMaxDate, 101)	
 	
 	
-	else ''
-	end  as lastpsi
+--	else ''
+--	end  as lastpsi
 
- FROM #tblCommonCohort cc 
- left join cteLastPSIGetOtherNeededFields lpsi on lpsi.hvcasePK = cc.hvcasePK and cc.tcidpk = lpsi.tcidpk
- left join codeduebydates cd on scheduledevent = 'PSI' AND lpsi.psiinterval = cd.Interval -- to get dueby, max, min (given interval)
-)
+-- FROM #tblCommonCohort cc 
+-- left join cteLastPSIGetOtherNeededFields lpsi on lpsi.hvcasePK = cc.hvcasePK and cc.tcidpk = lpsi.tcidpk
+-- left join codeduebydates cd on scheduledevent = 'PSI' AND lpsi.psiinterval = cd.Interval -- to get dueby, max, min (given interval)
+--)
 
 
 --- Follow Up forms
@@ -1204,22 +1319,16 @@ cteFollowUpFormDueDates
 as
 (
 SELECT m.HVCasePK, m.TCIDPK, OldID 
---, P.PSIInterval as PSIInterval, psim.Interval as psim_Interval,  PSIPK , tcdob
-	 	  ,case when fui.Interval is null then ''
-	 	  --,case when psim.Interval is null and PSIPK is null then ' Intake/Birth due by ' + convert(varchar(12), dateadd(dd,31, m.IntakeDate), 101)
+		,case when fui.Interval is null then ''
+	 	--,case when psim.Interval is null and PSIPK is null then ' Intake/Birth due by ' + convert(varchar(12), dateadd(dd,31, m.IntakeDate), 101)
 			when  FollowUpPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
 			else ''
-			end as FollowUpDue				
-				
-	 
+		end as FollowUpDue
  from #tblCommonCohort m
 left join cteFollowUpIntervalAlreadyShouldHaveBeenDone fui on fui.hvcasepk = m.hvcasepk and m.TCIDPK = fui.TCIDPK 
 left join codeduebydates cd on scheduledevent = 'Follow Up' AND fui.[Interval] = cd.Interval -- to get dueby, max, min (given interval)
 left join FollowUp fu on fu.HVCaseFK = m.HVCasePK and fu.FollowUpInterval = fui.Interval  
-
-
 )
-
 
 -- last FollowUp that was completed
 ,
@@ -1247,9 +1356,6 @@ cteLastFollowUpForm
 as
 (
 SELECT cc.HVCasePK ,cc.TCIDPK,oldid,
---oldid,PSIPK, 
-
-    
     case 
     when FollowUpInterval is null then ''	
     when FollowUpPK is null then ' Missing'	
@@ -1578,14 +1684,13 @@ SELECT distinct cc.HVCasePK
 	  ,CONVERT(varchar, cl.StartLevelDate, 101) as  StartLevelDate 
 	  ,Intakedd   
 	  ,tcid_dd
-
-	  ,case when cpsid.PSIDue is null then '' else cpsid.PSIDue end as PSIDue 
-	  ,case when cpsiu.lastpsi is null then '' else cpsiu.lastpsi end as lastpsi 
-	  
+	  , isnull(cfdd.CCIDue, '') as CCIDue
+	  , isnull(lccif.lastCHEERS, '') as lastCHEERS
+	  --,case when cpsid.PSIDue is null then '' else cpsid.PSIDue end as PSIDue 
+	  --,case when cpsiu.lastpsi is null then '' else cpsiu.lastpsi end as lastpsi 	  
 
 	  ,case when clfd.FollowUpDue is null then '' else clfd.FollowUpDue end as FollowUpDue
-	  ,case when clfu.lastFollowUp is null then '' else clfu.lastFollowUp end as lastFollowUp  
-	  
+	  ,case when clfu.lastFollowUp is null then '' else clfu.lastFollowUp end as lastFollowUp 	  
 	  
 	  ,XDateAge
 	  ,ref.HVCasePK
@@ -1640,9 +1745,7 @@ SELECT distinct cc.HVCasePK
 			 when lastASQ.ASQInWindow = 0  then lastASQ.EventDescription + ' Out of Window On ' + convert(varchar(12), lastASQ.DateCompleted, 101)
 			 when lastASQ.ASQInWindow = 1  then lastASQ.EventDescription + ' In Window On ' + convert(varchar(12), lastASQ.DateCompleted , 101)			 
 			 else '' end
-			 
-			 
-			 as formname
+		 as formname
 			 
 		--, case 
 		--	 when TCReceiving1 = 1 or TCReceiving2 = 1 or TCReceiving3 = 1 or TCReceiving4 = 1 then ' Child receiving EIP ' 
@@ -2078,11 +2181,7 @@ SELECT distinct cc.HVCasePK
 		 
 		 
 	  
-	   FROM #tblCommonCohort cc
-	   
-		left join ctePSIFormDueDates psiIntervalDue on psiIntervalDue.hvcasepk = cc.HVCasePK  and cc.TCIDPK = psiIntervalDue.TCIDPK 
-
-	   
+   FROM #tblCommonCohort cc
 	  --inner join cteTCIDFormDone tcidform on tcidform.HVCasePK = cc.HVCasePK
 	  left join cteReferrals ref on ref.HVCasePK = cc.HVCasePK
 	  left join cteExpectedMonthlyHomeVisits expvisits on expvisits.HVCasePK = cc.HVCasePK 
@@ -2106,24 +2205,18 @@ SELECT distinct cc.HVCasePK
 	  left join cteLastASQCompleted lastASQ on lastASQ.HVCasePK = cc.HVCasePK and lastASQ.TCIDPK = cc.TCIDPK   -- for lastasq
 	  left join cteLastDateOnMedicalForm ld on ld.HVCasePK = cc.HVCasePK and ld.TCIDPK = cc.TCIDPK
 	  left join cteLastASQSECompleted lasqse on lasqse.HVCasePK = cc.HVCasePK and lasqse.TCIDPK = cc.TCIDPK
-	  
-	  
+
 	  left join dbo.udfHVLevel(@programfk, @edate) hvl on hvl.hvcasefk = cc.HVCasePK  -- to get CurrentLevelName, CurrentLevelDate
 
 	  -- shots count
 	  left join @tblImmunizations immunizations on cc.HVCasePK = immunizations.HVCasePK and cc.TCIDPK = immunizations.TCIDPK
-	  ----
-	  
+	  ----	  
 	  left join @tblIntervals intervals on cc.HVCasePK = intervals.HVCasePK
-	  
-	  left join ctePSIFormDueDates cpsid on cpsid.HVCasePK = cc.HVCasePK and cpsid.TCIDPK = cc.TCIDPK
-	  left join cteLastPSIForm cpsiu on cpsiu.HVCasePK = cc.HVCasePK and cpsiu.TCIDPK = cc.TCIDPK
-	  
-	  
+	  left join cteCHEERSFormDueDates cfdd on cfdd.HVCasePK = cc.HVCasePK and cfdd.TCIDPK = cc.TCIDPK
+	  left join cteLastCCIForm lccif on lccif.HVCasePK = cc.HVCasePK and lccif.TCIDPK = cc.TCIDPK	  
 	  
 	  left join cteFollowUpFormDueDates clfd on clfd.HVCasePK = cc.HVCasePK and clfd.TCIDPK = cc.TCIDPK
-	  left join cteLastFollowUpForm clfu on clfu.HVCasePK = cc.HVCasePK and clfu.TCIDPK = cc.TCIDPK
-	  
+	  left join cteLastFollowUpForm clfu on clfu.HVCasePK = cc.HVCasePK and clfu.TCIDPK = cc.TCIDPK  
 
 order by FSWNAME,PC1ID   
 ----order by OldID
@@ -2136,6 +2229,4 @@ drop table #CodeDueByMaxFrequencies
 drop table #tblPTDetails
 drop table #tblTCMedical
  -- rspFSWEnrolledCaseTickler 4, '09/30/2013'
-
-
 GO

@@ -336,6 +336,7 @@ as
 			
 				 union
 			  ---- PSI 10/01/2012 added by dar chen
+			  -- changed to CHEERS Check-In jr 2019-05-20
 			  select LevelName
 					,pc1id
 					,rtrim(pc1.pcfirstname)+' '+rtrim(pc1.pclastname) pc1name
@@ -361,15 +362,15 @@ as
 					  inner join hvcase on hvcasepk = caseprogram.hvcasefk
 					  inner join pc pc1 on pc1fk = pc1.pcpk
 					  inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
-					  inner join codeduebydates on scheduledevent = 'PSI'
+					  inner join codeduebydates on scheduledevent = 'CHEERS'
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk
 					  inner join workerprogram on workerfk = fsw.workerpk  AND workerprogram.ProgramFK=ListItem
 					  inner join worker supervisor on supervisorfk = supervisor.workerpk
 					  inner join codelevel on codelevelpk = currentlevelfk
-					  left join PSI on PSI.hvcasefk = hvcasepk and PSI.programfk = caseprogram.programfk 
-					  and codeduebydates.interval = PSIInterval
-				  where PSI.hvcasefk is NULL
+					  left join CheersCheckIn cci on cci.hvcasefk = hvcasepk and cci.programfk = caseprogram.programfk 
+					  and codeduebydates.interval = cci.Interval
+				  where cci.hvcasefk is NULL
 				       AND HVCase.TCDOD IS NULL
 					   and caseprogress >= 11
 					   and currentFSWFK = isnull(@workerfk,currentFSWFK)
