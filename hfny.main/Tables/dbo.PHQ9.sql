@@ -50,17 +50,20 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-create TRIGGER [dbo].[fr_phq9]
+CREATE TRIGGER [dbo].[fr_phq9]
 on [dbo].[PHQ9]
 After insert
 
 AS
 
-Declare @PK int
+Declare @PK int, @ParentFormFK int
 
 set @PK = (SELECT PHQ9PK from inserted)
+set @ParentFormFK = (select formfk from inserted) 
 
-BEGIN
+begin
+--only want to write a review row if this is a stand alone PHQ9. PHQ9s with FormFK = 0 means it is a stand alone form and not embedded in Follow-Up, etc.
+if @ParentFormFK = 0
 	EXEC spAddFormReview_userTrigger @FormFK=@PK, @FormTypeValue='PQ'
 END
 GO
