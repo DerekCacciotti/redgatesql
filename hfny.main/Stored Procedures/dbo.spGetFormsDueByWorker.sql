@@ -2,6 +2,16 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- =============================================
+-- Author:		Ben Simmons
+-- Create date: 08/03/18
+-- Description:	This stored procedure is used to retrieve all the forms
+-- that a worker needs to enter in a certain time period.
+--
+-- NOTE:  This does NOT calculate if the forms have been completed,
+-- just when the forms are due and if they are in the time period supplied.
+-- added by derek c for dashboards 
+-- =============================================
 CREATE PROC [dbo].[spGetFormsDueByWorker]
 (
 	@WorkerFK INT,

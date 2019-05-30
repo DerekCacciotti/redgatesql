@@ -2,8 +2,10 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROC [dbo].[spIsUserAWorker] @username VARCHAR(MAX), @ProgramFK INT AS 
+CREATE PROC [dbo].[spIsUserAWorker] @username VARCHAR(max), @programfk INT AS
 
-SELECT TOP 1 *  FROM dbo.Worker INNER JOIN dbo.WorkerProgram ON WorkerProgram.WorkerFK = Worker.WorkerPK 
-WHERE UserName = @username AND ProgramFK = @ProgramFK
+
+SELECT TOP 1 * FROM worker w INNER JOIN dbo.WorkerProgram wp ON wp.WorkerFK = w.WorkerPK
+
+ WHERE w.UserName = @username AND wp.ProgramFK = @programfk
 GO

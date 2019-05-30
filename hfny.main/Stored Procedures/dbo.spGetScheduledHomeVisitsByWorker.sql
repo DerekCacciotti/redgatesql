@@ -2,6 +2,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- =============================================
+-- Author:		Benjamin Simmons
+-- Create date: 07/31/18
+-- Description:	This stored procedure returns upcoming scheduled home visits for a worker
+-- that are between two days overdue and 7 days until due.
+-- moved by derek c for dashboards
+-- =============================================
 CREATE PROC [dbo].[spGetScheduledHomeVisitsByWorker] 
 	-- Add the parameters for the stored procedure here
 	@WorkerFK INT,
@@ -33,8 +40,8 @@ BEGIN
 		HVCaseFK
 	)
 	SELECT DISTINCT cp.PC1ID,  
-	MAX(hl.VisitStartTime) AS MostRecentVisitDate,
-	DATEADD(DAY, ROUND(7 / NULLIF(cl.MaximumVisit, 0), 0), MAX(hl.VisitStartTime)) AS NextExpectedVisit,
+	MAX(hl.HVLogCreateDate) AS MostRecentVisitDate,
+	DATEADD(DAY, ROUND(7 / NULLIF(cl.MaximumVisit, 0), 0), MAX(hl.HVLogCreateDate)) AS NextExpectedVisit,
 	cp.HVCaseFK
 	FROM dbo.CaseProgram cp
 		INNER JOIN dbo.codeLevel cl ON cl.codeLevelPK = cp.CurrentLevelFK
@@ -56,7 +63,7 @@ BEGIN
 	)
 	SELECT TOP 1 tc.PC1ID, hl.NextScheduledVisit FROM 
 		@tblCohort tc 
-		INNER JOIN dbo.HVLog hl ON hl.HVCaseFK = tc.HVCaseFK AND hl.HVLogPK = tc.MostRecentHVLogDate
+		INNER JOIN dbo.HVLog hl ON hl.HVCaseFK = tc.HVCaseFK AND hl.HVLogCreateDate = tc.MostRecentHVLogDate
 		WHERE PC1ID = tc.PC1ID
 		ORDER BY hl.NextScheduledVisit DESC
 

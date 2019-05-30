@@ -1,0 +1,21 @@
+{
+  "Id": "3436d1b3-81c0-4c93-879a-5c9f8c2e7249",
+  "Name": "Covers changes to: ASQSE, scoreASQSE, spGetOptionItem. Script created at 2018-08-07 12:31.",
+  "ObjectIds": [
+    {
+      "Name": "ASQSE",
+      "Owner": "dbo",
+      "ObjectType": "Table"
+    },
+    {
+      "Name": "scoreASQSE",
+      "Owner": "dbo",
+      "ObjectType": "Table"
+    },
+    {
+      "Name": "spGetOptionItem",
+      "Owner": "dbo",
+      "ObjectType": "StoredProcedure"
+    }
+  ]
+}

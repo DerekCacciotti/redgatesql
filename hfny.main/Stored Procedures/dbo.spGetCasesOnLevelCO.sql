@@ -33,7 +33,8 @@ BEGIN
 	RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName) AS WorkerName,
 	'Level CO' AS LevelName,
 	cp.CurrentLevelDate AS LevelDate,
-	DATEDIFF(DAY, cp.CurrentLevelDate, GETDATE()) AS DaysOnLevel
+	DATEDIFF(DAY, cp.CurrentLevelDate, GETDATE()) AS DaysOnLevel,
+	MAX(cp.CurrentLevelDate) AS LastCODate
 	FROM	dbo.CaseProgram cp
 		INNER JOIN dbo.SplitString(@ProgramFK, ',')
 			ON cp.ProgramFK = ListItem
@@ -42,18 +43,16 @@ BEGIN
 		INNER JOIN dbo.WorkerProgram wp 
 			ON wp.WorkerFK = w.WorkerPK
 			AND wp.ProgramFK = cp.ProgramFK
+		
     WHERE w.WorkerPK = ISNULL(@WorkerFK, w.WorkerPK)
 		  AND wp.SupervisorFK = ISNULL(@SupervisorFK, wp.SupervisorFK)
 		  AND cp.DischargeDate IS NULL
-		  AND cp.CurrentLevelFK = 22 
-		  OR cp.CurrentLevelFK = 23 
-		  OR cp.CurrentLevelFK = 24 
-		  OR cp.CurrentLevelFK = 25
+		  AND cp.CurrentLevelFK = 22 OR cp.CurrentLevelFK = 23 OR cp.CurrentLevelFK = 24 OR cp.CurrentLevelFK = 25 
 		  OR cp.CurrentLevelFK = 26
 		  OR cp.CurrentLevelFK = 27
-		  OR cp.CurrentLevelFK = 28
+		  OR cp.CurrentFSWFK = 28
 		  OR cp.CurrentLevelFK = 29
-		  
+		  OR cp.CurrentLevelFK	= 1056
 	GROUP BY cp.PC1ID, (RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName)), cp.CurrentLevelDate, (DATEDIFF(DAY, cp.CurrentLevelDate, GETDATE()))
 END
 
