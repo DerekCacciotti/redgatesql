@@ -10,7 +10,7 @@ GO
 --mod by dar
 --exec rspFamilyTimeline null,1
 -- =============================================
-CREATE procedure [dbo].[rspFamilyTimeLine]
+CREATE PROC [dbo].[rspFamilyTimeLine]
 (
     @pc1id     varchar(13),
     @programfk varchar(max)
@@ -71,25 +71,6 @@ as
 					and caseprogress >= 11
 
         union
-		-- CHEERS Check-In
-			select eventDescription
-			  ,dateadd(dd,
-						--dueby,
-						case when codeDueByDates.Interval = '00' then 0 else DueBy end,
-						--hvcase.tcdob
-						case when codeDueByDates.Interval = '00' 
-								and hvcase.IntakeDate > hvcase.TCDOB 
-							then HVCase.IntakeDate 
-							else HVCase.TCDOB 
-						end) as DueDate
-			from caseprogram
-				inner join hvcase on hvcasepk = caseprogram.hvcasefk
-				inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
-				inner join codeduebydates on scheduledevent = 'CHEERS'
-				inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
-			where PC1ID = @pc1id
-				 and caseprogress >= 11
-		union
 
 		-- FOLLOW UP
 		select eventDescription
@@ -105,7 +86,7 @@ as
 		UNION
         
 		--CHEERS Check-In
-		select IIF(DATEADD(dd,dueby,hvcase.tcdob) < '02/01/2019', (EventDescription + ' (N/A)'), EventDescription)
+		select IIF(DATEADD(dd,dueby,hvcase.tcdob) < '02/01/2019', (EventDescription + ' (N/A)'), EventDescription) eventDescription
 			  ,dateadd(dd,dueby,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
