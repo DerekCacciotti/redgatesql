@@ -288,6 +288,6 @@ CASE WHEN AgeAtDateCompleted = -1 THEN 0 ELSE AgeAtDateCompleted END AgeAtDateCo
 nASQ, AgeAtDateCompletedMonth, b.EI, CASE WHEN b.EI > 0 THEN 'EI' ELSE
 a.Meets END AS Meets, CASE WHEN a.[ASQTCReceiving] = 1 THEN 'Yes' ELSE 'No' END AS TCReceivingEI
 FROM @cteYYY AS a JOIN @cteASQTCReceiving AS b ON a.PC1ID = b.PC1ID
-WHERE Age > 0 AND Age <= 5
+WHERE Age  >= 0 AND Age <= 5
 order by Age DESC, worker, PC1ID, TCAgeCode
 GO

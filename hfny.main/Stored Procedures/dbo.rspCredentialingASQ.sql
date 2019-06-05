@@ -2,8 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
 -- =============================================
 -- Author:		<cchen2>
 -- Create date: <June 3, 2010>
@@ -283,8 +281,7 @@ insert into @cteFinal
 )
 insert into @cteYYY
 SELECT a.*, b.nASQ
-, CASE WHEN a.Age = 1 THEN (CASE WHEN b.nASQ >= 2 THEN 'Yes' ELSE 'No' END)
-       WHEN a.Age = 2 THEN (CASE WHEN b.nASQ >= 2 THEN 'Yes' ELSE 'No' END)
+, CASE WHEN a.Age BETWEEN 0 AND 2 THEN (CASE WHEN b.nASQ >= 2 THEN 'Yes' ELSE 'No' END)
        ELSE (CASE WHEN b.nASQ >= 1 THEN 'Yes' ELSE 'No' END)
   END AS Meets
 FROM @cteFinal AS a JOIN @cteXXX AS b ON a.PC1ID = b.PC1ID
@@ -308,8 +305,6 @@ CASE WHEN AgeAtDateCompleted = -1 THEN 0 ELSE AgeAtDateCompleted END AgeAtDateCo
 nASQ, AgeAtDateCompletedMonth, b.EI, CASE WHEN b.EI > 0 THEN 'EI' ELSE
 a.Meets END AS Meets, CASE WHEN a.[ASQTCReceiving] = 1 THEN 'Yes' ELSE 'No' END AS TCReceivingEI
 FROM @cteYYY AS a JOIN @cteASQTCReceiving AS b ON a.PC1ID = b.PC1ID
-WHERE Age > 0 AND Age <= 5
+WHERE Age >= 0 AND Age <= 5
 order by Age DESC, worker, PC1ID, TCAgeCode
-
-
 GO

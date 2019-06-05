@@ -242,7 +242,7 @@ SELECT distinct
 supervisor, worker, a.PC1ID, TCName, TCDOB, GestationalAge, 
 Age, AgeMonth, nASQ, b.EI, CASE WHEN b.EI > 0 THEN 'EI' ELSE a.Meets END AS Meets
 FROM cteYYY AS a JOIN cteASQTCReceiving AS b ON a.PC1ID = b.PC1ID
-WHERE Age > 0 AND Age <= 5)
+WHERE Age  >= 0 AND Age <= 5)
 
 , cte1 AS (
   SELECT worker,  CAST(age AS VARCHAR(1)) + ' - ' +  CAST(age+1 AS VARCHAR(1))  AS age
