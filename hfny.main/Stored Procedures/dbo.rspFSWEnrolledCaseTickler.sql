@@ -1207,11 +1207,11 @@ SELECT cc.HVCasePK ,cc.TCIDPK,
 --		--,case when psim.Interval is null then ''	
 --		-- ,case when psim.Interval is null and PSIPK is null then 
 		  
---		--			case when Childdob is not null then  'PSI due  between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(20),  convert(varchar(12), dateadd(dd,30, tcdob), 101))  -- there is a baby
+--		--			case when Childdob is not null then  'PSI due between ' + convert(varchar(20), tcdob, 101) + ' and ' + convert(varchar(20),  convert(varchar(12), dateadd(dd,30, tcdob), 101))  -- there is a baby
 --		--			else ' PSI due upon Baby''s Birth'  -- baby is not born yet. it is just a EDC
 --		--			end
 				
---		--when  PSIPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
+--		--when  PSIPK is null then cd.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
 --		--else ''
 --		--end as PSIDue				
 --		,case when psim.Interval is null and PSIPK is null then 
@@ -1226,7 +1226,7 @@ SELECT cc.HVCasePK ,cc.TCIDPK,
 --														+ ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue , m.IntakeDate), 101)
 --						else '' 
 --						end
---					when  PSIPK is null then cd.EventDescription + ' Due  between ' 
+--					when  PSIPK is null then cd.EventDescription + ' Due between ' 
 --										+ convert(varchar(20), dateadd(dd, cd.MinimumDue, 
 --																		case when psim.Interval = '00' and Childdob < IntakeDate 
 --																				then IntakeDate 
@@ -1321,7 +1321,11 @@ as
 SELECT m.HVCasePK, m.TCIDPK, OldID 
 		,case when fui.Interval is null then ''
 	 	--,case when psim.Interval is null and PSIPK is null then ' Intake/Birth due by ' + convert(varchar(12), dateadd(dd,31, m.IntakeDate), 101)
-			when  FollowUpPK is null then cd.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
+			when  FollowUpPK is null then cd.EventDescription + 
+											' Due between ' + 
+											convert(varchar(20), dateadd(dd,cd.MinimumDue ,tcdob), 101) + 
+											' and ' + 
+											convert(varchar(20), dateadd(dd,cd.MaximumDue ,tcdob), 101)
 			else ''
 		end as FollowUpDue
  from #tblCommonCohort m
@@ -1729,9 +1733,17 @@ SELECT distinct cc.HVCasePK
 	        case when IntakeDate < dev_bdate then 
 					convert(varchar(20), dev_bdate, 101) else convert(varchar(20), IntakeDate, 101) end
 					
-			when casq.Interval < '24' then cdasq.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
-			else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd, cdasq.MinimumDue, cc.tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd, cdasq.MaximumDue, cc.tcdob), 101)
-			--else cdasq.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,tcdob), 101)
+			when casq.Interval < '24' then cdasq.EventDescription + 
+											' Due between ' + 
+											convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,dev_bdate), 101) + 
+											' and ' + 
+											convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,dev_bdate), 101)
+			else cdasq.EventDescription + 
+					' Due between ' + 
+					convert(varchar(20), dateadd(dd, cdasq.MinimumDue, cc.tcdob), 101) + 
+					' and ' + 
+					convert(varchar(20), dateadd(dd, cdasq.MaximumDue, cc.tcdob), 101)
+			--else cdasq.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cdasq.MinimumDue ,tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasq.MaximumDue ,tcdob), 101)
 			end as ASQDue   
      
 		--, hvl.levelname as CurrentLevelName
@@ -2163,10 +2175,13 @@ SELECT distinct cc.HVCasePK
 				when casqse.ASQSEReceiving = 1 then ' Child receiving EIP '
 				when casqse.Interval is null then ''
 				-- as per JH, dont use dev_date. Use tcdob .... khalsa 06/05/2014				
-				--else  cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
-				else cdasqse.EventDescription + ' Due  between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,cc.tcdob), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,cc.tcdob), 101)
-				end as ASQSEDue  		 
-		 
+				--else  cdasqse.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
+				else cdasqse.EventDescription + 
+						' Due between ' + 
+						convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,cc.tcdob), 101) + 
+						' and ' + 
+						convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,cc.tcdob), 101)
+				end as ASQSEDue 
 		 
 		 , case 
 			 when lasqse.ASQSEReceiving = 1 then ' Child receiving EIP ' 
