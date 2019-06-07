@@ -39,8 +39,25 @@ as
 									else @CaseFiltersPositive
 							   end;
 
-	select rtrim(PC.PCLastName)+cast(PC.PCPK as varchar(10)) [key01]
-		  ,a.PC1ID
+	with cteCaseCount as
+	(
+		select count(distinct PC1ID) as CaseCount
+		from CaseProgram as a
+			join HVCase as b on a.HVCaseFK = b.HVCasePK
+			inner join dbo.SplitString(@ProgramFK,',') on a.ProgramFK = listitem
+			inner join dbo.udfCaseFilters(@CaseFiltersPositive, NULL, @ProgramFK) cf on cf.HVCaseFK = a.HVCaseFK
+			left outer join Worker on Worker.WorkerPK = a.CurrentFSWFK and  Worker.WorkerPK = isnull(@WorkerFK, Worker.WorkerPK)
+			join Workerprogram as wp on wp.WorkerFK = Worker.WorkerPK and wp.ProgramFK = @ProgramFK
+		where b.IntakeDate <= @EndDt
+			 and (a.DischargeDate is null
+			 or a.DischargeDate > @StartDt)
+			 and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
+	)
+
+	select CaseCount
+		  , count(rtrim(T.TCLastName)+', '+rtrim(T.TCFirstName)) over () as TCCount
+		  , rtrim(PC.PCLastName)+cast(PC.PCPK as varchar(10)) [key01]
+		  , a.PC1ID
 		  ,rtrim(PC.PCLastName)+', '+rtrim(PC.PCFirstName) [Name]
 		  ,convert(varchar(12),PC.PCDOB,101) [DOB]
 		  ,PC.SSNo [SSNo]
@@ -90,7 +107,6 @@ as
 		  ,rtrim(T.TCLastName)+', '+rtrim(T.TCFirstName) [tcName]
 		  ,convert(varchar(12),T.TCDOB,101) [tcDOB]
 		  ,case when ls.SiteName is null then '' else ls.SiteName end as SiteCode
-
 		from CaseProgram as a
 			join HVCase as b on a.HVCaseFK = b.HVCasePK
 			inner join dbo.SplitString(@ProgramFK,',') on a.ProgramFK = listitem
@@ -136,7 +152,7 @@ as
 			-- substring(VisitType, 4, 1) <> '1', VisitStartTime < @EndDt and VisitStartTime >= b.IntakeDate
 
 			left outer join TCID T on T.HVCaseFK = b.HVCasePK and T.TCDOD is null
-
+			inner join cteCaseCount on 1=1
 		where b.IntakeDate <= @EndDt
 			 and (a.DischargeDate is null
 			 or a.DischargeDate > @StartDt)
