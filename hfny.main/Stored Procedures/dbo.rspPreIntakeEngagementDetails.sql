@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -109,9 +108,10 @@ as
 				from	HVCase h
 				inner join Kempe k on k.HVCaseFK = h.HVCasePK
 				inner join CaseProgram cp on h.HVCasePK = cp.HVCaseFK
-				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
-				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK -- get SiteFK
 				inner join dbo.SplitString(@ProgramFK, ',') on cp.programfk = listitem
+				inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
+				-- get SiteFK
+				inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = cp.ProgramFK
 
 		-- SiteFK = isnull(@sitefk,SiteFK) does not work because column SiteFK may be null itself 
 		-- so to solve this problem we make use of @tblInitRequiredDataTemp
