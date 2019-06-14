@@ -6,7 +6,7 @@ GO
 -- Author:		<Derek Cacciotti>
 -- Create date: <May 21, 2018>
 -- Description:	<report: Credentialing 6-6.C ASQSE>
--- Edit date: 
+-- Edit date: 6-14-19 based emails from jay
 -- rspASQHistory 1
 -- =============================================
 
@@ -262,11 +262,12 @@ insert into @cteFinal
 	,Meets char(3)
 )
 insert into @cteYYY
-SELECT a.*, b.nASQ
-, CASE WHEN a.Age = 1 THEN (CASE WHEN b.nASQ >= 2 THEN 'Yes' ELSE 'No' END)
-       WHEN a.Age = 2 THEN (CASE WHEN b.nASQ >= 2 THEN 'Yes' ELSE 'No' END)
-       ELSE (CASE WHEN b.nASQ >= 1 THEN 'Yes' ELSE 'No' END)
-  END AS Meets
+SELECT a.*, b.nASQ,
+CASE WHEN b.nASQ >= 1 THEN 'Yes' ELSE 'No' END AS Meets
+ --, CASE WHEN a.Age = 1 THEN (CASE WHEN b.nASQ >= 2 THEN 'Yes' ELSE 'No' END)
+--       WHEN a.Age = 2 THEN (CASE WHEN b.nASQ >= 2 THEN 'Yes' ELSE 'No' END)
+--       ELSE (CASE WHEN b.nASQ >= 1 THEN 'Yes' ELSE 'No' END)
+--  END AS Meets
 FROM @cteFinal AS a JOIN @cteXXX AS b ON a.PC1ID = b.PC1ID
 
 declare @cteASQTCReceiving table (
