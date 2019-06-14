@@ -59,6 +59,8 @@ begin
 			from [dbo].[udfLevelPieces](@programfk, @sdate, @edate) tlp
 				left outer join hvlog on tlp.casefk = hvlog.hvcasefk
 							   and cast(VisitStartTime as date) between tlp.StartDate and tlp.EndDate
+							   and FormComplete = 1
+							   and dbo.IsFormReviewed(VisitStartTime, 'VL', HVLogPK) = 1
 				inner join CaseProgram cp on cp.HVCaseFK = tlp.Casefk
 						  and cp.ProgramFK = tlp.programfk
 
