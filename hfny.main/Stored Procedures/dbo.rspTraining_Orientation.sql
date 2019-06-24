@@ -18,7 +18,6 @@ CREATE PROCEDURE [dbo].[rspTraining_Orientation]
 	@progfk AS INT,
 	@sdate AS DATE
 	
-WITH recompile
 as
 
 
@@ -28,7 +27,34 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-	;WITH  cteMain AS (
+	DECLARE @cteMain AS TABLE (
+		workerpk INT
+		, WrkrLName VARCHAR(35)
+		, FirstHomeVisitDate DATE
+		, FirstKempeDate DATE
+		, SupervisorFirstEvent DATE
+		, FirstEvent DATE
+		, WorkerName VARCHAR(75)
+		, Supervisor INT
+		, FSW INT
+		, FAW INT
+		, RowNumber INT
+		, HireDate DATE
+		)
+
+	INSERT INTO @cteMain ( workerpk ,
+	                       WrkrLName ,
+	                       FirstHomeVisitDate ,
+	                       FirstKempeDate ,
+	                       SupervisorFirstEvent ,
+	                       FirstEvent ,
+	                       WorkerName ,
+	                       Supervisor ,
+	                       FSW ,
+	                       FAW ,
+	                       RowNumber ,
+	                       HireDate )
+	
 	SELECT g.WorkerPK, g.WrkrLName, g.FirstHomeVisitDate
 	, g.FirstKempeDate, g.SupervisorFirstEvent
 	, g.FirstEvent
@@ -47,12 +73,12 @@ BEGIN
 	OR (wp.SupervisorStartDate  > @sdate AND wp.SupervisorEndDate IS NULL))
 	AND wp.TerminationDate IS NULL
 	AND wp.HireDate > @sdate
-)
+
 
 
 
 --Now we get the trainings (or lack thereof) for topic code 1.0
-, cte10_2a AS (
+; WITH cte10_2a AS (
 	SELECT RowNumber
 		, cteMain.workerpk
 		, t1.TopicCode
@@ -67,7 +93,7 @@ BEGIN
 		, FSW
 		, FAW
 		,HireDate
-	FROM cteMain
+	FROM @cteMain cteMain
 			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = cteMain.WorkerPK
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
@@ -100,7 +126,7 @@ BEGIN
 	, FirstKempeDate
 	, SupervisorFirstEvent
 		,HireDate
-	FROM cteMain, codetopic
+	FROM @cteMain, codetopic
 	WHERE (codetopic.TopicCode BETWEEN 1.0 AND 5.5)
 )
 
