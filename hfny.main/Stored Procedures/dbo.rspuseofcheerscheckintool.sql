@@ -194,8 +194,8 @@ INSERT INTO @finaltablewithrownums
 SELECT pc1id, c.hvcasefk, c.tcidfk, tc.TCFirstName, tc.TCDOB, hv.IntakeDate, cci.cheerscheckinpk, 
 cci.interval, cci.observationdate, 
 ROW_NUMBER() OVER(PARTITION BY c.tcidfk ORDER BY ObservationDate), CASE WHEN c.tcageindays BETWEEN MinimumDue AND MaximumDue THEN 'Yes' ELSE 'No' end FROM @cohort2 c
-
-LEFT JOIN dbo.CheersCheckIn cci ON cci.TCIDFK = c.tcidfk AND ObservationDate BETWEEN @startdate AND @enddate
+LEFT JOIN dbo.CheersCheckIn cci ON cci.TCIDFK = c.tcidfk
+--LEFT JOIN dbo.CheersCheckIn cci ON cci.TCIDFK = c.tcidfk AND ObservationDate BETWEEN @startdate AND @enddate
 LEFT JOIN dbo.codeDueByDates ON codeDueByDates.Interval = c.interval
 inner JOIN dbo.TCID tc ON tc.TCIDPK = c.tcidfk
 inner JOIN dbo.HVCase hv ON hv.HVCasePK = c.hvcasefk
@@ -208,7 +208,7 @@ WHERE ScheduledEvent = 'CHEERS'
 DECLARE @finaltable TABLE
 ( pc1id CHAR(13), hvcasefk int, tcidfk INT, tcfirstname varchar(200), tcdob datetime, intakedate DATETIME, 
 dateoflastcci datetime, lastinterval CHAR(10), previousccidate DATETIME, previousinterval CHAR(10), rowNum INT, 
-validintimeperiod CHAR(10), numvalidintimeperiod INT, inwindow CHAR(10), numoftcswithonecheers INT )
+validintimeperiod CHAR(10), numvalidintimeperiod INT, inwindow CHAR(10), numoftcswithonecheers INT, inperiod CHAR(10) )
 
 
 
@@ -227,7 +227,8 @@ INSERT INTO @finaltable
 	rowNum,
 	validintimeperiod,
 	inwindow, 
-	numoftcswithonecheers
+	numoftcswithonecheers,
+	inperiod
 
 	
     
@@ -235,8 +236,9 @@ INSERT INTO @finaltable
 
 
 SELECT t1.pc1id,t1.hvcasefk, t1.tcidfk,t1.tcfirstname, t1.tcdob,t1.intakedate,t1.observationdate,
-t1.interval, t2.observationdate, t2.interval, t1.rownum, CASE WHEN t1.observationdate IS NULL THEN 'No' ELSE 'Yes' END, t1.inwindow, 
-SUM(CASE WHEN t1.observationdate IS NOT NULL AND t1.rownum = 1 THEN 1 ELSE 0 END)
+t1.interval, t2.observationdate, t2.interval, t1.rownum, CASE WHEN t1.observationdate IS NULL THEN 'No' ELSE 'Yes' END, 
+t1.inwindow, SUM(CASE WHEN t1.observationdate IS NOT NULL AND t1.rownum = 1 THEN 1 ELSE 0 END), 
+CASE WHEN t1.observationdate BETWEEN @startdate AND @enddate THEN 'Yes' ELSE 'No' end
  FROM @finaltablewithrownums t1 left JOIN @finaltablewithrownums t2 ON t1.rownum - t2.rownum = 1 AND t1.tcidfk = t2.tcidfk
  GROUP BY t1.pc1id, t1.hvcasefk,t1.tcidfk,t1.tcfirstname, t1.tcdob, t1.intakedate, t1.observationdate, t1.interval,
   t2.observationdate,t2.interval, t1.rownum,t1.inwindow
