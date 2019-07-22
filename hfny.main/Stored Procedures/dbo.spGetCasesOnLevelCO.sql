@@ -2,6 +2,12 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+-- =============================================
+-- Author:		Ben Simmons
+-- Create date: 08/21/2018
+-- Description:	Get cases that are on level CO and get the last creative outreach form 
+-- for the case
+-- =============================================
 CREATE PROC [dbo].[spGetCasesOnLevelCO]
 	@SupervisorFK INT = NULL,
 	@WorkerFK INT = NULL,
@@ -43,16 +49,16 @@ BEGIN
 		INNER JOIN dbo.WorkerProgram wp 
 			ON wp.WorkerFK = w.WorkerPK
 			AND wp.ProgramFK = cp.ProgramFK
-		
     WHERE w.WorkerPK = ISNULL(@WorkerFK, w.WorkerPK)
 		  AND wp.SupervisorFK = ISNULL(@SupervisorFK, wp.SupervisorFK)
 		  AND cp.DischargeDate IS NULL
-		  AND cp.CurrentLevelFK = 22 OR cp.CurrentLevelFK = 23 OR cp.CurrentLevelFK = 24 OR cp.CurrentLevelFK = 25 
-		  OR cp.CurrentLevelFK = 26
-		  OR cp.CurrentLevelFK = 27
-		  OR cp.CurrentFSWFK = 28
-		  OR cp.CurrentLevelFK = 29
-		  OR cp.CurrentLevelFK	= 1056
+		  and (cp.CurrentLevelFK = 22
+		  or cp.CurrentLevelFK = 24
+		  or cp.CurrentLevelFK = 25
+		  or cp.CurrentLevelFK = 26
+		  or cp.CurrentLevelFK = 27
+		  or cp.CurrentLevelFK = 28
+		  or cp.CurrentLevelFK = 29)
 	GROUP BY cp.PC1ID, (RTRIM(w.FirstName) + ' ' + RTRIM(w.LastName)), cp.CurrentLevelDate, (DATEDIFF(DAY, cp.CurrentLevelDate, GETDATE()))
 END
 
