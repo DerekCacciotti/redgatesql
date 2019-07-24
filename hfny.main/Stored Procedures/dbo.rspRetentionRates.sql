@@ -131,6 +131,8 @@ SET NOCOUNT ON;
 	--	, CurrentLevelAtDischarge3 int
 	--	, CurrentLevelAtDischarge4 int
 	--	, CurrentLevelAtDischargeX int
+	--	, CurrentLevelAtDischargePrenatal int
+	--	, CurrentLevelAtDischargeOther int
 	--	, PC1DVAtIntake int
 	--	, PC1MHAtIntake int
 	--	, PC1SAAtIntake int
@@ -699,6 +701,8 @@ with cteCohort as
 		, CurrentLevelAtDischarge3 int
 		, CurrentLevelAtDischarge4 int
 		, CurrentLevelAtDischargeX int
+		, CurrentLevelAtDischargePrenatal int
+		, CurrentLevelAtDischargeOther int
 		, PC1DVAtIntake int
 		, PC1MHAtIntake int
 		, PC1SAAtIntake int
@@ -840,6 +844,8 @@ insert into @tblPC1WithStats
 		, CurrentLevelAtDischarge3
 		, CurrentLevelAtDischarge4
 		, CurrentLevelAtDischargeX
+		, CurrentLevelAtDischargePrenatal
+		, CurrentLevelAtDischargeOther
 		, PC1DVAtIntake
 		, PC1MHAtIntake
 		, PC1SAAtIntake
@@ -905,11 +911,18 @@ select distinct PC1ID
 		, case when PC1EmploymentAtIntake = '0' then 1 else 0 end as PC1EmploymentAtIntakeNo
 		, case when PC1EmploymentAtIntake is null or PC1EmploymentAtIntake = '' then 1 else 0 end as PC1EmploymentAtIntakeUnknownMissing
 		, CountOfHomeVisits
-		, case when left(LevelName,7) = 'Level 1' then 1 else 0 end as CurrentLevelAtDischarge1
-		, case when left(LevelName,7) = 'Level 2' then 1 else 0 end as CurrentLevelAtDischarge2
+		, case when left(LevelName,7) = 'Level 1' and charindex('Prenatal', LevelName) = 0
+				then 1 else 0 end as CurrentLevelAtDischarge1
+		, case when left(LevelName,7) = 'Level 2' and charindex('Prenatal', LevelName) = 0
+				then 1 else 0 end as CurrentLevelAtDischarge2
 		, case when left(LevelName,7) = 'Level 3' then 1 else 0 end as CurrentLevelAtDischarge3
 		, case when left(LevelName,7) = 'Level 4' then 1 else 0 end as CurrentLevelAtDischarge4
-		, case when left(LevelName,7) = 'Level X' then 1 else 0 end as CurrentLevelAtDischargeX
+		, case when left(LevelName,8) = 'Level CO' then 1 else 0 end as CurrentLevelAtDischargeX
+		, case when charindex('Prenatal', LevelName) >= 1 then 1 else 0 end as CurrentLevelAtDischargePrenatal
+		, case when left(LevelName,7) <> 'Level 1' and left(LevelName,7) <> 'Level 2' and 
+					left(LevelName,7) <> 'Level 3' and left(LevelName,7) <> 'Level 4' and 
+					left(LevelName,8) <> 'Level CO'
+				then 1 else 0 end as CurrentLevelAtDischargeOther
 		, case when DomesticViolenceAtIntake = 1 then 1 else 0 end as PC1DVAtIntake
 		, case when MentalIllnessAtIntake = 1 or DepressionAtIntake = 1 then 1 else 0 end as PC1MHAtIntake
 		, case when AlcoholAbuseAtIntake = 1 or SubstanceAbuseAtIntake = 1 then 1 else 0 end as PC1SAAtIntake
@@ -5742,6 +5755,209 @@ values ('Programmatic Factors'
 		, @EighteenMonthsAtIntake
 		, @TwentyFourMonthsAtIntake
 		, @ThirtySixMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where CurrentLevelAtDischargePrenatal = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and CurrentLevelAtDischargePrenatal = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and CurrentLevelAtDischargePrenatal = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and CurrentLevelAtDischargePrenatal = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and CurrentLevelAtDischargePrenatal = 1
+                                                        
+select @TwentyFourMonthsAtIntake = count(*)             
+from @tblPC1withStats                                   
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and CurrentLevelAtDischargePrenatal = 1
+                                                        
+select @ThirtySixMonthsAtIntake = count(*)              
+from @tblPC1withStats                                   
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and CurrentLevelAtDischargePrenatal = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Programmatic Factors'
+		, '    Prenatal'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+		
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where CurrentLevelAtDischargeOther = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and CurrentLevelAtDischargeOther = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and CurrentLevelAtDischargeOther = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt12Months = 0 and CurrentLevelAtDischargeOther = 1
+
+select @EighteenMonthsAtIntake = count(*)
+from @tblPC1withStats
+where ActiveAt12Months = 1 and ActiveAt18Months = 0 and CurrentLevelAtDischargeOther = 1
+                                                        
+select @TwentyFourMonthsAtIntake = count(*)             
+from @tblPC1withStats                                   
+where ActiveAt18Months = 1 and ActiveAt24Months = 0 and CurrentLevelAtDischargeOther = 1
+                                                        
+select @ThirtySixMonthsAtIntake = count(*)              
+from @tblPC1withStats                                   
+where ActiveAt24Months = 1 and ActiveAt36Months = 0 and CurrentLevelAtDischargeOther = 1
+
+insert into @tblResults (FactorType
+						, LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateOneYear
+						, RetentionRateEighteenMonths
+						, RetentionRateTwoYears
+						, RetentionRateThreeYears
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsOneYear
+						, EnrolledParticipantsEighteenMonths
+						, EnrolledParticipantsTwoYears
+						, EnrolledParticipantsThreeYears
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedOneYear
+						, RunningTotalDischargedEighteenMonths
+						, RunningTotalDischargedTwoYears
+						, RunningTotalDischargedThreeYears
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNOneYear
+						, TotalNEighteenMonths
+						, TotalNTwoYears
+						, TotalNThreeYears
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, OneYearIntake
+						, EighteenMonthsIntake
+						, TwoYearsIntake
+						, ThreeYearsIntake)
+values ('Programmatic Factors'
+		, '    Other'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateOneYear
+		, @RetentionRateEighteenMonths
+		, @RetentionRateTwoYears
+		, @RetentionRateThreeYears
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsOneYear
+		, @EnrolledParticipantsEighteenMonths
+		, @EnrolledParticipantsTwoYears
+		, @EnrolledParticipantsThreeYears
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedOneYear
+		, @RunningTotalDischargedEighteenMonths
+		, @RunningTotalDischargedTwoYears
+		, @RunningTotalDischargedThreeYears
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNOneYear
+		, @TotalNEighteenMonths
+		, @TotalNTwoYears
+		, @TotalNThreeYears
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @TwelveMonthsAtIntake
+		, @EighteenMonthsAtIntake
+		, @TwentyFourMonthsAtIntake
+		, @ThirtySixMonthsAtIntake)
+		
 --#endregion
 --#region Cases with More than 1 Home Visitor
 -- Cases with More than 1 Home Visitor
