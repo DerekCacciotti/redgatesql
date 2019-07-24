@@ -3,6 +3,8 @@
   "Deployment order": [
     {"Description":"Changes before migration script 'Script created at 2017-08-03 11:12.'","Type":"Compare","Id":"2017-08-03-120606 rp auto"},
     {"Description":"Migration script 'Script created at 2017-08-03 11:12.'","Type":"Migration","Id":"2017-08-03-120606 rq user"},
+    {"Description":"Changes before migration script 'Covers changes to: ASQSE, scoreASQSE, spGetOptionItem. Script created at 2018-08-07 12:31.'","Type":"Compare","Id":"2018-08-07-123807 ne auto"},
+    {"Description":"Migration script 'Covers changes to: ASQSE, scoreASQSE, spGetOptionItem. Script created at 2018-08-07 12:31.'","Type":"Migration","Id":"2018-08-07-123807 nf user"},
   ],
   "Conflict in this file?": "If there’s a conflict in this file, you probably want to keep both changes. Learn more: http://www.red-gate.com/SOC4/order-file-more-info"
 }
