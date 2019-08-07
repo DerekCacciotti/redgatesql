@@ -244,6 +244,6 @@ CASE WHEN t1.observationdate BETWEEN @startdate AND @enddate THEN 'Yes' ELSE 'No
   t2.observationdate,t2.interval, t1.rownum,t1.inwindow
 
 
- SELECT * FROM @finaltable ORDER BY pc1id
+ SELECT * FROM @finaltable ORDER BY validintimeperiod, pc1id
 			
 GO
