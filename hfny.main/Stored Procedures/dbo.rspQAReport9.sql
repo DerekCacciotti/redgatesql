@@ -337,7 +337,12 @@ select	HVCasePK
 				then dateadd(dd, DueBy, IntakeDate)
 			else dateadd(dd, DueBy, TCDOB)
 		end as FormDue
-from	@tbl4QAReport9 ;
+from	@tbl4QAReport9 
+where case
+			when (Interval = '00' and ((IntakeDate > TCDOB) and (TCDOB is not null)))
+				then dateadd(dd, DueBy, IntakeDate)
+			else dateadd(dd, DueBy, TCDOB)
+		end	>= '2019-02-01' ;
 
 --SELECT * FROM @tbl4QAReport9Main
 --ORDER BY HVCasePK 
@@ -348,102 +353,99 @@ from	@tbl4QAReport9 ;
 
 
 if @ReportType = 'summary'
+	begin
 
-begin
-
-	declare @numOfALLScreens int = 0 ;
-	set @numOfALLScreens = (select count(HVCasePK)from @tbl4QAReport9Main) ;
+		declare @numOfALLScreens int = 0 ;
+		set @numOfALLScreens = (select count(HVCasePK)from @tbl4QAReport9Main) ;
 
 
-	declare @numOfMissingCases int = 0 ;
-	set @numOfMissingCases = (select count (HVCasePK)from @tbl4QAReport9Main where Missing = 1) ;
+		declare @numOfMissingCases int = 0 ;
+		set @numOfMissingCases = (select count (HVCasePK)from @tbl4QAReport9Main where Missing = 1) ;
 
-	declare @numOfOutOfWindowsORNotReviewedCases int = 0 ;
-	set @numOfOutOfWindowsORNotReviewedCases = (
-											select	count(HVCasePK)
-											from	@tbl4QAReport9Main
-											where	OutOfWindow = 1 or FormNotReviewed = 1
+		declare @numOfOutOfWindowsORNotReviewedCases int = 0 ;
+		set @numOfOutOfWindowsORNotReviewedCases = (
+												select	count(HVCasePK)
+												from	@tbl4QAReport9Main
+												where	OutOfWindow = 1 or FormNotReviewed = 1
+												) ;
+
+		declare @numOfMissingAndOutOfWindowsCases int = 0 ;
+		set @numOfMissingAndOutOfWindowsCases = (@numOfMissingCases
+												+@numOfOutOfWindowsORNotReviewedCases
+												) ;
+
+
+		declare @tbl4QAReport9Summary table (
+											[SummaryId] int
+										, [SummaryText] [varchar](200)
+										, [MissingCases] [varchar](200)
+										, [NotOnTimeCases] [varchar](200)
+										, [SummaryTotal] [varchar](100)
 											) ;
 
-	declare @numOfMissingAndOutOfWindowsCases int = 0 ;
-	set @numOfMissingAndOutOfWindowsCases = (@numOfMissingCases
-											+@numOfOutOfWindowsORNotReviewedCases
-											) ;
+		insert into @tbl4QAReport9Summary (
+										[SummaryId], [SummaryText], [MissingCases]
+										, [NotOnTimeCases], [SummaryTotal]
+										)
+		values (
+				9
+			, 'CHEERS Check Ins for Active Cases (N='+convert(varchar, @numOfALLScreens)+')'
+			, convert(varchar, @numOfMissingCases)+' ('
+			+convert(
+						varchar
+						, round(
+								coalesce(
+											cast(@numOfMissingCases as float)* 100
+											/ nullif(@numOfALLScreens, 0), 0
+										), 0
+							)
+					)+'%)'
+			, convert(varchar, @numOfOutOfWindowsORNotReviewedCases)+' ('
+			+convert(
+						varchar
+						, round(
+								coalesce(
+											cast(@numOfOutOfWindowsORNotReviewedCases as float)* 100
+											/ nullif(@numOfALLScreens, 0), 0
+										), 0
+							)
+					)+'%)'
+			, convert(varchar, @numOfMissingAndOutOfWindowsCases)+' ('
+			+convert(
+						varchar
+						, round(
+								coalesce(
+											cast(@numOfMissingAndOutOfWindowsCases as float)* 100
+											/ nullif(@numOfALLScreens, 0), 0
+										), 0
+							)
+					)+'%)'
+			) ;
+
+		select * from @tbl4QAReport9Summary ;
+
+	end ;
+else 
+	begin
 
 
-	declare @tbl4QAReport9Summary table (
-										[SummaryId] int
-									, [SummaryText] [varchar](200)
-									, [MissingCases] [varchar](200)
-									, [NotOnTimeCases] [varchar](200)
-									, [SummaryTotal] [varchar](100)
-										) ;
-
-	insert into @tbl4QAReport9Summary (
-									[SummaryId], [SummaryText], [MissingCases]
-									, [NotOnTimeCases], [SummaryTotal]
-									)
-	values (
-			9
-		, 'CHEERS Check Ins for Active Cases (N='+convert(varchar, @numOfALLScreens)+')'
-		, convert(varchar, @numOfMissingCases)+' ('
-		+convert(
-					varchar
-					, round(
-							coalesce(
-										cast(@numOfMissingCases as float)* 100
-										/ nullif(@numOfALLScreens, 0), 0
-									), 0
-						)
-				)+'%)'
-		, convert(varchar, @numOfOutOfWindowsORNotReviewedCases)+' ('
-		+convert(
-					varchar
-					, round(
-							coalesce(
-										cast(@numOfOutOfWindowsORNotReviewedCases as float)* 100
-										/ nullif(@numOfALLScreens, 0), 0
-									), 0
-						)
-				)+'%)'
-		, convert(varchar, @numOfMissingAndOutOfWindowsCases)+' ('
-		+convert(
-					varchar
-					, round(
-							coalesce(
-										cast(@numOfMissingAndOutOfWindowsCases as float)* 100
-										/ nullif(@numOfALLScreens, 0), 0
-									), 0
-						)
-				)+'%)'
-
-		) ;
-
-	select * from @tbl4QAReport9Summary ;
-
-end ;
-else begin
-
-
-	select		PC1ID
-			, EventDescription as IntervalDue
-			--, qam.Interval		 
-			, convert(varchar(10), FormDue, 101) as FormDue
-			, convert(varchar(10), FormDoneDateCompleted, 101) as FormDoneDateCompleted
-			, convert(varchar(10), TCDOB, 101) as TCDOB
-			, Worker
-			, FormNotReviewed
-			, Missing
-			, OutOfWindow
-			, currentLevel
-	from		@tbl4QAReport9Main qam
-	inner join	codeDueByDates cdd on ScheduledEvent = 'CHEERS' and cdd.Interval = qam.Interval
-	where		(Missing = 1 or OutOfWindow = 1 or FormNotReviewed = 1)
-	order by	Worker
-			, PC1ID ;
-
-
-end ;
+		select		PC1ID
+				, EventDescription as IntervalDue
+				--, qam.Interval		 
+				, convert(varchar(10), FormDue, 101) as FormDue
+				, convert(varchar(10), FormDoneDateCompleted, 101) as FormDoneDateCompleted
+				, convert(varchar(10), TCDOB, 101) as TCDOB
+				, Worker
+				, FormNotReviewed
+				, Missing
+				, OutOfWindow
+				, currentLevel
+		from		@tbl4QAReport9Main qam
+		inner join	codeDueByDates cdd on ScheduledEvent = 'CHEERS' and cdd.Interval = qam.Interval
+		where		(Missing = 1 or OutOfWindow = 1 or FormNotReviewed = 1)
+		order by	Worker
+				, PC1ID ;
+	end ;
 
 --- rspQAReport9 1 ,'summary'
 GO
