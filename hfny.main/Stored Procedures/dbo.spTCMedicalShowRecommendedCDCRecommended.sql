@@ -256,7 +256,7 @@ BEGIN
 
 BEGIN
 
-SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+SELECT  *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
 AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
  AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
 
@@ -265,9 +265,10 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
  UNION 
 
  
- SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+ SELECT  *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
  --AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() 
- AND estdate BETWEEN @beginningofyear AND @endofyear
+ AND estdate BETWEEN @beginningofyear AND @endofyear AND NOT  DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
+ AND NOT DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
 
  UNION 
 
@@ -296,7 +297,7 @@ BEGIN
  -- when TC is 3 months or older 
 BEGIN
 
-SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
+SELECT  *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
 AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
  AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
 
@@ -306,8 +307,7 @@ AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
 
  
  SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
- AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate BETWEEN @beginningofyear AND @endofyear
-
+ AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate BETWEEN @beginningofyear AND @endofyear 
  UNION 
 
  SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL
