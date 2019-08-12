@@ -40,7 +40,8 @@ as
 						, tr.[TrainingMethodFK]
 						, tr.[TrainingCreateDate]
 						, tr.[TrainingCreator]
-						, convert(varchar(10), tr.[TrainingDate], 126) as TrainingDate
+						, tr.TrainingDate
+						--, convert(varchar(10), tr.[TrainingDate], 126) as TrainingDate
 						, tr.[TrainingDays]
 						, tr.[TrainingDescription]
 						, tr.[TrainingDuration]
