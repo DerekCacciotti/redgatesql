@@ -86,7 +86,7 @@ as
 		UNION
         
 		--CHEERS Check-In
-		select IIF(DATEADD(dd,dueby,hvcase.tcdob) < '02/01/2019', (EventDescription + ' (N/A)'), EventDescription) eventDescription
+		select IIF(DATEADD(dd,dueby,hvcase.tcdob) < '02/01/2019', (EventDescription + ' (N/A)'), IIF(Interval = '12', (EventDescription + ' (MIECHV Required)'), EventDescription)) eventDescription
 			  ,dateadd(dd,dueby,hvcase.tcdob) DueDate
 			from caseprogram
 				inner join hvcase on hvcasepk = caseprogram.hvcasefk
