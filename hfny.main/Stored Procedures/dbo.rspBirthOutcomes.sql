@@ -169,7 +169,7 @@ CASE WHEN oc.BirthTerm = 1 OR oc.GestationalWeeks > 37 THEN 'Full Term'
 
  FROM dbo.TCID tc 
  INNER JOIN dbo.CaseProgram cp ON cp.HVCaseFK = tc.HVCaseFK
- INNER JOIN dbo.OtherChild oc ON oc.HVCaseFK = tc.HVCaseFK 
+ LEFT OUTER JOIN dbo.OtherChild oc ON oc.HVCaseFK = tc.HVCaseFK 
  INNER JOIN dbo.HVCase hvc ON hvc.HVCasePK = tc.HVCaseFK 
  inner join Worker w on w.WorkerPK = cp.CurrentFSWFK
 inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
