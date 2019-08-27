@@ -9,7 +9,7 @@ GO
 -- [rspHomeVisitLogActivitySummary] 1,'10/01/2013','04/30/2014',null,'','N','N'
 -- [rspHomeVisitLogActivitySummary] 1,'10/01/2013','04/30/2014',null,'','N','N'
 -- =============================================
-CREATE PROC [dbo].[rspHomeVisitLogActivitySummary] 
+CREATE procedure [dbo].[rspHomeVisitLogActivitySummary] 
 	-- Add the parameters for the stored procedure here
 	(@ProgramFK int = null
    , @StartDt datetime
@@ -139,10 +139,10 @@ as --DECLARE	@programfk INT = 1
 								end) * 100 [FatherFigureParticipated]
 						  , sum(case when NonPrimaryFSWParticipated = 1 then 1
 									 else 0
-								end) [NonPrimaryFSWParticipated]
+								end) * 100 [NonPrimaryFSWParticipated]
 						  , sum(case when FatherAdvocateParticipated > 0 then 1
 									 else 0
-								end) [FatherAdvocateParticipated]
+								end) * 100 [FatherAdvocateParticipated]
 						  , sum(case when TCParticipated = 1 then 1
 									 else 0
 								end) * 100 [TCParticipated]
@@ -207,13 +207,13 @@ as --DECLARE	@programfk INT = 1
 								end) * 100 [CDToys]
 						  , sum(case when CDParentConcerned > 0 then 1
 									 else 0
-								end) [CDParentConcerned]
+								end) * 100 [CDParentConcerned]
 						  , sum(case when CDSocialEmotionalDevelopment > 0 then 1
 									 else 0
-								end) [CDSocialEmotionalDevelopment]
+								end) * 100 [CDSocialEmotionalDevelopment]
 						  , sum(case when CDFollowUpEIServices > 0 then 1
 									 else 0
-								end) [CDFollowUpEIServices]
+								end) * 100 [CDFollowUpEIServices]
 						  , sum(case when CDOther = 1 then 1
 									 else 0
 								end) * 100 [CDOther]
