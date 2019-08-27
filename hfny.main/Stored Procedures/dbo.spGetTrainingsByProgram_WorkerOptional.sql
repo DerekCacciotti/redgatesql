@@ -50,8 +50,6 @@ as
 						, tr.[TrainingHours]
 						, tr.[TrainingMinutes]
 						, tr.[TrainingTitle]
-						, ct.TopicCode
-						, ct.TopicName
 		from		[dbo].[Training] tr
 		INNER JOIN  dbo.TrainingDetail td ON td.TrainingFK = tr.TrainingPK
 		INNER JOIN	dbo.TrainingAttendee ta ON ta.TrainingFK = tr.TrainingPK
