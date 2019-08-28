@@ -7,6 +7,7 @@ GO
 -- Create date: 06/18/18
 -- Description:	returns distinct list of families who have a FU in period, value of HOMECompleted
 -- Edit on 04/30/2019 by Ben Simmons: Fixed duplicating PC1IDs #6857
+-- Edit on 98/28/2019 by Ben Simmons: Fixed transfer cases showing up
 -- =============================================
 
 CREATE PROC [dbo].[rspUseOfPCI_6-3D] 
@@ -36,11 +37,12 @@ begin
 	inner join worker fsw ON cp.CurrentFSWFK = fsw.workerpk
 	inner join workerprogram wp ON wp.workerfk = fsw.workerpk AND wp.ProgramFK=listitem
 	inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @programfk) cf on cf.HVCaseFK = cp.HVCaseFK
-	and fu.FollowUpDate between @StartDate and @EndDate
-	and case when @SiteFK = 0 then 1
+	WHERE fu.FollowUpDate between @StartDate and @EndDate
+	AND case when @SiteFK = 0 then 1
 		 when wp.SiteFK = @SiteFK then 1
 		 else 0
 	end = 1
+	AND (cp.DischargeDate IS NULL OR cp.DischargeDate >= fu.FollowUpDate)
 	ORDER BY HOMECompleted DESC, cp.PC1ID ASC
 
 END
