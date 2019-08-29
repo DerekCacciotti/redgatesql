@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +7,7 @@ GO
 -- Create date: 05/22/2013
 -- Description:	Training Data Training: New York State Required Trainings
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTrainingKempeCore]
+CREATE procedure [dbo].[rspTrainingKempeCore]
 	-- Add the parameters for the stored procedure here
 	@sdate AS DATETIME,
 	@progfk AS INT
@@ -88,7 +87,7 @@ BEGIN
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) < .9 THEN '1'
 	END AS Rating
-,	'2.3C. Staff and volunteers who use the assessment tool(s) have been trained in its/their use prior to administering it/them.' AS CSST
+,	'10-4A 2.3C. Staff who use the Parent Survey tool(s) have been trained in its/their use prior to administering it/them.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) AS PercentMeeting
 , PC1ID
 FROM cteFinal
