@@ -61,7 +61,7 @@ begin
 			inner join dbo.CaseProgram cp on cp.HVCaseFK = e2.HVCaseFK
 			inner join dbo.HVCase hc on hc.HVCasePK = cp.HVCaseFK
 			where (IntakeDate is not null and IntakeDate <= @rpdate)
-					and (DischargeDate IS NULL OR DischargeDate > @rpdate)
+					and (DischargeDate IS NULL OR DischargeDate >= @rpdate)
 		UNION ALL
 
 		-- pre-intake
