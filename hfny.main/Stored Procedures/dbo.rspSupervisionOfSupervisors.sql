@@ -30,6 +30,7 @@ begin
 
 	set @programfk = REPLACE(@programfk,'"','')
 
+	
 
 DECLARE @supCohort AS TABLE (
 	SupervisionPK int
@@ -113,6 +114,7 @@ INSERT INTO @supCohort ( SupervisionPK ,
 		, SupervisionMonth DATE
 		, SupCount INT
 		, TimeInMinutes INT
+		, workercasecount INT
   )
   INSERT INTO @tblAlmostFinal ( workerfk ,
                                 SupervisionMonth ,
@@ -126,12 +128,31 @@ INSERT INTO @supCohort ( SupervisionPK ,
   WHERE SupervisionDate=supervisionmonth AND s.WorkerFK= s.workerfk
   GROUP BY s.WorkerFK, s.SupervisionDate
 
+	DECLARE @tblCaseCount AS TABLE (
+		casecount INT
+		, workerfk INT
+		, supervisionmonth DATE
+	)
+	INSERT INTO	@tblCaseCount ( casecount ,
+	                            workerfk ,
+	                            supervisionmonth )
+	  SELECT COUNT(wad.hvcasefk) AS casecount , twg.workerfk, twg.supervisionmonth
+	  FROM dbo.WorkerAssignmentDetail wad
+	  INNER JOIN @tblWorkerGroup twg ON twg.programfk = wad.ProgramFK AND twg.workerfk = wad.WorkerFK
+	  INNER JOIN dbo.CaseProgram ON CaseProgram.HVCaseFK = wad.HVCaseFK
+	  WHERE twg.supervisionmonth BETWEEN wad.StartAssignmentDate AND ISNULL(wad.EndAssignmentDate, @EndDt)
+	  GROUP BY  twg.workerfk, twg.supervisionmonth
 
-SELECT a.workerfk, RTRIM(w1.FirstName) + ' ' + RTRIM(w1.LastName) AS Worker
-	,  CONVERT(CHAR(7),a.SupervisionMonth,120) AS SupervisionMonth
+UPDATE @tblAlmostFinal SET workercasecount = tcc.casecount
+FROM @tblAlmostFinal
+INNER JOIN @tblCaseCount tcc ON tcc.supervisionmonth = [@tblAlmostFinal].SupervisionMonth AND tcc.workerfk = [@tblAlmostFinal].workerfk
+
+
+SELECT a.workerfk, RTRIM(w1.FirstName) + RTRIM(w1.LastName) AS Worker
+	, a.SupervisionMonth
 	,  SupCount , TimeInMinutes
-   , w.SupervisorFK , RTRIM(w2.FirstName) + ' ' +  RTRIM(w2.LastName) AS Supervisor
-   , Caseload , w.programfk
+   , w.SupervisorFK , RTRIM(w2.FirstName) + RTRIM(w2.LastName) AS Supervisor
+   , Caseload , w.programfk, a.workercasecount
 FROM @tblAlmostFinal a
 INNER JOIN @tblWorkerGroup w ON w.workerfk = a.workerfk AND w.supervisionmonth = a.SupervisionMonth
 INNER JOIN dbo.Worker w1 ON w1.WorkerPK = w.workerfk
