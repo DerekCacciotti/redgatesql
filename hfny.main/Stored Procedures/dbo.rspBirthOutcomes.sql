@@ -2,6 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+
 CREATE PROC [dbo].[rspBirthOutcomes] @startdate DATETIME, @enddate DATETIME, @sitefk INT, @programfk VARCHAR(200),
 @WorkerFK INT,  @CaseFiltersPostive VARCHAR(100) AS
 
@@ -55,61 +56,95 @@ CREATE PROC [dbo].[rspBirthOutcomes] @startdate DATETIME, @enddate DATETIME, @si
  OCBirthTermType VARCHAR(max),
  OCBirthWeightType VARCHAR(MAX),
  TrimesterTypeAtIntake VARCHAR(max),
- numoftcmultiples INT,
- numofpc1sthatrecivedprenatalcare INT,
- numoffulltermtcs INT,
- numofprematuretcs INT, 
- numofmissingbirthtermtcs INT,
- numofnormalbirthweight int,
- numoflowbirthweight INT,
- numofmissingbirthweight INT,
- numoffulltermocs INT,
-numofprematureocs INT,
-numofmissingbirthtermocs INT,
-numofnormalocbirthweight int,
-numoflowocbirthweight INT,
-numofmissingocbirthweight INT,
-numofpc1senrolledinFirstTrimester INT,
-numofpc1senrolledinSecondTrimester INT,
-numoftcbornenrolledatFirstTrimester INT,
-numoftcbornenrolledatSecondTrimester INT,
-numoftcmultiplesenrolledtFirstTrimester INT,
-numoftcmultiplesenrolledtSecondTrimester INT,
-numofpc1srecevingprenatalcareenrolledatFirstTrimester INT,
-numofpc1srecevingprenatalcareenrolledatSecondTrimester INT,
-numofFulltermtcsenrolledatFirstTrimester int,
-numofprematuretcsenrolledatFirstTrimester INT, 
-numofmissingbirthweightenrolledatFirstTrimester INT,
-numofFulltermtcsenrolledatSecondTrimester int,
-numofprematuretcsenrolledatSecondTrimester INT, 
-numofmissingbirthweightenrolledatSceondTrimester INT,
-numofnormalbirthweighttcsenrolledatFirstTrimester int,
-numoflowbirthweighttcsenrolledatFirstTrimester INT,
-numofmissingbirthweighttcsenrolledatFirstTrimester INT,
-numofnormalbirthweighttcsenrolledatSecondTrimester int,
-numoflowbirthweighttcsenrolledatSecondTrimester INT,
-numofmissingbirthweighttcsenrolledatSecondTrimester INT, 
-numofpc1senrolledinThirdTrimester INT,
-numoftcbornenrolledintheThirdTrimester INT,
-numofmultipletcbornintheThirdTrimester INT,
-numofpc1sthatrecivedprenatalcareenrolledintheThirdTrimester INT,
-numoffulltermtcsenrolledatThirdTrimester INT,
-numofprematuretcsenrolledatThirdTrimester INT,
-numofmissingbirthtermenrolledatThirdTrimester INT,
-numofnormalbirthweighttcsenrolledatThirdTrimester INT,
-numoflowbirthweighttcenrolledatThirdTrimester INT,
-numofmissingbirthweightenrolledatThirdTrimester INT,
-numofpc1enrolledpostnatally INT,
-numoftcsbornenrolledpostnatally INT,
-numofmultipletcsbornpostnatally INT,
-numofpc1sreciveingprenatalcareenrolledpostnatally INT,
-numoffulltermtcsenrolledpostnatally INT,
-numofprematuretcsenrolledpostnatally INT,
-numofmissingbirthTermtcsenrolledpostnatally INT,
-numofnormalbrithweighttcsenrolledPostnatally INT,
-numoflowbrithweighttcsenrolledPostnatally INT,
-numofmissingbirthweighttcsenrolledPostnatally int
+ NumofTCMultiples INT,
+ Numofpc1sReceivingPrenatalCare INT,
+ NumofFullTermTCs INT,
+ NumofPreMatureTCs INT,
+ NumOfMissingBirthTermTCs INT,
+
+ NumOfNormalBirthWeightTCs INT,
+ NumOfLowBirthWeightTCs INT,
+ NumofMissingBirthWeightTCs INT,
+
+ NumofFullTermOCs INT,
+ NumofPrematureOCs INT, 
+
+ NumofMissingBirthTermOCs INT, 
+ NumofNormalBirthWeightOCs INT,
+ NumofLowBirthWeightOCs INT,
+ NumofMissingBirthWeightOCs INT,
+
+ NumOfPC1sEnrolledinFirstTrimester INT,
+ NumofPC1sEnrollledinSecondTrimester INT,
+
+
+ NumOfTCsBorninFirstTrimester INT,
+ NumofTCsBorninSecondTrimester INT,
+
+
+ NumOfTCMutiplesEnrolledinFirstTrimester INT,
+ NumOfTCMultiplesEnrolledinSecondTrimester INT, 
+
+ NumofPC1sReceivingPrenatalCareinFirstTrimester INT,
+ NumofPC1sReceivingPrenatalCareinSecondTrimester INT,
+
+
+ NumOfFullTermTCsEnrolledInFirstTrimester INT,
+ NumofFullTermTCsEnrolledinSecondTrimester INT,
+ NumOfPrematureTCsEnrolledinSecondTrimester INT,
+ NumofPrematureTCsEnrolledinFirstTrimester INT,
+
+ NumofMissingBirthTermTCsEnrolledinFirstTrimester INT,
+ NumofMissingBirthTermTCEnrolledinSecondTrimester INT,
+
+ NumofNormalBirthWeightTCsEnrolledinFirstTrimester INT,
+
+ NumofNormalBirthWeightTCsEnrolledinSecondTrimester INT,
+
+
+ NumofLowBirthWeightTCsEnrolledinFirstTrimester INT,
+ NumofLowBirthWeigtTCsEnrolledinSecondTriemester INT,
+
+ NumofMissingBirthWeightTCsEnrolledinFirstTrimester INT,
+ NumofMissingBirthWeightTCsEnrolledinSecondTrimester INT,
+
+
+ NumofPC1senrolledintheThirdTrimester INT,
+ NumofTCsBornEnrolledintheThirdTrimester INT, 
+ NumofTCMultiplesEnrolledintheThirdTrimester INT,
+ NumofPC1swhorecivedprenatalcareintheThirdTriemester INT,
+
+
+ NumofFullTermTCsEnrolledintheThirdTrimester INT,
+ NumofPrematureTCsEnrolledintheThirdTrimester INT,
+ NumofMissingBirthTermTCsEnrolledintheThirdTrimester INT,
+
+
+ NumofNormalBirthWeightEnrolledinThridTrimiester INT,
+ NumofLowBirthWeightEnrolledinThirdTrimester INT,
+ NumofMissingBirthWeightEnrolledintheThirdTrimester INT,
+
+
+ NumofPC1sEnrolledPostnatally INT,
+ NumofTCsBornEnrolledPostnatally INT,
+ NumofTCMultipleBornPostNatally INT,
+ NumofPC1sReceivingPrenatalCareEnrolledPostNatally INT,
+
+
+ NumofFullTermTCsBornEnrolledPostnatally INT,
+ NumofPreMatureTcsBornEnrolledPostnatally INT,
+ NumofMissingBirthTermPostnatally INT,
+
+ NumofNormalBirthWeightTcsBornPostNatally INT,
+ NumofLowBirthWeightTcsBornPostNatally INT,
+ NumofMissingBirthWeightTcsBornPostNatally INT
  )
+
+
+
+
+
+
 
 
  INSERT INTO @tblallcases
@@ -188,6 +223,7 @@ INNER JOIN dbo.CommonAttributes commapp ON  commapp.FormFK = tc.TCIDPK AND comma
   AND cp.ProgramFK = @programfk
   	and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 	AND cp.CurrentFSWFK = ISNULL(@WorkerFK,cp.CurrentFSWFK)
+	
 
 	UPDATE @tblallcases SET TrimesterTypeAtIntake = CASE WHEN intakedate >= tcdob THEN 'Postnatal' WHEN
 	intakeDate < TCDOB and datediff(dd, ConceptionDate, IntakeDate) > round(30.44*6,0) THEN 'Third Trimester' WHEN
@@ -195,239 +231,208 @@ INNER JOIN dbo.CommonAttributes commapp ON  commapp.FormFK = tc.TCIDPK AND comma
 	THEN 'Second Trimester' WHEN intakeDate < TCDOB and datediff(dd, ConceptionDate, IntakeDate) < 3*30.44 
 	THEN 'First Trimester' ELSE NULL END
 
-	-- update the table with the counts 
+	--TC
 	UPDATE @tblallcases SET numofpc1sinperiod = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases)
-	UPDATE @tblallcases SET numborninperiod = (SELECT  COUNT( DISTINCT Tcpk) FROM @tblallcases)
-
+	UPDATE @tblallcases SET numborninperiod = (SELECT COUNT(DISTINCT Tcpk) FROM  @tblallcases)
+	UPDATE @tblallcases SET NumofTCMultiples =  (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE ismultiple = 1)
+	UPDATE @tblallcases SET Numofpc1sReceivingPrenatalCare = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE isrecevingprenatalcare = 1)
 	
+	-- TC Birth Term
+	UPDATE  @tblallcases SET NumofFullTermTCs =  (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE birthtermType = 'Full Term')
+	UPDATE @tblallcases SET NumofPreMatureTCs = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE birthtermType = 'Premature')
+	UPDATE @tblallcases SET NumOfMissingBirthTermTCs = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE birthtermType = 'Missing Birth Term')
 
 
-	UPDATE @tblallcases SET numoftcmultiples = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE ismultiple = 1)
+	-- TC Birth Weight 
 
-	UPDATE @tblallcases SET numofpc1sthatrecivedprenatalcare = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases 
-	WHERE isrecevingprenatalcare = 1)
 
+		UPDATE @tblallcases SET NumOfNormalBirthWeightTCs = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE birththweightType = 'Normal')
+		UPDATE @tblallcases SET NumOfLowBirthWeightTCs = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE birththweightType = 'Low')
+		UPDATE @tblallcases SET NumofMissingBirthWeightTCs = (SELECT COUNT(DISTINCT Tcpk) FROM  @tblallcases WHERE birththweightType = 'Missing')
 
-	UPDATE @tblallcases SET numoffulltermtcs = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases 
-	WHERE birthtermType = 'Full Term')
+		-- OC
 
-	UPDATE @tblallcases SET numofprematuretcs = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases 
-	WHERE birthtermType = 'Premature')
+		UPDATE @tblallcases SET numofocborninperiod = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases)
+		UPDATE @tblallcases SET toatalofocmutiples = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases WHERE isocmultiple = 1)
 
-	UPDATE @tblallcases SET numofmissingbirthtermtcs = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases 
-	WHERE birthtermType = 'Missing Birth Term')
+		--oc birth term
 
+		UPDATE @tblallcases SET NumofFullTermOCs = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases WHERE OCBirthTermType = 'Normal')
+		UPDATE @tblallcases SET NumofPrematureOCs = (SELECT COUNT(DISTINCT ocpk) FROM @tblallcases WHERE OCBirthTermType = 'Premature')
+		UPDATE @tblallcases SET NumofMissingBirthTermOCs = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases WHERE OCBirthTermType = 'Missing Birth Term')
 
 
-	UPDATE @tblallcases SET numofnormalbirthweight = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE birththweightType = 'Normal')
+		-- oc Birth weight 
 
-	
-	UPDATE @tblallcases SET numoflowbirthweight = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE birththweightType = 'Low')
+		UPDATE @tblallcases SET NumofNormalBirthWeightOCs = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases WHERE OCBirthWeightType = 'Normal')
+		UPDATE @tblallcases SET NumofLowBirthWeightOCs = (SELECT COUNT(DISTINCT ocpk) FROM @tblallcases WHERE OCBirthWeightType = 'Low')
+		UPDATE @tblallcases SET NumofMissingBirthWeightOCs = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases WHERE OCBirthWeightType = 'Missing')
 
-	
-	UPDATE @tblallcases SET numofmissingbirthweight = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE birththweightType = 'Missing')
+		
+		-- tcs enrolled in first or second trimester 
 
-	UPDATE @tblallcases SET numofocborninperiod = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases 
-	WHERE ocdob BETWEEN @startdate AND @enddate)
+		UPDATE @tblallcases SET NumOfTCsBorninFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester')
+		UPDATE @tblallcases SET NumofTCsBorninSecondTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester')
+		
+		--pc1s enrolled in the first or second trimester
+		
+		UPDATE @tblallcases SET NumOfPC1sEnrolledinFirstTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester' )
+		UPDATE @tblallcases SET NumofPC1sEnrollledinSecondTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester')
 
-	UPDATE @tblallcases SET toatalofocmutiples = (SELECT COUNT(DISTINCT ocpk) FROM @tblallcases 
-	WHERE isocmultiple = 1 AND ocdob BETWEEN @startdate AND @enddate)
 
+		--pc1 prenatal care first or second trimester 
 
-	UPDATE @tblallcases SET numoffulltermocs = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases
-	WHERE OCBirthTermType = 'Full Term' AND ocdob BETWEEN @startdate AND @enddate)
+		UPDATE @tblallcases SET NumofPC1sReceivingPrenatalCareinFirstTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester' 
+		AND isrecevingprenatalcare = 1)
+		 
+		 UPDATE @tblallcases SET NumofPC1sReceivingPrenatalCareinSecondTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester'
+		 AND isrecevingprenatalcare = 1)
 
-	UPDATE @tblallcases SET numofprematureocs = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases
-	WHERE OCBirthTermType = 'Premature' AND ocdob BETWEEN @startdate AND @enddate)
 
-	UPDATE @tblallcases SET numofmissingbirthtermocs = (SELECT COUNT(DISTINCT Ocpk) FROM @tblallcases
-	WHERE OCBirthTermType = 'Missing Birth Term' AND ocdob BETWEEN @startdate AND @enddate)
+		 --birth term first or second trimester
 
+		 UPDATE @tblallcases SET NumOfFullTermTCsEnrolledInFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester' 
+		 AND birthtermType = 'Full Term')
+		 
+		 UPDATE @tblallcases SET NumofFullTermTCsEnrolledinSecondTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester'
+		 AND birthtermType = 'Full Term')
 
-	UPDATE @tblallcases SET numofnormalocbirthweight = (SELECT COUNT(DISTINCT ocpk) FROM @tblallcases 
-	WHERE OCBirthWeightType = 'Normal' AND ocdob BETWEEN @startdate AND @enddate)
 
+		  
+		 UPDATE @tblallcases SET NumofPrematureTCsEnrolledinFirstTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester'
+		 AND birthtermType = 'Premature')
+		 UPDATE @tblallcases SET NumOfPrematureTCsEnrolledinSecondTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester'
+		 AND birthtermType = 'Premature')
 
-	UPDATE @tblallcases SET numoflowocbirthweight = (SELECT COUNT(DISTINCT ocpk) FROM @tblallcases 
-	WHERE OCBirthWeightType = 'Low' AND ocdob BETWEEN @startdate AND @enddate)
 
-	UPDATE @tblallcases SET numofmissingocbirthweight = (SELECT COUNT(DISTINCT ocpk) FROM @tblallcases 
-	WHERE OCBirthWeightType = 'Missing' AND ocdob BETWEEN @startdate AND @enddate)
+		 UPDATE @tblallcases SET NumofMissingBirthTermTCsEnrolledinFirstTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester' 
+		 AND birthtermType = 'Missing Birth Term')
 
+		 UPDATE @tblallcases SET NumofMissingBirthTermTCEnrolledinSecondTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester'
+		 AND birthtermType = 'Missing Birth Term')
 
 
-	UPDATE @tblallcases SET numofpc1senrolledinFirstTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester')
 
-	UPDATE @tblallcases SET numofpc1senrolledinSecondTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases 
-	WHERE TrimesterTypeAtIntake = 'Second Trimester')
+		 -- mutiples first or second 
 
+		 UPDATE @tblallcases SET NumOfTCMutiplesEnrolledinFirstTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester'
+		 AND ismultiple = 1)
 
-	UPDATE @tblallcases SET numoftcbornenrolledatFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester')
-	UPDATE @tblallcases SET numoftcbornenrolledatSecondTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Second Trimester')
+		  UPDATE @tblallcases SET NumOfTCMultiplesEnrolledinSecondTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester'
+		 AND ismultiple = 1)
 
-	UPDATE @tblallcases SET numoftcmultiplesenrolledtFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester' AND ismultiple = 1)
 
-	UPDATE @tblallcases SET numoftcmultiplesenrolledtSecondTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Second Trimester' AND ismultiple = 1)
+		 --brith weight
 
+		 UPDATE @tblallcases SET NumofNormalBirthWeightTCsEnrolledinFirstTrimester  = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester'
+		  AND birththweightType = 'Normal')
 
-	UPDATE @tblallcases SET numofpc1srecevingprenatalcareenrolledatFirstTrimester = (SELECT COUNT( DISTINCT PC1ID) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester' AND isrecevingprenatalcare = 1 )
+		  UPDATE @tblallcases SET NumofLowBirthWeightTCsEnrolledinFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'First Trimester'
+		  AND birththweightType = 'Low')
 
+		 UPDATE @tblallcases SET NumofMissingBirthWeightTCsEnrolledinFirstTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE  TrimesterTypeAtIntake = 'First Trimester'
+		 AND birththweightType = 'Missing')
 
-	UPDATE @tblallcases SET numofpc1srecevingprenatalcareenrolledatSecondTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Second Trimester' AND isrecevingprenatalcare = 1)
 
 
-	
-	UPDATE @tblallcases SET numofFulltermtcsenrolledatFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester' AND birthtermType = 'Full Term')
+		 UPDATE @tblallcases SET NumofNormalBirthWeightTCsEnrolledinSecondTrimester  = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester'
+		  AND birththweightType = 'Normal')
 
+		  UPDATE @tblallcases SET NumofLowBirthWeigtTCsEnrolledinSecondTriemester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Second Trimester'
+		  AND birththweightType = 'Low')
 
-		UPDATE @tblallcases SET numofprematuretcsenrolledatFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester' AND birthtermType = 'Premature')
+		 UPDATE @tblallcases SET NumofMissingBirthWeightTCsEnrolledinSecondTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE  TrimesterTypeAtIntake = 'Second Trimester'
+		 AND birththweightType = 'Missing')
 
+		 -- thrid trimester 
 
-		UPDATE @tblallcases SET numofmissingbirthweightenrolledatFirstTrimester = 
-		(SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester' AND birthtermType = 'Missing Birth Term')
+		 UPDATE @tblallcases SET NumofPC1senrolledintheThirdTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester')
+		 UPDATE @tblallcases SET NumofTCsBornEnrolledintheThirdTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester')
+		 UPDATE @tblallcases SET  NumofTCMultiplesEnrolledintheThirdTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Thrid Trimester' 
+		 AND ismultiple = 1)
 
+		 UPDATE @tblallcases SET NumofPC1swhorecivedprenatalcareintheThirdTriemester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester' 
+		 AND isrecevingprenatalcare = 1)
 
 
 
 
 
-	UPDATE @tblallcases SET numofFulltermtcsenrolledatSecondTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Second Trimester' AND birthtermType = 'Full Term')
+		 -- third trimester birth term
 
+		 
+		 UPDATE @tblallcases SET NumofFullTermTCsEnrolledintheThirdTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester' 
+		 AND birthtermType = 'Full Term')
+		 
+		 UPDATE @tblallcases SET NumofPrematureTCsEnrolledintheThirdTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester'
+		 AND birthtermType = 'Premature')
 
-		UPDATE @tblallcases SET numofprematuretcsenrolledatSecondTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Second Trimester' AND birthtermType = 'Premature')
 
+		  
+		 UPDATE @tblallcases SET NumofMissingBirthTermTCsEnrolledintheThirdTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester'
+		 AND birthtermType = 'Missing Birth Term')
 
-		UPDATE @tblallcases SET numofmissingbirthweightenrolledatSceondTrimester = 
-		(SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Second Trimester' AND birthtermType = 'Missing Birth Term')
 
 
-	UPDATE @tblallcases SET numofnormalbirthweighttcsenrolledatFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester' AND birththweightType = 'Normal')
 
+		 -- thrid trimester birth weight
+		  UPDATE @tblallcases SET NumofNormalBirthWeightEnrolledinThridTrimiester  = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester'
+		  AND birththweightType = 'Normal')
 
-	UPDATE @tblallcases SET numoflowbirthweighttcsenrolledatFirstTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester' AND birththweightType = 'Low')
+		  UPDATE @tblallcases SET NumofLowBirthWeightEnrolledinThirdTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester'
+		  AND birththweightType = 'Low')
 
+		 UPDATE @tblallcases SET NumofMissingBirthWeightEnrolledintheThirdTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE  TrimesterTypeAtIntake = 'Third Trimester'
+		 AND birththweightType = 'Missing')
 
-	UPDATE @tblallcases SET numofmissingbirthweighttcsenrolledatFirstTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'First Trimester' AND birththweightType = 'Missing')
 
 
-	UPDATE @tblallcases SET numofnormalbirthweighttcsenrolledatSecondTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Secomd Trimester' AND birththweightType = 'Normal')
 
+		 --Postnatal 
 
-	UPDATE @tblallcases SET numoflowbirthweighttcsenrolledatSecondTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Second Trimester' AND birththweightType = 'Low')
+		 UPDATE @tblallcases SET NumofPC1sEnrolledPostnatally = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal')
+		 UPDATE @tblallcases SET NumofTCsBornEnrolledPostnatally = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal')
+		UPDATE @tblallcases SET NumofTCMultipleBornPostNatally = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal' AND ismultiple = 1)
+		UPDATE @tblallcases SET NumofPC1sReceivingPrenatalCareEnrolledPostNatally = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal'
+		 AND isrecevingprenatalcare = 1)
 
 
-	UPDATE @tblallcases SET numofmissingbirthweighttcsenrolledatSecondTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Second Trimester' AND birththweightType = 'Missing')
+		--postnatal brith terms
 
+		 
+		 UPDATE @tblallcases SET NumofFullTermTCsBornEnrolledPostnatally = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnaatl' 
+		 AND birthtermType = 'Full Term')
+		 
+		 UPDATE @tblallcases SET NumofPreMatureTcsBornEnrolledPostnatally = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal'
+		 AND birthtermType = 'Premature')
 
-	UPDATE @tblallcases SET numofpc1senrolledinThirdTrimester = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester')
 
+		  
+		 UPDATE @tblallcases SET NumofMissingBirthTermPostnatally = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal'
+		 AND birthtermType = 'Missing Birth Term')
 
-	UPDATE @tblallcases SET numoftcbornenrolledintheThirdTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester')
 
-	UPDATE @tblallcases SET numofmultipletcbornintheThirdTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester' AND ismultiple = 1)
+		 --postnatal birth weights
 
-	UPDATE @tblallcases SET numofpc1sthatrecivedprenatalcareenrolledintheThirdTrimester = (SELECT COUNT(DISTINCT PC1ID)
-	FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Third Trimester' AND isrecevingprenatalcare = 1)
 
+		 UPDATE @tblallcases SET NumofNormalBirthWeightTcsBornPostNatally  = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal'
+		  AND birththweightType = 'Normal')
 
-	UPDATE @tblallcases SET numoffulltermtcsenrolledatThirdTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester' AND birthtermType = 'Full Term')
+		  UPDATE @tblallcases SET NumofLowBirthWeightTcsBornPostNatally = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal'
+		  AND birththweightType = 'Low')
 
-	UPDATE @tblallcases SET numofprematuretcsenrolledatThirdTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester' AND birthtermType = 'Premature')
+		 UPDATE @tblallcases SET NumofMissingBirthWeightTcsBornPostNatally = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases WHERE  TrimesterTypeAtIntake = 'Postnatal'
+		 AND birththweightType = 'Missing')
 
-	UPDATE @tblallcases SET numofmissingbirthtermenrolledatThirdTrimester = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester' AND birthtermType = 'Missing Birth Term')
 
-	UPDATE @tblallcases SET numofnormalbirthweighttcsenrolledatThirdTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester' AND birththweightType = 'Normal')
 
-	UPDATE @tblallcases SET numoflowbirthweighttcenrolledatThirdTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester' AND birththweightType = 'Low')
 
 
-	UPDATE @tblallcases SET numofmissingbirthweightenrolledatThirdTrimester = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Third Trimester' AND birththweightType = 'Missing')
 
-	UPDATE @tblallcases SET numofpc1enrolledpostnatally = (SELECT COUNT(DISTINCT PC1ID) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Postnatal')
 
-	
 
-	UPDATE @tblallcases SET numoftcsbornenrolledpostnatally  = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Postnatal')
 
-
-	UPDATE @tblallcases SET numofmultipletcsbornpostnatally = (SELECT COUNT(DISTINCT tcpk ) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Postnatal' AND ismultiple = 1)
-
-
-	UPDATE @tblallcases SET numofpc1sreciveingprenatalcareenrolledpostnatally = (SELECT COUNT(DISTINCT PC1ID) 
-	FROM @tblallcases WHERE TrimesterTypeAtIntake = 'Postnatal' AND isrecevingprenatalcare = 1)
-
-	UPDATE @tblallcases SET numoffulltermtcsenrolledpostnatally = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases 
-	WHERE TrimesterTypeAtIntake = 'Postnatal' AND birthtermType = 'Full Term')
-
-
-	UPDATE @tblallcases SET numofprematuretcsenrolledpostnatally = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases 
-	WHERE TrimesterTypeAtIntake = 'Postnatal' AND birthtermType = 'Premature')
-
-
-	UPDATE @tblallcases SET numofmissingbirthTermtcsenrolledpostnatally = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Postnatal' AND birthtermType = 'Missing Birth Term')
-
-
-	UPDATE @tblallcases SET numofnormalbrithweighttcsenrolledPostnatally = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Postnatal' AND birththweightType = 'Normal')
-
-
-	UPDATE @tblallcases SET numoflowbrithweighttcsenrolledPostnatally = (SELECT COUNT(DISTINCT tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Postnatal' AND birththweightType = 'Low')
-
-
-	UPDATE @tblallcases SET numofmissingbirthweighttcsenrolledPostnatally = (SELECT COUNT(DISTINCT Tcpk) FROM @tblallcases
-	WHERE TrimesterTypeAtIntake = 'Postnatal' AND birththweightType = 'Missing')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+		 
 
 
 
