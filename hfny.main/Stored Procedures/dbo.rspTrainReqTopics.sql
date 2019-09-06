@@ -90,6 +90,7 @@ DECLARE @ctMain AS TABLE (
 , FirstPHQDate DATE
 , firstHITSDate DATE
 , firstAuditCDate DATE
+, firstCheersDate DATE
 , f1  DATE
 , f2 DATE
 , f2a DATE
@@ -185,6 +186,7 @@ DECLARE @ctMain AS TABLE (
 , f43 DATE
 , f44 DATE
 , f45 DATE
+, f46 DATE
 )
 
 
@@ -205,6 +207,7 @@ INSERT INTO @ctMain ( Name ,
                       FirstPHQDate ,
                       firstHITSDate ,
                       firstAuditCDate ,
+					  firstCheersDate,
                       f1 ,
                       f2 ,
                       f2a ,
@@ -299,7 +302,8 @@ INSERT INTO @ctMain ( Name ,
                       f42 ,
                       f43 ,
                       f44 ,
-                      f45 )
+                      f45 ,
+					  f46 )
 
 (
 SELECT workername
@@ -318,6 +322,7 @@ SELECT workername
 , fn.FirstPHQDate
 , fn.firstHITSDate
 , fn.firstAuditCDate
+, fn.firstCheersDate
 , (SELECT min(trainingdate) FROM @ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode= 1.0) AS 'f1'
 , (SELECT min(trainingdate) FROM @ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode= 2.0 AND ctA.SubTopicFK IS Null) AS 'f2'
 , (SELECT min(trainingdate) FROM @ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.SubTopicFK=65) AS 'f2a'
@@ -414,6 +419,7 @@ SELECT workername
 , (SELECT min(trainingdate) FROM @ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode= 43.0) AS 'f43'
 , (SELECT min(trainingdate) FROM @ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode= 44.0) AS 'f44'
 , (SELECT min(trainingdate) FROM @ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode= 45.0) AS 'f45'
+, (SELECT min(trainingdate) FROM @ctAttendee ctA WHERE ctA.WorkerFK=w.WorkerPK AND ctA.topiccode= 46.0) AS 'f46'
 
 -------END CP 6/12/2015 Adding New HFA Required topics ---------------
 FROM @ctWorkerTable w
@@ -602,7 +608,14 @@ SELECT distinct [Name]
 			CASE WHEN datediff(dd, [f45], [firstAuditCDate]) < 0 THEN '*' 
 			ELSE '' END
 		ELSE '' END AS 'f45_ast'
-	
+		
+ , [f46]
+	 , CASE isnull([f46], '01/01/2100')
+		WHEN [f46] THEN
+			CASE WHEN datediff(dd, [f46], [firstCheersDate]) < 0 THEN '*' 
+			ELSE '' END
+		ELSE '' END AS 'f46_ast'
+		
 	 , [f14a]
 	 , CASE isnull([f14a], '01/01/2100')
 		WHEN [f14a] THEN
@@ -1014,6 +1027,7 @@ SELECT distinct [Name]
 FROM @ctMain ctm
 WHERE ctm.WorkerPK = isnull(@worker,ctm.WorkerPK)
  ORDER BY Name
+
 
 END
 GO
