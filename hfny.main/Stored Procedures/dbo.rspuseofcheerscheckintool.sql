@@ -139,6 +139,7 @@ INSERT INTO @tblcheersatinterval
 SELECT pc1id,tcidfk, co.hvcasefk, co.programfk, tcdob, co.intakedate, tcageindays,  cbd.Interval FROM @tblcohort co 
 INNER JOIN dbo.codeDueByDates cbd ON cbd.ScheduledEvent = 'CHEERS' 
 AND co.tcageindays >= cbd.DueBy
+AND DATEADD(DAY, cbd.DueBy, co.tcdob) >= '02/01/2019'
 
 
 
