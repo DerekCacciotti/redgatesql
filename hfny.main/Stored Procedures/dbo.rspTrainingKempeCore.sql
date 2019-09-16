@@ -87,7 +87,7 @@ BEGIN
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) BETWEEN .9 AND .99 THEN '2'
 	WHEN cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) < .9 THEN '1'
 	END AS Rating
-,	'10-4A 2.3C. Staff who use the Parent Survey tool(s) have been trained in its/their use prior to administering it/them.' AS CSST
+,	'10-4A Staff who use the Parent Survey tool(s) have been trained in its/their use prior to administering it/them.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(cteFinal.workercount AS DECIMAL) AS PercentMeeting
 , PC1ID
 FROM cteFinal
