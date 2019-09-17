@@ -1,4 +1,13 @@
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (342, 'News is now a widget on the Home Page', 1, 31)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (343, 'Program Information form - Removed mask from Target ZIPs to allow more than one to be entered', 2, 31)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (344, 'Service Referrals landing page - restored Delete functionality', 3, 31)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (345, 'Report catalog - moved report documentation buttons', 4, 31)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (346, 'Supervision form - expanded all comment fields to 2,500 characters', 5, 31)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (347, 'Birth Outcomes report - Updates and fixes', 6, 31)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (348, 'Service referrals form - restored delete functionality', 7, 31)
+SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
+SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (2, 'Home Visit Log landing page - Fixed sorting of the table ', 1, 20)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (3, 'Supervision form - removed In-Depth discussion warning ', 2, 20)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (4, 'Father Figure form - fixed crash with cases that had a PC2 and no OBP ', 3, 20)

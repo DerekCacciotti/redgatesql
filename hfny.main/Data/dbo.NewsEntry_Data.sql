@@ -1,4 +1,7 @@
 SET IDENTITY_INSERT [dbo].[NewsEntry] ON
+INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (31, '2019-09-16 00:00:00.000')
+SET IDENTITY_INSERT [dbo].[NewsEntry] OFF
+SET IDENTITY_INSERT [dbo].[NewsEntry] ON
 INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (1, '2018-09-05 00:00:00.000')
 INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (2, '2018-12-10 00:00:00.000')
 INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (3, '2019-02-04 00:00:00.000')
