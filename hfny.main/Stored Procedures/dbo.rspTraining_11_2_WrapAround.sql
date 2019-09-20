@@ -54,7 +54,7 @@ INSERT INTO @cteMain ( WorkerPK ,
 	FROM Worker w 
 	INNER JOIN WorkerProgram wp ON w.WorkerPK = wp.WorkerFK	and wp.ProgramFK = @progfk
 	WHERE (wp.HireDate >=  @sdate and 
-	cast(wp.HireDate as date) < DATEADD(d, -181, CAST(GETDATE() AS DATE))
+	cast(wp.HireDate as date) < DATEADD(d, -92, CAST(GETDATE() AS DATE))
 	)
 	AND ((wp.FAWStartDate > @sdate AND wp.FAWEndDate IS NULL)
 	OR (wp.FSWStartDate > @sdate AND wp.FSWEndDate IS NULL)

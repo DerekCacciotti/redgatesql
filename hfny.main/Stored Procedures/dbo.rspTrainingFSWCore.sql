@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -39,7 +38,8 @@ BEGIN
 	 FROM cteEventDate
 	 INNER JOIN dbo.HVLog h ON h.FSWFK=WorkerPK
 	 INNER JOIN CaseProgram cp ON cp.HVCaseFK=h.HVCaseFK
-	 WHERE h.VisitStartTime = FirstHomeVisitDate AND h.FSWFK=WorkerPK
+	 AND  CONVERT(VARCHAR(10), h.VisitStartTime, 103)=  CONVERT(VARCHAR(10), FirstHomeVisitDate, 103)
+	 AND h.FSWFK=WorkerPK
 	 GROUP BY WorkerPK
 	, wrkrLName
 	, MyWrkrCount
