@@ -474,7 +474,28 @@ WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END
 	AND CaseProgram.ProgramFK = @ProgramFK
 	AND CaseProgress >= 11
 	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
-	AND DischargeDate IS NULL;
+	AND DischargeDate IS NULL
+	UNION
+
+
+
+
+SELECT	PC1ID,
+		EventDescription,
+		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
+FROM	CaseProgram
+	INNER JOIN HVCase
+		ON HVCasePK = CaseProgram.HVCaseFK
+	INNER JOIN TCID
+		ON TCID.HVCaseFK = HVCasePK
+	INNER JOIN codeDueByDates
+		ON ScheduledEvent = 'CHEERS'
+WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
+	AND CaseProgram.ProgramFK = @ProgramFK
+	AND CaseProgress >= 11
+	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
+	AND DischargeDate IS NULL
+
 
 -- FINAL TIMELINE
 SELECT	PC1ID,
@@ -482,4 +503,5 @@ SELECT	PC1ID,
 		DueDate AS DateRequired
 FROM	@timeline
 ORDER BY PC1ID, DueDate;
+
 GO
