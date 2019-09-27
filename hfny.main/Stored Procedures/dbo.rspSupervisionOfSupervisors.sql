@@ -113,20 +113,25 @@ INSERT INTO @supCohort ( SupervisionPK ,
           workerfk INT
 		, SupervisionMonth DATE
 		, SupCount INT
+		, TimeInHours INT
 		, TimeInMinutes INT
 		, workercasecount INT
   )
   INSERT INTO @tblAlmostFinal ( workerfk ,
                                 SupervisionMonth ,
                                 SupCount ,
+								TimeInHours,
                                 TimeInMinutes )
   SELECT s.workerfk, s.SupervisionDate, COUNT(SupervisionPK)  AS SupCount
-  , SUM((s.SupervisionHours * 60) + s.SupervisionMinutes) AS TimeInMinutes
+  , SUM(s.SupervisionHours * 60) AS TimeInHours
+  , SUM(s.SupervisionMinutes) AS TimeInMinutes
   FROM @supCohort s
   INNER JOIN @tblWorkerGroup ON [@tblWorkerGroup].workerfk = s.WorkerFK AND [@tblWorkerGroup].programfk = s.ProgramFK
   AND [@tblWorkerGroup].supervisionmonth = s.SupervisionDate
   WHERE SupervisionDate=supervisionmonth AND s.WorkerFK= s.workerfk
   GROUP BY s.WorkerFK, s.SupervisionDate
+
+  UPDATE @tblAlmostFinal SET TimeInMinutes = (ISNULL(TimeInHours, 0) + ISNULL(TimeInMinutes, 0))
 
 	DECLARE @tblCaseCount AS TABLE (
 		casecount INT
@@ -143,20 +148,49 @@ INSERT INTO @supCohort ( SupervisionPK ,
 	  WHERE twg.supervisionmonth BETWEEN wad.StartAssignmentDate AND ISNULL(wad.EndAssignmentDate, @EndDt)
 	  GROUP BY  twg.workerfk, twg.supervisionmonth
 
+
+	  --find the case during the month that had the highest case weight (e.g. lowest level)  
+	DECLARE @tblCaseWeight AS TABLE (
+		CaseLevel VARCHAR(15)
+		, workerfk INT
+		, supervisionmonth DATE
+	)
+
+	INSERT INTO	@tblCaseWeight ( CaseLevel ,
+	                            workerfk ,
+	                            supervisionmonth )
+	SELECT LevelName, workerfk, supervisionmonth
+	FROM (
+			  SELECT 'Level ' + cl.LevelAbbr AS LevelName , twg.workerfk, twg.supervisionmonth, MAX(cl.CaseWeight) AS CaseWeight
+			  , ROW_NUMBER() OVER (PARTITION BY twg.workerfk, twg.supervisionmonth ORDER BY cl.CaseWeight DESC) AS workerrow
+                                    
+			  FROM dbo.WorkerAssignmentDetail wad
+			  INNER JOIN @tblWorkerGroup twg ON twg.programfk = wad.ProgramFK AND twg.workerfk = wad.WorkerFK
+			  INNER JOIN dbo.CaseProgram ON CaseProgram.HVCaseFK = wad.HVCaseFK
+			  INNER JOIN dbo.HVLevelDetail hvd ON hvd.HVCaseFK = CaseProgram.HVCaseFK AND twg.supervisionmonth BETWEEN hvd.StartLevelDate AND ISNULL(hvd.EndLevelDate, @EndDt)
+			  INNER JOIN dbo.codeLevel cl ON cl.codeLevelPK = hvd.LevelFK
+			  WHERE twg.supervisionmonth BETWEEN wad.StartAssignmentDate AND ISNULL(wad.EndAssignmentDate, @EndDt)
+			  GROUP BY twg.workerfk, cl.LevelAbbr ,  twg.supervisionmonth, cl.CaseWeight
+			) y
+	WHERE y.workerrow = 1
+	 
+	  -------End Find Highest Case Weight ------------------------------------------
+
 UPDATE @tblAlmostFinal SET workercasecount = tcc.casecount
 FROM @tblAlmostFinal
 INNER JOIN @tblCaseCount tcc ON tcc.supervisionmonth = [@tblAlmostFinal].SupervisionMonth AND tcc.workerfk = [@tblAlmostFinal].workerfk
 
 
-SELECT a.workerfk, RTRIM(w1.FirstName) + RTRIM(w1.LastName) AS Worker
+SELECT a.workerfk, RTRIM(w1.FirstName) + ' ' + RTRIM(w1.LastName) AS Worker
 	, a.SupervisionMonth
 	,  SupCount , TimeInMinutes
-   , w.SupervisorFK , RTRIM(w2.FirstName) + RTRIM(w2.LastName) AS Supervisor
-   , Caseload , w.programfk, a.workercasecount
+   , w.SupervisorFK , RTRIM(w2.FirstName) + ' ' + RTRIM(w2.LastName) AS Supervisor
+   , Caseload , w.programfk, a.workercasecount, CaseLevel AS MaxLevelName
 FROM @tblAlmostFinal a
 INNER JOIN @tblWorkerGroup w ON w.workerfk = a.workerfk AND w.supervisionmonth = a.SupervisionMonth
 INNER JOIN dbo.Worker w1 ON w1.WorkerPK = w.workerfk
 INNER JOIN dbo.Worker w2 ON w2.WorkerPK = w.SupervisorFK
+LEFT JOIN @tblCaseWeight ON [@tblCaseWeight].supervisionmonth = a.SupervisionMonth AND [@tblCaseWeight].workerfk = a.workerfk
 ORDER BY programfk, SupervisionMonth, workerfk
 
 
