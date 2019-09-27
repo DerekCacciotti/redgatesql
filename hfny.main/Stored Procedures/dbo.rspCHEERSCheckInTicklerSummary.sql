@@ -8,7 +8,7 @@ GO
 -- Description: CHEERS Check In tickler summary
 -- Edit date: 
 -- =============================================
-create procedure [dbo].[rspCHEERSCheckInTicklerSummary]
+CREATE procedure [dbo].[rspCHEERSCheckInTicklerSummary]
 (
     @programfk    varchar(max)    = null,
     @rdate        datetime,
@@ -27,9 +27,9 @@ as
 
 	---- CHEERS Check-In
 	select distinct pc1id
-				   ,ISNULL(hvcase.tcdob, hvcase.edc) tcdob
+				   ,convert(date, isnull(hvcase.tcdob, hvcase.edc)) as tcdob
 				   ,eventDescription
-				   ,dateadd(dd,dueby,ISNULL(hvcase.tcdob, hvcase.edc)) DueDate
+				   ,convert(date, dateadd(dd,dueby,ISNULL(hvcase.tcdob, hvcase.edc))) as DueDate
 				   ,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 								   from tcid
 								   where hvcase.hvcasepk = tcid.hvcasefk
