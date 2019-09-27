@@ -26,3 +26,5 @@ From [CaseNote] INNER JOIN Inserted ON [CaseNote].[CaseNotePK]= Inserted.[CaseNo
 GO
 ALTER TABLE [dbo].[CaseNote] ADD CONSTRAINT [PK_CaseNotes] PRIMARY KEY CLUSTERED  ([CaseNotePK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [nci_wi_CaseNote_0DD622D0101BDAF66E3E2FD861BBC842] ON [dbo].[CaseNote] ([HVCaseFK], [ProgramFK]) INCLUDE ([CaseNoteContents], [CaseNoteCreateDate], [CaseNoteCreator], [CaseNoteDate], [CaseNoteEditDate], [CaseNoteEditor]) ON [PRIMARY]
+GO
