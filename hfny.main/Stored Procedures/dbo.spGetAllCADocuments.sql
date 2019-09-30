@@ -16,14 +16,30 @@ as
 		set nocount on;
 
     -- Insert statements for procedure here
-		select	AttachmentPK
+		--select	AttachmentPK
+		--	  , AttachmentTitle
+		--	  , AttachmentDescription
+		--	  , convert(varchar(10), FormDate, 126) as FormDate
+		--	  , convert(varchar(10), AttachmentCreateDate, 126) as AttachmentCreateDate
+		--	  , AttachmentCreator
+		--from	Attachment a 
+		--where	FormType = 'CA'
+		--order by AttachmentCreateDate desc;
+
+			SELECT DISTINCT	AttachmentPK
 			  , AttachmentTitle
 			  , AttachmentDescription
 			  , convert(varchar(10), FormDate, 126) as FormDate
 			  , convert(varchar(10), AttachmentCreateDate, 126) as AttachmentCreateDate
-			  , AttachmentCreator
+			  , AttachmentCreator,
+			  ac.AttachmentCategoryPK,
+			  ca.AttachmentCategory,
+			  ca.codeAttachmentCategoryPK
 		from	Attachment a 
+		LEFT OUTER JOIN dbo.AttachmentCategory ac ON ac.AttachmentFK = a.AttachmentPK
+		left JOIN dbo.codeAttachmentCategory ca ON ca.codeAttachmentCategoryPK = ac.AttachmentCategoryFK
 		where	FormType = 'CA'
 		order by AttachmentCreateDate desc;
+
 	end;
 GO
