@@ -1,5 +1,13 @@
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
-INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (349, 'Added Categories and filtering options to Forms ', 1, 32)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (350, 'The following pages can customized reports via the print button or the custom button on the case home page:
+
+1. Screen form 
+2. Preassesment
+3. Parent survey
+4. Preintake
+5. Service Referrals
+6. TCMedical
+', 1, 33)
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (2, 'Home Visit Log landing page - Fixed sorting of the table ', 1, 20)
@@ -346,4 +354,5 @@ INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [Ne
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (346, 'Supervision form - expanded all comment fields to 2,500 characters', 5, 31)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (347, 'Birth Outcomes report - Updates and fixes', 6, 31)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (348, 'Service referrals form - restored delete functionality', 7, 31)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (349, 'Added Categories and filtering options to Forms ', 1, 32)
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
