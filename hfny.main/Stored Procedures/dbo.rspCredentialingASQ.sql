@@ -55,7 +55,7 @@ AS
 		 , TCDOB varchar(12)
 		 , GestationalAge int
 		 , TCAge varchar(150)
-		 , DateCompleted varchar(12)
+		 , DateCompleted datetime
 		 , InWindow varchar(50)
 		 , [TCAgeCode] char(2)
 		 , ASQTCReceiving int
@@ -83,7 +83,7 @@ AS
 		 ,convert(varchar(12),c.TCDOB,101)
 		 ,c.GestationalAge
 		 ,ltrim(rtrim(replace(b.[AppCodeText],'(optional)','')))
-		 ,convert(varchar(12),a.DateCompleted,101) 
+		 ,a.DateCompleted
 		 ,case when ASQInWindow is null then 'Unknown'
 			  when ASQInWindow = 1 then 'In Window' else 'Out of Window' end 
 		 ,a.TCAge
@@ -146,7 +146,7 @@ AS
 		 ,CASE WHEN c.TCDOB IS NOT NULL THEN convert(varchar(12),c.TCDOB,101) ELSE convert(varchar(12),h.EDC,101) END
 		 ,c.GestationalAge
 		 ,'[None]'
-		 ,''
+		 ,NULL
 		 ,''
 		 ,''
 		 ,0
@@ -185,7 +185,7 @@ declare @cteAdjAge table (
 	, TCDOB varchar(12)
 	, GestationalAge int
 	, TCAge varchar(150)
-	, DateCompleted varchar(12)
+	, DateCompleted datetime
 	, InWindow varchar(50)
 	, [TCAgeCode] char(2)
 	, ASQTCReceiving int
@@ -209,7 +209,7 @@ declare @cteFinal table (
 	, TCDOB varchar(12)
 	, GestationalAge int
 	, TCAge varchar(150)
-	, DateCompleted varchar(12)
+	, DateCompleted datetime
 	, InWindow varchar(50)
 	, [TCAgeCode] char(2)
 	, ASQTCReceiving int
@@ -228,14 +228,14 @@ insert into @cteFinal
 	
 	,datediff(month, AdjTCDOB, getdate())
 	
-	, CASE WHEN DateCompleted <> '' 
+	, CASE WHEN DateCompleted is not null
 	THEN CASE WHEN dateadd(year, datediff (year, AdjTCDOB, DateCompleted), AdjTCDOB) > DateCompleted
             THEN datediff(year, AdjTCDOB, DateCompleted) - 1
             ELSE datediff(year, AdjTCDOB, DateCompleted)
           END
 	ELSE -1 END
 	
-	, CASE WHEN DateCompleted <> '' 
+	, CASE WHEN DateCompleted is not null 
 	THEN 
 	
 		CASE 
@@ -267,7 +267,7 @@ insert into @cteFinal
 	, TCDOB varchar(12)
 	, GestationalAge int
 	, TCAge varchar(150)
-	, DateCompleted varchar(12)
+	, DateCompleted datetime
 	, InWindow varchar(50)
 	, [TCAgeCode] char(2)
 	, ASQTCReceiving int
