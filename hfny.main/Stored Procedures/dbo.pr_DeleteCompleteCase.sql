@@ -615,6 +615,50 @@ begin try
 	close del_cursor;
 	deallocate del_cursor;
 
+	
+
+	--SupervisionHomeVisitCase
+	declare del_cursor cursor for
+	select SupervisionHomeVisitCasePK
+		from dbo.SupervisionHomeVisitCase 
+		where HVCaseFK = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC dbo.spDelSupervisionHomeVisitCase @SupervisionHomeVisitCasePK = @pk -- int
+		
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	
+
+	--SupervisionParentSurveyCase
+	declare del_cursor cursor for
+	select SupervisionParentSurveyCasePK
+		from dbo.SupervisionParentSurveyCase 
+		where HVCaseFK = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC dbo.spDelSupervisionParentSurveyCase @SupervisionParentSurveyCasePK = @pk -- int
+		
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
 	--CaseProgram
 	declare del_cursor cursor for
 	select CaseProgrampk
