@@ -989,7 +989,7 @@ SELECT
 	  , max(Interval) Interval
 
  		FROM #tblCommonCohort cc
-			left join codeduebydates on scheduledevent = 'ASQSE-1' AND cc.XDateAge >= DueBy -- minimum interval
+			left join codeduebydates on scheduledevent = 'ASQSE-2' AND cc.XDateAge >= DueBy -- minimum interval
 
  GROUP BY HVCasePK ,cc.TCIDPK
 )
@@ -1051,7 +1051,7 @@ select distinct cc.HVCasePK,cc.TCIDPK,A.ASQSEInWindow,A.ASQSEReceiving,A.ASQSETC
  
  --- ToDo: on monday .... khalsa
  
- left join codeduebydates cd on scheduledevent = 'ASQSE-1' AND LastASQSE.Interval = cd.Interval -- to get dueby, max, min (given interval)
+ left join codeduebydates cd on scheduledevent = 'ASQSE-2' AND LastASQSE.Interval = cd.Interval -- to get dueby, max, min (given interval)
 )
 
 
@@ -2174,6 +2174,11 @@ SELECT distinct cc.HVCasePK
 		  ,case when  lasqse.ASQSETCAge >= casqse.Interval then ''
 				when casqse.ASQSEReceiving = 1 then ' Child receiving EIP '
 				when casqse.Interval is null then ''
+
+				-- ASQSE-2 accounts for gestational age under 24 months 
+				when casqse.Interval < 24 then
+					cdasqse.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
+				
 				-- as per JH, dont use dev_date. Use tcdob .... khalsa 06/05/2014				
 				--else  cdasqse.EventDescription + ' Due between ' + convert(varchar(20), dateadd(dd,cdasqse.MinimumDue ,dev_bdate), 101) + ' and ' + convert(varchar(20), dateadd(dd,cdasqse.MaximumDue ,dev_bdate), 101)
 				else cdasqse.EventDescription + 
@@ -2213,7 +2218,7 @@ SELECT distinct cc.HVCasePK
 	  left join codeDueByDates cdasq on scheduledevent = 'ASQ' and cdasq.Interval = casq.Interval  
 	  
 	  left join cteASQSEThatIsDueNowWithEIPStatus casqse on casqse.HVCasePK = cc.HVCasePK and casqse.TCIDPK = cc.TCIDPK 
-	  left join codeDueByDates cdasqse on cdasqse.scheduledevent = 'ASQSE-1' and cdasqse.Interval = casqse.Interval  	  
+	  left join codeDueByDates cdasqse on cdasqse.scheduledevent = 'ASQSE-2' and cdasqse.Interval = casqse.Interval  	  
 	  
 	  left join #tblPTDetails asqd on asqd.HVCaseFK = cc.HVCasePK and asqd.TCIDPK = cc.TCIDPK 
 	  
