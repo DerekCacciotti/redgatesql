@@ -13,6 +13,14 @@ GO
 -- Author:    <Jay Robohn>
 -- Description: <copied from FamSys Feb 20, 2012 - see header below>
 -- =============================================
+-- Edited: 10/4/19
+-- Ticket #8136 Enrolled/Discharged Participants don't match main report
+-- Fix: 
+	--1. commented these 'AND' conditions when calculating enrolled participants starting ~line 318
+	  --and (LastHomeVisit is NULL or LastHomeVisit >= dateadd(month, 3, IntakeDate)) -- and dateadd(day, 3*30.44, IntakeDate)
+	--2. fixed line grouping level conditions, three years was 130 weeks, should be 156 to match main report
+-- =============================================
+ 
 CREATE procedure [dbo].[rspRetentionRatesByReferralSource]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
@@ -306,27 +314,34 @@ set @RetentionRateThreeYears = case when @TotalCohortCount = 0 then 0.0000 else 
 --#region Enrolled Participants
 select @EnrolledParticipantsThreeMonths = count(*)
 from @tblPC1withStats
-where ActiveAt3Months = 1 and (LastHomeVisit is NULL or LastHomeVisit >= dateadd(month, 3, IntakeDate)) -- and dateadd(day, 3*30.44, IntakeDate)
+where ActiveAt3Months = 1
+-- and (LastHomeVisit is NULL or LastHomeVisit >= dateadd(month, 3, IntakeDate)) -- and dateadd(day, 3*30.44, IntakeDate)
 
 select @EnrolledParticipantsSixMonths = count(*)
 from @tblPC1withStats
-where ActiveAt6Months = 1 and (LastHomeVisit is NULL or LastHomeVisit >= dateadd(month, 6, IntakeDate)) -- and dateadd(day, 6*30.44, IntakeDate)
+where ActiveAt6Months = 1
+-- and (LastHomeVisit is NULL or LastHomeVisit >= dateadd(month, 6, IntakeDate)) -- and dateadd(day, 6*30.44, IntakeDate)
 
 select @EnrolledParticipantsOneYear = count(*)
 from @tblPC1withStats
-where ActiveAt12Months = 1 and (LastHomeVisit is NULL or LastHomeVisit > dateadd(month, 12, IntakeDate)) -- and dateadd(day, 12*30.44, IntakeDate)
+where ActiveAt12Months = 1
+-- and (LastHomeVisit is NULL or LastHomeVisit > dateadd(month, 12, IntakeDate)) -- and dateadd(day, 12*30.44, IntakeDate)
 
 select @EnrolledParticipantsEighteenMonths = count(*)
 from @tblPC1withStats
-where ActiveAt18Months = 1 and (LastHomeVisit is NULL or LastHomeVisit > dateadd(month, 18, IntakeDate)) -- and dateadd(day, 18*30.44, IntakeDate) 
+where ActiveAt18Months = 1
+-- and (LastHomeVisit is NULL or LastHomeVisit > dateadd(month, 18, IntakeDate)) -- and dateadd(day, 18*30.44, IntakeDate) 
 
 select @EnrolledParticipantsTwoYears = count(*)
 from @tblPC1withStats
-where ActiveAt24Months = 1 and (LastHomeVisit is NULL or LastHomeVisit > dateadd(month, 24, IntakeDate)) -- and dateadd(day, 24*30.44, IntakeDate)
+where ActiveAt24Months = 1
+-- and (LastHomeVisit is NULL or LastHomeVisit > dateadd(month, 24, IntakeDate)) -- and dateadd(day, 24*30.44, IntakeDate)
 
 select @EnrolledParticipantsThreeYears = count(*)
 from @tblPC1withStats
-where ActiveAt36Months = 1 and (LastHomeVisit is NULL or LastHomeVisit > dateadd(month, 36, IntakeDate))
+where ActiveAt36Months = 1
+-- and (LastHomeVisit is NULL or LastHomeVisit > dateadd(month, 36, IntakeDate))
+
 --select @EnrolledParticipantsSixMonths = count(*)
 --from @tblPC1withStats
 --where ActiveAt6Months=1 and DischargeDate between dateadd(day, 6*30.44, IntakeDate) and dateadd(day, 12*30.44, IntakeDate)
@@ -440,42 +455,42 @@ select @LineGroupingLevel as LineGroupingLevel
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @RetentionRateOneYear else null end as RetentionRateOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @RetentionRateEighteenMonths else null end as RetentionRateEighteenMonths
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @RetentionRateTwoYears else null end as RetentionRateTwoYears
-		,case when datediff(ww,@enddate,getdate()) >= 130 then @RetentionRateTwoYears else null end as RetentionRateThreeYears
+		,case when datediff(ww,@enddate,getdate()) >= 156 then @RetentionRateThreeYears else null end as RetentionRateThreeYears
 		
 		,case when datediff(ww,@enddate,getdate()) >= 13 then @EnrolledParticipantsThreeMonths else null end as EnrolledParticipantsThreeMonths
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @EnrolledParticipantsSixMonths else null end as EnrolledParticipantsSixMonths
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @EnrolledParticipantsOneYear else null end as EnrolledParticipantsOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @EnrolledParticipantsEighteenMonths else null end as EnrolledParticipantsEighteenMonths
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @EnrolledParticipantsTwoYears else null end as EnrolledParticipantsTwoYears
-		,case when datediff(ww,@enddate,getdate()) >= 130 then @EnrolledParticipantsThreeYears else null end as EnrolledParticipantsThreeYears
+		,case when datediff(ww,@enddate,getdate()) >= 156 then @EnrolledParticipantsThreeYears else null end as EnrolledParticipantsThreeYears
 		
 		,case when datediff(ww,@enddate,getdate()) >= 13 then @RunningTotalDischargedThreeMonths else null end as RunningTotalDischargedThreeMonths
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @RunningTotalDischargedSixMonths else null end as RunningTotalDischargedSixMonths
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @RunningTotalDischargedOneYear else null end as RunningTotalDischargedOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @RunningTotalDischargedEighteenMonths else null end as RunningTotalDischargedEighteenMonths
 	    ,case when datediff(ww,@enddate,getdate()) >= 104 then @RunningTotalDischargedTwoYears else null end as RunningTotalDischargedTwoYears
-	    ,case when datediff(ww,@enddate,getdate()) >= 130 then @RunningTotalDischargedThreeYears else null end as RunningTotalDischargedThreeYears
+	    ,case when datediff(ww,@enddate,getdate()) >= 156 then @RunningTotalDischargedThreeYears else null end as RunningTotalDischargedThreeYears
 		
 		,case when datediff(ww,@enddate,getdate()) >= 13 then @TotalNThreeMonths else null end as TotalNThreeMonths
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @TotalNSixMonths else null end as TotalNSixMonths
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @TotalNOneYear else null end as TotalNOneYear
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @TotalNEighteenMonths else null end as TotalNEighteenMonths
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @TotalNTwoYears else null end as TotalNTwoYears
-		,case when datediff(ww,@enddate,getdate()) >= 130 then @TotalNThreeYears else null end as TotalNThreeYears
+		,case when datediff(ww,@enddate,getdate()) >= 156 then @TotalNThreeYears else null end as TotalNThreeYears
 		
 		,case when datediff(ww,@enddate,getdate()) >= 13 then @ThreeMonthsTotal else null end as ThreeMonthsTotal
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @SixMonthsTotal else null end as SixMonthsTotal
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @TwelveMonthsTotal else null end as TwelveMonthsTotal
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @EighteenMonthsTotal else null end as EighteenMonthsTotal
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @TwentyFourMonthsTotal else null end as TwentyFourMonthsTotal
-		,case when datediff(ww,@enddate,getdate()) >= 130 then @ThirtySixMonthsTotal else null end as ThirtySixMonthsTotal
+		,case when datediff(ww,@enddate,getdate()) >= 156 then @ThirtySixMonthsTotal else null end as ThirtySixMonthsTotal
 		
 		,case when datediff(ww,@enddate,getdate()) >= 13 then @ThreeMonthsAtDischarge else null end as ThreeMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 26 then @SixMonthsAtDischarge else null end as SixMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 52 then @TwelveMonthsAtDischarge else null end as TwelveMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 78 then @EighteenMonthsAtDischarge else null end as EighteenMonthsAtDischarge
 		,case when datediff(ww,@enddate,getdate()) >= 104 then @TwentyFourMonthsAtDischarge else null end as TwentyFourMonthsAtDischarge
-		,case when datediff(ww,@enddate,getdate()) >= 130 then @ThirtySixMonthsAtDischarge else null end as ThirtySixMonthsAtDischarge
+		,case when datediff(ww,@enddate,getdate()) >= 156 then @ThirtySixMonthsAtDischarge else null end as ThirtySixMonthsAtDischarge
 		, ReferralSourceText	
 		
 		,case when datediff(ww,@enddate,getdate()) >= 13 then 
@@ -609,5 +624,4 @@ from cteLast
 --from @tblResults
 
 END
-
 GO
