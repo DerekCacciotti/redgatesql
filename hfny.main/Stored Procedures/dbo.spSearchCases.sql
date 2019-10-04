@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 --Edited On: 4-5-2017
 --Edited by Chris Papas - removed function and removed the XML inner join to speed up search
 
@@ -18,7 +17,8 @@ CREATE procedure [dbo].[spSearchCases] (@PC1ID varchar(13) = null
 									 , @TCDOB datetime = null
 									 , @WorkerPK int = null
 									 , @ProgramFK int = null
-									 , @HVCasePK int = null
+									 , @HVCasePK int = NULL
+                                     ,@PCPhone CHAR(12) = NULL	
 									  )
 as
 	set nocount on;
@@ -72,6 +72,7 @@ as
 							 or hv.TCDOB = @TCDOB
 							 or WorkerPK = @WorkerPK
 							 or HVCasePK = @HVCasePK
+							 OR PCPhone = @PCPhone
 							)
 							and cp.ProgramFK = isnull(@ProgramFK, cp.ProgramFK)
 				 )

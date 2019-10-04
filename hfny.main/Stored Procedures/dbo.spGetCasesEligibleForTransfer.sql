@@ -2,7 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		<Author,,Name>
 -- Create date: <Create Date,,>
@@ -26,8 +25,8 @@ group by HVCaseFK
 
 
 
-SELECT  cp.PC1ID, cp.DischargeDate, PC.PCDOB, PC.PCFirstName, PC.PCLastName, 
-		cp.HVCaseFK, cp.ProgramFK, cp.CaseProgramPK,
+SELECT  cp.PC1ID, cp.DischargeDate, PC.PCDOB, PC.PCFirstName, PC.PCLastName,
+		cp.HVCaseFK, cp.ProgramFK, cp.CaseProgramPK,  p.ProgramName,
 		CASE WHEN cp.TransferredStatus = 1 THEN 'Pending'
 		WHEN cp.TransferredStatus = 2 THEN 'Enrolled'
 		WHEN cp.TransferredStatus = 3 THEN 'Not Enrolled'
@@ -36,6 +35,7 @@ FROM    CaseProgram cp
 		inner join cteLastDischargeCases ldc on ldc.HVCaseFK = cp.HVCaseFK and cp.DischargeDate = ldc.DischargeDate 
         INNER JOIN HVCase c ON cp.HVCaseFK = c.HVCasePK 
         INNER JOIN PC ON c.PC1FK = PC.PCPK
+		INNER JOIN HVProgram p ON p.HVProgramPK = cp.ProgramFK
 WHERE   (cp.DischargeReason = '37') 
         and (cp.DischargeDate IS NOT NULL)
         and cp.TransferredToProgramFK = @ProgramFK
