@@ -62,6 +62,6 @@ as begin
 								where cp.HVCaseFK = sc.HVCaseFK
 										and cp.ProgramFK = sc.ProgramFK
 								order by cp.CaseProgramCreateDate desc)
-	order by cp.PC1ID
+	order by upper(cp.PC1ID)
 end ;
 GO

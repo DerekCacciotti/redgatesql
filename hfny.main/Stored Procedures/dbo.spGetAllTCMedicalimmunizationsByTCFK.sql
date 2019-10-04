@@ -10,7 +10,8 @@ SELECT tm.*,
   Cast(Cast(mr1.ReasonCode as int) as varchar(2)) + '. ' + mr1.ReasonDescription as r1,
   Cast(Cast(mr2.ReasonCode as int) as varchar(2)) + '. ' + mr2.ReasonDescription as r2,
   Cast(Cast(mr3.ReasonCode as int) as varchar(2)) + '. ' + mr3.ReasonDescription as r3,
-CONVERT(CHAR(10),tm.TCItemDate,111) AS DisplayDate
+--CONVERT(CHAR(10),tm.TCItemDate,111) AS DisplayDate
+FORMAT(tm.TCItemDate,'MM/dd/yy') AS DisplayDate
 from dbo.TCMedical tm
 inner join dbo.codeMedicalItem cmi
 	on tm.TCMedicalItem=cmi.MedicalItemCode

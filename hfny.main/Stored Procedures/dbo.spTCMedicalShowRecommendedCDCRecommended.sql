@@ -90,7 +90,7 @@ SELECT codeduebydatespk,
     frequency,
     optional,
 	--DATEADD(day,DueBy, @TCDOB)
-	CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111)
+	CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 1)
 
        FROM dbo.codeDueByDates INNER JOIN dbo.codeMedicalItem  ON MedicalItemTitle = ScheduledEvent
        WHERE (MedicalItemGroup = 'Immunization')
@@ -128,7 +128,7 @@ SELECT --EventDescription,
        --ScheduledEvent,
        --Optional,
        --DueBy,
-       CONVERT(CHAR(10), TCItemDate, 111) AS TCItemDate
+       CONVERT(CHAR(10), TCItemDate, 1)
           , MedicalItemTitle
        --, CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111) AS estdate
 FROM TCMedical
@@ -155,13 +155,17 @@ BEGIN
        DECLARE @immunizationdate AS DATE = NULL --this is what we get from the @TCIDImmunizations table
        DECLARE @idDelete AS INT = NULL --this is what the TCIDImmunizations pk that we will delete once we get the immunization date
        DECLARE @myevent AS VARCHAR(10) = (SELECT scheduledevent FROM @CDCMaster WHERE id = @counter)
+	   DECLARE  @immunizationdateformatted  AS CHAR(10) = null
 
        PRINT @counter
 
        SET @immunizationdate = (SELECT TOP 1 DisplayDate FROM @TCIDImmunizations WHERE MedicalItemTitle = @myevent Order BY displaydate)
+
+	   SET @immunizationdateformatted =    CONVERT(CHAR(10), @immunizationdate, 1)
+
        SET @idDelete = (SELECT TOP 1 ImmunizationID FROM @TCIDImmunizations WHERE MedicalItemTitle = @myevent Order BY displaydate)
        
-       UPDATE @CDCMaster SET DisplayDate = @immunizationdate WHERE id = @counter
+       UPDATE @CDCMaster SET DisplayDate = @immunizationdateformatted WHERE id = @counter
        DELETE FROM @TCIDImmunizations WHERE ImmunizationID=@idDelete
 
 SET @counter = @counter + 1

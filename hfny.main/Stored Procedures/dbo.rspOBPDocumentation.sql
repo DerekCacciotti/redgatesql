@@ -7,7 +7,7 @@ GO
 -- Create date: 2/27/18
 -- Description:	This report stored procedure is used to populate the OBP Documentation Report
 -- =============================================
-CREATE PROCEDURE [dbo].[rspOBPDocumentation]
+CREATE procedure [dbo].[rspOBPDocumentation]
 	@ProgramFK	VARCHAR(MAX) = NULL,
 	@StartDate	DATETIME = NULL,
 	@EndDate	DATETIME = NULL
@@ -155,13 +155,13 @@ BEGIN
 	, SUM(CASE WHEN d.OBPGender = '02' AND d.OBPRelationToTC = '01' THEN 1 ELSE 0 END) AS NumDadsAsOBP
 	, SUM(CASE WHEN (d.OBPRelationToTC IS NULL OR d.OBPGender = '') AND d.PC1Gender <> '02' THEN 1 ELSE 0 END) AS NumDadsOther
 	, SUM(CASE WHEN s.HVScreenPK IS NOT NULL THEN 1 ELSE 0 END) AS NumScreensInPeriod
-	, SUM(CASE WHEN s.OBPInHome IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInHomeScreen
+	, SUM(CASE WHEN s.OBPInHome IS NOT NULL and s.OBPInHome = '1' then 1 ELSE 0 END) AS NumOBPInHomeScreen
 	, SUM(CASE WHEN s.RiskNotMarried IN ('1', '2') THEN 1 ELSE 0 END) AS NumPC1MaritalStatus
 	, SUM(CASE WHEN a.KempePK IS NOT NULL THEN 1 ELSE 0 END) AS NumAssessmentsInPeriod
-	, SUM(CASE WHEN a.OBPInHome IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInHomeAssessment
+	, SUM(CASE WHEN a.OBPInHome IS NOT NULL and a.OBPInHome = '1' then 1 ELSE 0 END) AS NumOBPInHomeAssessment
 	, SUM(CASE WHEN a.DadScore <> '0' THEN 1 ELSE 0 END) AS NumOBPWithKScore
 	, SUM(CASE WHEN i.IntakePK IS NOT NULL THEN 1 ELSE 0 END) AS NumIntakeInPeriod
-	, SUM(CASE WHEN i.OBPInHome IS NOT NULL THEN 1 ELSE 0 END) AS NumOBPInHomeIntake
+	, SUM(CASE WHEN i.OBPInHome IS NOT NULL and i.OBPInHome = '1' then 1 ELSE 0 END) AS NumOBPInHomeIntake
 	, SUM(CASE WHEN i.OBPInvolvement IS NOT NULL AND i.OBPInvolvement <> '' THEN 1 ELSE 0 END) AS NumOBPInvolvement
 	, SUM(CASE WHEN i.OBPInformationAvailable = 1 THEN 1 ELSE 0 END) AS NumOBPInfoAvailable
 	, SUM(CASE WHEN i.OBPInvolvement IN ('01', '02', '03') AND (i.OBPInformationAvailable IS NULL OR i.OBPInformationAvailable = 0) THEN 1 ELSE 0 END) AS NumInappropriateMissing
