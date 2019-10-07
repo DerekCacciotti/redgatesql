@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -42,6 +41,8 @@ begin
 										CaseFilterNameFK
 										 and cfno.listCaseFilterNameOptionPK = 
 											 cf.CaseFilterNameOptionFK)
+						when FilterType = 4
+							then format(CaseFilterNameDate, 'MM/dd/yy')
 						else
 							CaseFilterValue
 					end as FilterValue
