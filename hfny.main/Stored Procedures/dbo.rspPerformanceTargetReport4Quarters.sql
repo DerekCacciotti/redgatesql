@@ -16,7 +16,7 @@ GO
 -- mods by jrobohn 20130223 - added PCI1 report
 -- =============================================
 
-CREATE procedure [dbo].[rspPerformanceTargetReport4Quarters]
+CREATE PROC [dbo].[rspPerformanceTargetReport4Quarters]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartQuarterDate		datetime,
@@ -197,15 +197,15 @@ begin
 		, ReasonNotMeeting	varchar(150)
 		)
 
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetailsTemp
-	--		exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetHD1a @StartDate,@EndDate,@tblPTCohort 
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetailsTemp
-	--		exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetHD2a @StartDate,@EndDate,@tblPTCohort 
@@ -410,15 +410,15 @@ begin
 				and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
 	
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetailsTemp
-	--		exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetHD1a @StartDate,@EndDate,@tblPTCohort 
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetailsTemp
-	--		exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetHD2a @StartDate,@EndDate,@tblPTCohort 
@@ -613,15 +613,15 @@ begin
 				--siteFK
 				and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetailsTemp
-	--		exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetHD1a @StartDate,@EndDate,@tblPTCohort 
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetailsTemp
-	--		exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetHD2a @StartDate,@EndDate,@tblPTCohort 
@@ -816,15 +816,15 @@ begin
 				and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 
 	
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetailsTemp
-	--		exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetHD1a @StartDate,@EndDate,@tblPTCohort 
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetailsTemp
-	--		exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
+		insert into @tblPTDetailsTemp
+			exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetailsTemp
 			exec rspPerformanceTargetHD2a @StartDate,@EndDate,@tblPTCohort 
