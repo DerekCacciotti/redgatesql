@@ -1,13 +1,8 @@
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
-INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (350, 'The following pages can customized reports via the print button or the custom button on the case home page:
-
-1. Screen form 
-2. Preassesment
-3. Parent survey
-4. Preintake
-5. Service Referrals
-6. TCMedical
-', 1, 33)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (351, 'Fixed printing problem with report catalog report viewer', 2, 33)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (352, 'Document pages (Forms, Program Documents, and CA Documents) now have categories enabled. For Program Documents, categories are user-configurable, in other words, new categories can be added. In fact, to start, there will be no categories assigned and they''ll need to be added to existing documents and to new ones as you go.', 3, 33)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (353, 'Combined Tickler report - fixed the criteria option for CHEERS Check-In', 4, 33)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (354, 'OBP Information report - Fixed the calculations of OBP in home at different points in time', 5, 33)
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (2, 'Home Visit Log landing page - Fixed sorting of the table ', 1, 20)
@@ -355,4 +350,15 @@ INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [Ne
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (347, 'Birth Outcomes report - Updates and fixes', 6, 31)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (348, 'Service referrals form - restored delete functionality', 7, 31)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (349, 'Added Categories and filtering options to Forms ', 1, 32)
+SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
+SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (350, 'The following pages now have customized reports via the print button or the custom button on the case home page:
+
+1. Screen form 
+2. Pre-Assessment
+3. Parent survey
+4. Pre-Intake
+5. Service Referrals
+6. TC Medical
+', 1, 33)
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
