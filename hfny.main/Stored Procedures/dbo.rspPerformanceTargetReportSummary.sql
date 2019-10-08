@@ -15,7 +15,7 @@ GO
 -- mods by jrobohn 20130223 - added PCI1 report
 -- =============================================
 
-CREATE procedure [dbo].[rspPerformanceTargetReportSummary]
+CREATE PROC [dbo].[rspPerformanceTargetReportSummary]
 (
     @ProgramFKs				varchar(max)    = null,
     @StartDate				datetime,
@@ -141,15 +141,15 @@ begin
 		, ReasonNotMeeting	varchar(150)
 		)
 
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetails
-	--		exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1]') and type in (N'P', N'PC'))
+		insert into @tblPTDetails
+			exec rspPerformanceTargetHD1 @StartDate,@EndDate,@tblPTCohort 
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD1a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetHD1a @StartDate,@EndDate,@tblPTCohort 
-	--if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
-	--	insert into @tblPTDetails
-	--		exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
+	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2]') and type in (N'P', N'PC'))
+		insert into @tblPTDetails
+			exec rspPerformanceTargetHD2 @StartDate,@EndDate,@tblPTCohort
 	if exists (select * from sys.objects where object_id = object_id('[dbo].[rspPerformanceTargetHD2a]') and type in (N'P', N'PC'))
 		insert into @tblPTDetails
 			exec rspPerformanceTargetHD2a @StartDate,@EndDate,@tblPTCohort 
