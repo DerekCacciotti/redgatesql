@@ -46,13 +46,14 @@ inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 LEFT outer JOIN listSite ls on ls.listSitePK = wp.SiteFK
 inner join PC p on p.PCPK = HVCase.PC1FK
 left outer join TCID t on t.HVCaseFK = HVCase.HVCasePK
-where cp.ProgramFK = @ProgramFK
-		and IntakeDate is not null
+where 
+		 IntakeDate is not null
 		--for August 1 2016
 		and IntakeDate <=@EndDate
 		and (cp.DischargeDate is null or cp.DischargeDate>=@StartDate)
 		--and (ls.SiteName='Parsons Cohoes Site' or ls.SiteName='Parsons Albany Site ')
 		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 order by [Worker Last Name], [Worker First Name], cp.PC1ID
+
 
 GO
