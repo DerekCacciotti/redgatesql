@@ -104,7 +104,7 @@ WHERE cp.CurrentFSWFK = ISNULL(@WorkerFK,cp.CurrentFSWFK)
 	
 	-- get tcs 7 months old or older 
 	SELECT pc1id,tcidpk,programfk, tcdob,hvcasefk,intakedate,dischargedate,tcageindays,lastdate  FROM @tblallcases
-	WHERE DATEDIFF(month,tcdob,@startdate) >= 7 AND intakedate <=@enddate 
+	WHERE DATEDIFF(month,tcdob,@enddate) >= 7 AND intakedate <=@enddate 
 	AND (dischargedate IS NULL OR dischargedate >= @startdate)
 	
 
