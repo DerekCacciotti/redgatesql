@@ -39,8 +39,9 @@ inner join HVCase hc on hc.HVCasePK = a.HVCaseFK
 inner join pc on PC.PCPK = hc.PC1FK
 LEFT OUTER JOIN FormReview AS d ON a.HVLogPK = d.FormFK AND a.ProgramFK = d.ProgramFK AND d.FormType = 'VL'
 LEFT OUTER JOIN Attachment AS e ON a.HVLogPK = e.FormFK AND a.ProgramFK = e.ProgramFK AND e.FormType = 'VL'
-WHERE a.ProgramFK = @ProgramFK
-AND a.VisitStartTime BETWEEN @BeginOfMonth AND @EndOfMonth
+WHERE --a.ProgramFK = @ProgramFK
+ a.VisitStartTime BETWEEN @BeginOfMonth AND @EndOfMonth
 order BY c.LastName,c.FirstName,PC1id, a.VisitStartTime
+
 
 GO
