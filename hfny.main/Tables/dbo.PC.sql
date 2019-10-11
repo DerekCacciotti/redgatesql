@@ -25,6 +25,7 @@ CREATE TABLE [dbo].[PC]
 [PCMiddleInitial] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCNoPhone] [bit] NULL,
 [PCOldName] [varchar] (400) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[PCSuffix] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCOldName2] [varchar] (400) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCPhone] [char] (12) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PCPK_old] [int] NOT NULL,
@@ -35,7 +36,8 @@ CREATE TABLE [dbo].[PC]
 [RaceSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [SSNo] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TimesMoved] [int] NULL,
-[YearsInUSA] [numeric] (4, 0) NULL
+[YearsInUSA] [numeric] (4, 0) NULL,
+[PrefersTextMessages] [bit] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
