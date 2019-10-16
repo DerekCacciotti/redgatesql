@@ -1,8 +1,13 @@
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
-INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (355, 'Quarterly Performance Target / 4 Quarter reports - Removed HD1 and HD2', 1, 34)
-INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (356, 'Case Filters - Fixed handling of date-type filters in report catalog', 2, 34)
-INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (357, 'FSS Combined Tickler report - Fixed calculation of ASQ-SE window for premature TC', 3, 34)
-INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (358, 'Retention Rates report - Fixed Discharge Reasons and Referral Source summaries', 4, 34)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (359, 'Use of CHEERS Check-In Tool report - Modified to return one row per child.', 5, 34)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (360, 'Case Transfer Acceptance - added program name to grid', 1, 35)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (361, 'Search Cases - added phone number (searches main, cell and emergency phone numbers) and made grid easier to navigate', 2, 35)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (362, 'TC Medical form - changed date display to be consistent with the rest of the app', 3, 35)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (363, 'ASQ Credentialing report - fixed sort order', 4, 35)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (364, 'Case Filters - added mask to date-type fields', 5, 35)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (365, 'Document pages (Forms, Program Documents, and CA Documents) now have categories associated with each item', 6, 35)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (366, 'Person Profile - added checkbox for "Prefers Text Message..." and a suffix for the person''s name', 7, 35)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (367, 'Worker form - added validation to disallow terminating supervisors that have current workers assigned to them', 8, 35)
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (2, 'Home Visit Log landing page - Fixed sorting of the table ', 1, 20)
@@ -363,4 +368,10 @@ INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [Ne
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (352, 'Document pages (Forms, Program Documents, and CA Documents) now have categories enabled. For Program Documents, categories are user-configurable, in other words, new categories can be added. In fact, to start, there will be no categories assigned and they''ll need to be added to existing documents and to new ones as you go.', 3, 33)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (353, 'Combined Tickler report - fixed the criteria option for CHEERS Check-In', 4, 33)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (354, 'OBP Information report - Fixed the calculations of OBP in home at different points in time', 5, 33)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (356, 'Case Filters - Fixed handling of date-type filters in report catalog', 2, 34)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (357, 'FSS Combined Tickler report - Fixed calculation of ASQ-SE window for premature TC', 3, 34)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (358, 'Retention Rates report - Fixed Discharge Reasons and Referral Source summaries', 4, 34)
+SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
+SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (355, 'Quarterly Performance Target / 4 Quarter reports - Grayed out HD1 and HD2', 1, 34)
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
