@@ -124,14 +124,14 @@ SELECT [TopicName]
 			, s.subtopiccode
 )
 
+
 , cteAddMissingWorkers AS (
 	--if a worker has NO trainings, they won't appear at all, so add them back
-		SELECT DISTINCT  workerfk
-		, TrainingDate
-		, CASE WHEN  IsExempt='1' then 1
+		SELECT DISTINCT   TrainingDate
+		, CASE WHEN  IsExempt='1' THEN 1
 				WHEN TrainingDate IS NULL THEN 0
-				WHEN TrainingDate <= dateadd(day, 183, cte10_4a.HireDate) THEN 1 
-				WHEN TrainingDate > dateadd(day, 183, cte10_4a.HireDate) AND DATEDIFF(DAY,  cte10_4a.HireDate, GETDATE()) > 546 THEN 0 --Workers who are late with training but hired more than 18 months ago, get a two		
+				WHEN TrainingDate <= DATEADD(DAY, 183, cte10_4a.HireDate) THEN 1 
+				WHEN TrainingDate > DATEADD(DAY, 183, cte10_4a.HireDate) AND DATEDIFF(DAY,  cte10_4a.HireDate, GETDATE()) > 546 THEN 0 --Workers who are late with training but hired more than 18 months ago, get a two		
 				ELSE 0
 				END AS  SubtopicCount
 		, workerpk
@@ -150,14 +150,14 @@ SELECT [TopicName]
 		, [SubTopicName]
 		, IsExempt
 		FROM cte10_4a
-		right JOIN cteWorkersTopics ON cteWorkersTopics.workerpk = cte10_4a.workerfk 
+		RIGHT JOIN cteWorkersTopics ON cteWorkersTopics.workerpk = cte10_4a.workerfk 
 		AND cte10_4a.TopicCode = cteWorkersTopics.TopicCode AND cte10_4a.SubTopicCode = cteWorkersTopics.SubTopicCode
 		)
 		
 
 
 , cteMeetTarget AS (
-	SELECT MAX(RowNumber) OVER(PARTITION BY TopicCode) as TotalWorkers
+	SELECT MAX(RowNumber) OVER(PARTITION BY TopicCode) AS TotalWorkers
 	, cteAddMissingWorkers.WorkerPK
 	, WorkerName
 	, HireDate
@@ -170,18 +170,18 @@ SELECT [TopicName]
 	, subtopiccode
 	, TrainingDate
 	, SUM(SubtopicCount) AS CompletedAllOnTime
-	, SUM(SubtopicCount)  over (PARTITION BY TopicCode, cteAddMissingWorkers.WorkerFK) AS indivSubTopicsOnTime
+	, SUM(SubtopicCount)  OVER (PARTITION BY TopicCode, cteAddMissingWorkers.WorkerPK) AS indivSubTopicsOnTime
 	, CASE WHEN TrainingDate IS NOT NULL THEN 1 END AS ContentCompleted	
-	, CASE WHEN IsExempt='1' then 1
+	, CASE WHEN IsExempt='1' THEN 1
 		WHEN TrainingDate IS NULL THEN 0
-		WHEN TrainingDate <= dateadd(day, 183, HireDate) THEN 1 
-		WHEN TrainingDate > dateadd(day, 183, HireDate) AND DATEDIFF(DAY,  HireDate, GETDATE()) > 546 THEN 1 --Workers who are late with training but hired more than 18 months ago, get a two		
+		WHEN TrainingDate <= DATEADD(DAY, 183, HireDate) THEN 1 
+		WHEN TrainingDate > DATEADD(DAY, 183, HireDate) AND DATEDIFF(DAY,  HireDate, GETDATE()) > 546 THEN 1 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 0
 		END AS 'Meets Target'
-	, CASE WHEN IsExempt='1' then 3
+	, CASE WHEN IsExempt='1' THEN 3
 		WHEN TrainingDate IS NULL THEN 1
-		WHEN TrainingDate <= dateadd(day, 183, HireDate) THEN 3 
-		WHEN TrainingDate > dateadd(day, 183, HireDate) AND DATEDIFF(DAY,  HireDate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		WHEN TrainingDate <= DATEADD(DAY, 183, HireDate) THEN 3 
+		WHEN TrainingDate > DATEADD(DAY, 183, HireDate) AND DATEDIFF(DAY,  HireDate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 1
 		END AS 'IndividualRating'
 	
@@ -201,9 +201,7 @@ SELECT [TopicName]
 	, rownumber
 	, IsExempt
 	,SubtopicCount
-	, cteAddMissingWorkers.WorkerFK
 )
-
 
 
 --Now calculate the number meeting count
