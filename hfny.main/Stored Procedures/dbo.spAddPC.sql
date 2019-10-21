@@ -23,6 +23,7 @@ CREATE PROCEDURE [dbo].[spAddPC](@BirthCountry char(30)=NULL,
 @PCMiddleInitial varchar(200)=NULL,
 @PCNoPhone bit=NULL,
 @PCOldName varchar(400)=NULL,
+@PCSuffix varchar(50)=NULL,
 @PCOldName2 varchar(400)=NULL,
 @PCPhone char(12)=NULL,
 @PCPK_old int=NULL,
@@ -33,7 +34,8 @@ CREATE PROCEDURE [dbo].[spAddPC](@BirthCountry char(30)=NULL,
 @RaceSpecify varchar(500)=NULL,
 @SSNo varchar(200)=NULL,
 @TimesMoved int=NULL,
-@YearsInUSA numeric(4, 0)=NULL)
+@YearsInUSA numeric(4, 0)=NULL,
+@PrefersTextMessages bit=NULL)
 AS
 INSERT INTO PC(
 BirthCountry,
@@ -57,6 +59,7 @@ PCLastName,
 PCMiddleInitial,
 PCNoPhone,
 PCOldName,
+PCSuffix,
 PCOldName2,
 PCPhone,
 PCPK_old,
@@ -67,7 +70,8 @@ Race,
 RaceSpecify,
 SSNo,
 TimesMoved,
-YearsInUSA
+YearsInUSA,
+PrefersTextMessages
 )
 VALUES(
 @BirthCountry,
@@ -91,6 +95,7 @@ VALUES(
 @PCMiddleInitial,
 @PCNoPhone,
 @PCOldName,
+@PCSuffix,
 @PCOldName2,
 @PCPhone,
 @PCPK_old,
@@ -101,7 +106,8 @@ VALUES(
 @RaceSpecify,
 @SSNo,
 @TimesMoved,
-@YearsInUSA
+@YearsInUSA,
+@PrefersTextMessages
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

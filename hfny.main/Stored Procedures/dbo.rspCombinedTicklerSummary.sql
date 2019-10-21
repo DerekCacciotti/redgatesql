@@ -199,7 +199,12 @@ as
 					
 					,gestationalage
 					,eventDescription
-					,dateadd(dd,dueby,hvcase.tcdob) DueDate
+					,case
+						 when interval < 24 then
+							 dateadd(dd,dueby,(((40-gestationalage)*7)+hvcase.tcdob))
+						 else
+							 dateadd(dd,dueby,hvcase.tcdob)
+					 end DueDate
 					,substring((select distinct ', '+rtrim(tcfirstname)+' '+rtrim(tclastname)
 									from tcid
 									where hvcase.hvcasepk = tcid.hvcasefk
@@ -213,7 +218,7 @@ as
 					  inner join pc pc1 on pc1fk = pc1.pcpk
 					  inner join tcid on tcid.hvcasefk = hvcasepk --and tcid.programfk = caseprogram.programfk
 					  --inner join appoptions on caseprogram.programfk = appoptions.programfk and optionitem = 'asqse version'
-					  inner join codeduebydates on scheduledevent = 'ASQSE-1'  --optionValue
+					  inner join codeduebydates on scheduledevent = 'ASQSE-2'  --optionValue
 					  --inner join codeduebydates on scheduledevent = optionValue
 					  inner join dbo.SplitString(@programfk,',') on caseprogram.programfk = listitem
 					  inner join worker fsw on fsw.workerpk = currentfswfk

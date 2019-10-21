@@ -73,6 +73,8 @@ as
 							 or WorkerPK = @WorkerPK
 							 or HVCasePK = @HVCasePK
 							 OR PCPhone = @PCPhone
+							 OR PCCellPhone = @PCPhone
+							 OR PCEmergencyPhone = @PCPhone
 							)
 							and cp.ProgramFK = isnull(@ProgramFK, cp.ProgramFK)
 				 )

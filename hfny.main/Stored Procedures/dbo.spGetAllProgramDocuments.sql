@@ -23,7 +23,8 @@ BEGIN
 			  , AttachmentCreator,
 			  ac.AttachmentCategoryPK,
 			  ca.AttachmentCategory,
-			  ca.codeAttachmentCategoryPK
+			  ca.codeAttachmentCategoryPK,
+			  a.AttachmentFilePath
 		from	Attachment a 
 		LEFT OUTER JOIN dbo.AttachmentCategory ac ON ac.AttachmentFK = a.AttachmentPK
 		left JOIN dbo.codeAttachmentCategory ca ON ca.codeAttachmentCategoryPK = ac.AttachmentCategoryFK

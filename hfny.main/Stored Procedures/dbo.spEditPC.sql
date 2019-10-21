@@ -24,6 +24,7 @@ CREATE PROCEDURE [dbo].[spEditPC](@PCPK int=NULL,
 @PCMiddleInitial varchar(200)=NULL,
 @PCNoPhone bit=NULL,
 @PCOldName varchar(400)=NULL,
+@PCSuffix varchar(50)=NULL,
 @PCOldName2 varchar(400)=NULL,
 @PCPhone char(12)=NULL,
 @PCPK_old int=NULL,
@@ -34,7 +35,8 @@ CREATE PROCEDURE [dbo].[spEditPC](@PCPK int=NULL,
 @RaceSpecify varchar(500)=NULL,
 @SSNo varchar(200)=NULL,
 @TimesMoved int=NULL,
-@YearsInUSA numeric(4, 0)=NULL)
+@YearsInUSA numeric(4, 0)=NULL,
+@PrefersTextMessages bit=NULL)
 AS
 UPDATE PC
 SET 
@@ -59,6 +61,7 @@ PCLastName = @PCLastName,
 PCMiddleInitial = @PCMiddleInitial, 
 PCNoPhone = @PCNoPhone, 
 PCOldName = @PCOldName, 
+PCSuffix = @PCSuffix, 
 PCOldName2 = @PCOldName2, 
 PCPhone = @PCPhone, 
 PCPK_old = @PCPK_old, 
@@ -69,6 +72,7 @@ Race = @Race,
 RaceSpecify = @RaceSpecify, 
 SSNo = @SSNo, 
 TimesMoved = @TimesMoved, 
-YearsInUSA = @YearsInUSA
+YearsInUSA = @YearsInUSA, 
+PrefersTextMessages = @PrefersTextMessages
 WHERE PCPK = @PCPK
 GO
