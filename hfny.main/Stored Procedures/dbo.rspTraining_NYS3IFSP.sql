@@ -61,7 +61,7 @@ BEGIN
 		WHEN dateadd(dd, 91, DateStartedPos) < FirstIFSPDate THEN 'F'		
 		ELSE 'T' END AS MeetsTarget
 		,  CASE WHEN FirstIFSPDate IS NULL THEN 1
-		WHEN FirstIFSPDate <= dateadd(day, 183, DateStartedPos) THEN 3 
+		WHEN FirstIFSPDate <= dateadd(day, 91, DateStartedPos) THEN 3 
 		WHEN FirstIFSPDate > dateadd(day, 183, DateStartedPos) AND DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 1
 		END AS 'IndividualRating'
