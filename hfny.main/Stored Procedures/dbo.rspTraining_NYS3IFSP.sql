@@ -79,7 +79,7 @@ BEGIN
 )
 
  SELECT cteFinal.workername, DateStartedPos as FirstEventDate, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
-  ,  MIN(IndividualRating) as Rating
+  ,  (SELECT TOP 1 IndividualRating FROM ctefinal ORDER BY IndividualRating) as Rating
 ,	'NYS3. Staff (Supervisors and Home Visitors) receive FGP/IFSP training within three months of hire to a HFNY position.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) AS PercentMeeting
 FROM cteFinal
