@@ -85,19 +85,19 @@ as
 			  , pcfirstname + ' ' + pclastname as PC1
 			  , pcOldName
 			  , pcOldName2 
-			  , pcdob
+			  , FORMAT(cteresults.PCDOB, 'MM/dd/yy') AS pcdob
 			  , tc = tcfirstname + ' ' + tclastname
-			  , tcdob
+			  , FORMAT(cteresults.TCDOB, 'MM/dd/yy') AS tcdob
 			  , workerfirstname + ' ' + workerlastname as worker
-			  , dischargedate
-			  , intakedate
+			  , FORMAT(cteresults.DischargeDate, 'MM/dd/yy') AS dischargedate
+			  , FORMAT(cteresults.IntakeDate,'MM/dd/yy') AS intakedate
 			  , caseprogress
 			  , casehasobp
 			  , casehaspc2
 			  , levelname
 			  , case when dischargedate is null then 0
 					else 1
-				end
+				END as HasDischargedate
 			  , (case when PC1ID = @PC1ID then 1
 						else 0
 					end + 
@@ -146,4 +146,6 @@ as
 				 end
 			  , Score4OrderingRows desc
 			  , PC1ID;
+
+		
 GO
