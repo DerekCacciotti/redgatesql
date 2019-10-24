@@ -61,7 +61,7 @@ BEGIN
 		WHEN dateadd(dd, 91, DateStartedPos) < FirstIFSPDate THEN 'F'		
 		ELSE 'T' END AS MeetsTarget
 		,  CASE WHEN FirstIFSPDate IS NULL THEN 1
-		WHEN FirstIFSPDate <= dateadd(day, 183, DateStartedPos) THEN 3 
+		WHEN FirstIFSPDate <= dateadd(day, 91, DateStartedPos) THEN 3 
 		WHEN FirstIFSPDate > dateadd(day, 183, DateStartedPos) AND DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 1
 		END AS 'IndividualRating'
@@ -79,7 +79,7 @@ BEGIN
 )
 
  SELECT cteFinal.workername, DateStartedPos as FirstEventDate, FirstIFSPDate, MeetsTarget, workercount, totalmeetingcount
-  ,  MIN(IndividualRating) as Rating
+  ,  (SELECT TOP 1 IndividualRating FROM ctefinal ORDER BY IndividualRating) as Rating
 ,	'NYS3. Staff (Supervisors and Home Visitors) receive FGP/IFSP training within three months of hire to a HFNY position.' AS CSST
 , cast(totalmeetingcount AS DECIMAL) / cast(workercount AS DECIMAL) AS PercentMeeting
 FROM cteFinal

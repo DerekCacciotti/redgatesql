@@ -12,6 +12,8 @@ SELECT tm.*,
   Cast(Cast(mr3.ReasonCode as int) as varchar(2)) + '. ' + mr3.ReasonDescription as r3,
 --CONVERT(CHAR(10),tm.TCItemDate,111) AS DisplayDate
 FORMAT(tm.TCItemDate,'MM/dd/yy') AS DisplayDate
+--CAST(tm.TCItemDate AS date) AS DisplayDate 
+--tm.TCItemDate AS DisplayDate
 from dbo.TCMedical tm
 inner join dbo.codeMedicalItem cmi
 	on tm.TCMedicalItem=cmi.MedicalItemCode
@@ -28,5 +30,5 @@ left outer join
 	dbo.codeERHospitalReasons mr3
 	on tm.MedicalReason3 = mr3.ReasonCode
 WHERE (TCIDFK = @TCIDFK AND cmi.MedicalItemGroup = 'Immunization')                                 
-order by tm.TCMedicalItem
+order by tm.TCItemDate desc
 GO
