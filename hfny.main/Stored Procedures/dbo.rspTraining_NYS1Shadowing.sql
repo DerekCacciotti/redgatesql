@@ -19,7 +19,6 @@ BEGIN
 	SET NOCOUNT ON;
 --Get FAW's in time period
 
-
 declare @sdate2 as datetime
 declare @progfk2 as int
 
@@ -101,12 +100,14 @@ set @progfk2 = @progfk
 
 , cteFinal as (
 	Select Workertype, workername, firsteventdate, FirstShadowDate, workercounter, workerpk
-		,CASE WHEN FirstShadowDate Is Null THEN 'F'
-		WHEN FirstEventDate < FirstShadowDate THEN 'F'
-		ELSE 'T' END AS MeetsTarget
 		,  CASE WHEN FirstShadowDate IS NULL THEN 1
-		WHEN FirstShadowDate <= dateadd(day, 183, firsteventdate) THEN 3 
-		WHEN FirstShadowDate > dateadd(day, 183, firsteventdate) AND DATEDIFF(DAY,  firsteventdate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		WHEN FirstShadowDate <= dateadd(day, 1, firsteventdate) THEN 3 
+		WHEN FirstShadowDate > dateadd(day, 1, firsteventdate) AND DATEDIFF(DAY,  firsteventdate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		ELSE 1
+		END AS 'MeetsTarget'
+		,  CASE WHEN FirstShadowDate IS NULL THEN 1
+		WHEN FirstShadowDate <= dateadd(day, 1, firsteventdate) THEN 3 
+		WHEN FirstShadowDate > dateadd(day, 1, firsteventdate) AND DATEDIFF(DAY,  firsteventdate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 1
 		END AS 'IndividualRating'
 	From cteGetShadowDate
@@ -118,12 +119,13 @@ set @progfk2 = @progfk
   FROM cteFinal
   GROUP BY cteFinal.WorkerType
   )
-  
+
+
 --Now calculate the number meeting count, by currentrole
 ,  cteCountMeetingtemp AS (
 		SELECT 
 		WorkerType,
-		CASE WHEN MeetsTarget = 'T' THEN
+		CASE WHEN MeetsTarget > 1 THEN
 			 COUNT(*) 
 		END AS totalmeetingcount
 		FROM cteFinal
