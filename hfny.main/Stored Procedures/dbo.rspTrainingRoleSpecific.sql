@@ -241,7 +241,7 @@ INSERT INTO @cteDetails ( RowNumber ,
 				, CASE WHEN TrainingDate <= dateadd(day, 183, startdate) THEN 'Meeting' ELSE 'Not Meeting' END AS 'Meets Target'
 				, CASE WHEN TrainingDate IS NULL THEN 1 
 					WHEN TrainingDate <= dateadd(day, 183, startdate) THEN 3
-					WHEN DATEDIFF(DAY, @sdate, [@cteDetails].StartDate) > 546 AND TrainingDate IS NOT NULL THEN 2 
+					WHEN DATEDIFF(DAY, [@cteDetails].StartDate, GETDATE()) > 546 AND TrainingDate IS NOT NULL THEN 2 
 					ELSE 1 END AS 'IndividualRating'
 
 

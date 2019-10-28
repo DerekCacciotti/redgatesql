@@ -364,6 +364,7 @@ with cteCohort as
 			from HVLog vl
 			inner join #tmpCohort co on co.HVCasePK = vl.HVCaseFK
 			inner join HVCase c on c.HVCasePK = co.HVCasePK
+			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = vl.ProgramFK
 			where substring(VisitType, 4, 1) <> '1'
 			group by HVCaseFK
 		)
@@ -8216,5 +8217,4 @@ from @tblResults
 --)AS unpvt;
 
 end
-
 GO

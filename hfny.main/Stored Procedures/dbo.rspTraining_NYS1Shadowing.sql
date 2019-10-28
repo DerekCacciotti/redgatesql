@@ -69,7 +69,7 @@ set @progfk2 = @progfk
 
 
 , cteGetShadowDate AS (
-		select WorkerPK, WrkrLName, WorkerName
+		SELECT WorkerPK, WrkrLName, WorkerName
 		, FirstEventDate, WorkerType, workercounter
 		, Case 
 			WHEN WorkerType='FAW' THEN (Select MIN(trainingdate) as TrainingDate 
@@ -99,28 +99,45 @@ set @progfk2 = @progfk
 
 
 , cteFinal as (
-	Select Workertype, workername, firsteventdate, FirstShadowDate, workercounter
-		,CASE WHEN FirstShadowDate Is Null THEN 'F'
-		WHEN FirstEventDate < FirstShadowDate THEN 'F'
-		ELSE 'T' END AS MeetsTarget
+	Select Workertype, workername, firsteventdate, FirstShadowDate, workercounter, workerpk
 		,  CASE WHEN FirstShadowDate IS NULL THEN 1
-		WHEN FirstShadowDate <= dateadd(day, 183, firsteventdate) THEN 3 
-		WHEN FirstShadowDate > dateadd(day, 183, firsteventdate) AND DATEDIFF(DAY,  firsteventdate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		WHEN FirstShadowDate <= dateadd(day, 1, firsteventdate) THEN 3 
+		WHEN FirstShadowDate > dateadd(day, 1, firsteventdate) AND DATEDIFF(DAY,  firsteventdate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		ELSE 1
+		END AS 'MeetsTarget'
+		,  CASE WHEN FirstShadowDate IS NULL THEN 1
+		WHEN FirstShadowDate <= dateadd(day, 1, firsteventdate) THEN 3 
+		WHEN FirstShadowDate > dateadd(day, 1, firsteventdate) AND DATEDIFF(DAY,  firsteventdate, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 1
 		END AS 'IndividualRating'
 	From cteGetShadowDate
  )
- 
+
+ , cteFinal2 AS (
+  Select MIN(IndividualRating) AS ProgramRating
+  , WorkerType
+  FROM cteFinal
+  GROUP BY cteFinal.WorkerType
+  )
+
 
 --Now calculate the number meeting count, by currentrole
-, cteCountMeeting1 AS (
+,  cteCountMeetingtemp AS (
 		SELECT 
 		WorkerType,
-		CASE WHEN MeetsTarget = 'T' THEN
+		CASE WHEN MeetsTarget > 1 THEN
 			 COUNT(*) 
 		END AS totalmeetingcount
 		FROM cteFinal
 		GROUP BY Workertype, MeetsTarget
+)
+
+
+--Now calculate the number meeting count, by currentrole
+, cteCountMeeting1 AS (
+		SELECT * FROM cteCountMeetingtemp
+		WHERE cteCountMeetingtemp.totalmeetingcount IS NOT NULL
+        
 )
 
 , cteCountMeeting2 AS (
@@ -137,7 +154,7 @@ set @progfk2 = @progfk
 
 
  SELECT cteFinal.Workertype, workername, firsteventdate, FirstShadowDate, MeetsTarget, workercounter, totalmeetingcount
- ,  MIN(IndividualRating) as Rating
+ ,  cteFinal2.ProgramRating as Rating
 ,	CASE cteFinal.Workertype 
 		WHEN 'FAW' THEN 'NYS1b. Resource specialists shadow experienced staff prior to direct work with families.'
 		WHEN 'FSW' THEN 'NYS1a. Support specialists shadow experienced staff prior to direct work with families.'
@@ -150,10 +167,10 @@ set @progfk2 = @progfk
 	END AS FirstEventDateType
 , cast(totalmeetingcount AS DECIMAL) / cast(workercounter AS DECIMAL) AS PercentMeeting
  FROM cteFinal
+ INNER JOIN cteFinal2 ON cteFinal2.WorkerType = cteFinal.WorkerType
 INNER JOIN cteCountMeeting ON cteCountMeeting.Workertype = cteFinal.Workertype
-GROUP BY cteFinal.Workertype, workername, firsteventdate, FirstShadowDate, MeetsTarget, workercounter, totalmeetingcount
+GROUP BY cteFinal.Workertype, workername, firsteventdate, FirstShadowDate, MeetsTarget, workercounter, totalmeetingcount, cteFinal2.ProgramRating
 ORDER BY cteFinal.Workertype
-
 
 END
 GO
