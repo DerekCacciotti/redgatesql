@@ -69,7 +69,7 @@ begin
 		  ,Defaults
 		  --,'O:'+rtrim(CriteriaOptions)+' D(calc):'+rtrim(dbo.CalculateReportDefaults([Defaults]))+' D(raw):'+rtrim([Defaults]) as DefaultsBag
 		  ,Keywords
-		  ,a.AttachmentPK
+		  ,'' as AttachmentName -- space(100) 
 		  ,convert(varchar(10), UserLastRun, 126) as UserLastRun
 		  ,convert(varchar(10), ProgramLastRun, 126) as ProgramLastRun
 		  ,UserRank
