@@ -37,6 +37,8 @@ JOIN CaseProgram AS b ON a.HVCaseFK = b.HVCaseFK
 JOIN Worker AS c ON c.WorkerPK = a.FSWFK
 inner join HVCase hc on hc.HVCasePK = a.HVCaseFK
 inner join pc on PC.PCPK = hc.PC1FK
+inner  join dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
+
 LEFT OUTER JOIN FormReview AS d ON a.HVLogPK = d.FormFK AND a.ProgramFK = d.ProgramFK AND d.FormType = 'VL'
 LEFT OUTER JOIN Attachment AS e ON a.HVLogPK = e.FormFK AND a.ProgramFK = e.ProgramFK AND e.FormType = 'VL'
 WHERE --a.ProgramFK = @ProgramFK
