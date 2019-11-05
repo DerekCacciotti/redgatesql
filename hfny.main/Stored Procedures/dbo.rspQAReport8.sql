@@ -611,34 +611,55 @@ SELECT HVCasePK
 	  )) THEN 0
 	 
 	  -- handling optional - 36
-	  WHEN((qa04.IntervalExpected = '36') AND (
+	  WHEN((qa04.IntervalExpected = '36' OR qa04.IntervalExpected = '30') AND (
 		  '36' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+		  OR
+		  '30' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  		 
 	  )) THEN 0
-	 
-	  -- handling optional - 30
-	  WHEN((qa04.IntervalExpected = '30') AND (
-		  '30' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
-	  )) THEN 0
-	 
+
 	  -- handling optional - 24
-	  WHEN((qa04.IntervalExpected = '24') AND (
+	  WHEN((qa04.IntervalExpected = '24' OR qa04.IntervalExpected = '18') AND (
 		  '24' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+		  OR
+		  '18' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  		 
 	  )) THEN 0
-	 
-	  -- handling optional - 18
-	  WHEN((qa04.IntervalExpected = '18') AND (
-		  '18' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
-	  )) THEN 0
-	 
+
 	  -- handling optional - 12
-	  WHEN((qa04.IntervalExpected = '12') AND (
+	  WHEN((qa04.IntervalExpected = '12' OR qa04.IntervalExpected = '06') AND (
 		  '12' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+		  OR
+		  '06' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  		 
 	  )) THEN 0
+
+	  ---- handling optional - 36
+	  --WHEN((qa04.IntervalExpected = '36') AND (
+		 -- '36' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+	  --)) THEN 0
 	 
-	  -- handling optional - 06
-	  WHEN((qa04.IntervalExpected = '06') AND (
-		  '06' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
-	  )) THEN 0
+	  ---- handling optional - 30
+	  --WHEN((qa04.IntervalExpected = '30') AND (
+		 -- '30' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+	  --)) THEN 0
+	 
+	  ---- handling optional - 24
+	  --WHEN((qa04.IntervalExpected = '24') AND (
+		 -- '24' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+	  --)) THEN 0
+	 
+	  ---- handling optional - 18
+	  --WHEN((qa04.IntervalExpected = '18') AND (
+		 -- '18' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+	  --)) THEN 0
+	 
+	  ---- handling optional - 12
+	  --WHEN((qa04.IntervalExpected = '12') AND (
+		 -- '12' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+	  --)) THEN 0
+	 
+	  ---- handling optional - 06
+	  --WHEN((qa04.IntervalExpected = '06') AND (
+		 -- '06' IN (SELECT interval FROM  @tbl4QAReport8Intervals4AllASQSE1sInOurCohort qa4 WHERE  qa4.TCIDFK  = qa04.TCIDPK)  	
+	  --)) THEN 0
 	 
   	  	 
 	  	  	 
