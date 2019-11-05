@@ -2,9 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
-
 -- =============================================
 -- Author:    <Dar Chen>
 -- Create date: <Oct 1, 2012>
@@ -109,10 +106,7 @@ as
 			inner join workerprogram on workerfk = fsw.workerpk AND workerprogram.ProgramFK = ListItem
 			inner join worker supervisor on supervisorfk = supervisor.workerpk
 			inner join codelevel on codelevelpk = currentlevelfk
-			left join asqse on asqse.hvcasefk = hvcasepk and asqse.programfk = caseprogram.programfk 
-			and codeduebydates.interval = asqseTCAge
-		where asqse.hvcasefk is NULL
-			AND HVCase.TCDOD IS NULL
+		where HVCase.TCDOD IS NULL
 			and caseprogress >= 11
 			and currentFSWFK = isnull(@workerfk,currentFSWFK)
 			and supervisorfk = isnull(@supervisorfk,supervisorfk)
