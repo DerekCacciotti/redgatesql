@@ -1,5 +1,5 @@
 SET IDENTITY_INSERT [dbo].[NewsEntry] ON
-INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (35, '2019-10-16 00:00:00.000')
+INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (40, '2019-11-04 00:00:00.000')
 SET IDENTITY_INSERT [dbo].[NewsEntry] OFF
 SET IDENTITY_INSERT [dbo].[NewsEntry] ON
 INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (1, '2018-09-05 00:00:00.000')
@@ -36,4 +36,8 @@ INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (31, '2019-09-
 INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (32, '2019-09-30 00:00:00.000')
 INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (33, '2019-10-01 00:00:00.000')
 INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (34, '2019-10-08 00:00:00.000')
+INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (35, '2019-10-16 00:00:00.000')
+INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (36, '2019-10-24 00:00:00.000')
+INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (38, '2019-10-30 00:00:00.000')
+INSERT INTO [dbo].[NewsEntry] ([NewsEntryPK], [EntryDate]) VALUES (39, '2019-10-31 00:00:00.000')
 SET IDENTITY_INSERT [dbo].[NewsEntry] OFF

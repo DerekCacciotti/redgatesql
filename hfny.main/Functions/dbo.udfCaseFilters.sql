@@ -111,11 +111,11 @@ begin
 							   ,cp.ProgramFK
 							   ,cast(isnull(CaseFilterNameFK,listCaseFilterNamePK) as varchar(10))+';'
 								+case 
-									when cfn.FilterType = 1
+									when cfn.FilterType = '01'
 										then case when cf.CaseFilterNameChoice=1 then 'Yes' else 'No' end
-									when cfn.FilterType = 2
+									when cfn.FilterType = '02'
 										then (select cfno.FilterOption from listCaseFilterNameOption cfno where listCaseFilterNameOptionPK=cf.CaseFilterNameOptionFK)
-									when cfn.FilterType = 3
+									when cfn.FilterType in ('03', '04')
 										then CaseFilterValue
 								end as answers
 							from CaseProgram cp
