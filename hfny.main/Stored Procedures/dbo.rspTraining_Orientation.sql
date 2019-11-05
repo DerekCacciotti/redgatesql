@@ -12,6 +12,11 @@ GO
 --				are no longer being populated based on the latest workerform changes by Dar, so I've modified this report.
 
 -- Edit date: 08/23/2018 CP - New BPS Standards require all recently hired workers (past 18 mos) to get training on time or receive not meeting standard
+
+-- EDIT DATE: 10/10/2019 CP - As per meeting with Corinne, HFA changed requirement of 10.a-b to include 'Practices of Ethical Standards'.
+			--Therefore, all workers must complete the 10.a-b training again where this new section has been added to the training.
+			--Workers terminated prior to 7/1/2019 will continue to be scored the previous way, worker hired after 7/1/2019 or working as of 7/1/2019 must
+			--get the training again to be in compliance 
 -- =============================================
 CREATE PROCEDURE [dbo].[rspTraining_Orientation]
 	-- Add the parameters for the stored procedure here
