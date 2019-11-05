@@ -12,3 +12,5 @@ CREATE TABLE [dbo].[AttachmentCategory]
 GO
 ALTER TABLE [dbo].[AttachmentCategory] ADD CONSTRAINT [PK__Attachme__AB86ECEECE748D3F] PRIMARY KEY CLUSTERED  ([AttachmentCategoryPK]) ON [PRIMARY]
 GO
+ALTER TABLE [dbo].[AttachmentCategory] ADD CONSTRAINT [FK_AttachmentCategory_Attachment] FOREIGN KEY ([AttachmentFK]) REFERENCES [dbo].[Attachment] ([AttachmentPK])
+GO
