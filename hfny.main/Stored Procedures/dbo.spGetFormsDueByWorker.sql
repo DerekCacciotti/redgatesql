@@ -44,7 +44,7 @@ FROM	CaseProgram
 	INNER JOIN TCID
 		ON TCID.HVCaseFK = HVCasePK
 	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'ASQ-3'
+		ON ScheduledEvent = 'ASQ'
 WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
 	AND CaseProgram.ProgramFK = @ProgramFK
 	AND CaseProgress >= 11
@@ -79,42 +79,42 @@ WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END
 UNION
 
 -- HOME
-SELECT	PC1ID,
-		EventDescription,
-		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
-FROM	CaseProgram
-	INNER JOIN HVCase
-		ON HVCasePK = CaseProgram.HVCaseFK
-	INNER JOIN TCID
-		ON TCID.HVCaseFK = HVCasePK
-	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'HOME'
-WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
-	AND CaseProgram.ProgramFK = @ProgramFK
-	AND CaseProgress >= 11
-	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
-	AND DischargeDate IS NULL
+--SELECT	PC1ID,
+--		EventDescription,
+--		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
+--FROM	CaseProgram
+--	INNER JOIN HVCase
+--		ON HVCasePK = CaseProgram.HVCaseFK
+--	INNER JOIN TCID
+--		ON TCID.HVCaseFK = HVCasePK
+--	INNER JOIN codeDueByDates
+--		ON ScheduledEvent = 'HOME'
+--WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
+--	AND CaseProgram.ProgramFK = @ProgramFK
+--	AND CaseProgress >= 11
+--	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
+--	AND DischargeDate IS NULL
 
-UNION
+--UNION
 
--- HOME EC
-SELECT	PC1ID,
-		EventDescription,
-		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
-FROM	CaseProgram
-	INNER JOIN HVCase
-		ON HVCasePK = CaseProgram.HVCaseFK
-	INNER JOIN TCID
-		ON TCID.HVCaseFK = HVCasePK
-	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'HOMEEC'
-WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
-	AND CaseProgram.ProgramFK = @ProgramFK
-	AND CaseProgress >= 11
-	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
-	AND DischargeDate IS NULL
+---- HOME EC
+--SELECT	PC1ID,
+--		EventDescription,
+--		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
+--FROM	CaseProgram
+--	INNER JOIN HVCase
+--		ON HVCasePK = CaseProgram.HVCaseFK
+--	INNER JOIN TCID
+--		ON TCID.HVCaseFK = HVCasePK
+--	INNER JOIN codeDueByDates
+--		ON ScheduledEvent = 'HOMEEC'
+--WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
+--	AND CaseProgram.ProgramFK = @ProgramFK
+--	AND CaseProgress >= 11
+--	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
+--	AND DischargeDate IS NULL
 
-UNION
+--UNION
 
 -- FOLLOW UP
 SELECT	PC1ID,
@@ -126,7 +126,7 @@ FROM	CaseProgram
 	INNER JOIN TCID
 		ON TCID.HVCaseFK = HVCasePK
 	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'FOLLOW UP'
+		ON ScheduledEvent = 'Follow Up'
 WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
 	AND CaseProgram.ProgramFK = @ProgramFK
 	AND CaseProgress >= 11
@@ -203,7 +203,7 @@ FROM	CaseProgram
 	INNER JOIN TCID
 		ON TCID.HVCaseFK = HVCasePK
 	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'POLIO'
+		ON ScheduledEvent = 'Polio'
 WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
 	AND CaseProgram.ProgramFK = @ProgramFK
 	AND CaseProgress >= 11
@@ -279,7 +279,7 @@ FROM	CaseProgram
 	INNER JOIN TCID
 		ON TCID.HVCaseFK = HVCasePK
 	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'FLU'
+		ON ScheduledEvent = 'Flu'
 WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
 	AND CaseProgram.ProgramFK = @ProgramFK
 	AND CaseProgress >= 11
@@ -374,108 +374,107 @@ FROM	CaseProgram
 	INNER JOIN TCID
 		ON TCID.HVCaseFK = HVCasePK
 	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'IFSP'
+		ON ScheduledEvent = 'IFSP/FGP'
 WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
 	AND CaseProgram.ProgramFK = @ProgramFK
 	AND CaseProgress >= 11
 	AND DATEADD(dd, MinimumDue, HVCase.IntakeDate) BETWEEN @StartDate AND @EndDate
 	AND DischargeDate IS NULL
-
 UNION
 
--- Safety Checklist
-SELECT	PC1ID,
-		EventDescription,
-		DATEADD(dd, MinimumDue, HVCase.TCDOB) DueDate
-FROM	CaseProgram
-	INNER JOIN HVCase
-		ON HVCasePK = CaseProgram.HVCaseFK
-	INNER JOIN TCID
-		ON TCID.HVCaseFK = HVCasePK
-	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'SafetyCheckList'
-WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
-	AND CaseProgram.ProgramFK = @ProgramFK
-	AND CaseProgress >= 11
-	AND DATEADD(dd, MinimumDue, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
-	AND DischargeDate IS NULL
+---- Safety Checklist
+--SELECT	PC1ID,
+--		EventDescription,
+--		DATEADD(dd, MinimumDue, HVCase.TCDOB) DueDate
+--FROM	CaseProgram
+--	INNER JOIN HVCase
+--		ON HVCasePK = CaseProgram.HVCaseFK
+--	INNER JOIN TCID
+--		ON TCID.HVCaseFK = HVCasePK
+--	INNER JOIN codeDueByDates
+--		ON ScheduledEvent = 'SafetyCheckList'
+--WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
+--	AND CaseProgram.ProgramFK = @ProgramFK
+--	AND CaseProgress >= 11
+--	AND DATEADD(dd, MinimumDue, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
+--	AND DischargeDate IS NULL
 
-UNION
+--UNION
 
--- Benefits Status Change Form
-SELECT	PC1ID,
-		EventDescription,
-		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
-FROM	CaseProgram
-	INNER JOIN HVCase
-		ON HVCasePK = CaseProgram.HVCaseFK
-	INNER JOIN TCID
-		ON TCID.HVCaseFK = HVCasePK
-	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'BenefitsStatusChange'
-WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
-	AND CaseProgram.ProgramFK = @ProgramFK
-	AND CaseProgress >= 11
-	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
-	AND DischargeDate IS NULL
+---- Benefits Status Change Form
+--SELECT	PC1ID,
+--		EventDescription,
+--		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
+--FROM	CaseProgram
+--	INNER JOIN HVCase
+--		ON HVCasePK = CaseProgram.HVCaseFK
+--	INNER JOIN TCID
+--		ON TCID.HVCaseFK = HVCasePK
+--	INNER JOIN codeDueByDates
+--		ON ScheduledEvent = 'BenefitsStatusChange'
+--WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
+--	AND CaseProgram.ProgramFK = @ProgramFK
+--	AND CaseProgress >= 11
+--	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
+--	AND DischargeDate IS NULL
 
-UNION
+--UNION
 
--- Received Period of Purple Crying Kit (just a reminder, not form data to back this up)
-SELECT	PC1ID,
-		EventDescription,
-		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
-FROM	CaseProgram
-	INNER JOIN HVCase
-		ON HVCasePK = CaseProgram.HVCaseFK
-	INNER JOIN TCID
-		ON TCID.HVCaseFK = HVCasePK
-	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'CryingKit'		
-WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
-	AND CaseProgram.ProgramFK = @ProgramFK
-	AND CaseProgress >= 11
-	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
-	AND DischargeDate IS NULL
+---- Received Period of Purple Crying Kit (just a reminder, not form data to back this up)
+--SELECT	PC1ID,
+--		EventDescription,
+--		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
+--FROM	CaseProgram
+--	INNER JOIN HVCase
+--		ON HVCasePK = CaseProgram.HVCaseFK
+--	INNER JOIN TCID
+--		ON TCID.HVCaseFK = HVCasePK
+--	INNER JOIN codeDueByDates
+--		ON ScheduledEvent = 'CryingKit'		
+--WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
+--	AND CaseProgram.ProgramFK = @ProgramFK
+--	AND CaseProgress >= 11
+--	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
+--	AND DischargeDate IS NULL
 
-UNION
+--UNION
 
--- Hearing (OAE)
-SELECT	PC1ID,
-		EventDescription,
-		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
-FROM	CaseProgram
-	INNER JOIN HVCase
-		ON HVCasePK = CaseProgram.HVCaseFK
-	INNER JOIN TCID
-		ON TCID.HVCaseFK = HVCasePK
-	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'OAE'
-WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
-	AND CaseProgram.ProgramFK = @ProgramFK
-	AND CaseProgress >= 11
-	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
-	AND DischargeDate IS NULL
+---- Hearing (OAE)
+--SELECT	PC1ID,
+--		EventDescription,
+--		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
+--FROM	CaseProgram
+--	INNER JOIN HVCase
+--		ON HVCasePK = CaseProgram.HVCaseFK
+--	INNER JOIN TCID
+--		ON TCID.HVCaseFK = HVCasePK
+--	INNER JOIN codeDueByDates
+--		ON ScheduledEvent = 'OAE'
+--WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
+--	AND CaseProgram.ProgramFK = @ProgramFK
+--	AND CaseProgress >= 11
+--	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
+--	AND DischargeDate IS NULL
 
-UNION
+--UNION
 
--- Vision & Health Record
-SELECT	PC1ID,
-		EventDescription,
-		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
-FROM	CaseProgram
-	INNER JOIN HVCase
-		ON HVCasePK = CaseProgram.HVCaseFK
-	INNER JOIN TCID
-		ON TCID.HVCaseFK = HVCasePK
-	INNER JOIN codeDueByDates
-		ON ScheduledEvent = 'VHR'
-WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
-	AND CaseProgram.ProgramFK = @ProgramFK
-	AND CaseProgress >= 11
-	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
-	AND DischargeDate IS NULL
-	UNION
+---- Vision & Health Record
+--SELECT	PC1ID,
+--		EventDescription,
+--		DATEADD(dd, DueBy, HVCase.TCDOB) DueDate
+--FROM	CaseProgram
+--	INNER JOIN HVCase
+--		ON HVCasePK = CaseProgram.HVCaseFK
+--	INNER JOIN TCID
+--		ON TCID.HVCaseFK = HVCasePK
+--	INNER JOIN codeDueByDates
+--		ON ScheduledEvent = 'VHR'
+--WHERE CASE WHEN CurrentFSWFK IS NOT NULL THEN CurrentFSWFK ELSE CurrentFAWFK END = @WorkerFK
+--	AND CaseProgram.ProgramFK = @ProgramFK
+--	AND CaseProgress >= 11
+--	AND DATEADD(dd, DueBy, HVCase.TCDOB) BETWEEN @StartDate AND @EndDate
+--	AND DischargeDate IS NULL
+--	UNION
 
 
 

@@ -40,20 +40,27 @@ BEGIN
 		HVCaseFK
 	)
 	SELECT DISTINCT cp.PC1ID,  
-	MAX(hl.HVLogCreateDate) AS MostRecentVisitDate,
-	DATEADD(DAY, ROUND(7 / NULLIF(cl.MaximumVisit, 0), 0), MAX(hl.HVLogCreateDate)) AS NextExpectedVisit,
+	ISNULL(MAX(hl.VisitStartTime),hc.IntakeDate) as MostRecentVisitDate,
+	DATEADD(DAY, ROUND(7 / NULLIF(cl.MaximumVisit, 0), 0), (ISNULL(MAX(hl.VisitStartTime),hc.IntakeDate))) AS NextExpectedVisit,
 	cp.HVCaseFK
 	FROM dbo.CaseProgram cp
 		INNER JOIN dbo.codeLevel cl ON cl.codeLevelPK = cp.CurrentLevelFK
 		INNER JOIN dbo.Worker w ON cp.CurrentFSWFK = w.WorkerPK
 		INNER JOIN dbo.WorkerAssignment wa ON wa.WorkerFK = w.WorkerPK AND wa.ProgramFK = cp.ProgramFK
-		INNER JOIN dbo.HVLog hl ON hl.HVCaseFK = cp.HVCaseFK AND hl.ProgramFK = cp.ProgramFK
-	WHERE cl.MaximumVisit IS NOT NULL 
-		AND cl.MaximumVisit > 0
-		AND cp.ProgramFK = @ProgramFK
+		LEFT JOIN dbo.HVLog hl ON hl.HVCaseFK = cp.HVCaseFK AND hl.ProgramFK = cp.ProgramFK
+		INNER JOIN HVCase hc ON hc.HVCasePK = cp.HVCaseFK 
+
+	WHERE
+	
+	cl.MaximumVisit IS NOT NULL 
+	AND cl.MaximumVisit > 0
+		and cp.ProgramFK = @ProgramFK
 		AND w.WorkerPK = @WorkerFK
-	GROUP BY cp.PC1ID, cp.HVCaseFK, cl.MaximumVisit
+	GROUP BY cp.PC1ID, cp.HVCaseFK, cl.MaximumVisit, hc.IntakeDate
 	ORDER BY cp.PC1ID
+
+
+	--SELECT * FROM @tblCohort tc
 
 	--Get the highest scheduled visit (so that cases with 2 HVLogs on the same day do not mess the calculation up)
 	INSERT INTO @tblHVLogNextScheduledVisit
@@ -63,18 +70,23 @@ BEGIN
 	)
 	SELECT TOP 1 tc.PC1ID, hl.NextScheduledVisit FROM 
 		@tblCohort tc 
-		INNER JOIN dbo.HVLog hl ON hl.HVCaseFK = tc.HVCaseFK AND hl.HVLogCreateDate = tc.MostRecentHVLogDate
+		LEFT JOIN dbo.HVLog hl ON hl.HVCaseFK = tc.HVCaseFK AND hl.VisitStartTime = tc.MostRecentHVLogDate
 		WHERE PC1ID = tc.PC1ID
 		ORDER BY hl.NextScheduledVisit DESC
 
 	--Return the required information
 	SELECT tc.PC1ID,
 			tc.NextExpectedVisit,
-			thlnsv.NextScheduledVisit
+			FORMAT(thlnsv.NextScheduledVisit, 'MM/dd/yy') AS NextScheduledVisit
 			FROM @tblCohort tc
 			LEFT JOIN @tblHVLogNextScheduledVisit thlnsv ON thlnsv.PC1ID = tc.PC1ID
 			WHERE tc.NextExpectedVisit <= DATEADD(DAY, 8, GETDATE())
 			ORDER BY tc.NextExpectedVisit ASC
 
+
+			
+			
+
 END
+
 GO
