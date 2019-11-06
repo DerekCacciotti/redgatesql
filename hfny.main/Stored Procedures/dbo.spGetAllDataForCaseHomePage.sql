@@ -117,6 +117,27 @@ begin
 			from FollowUp fu
 			where HVCaseFK = @HVCaseFK
 		)
+	, ctePartnerViolenceScreenCount
+	AS
+		(
+		SELECT COUNT(PartnerViolenceScreenPK) AS CountOfPartnerViolenceScreens
+			FROM dbo.PartnerViolenceScreen
+			WHERE HVCaseFK = @HVCaseFK
+		)
+		, cteUNCOPECount
+	AS
+		(
+		SELECT COUNT(UNCOPEPK) AS CountOfUNCOPEs
+			FROM dbo.UNCOPE
+			WHERE HVCaseFK = @HVCaseFK
+		)
+		, cteCESDCount
+	AS
+		(
+		SELECT COUNT(CESDPK) AS CountOfCESDs
+			FROM dbo.CESD
+			WHERE HVCaseFK = @HVCaseFK
+		)
 	, cteCheersCheckInCount
 	AS
 		(
@@ -512,6 +533,12 @@ begin
 				, PSI_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PS')
 				, FatherFigure_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'FF')
 				, FatherFigure_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'FF')
+				, PartnerViolenceScreen_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'PV')
+				, PartnerViolenceScreen_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'PV')
+				, UNCOPE_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'UN')
+				, UNCOPE_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'UN')
+				, CESD_ReviewOn = (select ReviewOn from cteRawFormApprovals where FormType = 'CE')
+				, CESD_FormsReviewed = (select FormsReviewed from cteRawFormApprovals where FormType = 'CE')
 		)
 	
 	, cteCaseTransferStatus
@@ -593,6 +620,9 @@ begin
 			, isnull(CountOfPSIs, 0) as CountOfPSIs
 			, isnull(CountOfPHQ9s, 0) as CountOfPHQ9s
 			, isnull(CountOfFollowUps, 0) as CountOfFollowUps
+			, isnull(CountOfPartnerViolenceScreens, 0) as CountOfPartnerViolenceScreens			
+			, isnull(CountOfUNCOPEs, 0) as CountOfUNCOPEs	
+			, isnull(CountOfCESDs, 0) as CountOfCESDs	
 			, isnull(CountOfCheersCheckIns, 0) as CountOfCheersCheckIns
 			, isnull(case when charindex('/', CountOfASQs) > 0 
 						then CountOfASQs 
@@ -674,6 +704,12 @@ begin
 			, cfa.PSI_FormsReviewed
 			, cfa.FatherFigure_ReviewOn
 			, cfa.FatherFigure_FormsReviewed
+			, cfa.PartnerViolenceScreen_ReviewOn
+			, cfa.PartnerViolenceScreen_FormsReviewed
+			, cfa.UNCOPE_ReviewOn
+			, cfa.UNCOPE_FormsReviewed
+			, cfa.CESD_ReviewOn
+			, cfa.CESD_FormsReviewed
 			, cts.TransferredToFrom
 			, cts.ProgramName
 			, cts.TransferStatusText
@@ -710,6 +746,9 @@ begin
 		inner join ctePHQ9Count on 1 = 1
 		inner join cteFollowUpCount on 1 = 1
 		INNER JOIN cteCheersCheckInCount ON 1 = 1
+		INNER JOIN ctePartnerViolenceScreenCount ON 1 = 1
+		INNER JOIN cteUNCOPECount ON 1 = 1
+		INNER JOIN cteCESDCount ON 1 = 1
 		inner join cteTargetChildFormCompleteDate on 1=1
 		inner join cteTargetChildren_Flattened on 1=1
 		inner join cteASQCount on 1 = 1

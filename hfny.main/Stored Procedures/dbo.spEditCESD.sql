@@ -1,0 +1,60 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[spEditCESD](@CESDPK int=NULL,
+@ProgramFK int=NULL,
+@HVCaseFK int=NULL,
+@CESDDate datetime=NULL,
+@Bothered int=NULL,
+@PoorAppetite int=NULL,
+@CantShakeBlues int=NULL,
+@GoodAsOthers int=NULL,
+@TroubleKeepingMind int=NULL,
+@Depressed int=NULL,
+@EverythingAnEffort int=NULL,
+@Hopeful int=NULL,
+@Failure int=NULL,
+@Fearful int=NULL,
+@RestlessSleep int=NULL,
+@Happy int=NULL,
+@TalkedLess int=NULL,
+@Lonely int=NULL,
+@UnfriendlyPeople int=NULL,
+@EnjoyLife int=NULL,
+@Crying int=NULL,
+@Sad int=NULL,
+@PeopleDislikeMe int=NULL,
+@CantGetGoing int=NULL,
+@Score int=NULL,
+@CESDEditor varchar(max)=NULL)
+AS
+UPDATE CESD
+SET 
+ProgramFK = @ProgramFK, 
+HVCaseFK = @HVCaseFK, 
+CESDDate = @CESDDate, 
+Bothered = @Bothered, 
+PoorAppetite = @PoorAppetite, 
+CantShakeBlues = @CantShakeBlues, 
+GoodAsOthers = @GoodAsOthers, 
+TroubleKeepingMind = @TroubleKeepingMind, 
+Depressed = @Depressed, 
+EverythingAnEffort = @EverythingAnEffort, 
+Hopeful = @Hopeful, 
+Failure = @Failure, 
+Fearful = @Fearful, 
+RestlessSleep = @RestlessSleep, 
+Happy = @Happy, 
+TalkedLess = @TalkedLess, 
+Lonely = @Lonely, 
+UnfriendlyPeople = @UnfriendlyPeople, 
+EnjoyLife = @EnjoyLife, 
+Crying = @Crying, 
+Sad = @Sad, 
+PeopleDislikeMe = @PeopleDislikeMe, 
+CantGetGoing = @CantGetGoing, 
+Score = @Score, 
+CESDEditor = @CESDEditor
+WHERE CESDPK = @CESDPK
+GO
