@@ -54,7 +54,6 @@ BEGIN
 
 			INNER JOIN codeLevel cl ON cl.codeLevelPK = cp.CurrentLevelFK
     WHERE w.WorkerPK = ISNULL(@WorkerFK, w.WorkerPK)
-		  AND wp.SupervisorFK = ISNULL(@SupervisorFK, wp.SupervisorFK)
 		  AND cp.DischargeDate IS NULL
 		  and (cp.CurrentLevelFK = 22
 		  or cp.CurrentLevelFK = 24
