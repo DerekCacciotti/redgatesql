@@ -231,7 +231,7 @@ set fmtOnly off ;
 				and wp.SupervisorFK = isnull(@supervisorfk, wp.SupervisorFK)
 				--and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
 				and (case when @sitefk = 0 then 1 when wp.SiteFK = @sitefk then 1 else 0 end = 1)
-				and wrkr.FTE <> '03'
+				--and wrkr.FTE <> '03'
 	order by	w.WorkerName ;
 
 
@@ -819,7 +819,7 @@ set fmtOnly off ;
 					-- Form found in period and duration is 1:30 or greater 
  					when (sdg.WeeklyDuration >= (case when w.FTE = '01' then 90
 												when w.FTE = '02' then 60
-												when w.FTE = '03' then 0
+												when w.FTE = '03' then 15
 												else 90 end
 												)
 						--90
@@ -827,7 +827,7 @@ set fmtOnly off ;
 					-- Form found in period and duration less than 1:30
 					when (sdg.WeeklyDuration < (case when w.FTE = '01' then 90
 												when w.FTE = '02' then 60
-												when w.FTE = '03' then 0
+												when w.FTE = '03' then 15
 												else 90 end
 											)
 						--90
@@ -857,7 +857,7 @@ set fmtOnly off ;
 							isnull(SupervisionMinutes, 0) >=
 							(case when w.FTE = '01' then 90
 								when w.FTE = '02' then 60
-								when w.FTE = '03' then 0
+								when w.FTE = '03' then 15
 								else 90 end
 							)
 						-- 90
@@ -867,7 +867,7 @@ set fmtOnly off ;
 							isnull(SupervisionMinutes, 0) <
 							(case when w.FTE = '01' then 90
 									when w.FTE = '02' then 60
-									when w.FTE = '03' then 0
+									when w.FTE = '03' then 15
 									else 90 end
 								)
 						-- 90
@@ -1171,5 +1171,4 @@ set fmtOnly off ;
 	drop table #tblWeekPeriods ;
 	drop table #tblMaxOf2SupvisionPerWeekToBeConsidered ;
 end ;
-
 GO

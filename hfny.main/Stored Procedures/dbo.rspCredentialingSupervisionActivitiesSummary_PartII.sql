@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Devinder Singh Khalsa
 -- Create date: January 9th, 2014
@@ -24,16 +22,12 @@ CREATE procedure [dbo].[rspCredentialingSupervisionActivitiesSummary_PartII]
     
 as
 
-
-set nocount on
-
-IF 1=0 BEGIN
-    SET FMTONLY OFF
-END
-
+	set nocount on
+	IF 1=0 BEGIN
+		SET FMTONLY OFF
+	END
 
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK end	
-	
 	
 	--Step#: 1
 	-- Get list of all FAW and FSW that belong to the given program
@@ -259,30 +253,25 @@ END
 		--								, @AllWorkers = 0
 	)
 
--- Supervision sessions that did not take place with a reason
+	-- Supervision sessions that did not take place with a reason
 	-- to show list of the other reasons
 	,cteSupervisionsThatDidNotTakePlaceWithReasonOther
 	as
-	(
-				SELECT 
-
-								
-			Convert(VARCHAR(12), SupervisionDate, 101) + ' - ' + sup.WorkerName  + ' (Supervisor) - (Worker) ' +  w.WorkerName + ' - ' +	ReasonOtherSpecify 	as ReasonOtherSpecify			
-				
-			  
-			   FROM #tblWeekPeriodsAdjusted wp 		
+	(select Convert(VARCHAR(12), SupervisionDate, 101) + ' - ' + sup.WorkerName  + 
+			' (Supervisor) - (Worker) ' +  w.WorkerName + ' - ' + ReasonOtherSpecify 
+			as ReasonOtherSpecify			
+	   from #tblWeekPeriodsAdjusted wp 		
 		--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
 		left join #tblWorkers w on w.workerpk = wp.workerpk  -- include only those weeks where worker performed supervisions. 
 		left join Supervision s on s.WorkerFK = w.WorkerPK and SupervisionDate between StartDate and EndDate
 		inner join WorkerProgram wp1 on wp1.WorkerFK = w.workerpk
 		left join cteSupervisors sup on wp1.SupervisorFK = sup.WorkerPK		
 		where SupervisionPK is not null
-		and TakePlace = 0
+		and s.SupervisionSessionType = '0'
 		and ReasonOther = 1
 	)
 	
-
-SELECT * FROM cteSupervisionsThatDidNotTakePlaceWithReasonOther
+select * from cteSupervisionsThatDidNotTakePlaceWithReasonOther
 
 --ToDo: Also print out the other activities and reasons ... Khalsa
 
