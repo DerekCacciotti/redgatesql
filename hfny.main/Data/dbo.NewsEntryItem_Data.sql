@@ -1,6 +1,11 @@
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
-INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (399, 'Report Catalog - Fixed bug - it wasn''t finding SupervisionOfSupervisors doc', 1, 40)
-INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (400, 'Facesheet report - Added PC1 DOB', 2, 40)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (401, 'Forms - Added ability to change form date when editing', 1, 41)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (402, 'FSS Enrolled Tickler Summaries report - (temporarily) removed IFSP/FGP from report', 2, 41)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (403, 'Quality Assurance report - adding handling of ASQ-SE optionality ', 3, 41)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (404, '(ON HOLD) Training Orientation report - added Ethical Standards training', 4, 41)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (405, 'Supervision reports - Included < 25% FTE workers and they''re required to have 15 minutes of Supervision', 5, 41)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (406, 'Worker form - Added DataEntry users to username dropdown and removed Admin/CA', 6, 41)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (407, 'Parent Survey form - fixed when print button is displayed', 7, 41)
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] ON
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (2, 'Home Visit Log landing page - Fixed sorting of the table ', 1, 20)
@@ -399,4 +404,6 @@ INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [Ne
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (395, 'TC Medical form - Fixed sorting of dates', 5, 39)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (396, 'Worker form - added validation to disallow terminating supervisors that have current workers assigned to them. Also fixed placement of Submit/Cancel buttons.', 2, 39)
 INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (398, 'Shadowing report - Fixed calculation of scoring/rating', 11, 39)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (399, 'Report Catalog - Fixed bug - it wasn''t finding SupervisionOfSupervisors doc', 1, 40)
+INSERT INTO [dbo].[NewsEntryItem] ([NewsEntryItemPK], [Contents], [OrderBy], [NewsEntryFK]) VALUES (400, 'Facesheet report - Added PC1 DOB', 2, 40)
 SET IDENTITY_INSERT [dbo].[NewsEntryItem] OFF
