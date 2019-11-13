@@ -7,27 +7,37 @@ GO
 -- Create date: <June 19,2009>
 -- Description:	<Return the OptionValue for OptionItem, ProgramCode, for specify date>
 -- mod: <Jay Robohn> <Aug 06,2018> <Make ProgramFK optional>
+-- Updated by Benjamin Simmons on 11/13/19. Modified so that it works properly if sending
+-- the current datetime from the app service.
 -- =============================================
-CREATE procedure [dbo].[spGetOptionItem] (@OptionItem varchar(50)
-								, @ProgramFK int
-								, @CompareDate datetime
-								, @OptionValue varchar(200) output)
-as
-	begin
-		-- SET NOCOUNT ON added to prevent extra result sets from
-		-- interfering with SELECT statements.
-		set noCount on ;
+CREATE PROC [dbo].[spGetOptionItem]
+(
+    @OptionItem VARCHAR(50),
+    @ProgramFK INT,
+    @CompareDate DATETIME,
+    @OptionValue VARCHAR(200) OUTPUT
+)
+AS
+BEGIN
+    -- SET NOCOUNT ON added to prevent extra result sets from
+    -- interfering with SELECT statements.
+    SET NOCOUNT ON;
 
-		-- Insert statements for procedure here
-		select	@OptionValue = OptionValue
-		from	AppOptions
-		where	OptionItem = @OptionItem 
-				and case when @ProgramFK is null then 1
-						when ProgramFK = @ProgramFK then 1
-						else 0
-					end = 1
-				and @CompareDate between OptionStart and isnull(OptionEnd, getdate())
+    -- Insert statements for procedure here
+    SELECT @OptionValue = ao.OptionValue
+    FROM dbo.AppOptions ao
+    WHERE OptionItem = @OptionItem
+          AND CASE
+                  WHEN @ProgramFK = 0 THEN
+                      1
+                  WHEN ProgramFK = @ProgramFK THEN
+                      1
+                  ELSE
+                      0
+              END = 1
+          AND @CompareDate
+          BETWEEN OptionStart AND ISNULL(OptionEnd, @CompareDate);
+			--If the end date is null, use the compare date to ensure inclusion (BETWEEN is inclusive)
 
-	end ;
-
+END;
 GO
