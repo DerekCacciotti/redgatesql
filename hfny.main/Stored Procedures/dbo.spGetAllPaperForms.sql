@@ -19,7 +19,8 @@ as
 		SELECT DISTINCT	AttachmentPK
 			  , AttachmentTitle
 			  , AttachmentDescription
-			  , convert(varchar(10), FormDate, 126) as FormDate
+			  , --convert(varchar(10), FormDate, 126) as FormDate
+			  FORMAT(a.FormDate,'MM/dd/yy') AS FormDate
 			  , convert(varchar(10), AttachmentCreateDate, 126) as AttachmentCreateDate
 			  , AttachmentCreator,
 			  ac.AttachmentCategoryPK,
