@@ -671,6 +671,10 @@ as --DECLARE	@programfk INT = 1
 						  , SUM(CASE WHEN a.FamilyMemberReads IS NOT NULL AND a.FamilyMemberReads <> '' THEN 1
 									ELSE 0 END) * 100 MIECHV1
 						  ,
+						  -- added by dc
+						  SUM(CASE WHEN a.TCAlwaysOnBack = 1 THEN 1 ELSE 0 END) * 100 AS TCAlwaysOnBack,
+						  SUM(CASE WHEN a.TCAlwaysWithoutSharing = 1 THEN 1 ELSE 0 END) * 100 AS TCAlwaysWithoutSharing,
+						 
 -- concrete activities
 							sum(case when CATransportation = 1   then 1
 									 else 0
@@ -946,9 +950,9 @@ as --DECLARE	@programfk INT = 1
 
 -- MIECHV only
 				b.FamilyMemberReads / x FamilyMemberReads
-			  , b.MIECHV1 / x MIECHV1
-			  ,
-
+			  , b.MIECHV1 / x MIECHV1,
+				b.TCAlwaysOnBack / x TCAlwaysOnBack,
+				b.TCAlwaysWithoutSharing / x TCAlwaysWithoutSharing,
 -- concrete activities
 				[CATransportation] / x [CATransportation]
 			  , [CAGoods] / x [CAGoods]

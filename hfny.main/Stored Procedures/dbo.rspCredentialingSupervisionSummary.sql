@@ -189,7 +189,7 @@ where		w.WorkerPK not in (select WorkerPK from #tblSUPPMWorkers) and
 			and wp.SupervisorFK = isnull(@supervisorfk, wp.SupervisorFK)
 			--and startdate < enddate --Chris Papas 05/25/2011 due to problem with pc1id='IW8601030812'
 			and (case when @sitefk = 0 then 1 when wp.SiteFK = @sitefk then 1 else 0 end = 1)
-			and wrkr.FTE <> '03'
+			--and wrkr.FTE <> '03'
 order by	w.WorkerName ;
 
 -- rspCredentialingSupervisionSummary 1, '01/06/2013', '02/02/2013'		
@@ -742,7 +742,7 @@ as (
 
 				when (sdg.WeeklyDuration >= (case when w.FTE = '01' then 90
 											when w.FTE = '02' then 60
-											when w.FTE = '03' then 0
+											when w.FTE = '03' then 15
 											else 90 end
 											)
 					--(case when w.FTEFullTime = null then 90 when w.FTEFullTime = 1 then 90 else 60 end)
@@ -750,7 +750,7 @@ as (
 
 				when (sdg.WeeklyDuration < (case when w.FTE = '01' then 90
 											when w.FTE = '02' then 60
-											when w.FTE = '03' then 0
+											when w.FTE = '03' then 15
 											else 90 end
 										)
 					--(case when w.FTEFullTime = NULL then 90 when w.FTEFullTime = 1 then 90 else 60 end)
