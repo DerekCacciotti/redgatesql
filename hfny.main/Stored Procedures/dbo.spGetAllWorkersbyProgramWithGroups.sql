@@ -15,6 +15,10 @@ GO
 -- Test: exec spGetAllWorkersbyProgramWithGroups 30,null,'FSW,FAW,FAdv,SUP,PM'
 --		 exec spGetAllWorkersbyProgramWithGroups 1,'2016-01-01', 'SUP,FAW,FSW'
 --		 exec spGetAllWorkersbyProgramWithGroups 2,NULL,NULL,1
+
+-- Edit date: 10/10/2019
+-- Edited by: Bill O'Brien
+-- Edit Reason: With Worker Redesign, need to account for role end dates and worker leave periods.
 -- =============================================
 CREATE procedure [dbo].[spGetAllWorkersbyProgramWithGroups]
 	@ProgramFK  int           = null,
@@ -38,35 +42,35 @@ if @AllWorkers = 0 or @AllWorkers is null
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and faw = 1
-					and @EventDate between FAWStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between FAWStartDate AND isnull(FAWEndDate, isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate()))))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FSW' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and fsw = 1
-					and @EventDate between FSWStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between FSWStartDate AND isnull(FAWEndDate, isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate()))))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FAdv' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and FatherAdvocate = 1
-					and @EventDate between FatherAdvocateStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between FatherAdvocateStartDate AND isnull(FatherAdvocateEndDate, isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate()))))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'SUP' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and supervisor = 1
-					and @EventDate between SupervisorStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between SupervisorStartDate AND isnull(SupervisorEndDate, isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate()))))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'PM' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and programmanager = 1
-					and @EventDate between ProgramManagerStartDate AND isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate())))
+					and @EventDate between ProgramManagerStartDate AND isnull(ProgramManagerEndDate, isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate()))))
 			)
 
 		select rtrim(LastName) + ', ' + rtrim(FirstName) 
@@ -82,7 +86,9 @@ if @AllWorkers = 0 or @AllWorkers is null
 				, workertype
 		from cteAllWorkers aw
 		inner join dbo.SplitString(@WorkerType,',') on workertype = listitem
+		left join fnWorkersOnLeave(@EventDate, @ProgramFK) wol on wol.WorkerFK = WorkerPK
 		where (not FirstName like 'Historical%') and LastName <> 'Transfer Worker'
+		and wol.WorkerFK is null
 		-- where workertype in (select listitem from dbo.SplitString(@WorkerType,','))
 		-- inner join Worker w on w.WorkerPK = aw.WorkerPK
 		order by case workertype 
@@ -105,9 +111,11 @@ else
 						, case when TerminationDate is null then 0 else 1 end
 		from WorkerProgram wp
 		inner join Worker w on w.WorkerPK = wp.WorkerFK
+		left join fnWorkersOnLeave(@EventDate, @ProgramFK) wol on wol.WorkerFK = WorkerPK
 		where ProgramFK = isnull(@ProgramFK, ProgramFK)
 				and (not FirstName like 'Historical%') 
 				and LastName <> 'Transfer Worker'
+				and wol.WorkerFK is null
 		order by case when TerminationDate is null then 0 else 1 end, LastName, FirstName
 	end
 GO
