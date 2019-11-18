@@ -6,8 +6,9 @@ CREATE TABLE [dbo].[AppOptions]
 [OptionEnd] [datetime] NULL,
 [OptionItem] [varchar] (50) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [OptionStart] [datetime] NOT NULL,
-[OptionValue] [varchar] (250) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[ProgramFK] [int] NULL
+[OptionValue] [varchar] (250) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ProgramFK] [int] NULL,
+[AppName] [varchar] (100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[AppOptions] ADD CONSTRAINT [PK__AppOptio__6E5B65BC7F60ED59] PRIMARY KEY CLUSTERED  ([AppOptionsPK]) ON [PRIMARY]
