@@ -12,8 +12,8 @@ CREATE procedure [dbo].[spAddFormReview_userTRIGGER](@FormFK int, @FormTypeValue
 	-- Add the parameters for the stored procedure here
 	AS
 
-Declare @TableName varchar(20), @FormDateName varchar(20), 
-        @CreatorName varchar(max), @PKName as varchar(20),
+Declare @TableName varchar(32), @FormDateName varchar(20), 
+        @CreatorName varchar(max), @PKName as varchar(32),
 		@SelectStatement nVarchar(700),
 	    @DateValue datetime, @CreatorValue varchar(20), 
 		@PrgFKValue int, @HVCaseFKValue int,
