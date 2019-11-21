@@ -61,6 +61,7 @@
   <DataFileSet>
     <Count>23</Count>
     <DataFile>dbo.codeApp_Data.sql</DataFile>
+    <DataFile>dbo.codeAttachmentCategory_Data.sql</DataFile>
     <DataFile>dbo.codeAuditC_Data.sql</DataFile>
     <DataFile>dbo.codeCaseProgress_Data.sql</DataFile>
     <DataFile>dbo.codeCounty_Data.sql</DataFile>
