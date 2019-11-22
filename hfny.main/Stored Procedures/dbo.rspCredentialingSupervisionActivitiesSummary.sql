@@ -489,7 +489,8 @@ as (
 			, sum(convert(int, shvc.Tools)) as Tools
 			, sum(convert(int, shvc.TransitionPlanning)) as TransitionPlanning
 	from cteSupervisionsThatTookPlace sttp
-	left join SupervisionHomeVisitCase shvc on shvc.SupervisionFK = sttp.SupervisionPK
+	inner join SupervisionHomeVisitCase shvc on shvc.SupervisionFK = sttp.SupervisionPK
+	where SupervisionSessionType = '1'
 )
 , ctePSCaseActivities 
 as (
@@ -500,7 +501,8 @@ as (
 			, sum(convert(int, spsc.Referrals)) as Referrals
 			, sum(convert(int, spsc.RiskFactors)) as RiskFactors
 	from cteSupervisionsThatTookPlace sttp
-	left join SupervisionParentSurveyCase spsc on spsc.SupervisionFK = sttp.SupervisionPK
+	inner join SupervisionParentSurveyCase spsc on spsc.SupervisionFK = sttp.SupervisionPK
+	where SupervisionSessionType = '1'
 )
 , cteSupervisionsThatTookPlacePercActivities
 as (
