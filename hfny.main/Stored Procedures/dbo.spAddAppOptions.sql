@@ -2,13 +2,14 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddAppOptions](@OptionDataType char(20)=NULL,
-@OptionDescription char(250)=NULL,
+CREATE PROCEDURE [dbo].[spAddAppOptions](@OptionDataType varchar(20)=NULL,
+@OptionDescription varchar(250)=NULL,
 @OptionEnd datetime=NULL,
-@OptionItem char(50)=NULL,
+@OptionItem varchar(50)=NULL,
 @OptionStart datetime=NULL,
-@OptionValue char(200)=NULL,
-@ProgramFK int=NULL)
+@OptionValue varchar(250)=NULL,
+@ProgramFK int=NULL,
+@AppName varchar(100)=NULL)
 AS
 INSERT INTO AppOptions(
 OptionDataType,
@@ -17,7 +18,8 @@ OptionEnd,
 OptionItem,
 OptionStart,
 OptionValue,
-ProgramFK
+ProgramFK,
+AppName
 )
 VALUES(
 @OptionDataType,
@@ -26,7 +28,8 @@ VALUES(
 @OptionItem,
 @OptionStart,
 @OptionValue,
-@ProgramFK
+@ProgramFK,
+@AppName
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

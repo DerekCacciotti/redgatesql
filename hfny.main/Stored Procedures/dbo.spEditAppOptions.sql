@@ -3,13 +3,14 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditAppOptions](@AppOptionsPK int=NULL,
-@OptionDataType char(20)=NULL,
-@OptionDescription char(250)=NULL,
+@OptionDataType varchar(20)=NULL,
+@OptionDescription varchar(250)=NULL,
 @OptionEnd datetime=NULL,
-@OptionItem char(50)=NULL,
+@OptionItem varchar(50)=NULL,
 @OptionStart datetime=NULL,
-@OptionValue char(200)=NULL,
-@ProgramFK int=NULL)
+@OptionValue varchar(250)=NULL,
+@ProgramFK int=NULL,
+@AppName varchar(100)=NULL)
 AS
 UPDATE AppOptions
 SET 
@@ -19,6 +20,7 @@ OptionEnd = @OptionEnd,
 OptionItem = @OptionItem, 
 OptionStart = @OptionStart, 
 OptionValue = @OptionValue, 
-ProgramFK = @ProgramFK
+ProgramFK = @ProgramFK, 
+AppName = @AppName
 WHERE AppOptionsPK = @AppOptionsPK
 GO

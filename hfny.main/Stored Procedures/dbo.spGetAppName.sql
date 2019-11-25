@@ -28,7 +28,7 @@ BEGIN
     (
         AppName
     )
-    SELECT an.AppName
+    SELECT an.Name
     FROM dbo.AppName an;
 
 	--Set the number of results to the count from the app name table
