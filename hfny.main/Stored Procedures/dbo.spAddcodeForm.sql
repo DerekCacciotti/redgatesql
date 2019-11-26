@@ -2,13 +2,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddcodeForm](@FormPKName varchar(20)=NULL,
+CREATE PROCEDURE [dbo].[spAddcodeForm](@FormPKName varchar(32)=NULL,
 @canBeReviewed bit=NULL,
 @codeFormAbbreviation char(2)=NULL,
 @codeFormName varchar(50)=NULL,
 @CreatorFieldName varchar(40)=NULL,
 @FormDateName varchar(20)=NULL,
-@MainTableName varchar(20)=NULL)
+@MainTableName varchar(32)=NULL)
 AS
 INSERT INTO codeForm(
 FormPKName,
