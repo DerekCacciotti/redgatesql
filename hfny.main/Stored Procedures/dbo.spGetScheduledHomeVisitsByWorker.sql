@@ -56,6 +56,7 @@ BEGIN
 	AND cl.MaximumVisit > 0
 		and cp.ProgramFK = @ProgramFK
 		AND w.WorkerPK = @WorkerFK
+		AND cp.DischargeDate IS NULL
 	GROUP BY cp.PC1ID, cp.HVCaseFK, cl.MaximumVisit, hc.IntakeDate
 	ORDER BY cp.PC1ID
 
