@@ -8,8 +8,7 @@ GO
 -- Description:	Get all the app options
 -- =============================================
 
-CREATE PROC [dbo].[spGetAllAppOptions] 
-	@AppName VARCHAR(100)
+CREATE PROC [dbo].[spGetAllAppOptions]
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -28,8 +27,7 @@ BEGIN
            ao.AppName,
            hp.ProgramName
     FROM dbo.AppOptions ao
-		LEFT JOIN dbo.HVProgram hp ON ao.ProgramFK = hp.HVProgramPK
-	WHERE ao.AppName = @AppName;
+		LEFT JOIN dbo.HVProgram hp ON ao.ProgramFK = hp.HVProgramPK;
 
 END;
 GO
