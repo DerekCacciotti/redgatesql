@@ -294,6 +294,26 @@ begin try
 	close del_cursor;
 	deallocate del_cursor;
 
+	--CheersCheckIn
+	declare del_cursor cursor for
+	select cci.CheersCheckInPK
+		from dbo.CheersCheckIn cci
+		where cci.HVCaseFK = @hvcasefk
+			 and cci.ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC dbo.spDelCheersCheckIn @CheersCheckInPK = @pk
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
 	--TCID
 	declare del_cursor cursor for
 	select TCIDpk
@@ -593,29 +613,7 @@ begin try
 
 	end
 	close del_cursor;
-	deallocate del_cursor;
-
-	--CheersCheckIn
-	declare del_cursor cursor for
-	select cci.CheersCheckInPK
-		from dbo.CheersCheckIn cci
-		where cci.HVCaseFK = @hvcasefk
-			 and cci.ProgramFK = @ProgramFK;
-	open del_cursor
-
-	fetch next from del_cursor into @PK
-
-	while @@FETCH_STATUS = 0
-	begin
-		EXEC dbo.spDelCheersCheckIn @CheersCheckInPK = @pk
-
-		fetch next from del_cursor into @PK
-
-	end
-	close del_cursor;
-	deallocate del_cursor;
-
-	
+	deallocate del_cursor;	
 
 	--SupervisionHomeVisitCase
 	declare del_cursor cursor for
@@ -652,6 +650,66 @@ begin try
 	while @@FETCH_STATUS = 0
 	begin
 		EXEC dbo.spDelSupervisionParentSurveyCase @SupervisionParentSurveyCasePK = @pk -- int
+		
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	--Partner Violence Screen
+	declare del_cursor cursor for
+	select PartnerViolenceScreenPK
+		from dbo.PartnerViolenceScreen
+		where HVCaseFK = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC dbo.spDelPartnerViolenceScreen @PartnerViolenceScreenPK = @pk -- int
+		
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	--CESD
+	declare del_cursor cursor for
+	select CESDPK
+		from dbo.CESD
+		where HVCaseFK = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC dbo.spDelCESD @CESDPK = @pk -- int
+		
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
+
+	--UNCOPE
+	declare del_cursor cursor for
+	select UNCOPEPK
+		from dbo.UNCOPE
+		where HVCaseFK = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		EXEC dbo.spDelUNCOPE @UNCOPEPK = @pk -- int
 		
 		fetch next from del_cursor into @PK
 
