@@ -74,6 +74,7 @@
     <DataFile>dbo.codeMedicalItem_Data.sql</DataFile>
     <DataFile>dbo.codePerformanceTargetTitle_Data.sql</DataFile>
     <DataFile>dbo.codeRegion_Data.sql</DataFile>
+    <DataFile>dbo.codeReportAccess_Data.sql</DataFile>
     <DataFile>dbo.codeReportCatalog_Data.sql</DataFile>
     <DataFile>dbo.codeServiceReferral_Data.sql</DataFile>
     <DataFile>dbo.codeSubTopicDetail_Data.sql</DataFile>
@@ -84,6 +85,5 @@
     <DataFile>dbo.scoreASQSE_Data.sql</DataFile>
     <DataFile>dbo.scoreASQ_Data.sql</DataFile>
     <DataFile>dbo.State_Data.sql</DataFile>
-    <DataFile>dbo.codeReportAccess_Data.sql</DataFile>
   </DataFileSet>
 </DatabaseInformation>
