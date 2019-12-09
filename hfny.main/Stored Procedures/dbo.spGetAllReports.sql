@@ -6,11 +6,16 @@ GO
 -- Author:		<Jay Robohn>
 -- Create date: <Jan 24, 2011>
 -- Description:	<Gets all items in the codeReportCatalog table>
+-- Edit Date: 12/09/2019 (Ben Simmons)
+-- Edit Reason: Implemented the codeReportAccess table that will limit the reports that
+-- users can see based on their state and the point in time that is passed to this stored proc.
 -- =============================================
-CREATE procedure [dbo].[spGetAllReports]
+CREATE PROC [dbo].[spGetAllReports]
 (
     @strProgramFK varchar(3)     = null,
-    @UserName     varchar(50)    = null
+    @UserName     varchar(50)    = NULL,
+	@StateFK INT = NULL,
+	@PointInTime DATETIME = NULL
 )
 as
 begin
@@ -24,7 +29,7 @@ begin
 	as (select ProgramFK
 			  ,ReportFK
 			  ,max(TimeRun) as UserLastRun
-			from ReportHistory rh
+			from dbo.ReportHistory rh
 			where ProgramFK = @ProgramFK
 				 and UserName = @UserName
 			group by ProgramFK
@@ -34,7 +39,7 @@ begin
 	as (select ProgramFK
 			  ,ReportFK
 			  ,max(TimeRun) as ProgramLastRun
-			from ReportHistory rh
+			from dbo.ReportHistory rh
 			where ProgramFK = @ProgramFK
 			group by ProgramFK
 					,ReportFK
@@ -43,7 +48,7 @@ begin
 	as (select row_number() over (order by count(ReportFK) desc) as UserRank
 			  ,count(ReportFK) as UserCount
 			  ,ReportFK
-			from ReportHistory rh
+			from dbo.ReportHistory rh
 			where ProgramFK = @ProgramFK
 				 and UserName = @UserName
 			group by ProgramFK
@@ -54,37 +59,40 @@ begin
 	as (select row_number() over (order by count(ReportFK) desc) as ProgramRank
 			  ,count(ReportFK) as ProgramCount
 			  ,ReportFK
-			from ReportHistory rh
+			from dbo.ReportHistory rh
 			where ProgramFK = @ProgramFK
 			group by ProgramFK
 					,ReportFK
 
 	)
-	select codeReportCatalogPK
+	select rc.codeReportCatalogPK
 		  ,rc.ReportName
-		  ,ReportCategory
-		  ,ReportDescription
-		  ,ReportClass
-		  ,CriteriaOptions
-		  ,Defaults
+		  ,rc.ReportCategory
+		  ,rc.ReportDescription
+		  ,rc.ReportClass
+		  ,rc.CriteriaOptions
+		  ,rc.Defaults
 		  --,'O:'+rtrim(CriteriaOptions)+' D(calc):'+rtrim(dbo.CalculateReportDefaults([Defaults]))+' D(raw):'+rtrim([Defaults]) as DefaultsBag
-		  ,Keywords
+		  ,rc.Keywords
 		  ,'' as AttachmentName -- space(100) 
 		  ,convert(varchar(10), UserLastRun, 126) as UserLastRun
 		  ,convert(varchar(10), ProgramLastRun, 126) as ProgramLastRun
-		  ,UserRank
-		  ,UserCount
-		  ,ProgramRank
-		  ,ProgramCount
-		from codeReportCatalog rc
-			left outer join Attachment a on a.FormFK = rc.codeReportCatalogPK and a.FormType = 'RC'
+		  ,fbu.UserRank
+		  ,fbu.UserCount
+		  ,fbp.ProgramRank
+		  ,fbp.ProgramCount
+		from dbo.codeReportCatalog rc
+			INNER JOIN dbo.codeReportAccess cra ON cra.ReportFK = rc.codeReportCatalogPK AND cra.StateFK = @StateFK
+			left outer join dbo.Attachment a on a.FormFK = rc.codeReportCatalogPK and a.FormType = 'RC'
 			left outer join cteLastRunByUser lrbu on lrbu.ReportFK = rc.codeReportCatalogPK
 			left outer join cteLastRunByProgram lrbp on lrbp.ReportFK = rc.codeReportCatalogPK
 			left outer join cteFrequencyByUser fbu on fbu.ReportFK = rc.codeReportCatalogPK
 			left outer join cteFrequencyByProgram fbp on fbp.ReportFK = rc.codeReportCatalogPK
-		where ReportClass is not null
-		order by [ReportCategory]
-				,[ReportName]
+		where rc.ReportClass is not NULL
+			AND cra.StartDate <= @PointInTime
+			AND (cra.EndDate IS NULL OR cra.EndDate >= @PointInTime)
+		ORDER by rc.[ReportCategory]
+				, rc.[ReportName]
 
 --	,cteFrequencyByUser
 --		as
