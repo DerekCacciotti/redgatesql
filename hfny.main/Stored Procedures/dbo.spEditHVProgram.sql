@@ -34,6 +34,7 @@ CREATE PROCEDURE [dbo].[spEditHVProgram](@HVProgramPK int=NULL,
 @ProgramStreet char(40)=NULL,
 @ProgramZip char(10)=NULL,
 @RegionFK int=NULL,
+@StateFK int=NULL,
 @TargetZip nvarchar(500)=NULL)
 AS
 UPDATE HVProgram
@@ -69,6 +70,7 @@ ProgramPhone = @ProgramPhone,
 ProgramStreet = @ProgramStreet, 
 ProgramZip = @ProgramZip, 
 RegionFK = @RegionFK, 
+StateFK = @StateFK, 
 TargetZip = @TargetZip
 WHERE HVProgramPK = @HVProgramPK
 GO

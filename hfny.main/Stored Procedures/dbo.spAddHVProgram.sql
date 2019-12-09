@@ -33,6 +33,7 @@ CREATE PROCEDURE [dbo].[spAddHVProgram](@ContractEndDate datetime=NULL,
 @ProgramStreet char(40)=NULL,
 @ProgramZip char(10)=NULL,
 @RegionFK int=NULL,
+@StateFK int=NULL,
 @TargetZip nvarchar(500)=NULL)
 AS
 INSERT INTO HVProgram(
@@ -67,6 +68,7 @@ ProgramPhone,
 ProgramStreet,
 ProgramZip,
 RegionFK,
+StateFK,
 TargetZip
 )
 VALUES(
@@ -101,6 +103,7 @@ VALUES(
 @ProgramStreet,
 @ProgramZip,
 @RegionFK,
+@StateFK,
 @TargetZip
 )
 

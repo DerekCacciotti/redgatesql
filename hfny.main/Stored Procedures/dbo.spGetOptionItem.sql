@@ -15,6 +15,7 @@ CREATE PROC [dbo].[spGetOptionItem]
     @OptionItem VARCHAR(50),
     @ProgramFK INT,
     @CompareDate DATETIME,
+    @AppName VARCHAR(100),
     @OptionValue VARCHAR(200) OUTPUT
 )
 AS
@@ -27,6 +28,7 @@ BEGIN
     SELECT @OptionValue = ao.OptionValue
     FROM dbo.AppOptions ao
     WHERE OptionItem = @OptionItem
+          AND ao.AppName = @AppName
           AND CASE
                   WHEN @ProgramFK = 0 THEN
                       1
@@ -37,7 +39,7 @@ BEGIN
               END = 1
           AND @CompareDate
           BETWEEN OptionStart AND ISNULL(OptionEnd, @CompareDate);
-			--If the end date is null, use the compare date to ensure inclusion (BETWEEN is inclusive)
+--If the end date is null, use the compare date to ensure inclusion (BETWEEN is inclusive)
 
 END;
 GO
