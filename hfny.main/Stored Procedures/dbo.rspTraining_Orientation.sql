@@ -32,9 +32,6 @@ BEGIN
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
 
-	DECLARE @newDatecode1 AS DATE = '07/01/2019'  --this is the new date used to pull topiccode 1.0, since they changed it, all workers need it after this date,
-											-- so if they got training prior to this date, don't pull the training
-	
 	DECLARE @cteMain AS TABLE (
 		workerpk INT
 		, WrkrLName VARCHAR(35)
@@ -84,85 +81,9 @@ BEGIN
 
 
 
-DECLARE @cte10_Code1 AS TABLE (
-		RowNumber INT
-		, workerpk INT
-		, TopicCode DECIMAL
-		, topicname VARCHAR(175)
-		, TrainingDate DATE
-		, FirstHomeVisitDate DATE
-		, FirstKempeDate DATE
-		, SupervisorFirstEvent DATE
-		, FirstEvent DATE
-		, WorkerName VARCHAR(75)
-		, Supervisor INT
-		, FSW INT
-		, FAW INT
-		,HireDate date
-)
-INSERT INTO	@cte10_Code1 ( RowNumber ,
-                           workerpk ,
-                           TopicCode ,
-                           topicname ,
-                           TrainingDate ,
-                           FirstHomeVisitDate ,
-                           FirstKempeDate ,
-                           SupervisorFirstEvent ,
-                           FirstEvent ,
-                           WorkerName ,
-                           Supervisor ,
-                           FSW ,
-                           FAW ,
-                           HireDate )
-SELECT RowNumber
-		, cteMain.workerpk
-		, t1.TopicCode
-		, t1.topicname
-		, MIN(t.TrainingDate) AS TrainingDate
-		, FirstHomeVisitDate
-		, FirstKempeDate
-		, SupervisorFirstEvent
-		, FirstEvent
-		, WorkerName
-		, Supervisor
-		, FSW
-		, FAW
-		,HireDate
-	FROM @cteMain cteMain
-			LEFT JOIN TrainingAttendee ta ON ta.WorkerFK = cteMain.WorkerPK
-			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
-			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
-			RIGHT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE (t1.TopicCode = 1.0)
-	AND TrainingDate >= @newDatecode1
-	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
-	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
-			, t1.TopicCode
-			, t1.topicname
-			, WorkerName
-			, Supervisor
-			, FSW
-			, FAW
-			, rownumber
-		,HireDate
 
-
-
---Now we get the trainings (or lack thereof) for topic code 2.0 to 5.5
-INSERT INTO	@cte10_Code1 ( RowNumber ,
-                           workerpk ,
-                           TopicCode ,
-                           topicname ,
-                           TrainingDate ,
-                           FirstHomeVisitDate ,
-                           FirstKempeDate ,
-                           SupervisorFirstEvent ,
-                           FirstEvent ,
-                           WorkerName ,
-                           Supervisor ,
-                           FSW ,
-                           FAW ,
-                           HireDate )
+--Now we get the trainings (or lack thereof) for topic code 1.0
+; WITH cte10_2a AS (
 	SELECT RowNumber
 		, cteMain.workerpk
 		, t1.TopicCode
@@ -182,7 +103,7 @@ INSERT INTO	@cte10_Code1 ( RowNumber ,
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			RIGHT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE (t1.TopicCode BETWEEN 2.0 AND 5.5)
+	WHERE (t1.TopicCode BETWEEN 1.0 AND 5.5)
 	GROUP BY WorkerPK, WrkrLName, FirstHomeVisitDate
 	, FirstKempeDate, SupervisorFirstEvent, FirstEvent
 			, t1.TopicCode
@@ -193,11 +114,11 @@ INSERT INTO	@cte10_Code1 ( RowNumber ,
 			, FAW
 			, rownumber
 		,HireDate
+)
 
 
 
-
-; WITH cteAddMissingWorkers_cte10_2a AS (
+, cteAddMissingWorkers_cte10_2a AS (
 	--if a worker has NO trainings, they won't appear at all, so add them back
 	SELECT WorkerPK
 	, codeTopic.TopicCode
@@ -234,7 +155,7 @@ INSERT INTO	@cte10_Code1 ( RowNumber ,
 		, b.FSW
 		, b.FAW
 		, b.HireDate
-	FROM @cte10_Code1 t
+	FROM cte10_2a t
 	RIGHT JOIN cteAddMissingWorkers_cte10_2a b
 	ON b.WorkerPK = t.WorkerPK
 	AND b.TopicCode = t.TopicCode
@@ -259,7 +180,7 @@ INSERT INTO	@cte10_Code1 ( RowNumber ,
 		, b.FSW
 		, b.FAW
 		, t.HireDate
-	FROM @cte10_Code1 t
+	FROM cte10_2a t
 	RIGHT JOIN cteAddMissingWorkers_cte10_2a b
 	ON b.WorkerPK = t.WorkerPK
 	AND b.TopicCode = t.TopicCode
