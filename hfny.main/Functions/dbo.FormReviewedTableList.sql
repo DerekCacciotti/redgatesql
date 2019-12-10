@@ -1,3 +1,4 @@
+
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -9,7 +10,7 @@ GO
 --				This was created because the utility to check formreview goes item by item, and in a large
 --				table (like the 1000+ in TrainingHome) it was taking 5 minutes or more to go through the whole list
 -- =============================================
-CREATE function [dbo].[FormReviewedTableList]
+CREATE FUNCTION [dbo].[FormReviewedTableList]
 (
   @FormType  varchar(2),
   @ProgFK INT
@@ -38,16 +39,10 @@ CREATE function [dbo].[FormReviewedTableList]
 								WHEN  fro.FormReviewStartDate > fr.Formdate THEN ''  --approved but someone changed review date into future
 								WHEN  fro.FormReviewStartDate IS Null THEN '' END --approved but somehow reviewing training NOT set
 							END AS 'IsApproved'
-						from		FormReview fr
-						left outer join	[dbo].[FormReviewOptions] fro on fro.ProgramFK = fr.ProgramFK
-										and fro.FormType = fr.FormType
-										and FormDate >= FormReviewStartDate 
-										and FormDate < case when FormReviewEndDate is null
-																then dateadd(day, 1, getdate())
-																else FormReviewEndDate
-															end
-						where		fr.ProgramFK = @ProgFK 
-									and fr.FormType = @FormType
+						FROM FormReview fr
+						INNER JOIN [dbo].[FormReviewOptions] fro ON fro.ProgramFK = fr.ProgramFK  
+						WHERE (fr.ProgramFK = @ProgFK AND fro.ProgramFK= @progFK)
+						AND fr.FormType=@FormType AND fro.FormType=@FormType	
 				END
 			ELSE
 				BEGIN
