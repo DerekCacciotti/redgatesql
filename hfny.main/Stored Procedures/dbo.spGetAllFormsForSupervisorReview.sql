@@ -35,6 +35,7 @@ begin
 		inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 		where programfk = @ProgramFK 
 				and current_timestamp between SupervisorStartDate and isnull(SupervisorEndDate,dateadd(dd,1,datediff(dd,0,getdate())))
+				AND wp.WorkerFK = ISNULL(@SupervisorFK, wp.WorkerFK)
 	)	
 	, cteCohort as 
 	(
