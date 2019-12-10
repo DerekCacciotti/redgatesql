@@ -1,9 +1,7 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- =============================================
 -- Author:		Chris Papas
 -- Create date: 07/15/2009
@@ -26,8 +24,7 @@ BEGIN
 		 , IsMICHC
 	from 
 	listReferralSource
-	where ProgramFK = @ProgramPK
+	where ProgramFK = @ProgramPK AND RSIsActive = 1
 	order by ReferralSourceName
 END
-
 GO
