@@ -33,6 +33,10 @@ BEGIN
 	DELETE cra FROM dbo.codeReportAccess cra 
 		INNER JOIN Deleted d ON d.codeReportCatalogPK = cra.ReportFK
 
+	--Delete any attachment rows for the report
+	DELETE a FROM dbo.Attachment a
+		INNER JOIN Deleted d ON d.codeReportCatalogPK = a.FormFK AND a.FormType = 'RC'
+
 	--Delete the report catalog row
 	DELETE crc FROM dbo.codeReportCatalog crc
 		INNER JOIN Deleted d ON d.codeReportCatalogPK = crc.codeReportCatalogPK
