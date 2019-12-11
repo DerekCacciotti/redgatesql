@@ -45,7 +45,7 @@ INSERT INTO @cteMAIN ( workerfk ,
                       -- RowNumber ,
 					   TopicCode )
 	SELECT DISTINCT wp.workerfk
-	, 'FAW' AS CurrentRole
+	, 'FRS' AS CurrentRole
 	, FAWInitialStart 
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
    -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
@@ -59,7 +59,7 @@ INSERT INTO @cteMAIN ( workerfk ,
 	GROUP BY wp.WorkerFK, LastName, FirstName, FAWInitialStart
 
 
---Get Supervisor's in time period for FAW Training
+--Get Supervisor's in time period for FRS Training
 INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
@@ -82,7 +82,7 @@ INSERT INTO @cteMAIN ( workerfk ,
 
 
 
---Get Supervisor's in time period for FSW Traomomg
+--Get Supervisor's in time period for FSS Traomomg
 INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
@@ -104,14 +104,14 @@ INSERT INTO @cteMAIN ( workerfk ,
 	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorInitialStart
 
 
---Get FSW's in time period
+--Get FSS's in time period
 INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
                        WorkerName ,
                      --  RowNumber ,
 					   TopicCode )
-	SELECT DISTINCT wp.workerfk, 'FSW' 
+	SELECT DISTINCT wp.workerfk, 'FSS' 
     , FSWInitialStart 
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
    -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
@@ -178,7 +178,7 @@ DECLARE @cteMAINTraining AS TABLE(
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=10.0 AND (CurrentRole='FAW'  OR CurrentRole='Supervisor')
+	WHERE t1.TopicCode=10.0 AND (CurrentRole='FRS'  OR CurrentRole='Supervisor')
 	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
 			, t1.TopicCode
 			, t1.topicname
@@ -201,7 +201,7 @@ FROM cteFAWMainTraining
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=11.0 AND (CurrentRole='FSW' OR CurrentRole='Supervisor')
+	WHERE t1.TopicCode=11.0 AND (CurrentRole='FSS' OR CurrentRole='Supervisor')
 	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
 			, t1.TopicCode
 			, t1.topicname
@@ -268,8 +268,8 @@ INSERT INTO @cteDetails ( RowNumber ,
 
 
 		
-		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FAW'  OR CurrentRole='Supervisor') AND TopicCode IS NULL
-		UPDATE @cteDetails SET TopicCode=11.0 WHERE (CurrentRole='FSW' OR CurrentRole='Supervisor')  AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FRS'  OR CurrentRole='Supervisor') AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=11.0 WHERE (CurrentRole='FSS' OR CurrentRole='Supervisor')  AND TopicCode IS NULL
 		UPDATE @cteDetails SET TopicCode=12.0 WHERE (CurrentRole='Supervisor')  AND TopicCode IS NULL
 
 		
