@@ -19,8 +19,7 @@ BEGIN
 
     --Get all the report access rows from the database
     SELECT cra.codeReportAccessPK,
-           cra.StartDate,
-           cra.EndDate,
+           cra.AllowedAccess,
            cra.ReportFK,
            cra.StateFK
     FROM dbo.codeReportAccess cra

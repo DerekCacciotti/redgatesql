@@ -2,20 +2,20 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROCEDURE [dbo].[spAddcodeReportAccess](@StartDate datetime=NULL,
-@EndDate datetime=NULL,
+CREATE PROCEDURE [dbo].[spAddcodeReportAccess](@AllowedAccess bit=NULL,
+@Creator varchar(256)=NULL,
 @ReportFK int=NULL,
 @StateFK int=NULL)
 AS
 INSERT INTO codeReportAccess(
-StartDate,
-EndDate,
+AllowedAccess,
+Creator,
 ReportFK,
 StateFK
 )
 VALUES(
-@StartDate,
-@EndDate,
+@AllowedAccess,
+@Creator,
 @ReportFK,
 @StateFK
 )

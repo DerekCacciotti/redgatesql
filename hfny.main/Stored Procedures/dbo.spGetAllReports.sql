@@ -89,8 +89,7 @@ begin
 			left outer join cteFrequencyByUser fbu on fbu.ReportFK = rc.codeReportCatalogPK
 			left outer join cteFrequencyByProgram fbp on fbp.ReportFK = rc.codeReportCatalogPK
 		where rc.ReportClass is not NULL
-			AND cra.StartDate <= @PointInTime
-			AND (cra.EndDate IS NULL OR cra.EndDate >= @PointInTime)
+			AND cra.AllowedAccess =	1
 		ORDER by rc.[ReportCategory]
 				, rc.[ReportName]
 

@@ -3,15 +3,15 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditcodeReportAccess](@codeReportAccessPK int=NULL,
-@StartDate datetime=NULL,
-@EndDate datetime=NULL,
+@AllowedAccess bit=NULL,
+@Editor varchar(256)=NULL,
 @ReportFK int=NULL,
 @StateFK int=NULL)
 AS
 UPDATE codeReportAccess
 SET 
-StartDate = @StartDate, 
-EndDate = @EndDate, 
+AllowedAccess = @AllowedAccess, 
+Editor = @Editor, 
 ReportFK = @ReportFK, 
 StateFK = @StateFK
 WHERE codeReportAccessPK = @codeReportAccessPK
