@@ -12,7 +12,6 @@ CREATE PROCEDURE [dbo].[rspPrenatalPHQ9Screen] (@ProgramFK VARCHAR(MAX) = NULL,
 												@CutoffDate DATE = NULL,
 												@SupervisorFK INT = NULL,
 												@WorkerFK INT = NULL,
-												@PC1ID VARCHAR(13) = '',
 												@SiteFK INT = NULL,
 												@CaseFiltersPositive VARCHAR(100) = ''
 											)
@@ -26,7 +25,6 @@ IF @ProgramFK is null
 	END;
 SET @ProgramFK = REPLACE(@ProgramFK, '"', '');
 SET @SiteFK = ISNULL(@SiteFK, 0);
-SET @PC1ID = ISNULL(@PC1ID, '');
 SET @CaseFiltersPositive = CASE	WHEN @CaseFiltersPositive = '' THEN null
 								ELSE @CaseFiltersPositive
 						   END;
@@ -94,7 +92,6 @@ WHERE
 	AND hc.TCDOB < hc.IntakeDate
 	AND cp.CurrentFSWFK = ISNULL(@WorkerFK, cp.CurrentFSWFK)
 	AND wp.SupervisorFK = ISNULL(@SupervisorFK, wp.SupervisorFK)
-	AND cp.PC1ID = CASE	WHEN @PC1ID = '' THEN cp.PC1ID ELSE @PC1ID END
 	AND CASE WHEN @SiteFK = 0 THEN 1 WHEN wp.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1
 			 
 
