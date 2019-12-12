@@ -160,13 +160,13 @@ AS
 	--find the first and last parent survey conducted by each worker, observed or not.
 	UPDATE @tblWorkers SET FirstParentSurvey = kempes.firstParentSurvey
 						 , LastParentSurvey = kempes.lastParentSurvey   FROM
-    @tblWorkers tw INNER JOIN (SELECT MIN(kempedate) AS firstParentSurvey, MAX(KempeDate) AS lastParentSurvey, FAWFK FROM @tblKempesInPeriod GROUP BY FAWFK) AS kempes
+    @tblWorkers tw INNER JOIN (SELECT MIN(kempedate) AS firstParentSurvey, MAX(KempeDate) AS lastParentSurvey, FAWFK FROM Kempe GROUP BY FAWFK) AS kempes
 	ON tw.WorkerPK = kempes.FAWFK
 	
 	--find the first and last home visit conducted by each worker, observed or not.
 	UPDATE @tblWorkers SET FirstHomeVisit = hv.firstVisit
 						  ,LastHomeVisit = hv.lastVisit FROM
-	@tblWorkers tw INNER JOIN (SELECT MIN(VisitStartTime) AS firstVisit, MAX(VisitStartTime) AS lastVisit , FSWFK FROM @tblHomeVisitsInPeriod GROUP BY FSWFK) AS hv
+	@tblWorkers tw INNER JOIN (SELECT MIN(VisitStartTime) AS firstVisit, MAX(VisitStartTime) AS lastVisit , FSWFK FROM HVLog GROUP BY FSWFK) AS hv
 	ON tw.WorkerPK = hv.FSWFK
 
 	--put all the observed parent surveys and home visits into one table
