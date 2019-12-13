@@ -59,7 +59,7 @@
     <DataWriteAllFilesInOneDirectory>True</DataWriteAllFilesInOneDirectory>
   </WriteToFileOptions>
   <DataFileSet>
-    <Count>26</Count>
+    <Count>25</Count>
     <DataFile>dbo.AppOptions_Data.sql</DataFile>
     <DataFile>dbo.codeApp_Data.sql</DataFile>
     <DataFile>dbo.codeAttachmentCategory_Data.sql</DataFile>
@@ -79,10 +79,9 @@
     <DataFile>dbo.codeReportAccess_Data.sql</DataFile>
     <DataFile>dbo.codeReportCatalog_Data.sql</DataFile>
     <DataFile>dbo.codeServiceReferral_Data.sql</DataFile>
+    <DataFile>dbo.codeSubTopicDetail_Data.sql</DataFile>
     <DataFile>dbo.codeTopic_Data.sql</DataFile>
     <DataFile>dbo.codeTraining_Data.sql</DataFile>
-    <DataFile>dbo.NewsEntryItem_Data.sql</DataFile>
-    <DataFile>dbo.NewsEntry_Data.sql</DataFile>
     <DataFile>dbo.scoreASQSE_Data.sql</DataFile>
     <DataFile>dbo.scoreASQ_Data.sql</DataFile>
     <DataFile>dbo.State_Data.sql</DataFile>
