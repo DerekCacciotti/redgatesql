@@ -18,8 +18,8 @@ BEGIN
     --Get all the form rows from the database
     SELECT cf.codeFormPK, cf.codeFormName, STRING_AGG(s.Abbreviation, ', ') WITHIN GROUP (ORDER BY s.Abbreviation ASC) AS StatesAllowed
 	FROM dbo.codeForm cf
-	INNER JOIN dbo.codeFormAccess cfa ON cfa.codeFormFK = cf.codeFormPK
-	INNER JOIN dbo.State s ON s.StatePK = cfa.StateFK
+	LEFT JOIN dbo.codeFormAccess cfa ON cfa.codeFormFK = cf.codeFormPK AND cfa.AllowedAccess = 1
+	LEFT JOIN dbo.State s ON s.StatePK = cfa.StateFK
 	GROUP BY cf.codeFormPK, cf.codeFormName
 
 END;
