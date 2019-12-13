@@ -39,3 +39,5 @@ END
 GO
 ALTER TABLE [dbo].[codeForm] ADD CONSTRAINT [PK__codeForm__C6B7B00D3B75D760] PRIMARY KEY CLUSTERED  ([codeFormPK]) ON [PRIMARY]
 GO
+CREATE UNIQUE NONCLUSTERED INDEX [IX_uniqueAbbreviation] ON [dbo].[codeForm] ([codeFormAbbreviation]) ON [PRIMARY]
+GO
