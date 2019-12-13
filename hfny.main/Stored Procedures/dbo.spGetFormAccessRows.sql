@@ -9,7 +9,8 @@ GO
 -- =============================================
 
 CREATE PROC [dbo].[spGetFormAccessRows] 
-	@StateFK INT = NULL
+	@StateFK INT = NULL,
+	@CodeFormFK INT = NULL
 AS
 BEGIN
     -- SET NOCOUNT ON added to prevent extra result sets from
@@ -26,7 +27,8 @@ BEGIN
            cfa.codeFormFK,
            cfa.StateFK
     FROM dbo.codeFormAccess cfa
-    WHERE cfa.StateFK = ISNULL(@StateFK, cfa.StateFK);
+    WHERE cfa.StateFK = ISNULL(@StateFK, cfa.StateFK)
+		AND cfa.codeFormFK = ISNULL(@CodeFormFK, cfa.codeFormFK);
 
 END;
 GO
