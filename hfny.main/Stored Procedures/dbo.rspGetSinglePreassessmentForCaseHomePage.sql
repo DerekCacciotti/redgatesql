@@ -3,7 +3,7 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROC [dbo].[rspGetSinglePreassessmentForCaseHomePage] @papk INT AS
-SELECT TOP 1 cp.PC1ID, hvs.ScreenDate, pa.PADate, pa.PAParentLetter, ISNULL(tcid.TCDOB, '') AS TCDIB,
+SELECT TOP 1 cp.PC1ID, hvs.ScreenDate, pa.PADate, pa.PAParentLetter, ISNULL(tcid.TCDOB, '') AS TCDOB,
 --tcid.TCDOB, w.FirstName, w.LastName, pa.PAParentLetter,
 pa.PACall2Parent,pa.PACallFromParent,pa.PAVisitAttempt,pa.PAVisitMade,pa.PAOtherHVProgram, pa.PAParent2Office,
 pa.PAProgramMaterial,pa.PAGift,pa.PACaseReview, pa.PAOtherActivity, pa.CaseStatus, pa.KempeDate, pa.PAFSWFK,
