@@ -86,7 +86,7 @@ FROM CaseProgram cp
 WHERE 
 	cp.DischargeDate IS NULL
 	AND hc.IntakeDate >= @CutoffDate
-	AND hc.TCDOB < hc.IntakeDate
+	AND hc.TCDOB >= hc.IntakeDate
 	AND cp.CurrentFSWFK = ISNULL(@WorkerFK, cp.CurrentFSWFK)
 	AND wp.SupervisorFK = ISNULL(@SupervisorFK, wp.SupervisorFK)
 	AND CASE WHEN @SiteFK = 0 THEN 1 WHEN wp.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1
