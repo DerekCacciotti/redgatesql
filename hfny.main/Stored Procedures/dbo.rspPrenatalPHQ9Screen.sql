@@ -41,7 +41,6 @@ DECLARE @Cohort AS TABLE (
 	GestationalAge INT,
 	IntakeDate DATETIME,
 	TCDOB DATETIME,
-	EDC DATETIME,
 	DateAdministered DATETIME,
 	Invalid BIT,
 	TotalFamilies INT,
@@ -59,7 +58,6 @@ INSERT INTO @Cohort
     TCLastName,
     IntakeDate,
     TCDOB,
-    EDC,
 	DateAdministered,
 	Invalid
 )
@@ -74,7 +72,6 @@ SELECT
 	tc.TCLastName,
 	hc.IntakeDate,
 	hc.TCDOB,
-	hc.EDC,
 	p.DateAdministered,
 	p.Invalid
 FROM CaseProgram cp
@@ -108,7 +105,6 @@ SELECT DISTINCT
        TCLastName,
        IntakeDate,
        TCDOB,
-       EDC,
        DateAdministered,
        Invalid,
 	   TotalFamilies,
