@@ -60,12 +60,12 @@ BEGIN
 		--Scoring for MeetsTarget is same as Individual Rating.  Edited 12-18-2019
 		,  CASE WHEN FirstIFSPDate IS NULL THEN '1'
 		WHEN FirstIFSPDate <= dateadd(day, 91, DateStartedPos) THEN '3' 
-		WHEN FirstIFSPDate > dateadd(day, 183, DateStartedPos) AND DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN '2' --Workers who are late with training but hired more than 18 months ago, get a two		
+		WHEN DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN '2' --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE '1'
 		END AS MeetsTarget
 		,  CASE WHEN FirstIFSPDate IS NULL THEN 1
 		WHEN FirstIFSPDate <= dateadd(day, 91, DateStartedPos) THEN 3 
-		WHEN FirstIFSPDate > dateadd(day, 183, DateStartedPos) AND DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		WHEN DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 1
 		END AS 'IndividualRating'
 		, '1' AS GenericColumn --used for next cte cteCountMeeting
