@@ -59,7 +59,8 @@
     <DataWriteAllFilesInOneDirectory>True</DataWriteAllFilesInOneDirectory>
   </WriteToFileOptions>
   <DataFileSet>
-    <Count>22</Count>
+    <Count>23</Count>
+    <DataFile>dbo.AppOptions_Data.sql</DataFile>
     <DataFile>dbo.codeApp_Data.sql</DataFile>
     <DataFile>dbo.codeAttachmentCategory_Data.sql</DataFile>
     <DataFile>dbo.codeAuditC_Data.sql</DataFile>
@@ -81,6 +82,5 @@
     <DataFile>dbo.codeTraining_Data.sql</DataFile>
     <DataFile>dbo.scoreASQSE_Data.sql</DataFile>
     <DataFile>dbo.scoreASQ_Data.sql</DataFile>
-    <DataFile>dbo.State_Data.sql</DataFile>
   </DataFileSet>
 </DatabaseInformation>
