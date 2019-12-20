@@ -1,0 +1,13 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[spDelAppName](@AppNamePK int)
+
+AS
+
+
+DELETE 
+FROM AppName
+WHERE AppNamePK = @AppNamePK
+GO
