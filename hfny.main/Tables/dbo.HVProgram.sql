@@ -35,6 +35,7 @@ CREATE TABLE [dbo].[HVProgram]
 [ProgramStreet] [char] (40) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ProgramZip] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RegionFK] [int] NULL,
+[StateFK] [int] NOT NULL CONSTRAINT [DF_HVProgram_StateFK] DEFAULT ((1)),
 [TargetZip] [nvarchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
@@ -56,4 +57,6 @@ GO
 CREATE NONCLUSTERED INDEX [IX_FK_HVProgram_CountyFK] ON [dbo].[HVProgram] ([CountyFK]) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[HVProgram] WITH NOCHECK ADD CONSTRAINT [FK_HVProgram_CountyFK] FOREIGN KEY ([CountyFK]) REFERENCES [dbo].[codeCounty] ([codeCountyPK])
+GO
+ALTER TABLE [dbo].[HVProgram] ADD CONSTRAINT [FK_HVProgram_State] FOREIGN KEY ([StateFK]) REFERENCES [dbo].[State] ([StatePK])
 GO

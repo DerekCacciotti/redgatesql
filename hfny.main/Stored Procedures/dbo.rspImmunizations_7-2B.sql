@@ -16,7 +16,8 @@ CREATE PROC [dbo].[rspImmunizations_7-2B]
 	@PointInTime DATETIME = NULL,
 	@SiteFK INT = NULL,
     @CaseFiltersPositive varchar(100) = '',
-	@FSWFK INT = NULL
+	@FSWFK INT = NULL,
+	@PC1ID VARCHAR(13)
 
 AS
 BEGIN
@@ -208,6 +209,7 @@ BEGIN
 		AND @PointInTime >= DATEADD(MONTH, 12, t.TCDOB)
 		AND cp.CurrentFSWFK = ISNULL(@FSWFK, cp.CurrentFSWFK)
 		AND (CASE WHEN @SiteFK = 0 THEN 1 WHEN wp.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1)
+		AND  cp.PC1ID = ISNULL(@PC1ID, cp.PC1ID)
 		ORDER BY cp.PC1ID
 
 
