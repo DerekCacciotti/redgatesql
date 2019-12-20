@@ -1,13 +1,10 @@
 SET IDENTITY_INSERT [dbo].[codeReportAccess] ON
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (358, 1, '2019-12-19 13:29:43.040', 'bsimmons', NULL, NULL, 3346, 1)
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (359, 1, '2019-12-19 13:29:43.043', 'bsimmons', NULL, NULL, 3346, 2)
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (360, 1, '2019-12-19 13:29:43.043', 'bsimmons', NULL, NULL, 3346, 3)
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (361, 1, '2019-12-19 13:30:09.807', 'bsimmons', NULL, NULL, 3349, 1)
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (362, 1, '2019-12-19 13:30:09.807', 'bsimmons', NULL, NULL, 3349, 2)
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (363, 1, '2019-12-19 13:30:09.807', 'bsimmons', NULL, NULL, 3349, 3)
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (364, 1, '2019-12-19 13:30:43.247', 'bsimmons', NULL, NULL, 3350, 1)
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (365, 1, '2019-12-19 13:30:43.247', 'bsimmons', NULL, NULL, 3350, 2)
-INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (366, 1, '2019-12-19 13:30:43.247', 'bsimmons', NULL, NULL, 3350, 3)
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (627, 1, '2019-12-20 11:30:03.440', 'bsimmons', NULL, NULL, 3346, 1)
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (628, 1, '2019-12-20 11:30:03.440', 'bsimmons', NULL, NULL, 3349, 1)
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (629, 1, '2019-12-20 11:30:11.300', 'bsimmons', NULL, NULL, 3346, 3)
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (630, 1, '2019-12-20 11:30:11.300', 'bsimmons', NULL, NULL, 3349, 3)
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (631, 1, '2019-12-20 11:30:19.850', 'bsimmons', NULL, NULL, 3346, 2)
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (632, 1, '2019-12-20 11:30:19.850', 'bsimmons', NULL, NULL, 3349, 2)
 SET IDENTITY_INSERT [dbo].[codeReportAccess] OFF
 SET IDENTITY_INSERT [dbo].[codeReportAccess] ON
 INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [EditDate], [Editor], [ReportFK], [StateFK]) VALUES (1, 1, '2019-12-11 09:52:43.733', 'bsimmons', '2019-12-18 11:05:33.090', 'bsimmons', 145, 1)
