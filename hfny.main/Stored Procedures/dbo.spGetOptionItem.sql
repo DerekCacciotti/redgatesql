@@ -39,7 +39,7 @@ BEGIN
               END = 1
           AND @CompareDate
           BETWEEN OptionStart AND ISNULL(OptionEnd, @CompareDate);
---If the end date is null, use the compare date to ensure inclusion (BETWEEN is inclusive)
+			--If the end date is null, use the compare date to ensure inclusion (BETWEEN is inclusive)
 
 END;
 GO
