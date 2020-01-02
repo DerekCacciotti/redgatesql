@@ -35,10 +35,16 @@ AS
 	,FirstName VARCHAR(MAX)
 	,LastName VARCHAR(MAX)
 	,WorkerType VARCHAR(32)
+	,PerformedHomeVisit BIT
+	,PerformedParentSurvey BIT
 	,FirstParentSurvey DATETIME
 	,LastParentSurvey DATETIME
 	,FirstHomeVisit DATETIME
 	,LastHomeVisit DATETIME
+	,ProgramManagerStartDate DATETIME
+	,ProgramManagerEndDate DATETIME
+	,SupervisorStartDate DATETIME
+	,SupervisorEndDate DATETIME
 	,DisplayOrder INT
 	)
 
@@ -47,56 +53,30 @@ AS
 	    WorkerPK,
 	    FirstName,
 	    LastName,
-		WorkerType
+		ProgramManagerStartDate,
+		ProgramManagerEndDate,
+		SupervisorStartDate,
+		SupervisorEndDate
 	)
 
-	SELECT WorkerPK
-		,w.FirstName
-		,w.LastName
-		--label workers according to documentation
-	    ,CASE WHEN
-				FAWStartDate IS NOT NULL AND
-				(FSWStartDate IS NULL OR FSWStartDate > @EndDate) AND (FSWEndDate IS NULL OR FSWEndDate < @StartDate) And
-				(SupervisorStartDate IS NULL OR SupervisorStartDate > @EndDate) AND (SupervisorEndDate IS NULL OR SupervisorEndDate < @StartDate) AND
-				(ProgramManagerStartDate IS NULL OR ProgramManagerStartDate > @EndDate) AND (ProgramManagerEndDate IS NULL OR ProgramManagerEndDate < @StartDate)
-			THEN 'FRS'
-			WHEN	
-				FSWStartDate IS NOT NULL AND
-				(FAWStartDate IS NULL OR FAWStartDate > @EndDate) AND (FAWEndDate IS NULL OR FAWEndDate < @StartDate) And
-                (SupervisorStartDate IS NULL OR SupervisorStartDate > @EndDate) AND (SupervisorEndDate IS NULL OR SupervisorEndDate < @StartDate) AND
-                (ProgramManagerStartDate IS NULL OR ProgramManagerStartDate > @EndDate) AND (ProgramManagerEndDate IS NULL OR ProgramManagerEndDate < @StartDate)
-			THEN 'FSS'
-			WHEN 
-				FSWStartDate IS NOT NULL AND FAWStartDate IS NOT NULL AND	
-                (SupervisorStartDate IS NULL OR SupervisorStartDate > @EndDate) AND (SupervisorEndDate IS NULL OR SupervisorEndDate < @StartDate) AND
-                (ProgramManagerStartDate IS NULL OR ProgramManagerStartDate > @EndDate) AND (ProgramManagerEndDate IS NULL OR ProgramManagerEndDate < @StartDate)
-			THEN 'Dual Role'
-			WHEN 
-				SupervisorStartDate IS NOT NULL OR 
-				ProgramManagerStartDate IS NOT NULL OR
-				SupervisorEndDate > @StartDate OR
-				ProgramManagerEndDate > @StartDate
-			THEN 'Supervisor / Program Manager'
-		END				
+	SELECT 
+		WorkerPK,
+		w.FirstName,
+		w.LastName,
+		wp.ProgramManagerStartDate,
+		wp.ProgramManagerEndDate,
+		wp.SupervisorStartDate,
+		wp.SupervisorEndDate			
 	FROM Worker w INNER JOIN dbo.WorkerProgram wp ON w.WorkerPK = wp.WorkerFK
-	inner join dbo.SplitString(@ProgramFK,',') on wp.programfk = ListItem
-
-	--filter workers according to documentation
-	WHERE((wp.FAWStartDate < @StartDate AND (wp.FAWEndDate IS NULL OR wp.FAWEndDate > @EndDate)) OR
-		  (wp.FSWStartDate < @StartDate AND (wp.FSWEndDate IS NULL OR wp.FSWEndDate > @EndDate)) OR
-		  (wp.ProgramManagerStartDate < @StartDate AND (wp.ProgramManagerEndDate IS NULL OR wp.ProgramManagerEndDate > @EndDate)) OR
-		  (wp.SupervisorStartDate < @StartDate AND (wp.SupervisorEndDate IS NULL OR wp.SupervisorEndDate > @EndDate)))
-		AND
+	INNER JOIN dbo.SplitString(@ProgramFK,',') on wp.programfk = ListItem
+	WHERE
 		(wp.TerminationDate IS NULL OR wp.TerminationDate > @EndDate)
+		AND HireDate < @EndDate
 		AND WorkerPK = ISNULL(@WorkerFK, WorkerPK)
-		AND FirstName <> 'Out of State'
+		AND FirstName not in ( 'Out of State', 'In State')
+		
 
-	--set ordinal for display in report
-	UPDATE @tblWorkers SET DisplayOrder = CASE WHEN WorkerType = 'FRS' THEN 1
-											   WHEN WorkerType = 'FSS' THEN 2
-											   WHEN WorkerType = 'Dual Role' THEN 3
-											   WHEN WorkerType = 'Supervisor / Program Manager' THEN 4
-										   END 
+
 
 	--get all the parent surveys administered in the period
 	DECLARE @tblKempesInPeriod AS TABLE (
@@ -169,6 +149,28 @@ AS
 	@tblWorkers tw INNER JOIN (SELECT MIN(VisitStartTime) AS firstVisit, MAX(VisitStartTime) AS lastVisit , FSWFK FROM HVLog GROUP BY FSWFK) AS hv
 	ON tw.WorkerPK = hv.FSWFK
 
+	--figure out whether or not they performed an event
+	UPDATE @tblWorkers 
+	Set PerformedHomeVisit = 1 
+	FROM @tblWorkers tw	INNER JOIN @tblHomeVisitsInPeriod thvp on tw.WorkerPK = thvp.FSWFK
+
+	UPDATE @tblWorkers 
+	Set PerformedParentSurvey = 1 
+	FROM @tblWorkers tw	INNER JOIN @tblKempesInPeriod tkip on tw.WorkerPK = tkip.FAWFK
+
+	--figure out worker type based on sup/pm dates and whether or not they performed an event
+	UPDATE @tblWorkers
+	Set WorkerType = 
+		CASE WHEN (SupervisorStartDate is null or SupervisorEndDate < @StartDate) and (ProgramManagerStartDate is null or ProgramManagerEndDate < @StartDate) 
+				THEN 
+					CASE WHEN PerformedHomeVisit = 1 and PerformedParentSurvey = 1 THEN 'Dual Role'
+						 WHEN PerformedHomeVisit = 1 and PerformedParentSurvey IS NULL THEN 'FSS'
+						 WHEN PerformedHomeVisit IS NULL and PerformedParentSurvey = 1 THEN 'FRS'
+						 
+				    END
+			 ELSE 'Supervisor / Program Manager'
+		END
+
 	--put all the observed parent surveys and home visits into one table
 	DECLARE @tblObservedEventsInPeriod AS TABLE (
 	HVCaseFK INT
@@ -228,7 +230,11 @@ AS
 		EligibleDual INT,
 		MeetsRequirementsFRS INT,
 		MeetsRequirementsFSS INT,
-		MeetsRequirementsDual INT  
+		MeetsRequirementsDual INT,
+		ProgramManagerStartDate DATETIME,
+		ProgramManagerEndDate DATETIME,
+		SupervisorStartDate DATETIME,
+		SupervisorEndDate DATETIME  
 	)
 	INSERT INTO @tblResults
 	(
@@ -239,40 +245,46 @@ AS
 	    LastParentSurvey,
 	    FirstHomeVisit,
 	    LastHomeVisit,
-	    WorkerType,
+		WorkerType,
 		DisplayOrder,
 	    PC1ID,
 	    EventDate,
 	    isHomeVisit,
-	    FirstObservationOfMonth
+	    FirstObservationOfMonth,
+		ProgramManagerStartDate,
+		ProgramManagerEndDate,
+		SupervisorStartDate,
+		SupervisorEndDate
 	)
 
-	SELECT tw.WorkerPK
-           ,tw.FirstName
-           ,tw.LastName
-		   ,tw.FirstParentSurvey
-		   ,tw.LastParentSurvey
-		   ,tw.FirstHomeVisit
-		   ,tw.LastHomeVisit
-           ,tw.WorkerType
-		   ,tw.DisplayOrder
-		   ,oeip.PC1ID
-           ,oeip.EventDate
-           ,oeip.isHomeVisit
-		   --convert the row number into a bit. Row = 1 meets, ie. first observation of month, Row > 1 does not meet
-           ,CASE 
-			     WHEN oeip.Meets = 1 THEN 1 
-				 WHEN oeip.Meets > 1  THEN 0
-				 ELSE oeip.Meets
-			END
-		   FROM @tblWorkers tw
-	left JOIN @tblObservedEventsInPeriod oeip ON tw.WorkerPK = oeip.WorkerFK
-	--only keep results where worker performed an event, observed or not.
-	WHERE  (tw.WorkerType = 'FRS' AND tw.FirstParentSurvey IS NOT NULL)
-	    OR (tw.WorkerType = 'FSS' AND tw.FirstHomeVisit IS NOT NULL)
-		OR (tw.WorkerType = 'Dual Role' AND tw.FirstHomeVisit IS NOT NULL AND tw.FirstParentSurvey IS NOT NULL)
-		OR (tw.WorkerType = 'Supervisor / Program Manager' AND (tw.FirstHomeVisit IS NOT NULL OR tw.FirstParentSurvey IS NOT NULL))
+	SELECT 
+		tw.WorkerPK,
+        tw.FirstName,
+        tw.LastName,
+		tw.FirstParentSurvey,
+		tw.LastParentSurvey,
+		tw.FirstHomeVisit,
+		tw.LastHomeVisit,
+		tw.WorkerType,
+		tw.DisplayOrder,		
+		oeip.PC1ID,
+		oeip.EventDate,
+		oeip.isHomeVisit,
+		--convert the row number into a bit. Row = 1 meets, ie. first observation of month, Row > 1 does not meet
+        CASE 
+		     WHEN oeip.Meets = 1 THEN 1 
+			 WHEN oeip.Meets > 1  THEN 0
+			 ELSE oeip.Meets
+		END,
+		tw.ProgramManagerStartDate,
+		tw.ProgramManagerEndDate,
+		tw.SupervisorStartDate,
+		tw.SupervisorEndDate
+		FROM @tblWorkers tw
+		left JOIN @tblObservedEventsInPeriod oeip ON tw.WorkerPK = oeip.WorkerFK
 
+	--determine worker types based on whether or not they performed an event in the time period and if they have a supervisor/manager dates
+	
 	--get counts of worker types. Eligible means you performed an event, so just count distinct according to worker type
 	UPDATE @tblResults SET EligibleFRS = (SELECT COUNT(DISTINCT WorkerPK) FROM @tblResults tr 
 										  WHERE WorkerType = 'FRS')
@@ -318,7 +330,17 @@ AS
 													 ON PSobs.workerPK = HVobs.workerPK
 													 --meeting is one ps obs and 2 hv obs 
 													 WHERE PSObs.firstPSObs >= 1 AND HVObs.firstHVObs >=2)
-													  
+	
+		--set ordinal for display in report
+	UPDATE @tblResults SET DisplayOrder = CASE WHEN WorkerType = 'FRS' THEN 1
+											   WHEN WorkerType = 'FSS' THEN 2
+											   WHEN WorkerType = 'Dual Role' THEN 3
+											   WHEN WorkerType = 'Supervisor / Program Manager' THEN 4
+										   END
+										    												  
 	SELECT * FROM @tblResults tr
+ 
+
+
 
 GO
