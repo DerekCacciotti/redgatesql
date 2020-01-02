@@ -83,9 +83,6 @@ AS
 			(ProgramManagerStartDate < @EndDate and (ProgramManagerEndDate is null or ProgramManagerEndDate > @EndDate))
 			)
 		
-
-
-
 	--get all the parent surveys administered in the period
 	DECLARE @tblKempesInPeriod AS TABLE (
 		HVCaseFK INT
@@ -290,6 +287,7 @@ AS
 		tw.SupervisorEndDate
 		FROM @tblWorkers tw
 		left JOIN @tblObservedEventsInPeriod oeip ON tw.WorkerPK = oeip.WorkerFK
+		WHERE (tw.PerformedHomeVisit is not null or tw.PerformedParentSurvey is not null)
 
 	--determine worker types based on whether or not they performed an event in the time period and if they have a supervisor/manager dates
 	
