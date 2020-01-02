@@ -71,9 +71,17 @@ AS
 	INNER JOIN dbo.SplitString(@ProgramFK,',') on wp.programfk = ListItem
 	WHERE
 		(wp.TerminationDate IS NULL OR wp.TerminationDate > @EndDate)
-		AND HireDate < @EndDate
 		AND WorkerPK = ISNULL(@WorkerFK, WorkerPK)
 		AND FirstName not in ( 'Out of State', 'In State')
+		AND (
+			(FAWStartDate < @EndDate and (FAWEndDate is null or FAWEndDate > @EndDate))
+			or
+			(FSWStartDate < @EndDate and (FSWEndDate is null or FSWEndDate > @EndDate))
+			or
+			(SupervisorStartDate < @EndDate and (SupervisorEndDate is null or SupervisorEndDate > @EndDate))
+			or
+			(ProgramManagerStartDate < @EndDate and (ProgramManagerEndDate is null or ProgramManagerEndDate > @EndDate))
+			)
 		
 
 
@@ -338,7 +346,7 @@ AS
 											   WHEN WorkerType = 'Supervisor / Program Manager' THEN 4
 										   END
 										    												  
-	SELECT * FROM @tblResults tr
+	SELECT * FROM @tblResults tr 
  
 
 
