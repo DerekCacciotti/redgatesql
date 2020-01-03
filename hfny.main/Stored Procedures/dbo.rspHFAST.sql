@@ -41,6 +41,7 @@ BEGIN
 		,FTE NUMERIC(5,2)
 		,Race VARCHAR(MAX)
 		,RaceSpecify VARCHAR(MAX)
+		,Gender CHAR(2)
 	)
 	INSERT INTO @tblWorkers
 		(
@@ -52,6 +53,7 @@ BEGIN
 		, FTE
 		, Race
 		, RaceSpecify
+		, Gender
 		)	
 	SELECT WorkerProgramPK
 		, FAWStartDate
@@ -65,6 +67,7 @@ BEGIN
 		  END AS FTE
 		, Race
 		, RaceSpecify
+		, Gender
 		FROM dbo.WorkerProgram wp
 		inner join dbo.Worker w ON w.WorkerPK = wp.WorkerFK
 		inner join dbo.SplitString(@programfk,',') ON wp.programfk  = listitem
@@ -560,7 +563,7 @@ BEGIN
 	)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(20, 'B3', 'How many PEOPLE worked in Assessment role at the end of last year?', 0, 0,
+	VALUES(20, 'B3', 'How many PEOPLE worked in Family Resource Specialist role at the end of last year?', 0, 0,
 		  (SELECT COUNT(workerprogrampk) 
 		   FROM @tblWorkers 
 		   WHERE [@tblWorkers].FAWStartDate < @eDate 
@@ -568,7 +571,7 @@ BEGIN
 		)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(30, 'B4', 'What was your total FTEs in Family Assessment Worker?', 0, 0,
+	VALUES(30, 'B4', 'What was your total FTEs in Family Resource Specialist role?', 0, 0,
 	( SELECT sum([@tblWorkers].FTE) 
 					FROM @tblWorkers 
 					WHERE [@tblWorkers].FAWStartDate < @eDate 
@@ -576,7 +579,7 @@ BEGIN
     )
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(40, 'B5', 'How many PEOPLE worked in Home Visitor role at the end?', 0, 0,
+	VALUES(40, 'B5', 'How many PEOPLE worked in Family Support Specialist role at the end of last year?', 0, 0,
 	( SELECT COUNT(workerprogrampk) 
 					  FROM @tblWorkers 
 					  WHERE [@tblWorkers].FSWStartDate < @eDate 
@@ -584,15 +587,18 @@ BEGIN
 	)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(50, 'B6', 'What was your total FTEs in Home Visitor role?', 0, 0,
+	VALUES(50, 'B6', 'What was your total FTEs in Family Support Specialist role?', 0, 0,
 	( SELECT sum([@tblWorkers].FTE) 
 					FROM @tblWorkers 
 					WHERE [@tblWorkers].FSWStartDate < @eDate 
 							and ([@tblWorkers].FSWEndDate is null or [@tblWorkers].FSWEndDate > @eDate))
     )
 -----------------
+	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) 
+	VALUES(55, 'B7', 'What is your Site''s definition of Full-time hours per week, excluding required lunch hour (select closest option)', 0,0)
+-----------------
 INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) 
-VALUES(60, NULL, 'Ethnicity: Number of Home Visitors who are:', 1, 0)
+VALUES(60, NULL, 'Ethnicity: Number of Family Support Specialists who are:', 1, 0)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
 	VALUES(70, 'B8', 'Hispanic', 0, 0,
@@ -630,7 +636,7 @@ VALUES(60, NULL, 'Ethnicity: Number of Home Visitors who are:', 1, 0)
 	)
 -----------------
 INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) 
-VALUES(100, NULL, 'Race: Number of Home Visitors who are:', 1, 0)
+VALUES(100, NULL, 'Race: Number of Family Support Specialists who are:', 1, 0)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
 	VALUES(110, 'B9', 'White', 0, 0,
@@ -698,13 +704,38 @@ VALUES(100, NULL, 'Race: Number of Home Visitors who are:', 1, 0)
 		)
 	)
 -----------------
-	--ToDo
-INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES(190, NULL, 'Gender: Number of Family Support Specialists who are:', 1, 0)
-	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES(200, 'B10', 'Women', 0, 0)
-	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES(210, 'B10', 'Men', 0, 0)
+INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) 
+VALUES(190, NULL, 'Gender: Number of Family Support Specialists who are:', 1, 0)
+-----------------
+	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
+	VALUES(200, 'B10', 'Women', 0, 0, 
+		(	SELECT COUNT(Gender)
+			FROM @tblWorkers
+			WHERE Gender = '01'
+			and ([@tblWorkers].FSWStartDate < @eDate and ([@tblWorkers].FSWEndDate is null or [@tblWorkers].FSWEndDate > @eDate))
+		)
+	)
+-----------------
+	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
+	VALUES(210, 'B10', 'Men', 0, 0, 
+		(	SELECT COUNT(Gender)
+			FROM @tblWorkers
+			WHERE Gender = '02'
+			and ([@tblWorkers].FSWStartDate < @eDate and ([@tblWorkers].FSWEndDate is null or [@tblWorkers].FSWEndDate > @eDate))
+		)
+	)
+-----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES(220, 'B10', 'Other Gender', 0, 0)
-	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES(230, 'B10', 'Unknown', 0, 0)
-	--End ToDo
+-----------------
+	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
+	VALUES(230, 'B10', 'Unknown', 0, 0, 
+		(	SELECT COUNT(Gender)
+			FROM @tblWorkers
+			WHERE Gender is null
+			and ([@tblWorkers].FSWStartDate < @eDate and ([@tblWorkers].FSWEndDate is null or [@tblWorkers].FSWEndDate > @eDate))
+		)
+	)
+
 -----------------
 INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES(240, NULL, 'How many families:', 1, 0)
 -----------------	
@@ -719,14 +750,17 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	VALUES(250, 'B11', 'Received at least 1 home visit?', 0, 0,
 		(	SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 250 and Detail = 1))
 -----------------
-	INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	SELECT 260, tpid.PC1ID, 0, 1
-	FROM @tblPC1IDs tpid 
-	WHERE tpid.PC1ID in ( SELECT DISTINCT me.PC1ID FROM MIECHVEligible me )
+
+	--hide miechv number temporarily until we get new miechv data
+
+	--INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	--SELECT 260, tpid.PC1ID, 0, 1
+	--FROM @tblPC1IDs tpid 
+	--WHERE tpid.PC1ID in ( SELECT DISTINCT me.PC1ID FROM MIECHVEligible me )
 	
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(260, 'B12', 'Were MIECHV funded (at least 25%)?', 0, 0,
-		(	SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 260 and Detail = 1))
+	VALUES(260, 'B12', 'Were MIECHV funded (at least 25%)?', 0, 0, null)
+	--(	SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 260 and Detail = 1))
 -----------------
     INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	SELECT 270, tpid.PC1ID, 0, 1	
@@ -827,7 +861,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES(350, NULL, 'How many primary participants were:', 1, 0)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(360, 'B21', 'Female', 0, 0,
+	VALUES(360, 'B21', 'Women', 0, 0,
 		(	SELECT COUNT(Gender)
 			FROM @tblLastHomeVisit
 			WHERE Gender = '01'
@@ -835,7 +869,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(370, 'B22', 'Male', 0, 0,
+	VALUES(370, 'B22', 'Men', 0, 0,
 		(	 SELECT COUNT(Gender)
 			 FROM @tblLastHomeVisit
 			 WHERE Gender = '02'
@@ -843,7 +877,10 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(380, 'B23', 'Other/Gender Unknown', 0, 0,
+	VALUES(380, 'B23', 'Other gender', 0, 0, null)
+-----------------
+	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
+	VALUES(385, 'B23', 'Unknown gender', 0, 0,
 		(	 SELECT COUNT(*)
 			FROM @tblLastHomeVisit
 			WHERE Gender is null or Gender = ''
@@ -1737,7 +1774,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(1125, 'B43', '65 or more', 0, 0,
+	VALUES(1125, 'B51', '65 or more', 0, 0,
 		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 1125 and Detail = 1)
 	)
 -----------------
@@ -1750,7 +1787,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(1130, 'B43', 'Unknown', 0, 0,
+	VALUES(1130, 'B51', 'Unknown', 0, 0,
 		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 1130 and Detail = 1)
 	)
 -----------------
@@ -1916,7 +1953,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	)
 		
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(1290, 'B46', 'Primary Language Spanish', 0, 0,
+	VALUES(1290, 'B54', 'Primary Language Spanish', 0, 0,
 		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 1290 and Detail = 1)
 	)
 -----------------
@@ -1928,7 +1965,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 		WHERE PrimaryLanguage = '03'
 	)
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(1300, 'B46', 'Primary Language not English nor Spanish', 0, 0,
+	VALUES(1300, 'B54', 'Primary Language not English nor Spanish', 0, 0,
 		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 1300 and Detail = 1) 
 	)
 -----------------
