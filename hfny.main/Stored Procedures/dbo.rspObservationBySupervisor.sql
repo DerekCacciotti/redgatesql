@@ -137,8 +137,8 @@ AS
 		,FSWFK
 		,SupervisorObservation
 	FROM HVLog hv
-	INNER JOIN dbo.SplitString(@ProgramFK,',') on hv.programfk = ListItem
 	INNER JOIN dbo.CaseProgram cp ON cp.HVCaseFK = hv.HVCaseFK
+	INNER JOIN dbo.SplitString(@ProgramFK,',') on cp.programfk = ListItem
 	INNER JOIN dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = hv.HVCaseFK
 	WHERE VisitStartTime BETWEEN @StartDate AND @EndDate
 
