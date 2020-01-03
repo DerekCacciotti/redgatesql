@@ -1069,7 +1069,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(590, 'B42', 'Title XIX (Meicaid) / Title XXI (SCHIP) or Tri-Care', 0, 0,
+	VALUES(590, 'B42', 'Title XIX (Medicaid) / Title XXI (SCHIP) or Tri-Care', 0, 0,
 		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 590 and Detail = 1)
 	)
 -----------------
