@@ -7,7 +7,7 @@ CREATE PROC [dbo].[spGetAllSupervisionsforSupervisionReview] @ProgramFK INT AS
 
 SELECT FORMAT(s.SupervisionDate,'MM/dd/yy')  AS SupervisionDate, s.SupervisionStartTime, s.SupervisionSessionType, 
 LTRIM(RTRIM(w.LastName)) + ', ' + LTRIM(RTRIM(w.FirstName)) AS WorkerName,
-LTRIM(RTRIM(super.LastName)) + ', ' + LTRIM(RTRIM(w.FirstName)) AS SupervisorName,
+LTRIM(RTRIM(super.LastName)) + ', ' + LTRIM(RTRIM(super.FirstName)) AS SupervisorName,
  CASE WHEN s.SupervisionSessionType = '1' THEN 'Scheduled Session' WHEN s.SupervisionSessionType = '2' THEN 'Pre-Supervision Planning' 
 		WHEN s.SupervisionSessionType = '3' THEN 'Group Session' ELSE 'Missed Session' END as SupervisionType,s.SupervisionPK
  FROM Supervision s 
