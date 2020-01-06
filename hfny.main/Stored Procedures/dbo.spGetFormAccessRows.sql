@@ -22,8 +22,6 @@ BEGIN
            cfa.AllowedAccess,
            cfa.CreateDate,
            cfa.Creator,
-           cfa.EditDate,
-           cfa.Editor,
            cfa.codeFormFK,
            cfa.StateFK
     FROM dbo.codeFormAccess cfa
