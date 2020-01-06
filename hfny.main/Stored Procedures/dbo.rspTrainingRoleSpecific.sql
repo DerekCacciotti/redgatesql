@@ -45,7 +45,7 @@ INSERT INTO @cteMAIN ( workerfk ,
                       -- RowNumber ,
 					   TopicCode )
 	SELECT DISTINCT wp.workerfk
-	, 'FAW' AS CurrentRole
+	, 'FRS' AS CurrentRole
 	, FAWInitialStart 
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
    -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
@@ -59,18 +59,59 @@ INSERT INTO @cteMAIN ( workerfk ,
 	GROUP BY wp.WorkerFK, LastName, FirstName, FAWInitialStart
 
 
+--Get Supervisor's in time period for FRS Training
+INSERT INTO @cteMAIN ( workerfk ,
+                       CurrentRole ,
+                       StartDate ,
+                       WorkerName ,
+                      -- RowNumber ,
+					   TopicCode )
+	SELECT DISTINCT wp.workerfk
+	, 'Supervisor' 
+	, w.SupervisorInitialStart 
+	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
+   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
+	, 10.0
+	FROM WorkerProgram wp
+	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
+	WHERE SupervisorInitialStart BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
+	AND (SupervisorEndDate IS NULL OR SupervisorEndDate > dateadd(day, 180, SupervisorStartDate))
+	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
+	AND wp.ProgramFK = @progfk
+	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorInitialStart
 
 
 
+--Get Supervisor's in time period for FSS Traomomg
+INSERT INTO @cteMAIN ( workerfk ,
+                       CurrentRole ,
+                       StartDate ,
+                       WorkerName ,
+                      -- RowNumber ,
+					   TopicCode )
+	SELECT DISTINCT wp.workerfk
+	, 'Supervisor' 
+	, w.SupervisorInitialStart 
+	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
+   -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
+	, 11.0
+	FROM WorkerProgram wp
+	INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
+	WHERE SupervisorInitialStart BETWEEN @sdate AND  dateadd(day, -183, GETDATE())
+	AND (SupervisorEndDate IS NULL OR SupervisorEndDate > dateadd(day, 180, SupervisorStartDate))
+	AND (wp.TerminationDate IS NULL OR wp.TerminationDate > GETDATE())
+	AND wp.ProgramFK = @progfk
+	GROUP BY wp.WorkerFK, LastName, FirstName, SupervisorInitialStart
 
---Get FSW's in time period
+
+--Get FSS's in time period
 INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
                        WorkerName ,
                      --  RowNumber ,
 					   TopicCode )
-	SELECT DISTINCT wp.workerfk, 'FSW' 
+	SELECT DISTINCT wp.workerfk, 'FSS' 
     , FSWInitialStart 
 	, rtrim(w.FirstName) + ' ' + rtrim(w.LastName) 
    -- , ROW_NUMBER() OVER(ORDER BY workerfk DESC) 
@@ -137,7 +178,7 @@ DECLARE @cteMAINTraining AS TABLE(
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=10.0 AND CurrentRole='FAW'
+	WHERE t1.TopicCode=10.0 AND (CurrentRole='FRS'  OR CurrentRole='Supervisor')
 	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
 			, t1.TopicCode
 			, t1.topicname
@@ -160,7 +201,7 @@ FROM cteFAWMainTraining
 			LEFT JOIN Training t ON t.TrainingPK = ta.TrainingFK
 			LEFT JOIN TrainingDetail td ON td.TrainingFK = t.TrainingPK
 			LEFT JOIN codeTopic t1 ON td.TopicFK=t1.codeTopicPK
-	WHERE t1.TopicCode=11.0 AND CurrentRole='FSW'
+	WHERE t1.TopicCode=11.0 AND (CurrentRole='FSS' OR CurrentRole='Supervisor')
 	GROUP BY RowNumber, CurrentRole, [@cteMAIN].workerfk, WorkerName, StartDate
 			, t1.TopicCode
 			, t1.topicname
@@ -227,8 +268,8 @@ INSERT INTO @cteDetails ( RowNumber ,
 
 
 		
-		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FAW') AND TopicCode IS NULL
-		UPDATE @cteDetails SET TopicCode=11.0 WHERE (CurrentRole='FSW')  AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FRS'  OR CurrentRole='Supervisor') AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=11.0 WHERE (CurrentRole='FSS' OR CurrentRole='Supervisor')  AND TopicCode IS NULL
 		UPDATE @cteDetails SET TopicCode=12.0 WHERE (CurrentRole='Supervisor')  AND TopicCode IS NULL
 
 		
@@ -266,26 +307,25 @@ INSERT INTO @cteDetails ( RowNumber ,
 
 
 ----now put it all together
-SELECT cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerfk
+SELECT CurrentRole, cteAggregates.RowNumber, cteAggregates.workerfk
 , cteAggregates.WorkerName, cteAggregates.StartDate, cteAggregates.TopicCode, cteAggregates.topicname
 , cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers
-,  case when cteAggregates.CurrentRole is null then cteAggregates.CurrentRole else cteAggregates.CurrentRole end as CurrentRole
+--,  case when cteAggregates.CurrentRole is null then cteAggregates.CurrentRole else cteAggregates.CurrentRole end as CurrentRole
 ,  case when cteCountMeeting.totalmeetingcount is null then 0 else cteCountMeeting.totalmeetingcount end as [totalmeetingcount]
 ,  case when totalmeetingcount is null then 0 else cast(totalmeetingcount AS decimal(10,2)) / CAST(TotalWorkers AS decimal(10,2)) end AS MeetingPercent
 , 	(SELECT TOP 1 IndividualRating FROM cteAggregates cte WHERE cteAggregates.TopicCode = cte.TopicCode ORDER BY IndividualRating) AS Rating
 , IndividualRating
-,	CASE cteAggregates.CurrentRole 
-		WHEN 'FAW' THEN '10-4a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
-		WHEN 'FSW' THEN '10-4b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
-		WHEN 'Supervisor' THEN '10-4c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
+,	CASE cteAggregates.TopicCode 
+		WHEN '10.0' THEN '10-4a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
+		WHEN '11.0' THEN '10-4b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
+		WHEN '12.0' THEN '10-4c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
 	END AS CSST
 FROM cteAggregates
 LEFT JOIN cteCountMeeting ON cteCountMeeting.TopicCode = cteAggregates.TopicCode
-group by cteAggregates.CurrentRole, cteAggregates.RowNumber, cteAggregates.workerfk
+group by cteAggregates.RowNumber, cteAggregates.workerfk
 , cteAggregates.WorkerName, cteAggregates.StartDate, cteAggregates.TopicCode, cteAggregates.topicname
 , cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers, cteCountMeeting.TopicCode
-, cteCountMeeting.totalmeetingcount, IndividualRating
-ORDER BY cteAggregates.CurrentRole,RowNumber
+, cteCountMeeting.totalmeetingcount, IndividualRating, CurrentRole
 
 
 
