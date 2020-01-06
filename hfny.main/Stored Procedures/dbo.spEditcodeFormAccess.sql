@@ -4,14 +4,12 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditcodeFormAccess](@codeFormAccessPK int=NULL,
 @AllowedAccess bit=NULL,
-@Editor varchar(256)=NULL,
 @codeFormFK int=NULL,
 @StateFK int=NULL)
 AS
 UPDATE codeFormAccess
 SET 
 AllowedAccess = @AllowedAccess, 
-Editor = @Editor, 
 codeFormFK = @codeFormFK, 
 StateFK = @StateFK
 WHERE codeFormAccessPK = @codeFormAccessPK
