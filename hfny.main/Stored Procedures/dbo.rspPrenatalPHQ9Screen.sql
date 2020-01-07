@@ -32,13 +32,9 @@ SET @CaseFiltersPositive = CASE	WHEN @CaseFiltersPositive = '' THEN null
 DECLARE @Cohort AS TABLE (
 	HVCaseFK INT,
 	PC1ID CHAR(13),
-	SupervisorFirstName CHAR(20),
-	SupervisorLastName CHAR(30),
-	WorkerFirstName CHAR(20),
-	WorkerLastName CHAR(30),
-	TCFirstName VARCHAR(200),
-	TCLastName VARCHAR(200),
-	GestationalAge INT,
+	Supervisor VARCHAR(50),
+	Worker VARCHAR(50),
+	TC VARCHAR(50),
 	IntakeDate DATETIME,
 	TCDOB DATETIME,
 	DateAdministered DATETIME,
@@ -50,12 +46,9 @@ INSERT INTO @Cohort
 (
     HVCaseFK,
     PC1ID,
-    SupervisorFirstName,
-    SupervisorLastName,
-    WorkerFirstName,
-    WorkerLastName,
-    TCFirstName,
-    TCLastName,
+    Supervisor,
+    Worker,
+    TC,
     IntakeDate,
     TCDOB,
 	DateAdministered,
@@ -64,12 +57,9 @@ INSERT INTO @Cohort
 SELECT 
 	cp.HVCaseFK,
 	cp.PC1ID,
-	supervisor.FirstName,
-	supervisor.LastName,
-	fsw.FirstName,
-	fsw.LastName,
-	tc.TCFirstName,
-	tc.TCLastName,
+	TRIM(supervisor.FirstName) + ' ' + TRIM(supervisor.LastName),
+	TRIM(fsw.FirstName) + ' ' + TRIM(fsw.LastName),
+	TRIM(tc.TCFirstName) + ' ' + TRIM(tc.TCLastName),
 	hc.IntakeDate,
 	hc.TCDOB,
 	p.DateAdministered,
@@ -86,7 +76,7 @@ FROM CaseProgram cp
 WHERE 
 	cp.DischargeDate IS NULL
 	AND hc.IntakeDate >= @CutoffDate
-	AND hc.TCDOB >= hc.IntakeDate
+	AND hc.TCDOB > hc.IntakeDate
 	AND cp.CurrentFSWFK = ISNULL(@WorkerFK, cp.CurrentFSWFK)
 	AND wp.SupervisorFK = ISNULL(@SupervisorFK, wp.SupervisorFK)
 	AND CASE WHEN @SiteFK = 0 THEN 1 WHEN wp.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1
@@ -97,12 +87,9 @@ UPDATE @Cohort SET TotalMeeting = (SELECT COUNT(DISTINCT HVCaseFK) FROM @Cohort 
 SELECT DISTINCT
 	   HVCaseFK,
        PC1ID,
-       SupervisorFirstName,
-       SupervisorLastName,
-       WorkerFirstName,
-       WorkerLastName,
-       TCFirstName,
-       TCLastName,
+       Supervisor,
+       Worker,
+       TC,
        IntakeDate,
        TCDOB,
        DateAdministered,
@@ -114,5 +101,4 @@ SELECT DISTINCT
 	        WHEN  Invalid = 1 THEN 'PHQ9 Invalid'
 			ELSE '' END AS ReasonNotMeeting 
 FROM @Cohort
-ORDER BY HVCaseFK, DateAdministered
 GO
