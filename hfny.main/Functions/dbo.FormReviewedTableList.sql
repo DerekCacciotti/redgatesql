@@ -38,16 +38,10 @@ CREATE function [dbo].[FormReviewedTableList]
 								WHEN  fro.FormReviewStartDate > fr.Formdate THEN ''  --approved but someone changed review date into future
 								WHEN  fro.FormReviewStartDate IS Null THEN '' END --approved but somehow reviewing training NOT set
 							END AS 'IsApproved'
-						from		FormReview fr
-						left outer join	[dbo].[FormReviewOptions] fro on fro.ProgramFK = fr.ProgramFK
-										and fro.FormType = fr.FormType
-										and FormDate >= FormReviewStartDate 
-										and FormDate < case when FormReviewEndDate is null
-																then dateadd(day, 1, getdate())
-																else FormReviewEndDate
-															end
-						where		fr.ProgramFK = @ProgFK 
-									and fr.FormType = @FormType
+						from FormReview fr
+						inner join [dbo].[FormReviewOptions] fro on fro.ProgramFK = fr.ProgramFK
+						where		(fr.ProgramFK = @ProgFK and fro.ProgramFK = @ProgFK)
+									and fr.FormType = @FormType and fro.FormType = fr.FormType
 				END
 			ELSE
 				BEGIN
