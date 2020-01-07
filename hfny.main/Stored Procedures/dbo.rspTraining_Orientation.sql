@@ -87,7 +87,7 @@ BEGIN
 DECLARE @cte10_Code1 AS TABLE (
 		RowNumber INT
 		, workerpk INT
-		, TopicCode DECIMAL
+		, TopicCode DECIMAL(5,1) 
 		, topicname VARCHAR(175)
 		, TrainingDate DATE
 		, FirstHomeVisitDate DATE
