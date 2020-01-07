@@ -107,7 +107,7 @@ BEGIN
 		MaritalStatus CHAR(2),
 		NumberInHouse INT,
 		Parity INT,
-		Gravida INT
+		Gravida CHAR(2)
 	)
 	INSERT INTO	@CommonAtt
 	(
@@ -369,7 +369,7 @@ BEGIN
 
 	DECLARE @Gravida AS TABLE (
 	HVCaseFK INT,
-	Gravida INT
+	Gravida CHAR(2)
 	)
 	INSERT INTO @Gravida
 	(

@@ -4,11 +4,11 @@ SET ANSI_NULLS ON
 GO
 -- =============================================
 -- Author:	  Bill O'Brien
--- Create date: 12/12/2019
--- Description: <report: Credentialing 7-4 B. Administration of the Depression Screen Prenatally (PHQ-2/9) - Summary>
--- EXEC rspPrenatalPHQ9Screen 1, '2018-07-01', null, null, null, null, ''
+-- Create date: 01/02/2020
+-- Description: <report: Credentialing 7-4 C. Administration of the Depression Screen Postnatally (PHQ-2/9) - Summary>
+-- EXEC rspPostnatalPHQ9Screen 1, '2018-07-01', null, null, null, null, ''
 -- =============================================
-CREATE PROCEDURE [dbo].[rspPrenatalPHQ9Screen] (@ProgramFK VARCHAR(MAX) = NULL,
+CREATE PROCEDURE [dbo].[rspPostnatalPHQ9Screen] (@ProgramFK VARCHAR(MAX) = NULL,
 												@CutoffDate DATE = NULL,
 												@SupervisorFK INT = NULL,
 												@WorkerFK INT = NULL,
@@ -72,18 +72,22 @@ FROM CaseProgram cp
 	INNER JOIN WorkerProgram wp ON wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = ListItem
 	INNER JOIN Worker supervisor ON wp.SupervisorFK = supervisor.WorkerPK
 	INNER JOIN TCID tc ON tc.HVCaseFK = cp.HVCaseFK
-	LEFT JOIN dbo.PHQ9 p ON p.HVCaseFK = cp.HVCaseFK AND p.DateAdministered < hc.TCDOB
+	LEFT JOIN dbo.PHQ9 p ON p.HVCaseFK = cp.HVCaseFK AND DateDiff(day, CASE WHEN hc.TCDOB < IntakeDate Then IntakeDate ELSE hc.TCDOB END, p.DateAdministered) BETWEEN 0 AND 93
 WHERE 
 	cp.DischargeDate IS NULL
-	AND hc.IntakeDate >= @CutoffDate
-	AND hc.TCDOB > hc.IntakeDate
+	AND DateDiff(day, hc.TCDOB, @CutoffDate) >= 93
 	AND cp.CurrentFSWFK = ISNULL(@WorkerFK, cp.CurrentFSWFK)
 	AND wp.SupervisorFK = ISNULL(@SupervisorFK, wp.SupervisorFK)
 	AND CASE WHEN @SiteFK = 0 THEN 1 WHEN wp.SiteFK = @SiteFK THEN 1 ELSE 0 END = 1
 			 
 
 UPDATE @Cohort SET TotalFamilies = (SELECT COUNT(DISTINCT HVCaseFK) FROM @Cohort)
-UPDATE @Cohort SET TotalMeeting = (SELECT COUNT(DISTINCT HVCaseFK) FROM @Cohort  WHERE DateAdministered IS NOT NULL AND Invalid = 0)
+UPDATE @Cohort SET TotalMeeting = (
+								   SELECT COUNT(DISTINCT HVCaseFK) FROM @Cohort  
+								   WHERE 
+										DateAdministered IS NOT NULL 
+										AND Invalid = 0
+									)
 SELECT DISTINCT
 	   HVCaseFK,
        PC1ID,
@@ -96,8 +100,10 @@ SELECT DISTINCT
        Invalid,
 	   TotalFamilies,
 	   TotalMeeting,
-	   CASE WHEN DateAdministered IS NOT NULL AND Invalid = 0 THEN 'Meets' ELSE 'Does Not Meet' END AS MeetsStandard,
-	   CASE WHEN DateAdministered IS NULL THEN 'Not Administered' 
+	   CASE WHEN DateAdministered IS NOT NULL 
+				 AND Invalid = 0
+			THEN 'Meets' ELSE 'Does Not Meet' END AS MeetsStandard,
+	   CASE WHEN DateAdministered IS NULL THEN 'Not Administered'
 	        WHEN  Invalid = 1 THEN 'PHQ9 Invalid'
 			ELSE '' END AS ReasonNotMeeting 
 FROM @Cohort
