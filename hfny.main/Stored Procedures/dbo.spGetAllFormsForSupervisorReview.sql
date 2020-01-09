@@ -12,7 +12,7 @@ GO
 -- added: How to handle some special url redirections - bug# HW946 ... Khalsa 3/7/2014
 -- 
 -- =============================================
-CREATE procedure [dbo].[spGetAllFormsForSupervisorReview]
+CREATE PROC [dbo].[spGetAllFormsForSupervisorReview]
 	(
 	@ProgramFK int
 	, @DaysToLoad int=30
@@ -240,7 +240,8 @@ begin
 		where fr.ProgramFK = isnull(@ProgramFK, fr.ProgramFK)	
 				and ReviewedBy is null
 				and FormDate between FormReviewStartDate and isnull(FormReviewEndDate, current_timestamp)
-				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp) 
+				and FormDate between dateadd(day, @DaysToLoad*-1, isnull(FormReviewEndDate, current_timestamp)) and isnull(FormReviewEndDate, current_timestamp)
+				AND s.FormComplete = 1 
 	)
 	
 	select * from cteFormReview
