@@ -7,7 +7,7 @@ GO
 -- Create date: 11/22/2019
 -- Description:	BPS 12-2.B Supervisor Observation of Home Visits and Parent Surveys
 -- =============================================
-CREATE proc [dbo].[rspObservationBySupervisor]
+CREATE procedure [dbo].[rspObservationBySupervisor]
 (
     @StartDate DATETIME,
 	@EndDate DATETIME,
@@ -140,7 +140,7 @@ AS
 	INNER JOIN dbo.CaseProgram cp ON cp.HVCaseFK = hv.HVCaseFK
 	INNER JOIN dbo.SplitString(@ProgramFK,',') on cp.programfk = ListItem
 	INNER JOIN dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK = hv.HVCaseFK
-	WHERE VisitStartTime BETWEEN @StartDate AND @EndDate
+	WHERE convert(date, VisitStartTime) BETWEEN @StartDate AND @EndDate
 
 	--find the first and last parent survey conducted by each worker, observed or not.
 	UPDATE @tblWorkers SET FirstParentSurvey = kempes.firstParentSurvey
@@ -343,10 +343,6 @@ AS
 											   WHEN WorkerType = 'Dual Role' THEN 3
 											   WHEN WorkerType = 'Supervisor / Program Manager' THEN 4
 										   END
-										    												  
+                                           
 	SELECT * FROM @tblResults tr 
- 
-
-
-
 GO
