@@ -751,16 +751,14 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 		(	SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 250 and Detail = 1))
 -----------------
 
-	--hide miechv number temporarily until we get new miechv data
-
-	--INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
-	--SELECT 260, tpid.PC1ID, 0, 1
-	--FROM @tblPC1IDs tpid 
-	--WHERE tpid.PC1ID in ( SELECT DISTINCT me.PC1ID FROM MIECHVEligible me )
+	INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	SELECT 260, tpid.PC1ID, 0, 1
+	FROM @tblPC1IDs tpid 
+	WHERE tpid.PC1ID in ( SELECT DISTINCT me.PC1ID FROM MIECHVEligible me )
 	
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
-	VALUES(260, 'B12', 'Were MIECHV funded (at least 25%)?', 0, 0, null)
-	--(	SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 260 and Detail = 1))
+	VALUES(260, 'B12', 'Were MIECHV funded (at least 25%)?', 0, 0, 
+	(	SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 260 and Detail = 1))
 -----------------
     INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	SELECT 270, tpid.PC1ID, 0, 1	
