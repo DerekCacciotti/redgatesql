@@ -72,7 +72,9 @@ FROM CaseProgram cp
 	INNER JOIN WorkerProgram wp ON wp.WorkerFK = fsw.WorkerPK and wp.ProgramFK = ListItem
 	INNER JOIN Worker supervisor ON wp.SupervisorFK = supervisor.WorkerPK
 	INNER JOIN TCID tc ON tc.HVCaseFK = cp.HVCaseFK
-	LEFT JOIN dbo.PHQ9 p ON p.HVCaseFK = cp.HVCaseFK AND DateDiff(day, CASE WHEN hc.TCDOB < IntakeDate Then IntakeDate ELSE hc.TCDOB END, p.DateAdministered) BETWEEN 0 AND 93
+	LEFT JOIN dbo.PHQ9 p ON p.HVCaseFK = cp.HVCaseFK 
+		AND DateDiff(day, CASE WHEN hc.TCDOB < IntakeDate Then IntakeDate ELSE hc.TCDOB END, p.DateAdministered) BETWEEN 0 AND 93
+		AND Invalid = 0
 WHERE 
 	cp.DischargeDate IS NULL
 	AND DateDiff(day, hc.TCDOB, @CutoffDate) >= 93
@@ -82,12 +84,8 @@ WHERE
 			 
 
 UPDATE @Cohort SET TotalFamilies = (SELECT COUNT(DISTINCT HVCaseFK) FROM @Cohort)
-UPDATE @Cohort SET TotalMeeting = (
-								   SELECT COUNT(DISTINCT HVCaseFK) FROM @Cohort  
-								   WHERE 
-										DateAdministered IS NOT NULL 
-										AND Invalid = 0
-									)
+UPDATE @Cohort SET TotalMeeting = (SELECT COUNT(DISTINCT HVCaseFK) FROM @Cohort WHERE DateAdministered IS NOT NULL)
+
 SELECT DISTINCT
 	   HVCaseFK,
        PC1ID,
@@ -100,11 +98,6 @@ SELECT DISTINCT
        Invalid,
 	   TotalFamilies,
 	   TotalMeeting,
-	   CASE WHEN DateAdministered IS NOT NULL 
-				 AND Invalid = 0
-			THEN 'Meets' ELSE 'Does Not Meet' END AS MeetsStandard,
-	   CASE WHEN DateAdministered IS NULL THEN 'Not Administered'
-	        WHEN  Invalid = 1 THEN 'PHQ9 Invalid'
-			ELSE '' END AS ReasonNotMeeting 
+	   CASE WHEN DateAdministered IS NOT NULL THEN 'Meets' ELSE 'Does Not Meet' END AS MeetsStandard
 FROM @Cohort
 GO
