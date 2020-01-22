@@ -2,11 +2,10 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROC [dbo].[rspGetSinglePreassessmentForCaseHomePage] @papk INT AS
-SELECT TOP 1 cp.PC1ID, hvs.ScreenDate, pa.PADate, pa.PAParentLetter, ISNULL(hc.TCDOB, '') AS TCDOB,
-isnull(hc.TCDOB, hc.EDC) as TCDOB
-, '5. ' + case when hc.TCDOB is null then 'EDC:' else 'TC DOB:' end as DOBLabel,
-
+CREATE procedure [dbo].[rspGetSinglePreassessmentForCaseHomePage] @papk INT AS
+SELECT TOP 1 cp.PC1ID, hvs.ScreenDate, pa.PADate, pa.PAParentLetter
+				, isnull(hc.TCDOB, hc.EDC) as TCDOB
+				, '5. ' + case when hc.TCDOB is null then 'EDC:' else 'TC DOB:' end as DOBLabel,
 --tcid.TCDOB, w.FirstName, w.LastName, pa.PAParentLetter,
 pa.PACall2Parent,pa.PACallFromParent,pa.PAVisitAttempt,pa.PAVisitMade,pa.PAOtherHVProgram, pa.PAParent2Office,
 pa.PAProgramMaterial,pa.PAGift,pa.PACaseReview, pa.PAOtherActivity, pa.CaseStatus, pa.KempeDate, pa.PAFSWFK,
