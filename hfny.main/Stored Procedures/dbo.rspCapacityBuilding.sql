@@ -87,8 +87,7 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	
 	select  SUM(ProgramCapacity) AS ProgramCapacity,
 			SUM(CurrentCapacity) AS CurrentCapacity,
-			CASE WHEN SUM(ProgramCapacity) is null then 'Program capacity blank on Program Information Form.' 
-			ELSE COALESCE(cast(SUM(CurrentCapacity) AS FLOAT) / NULLIF(SUM(ProgramCapacity),0), 0) end AS PerctOfProgramCapacity
+			CASE WHEN SUM(ProgramCapacity) is not null then COALESCE(cast(SUM(CurrentCapacity) AS FLOAT) / NULLIF(SUM(ProgramCapacity),0), 0) end AS PerctOfProgramCapacity
 		FROM cteProgramCapacityX
 	)
 	
