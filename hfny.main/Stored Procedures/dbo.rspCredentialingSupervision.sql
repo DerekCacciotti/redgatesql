@@ -836,7 +836,7 @@ set fmtOnly off ;
 						) and (wws.SupervisionSessionType = '1') then 'N' 
 					-- Form not found in period
 					when (wws.WorkerFK is null and wws.SupervisionPK is NULL AND wl.WorkerLeavePK IS NULL) then 'N'
-					WHEN wl.WorkerLeavePK IS NOT NULL THEN 'E'
+					WHEN wl.WorkerLeavePK IS NOT NULL THEN 'E' -- Form not found in period, but worker was on leave during the period
 					end as MeetsStandard
 				, case
 					-- when (TakePlace = 0) and (StaffOutAllWeek = 1)  then 'Staff out all week'  -- Form found in period and reason is "Staff out all week"
@@ -877,7 +877,7 @@ set fmtOnly off ;
 						) and (wws.SupervisionSessionType = '1') then 'Duration less than 1:30'
 					when wws.SupervisionSessionType = '2' then 'Planning-only'
 					when (wws.WorkerFK is null and wws.SupervisionPK is NULL AND wl.WorkerLeavePK IS NULL) then 'Unknown/Missing' -- Form not found in period
-					WHEN wl.WorkerLeavePK IS NOT NULL THEN 'Worker on leave'
+					WHEN wl.WorkerLeavePK IS NOT NULL THEN 'Worker on leave' -- Form not found in period, but worker was on leave during the period
 					end as ReasonSupeVisionNotHeld
 
 				--,reason.ReasonNOSupervision
@@ -896,7 +896,7 @@ set fmtOnly off ;
 		left join	cteSupervisionReasonsChecked reasonsChecked on reasonsChecked.SupervisionPK = reason.SupervisionPK
 		left join	cteSupervisionDurationsGroupedByWeek sdg on sdg.WorkerPK = wws.WorkerPK
 																and sdg.WeekNumber = wws.WeekNumber
-		LEFT JOIN dbo.WorkerLeave wl ON wws.WorkerPK = wl.WorkerFK 
+		LEFT JOIN dbo.WorkerLeave wl ON wws.WorkerPK = wl.WorkerFK -- To fetch the leave records for the worker
 						AND (wws.StartDate BETWEEN wl.LeaveStartDate AND wl.LeaveEndDate 
 								OR wws.EndDate BETWEEN wl.LeaveStartDate AND wl.LeaveEndDate)
 		left join	Worker w on wws.WorkerFK = w.WorkerPK
