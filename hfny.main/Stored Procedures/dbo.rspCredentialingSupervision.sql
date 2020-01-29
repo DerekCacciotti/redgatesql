@@ -77,6 +77,7 @@ set fmtOnly off ;
 							, FirstName varchar(50)
 							, TerminationDate datetime
 							, WorkerPK int
+							, UserName varchar(50)
 							, SortOrder int
 
 								) ;
@@ -91,6 +92,7 @@ set fmtOnly off ;
 							, FirstName varchar(50)
 							, TerminationDate datetime
 							, WorkerPK int
+							, UserName varchar(50)
 							, SortOrder int
 
 								) ;
