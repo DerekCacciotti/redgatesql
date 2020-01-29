@@ -49,7 +49,7 @@ if @AllWorkers = 0 or @AllWorkers is null
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
 					-- and fsw = 1
-					and @EventDate between FSWStartDate AND isnull(FAWEndDate, isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate()))))
+					and @EventDate between FSWStartDate AND isnull(FSWEndDate, isnull(TerminationDate,dateadd(dd,1,datediff(dd,0,getdate()))))
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FAdv' as workertype
 			from worker
