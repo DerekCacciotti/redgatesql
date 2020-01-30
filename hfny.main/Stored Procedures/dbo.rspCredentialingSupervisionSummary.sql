@@ -22,7 +22,7 @@ GO
 -- max of 2 supervisions per week ... khalsa 1/29/2014
 
 -- =============================================
-CREATE procedure [dbo].[rspCredentialingSupervisionSummary] @ProgramFK int = null
+CREATE PROC [dbo].[rspCredentialingSupervisionSummary] @ProgramFK int = null
 												, @sDate datetime = null
 												, @eDate datetime = null
 												, @supervisorfk int = null
@@ -758,7 +758,8 @@ as (
 					--(case when w.FTEFullTime = NULL then 90 when w.FTEFullTime = 1 then 90 else 60 end)
 					) and (SupervisionSessionType = '1') then 'N' -- Form found in period and duration less than 1:30
 
-				when (WorkerFK is null and wws.SupervisionPK is null) then 'N' -- Form not found in period
+				when (wws.WorkerFK is null and wws.SupervisionPK is NULL AND wl.WorkerLeavePK IS NULL) then 'N' -- Form not found in period
+				WHEN wl.WorkerLeavePK IS NOT NULL THEN 'E' -- Form not found in period, but worker was on leave during the period
 				end as MeetsStandard
 
 			, case when (SupervisionSessionType = '0') and (StaffOutAllWeek = 1) then 'Staff out all week' -- Form found in period and reason is “Staff out all week” Note: E = Excused
@@ -767,7 +768,8 @@ as (
 					and (SupervisionSessionType = '1') then '' -- Form found in period and duration is 1:30 or greater 
 				when (isnull(SupervisionHours * 60, 0)+isnull(SupervisionMinutes, 0) < 90)
 					and (SupervisionSessionType = '1') then '' -- Form found in period and duration less than 1:30
-				when (WorkerFK is null and wws.SupervisionPK is null) then 'Unknown' -- Form not found in period
+				when (wws.WorkerFK is null and wws.SupervisionPK is NULL AND wl.WorkerLeavePK IS NULL) then 'Unknown' -- Form not found in period
+				WHEN wl.WorkerLeavePK IS NOT NULL THEN 'Staff on leave' -- Form not found in period, but worker was on leave during the period
 				end as ReasonSupeVisionNotHeld
 
 			--,reason.ReasonNOSupervision
@@ -785,6 +787,9 @@ as (
 	left join	cteSupervisionReasonsNotTookPlace reason on reason.SupervisionPK = wws.SupervisionPK -- to fetch in reasons for supervision not took place
 	left join	cteSupervisionDurationsGroupedByWeek sdg on sdg.WorkerPK = wws.WorkerPK
 															and sdg.WeekNumber = wws.WeekNumber
+	LEFT JOIN dbo.WorkerLeave wl ON wws.WorkerPK = wl.WorkerFK        -- To fetch the leave records for the worker
+					AND (wws.StartDate BETWEEN wl.LeaveStartDate AND wl.LeaveEndDate 
+							OR wws.EndDate BETWEEN wl.LeaveStartDate AND wl.LeaveEndDate)
 	left join	Worker w on wws.WorkerFK = w.WorkerPK
 )
 
