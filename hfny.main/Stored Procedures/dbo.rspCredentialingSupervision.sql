@@ -21,7 +21,7 @@ GO
 -- max of 2 supervisions per week ... khalsa 1/29/2014
 
 -- =============================================
-CREATE procedure [dbo].[rspCredentialingSupervision] @ProgramFK int = null
+CREATE PROC [dbo].[rspCredentialingSupervision] @ProgramFK int = null
 										, @sDate datetime = null
 										, @eDate datetime = null
 										, @supervisorfk int = null
@@ -1027,7 +1027,7 @@ set fmtOnly off ;
 	as (
 
 		select		WorkerName
-				, sum(	case when DaysInTheCurrentWeek = 7 and	MeetsStandard1 <> ' ' then 1
+				, sum(	case when DaysInTheCurrentWeek = 7 then 1
 						else 0 end
 					) as NumOfExpectedSessions
 				, sum(case when MeetsStandard1 = 'E' then 1 else 0 end) as NumOfAllowedExecuses
