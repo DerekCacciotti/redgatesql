@@ -1031,7 +1031,7 @@ set fmtOnly off ;
 	as (
 
 		select		WorkerName
-				, sum(	case when DaysInTheCurrentWeek = 7 and	MeetsStandard1 <> ' ' then 1
+				, sum(	case when DaysInTheCurrentWeek = 7 then 1
 						else 0 end
 					) as NumOfExpectedSessions
 				, sum(case when MeetsStandard1 = 'E' then 1 else 0 end) as NumOfAllowedExecuses
