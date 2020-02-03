@@ -55,6 +55,7 @@ create table #tblStaff (
 						, FirstName varchar(50)
 						, TerminationDate datetime
 						, WorkerPK int
+						, UserName varchar(50)
 						, SortOrder int
 
 							) ;
@@ -69,6 +70,7 @@ create table #tblSUPPMWorkers (
 						, FirstName varchar(50)
 						, TerminationDate datetime
 						, WorkerPK int
+						, UserName varchar(50)
 						, SortOrder int
 
 							) ;
@@ -1010,7 +1012,6 @@ left join	#tblWorkers twrkr on twrkr.WorkerPK = ss.WorkerPK
 left join	Worker w on w.WorkerPK = ss.WorkerPK
 inner join	cteCalculateHFABPSRating cc on 1 = 1
 order by	WorkerName ;
-
 
 -- rspCredentialingSupervisionSummary 4, '06/01/2013', '08/31/2013'					
 -- rspCredentialingSupervisionSummary 1, '07/01/2013', '08/31/2013'		

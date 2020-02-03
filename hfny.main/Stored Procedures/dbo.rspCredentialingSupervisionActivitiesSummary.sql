@@ -50,6 +50,7 @@ create table #tblStaff (
 				, FirstName varchar(50)
 				, TerminationDate datetime
 				, WorkerPK int
+				, UserName varchar(50)
 				, SortOrder int
 
 					) ;
