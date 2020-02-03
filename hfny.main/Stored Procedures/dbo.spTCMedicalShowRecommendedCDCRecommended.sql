@@ -155,7 +155,7 @@ while @counter <= @NumberOfRowsCDCMaster begin
 					select		top 1 ImmunizationID
 					from		@TCIDImmunizations
 					where		MedicalItemTitle = @myevent
-					order by	DisplayDate
+					order by	EventDate
 					) ;
 
 	update	@CDCMaster
