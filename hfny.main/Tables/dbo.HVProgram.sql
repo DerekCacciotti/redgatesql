@@ -6,6 +6,7 @@ CREATE TABLE [dbo].[HVProgram]
 [ContractNumber] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ContractStartDate] [datetime] NULL,
 [CountyFK] [int] NULL,
+[DisplayName] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ExtraField1Description] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ExtraField2Description] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ExtraField3Description] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
