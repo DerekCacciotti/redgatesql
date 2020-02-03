@@ -36,18 +36,17 @@ set @TCDOB = (select TCDOB from dbo.TCID where TCIDPK = @TCIDFK) ;
 -- get the TC age in days 
 set @TCAgeInDays = (select datediff(day, @TCDOB, getdate())) ;
 -- check to see if the TC is greater or equal to 90 days old 
-if (@TCAgeInDays >= 90) begin
-
-set @IsTCMoreThan3MonthsOld = 1 ;
-end ;
+if (@TCAgeInDays >= 90) 
+	begin
+		set @IsTCMoreThan3MonthsOld = 1 ;
+	end ;
 
 --get the status of the chickenpox virus and overall immunizations
 set @ChickenPoxStatus = (select VaricellaZoster from dbo.TCID where TCIDPK = @TCIDFK) ;
 set @ImmunizationStatus = (select NoImmunization from dbo.TCID where TCIDPK = @TCIDFK) ;
 
-print @ChickenPoxStatus ;
-print @ImmunizationStatus ;
-
+--print @ChickenPoxStatus ;
+--print @ImmunizationStatus ;
 
 --This is my CDC Master Table
 declare @CDCMaster table (
@@ -61,10 +60,10 @@ declare @CDCMaster table (
 					, scheduledevent varchar(20)
 					, frequency int
 					, optional bit
+					, EventDate date
 					, DisplayDate char(10)
 					, estdate char(10)
 						) ;
-
 
 insert into @CDCMaster (
 						codeduebydatespk, dueby, eventdescription, interval, maxdue, mindue
@@ -97,6 +96,7 @@ declare @TCIDImmunizations table (
 							, ScheduledEvent varchar(120)
 							, Optional bit
 							, DueBy int
+							, EventDate date
 							, DisplayDate char(10)
 							, MedicalItemTitle varchar(10)
 							, estdate char(10)
@@ -107,14 +107,15 @@ insert into @TCIDImmunizations (
 								--ScheduledEvent,
 								--Optional,
 								--DueBy,
-								DisplayDate, MedicalItemTitle
+								EventDate, DisplayDate, MedicalItemTitle
 							--estdate
 							)
 select --EventDescription,
 	--ScheduledEvent,
 	--Optional,
 	--DueBy,
-			convert(char(10), TCItemDate, 1)
+		TCItemDate
+		, convert(char(10), TCItemDate, 1)
 		, MedicalItemTitle
 --, CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111) AS estdate
 from		TCMedical
@@ -126,6 +127,9 @@ where		(MedicalItemGroup = 'Immunization') and TCIDFK = @TCIDFK ;
 --UPDATE @CDCMaster SET estdate = CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111) 
 
 --SELECT * FROM @CDCMaster ORDER BY dueby
+--SELECT * FROM @CDCMaster ORDER BY DisplayDate
+--SELECT * FROM @CDCMaster ORDER BY EventDate
+--select * from @TCIDImmunizations ti
 
 while @counter <= @NumberOfRowsCDCMaster begin
 
@@ -134,14 +138,16 @@ while @counter <= @NumberOfRowsCDCMaster begin
 	declare @myevent as varchar(10) = (select scheduledevent from @CDCMaster where ID = @counter) ;
 	declare @ImmunizationDateFormatted as char(10) = null ;
 
-	print @counter ;
+	-- print 'Counter: ' + convert(varchar(5), @counter) ;
 
 	set @ImmunizationDate = (
 							select		top 1 DisplayDate
 							from		@TCIDImmunizations
 							where		MedicalItemTitle = @myevent
-							order by	DisplayDate
+							order by	EventDate
 							) ;
+	
+	-- print 'Immunization date: ' + convert(varchar(10), @ImmunizationDate) ;
 
 	set @ImmunizationDateFormatted = convert(char(10), @ImmunizationDate, 1) ;
 
@@ -164,7 +170,6 @@ if (@ChickenPoxStatus = 1)
 	begin
 		if (@IsTCMoreThan3MonthsOld = 0) 
 			begin
-
 				select	*
 					, 'Past due' as type
 				from	@CDCMaster
@@ -244,7 +249,7 @@ else
 						and estdate > @EndOfYear ;
 			end ;
 		end ;
-	else
+	else -- @IsTCMoreThan3MonthsOld <> 0
 		-- begin for the else 
 		begin
 			-- when TC is 3 months or older 
