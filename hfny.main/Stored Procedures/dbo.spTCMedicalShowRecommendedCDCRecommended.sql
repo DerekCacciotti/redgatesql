@@ -2,341 +2,271 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROC [dbo].[spTCMedicalShowRecommendedCDCRecommended]
+-- =============================================
+-- Procedure: spTCMedicalShowRecommendedCDCRecommended
+-- Author:		Derek Cacciotti
+-- Create date: April 2, 2019
+-- Description:	CDC Schedule matched up with Immunization History
 
-    @TCIDFK INT
-AS
+-- Modified: jayrobot
+-- Mod Date: Feb. 3, 2020
+-- Fix: Order by in while loop was character version of a date
+-- =============================================
+CREATE procedure [dbo].[spTCMedicalShowRecommendedCDCRecommended]
+	@TCIDFK int
+as
 
-
- DECLARE @TCDOB DATE
+declare @TCDOB date ;
 --DECLARE @TCIDFK int 
-DECLARE @numberofrowscdcmaster INT
-DECLARE @counter int 
-DECLARE @currentscheduledevent VARCHAR(150)
-DECLARE @chickenpoxstatus BIT
-DECLARE @immunizationstatus BIT
+declare @NumberOfRowsCDCMaster int ;
+declare @counter int ;
+declare @CurrentScheduledEvent varchar(150) ;
+declare @ChickenPoxStatus bit ;
+declare @ImmunizationStatus bit ;
 
-DECLARE @TCAgeInDays INT 
-
-DECLARE @isTCMorethan3MonthsOld BIT = 0
-
-DECLARE @beginningofyear DATETIME =  DATEADD(yy, DATEDIFF(yy, 0, GETDATE()), 0)
-DECLARE @endofyear DATETIME = DATEADD(yy, DATEDIFF(yy, 0, GETDATE()) + 1, -1)
-SET @counter = 0
+declare @TCAgeInDays int ;
+declare @IsTCMoreThan3MonthsOld bit = 0 ;
+declare @BeginningOfYear datetime = dateadd(yy, datediff(yy, 0, getdate()), 0) ;
+declare @EndOfYear datetime = dateadd(yy, datediff(yy, 0, getdate())+1, -1) ;
+set @counter = 0 ;
 --SET @TCIDFK = 40494
 
-
-
-
-
-
-
 --get the TCDOB
-SET @tcdob = (SELECT tcdob FROM dbo.TCID WHERE TCIDPK=@TCIDFK)
+set @TCDOB = (select TCDOB from dbo.TCID where TCIDPK = @TCIDFK) ;
 -- get the TC age in days 
-SET @TCAgeInDays = (SELECT DATEDIFF(DAY, @TCDOB, GETDATE()))
+set @TCAgeInDays = (select datediff(day, @TCDOB, getdate())) ;
 -- check to see if the TC is greater or equal to 90 days old 
-IF(@TCAgeInDays >= 90)
-BEGIN
+if (@TCAgeInDays >= 90) begin
 
-SET @isTCMorethan3MonthsOld = 1
-END
+set @IsTCMoreThan3MonthsOld = 1 ;
+end ;
 
 --get the status of the chickenpox virus and overall immunizations
-SET @chickenpoxstatus = (SELECT VaricellaZoster FROM dbo.TCID WHERE TCIDPK = @TCIDFK)
-SET @immunizationstatus = (SELECT NoImmunization FROM dbo.TCID WHERE TCIDPK = @TCIDFK)
+set @ChickenPoxStatus = (select VaricellaZoster from dbo.TCID where TCIDPK = @TCIDFK) ;
+set @ImmunizationStatus = (select NoImmunization from dbo.TCID where TCIDPK = @TCIDFK) ;
 
-PRINT @chickenpoxstatus
-PRINT @immunizationstatus
+print @ChickenPoxStatus ;
+print @ImmunizationStatus ;
 
 
 --This is my CDC Master Table
-DECLARE @CDCMaster TABLE
-( ID INT IDENTITY(1,1),
-codeduebydatespk INT, 
-dueby INT,
-eventdescription VARCHAR(50),
-interval CHAR(2),
-maxdue INT,
-mindue INT,
-scheduledevent VARCHAR(20),
-frequency INT,
-optional BIT,
-DisplayDate CHAR(10),
-estdate CHAR(10)
-)
+declare @CDCMaster table (
+						ID	int identity(1, 1)
+					, codeduebydatespk int
+					, dueby int
+					, eventdescription varchar(50)
+					, interval char(2)
+					, maxdue int
+					, mindue int
+					, scheduledevent varchar(20)
+					, frequency int
+					, optional bit
+					, DisplayDate char(10)
+					, estdate char(10)
+						) ;
 
 
-INSERT INTO @CDCMaster
-(
-    codeduebydatespk,
-    dueby,
-    eventdescription,
-    interval,
-    maxdue,
-    mindue,
-    scheduledevent,
-    frequency,
-    optional,
-	estdate
-)
-SELECT codeduebydatespk,
-    dueby,
-    eventdescription,
-    interval,
-    MaximumDue,
-    MinimumDue,
-    scheduledevent,
-    frequency,
-    optional,
-	--DATEADD(day,DueBy, @TCDOB)
-	CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 1)
+insert into @CDCMaster (
+						codeduebydatespk, dueby, eventdescription, interval, maxdue, mindue
+					, scheduledevent, frequency, optional, estdate
+					)
+select		codeDueByDatesPK
+		, DueBy
+		, EventDescription
+		, Interval
+		, MaximumDue
+		, MinimumDue
+		, ScheduledEvent
+		, Frequency
+		, Optional
+		--DATEADD(day,DueBy, @TCDOB)
+		, convert(char(10), dateadd(day, DueBy, @TCDOB), 1)
 
-       FROM dbo.codeDueByDates INNER JOIN dbo.codeMedicalItem  ON MedicalItemTitle = ScheduledEvent
-       WHERE (MedicalItemGroup = 'Immunization')
-          ORDER BY codeDueByDates.DueBy
+from		dbo.codeDueByDates
+inner join	dbo.codeMedicalItem on MedicalItemTitle = ScheduledEvent
+where		(MedicalItemGroup = 'Immunization')
+order by	codeDueByDates.DueBy ;
 
 
 
-       SET @numberofrowscdcmaster = (SELECT COUNT(*) FROM @CDCMaster)
+set @NumberOfRowsCDCMaster = (select count (*)from @CDCMaster) ;
 
-          
+declare @TCIDImmunizations table (
+								ImmunizationID	int identity(1, 1)
+							, EventDescription varchar(120)
+							, ScheduledEvent varchar(120)
+							, Optional bit
+							, DueBy int
+							, DisplayDate char(10)
+							, MedicalItemTitle varchar(10)
+							, estdate char(10)
+								) ;
 
-DECLARE @TCIDImmunizations TABLE
-(
-ImmunizationID INT IDENTITY(1,1),
-EventDescription VARCHAR(120),
-ScheduledEvent VARCHAR(120),
-Optional BIT,
-DueBy INT,
-DisplayDate CHAR(10),
-MedicalItemTitle VARCHAR(10),
-estdate CHAR(10)
-)
-
-INSERT INTO @TCIDImmunizations
-(
-    --EventDescription,
-    --ScheduledEvent,
-    --Optional,
-    --DueBy,
-    DisplayDate,
-       MedicalItemTitle
-    --estdate
-)
-SELECT --EventDescription,
-       --ScheduledEvent,
-       --Optional,
-       --DueBy,
-       CONVERT(CHAR(10), TCItemDate, 1)
-          , MedicalItemTitle
-       --, CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111) AS estdate
-FROM TCMedical
-INNER JOIN codeMedicalItem ON MedicalItemCode = TCMedicalItem
+insert into @TCIDImmunizations (
+								--EventDescription,
+								--ScheduledEvent,
+								--Optional,
+								--DueBy,
+								DisplayDate, MedicalItemTitle
+							--estdate
+							)
+select --EventDescription,
+	--ScheduledEvent,
+	--Optional,
+	--DueBy,
+			convert(char(10), TCItemDate, 1)
+		, MedicalItemTitle
+--, CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111) AS estdate
+from		TCMedical
+inner join	codeMedicalItem on MedicalItemCode = TCMedicalItem
 --INNER JOIN dbo.codeDueByDates ON MedicalItemTitle = ScheduledEvent
-WHERE (MedicalItemGroup = 'Immunization')
-AND tcidfk = @TCIDFK
-
-
+where		(MedicalItemGroup = 'Immunization') and TCIDFK = @TCIDFK ;
 
 --set the estimated dates for when the CDC wants the immunizations in the master table
 --UPDATE @CDCMaster SET estdate = CONVERT(CHAR(10), DATEADD(DAY, DueBy, @TCDOB), 111) 
 
-
 --SELECT * FROM @CDCMaster ORDER BY dueby
 
+while @counter <= @NumberOfRowsCDCMaster begin
 
+	declare @ImmunizationDate as date = null ; --this is what we get from the @TCIDImmunizations table
+	declare @idDelete as int = null ; --this is what the TCIDImmunizations pk that we will delete once we get the immunization date
+	declare @myevent as varchar(10) = (select scheduledevent from @CDCMaster where ID = @counter) ;
+	declare @ImmunizationDateFormatted as char(10) = null ;
 
+	print @counter ;
 
+	set @ImmunizationDate = (
+							select		top 1 DisplayDate
+							from		@TCIDImmunizations
+							where		MedicalItemTitle = @myevent
+							order by	DisplayDate
+							) ;
 
-WHILE @counter <= @numberofrowscdcmaster
-BEGIN
+	set @ImmunizationDateFormatted = convert(char(10), @ImmunizationDate, 1) ;
 
-       DECLARE @immunizationdate AS DATE = NULL --this is what we get from the @TCIDImmunizations table
-       DECLARE @idDelete AS INT = NULL --this is what the TCIDImmunizations pk that we will delete once we get the immunization date
-       DECLARE @myevent AS VARCHAR(10) = (SELECT scheduledevent FROM @CDCMaster WHERE id = @counter)
-	   DECLARE  @immunizationdateformatted  AS CHAR(10) = null
+	set @idDelete = (
+					select		top 1 ImmunizationID
+					from		@TCIDImmunizations
+					where		MedicalItemTitle = @myevent
+					order by	DisplayDate
+					) ;
 
-       PRINT @counter
+	update	@CDCMaster
+	set		DisplayDate = @ImmunizationDateFormatted
+	where	ID = @counter ;
+	delete from @TCIDImmunizations where ImmunizationID = @idDelete ;
 
-       SET @immunizationdate = (SELECT TOP 1 DisplayDate FROM @TCIDImmunizations WHERE MedicalItemTitle = @myevent Order BY displaydate)
+	set @counter = @counter+1 ;
+end ;
 
-	   SET @immunizationdateformatted =    CONVERT(CHAR(10), @immunizationdate, 1)
+if (@ChickenPoxStatus = 1) 
+	begin
+		if (@IsTCMoreThan3MonthsOld = 0) 
+			begin
 
-       SET @idDelete = (SELECT TOP 1 ImmunizationID FROM @TCIDImmunizations WHERE MedicalItemTitle = @myevent Order BY displaydate)
-       
-       UPDATE @CDCMaster SET DisplayDate = @immunizationdateformatted WHERE id = @counter
-       DELETE FROM @TCIDImmunizations WHERE ImmunizationID=@idDelete
-
-SET @counter = @counter + 1
-END
-
-
-IF(@chickenpoxstatus = 1)
-BEGIN 
-
-
-
-
-
-IF(@isTCMorethan3MonthsOld = 0)
-BEGIN
-
-SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
-AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
- AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
- AND scheduledevent != 'VZ'
- 
-
-
- UNION 
-
- SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
- --AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() 
- AND estdate BETWEEN @beginningofyear AND @endofyear
- AND scheduledevent != 'VZ' 
-
- UNION 
-
- SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL OR scheduledevent = 'VZ'
-
-
- UNION
- SELECT  *, '' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate > @endofyear
-
-END
-
-
-
-ELSE
-
-BEGIN
-
-
-SELECT *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
-AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
- AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
- AND scheduledevent != 'VZ'
- 
-
-
- UNION 
-
- SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
- AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate BETWEEN @beginningofyear AND @endofyear
- AND scheduledevent != 'VZ' 
-
- UNION 
-
- SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL OR scheduledevent = 'VZ'
-
-
- UNION
- SELECT  *, '' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate > @endofyear
-
-END
-
-
-END
-
-
-
-
-
-
-
-
-
-
-
-
+				select	*
+					, 'Past due' as type
+				from	@CDCMaster
+				where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) < getdate()
+						and dateadd(day, dueby, @TCDOB) < getdate() and scheduledevent != 'VZ'
+				union
+				select	*
+					, 'Nearing' as type
+				from	@CDCMaster
+				where	DisplayDate is null
+						--AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() 
+						and estdate between @BeginningOfYear and @EndOfYear and scheduledevent != 'VZ'
+				union
+				select	*
+					, 'Done' as type
+				from	@CDCMaster
+				where	DisplayDate is not null or scheduledevent = 'VZ'
+				union
+				select	*
+					, '' as type
+				from	@CDCMaster
+				where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) >= getdate()
+						and estdate > @EndOfYear ;
+			end ;
+		else -- @IsTCMoreThan3MonthsOld <> 0
+			begin
+				select	*
+					, 'Past due' as type
+				from	@CDCMaster
+				where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) < getdate()
+						and dateadd(day, dueby, @TCDOB) < getdate() and scheduledevent != 'VZ'
+				union
+				select	*
+					, 'Nearing' as type
+				from	@CDCMaster
+				where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) >= getdate()
+						and estdate between @BeginningOfYear and @EndOfYear and scheduledevent != 'VZ'
+				union
+				select	*
+					, 'Done' as type
+				from	@CDCMaster
+				where	DisplayDate is not null or scheduledevent = 'VZ'
+				union
+				select	*
+					, '' as type
+				from	@CDCMaster
+				where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) >= getdate()
+						and estdate > @EndOfYear ;
+			end ;
+		end ;
 -- else for the chicken pox virus check 
-ELSE
-
-
-
-IF(@isTCMorethan3MonthsOld = 0)
-BEGIN
-
-BEGIN
-
-SELECT  *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
-AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
- AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
-
-
-
- UNION 
-
- 
- SELECT  *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
- --AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() 
- AND estdate BETWEEN @beginningofyear AND @endofyear AND NOT  DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
- AND NOT DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
-
- UNION 
-
- SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL
-
-
- UNION
- SELECT  *, '' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate > @endofyear
-
-
-
-
-
-end
-
- 
-
-END
-
-
-ELSE
--- begin for the else 
-BEGIN
-
-
- -- when TC is 3 months or older 
-BEGIN
-
-SELECT  *, 'Past due' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
-AND DATEADD(MONTH, -3, DATEADD(DAY,dueby, @TCDOB)) < GETDATE()
- AND DATEADD(DAY, DueBy, @TCDOB) < GETDATE()
-
-
-
- UNION 
-
- 
- SELECT *, 'Nearing' AS type FROM @CDCMaster WHERE DisplayDate IS NULL 
- AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate BETWEEN @beginningofyear AND @endofyear 
- UNION 
-
- SELECT *, 'Done' AS type FROM @CDCMaster WHERE DisplayDate IS NOT NULL
-
-
- UNION
- SELECT  *, '' AS type FROM @CDCMaster WHERE DisplayDate IS NULL AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() AND estdate > @endofyear
-
-
-
-
-
-end
-
- 
-
- 
-
- -- end for the else 
-
-END
-
-
-
-
-
-
+else
+	if (@IsTCMoreThan3MonthsOld = 0) 
+		begin
+			begin
+				select	*
+					, 'Past due' as type
+				from	@CDCMaster
+				where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) < getdate()
+						and dateadd(day, dueby, @TCDOB) < getdate()
+				union
+				select	*
+					, 'Nearing' as type
+				from	@CDCMaster
+				where	DisplayDate is null
+						--AND DATEADD(MONTH,-3,DATEADD(DAY, dueby, @TCDOB)) >= GETDATE() 
+						and estdate between @BeginningOfYear and @EndOfYear
+						and not dateadd(month, -3, dateadd(day, dueby, @TCDOB)) < getdate()
+						and not dateadd(day, dueby, @TCDOB) < getdate()
+				union
+				select *, 'Done' as type from @CDCMaster where DisplayDate is not null
+				union
+				select	*
+					, '' as type
+				from	@CDCMaster
+				where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) >= getdate()
+						and estdate > @EndOfYear ;
+			end ;
+		end ;
+	else
+		-- begin for the else 
+		begin
+			-- when TC is 3 months or older 
+			select	*
+				, 'Past due' as type
+			from	@CDCMaster
+			where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) < getdate()
+					and dateadd(day, dueby, @TCDOB) < getdate()
+			union
+			select	*
+				, 'Nearing' as type
+			from	@CDCMaster
+			where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) >= getdate()
+					and estdate between @BeginningOfYear and @EndOfYear
+			union
+			select *, 'Done' as type from @CDCMaster where DisplayDate is not null
+			union
+			select	*
+				, '' as type
+			from	@CDCMaster
+			where	DisplayDate is null and dateadd(month, -3, dateadd(day, dueby, @TCDOB)) >= getdate()
+					and estdate > @EndOfYear ;
+		-- end for the else 
+		end ;
 GO
