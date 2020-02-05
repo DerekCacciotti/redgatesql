@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -46,11 +45,10 @@ BEGIN
 	set @ProgramFK = REPLACE(@ProgramFK,'"','')	
 	set @casefilterspositive = case when @casefilterspositive = '' then null else @casefilterspositive end
 
--- Let us declare few table variables so that we can manipulate the rows at our will
--- Note: Table variables are a superior alternative to using temporary tables 
+	DECLARE @ProgramCapacity INT = (SELECT ProgramCapacity FROM HVProgram where HVProgramPK = @programfk)
 
 ---------------------------------------------
--- Initially, get the subset of data that we are interested in ... Good Practice ... Khalsa 
+-- Initially, get the subset of data
 -- table variable for holding Init Required Data
 DECLARE @tblInitRequiredData TABLE(
 	[HVCasePK] [int],
@@ -634,9 +632,29 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Calculate totals (last row)
-			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('Families enrolled at the end of period',
-			@TotalNumberOfFamiliesEnrolledQuarterly + @TotalNumOfFamiliesEnrolledThisPeriodQuarterly - @TotalNumOfFamiliesDischargedThisPeriodQuarterly,
-			 @NumberOfFamiliesEnrolled4ContractPeriod + @TotalNumOfFamiliesEnrolledThisPeriodContractPeriod - @TotalNumOfFamiliesDischargedContractPeriod) 
+			DECLARE @EnrolledAtEndQuarter INT = @TotalNumberOfFamiliesEnrolledQuarterly + @TotalNumOfFamiliesEnrolledThisPeriodQuarterly - @TotalNumOfFamiliesDischargedThisPeriodQuarterly 
+			DECLARE @EnrolledAtEndContract INT = @NumberOfFamiliesEnrolled4ContractPeriod + @TotalNumOfFamiliesEnrolledThisPeriodContractPeriod - @TotalNumOfFamiliesDischargedContractPeriod
+			
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])
+			VALUES('Families enrolled at the end of period',
+			@EnrolledAtEndQuarter,
+			@EnrolledAtEndContract)
+
+			--Adding program capacity calculations				
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('Contracted Capacity', @ProgramCapacity, @ProgramCapacity) 
+
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])
+			VALUES(
+				'Capacity Fullfillment',
+				CASE WHEN @ProgramCapacity <> 0 THEN 
+						CONVERT(VARCHAR, ROUND(CONVERT(FLOAT, @EnrolledAtEndQuarter) / @ProgramCapacity * 100, 0, 0)) + '%' 
+					 ELSE '' 
+				END,
+				CASE WHEN @ProgramCapacity <> 0 THEN 
+						CONVERT(VARCHAR, ROUND(CONVERT(FLOAT, @EnrolledAtEndContract) / @ProgramCapacity * 100, 0, 0)) + '%' 
+					 ELSE '' 
+				END
+			)  
 	END 
 	ELSE 
 	BEGIN 
@@ -665,11 +683,22 @@ IF (@CustomQuarterlyDates = 0)
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('','', '') --insert empty row
 
 			-- Calculate totals (last row)
+			DECLARE @EnrolledAtEnd INT = @TotalNumberOfFamiliesEnrolledQuarterly + @TotalNumOfFamiliesEnrolledThisPeriodQuarterly - @TotalNumOfFamiliesDischargedThisPeriodQuarterly
 			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])VALUES('Families enrolled at the end of period',
-			@TotalNumberOfFamiliesEnrolledQuarterly + @TotalNumOfFamiliesEnrolledThisPeriodQuarterly - @TotalNumOfFamiliesDischargedThisPeriodQuarterly, '') 
+			@EnrolledAtEnd, '') 
 	
-	
-	
+			--Adding program capacity calculations				
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])
+			VALUES('Contracted Capacity', @ProgramCapacity, '')
+
+			INSERT INTO @tblEnrolledProgramCaseload([CaseLoadText],[CaseLoadQuarterlyData],[CaseLoadContractPeriodData])
+			VALUES(
+				'Capacity Fullfillment',
+				CASE WHEN @ProgramCapacity <> 0 THEN 
+						CONVERT(VARCHAR, ROUND(CONVERT(FLOAT, @EnrolledAtEnd) / @ProgramCapacity * 100, 0, 0)) + '%' 
+					 ELSE '' 
+					 END,
+				 '')  
 	
 	END 
 
