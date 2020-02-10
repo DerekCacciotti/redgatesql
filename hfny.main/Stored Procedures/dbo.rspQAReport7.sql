@@ -415,7 +415,7 @@ SELECT
 		END
 	END AS YearTwoFailureReason,
 
-	CASE WHEN YearThreeASQCount < 1 THEN
+	CASE WHEN YearThreeASQCount < 2 THEN
 		CASE
 			WHEN TCAgeInDays > 1095 THEN
 				CASE WHEN YearThreeNotInWindow > 0 AND YearThreeNotReviewed IS NULL THEN 'Out of Window'
@@ -457,13 +457,13 @@ WHERE
 	(TCAgeInDays BETWEEN 731 AND 1095 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2))
 	OR
 	--TCs less than four years old can only fail on Year 1, 2, 3 ASQs
-	(TCAgeInDays BETWEEN 1096 AND 1460 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 1))
+	(TCAgeInDays BETWEEN 1096 AND 1460 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2))
 	OR
 	--TCs less than five years old can only fail on Year 1, 2, 3, 4 ASQs
-	(TCAgeInDays BETWEEN 1461 AND 1825 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 1 OR YearFourASQCount < 1))
+	(TCAgeInDays BETWEEN 1461 AND 1825 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2 OR YearFourASQCount < 1))
 	OR
 	--TCs greater than five years old can fail in any period 
-	(TCAgeInDays >= 1826 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 1 OR YearFourASQCount < 1 OR YearFiveASQCount < 1))
+	(TCAgeInDays >= 1826 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2 OR YearFourASQCount < 1 OR YearFiveASQCount < 1))
 
 IF @ReportType = 'summary'
 
