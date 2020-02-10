@@ -541,7 +541,6 @@ SELECT
 	CurrentLevel,
 	CONVERT(VARCHAR, TCDOB, 101) AS TCDOB,
 	CONVERT(VARCHAR, CalcDOB, 101) AS CalcDOB,
-	TCAgeInDays,
 	CASE WHEN YearOneFailureReason IS NOT NULL THEN 'Year 1: ' + YearOneFailureReason + '<br/>' ELSE '' END +
 	CASE WHEN YearTwoFailureReason IS NOT NULL THEN 'Year 2: ' + YearTwoFailureReason + '<br/>' ELSE '' END +
 	CASE WHEN YearThreeFailureReason IS NOT NULL THEN 'Year 3: ' + YearThreeFailureReason + '<br/>' ELSE '' END +
