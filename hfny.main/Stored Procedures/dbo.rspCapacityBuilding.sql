@@ -83,8 +83,7 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	
 	select  SUM(ProgramCapacity) AS ProgramCapacity,
 			SUM(CurrentCapacity) AS CurrentCapacity,
-			CASE WHEN SUM(ProgramCapacity) is null then 'Program capacity blank on Program Information Form.' 
-			ELSE COALESCE(cast(SUM(CurrentCapacity) AS FLOAT) / NULLIF(SUM(ProgramCapacity),0), 0) end AS PerctOfProgramCapacity
+			CASE WHEN SUM(ProgramCapacity) is not null then COALESCE(cast(SUM(CurrentCapacity) AS FLOAT) / NULLIF(SUM(ProgramCapacity),0), 0) end AS PerctOfProgramCapacity
 		FROM cteProgramCapacityX
 	)
 	
@@ -276,8 +275,8 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	 ,F
 	 ,CONVERT(VARCHAR, ROUND([F/D] * 100, 2, 1)) + '%' AS [F/D]
 	 ,[A-B]
-	 ,ROUND(G * 100, 2, 1) AS G
-	 ,ROUND(H * 100, 2, 1) AS H
+	 ,CONVERT(VARCHAR, ROUND(G * 100, 2, 1)) + '%' AS G
+	 ,CONVERT(VARCHAR, ROUND(H * 100, 2, 1)) + '%' AS H
 	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 3, 0) AS EN3
 	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 6, 0) AS EN6
 	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 12, 0) AS EN12

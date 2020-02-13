@@ -327,7 +327,7 @@ BEGIN
 	
 	--Cohort PC1 Health Insurance assessments in given year
 	DECLARE @tblPC1Insurance AS TABLE (
-		 FormDate DATE 
+		 FormDate DATE
 	   , HIFamilyChildHealthPlus BIT
 	   , HIOther BIT
 	   , HIPCAP BIT
@@ -342,11 +342,12 @@ BEGIN
 	   , PBSSI CHAR(1)
 	   , PBTANF CHAR(1)
 	   , PBWIC CHAR(1)
-	   , PC1ReceivingMedicaid BIT
+	   , PC1ReceivingMedicaid_IN CHAR(1)
+	   , PC1ReceivingMedicaid_FU CHAR(1)
 	   , RowNum  INT
 	)
 	INSERT INTO @tblPC1Insurance (
-		FormDate 
+		FormDate
 	   , HIFamilyChildHealthPlus
 	   , HIOther
 	   , HIPCAP
@@ -361,7 +362,8 @@ BEGIN
 	   , PBSSI
 	   , PBTANF
 	   , PBWIC
-	   , PC1ReceivingMedicaid
+	   , PC1ReceivingMedicaid_IN
+	   , PC1ReceivingMedicaid_FU
 	   , RowNum 
 	)
 	SELECT ca.FormDate
@@ -379,13 +381,12 @@ BEGIN
 	   , ca.PBSSI
 	   , ca.PBTANF
 	   , ca.PBWIC
+	   , ca.PC1ReceivingMedicaid
 	   , ca2.PC1ReceivingMedicaid
 	   , ROW_NUMBER() OVER (PARTITION BY ca.hvcasefk ORDER BY ca.FormDate DESC) AS [row]  
 	   FROM commonattributes ca
-	   inner join @tblHomeVisits thv ON thv.hvcasefk = ca.hvcasefk
-	   inner join commonattributes ca2 ON  ca2.FormType = 'FU-PC1' and ca.FormFK = ca2.FormFK
-	   WHERE ca.FormType in ('FU', 'IN', 'KE')
-	  and ca.FormDate between @sdate and @edate
+	   left join commonattributes ca2 ON  ca2.FormType = 'FU-PC1' and ca.FormType = 'FU' and ca.FormFK = ca2.FormFK and ca.HVCaseFK = ca2.HVCaseFK
+	   WHERE ca.FormType in ('FU', 'IN', 'KE') and ca.HVCaseFK in (select hvcasefk from @tblHomeVisits)
 
 	--Cohort TC Health insurance assessments in given year
 	DECLARE @tblTCInsurance AS TABLE (
@@ -424,8 +425,7 @@ BEGIN
 		, ROW_NUMBER() OVER (PARTITION BY ca.hvcasefk ORDER BY ca.FormDate DESC)
 	FROM dbo.CommonAttributes ca
 	inner join HVCase hc ON hc.HVCasePK = ca.HVCaseFK
-	inner join @tblHomeVisits thv ON thv.hvcasefk = ca.HVCaseFK
-	WHERE FormType in ('TC', 'FU') and FormDate between @sDate and @eDate
+	WHERE FormType in ('TC', 'FU') and ca.HVCaseFK in (select hvcasefk from @tblHomeVisits)
 
 --Cohort TC Birth Info
     DECLARE @tblTCBirthInfo AS TABLE (
@@ -471,8 +471,7 @@ BEGIN
 		,FormDate
 		,ROW_NUMBER() OVER(PARTITION BY ca.hvcasefk ORDER BY FormDate DESC)
 		FROM dbo.CommonAttributes ca
-		inner join @tblHomeVisits thv ON thv.hvcasefk = ca.HVCaseFK
-		WHERE ca.FormType in ('IN', 'FU')
+		WHERE ca.FormType in ('IN', 'FU') and ca.HVCaseFK in (select hvcasefk from @tblHomeVisits)
 
 --Cohort Employment assessments in given year
 	DECLARE @tblEmployment AS TABLE (
@@ -1100,7 +1099,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	SELECT 590, tpid.PC1ID, 0, 1
 	FROM @tblPC1IDs tpid WHERE tpid.hvcasefk in (
 		SELECT DISTINCT hvcasefk FROM @tblPC1Insurance
-		WHERE RowNum = 1 and PC1ReceivingMedicaid = 1 
+		WHERE RowNum = 1 and (PC1ReceivingMedicaid_FU = '1' OR PC1ReceivingMedicaid_IN = '1') 
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
