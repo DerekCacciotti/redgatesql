@@ -14,7 +14,8 @@ CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Details]
 	(
 		@programfk varchar(max) = null ,
 		@StartDate datetime ,
-		@EndDate datetime
+		@EndDate datetime ,
+		@WorkerFK int
 	)
 as
 	if @programfk is null
@@ -95,9 +96,9 @@ as
 														and ca.FormType = 'KE'
 				where  (   h.IntakeDate is not null
 						   or cp.DischargeDate is not null ) -- only include kempes that are positive and where there is a clos_date or an intake date.
-					   and k.KempeResult = 1
-					   and k.KempeDate
-					   between @StartDate and @EndDate
+						and k.KempeResult = 1
+						and k.KempeDate between @StartDate and @EndDate
+						and cp.CurrentFAWFK = isnull(@WorkerFK, cp.CurrentFAWFK)
 			)
 	select	 ( case when IntakeDate is not null then ''					--'AcceptedFirstVisitEnrolled' 
 					when KempeResult = 1
@@ -149,7 +150,4 @@ as
 			 PC1ID; -- ReportDischargeText, PC1ID
 
 -- rspCredentialingKempeAnalysis_Details 2, '01/01/2011', '12/31/2011'
-
-
-
 GO
