@@ -2,7 +2,7 @@ CREATE TABLE [dbo].[HVProgram]
 (
 [HVProgramPK] [int] NOT NULL IDENTITY(1, 1),
 [ContractEndDate] [datetime] NULL,
-[ContractManager] [char] (30) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[ContractManagerFK] [int] NULL,
 [ContractNumber] [char] (10) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [ContractStartDate] [datetime] NULL,
 [CountyFK] [int] NULL,
@@ -58,6 +58,10 @@ GO
 CREATE NONCLUSTERED INDEX [IX_FK_HVProgram_CountyFK] ON [dbo].[HVProgram] ([CountyFK]) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[HVProgram] WITH NOCHECK ADD CONSTRAINT [FK_HVProgram_CountyFK] FOREIGN KEY ([CountyFK]) REFERENCES [dbo].[codeCounty] ([codeCountyPK])
+GO
+ALTER TABLE [dbo].[HVProgram] ADD CONSTRAINT [FK_HVProgram_HVProgram] FOREIGN KEY ([HVProgramPK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
+GO
+ALTER TABLE [dbo].[HVProgram] ADD CONSTRAINT [FK_HVProgram_listContractManager] FOREIGN KEY ([ContractManagerFK]) REFERENCES [dbo].[listContractManager] ([listContractManagerPK])
 GO
 ALTER TABLE [dbo].[HVProgram] ADD CONSTRAINT [FK_HVProgram_State] FOREIGN KEY ([StateFK]) REFERENCES [dbo].[State] ([StatePK])
 GO
