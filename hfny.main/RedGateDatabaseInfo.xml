@@ -1,11 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<DatabaseInformation Version="2">
+<DatabaseInformation Version="3">
   <ScriptFileEncoding>UTF8</ScriptFileEncoding>
   <DefaultCollation>SQL_Latin1_General_CP1_CI_AS</DefaultCollation>
   <DefaultSchema>dbo</DefaultSchema>
   <DefaultUser>dbo</DefaultUser>
   <DefaultFilegroup>PRIMARY</DefaultFilegroup>
   <DatabaseVersion>14</DatabaseVersion>
+  <CompatibilityLevel>140</CompatibilityLevel>
+  <EngineEdition>Unknown</EngineEdition>
   <IsAzure>False</IsAzure>
   <ScriptFolderType>Default</ScriptFolderType>
   <MaxDataFileSize>10485760</MaxDataFileSize>
@@ -59,7 +61,7 @@
     <DataWriteAllFilesInOneDirectory>True</DataWriteAllFilesInOneDirectory>
   </WriteToFileOptions>
   <DataFileSet>
-    <Count>25</Count>
+    <Count>24</Count>
     <DataFile>dbo.AppOptions_Data.sql</DataFile>
     <DataFile>dbo.codeApp_Data.sql</DataFile>
     <DataFile>dbo.codeAttachmentCategory_Data.sql</DataFile>
@@ -79,7 +81,6 @@
     <DataFile>dbo.codeReportAccess_Data.sql</DataFile>
     <DataFile>dbo.codeReportCatalog_Data.sql</DataFile>
     <DataFile>dbo.codeServiceReferral_Data.sql</DataFile>
-    <DataFile>dbo.codeSubTopicDetail_Data.sql</DataFile>
     <DataFile>dbo.codeTopic_Data.sql</DataFile>
     <DataFile>dbo.codeTraining_Data.sql</DataFile>
     <DataFile>dbo.scoreASQSE_Data.sql</DataFile>
