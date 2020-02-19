@@ -304,6 +304,7 @@ BEGIN
 		,PC1PhysicallyAbused CHAR(1)
 		,PC1SexuallyAbused CHAR(1)
 		,MomScore CHAR(3)
+		,MomCPSArea CHAR(2)
 		,DadScore CHAR(3)
 
 	)
@@ -313,6 +314,7 @@ BEGIN
 		, PC1PhysicallyAbused
 		, PC1SexuallyAbused
 		, MomScore
+		,MomCPSArea
 		, DadScore 
 	)
 	SELECT DISTINCT
@@ -321,6 +323,7 @@ BEGIN
 		,PC1PhysicallyAbused
 		,PC1SexuallyAbused
 		, MomScore
+		,MomCPSArea
 		, DadScore 
 	FROM Kempe
 	WHERE hvcasefk in (SELECT hvcasefk FROM @tblHomeVisits)
@@ -1054,8 +1057,17 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 530 and Detail = 1)
 	)
 -----------------
-	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail)
-	VALUES(540, 'B39', 'Involved in Child Welfare System (as caregiver).', 0, 0)
+	INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	SELECT 540, tpid.PC1ID, 0, 1
+	FROM @tblPC1IDs tpid WHERE tpid.hvcasefk in (
+		SELECT DISTINCT hvcasefk FROM @tblKempeInfo
+		WHERE MomCPSArea = '05' OR MomCPSArea = '10'
+	)
+
+	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response)
+	VALUES(540, 'B39', 'Involved in Child Welfare System (as caregiver).', 0, 0,
+		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 540 and Detail = 1)	
+	)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	SELECT 550, tpid.PC1ID, 0, 1
