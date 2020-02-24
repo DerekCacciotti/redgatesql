@@ -49,6 +49,7 @@ inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 LEFT outer JOIN listSite ls on ls.listSitePK = wp.SiteFK
 inner join PC p on p.PCPK = HVCase.PC1FK
 left outer join TCID t on t.HVCaseFK = HVCase.HVCasePK
+inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK =cp.HVCaseFK
 where 
 		 IntakeDate is not null
 		--for August 1 2016
