@@ -1,0 +1,14 @@
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE PROCEDURE [dbo].[spGetGoalPlanbyPK]
+
+(@GoalPlanPK int)
+AS
+SET NOCOUNT ON;
+
+SELECT * 
+FROM GoalPlan
+WHERE GoalPlanPK = @GoalPlanPK
+GO
