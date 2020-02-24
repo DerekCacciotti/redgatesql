@@ -50,6 +50,7 @@ create table #tblStaff (
 				, FirstName varchar(50)
 				, TerminationDate datetime
 				, WorkerPK int
+				, UserName varchar(50)
 				, SortOrder int
 
 					) ;
@@ -435,7 +436,6 @@ as (
 			, sum(convert(int, s.TeamDevelopment)) as TeamDevelopment
 			, sum(convert(int, s.WorkplaceEnvironment)) as WorkplaceEnvironment
 
-
 	--, sum(convert(int, AssessmentIssues)) as AssessmentIssues
 	--, sum(convert(int, IFSP)) as IFSP
 	--, sum(convert(int, FamilyProgress)) as FamilyProgress
@@ -476,17 +476,44 @@ as (
 								and SupervisionDate between StartDate and EndDate
 	where		SupervisionPK is not null and SupervisionSessionType = '1'
 )
-
-
-,	cteSupervisionsThatTookPlacePercActivities
+, cteHVCaseActivities 
+as (
+	select count(*) as CountOfHVCasesDiscussed
+			, sum(convert(int, shvc.ChallengingIssues)) as ChallengingIssues
+			, sum(convert(int, shvc.CHEERSFeedback)) as CHEERSFeedback
+			, sum(convert(int, shvc.FGPProgress)) as FGPProgress
+			, sum(convert(int, shvc.HVCPS)) as HVCPS
+			, sum(convert(int, shvc.HVReferrals)) as HVReferrals
+			, sum(convert(int, shvc.LevelChange)) as LevelChange
+			, sum(convert(int, shvc.Medical)) as Medical
+			, sum(convert(int, shvc.ServicePlan)) as ServicePlan
+			, sum(convert(int, shvc.Tools)) as Tools
+			, sum(convert(int, shvc.TransitionPlanning)) as TransitionPlanning
+	from cteSupervisionsThatTookPlace sttp
+	inner join SupervisionHomeVisitCase shvc on shvc.SupervisionFK = sttp.SupervisionPK
+	where SupervisionSessionType = '1'
+)
+, ctePSCaseActivities 
+as (
+	select count(*) as CountOfPSCasesDiscussed
+			, sum(convert(int, spsc.AssessmentIssues)) as AssessmentIssues
+			, sum(convert(int, spsc.ProtectiveFactors)) as ProtectiveFactors
+			, sum(convert(int, spsc.PSServicePlan)) as PSServicePlan
+			, sum(convert(int, spsc.Referrals)) as Referrals
+			, sum(convert(int, spsc.RiskFactors)) as RiskFactors
+	from cteSupervisionsThatTookPlace sttp
+	inner join SupervisionParentSurveyCase spsc on spsc.SupervisionFK = sttp.SupervisionPK
+	where SupervisionSessionType = '1'
+)
+, cteSupervisionsThatTookPlacePercActivities
 as (
 	select	NumOfTotalSupervisions
-		, convert(varchar, Boundaries)+' (' +
-			convert(varchar, round(coalesce(cast(Boundaries as float) * 100
+		, convert(varchar(12), Boundaries)+' (' +
+			convert(varchar(12), round(coalesce(cast(Boundaries as float) * 100
 									/ nullif(NumOfTotalSupervisions, 0), 0), 0)) +
 			'%)' as PercOfBoundaries
-		, convert(varchar, Caseload)+' (' +
-			convert(varchar, round(coalesce(cast(Caseload as float) * 100
+		, convert(varchar(12), Caseload)+' (' +
+			convert(varchar(12), round(coalesce(cast(Caseload as float) * 100
 									/ nullif(NumOfTotalSupervisions, 0), 0), 0)) + 
 			'%)' as PercOfCaseload
 		, convert(varchar(12), Coaching) + ' (' +
@@ -577,6 +604,68 @@ as (
 			convert(varchar(12), round(coalesce(cast(WorkplaceEnvironment as float) * 100
 									/ nullif(NumOfTotalSupervisions, 0), 0), 0)) +
 			'%)' as PercOfWorkplaceEnvironment
+		, CountOfHVCasesDiscussed
+		, convert(varchar(12), ChallengingIssues) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(ChallengingIssues as float)* 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfChallengingIssues
+		, convert(varchar(12), CHEERSFeedback)+' (' 
+			+convert(varchar(12), round(coalesce(cast(CHEERSFeedback as float) * 100 
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfCHEERSFeedback
+		, convert(varchar(12), FGPProgress) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(FGPProgress as float) * 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfFGPProgress
+		, convert(varchar(12), HVCPS) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(HVCPS as float) * 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfHVCPS
+		, convert(varchar(12), HVReferrals) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(HVReferrals as float) * 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfHVReferrals
+		, convert(varchar(12), LevelChange) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(LevelChange as float) * 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfLevelChange
+		, convert(varchar(12), Medical) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(Medical as float) * 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfMedical
+		, convert(varchar(12), ServicePlan) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(ServicePlan as float) * 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfServicePlan
+		, convert(varchar(12), Tools) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(Tools as float) * 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfTools
+		, convert(varchar(12), TransitionPlanning) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(TransitionPlanning as float) * 100
+									/ nullif(CountOfHVCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfTransitionPlanning
+		, CountOfPSCasesDiscussed
+		, convert(varchar(12), AssessmentIssues) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(AssessmentIssues as float) * 100
+									/ nullif(CountOfPSCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfAssessmentIssues
+		, convert(varchar(12), ProtectiveFactors) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(ProtectiveFactors as float) * 100
+									/ nullif(CountOfPSCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfProtectiveFactors
+		, convert(varchar(12), PSServicePlan) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(PSServicePlan as float) * 100
+									/ nullif(CountOfPSCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfPSServicePlan
+		, convert(varchar(12), Referrals) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(Referrals as float) * 100
+									/ nullif(CountOfPSCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfReferrals
+		, convert(varchar(12), RiskFactors) + ' (' + 
+			convert(varchar(12), round(coalesce(cast(RiskFactors as float) * 100
+									/ nullif(CountOfPSCasesDiscussed, 0), 0), 0)) + 
+			'%)' as PercOfRiskFactors
 
 	--, convert(varchar, AssessmentIssues)+' ('
 	--	+convert(
@@ -894,7 +983,8 @@ as (
 
 
 	from	cteSupervisionsThatTookPlaceActivities
-
+	inner join cteHVCaseActivities on 1=1
+	inner join ctePSCaseActivities on 1=1
 )
 
 ---- to show list of the other activities
@@ -1135,13 +1225,7 @@ as (
 
 -- Supervision sessions that took place
 , cteSupervisionsThatDidNotTakePlaceWithReason
-as (
-	select
-
-				count(*) as NumOfTotalSupervisionsNotTookPlace
-
-
-
+as (select count(*) as NumOfTotalSupervisionsNotTookPlace
 			, sum(convert(int, ParticipantEmergency)) as ParticipantEmergency
 			, sum(convert(int, ShortWeek)) as ShortWeek
 			, sum(convert(int, StaffCourt)) as StaffCourt
@@ -1159,8 +1243,6 @@ as (
 			, sum(convert(int, SupervisorVacation)) as SupervisorVacation
 			, sum(convert(int, ReasonOther)) as ReasonOther
 			, sum(convert(int, Weather)) as Weather
-
-
 	from		#tblWeekPeriodsAdjusted wp
 	--left join #tblWorkers w on 1=1  -- We need to know if supervision event in any week is missing
 	left join	#tblWorkers w on w.WorkerPK = wp.WorkerPK -- include only those weeks where worker performed supervisions. 
@@ -1403,6 +1485,23 @@ select	PercOfSupGreaterThanEQTo90Mins
 		, PercOfSupportHFAModel
 		, PercOfTeamDevelopment
 		, PercOfWorkplaceEnvironment
+		, CountOfHVCasesDiscussed
+		, PercOfChallengingIssues
+		, PercOfCHEERSFeedback
+		, PercOfFGPProgress
+		, PercOfHVCPS
+		, PercOfHVReferrals
+		, PercOfLevelChange
+		, PercOfMedical
+		, PercOfServicePlan
+		, PercOfTools
+		, PercOfTransitionPlanning
+		, CountOfPSCasesDiscussed
+		, PercOfAssessmentIssues
+		, PercOfProtectiveFactors
+		, PercOfPSServicePlan
+		, PercOfReferrals
+		, PercOfRiskFactors
 		, OtherNumOfTotalSupervisionsNotTookPlace
 		, OtherPercOfParticipantEmergency
 		, OtherPercOfShortWeek

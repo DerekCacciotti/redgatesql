@@ -15,6 +15,7 @@ CREATE PROC [dbo].[spGetOptionItem]
     @OptionItem VARCHAR(50),
     @ProgramFK INT,
     @CompareDate DATETIME,
+    @AppName VARCHAR(100),
     @OptionValue VARCHAR(200) OUTPUT
 )
 AS
@@ -27,6 +28,7 @@ BEGIN
     SELECT @OptionValue = ao.OptionValue
     FROM dbo.AppOptions ao
     WHERE OptionItem = @OptionItem
+          AND ao.AppName = @AppName
           AND CASE
                   WHEN @ProgramFK = 0 THEN
                       1

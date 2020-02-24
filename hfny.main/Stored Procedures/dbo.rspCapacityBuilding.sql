@@ -76,10 +76,7 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	as
 	( 
 		select ProgramCapacity, ProgramFK,
-			count(PC1ID) - sum(PreintakeCount) AS CurrentCapacity
-			--,case when ProgramCapacity is null then 'Program capacity blank on Program Information Form.' 
-			--ELSE CONVERT(VARCHAR, round(COALESCE(cast((count(PC1ID) - sum(PreintakeCount)) AS FLOAT) * 100 / 
-			--NULLIF(ProgramCapacity,0), 0), 0))  + '%' end AS PerctOfProgramCapacity
+			count(PC1ID) - SUM(PreintakeCount) AS CurrentCapacity
 		FROM ctemainAgain
 		group by ProgramCapacity, ProgramFK
 	)	 
@@ -88,11 +85,9 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	cteProgramCapacity
 	AS (
 	
-	select  sum(ProgramCapacity) AS ProgramCapacity,
-			sum(CurrentCapacity) AS CurrentCapacity,
-			case when sum(ProgramCapacity) is null then 'Program capacity blank on Program Information Form.' 
-			ELSE CONVERT(VARCHAR, round(COALESCE(cast(sum(CurrentCapacity) AS FLOAT) * 100 / 
-			NULLIF(sum(ProgramCapacity),0), 0), 0))  + '%' end AS PerctOfProgramCapacity
+	select  SUM(ProgramCapacity) AS ProgramCapacity,
+			SUM(CurrentCapacity) AS CurrentCapacity,
+			CASE WHEN SUM(ProgramCapacity) is not null then COALESCE(cast(SUM(CurrentCapacity) AS FLOAT) / NULLIF(SUM(ProgramCapacity),0), 0) end AS PerctOfProgramCapacity
 		FROM cteProgramCapacityX
 	)
 	
@@ -100,10 +95,8 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	, cteScreen as
 	(
 		SELECT count(*) AS TotalScreens,
-		sum(CASE WHEN a.ReferralMade = 1 THEN 1 ELSE 0 END) AS PositiveScreens,
-		CONVERT(VARCHAR, round(COALESCE(cast((sum(CASE WHEN a.ReferralMade = 1 THEN 1 ELSE 0 END)) AS FLOAT) * 100 / 
-		NULLIF(count(*),0), 0), 0))  + '%'
-		AS PercentScreen
+		SUM(CASE WHEN a.ReferralMade = 1 THEN 1 ELSE 0 END) AS PositiveScreens,
+		COALESCE(cast((SUM(CASE WHEN a.ReferralMade = 1 THEN 1 ELSE 0 END)) AS FLOAT) / NULLIF(count(*),0), 0)	AS PercentScreen
 		FROM HVScreen AS a
 		inner join dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
 		WHERE a.ScreenDate BETWEEN @startDT AND @endDT
@@ -112,12 +105,10 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	, cteKempe AS
 	(
 		SELECT 
-		sum(CASE WHEN a.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) AS TotalKempe
-		, sum(CASE WHEN a.CaseStatus IN ('02') AND a.FSWAssignDate IS NOT NULL THEN 1 ELSE 0 END) AS PositiveReferredKempe
-		, CONVERT(VARCHAR, round(COALESCE(cast((sum(CASE WHEN a.CaseStatus IN ('02') AND 
-		a.FSWAssignDate IS NOT NULL THEN 1 ELSE 0 END)) AS FLOAT) * 100 / 
-		NULLIF(sum(CASE WHEN a.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END),0), 0), 0))  + '%'
-		AS PercentKempe
+		SUM(CASE WHEN a.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END) AS TotalKempe
+		, SUM(CASE WHEN a.CaseStatus IN ('02') AND a.FSWAssignDate IS NOT NULL THEN 1 ELSE 0 END) AS PositiveReferredKempe
+		, COALESCE(cast((SUM(CASE WHEN a.CaseStatus IN ('02') AND a.FSWAssignDate IS NOT NULL THEN 1 ELSE 0 END)) AS FLOAT) / 
+		           NULLIF(SUM(CASE WHEN a.CaseStatus IN ('02', '04') THEN 1 ELSE 0 END),0), 0)	AS PercentKempe
 		FROM Preassessment AS a
 		JOIN Kempe AS b ON a.HVCaseFK = b.HVCaseFK  -- new
 		inner join dbo.SplitString(@programfk,',') on a.ProgramFK = listitem
@@ -141,11 +132,19 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	)
 
 	, cteAcceptanceRate AS 
-	(SELECT 
-	 CONVERT(VARCHAR, CONVERT(VARCHAR, round(COALESCE(cast(sum(Case WHEN IntakeDate IS NOT NULL 
-    OR (KempeResult = 1 AND IntakeDate IS NULL AND DischargeDate IS NOT NULL 
-	AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL)) THEN 1 ELSE 0 END) AS FLOAT) 
-	* 100/ NULLIF(count(*),0), 0), 0))  + '%') AS AcceptanceRate	
+	(SELECT   
+		COALESCE(cast(SUM(Case WHEN IntakeDate IS NOT NULL OR 
+									( 
+										KempeResult = 1 
+										AND IntakeDate IS NULL 
+										AND DischargeDate IS NOT NULL 
+										AND (PIVisitMade > 0 AND PIVisitMade IS NOT NULL)
+									) 
+							   THEN 1 
+							   ELSE 0 
+							END
+						 ) 
+				 AS FLOAT) / NULLIF(count(*),0),0) AS AcceptanceRate	
 
 	FROM HVCase h
 	INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK
@@ -153,7 +152,7 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	INNER JOIN Kempe k ON k.HVCaseFK = h.HVCasePK
 	INNER JOIN PC P ON P.PCPK = h.PC1FK
 	LEFT OUTER JOIN 
-	(SELECT KempeFK, sum(CASE WHEN PIVisitMade > 0 THEN 1 ELSE 0 END) PIVisitMade
+	(SELECT KempeFK, SUM(CASE WHEN PIVisitMade > 0 THEN 1 ELSE 0 END) PIVisitMade
 		FROM Preintake AS a
 		INNER JOIN CaseProgram cp ON cp.HVCaseFK = a.HVCaseFK
 	    INNER join dbo.SplitString(@ProgramFK, ',') on cp.programfk = listitem
@@ -162,14 +161,6 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	WHERE (h.IntakeDate IS NOT NULL OR cp.DischargeDate IS NOT NULL) AND k.KempeResult = 1 
 	AND k.KempeDate BETWEEN @startDt AND @endDT
 	)
-	--(SELECT
-	--    count(*) AS Totals
-	--	, sum(Case WHEN IntakeDate IS NOT NULL THEN 1 ELSE 0 END) TotalEnrolled
-	--	--, sum(Case WHEN DischargeDate IS NOT NULL AND IntakeDate IS NULL THEN 1 ELSE 0 END) TotalNotEnrolled
-	--	,CONVERT(VARCHAR, CONVERT(VARCHAR, round(COALESCE(cast(sum(Case WHEN IntakeDate IS NOT NULL THEN 1 ELSE 0 END) AS FLOAT) 
-	--	* 100/ NULLIF(count(*),0), 0), 0))  + '%') AS AcceptanceRate	 
-	-- FROM cteAcceptanceRateX
-	--)
 	
 	-- retention rate
 	,
@@ -241,10 +232,9 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	,
 	cteRetention AS 
 	(SELECT
-	count(*) AS TotalEnrolledParticipants
-	, sum(case when ActiveAt12Months=1 then 1 else 0 end) as TwelveMonthsTotal
-	,CONVERT(VARCHAR, CONVERT(VARCHAR, round(COALESCE(cast(sum(case when ActiveAt12Months=1 then 1 else 0 end) AS FLOAT) 
-			* 100/ NULLIF(count(*),0), 0), 0))  + '%') AS RetentionRateOneYear	 
+		count(*) AS TotalEnrolledParticipants
+		, SUM(case when ActiveAt12Months=1 then 1 else 0 end) as TwelveMonthsTotal
+		,COALESCE(cast(SUM(case when ActiveAt12Months = 1 then 1 else 0 end) AS FLOAT) / NULLIF(count(*),0), 0) AS RetentionRateOneYear	 
 	FROM cteRetentionX
 	)
 
@@ -268,8 +258,7 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	        ,PercentScreen AS [D/C]
 	        ,TotalKempe AS E
 	        ,PositiveReferredKempe AS F
-	        ,CONVERT(VARCHAR, CONVERT(VARCHAR, round(COALESCE(cast(PositiveReferredKempe AS FLOAT) 
-			 * 100/ NULLIF(PositiveScreens,0), 0), 0))  + '%') AS [F/D]
+	        ,COALESCE(cast(PositiveReferredKempe AS FLOAT) / NULLIF(PositiveScreens,0), 0) AS [F/D]
 			,ProgramCapacity - CurrentCapacity AS [A-B]
 			,AcceptanceRate AS G
 			,RetentionRateOneYear AS H
@@ -279,18 +268,30 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	
 	cteRpt AS 
 	(
-	select *
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/3, 0) AS EN3
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/6, 0) AS EN6
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/12, 0) AS EN12
+	select 
+	  A
+	 ,B
+	 ,CONVERT(VARCHAR, ROUND([B/A] * 100, 2, 1)) + '%' AS [B/A]
+	 ,C
+	 ,D
+	 ,CONVERT(VARCHAR, ROUND([D/C] * 100, 2, 1)) + '%' AS [D/C]
+	 ,E
+	 ,F
+	 ,CONVERT(VARCHAR, ROUND([F/D] * 100, 2, 1)) + '%' AS [F/D]
+	 ,[A-B]
+	 ,CONVERT(VARCHAR, ROUND(G * 100, 2, 1)) + '%' AS G
+	 ,CONVERT(VARCHAR, ROUND(H * 100, 2, 1)) + '%' AS H
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 3, 0) AS EN3
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 6, 0) AS EN6
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 12, 0) AS EN12
+
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 3 / CASE WHEN G = 0 THEN 1 ELSE G END, 0) AS K3
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 6 / CASE WHEN G = 0 THEN 1 ELSE G END, 0) AS K6
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) / 12 / CASE WHEN G = 0 THEN 1 ELSE G END, 0) AS K12
 	
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/3/(convert(FLOAT, replace(G,'%','') / 100.0)), 0) AS K3
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/6/(convert(FLOAT, replace(G,'%','') / 100.0)), 0) AS K6
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/12/(convert(FLOAT, replace(G,'%','') / 100.0)), 0) AS K12
-	
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/3/(convert(FLOAT, replace(G,'%','') / 100.0))/(convert(FLOAT, replace([F/D],'%','') / 100.0)), 0) AS S3
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/6/(convert(FLOAT, replace(G,'%','') / 100.0))/(convert(FLOAT, replace([F/D],'%','') / 100.0)), 0) AS S6
-	, round((A - (convert(FLOAT, replace(H,'%','') / 100.0) * A) + (A - B))/12/(convert(FLOAT, replace(G,'%','') / 100.0))/(convert(FLOAT, replace([F/D],'%','') / 100.0)), 0) AS S12
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) /3 / CASE WHEN G = 0 THEN 1 ELSE G END /  CASE WHEN [F/D] = 0 THEN 1 ELSE [F/D] END, 0) AS S3
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) /6 / CASE WHEN G = 0 THEN 1 ELSE G END /  CASE WHEN [F/D] = 0 THEN 1 ELSE [F/D] END, 0) AS S6
+	, ROUND((A - (CASE WHEN H = 0 THEN 1 ELSE H END * A) + (A - B)) /12/ CASE WHEN G = 0 THEN 1 ELSE G END /  CASE WHEN [F/D] = 0 THEN 1 ELSE [F/D] END, 0) AS S12
 	
 	from cteRptX
 	)
@@ -300,13 +301,13 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
     , cteD as
 	(
 		SELECT 
-		isnull(sum(CASE WHEN a.ReferralMade = 1 
+		isnull(SUM(CASE WHEN a.ReferralMade = 1 
 		AND a.ScreenDate BETWEEN @startDT1 AND @endDT1
 		THEN 1 ELSE 0 END), 0) AS D1
-		, isnull(sum(CASE WHEN a.ReferralMade = 1 
+		, isnull(SUM(CASE WHEN a.ReferralMade = 1 
 		AND a.ScreenDate BETWEEN @startDT2 AND @endDT2
 		THEN 1 ELSE 0 END), 0) AS D2
-		, isnull(sum(CASE WHEN a.ReferralMade = 1 
+		, isnull(SUM(CASE WHEN a.ReferralMade = 1 
 		AND a.ScreenDate BETWEEN @startDT3 AND @endDT3
 		THEN 1 ELSE 0 END), 0) AS D3
 		FROM HVScreen AS a
@@ -318,15 +319,15 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
     cteF AS
 	(
 		SELECT 
-		isnull(sum(CASE WHEN a.CaseStatus IN ('02') 
+		isnull(SUM(CASE WHEN a.CaseStatus IN ('02') 
 		AND a.FSWAssignDate IS NOT NULL 
 		AND a.KempeDate BETWEEN @startDT1 AND @endDT1
 		THEN 1 ELSE 0 END), 0) AS F1
-		, isnull(sum(CASE WHEN a.CaseStatus IN ('02') 
+		, isnull(SUM(CASE WHEN a.CaseStatus IN ('02') 
 		AND a.FSWAssignDate IS NOT NULL 
 		AND a.KempeDate BETWEEN @startDT2 AND @endDT2
 		THEN 1 ELSE 0 END), 0) AS F2
-		, isnull(sum(CASE WHEN a.CaseStatus IN ('02') 
+		, isnull(SUM(CASE WHEN a.CaseStatus IN ('02') 
 		AND a.FSWAssignDate IS NOT NULL 
 		AND a.KempeDate BETWEEN @startDT3 AND @endDT3
 		THEN 1 ELSE 0 END), 0) AS F3
@@ -339,11 +340,11 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	cteX AS 
 	(
 	SELECT 
-	isnull(sum(CASE WHEN h.IntakeDate BETWEEN @startDT1 AND @endDT1
+	isnull(SUM(CASE WHEN h.IntakeDate BETWEEN @startDT1 AND @endDT1
 		THEN 1 ELSE 0 END), 0) AS X1
-	, isnull(sum(CASE WHEN h.IntakeDate BETWEEN @startDT2 AND @endDT2
+	, isnull(SUM(CASE WHEN h.IntakeDate BETWEEN @startDT2 AND @endDT2
 		THEN 1 ELSE 0 END), 0) AS X2
-	, isnull(sum(CASE WHEN h.IntakeDate BETWEEN @startDT3 AND @endDT3
+	, isnull(SUM(CASE WHEN h.IntakeDate BETWEEN @startDT3 AND @endDT3
 		THEN 1 ELSE 0 END), 0) AS X3
 	FROM HVCase h
 		INNER JOIN CaseProgram cp ON cp.HVCaseFK = h.HVCasePK

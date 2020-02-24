@@ -30,7 +30,7 @@ BEGIN
 		WHEN FSWInitialStart>SupervisorInitialStart THEN SupervisorInitialStart
 	END AS DateStartedPos
 	, '1' AS MyWrkrCount
-	FROM [dbo].[fnGetWorkerEventDates](@progfk, NULL, NULL)
+	FROM dbo.fnGetWorkerEventDates(@progfk, NULL, NULL)
 	WHERE (FSWInitialStart >=  @sdate and FSWInitialStart < DATEADD(d, -91, GETDATE())
 	OR SupervisorInitialStart >=  @sdate and SupervisorInitialStart < DATEADD(d, -91, GETDATE())
 	AND rtrim(wrkrFname) NOT LIKE 'Historic%'
@@ -57,12 +57,15 @@ BEGIN
 , cteFinal as (
 	SELECT WorkerPK, workername, FirstIFSPDate, workercount
 		, DateStartedPos
-		,CASE WHEN FirstIFSPDate Is Null THEN 'F'
-		WHEN dateadd(dd, 91, DateStartedPos) < FirstIFSPDate THEN 'F'		
-		ELSE 'T' END AS MeetsTarget
+		--Scoring for MeetsTarget is same as Individual Rating.  Edited 12-18-2019
+		,  CASE WHEN FirstIFSPDate IS NULL THEN '1'
+		WHEN FirstIFSPDate <= dateadd(day, 91, DateStartedPos) THEN '3' 
+		WHEN DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN '2' --Workers who are late with training but hired more than 18 months ago, get a two		
+		ELSE '1'
+		END AS MeetsTarget
 		,  CASE WHEN FirstIFSPDate IS NULL THEN 1
 		WHEN FirstIFSPDate <= dateadd(day, 91, DateStartedPos) THEN 3 
-		WHEN FirstIFSPDate > dateadd(day, 183, DateStartedPos) AND DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
+		WHEN DATEDIFF(DAY,  DateStartedPos, GETDATE()) > 546 THEN 2 --Workers who are late with training but hired more than 18 months ago, get a two		
 		ELSE 1
 		END AS 'IndividualRating'
 		, '1' AS GenericColumn --used for next cte cteCountMeeting

@@ -18,7 +18,7 @@ GO
 			--Workers terminated prior to 7/1/2019 will continue to be scored the previous way, worker hired after 7/1/2019 or working as of 7/1/2019 must
 			--get the training again to be in compliance 
 -- =============================================
-CREATE PROCEDURE [dbo].[rspTraining_Orientation]
+CREATE PROC [dbo].[rspTraining_Orientation]
 	-- Add the parameters for the stored procedure here
 	@progfk AS INT,
 	@sdate AS DATE
@@ -87,7 +87,7 @@ BEGIN
 DECLARE @cte10_Code1 AS TABLE (
 		RowNumber INT
 		, workerpk INT
-		, TopicCode DECIMAL
+		, TopicCode DECIMAL(5,1) 
 		, topicname VARCHAR(175)
 		, TrainingDate DATE
 		, FirstHomeVisitDate DATE
@@ -288,6 +288,7 @@ INSERT INTO	@cte10_Code1 ( RowNumber ,
 		WHEN  FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN '3' 
 		WHEN TrainingDate IS NULL THEN '1' 
 		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN '3'
+		WHEN TopicCode = 1.0 AND HireDate < @newDatecode1 AND cte10_2b.TrainingDate IS NOT NULL THEN '3'
 		WHEN TopicCode = 3.0 and TrainingDate <= FirstHomeVisitDate THEN '3'
 		WHEN TopicCode = 3.0 and TrainingDate > FirstHomeVisitDate AND DATEDIFF(DAY, GETDATE(), HireDate) > 546 THEN '2'	
 		WHEN DATEADD(DAY, 546, cte10_2b.HireDate) <= GETDATE() AND cte10_2b.TrainingDate IS NOT NULL THEN '2'
@@ -296,6 +297,7 @@ INSERT INTO	@cte10_Code1 ( RowNumber ,
 		WHEN TrainingDate IS NULL THEN '1' 
 		WHEN  FirstEvent <= '07/01/2014' AND TrainingDate IS NOT NULL THEN 3 
 		WHEN FirstEvent <= '07/01/2014' AND TopicCode = 5.5 THEN 3
+		WHEN TopicCode = 1.0 AND HireDate < @newDatecode1 AND cte10_2b.TrainingDate IS NOT NULL THEN 3
 		WHEN TopicCode = 3.0 and TrainingDate <= FirstHomeVisitDate THEN 3
 		WHEN TopicCode = 3.0 and TrainingDate > FirstHomeVisitDate AND DATEDIFF(DAY, GETDATE(), HireDate) > 546 THEN 2	
 		WHEN DATEADD(DAY, 546, cte10_2b.HireDate) <= GETDATE() AND cte10_2b.TrainingDate IS NOT NULL THEN 2
