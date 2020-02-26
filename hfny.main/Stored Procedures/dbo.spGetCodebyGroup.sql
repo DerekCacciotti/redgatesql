@@ -23,7 +23,9 @@ IF @AppCodeUsedWhere Is Null and @AppCode is null begin
 	SELECT AppCode, 
 	AppCodeGroup, 
 	AppCodeText, 
-	AppCodeUsedWhere, 
+	AppCodeUsedWhere,
+	OrderBy,
+	AppCodeSubGroup,
 	codeAppPK
 	FROM codeApp
 	WHERE AppCodeGroup = @AppCodeGroup
@@ -35,6 +37,8 @@ else if @AppCodeUsedWhere is not null and @AppCode is null begin
 	AppCodeGroup, 
 	AppCodeText, 
 	AppCodeUsedWhere, 
+	OrderBy,
+	AppCodeSubGroup,
 	codeAppPK
 	FROM codeApp
 	WHERE AppCodeGroup = @AppCodeGroup and
@@ -47,6 +51,8 @@ else if @AppCode IS NOT NULL and @AppCodeUsedWhere IS NULL begin
 	AppCodeGroup, 
 	AppCodeText, 
 	AppCodeUsedWhere, 
+	OrderBy,
+	AppCodeSubGroup,
 	codeAppPK
 	FROM codeApp
 	WHERE AppCodeGroup = @AppCodeGroup and
@@ -59,6 +65,8 @@ ELSE IF @AppCode IS NOT NULL and @AppCodeUsedWhere IS NOT NULL begin
 	AppCodeGroup, 
 	AppCodeText, 
 	AppCodeUsedWhere, 
+	OrderBy,
+	AppCodeSubGroup,
 	codeAppPK
 	FROM codeApp
 	WHERE AppCodeGroup = @AppCodeGroup and
