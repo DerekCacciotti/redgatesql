@@ -153,6 +153,9 @@ begin try
 	close del_cursor;
 	deallocate del_cursor;
 
+	--GoalPlan
+	EXEC dbo.spDeleteAllGoalPlansByHVCaseFK @HVCaseFK = @hvcasefk, @User = NULL
+
 	--HVLog
 	declare del_cursor cursor for
 	select HVLOGpk
