@@ -20,8 +20,11 @@ CREATE TABLE [dbo].[GoalPlanDeleted]
 [GoalStatement] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [GoalStatus] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [GoalStatusDate] [datetime] NULL,
+[IsConsentSigned] [bit] NOT NULL CONSTRAINT [DF_GoalPlanDeleted_IsConsentSigned] DEFAULT ((0)),
+[IsTransitionPlan] [bit] NOT NULL CONSTRAINT [DF_GoalPlanDeleted_IsTransitionPlan] DEFAULT ((0)),
 [NextStep] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProtectiveFactors] [char] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[ServicePartners] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [StartDate] [datetime] NOT NULL,
 [HVCaseFK] [int] NOT NULL
 ) ON [PRIMARY]

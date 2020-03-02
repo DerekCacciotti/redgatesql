@@ -16,8 +16,11 @@ CREATE TABLE [dbo].[GoalPlan]
 [GoalStatement] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [GoalStatus] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [GoalStatusDate] [datetime] NOT NULL,
+[IsConsentSigned] [bit] NOT NULL CONSTRAINT [DF_GoalPlan_IsConsentSigned] DEFAULT ((0)),
+[IsTransitionPlan] [bit] NOT NULL CONSTRAINT [DF_GoalPlan_IsTransitionPlan] DEFAULT ((0)),
 [NextStep] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [ProtectiveFactors] [char] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[ServicePartners] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [StartDate] [datetime] NOT NULL,
 [HVCaseFK] [int] NOT NULL
 ) ON [PRIMARY]
@@ -60,34 +63,40 @@ BEGIN
 	    GoalStatement,
 		GoalStatus,
 		GoalStatusDate,
+		IsConsentSigned,
+		IsTransitionPlan,
 	    NextStep,
 	    ProtectiveFactors,
+		ServicePartners,
 	    StartDate,
 	    HVCaseFK
 	)
 	SELECT 
-	    GoalPlanPK,
-	    AnticipatedAchievementDate,
+	    d.GoalPlanPK,
+	    d.AnticipatedAchievementDate,
 		1,  --This was a delete
-	    GoalArea,
-	    GoalCreationDiscussion,
-		GoalName,
-	    GoalPertainsTo,
-		GoalPertainsToSpecify,
-	    GoalPlanActive,
-	    GoalPlanCreateDate,
-	    GoalPlanCreator,
-	    GoalPlanEditDate,
-	    GoalPlanEditor,
-	    GoalProblemSolvingAndPlan,
-	    GoalStatement,
-		GoalStatus,
-		GoalStatusDate,
-	    NextStep,
-	    ProtectiveFactors,
-	    StartDate,
-	    HVCaseFK
-		FROM Deleted
+	    d.GoalArea,
+	    d.GoalCreationDiscussion,
+		d.GoalName,
+	    d.GoalPertainsTo,
+		d.GoalPertainsToSpecify,
+	    d.GoalPlanActive,
+	    d.GoalPlanCreateDate,
+	    d.GoalPlanCreator,
+	    d.GoalPlanEditDate,
+	    d.GoalPlanEditor,
+	    d.GoalProblemSolvingAndPlan,
+	    d.GoalStatement,
+		d.GoalStatus,
+		d.GoalStatusDate,
+		d.IsConsentSigned,
+		d.IsTransitionPlan,
+	    d.NextStep,
+	    d.ProtectiveFactors,
+		d.ServicePartners,
+	    d.StartDate,
+	    d.HVCaseFK
+		FROM Deleted d
 END
 GO
 SET QUOTED_IDENTIFIER ON
@@ -134,8 +143,11 @@ BEGIN
 	    GoalStatement,
 		GoalStatus,
 		GoalStatusDate,
+		IsConsentSigned,
+		IsTransitionPlan,
 	    NextStep,
 	    ProtectiveFactors,
+		ServicePartners,
 	    StartDate,
 	    HVCaseFK
 	)
@@ -157,8 +169,11 @@ BEGIN
 	    d.GoalStatement,
 		d.GoalStatus,
 		d.GoalStatusDate,
+		d.IsConsentSigned,
+		d.IsTransitionPlan,
 	    d.NextStep,
 	    d.ProtectiveFactors,
+		d.ServicePartners,
 	    d.StartDate,
 	    d.HVCaseFK
 		FROM dbo.GoalPlan gp
