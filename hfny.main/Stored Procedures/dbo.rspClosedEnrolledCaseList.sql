@@ -10,6 +10,7 @@ GO
 -- exec rspClosedEnrolledCaseList_original 1,'20120701','20120731'
 -- Edit date: 10/11/2013 CP - workerprogram was duplicating cases when worker transferred
 --            added this code to the workerprogram join condition: AND wp.programfk = listitem
+-- Edit date: 03/03/20 WO - Removed SSN
 -- =============================================
 CREATE PROCEDURE [dbo].[rspClosedEnrolledCaseList]-- Add the parameters for the stored procedure here
     @programfk VARCHAR(MAX) = null,
@@ -41,7 +42,6 @@ set @programfk = REPLACE(@programfk,'"','')
 	      , cp.PC1ID
 		  ,rtrim(PC.PCLastName)+', '+rtrim(PC.PCFirstName) [Name]
 		  ,convert(varchar(12),PC.PCDOB,101) [DOB]
-		  ,PC.SSNo [SSNo]
 		  ,convert(varchar(12),Kempe.KempeDate,101) [KemptDate]
 		  ,convert(varchar(12),HVScreen.ScreenDate,101) [ScreenDate]
 		  ,rtrim(w.LastName)+', '+rtrim(w.FirstName) [FSW]
@@ -92,7 +92,7 @@ set @programfk = REPLACE(@programfk,'"','')
 		from CaseProgram cp
 		    join dbo.SplitString(@programfk,',') on cp.programfk = listitem
 			join HVCase c on cp.HVCaseFK = c.HVCasePK
-			-- pc1 name, dob, and SS# =  c.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB, PC.SSNo
+			-- pc1 name, dob =  c.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB
 			join PC on PC.PCPK = c.PC1FK
 			-- screen date = cp.HVCaseFK <-> Kempe.HVCaseFK -> Kempe.KempeDate
 			join Kempe on Kempe.HVCaseFK = c.HVCasePK
