@@ -18,8 +18,11 @@ CREATE PROCEDURE [dbo].[spAddGoalPlanDeleted](@GoalPlanPK int=NULL,
 @GoalStatement varchar(500)=NULL,
 @GoalStatus char(2)=NULL,
 @GoalStatusDate datetime=NULL,
+@IsConsentSigned bit=NULL,
+@IsTransitionPlan bit=NULL,
 @NextStep varchar(max)=NULL,
 @ProtectiveFactors char(5)=NULL,
+@ServicePartners varchar(max)=NULL,
 @StartDate datetime=NULL,
 @HVCaseFK int=NULL)
 AS
@@ -40,8 +43,11 @@ GoalProblemSolvingAndPlan,
 GoalStatement,
 GoalStatus,
 GoalStatusDate,
+IsConsentSigned,
+IsTransitionPlan,
 NextStep,
 ProtectiveFactors,
+ServicePartners,
 StartDate,
 HVCaseFK
 )
@@ -62,8 +68,11 @@ VALUES(
 @GoalStatement,
 @GoalStatus,
 @GoalStatusDate,
+@IsConsentSigned,
+@IsTransitionPlan,
 @NextStep,
 @ProtectiveFactors,
+@ServicePartners,
 @StartDate,
 @HVCaseFK
 )
