@@ -32,7 +32,6 @@ CREATE PROCEDURE [dbo].[spAddPC](@BirthCountry char(30)=NULL,
 @PCZip varchar(200)=NULL,
 @Race char(2)=NULL,
 @RaceSpecify varchar(500)=NULL,
-@SSNo varchar(200)=NULL,
 @TimesMoved int=NULL,
 @YearsInUSA numeric(4, 0)=NULL,
 @PrefersTextMessages bit=NULL)
@@ -68,7 +67,6 @@ PCStreet,
 PCZip,
 Race,
 RaceSpecify,
-SSNo,
 TimesMoved,
 YearsInUSA,
 PrefersTextMessages
@@ -104,7 +102,6 @@ VALUES(
 @PCZip,
 @Race,
 @RaceSpecify,
-@SSNo,
 @TimesMoved,
 @YearsInUSA,
 @PrefersTextMessages
