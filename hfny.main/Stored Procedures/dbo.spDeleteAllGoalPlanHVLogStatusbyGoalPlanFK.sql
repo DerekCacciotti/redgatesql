@@ -2,16 +2,13 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
-
-
 -- =============================================
 -- Author:		Benjamin Simmons
 -- Create date: 06/13/18
 -- Description: This stored procedure deletes all the GoalPlanHVLogStatus rows that relate
 -- to the supplied GoalPlanFK
 -- =============================================
-CREATE PROCEDURE [dbo].[spDeleteAllGoalPlanHVLogStatusbyGoalPlanFK]
+CREATE PROC [dbo].[spDeleteAllGoalPlanHVLogStatusbyGoalPlanFK]
 	-- Add the parameters for the stored procedure here
 	@GoalPlanFK INT,
 	@User varchar(max)
