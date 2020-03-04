@@ -1,13 +1,13 @@
 CREATE TABLE [dbo].[GoalPlanHVLogStatus]
 (
 [GoalPlanHVLogStatusPK] [int] NOT NULL IDENTITY(1, 1),
+[Challenges] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [DevelopmentSinceLastVisit] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[GoalProblemSolvingAndPlanEdit] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[FollowUpAndSupport] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [GoalPlanHVLogStatusCreateDate] [datetime] NOT NULL CONSTRAINT [DF_GoalPlanHVLogStatus_GoalStepCreateDate] DEFAULT (getdate()),
 [GoalPlanHVLogStatusCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [GoalPlanHVLogStatusEditDate] [datetime] NULL,
 [GoalPlanHVLogStatusEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[NextStepEdit] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [GoalPlanFK] [int] NOT NULL,
 [HVLogFK] [int] NOT NULL
 ) ON [PRIMARY]
@@ -36,8 +36,8 @@ BEGIN
 	    GoalPlanHVLogStatusPK,
 		Deleted,
 	    DevelopmentSinceLastVisit,
-	    GoalProblemSolvingAndPlanEdit,
-	    NextStepEdit,
+	    Challenges,
+	    FollowUpAndSupport,
 	    GoalPlanHVLogStatusCreateDate,
 	    GoalPlanHVLogStatusCreator,
 	    GoalPlanHVLogStatusEditDate,
@@ -47,16 +47,16 @@ BEGIN
 	)
 	SELECT GoalPlanHVLogStatusPK,
 		1, -- This was a delete
-	    DevelopmentSinceLastVisit,
-	    GoalProblemSolvingAndPlanEdit,
-	    NextStepEdit,
-	    GoalPlanHVLogStatusCreateDate,
-	    GoalPlanHVLogStatusCreator,
-	    GoalPlanHVLogStatusEditDate,
-	    GoalPlanHVLogStatusEditor,
-	    GoalPlanFK,
-	    HVLogFK
-	FROM Deleted
+	    d.DevelopmentSinceLastVisit,
+	    d.Challenges,
+	    d.FollowUpAndSupport,
+	    d.GoalPlanHVLogStatusCreateDate,
+	    d.GoalPlanHVLogStatusCreator,
+	    d.GoalPlanHVLogStatusEditDate,
+	    d.GoalPlanHVLogStatusEditor,
+	    d.GoalPlanFK,
+	    d.HVLogFK
+	FROM Deleted d
 END
 GO
 SET QUOTED_IDENTIFIER ON
@@ -88,8 +88,8 @@ BEGIN
 	    GoalPlanHVLogStatusPK,
 		Deleted,
 	    DevelopmentSinceLastVisit,
-	    GoalProblemSolvingAndPlanEdit,
-	    NextStepEdit,
+	    Challenges,
+	    FollowUpAndSupport,
 	    GoalPlanHVLogStatusCreateDate,
 	    GoalPlanHVLogStatusCreator,
 	    GoalPlanHVLogStatusEditDate,
@@ -101,8 +101,8 @@ BEGIN
 		d.GoalPlanHVLogStatusPK,
 		0, --This was an edit, not a deletion
 	    d.DevelopmentSinceLastVisit,
-	    d.GoalProblemSolvingAndPlanEdit,
-	    d.NextStepEdit,
+	    d.Challenges,
+	    d.FollowUpAndSupport,
 	    d.GoalPlanHVLogStatusCreateDate,
 	    d.GoalPlanHVLogStatusCreator,
 	    d.GoalPlanHVLogStatusEditDate,
