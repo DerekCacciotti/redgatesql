@@ -10,16 +10,16 @@ CREATE PROCEDURE [dbo].[spAddGoalPlan](@AnticipatedAchievementDate datetime=NULL
 @GoalPertainsToSpecify varchar(100)=NULL,
 @GoalPlanActive bit=NULL,
 @GoalPlanCreator varchar(max)=NULL,
-@GoalProblemSolvingAndPlan varchar(max)=NULL,
+@GoalPotentialBarriers varchar(max)=NULL,
 @GoalStatement varchar(500)=NULL,
 @GoalStatus char(2)=NULL,
 @GoalStatusDate datetime=NULL,
 @IsConsentSigned bit=NULL,
 @IsTransitionPlan bit=NULL,
-@NextStep varchar(max)=NULL,
 @ProtectiveFactors char(5)=NULL,
 @ServicePartners varchar(max)=NULL,
 @StartDate datetime=NULL,
+@Strengths varchar(max)=NULL,
 @HVCaseFK int=NULL)
 AS
 INSERT INTO GoalPlan(
@@ -31,16 +31,16 @@ GoalPertainsTo,
 GoalPertainsToSpecify,
 GoalPlanActive,
 GoalPlanCreator,
-GoalProblemSolvingAndPlan,
+GoalPotentialBarriers,
 GoalStatement,
 GoalStatus,
 GoalStatusDate,
 IsConsentSigned,
 IsTransitionPlan,
-NextStep,
 ProtectiveFactors,
 ServicePartners,
 StartDate,
+Strengths,
 HVCaseFK
 )
 VALUES(
@@ -52,16 +52,16 @@ VALUES(
 @GoalPertainsToSpecify,
 @GoalPlanActive,
 @GoalPlanCreator,
-@GoalProblemSolvingAndPlan,
+@GoalPotentialBarriers,
 @GoalStatement,
 @GoalStatus,
 @GoalStatusDate,
 @IsConsentSigned,
 @IsTransitionPlan,
-@NextStep,
 @ProtectiveFactors,
 @ServicePartners,
 @StartDate,
+@Strengths,
 @HVCaseFK
 )
 
