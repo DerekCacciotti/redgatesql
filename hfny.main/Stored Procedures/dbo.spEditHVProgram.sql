@@ -4,10 +4,11 @@ SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditHVProgram](@HVProgramPK int=NULL,
 @ContractEndDate datetime=NULL,
-@ContractManager char(30)=NULL,
+@ContractManagerFK int=NULL,
 @ContractNumber char(10)=NULL,
 @ContractStartDate datetime=NULL,
 @CountyFK int=NULL,
+@DisplayName varchar(max)=NULL,
 @ExtraField1Description char(30)=NULL,
 @ExtraField2Description char(30)=NULL,
 @ExtraField3Description char(30)=NULL,
@@ -40,10 +41,11 @@ AS
 UPDATE HVProgram
 SET 
 ContractEndDate = @ContractEndDate, 
-ContractManager = @ContractManager, 
+ContractManagerFK = @ContractManagerFK, 
 ContractNumber = @ContractNumber, 
 ContractStartDate = @ContractStartDate, 
 CountyFK = @CountyFK, 
+DisplayName = @DisplayName, 
 ExtraField1Description = @ExtraField1Description, 
 ExtraField2Description = @ExtraField2Description, 
 ExtraField3Description = @ExtraField3Description, 
