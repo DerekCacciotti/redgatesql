@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE procedure [dbo].[rspCasesServedInTimePeriod] @StartDate DATETIME, @EndDate DATETIME, @SiteFK INT, @ProgramFK varchar(200) AS
+CREATE procedure [dbo].[rspCasesServedInTimePeriod] @StartDate DATETIME, @EndDate DATETIME, @SiteFK INT, @ProgramFK varchar(200),  @CaseFiltersPositive varchar(200) AS
 
 if @ProgramFK is null
 	begin
@@ -12,7 +12,10 @@ if @ProgramFK is null
 	end
 	set @ProgramFK = replace(@ProgramFK,'"','')
 	set @SiteFK = case when dbo.IsNullOrEmpty(@SiteFK) = 1 then 0 else @SiteFK END
-    
+
+    set @CaseFiltersPositive = case	when @CaseFiltersPositive = '' then null
+										else @CaseFiltersPositive
+								   end;
 
 --Parsons
 --DECLARE @BeginOfMonth AS DATE = '01/01/2019'
@@ -46,6 +49,7 @@ inner join WorkerProgram wp on wp.WorkerFK = w.WorkerPK
 LEFT outer JOIN listSite ls on ls.listSitePK = wp.SiteFK
 inner join PC p on p.PCPK = HVCase.PC1FK
 left outer join TCID t on t.HVCaseFK = HVCase.HVCasePK
+inner join dbo.udfCaseFilters(@CaseFiltersPositive, '', @ProgramFK) cf on cf.HVCaseFK =cp.HVCaseFK
 where 
 		 IntakeDate is not null
 		--for August 1 2016
@@ -54,6 +58,4 @@ where
 		--and (ls.SiteName='Parsons Cohoes Site' or ls.SiteName='Parsons Albany Site ')
 		and (case when @SiteFK = 0 then 1 when wp.SiteFK = @SiteFK then 1 else 0 end = 1)
 order by [Worker Last Name], [Worker First Name], cp.PC1ID
-
-
 GO
