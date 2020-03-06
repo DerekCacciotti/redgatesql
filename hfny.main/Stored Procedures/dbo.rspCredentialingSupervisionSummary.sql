@@ -22,7 +22,7 @@ GO
 -- max of 2 supervisions per week ... khalsa 1/29/2014
 
 -- =============================================
-CREATE PROCEDURE [dbo].[rspCredentialingSupervisionSummary] @ProgramFK int = null
+CREATE procedure [dbo].[rspCredentialingSupervisionSummary] @ProgramFK int = null
 												, @StartDate datetime = null
 												, @EndDate datetime = null
 												, @supervisorfk int = null
@@ -464,7 +464,7 @@ as (
 )
 
 -- Now take the top 2 supervisions, if any
-insert into #tblMaxOf2SupvisionPerWeekToBeConsidered
+insert into #tblMaxOf2SupervisionsPerWeek
 select		*
 from		cteSupervisionsPerWorkerPerWeek
 where		rownum <= 2
