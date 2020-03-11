@@ -20,7 +20,7 @@ GO
 -- Edited by: Bill O'Brien
 -- Edit Reason: With Worker Redesign, need to account for role end dates and worker leave periods.
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetAllWorkersbyProgramWithGroups]
+CREATE procedure [dbo].[spGetAllWorkersbyProgramWithGroups]
 	@ProgramFK  int           = null,
     @EventDate  datetime      = null,
     @WorkerType varchar(20)   = null,
@@ -105,37 +105,37 @@ else
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
-					-- and faw = 1
-					and @EventDate between FAWStartDate AND isnull(FAWEndDate, dateadd(dd,1,datediff(dd,0,getdate())))
+					and FAWStartDate is not null
+					and @EventDate >= FAWStartDate
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FSW' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
-					-- and fsw = 1
-					and @EventDate between FSWStartDate AND isnull(FSWEndDate, dateadd(dd,1,datediff(dd,0,getdate())))
+					and FSWStartDate is not null
+					and @EventDate >= FSWStartDate
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'FAdv' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
-					-- and FatherAdvocate = 1
-					and @EventDate between FatherAdvocateStartDate AND isnull(FatherAdvocateEndDate, dateadd(dd,1,datediff(dd,0,getdate())))
+					and FatherAdvocateStartDate is not null
+					and @EventDate >= FatherAdvocateStartDate
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'SUP' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
-					-- and supervisor = 1
-					and @EventDate between SupervisorStartDate AND isnull(SupervisorEndDate, dateadd(dd,1,datediff(dd,0,getdate())))
+					and SupervisorStartDate is not null
+					and @EventDate >= SupervisorStartDate
 			union all
 			select LastName, FirstName, TerminationDate, WorkerPK, 'PM' as workertype
 			from worker
 			inner join workerprogram on workerpk=workerfk
 			where ProgramFK = isnull(@ProgramFK, ProgramFK)
-					-- and programmanager = 1
-					and @EventDate between ProgramManagerStartDate AND isnull(ProgramManagerEndDate, dateadd(dd,1,datediff(dd,0,getdate())))
-			)
+					and ProgramManagerStartDate is not null
+					and @EventDate >= ProgramManagerStartDate
+		)
 
 		select rtrim(LastName) + ', ' + rtrim(FirstName) 
 					+ case when TerminationDate is not null 
@@ -164,6 +164,7 @@ else
 					end, 
 					case when TerminationDate is null then 0 else 1 end, 
 					LastName, FirstName
+
 	end
 	--begin
 	--	select distinct rtrim(LastName) + ', ' + rtrim(FirstName) + case when TerminationDate is not null then ' *' else '' end as WorkerName
