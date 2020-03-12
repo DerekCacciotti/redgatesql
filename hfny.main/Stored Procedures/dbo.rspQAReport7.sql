@@ -9,6 +9,7 @@ GO
 -- rspQAReport7 3, 'summary'	--- for summary page
 -- rspQAReport7 1			--- for main report - location = 1
 -- rspQAReport7 null			--- for main report for all locations
+-- Edit: 03/03/2020 WO Account for TCs receiving services.
 -- =============================================
 
 
@@ -32,24 +33,25 @@ DECLARE @Cohort AS TABLE (
 	CalcDOB DATETIME,
 	TCAgeInDays INT,
 	TCName VARCHAR(400),
+	ASQTCReceiving char(1),
 	Worker VARCHAR(50),
 	GestationalAge INT,
 	CurrentLevel VARCHAR(50),
-	YearOneASQCount INT,
-	YearOneNotInWindow INT,
-	YearOneNotReviewed INT,
-	YearTwoASQCount INT,
-	YearTwoNotInWindow INT,
-	YearTwoNotReviewed INT,
-	YearThreeASQCount INT,
-	YearThreeNotInWindow INT,
-	YearThreeNotReviewed INT,
-	YearFourASQCount INT,
-	YearFourNotInWindow INT,
-	YearFourNotReviewed INT,
-	YearFiveASQCount INT,
-	YearFiveNotInWindow INT,
-	YearFiveNotReviewed INT
+	YearOneASQCount INT DEFAULT 0,
+	YearOneNotInWindow INT DEFAULT 0,
+	YearOneNotReviewed INT DEFAULT 0,
+	YearTwoASQCount INT DEFAULT 0,
+	YearTwoNotInWindow INT DEFAULT 0,
+	YearTwoNotReviewed INT DEFAULT 0,
+	YearThreeASQCount INT DEFAULT 0,
+	YearThreeNotInWindow INT DEFAULT 0,
+	YearThreeNotReviewed INT DEFAULT 0,
+	YearFourASQCount INT DEFAULT 0,
+	YearFourNotInWindow INT DEFAULT 0,
+	YearFourNotReviewed INT DEFAULT 0,
+	YearFiveASQCount INT DEFAULT 0,
+	YearFiveNotInWindow INT DEFAULT 0,
+	YearFiveNotReviewed INT DEFAULT 0
 )
 
 INSERT INTO @Cohort (
@@ -92,7 +94,6 @@ SET TCAgeInDays =
 	END
 
 --calculating age in days
-
 DECLARE @ASQs AS TABLE (
 	ASQPK INT,
 	HVCaseFK INT,
@@ -101,7 +102,8 @@ DECLARE @ASQs AS TABLE (
 	AgeWhenCompleted INT,
 	Interval CHAR(2),
 	InWindow BIT,
-	Reviewed BIT
+	Reviewed BIT,
+	ASQTCReceiving char(1)
 )
 
 INSERT INTO @ASQs (
@@ -111,7 +113,9 @@ INSERT INTO @ASQs (
 	DateCompleted,
 	Interval,
 	InWindow,
-	Reviewed
+	Reviewed,
+	ASQTCReceiving
+	
 )
 
 SELECT 
@@ -120,8 +124,9 @@ SELECT
 	a.TCIDFK,
 	a.DateCompleted,
 	a.TCAge,
-	a.ASQInWindow,	
-	dbo.IsFormReviewed(a.DateCompleted, 'AQ', ASQPK)
+	a.ASQInWindow,
+	dbo.IsFormReviewed(a.DateCompleted, 'AQ', ASQPK),
+	a.ASQTCReceiving
 FROM ASQ a
 WHERE a.HVCaseFK IN (SELECT HVCaseFK FROM @Cohort)
 
@@ -129,6 +134,13 @@ UPDATE @ASQs
 SET AgeWhenCompleted = CASE WHEN TCDOB <> CalcDOB THEN DATEDIFF(DAY, CalcDOB, DateCompleted) ELSE DATEDIFF(DAY, TCDOB, DateCompleted) END
 FROM @ASQS a
 INNER JOIN @Cohort c on a.HVCaseFK = c.HVCaseFK
+
+--Update to cohort to reflect kids where "Receiving Services" has NEVER been checked on the ASQ. Only those kids can fail the standard. 
+UPDATE @Cohort SET ASQTCReceiving = '1'
+WHERE HVCaseFK in (SELECT HVCaseFK FROM @ASQs WHERE ASQTCReceiving = '1')
+
+--Set the rest to '0' to get rid of the nulls
+UPDATE @Cohort SET ASQTCReceiving = '0' WHERE ASQTCReceiving is null
 
 -------------------------
 --FIRST YEAR CALCULATIONS
@@ -359,6 +371,7 @@ DECLARE @Details TABLE (
 	Worker VARCHAR(50),
 	GestationalAge INT,
 	CurrentLevel VARCHAR(50),
+	ASQTCReceiving char(1),
 	YearOneFailureReason VARCHAR(32),
 	YearTwoFailureReason VARCHAR(32),
 	YearThreeFailureReason VARCHAR(32),
@@ -376,6 +389,7 @@ INSERT INTO @Details (
 	Worker,
 	GestationalAge,
 	CurrentLevel,
+	ASQTCReceiving,
 	YearOneFailureReason,
 	YearTwoFailureReason,
 	YearThreeFailureReason, 
@@ -393,13 +407,14 @@ SELECT
 	Worker,
 	GestationalAge,
 	CurrentLevel,
+	ASQTCReceiving,
 	--If there aren't the required number of reviewed and in window asqs, figure out why.
 	--We're pulling TCs that are at least 12 months old, so don't need to check age for 1st year.
 	CASE WHEN YearOneASQCount < 2 THEN
-		CASE WHEN YearOneNotInWindow > 0 AND YearOneNotReviewed IS NULL THEN 'Out of Window'
-			 WHEN YearOneNotInWindow IS NULL AND YearOneNotReviewed > 0 THEN 'Not Reviewed' 
+		CASE WHEN YearOneNotInWindow > 0 AND YearOneNotReviewed = 0 THEN 'Out of Window'
+			 WHEN YearOneNotInWindow = 0 AND YearOneNotReviewed > 0 THEN 'Not Reviewed' 
 			 WHEN YearOneNotInWindow > 0 AND YearOneNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-			 WHEN YearOneNotInWindow IS NULL AND YearOneNotReviewed IS NULL THEN 'Missing'
+			 WHEN YearOneNotInWindow = 0 AND YearOneNotReviewed = 0 THEN 'Missing'
 		END
 	END AS YearOneFailureReason,
 
@@ -407,10 +422,10 @@ SELECT
 		CASE
 		--TC must be at least two years old to fail the two year asq requirement. Pattern continues with 3, 4, 5 year ASQs 
 			WHEN TCAgeInDays > 730 THEN
-				CASE WHEN YearTwoNotInWindow > 0 AND YearTwoNotReviewed IS NULL THEN 'Out of Window'
-					 WHEN YearTwoNotInWindow IS NULL AND YearTwoNotReviewed > 0 THEN 'Not Reviewed' 
+				CASE WHEN YearTwoNotInWindow > 0 AND YearTwoNotReviewed = 0 THEN 'Out of Window'
+					 WHEN YearTwoNotInWindow = 0 AND YearTwoNotReviewed > 0 THEN 'Not Reviewed' 
 					 WHEN YearTwoNotInWindow > 0 AND YearTwoNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-					 WHEN YearTwoNotInWindow IS NULL AND YearTwoNotReviewed IS NULL THEN 'Missing'
+					 WHEN YearTwoNotInWindow = 0 AND YearTwoNotReviewed = 0 THEN 'Missing'
 				END
 		END
 	END AS YearTwoFailureReason,
@@ -418,10 +433,10 @@ SELECT
 	CASE WHEN YearThreeASQCount < 2 THEN
 		CASE
 			WHEN TCAgeInDays > 1095 THEN
-				CASE WHEN YearThreeNotInWindow > 0 AND YearThreeNotReviewed IS NULL THEN 'Out of Window'
-					 WHEN YearThreeNotInWindow IS NULL AND YearThreeNotReviewed > 0 THEN 'Not Reviewed' 
+				CASE WHEN YearThreeNotInWindow > 0 AND YearThreeNotReviewed = 0 THEN 'Out of Window'
+					 WHEN YearThreeNotInWindow = 0 AND YearThreeNotReviewed > 0 THEN 'Not Reviewed' 
 					 WHEN YearThreeNotInWindow > 0 AND YearThreeNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-					 WHEN YearThreeNotInWindow IS NULL AND YearThreeNotReviewed IS NULL THEN 'Missing'
+					 WHEN YearThreeNotInWindow = 0 AND YearThreeNotReviewed = 0 THEN 'Missing'
 				END
 		END
 	END	AS YearThreeFailureReason,
@@ -429,10 +444,10 @@ SELECT
 	CASE WHEN YearFourASQCount < 1 THEN
 		CASE
 			WHEN TCAgeInDays > 1460 THEN
-				CASE WHEN YearFourNotInWindow > 0 AND YearFourNotReviewed IS NULL THEN 'Out of Window'
-					 WHEN YearFourNotInWindow IS NULL AND YearFourNotReviewed > 0 THEN 'Not Reviewed' 
+				CASE WHEN YearFourNotInWindow > 0 AND YearFourNotReviewed = 0 THEN 'Out of Window'
+					 WHEN YearFourNotInWindow = 0 AND YearFourNotReviewed > 0 THEN 'Not Reviewed' 
 					 WHEN YearFourNotInWindow > 0 AND YearFourNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-					 WHEN YearFourNotInWindow IS NULL AND YearFourNotReviewed IS NULL THEN 'Missing'
+					 WHEN YearFourNotInWindow = 0 AND YearFourNotReviewed = 0 THEN 'Missing'
 				END 
 		END
 	END AS YearFiveFailureReason,
@@ -440,10 +455,10 @@ SELECT
 	CASE WHEN YearFiveASQCount < 1 THEN
 		CASE
 			WHEN TCAgeInDays > 1825 THEN
-				CASE WHEN YearFiveNotInWindow > 0 AND YearFiveNotReviewed IS NULL THEN 'Out of Window'
-					 WHEN YearFiveNotInWindow IS NULL AND YearFiveNotReviewed > 0 THEN 'Not Reviewed' 
+				CASE WHEN YearFiveNotInWindow > 0 AND YearFiveNotReviewed = 0 THEN 'Out of Window'
+					 WHEN YearFiveNotInWindow = 0 AND YearFiveNotReviewed > 0 THEN 'Not Reviewed' 
 					 WHEN YearFiveNotInWindow > 0 AND YearFiveNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-					 WHEN YearFiveNotInWindow IS NULL AND YearFiveNotReviewed IS NULL THEN 'Missing'
+					 WHEN YearFiveNotInWindow = 0 AND YearFiveNotReviewed = 0 THEN 'Missing'
 				END 
 		END
 	END AS YearFiveFailureReason
@@ -451,19 +466,19 @@ SELECT
 FROM @Cohort
 WHERE 
 	--TCs less than two years old can only fail on Year 1 ASQs
-	(TCAgeInDays BETWEEN 0 AND 730 AND YearOneASQCount < 2)
+	(TCAgeInDays BETWEEN 0 AND 730 AND YearOneASQCount < 2 AND ASQTCReceiving <> '1')
 	OR
 	--TCs less than three years old can only fail on Year 1, 2 ASQs
-	(TCAgeInDays BETWEEN 731 AND 1095 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2))
+	(TCAgeInDays BETWEEN 731 AND 1095 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2) AND ASQTCReceiving <> '1')
 	OR
 	--TCs less than four years old can only fail on Year 1, 2, 3 ASQs
-	(TCAgeInDays BETWEEN 1096 AND 1460 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2))
+	(TCAgeInDays BETWEEN 1096 AND 1460 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2) AND ASQTCReceiving <> '1')
 	OR
 	--TCs less than five years old can only fail on Year 1, 2, 3, 4 ASQs
-	(TCAgeInDays BETWEEN 1461 AND 1825 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2 OR YearFourASQCount < 1))
+	(TCAgeInDays BETWEEN 1461 AND 1825 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2 OR YearFourASQCount < 1) AND ASQTCReceiving <> '1')
 	OR
 	--TCs greater than five years old can fail in any period 
-	(TCAgeInDays >= 1826 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2 OR YearFourASQCount < 1 OR YearFiveASQCount < 1))
+	(TCAgeInDays >= 1826 AND (YearOneASQCount < 2 OR YearTwoASQCount < 2 OR YearThreeASQCount < 2 OR YearFourASQCount < 1 OR YearFiveASQCount < 1) AND ASQTCReceiving <> '1')
 
 IF @ReportType = 'summary'
 
