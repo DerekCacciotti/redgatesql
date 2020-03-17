@@ -37,6 +37,7 @@ as
 			,FirstName		varchar(50)
 			,TerminationDate datetime
 			,WorkerPK int
+			, UserName varchar(50)
 			,SortOrder int
 		
 		)
@@ -51,6 +52,7 @@ as
 			,FirstName		varchar(50)
 			,TerminationDate datetime
 			,WorkerPK int
+			, UserName varchar(50)
 			,SortOrder int
 		
 		)

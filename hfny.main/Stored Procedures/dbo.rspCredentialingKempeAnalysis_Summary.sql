@@ -13,7 +13,12 @@ GO
 -- rspCredentialingKempeAnalysis_Summary 1, '04/01/2012', '03/31/2013'
 -- rspCredentialingKempeAnalysis_Summary 6, '05/01/2017', '04/30/2018'
 -- =============================================
-CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Summary] (@programfk varchar(max) = null, @StartDate datetime, @EndDate datetime)
+CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Summary] 
+(@programfk varchar(max) = null
+	, @StartDate datetime
+	, @EndDate datetime
+	, @WorkerFK int
+)
 as
 begin
 	if 1=0 begin
@@ -254,7 +259,9 @@ begin
 	left join		CommonAttributes catc on catc.HVCaseFK = h.HVCasePK and catc.FormType = 'TC'
 	left join		CommonAttributes cain on cain.HVCaseFK = h.HVCasePK and cain.FormType = 'IN-PC1'
 	where			(h.IntakeDate is not null or cp.DischargeDate is not null) -- only include kempes that are positive and where there is a clos_date or an intake date.
-					and k.KempeResult = 1 and	k.KempeDate between @StartDateX and @EndDateX ;
+						and k.KempeResult = 1 
+						and k.KempeDate between @StartDateX and @EndDateX 
+						and cp.CurrentFAWFK = isnull(@WorkerFK, cp.CurrentFAWFK) ;
 
 	insert into #cteMain1
 	select	case when IntakeDate is not null then '1' --'AcceptedFirstVisitEnrolled' 

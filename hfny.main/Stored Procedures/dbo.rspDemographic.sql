@@ -36,6 +36,7 @@ BEGIN
 		PCFirstName VARCHAR(200),
 		PCLastName VARCHAR(200),
 		PCDOB DATETIME,
+		PCZip VARCHAR(200),
 		Gender CHAR(2),
 		Race CHAR(2),
 		RaceSpecify VARCHAR(500),
@@ -56,6 +57,7 @@ BEGIN
 	    PCFirstName,
 	    PCLastName,
 	    PCDOB,
+		PCZip,
 	    Gender,
 	    Race,
 	    RaceSpecify,
@@ -75,6 +77,7 @@ BEGIN
 		p.PCFirstName,
 		p.PCLastName,
 		p.PCDOB,
+		p.PCZip,
 		p.Gender,
 		p.Race,
 		p.RaceSpecify,
@@ -107,7 +110,7 @@ BEGIN
 		MaritalStatus CHAR(2),
 		NumberInHouse INT,
 		Parity INT,
-		Gravida INT
+		Gravida CHAR(2)
 	)
 	INSERT INTO	@CommonAtt
 	(
@@ -369,7 +372,7 @@ BEGIN
 
 	DECLARE @Gravida AS TABLE (
 	HVCaseFK INT,
-	Gravida INT
+	Gravida CHAR(2)
 	)
 	INSERT INTO @Gravida
 	(
@@ -408,6 +411,7 @@ BEGIN
            c.PCFirstName,
            c.PCLastName,
            LEFT(CONVERT(VARCHAR, c.PCDOB, 120), 10) AS PCDOB,
+		   PCZip,
 		   gender.AppCodeText AS Gender,
 		   race.AppCodeText AS Race,
            c.RaceSpecify,
@@ -559,5 +563,6 @@ BEGIN
 	LEFT JOIN @Issues i ON i.HVCaseFK = c.HVCasePK
 	LEFT JOIN dbo.codeDischarge cd ON cd.DischargeCode = c.DischargeReason
 	LEFT JOIN @OBPInHome oih ON oih.HVCaseFK = c.HVCasePK
+
 END
 GO
