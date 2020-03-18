@@ -6,6 +6,7 @@ GO
 -- Author:		Bill O'Brien
 -- Create date: 04/09/19
 -- Description:	Approved Curriculum Monitoring Report
+-- Edit: 03/18/20 Add 'CurriculumOtherSupplementalInformation' to counts for any curricula
 -- =============================================
 CREATE PROC [dbo].[rspApprovedCurriculumMonitoring] 
 	-- Add the parameters for the stored procedure here
@@ -53,7 +54,8 @@ BEGIN
 	 , CurriculumPartnersHealthyBaby int
 	 , CurriculumPAT int
 	 , CurriculumPATFocusFathers int
-	 , CurriculumSanAngelo int	 
+	 , CurriculumSanAngelo int
+	 , CurriculumOtherSupplementalInformation int	 
 	)
 
 	declare @CaseLevels as table (
@@ -95,7 +97,9 @@ BEGIN
 		, CurriculumPartnersHealthyBaby
 		, CurriculumPAT
 		, CurriculumPATFocusFathers
-		, CurriculumSanAngelo)
+		, CurriculumSanAngelo
+		, CurriculumOtherSupplementalInformation
+	)
 
 	select hv.hvcasefk
 		, cp.PC1ID
@@ -111,6 +115,7 @@ BEGIN
 		, case when   CurriculumPAT = 1 then 1 else 0 end 
 		, case when   CurriculumPATFocusFathers = 1 then 1 else 0 end 
 		, case when   CurriculumSanAngelo = 1 then 1 else 0 end
+		, case when  CurriculumOtherSupplementalInformation = 1 then 1 else 0 end
 		 from hvlog hv
 		INNER JOIN dbo.CaseProgram cp on cp.HVCaseFK = hv.HVCaseFK 
 		INNER JOIN dbo.udfCaseFilters(@CaseFiltersPositive,'',@ProgramFK) cf ON cf.HVCaseFK = hv.HVCaseFK
@@ -134,6 +139,7 @@ BEGIN
 		or CurriculumPAT = 1
 		or CurriculumPATFocusFathers = 1
 		or CurriculumSanAngelo = 1
+		or CurriculumOtherSupplementalInformation = 1
 	then 1 else 0 end
 
 	update @Cohort set 
