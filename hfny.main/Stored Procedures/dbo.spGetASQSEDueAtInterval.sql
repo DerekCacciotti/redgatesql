@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROC [dbo].[spGetASQSEDueAtInterval] @TCDOB VARCHAR(MAX), @HVDate VARCHAR(MAX), @HVCaseFK INT AS
+CREATE procedure [dbo].[spGetASQSEDueAtInterval] @TCDOB VARCHAR(MAX), @HVDate VARCHAR(MAX), @HVCaseFK INT AS
 
 DECLARE @TCAgeDays int
 DECLARE @PreviousInterval TABLE
@@ -19,7 +19,7 @@ DateComplete DATETIME,
 ASQUnderCutOff BIT,
 NextInterval VARCHAR(max),
 NextDue DATETIME,
-IsRecivingServices bit
+IsReceivingServices bit
 )
 
 
@@ -71,7 +71,7 @@ INSERT INTO @PreviousInterval
 			    ASQUnderCutOff,
 			    NextInterval,
 			    NextDue,
-				IsRecivingServices
+				IsReceivingServices
 			)
 			
 

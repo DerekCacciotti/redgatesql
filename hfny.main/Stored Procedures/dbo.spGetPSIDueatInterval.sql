@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROC [dbo].[spGetPSIDueatInterval] @TCDOB VARCHAR(MAX), @HVDate VARCHAR(MAX), @HVCaseFK INT AS 
+CREATE procedure [dbo].[spGetPSIDueatInterval] @TCDOB VARCHAR(MAX), @HVDate VARCHAR(MAX), @HVCaseFK INT AS 
 
 DECLARE @TCAgeDays int
 DECLARE @PreviousInterval TABLE
@@ -16,10 +16,8 @@ DECLARE @tblResults TABLE
 ( ScheduledEvent VARCHAR(max),
 Completed BIT,
 DateComplete DATETIME,
-ASQUnderCutOff BIT,
 NextInterval VARCHAR(max),
-NextDue DATETIME,
-IsRecivingServices bit
+NextDue DATETIME
 )
 
 
@@ -67,11 +65,9 @@ INSERT INTO @PreviousInterval
 			(
 			    ScheduledEvent,
 			    Completed,
-			    DateComplete,
-			   
+			    DateComplete,			   
 			    NextInterval,
-			    NextDue
-				
+			    NextDue				
 			)
 			
 
@@ -79,8 +75,7 @@ INSERT INTO @PreviousInterval
 					,  case when p.PSIPK Is null then 0 else 1 end  
 					, p.PSIDateComplete  			
 					, cdbdnext.EventDescription  
-					,  dateadd(day, cdbdnext.DueBy, @TCDOB)
-					
+					,  dateadd(day, cdbdnext.DueBy, @TCDOB)					
 			from @PreviousInterval pi2   
 			inner join @NextInterval ni2  on 1 = 1  
 			left outer join codeDueByDates cdbdprev on cdbdprev.Interval = pi2.interval and cdbdprev.ScheduledEvent = 'PSI'  

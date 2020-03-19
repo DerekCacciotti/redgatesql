@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROC [dbo].[spGetASQDueAtInterval] @TCDOB VARCHAR(max), @HVDate VARCHAR(max), @HVCaseFK INT AS
+CREATE procedure [dbo].[spGetASQDueAtInterval] @TCDOB VARCHAR(max), @HVDate VARCHAR(max), @HVCaseFK INT AS
 
 
 
@@ -21,7 +21,7 @@ DateComplete DATETIME,
 ASQUnderCutOff BIT,
 NextInterval VARCHAR(max),
 NextDue DATETIME,
-IsRecivingServices bit
+IsReceivingServices bit
 )
 
 
@@ -73,7 +73,7 @@ INSERT INTO @PreviousInterval
 			    ASQUnderCutOff,
 			    NextInterval,
 			    NextDue,
-				IsRecivingServices
+				IsReceivingServices
 			)
 			
 
