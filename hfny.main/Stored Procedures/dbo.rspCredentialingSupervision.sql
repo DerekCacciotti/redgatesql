@@ -21,9 +21,9 @@ GO
 -- max of 2 supervisions per week ... khalsa 1/29/2014
 
 -- =============================================
-CREATE PROC [dbo].[rspCredentialingSupervision] @ProgramFK int = null
-										, @sDate datetime = null
-										, @eDate datetime = null
+CREATE PROCEDURE [dbo].[rspCredentialingSupervision] @ProgramFK int = null
+										, @StartDate datetime = null
+										, @EndDate datetime = null
 										, @supervisorfk int = null
 										, @workerfk int = null
 										, @sitefk int = null
@@ -50,12 +50,12 @@ set fmtOnly off ;
 
 	-- replace the start date of the report with worker's scheduled date of supervision	
 	--Note: DayOfWeekSupScheduled and sDate are now required dates
-	--set @sDate = dateadd(day,(isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate)
+	--set @StartDate = dateadd(day,(isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@StartDate)) - DATEPART(weekday,@StartDate)), @StartDate)
 
 	-- Get name of the day of week that user selected
 	-- Need to show it back to the user in the report
 	--DECLARE @DayofWeek VARCHAR(10)
-	--SELECT @DayofWeek = CASE isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@sDate))
+	--SELECT @DayofWeek = CASE isnull(@DayOfWeekSupScheduled,DATEPART(weekday,@StartDate))
 	--WHEN 1 THEN 'Sunday'
 	--WHEN 2 THEN 'Monday'
 	--WHEN 3 THEN 'Tuesday'
@@ -66,7 +66,7 @@ set fmtOnly off ;
 	--END	
 
 	--print @rtDayofWeek
-	--select @sDate
+	--select @StartDate
 
 
 	--Step#: 1
@@ -176,9 +176,9 @@ set fmtOnly off ;
 													day
 													,	(isnull(
 													wrkr.SupervisionScheduledDay
-													, datepart(weekday, @sDate)
-													)-datepart(weekday, @sDate)
-													), @sDate
+													, datepart(weekday, @StartDate)
+													)-datepart(weekday, @StartDate)
+													), @StartDate
 												)
 									)
 						)when 1 then 'Sunday'
@@ -193,11 +193,11 @@ set fmtOnly off ;
 
 			-- let us adjust the startdate for the worker (depends on SupervisionScheduledDay)
 			-- replace the start date of the report with worker's scheduled date of supervision	
-			--,dateadd(day,(isnull(wrkr.SupervisionScheduledDay,DATEPART(weekday,@sDate)) - DATEPART(weekday,@sDate)), @sDate) as sdate
+			--,dateadd(day,(isnull(wrkr.SupervisionScheduledDay,DATEPART(weekday,@StartDate)) - DATEPART(weekday,@StartDate)), @StartDate) as sdate
 			-- Note: given sdate = 10/01/13 (i.e. Tuesday)and DayOfWeekSupScheduled = 2 (i.e. Monday) FIND the next monday (10/07/13) which will be in the first week period
 			--       else if DayOfWeekSupScheduled >= weekday of sDate then FIND the date of DayOfWeekSupScheduled from sDate
-			, case when (isnull(wrkr.SupervisionScheduledDay, datepart(weekday, @sDate))
-						-datepart(weekday, @sDate)
+			, case when (isnull(wrkr.SupervisionScheduledDay, datepart(weekday, @StartDate))
+						-datepart(weekday, @StartDate)
 						) < 0 then
 						dateadd(
 									day, 7
@@ -205,21 +205,21 @@ set fmtOnly off ;
 											day
 											,	(isnull(
 												wrkr.SupervisionScheduledDay
-												, datepart(weekday, @sDate)
-												)-datepart(weekday, @sDate)
-											), @sDate
+												, datepart(weekday, @StartDate)
+												)-datepart(weekday, @StartDate)
+											), @StartDate
 										)
 								)
 				else
 					dateadd(
 							day
-							,	(isnull(wrkr.SupervisionScheduledDay, datepart(weekday, @sDate))
-								-datepart(weekday, @sDate)
-							), @sDate
+							,	(isnull(wrkr.SupervisionScheduledDay, datepart(weekday, @StartDate))
+								-datepart(weekday, @StartDate)
+							), @StartDate
 						)end as sdate
 
 
-			, @eDate as edate
+			, @EndDate as edate
 
 	from		#tblStaff w
 	inner join	WorkerProgram wp on wp.WorkerFK = w.WorkerPK and wp.ProgramFK = @ProgramFK
@@ -227,7 +227,7 @@ set fmtOnly off ;
 	left join	Worker wrkr on w.WorkerPK = wrkr.WorkerPK -- bring in SupervisionScheduledDay
 	where		w.WorkerPK not in (select WorkerPK from #tblSUPPMWorkers)
 				 and 
-				fn.FirstEvent <= @eDate -- exclude workers who are probably new and have not activity (visits) yet ... khalsa
+				fn.FirstEvent <= @EndDate -- exclude workers who are probably new and have not activity (visits) yet ... khalsa
 
 				and w.WorkerPK = isnull(@workerfk, w.WorkerPK)
 				and wp.SupervisorFK = isnull(@supervisorfk, wp.SupervisorFK)
@@ -238,7 +238,7 @@ set fmtOnly off ;
 
 
 	--SELECT * FROM 	#tblWorkers
-	--	----- RESET the startdate if firstevent date falls between @sdate and @edate
+	--	----- RESET the startdate if firstevent date falls between @StartDate and @EndDate
 	--	--declare @FirstEventDate	datetime	
 	--	--set @FirstEventDate = (select * from #tblWorkers)
 
@@ -272,7 +272,7 @@ set fmtOnly off ;
 
 		from	cteGenerateWeeksGiven2Dates
 
-		where	dateadd(d, 6, StartDate) < @eDate ---  @eDate date entered by the user from UI
+		where	dateadd(d, 6, StartDate) < @EndDate ---  @EndDate date entered by the user from UI
 
 	)
 
@@ -285,16 +285,16 @@ set fmtOnly off ;
 	insert into #tblWeekPeriods select * from cteGenerateWeeksGiven2Dates ;
 
 	------ We are only interested in each week's start date
-	------ These are all the weeks between given two dates but at the end we added user given @eDate ... khalsa
+	------ These are all the weeks between given two dates but at the end we added user given @EndDate ... khalsa
 
 	-- insert user's enddate at the end for the last period
 	--update #tblWeekPeriods
-	--set EndDate = @eDate
+	--set EndDate = @EndDate
 	--where WeekNumber = (select top 1 WeekNumber from #tblWeekPeriods order by WeekNumber desc)
 	-- fix jr 2014-10-02 the above update only updated all groups for the highest WeekNumber across all groups
 	--					 it needs to grab the highest WeekNumber by worker, which is what this now does
 	update		#tblWeekPeriods
-	set			EndDate = @eDate
+	set			EndDate = @EndDate
 	from		#tblWeekPeriods wp
 	inner join	(
 				select		WorkerPK
@@ -307,7 +307,7 @@ set fmtOnly off ;
 	--where workerpk = 152
 	--order by workerpk
 
-	-- Let us make sure that if a worker's firstevent date falls between @sdate and @edate then 
+	-- Let us make sure that if a worker's firstevent date falls between @StartDate and @EndDate then 
 	-- adjust number of weeks for that worker. It will be less because he did not do anything till firstevent
 	create table #tblWeekPeriodsAdjusted (
 										WeekNumber	int
@@ -818,6 +818,14 @@ set fmtOnly off ;
 							(StaffOutAllWeek <> 1) and 
 							(sdg.WeeklyDuration = 0) then 'N' 
 
+					-- weekly duration already met, this form is not applicable
+					when (sdg.WeeklyDuration >= (case when w.FTE = '01' then 90
+												when w.FTE = '02' then 60
+												when w.FTE = '03' then 15
+												else 90 end
+											)
+						--90
+						) and (wws.SupervisionSessionType = '2' ) then 'N/A' 
 					-- Form found in period and duration is 1:30 or greater 
  					when (sdg.WeeklyDuration >= (case when w.FTE = '01' then 90
 												when w.FTE = '02' then 60
@@ -957,7 +965,7 @@ set fmtOnly off ;
 			, SupervisionSessionType
 			, MeetsStandard
 			--ToDo: firstevent date is in the period, but not in the current week then MeetsStandard should be blank
-			, case when (FirstEvent between @sDate and @eDate) then
+			, case when (FirstEvent between @StartDate and @EndDate) then
 
 						case when (FirstEvent <= EndDate) then MeetsStandard else '' end
 
@@ -971,8 +979,8 @@ set fmtOnly off ;
 			, ReasonSupeVisionNotHeld
 			, DaysInTheCurrentWeek
 			, WeekNumber
-			, @sDate as sdate1
-			, @eDate as edate1
+			, @StartDate as sdate1
+			, @EndDate as edate1
 			, FirstEvent
 			, WorkerPK
 		from	cteReportDetails
@@ -999,7 +1007,7 @@ set fmtOnly off ;
 			, SupervisionSessionType
 			, MeetsStandard
 			--ToDo: firstevent date is in the period, but not in the current week then MeetsStandard should be blank
-			, case when (FirstEvent between @sDate and @eDate) then
+			, case when (FirstEvent between @StartDate and @EndDate) then
 						-- Need JH Help
 						case when (FirstEvent <= EndDate) then MeetsStandard else '' end
 				else MeetsStandard end as MeetsStandard1
@@ -1031,7 +1039,9 @@ set fmtOnly off ;
 	as (
 
 		select		WorkerName
-				, sum(	case when DaysInTheCurrentWeek = 7 then 1
+				, sum(	case when DaysInTheCurrentWeek = 7 
+									AND MeetsStandard1 <> ' '  
+									AND MeetsStandard1 <> 'N/A' THEN 1
 						else 0 end
 					) as NumOfExpectedSessions
 				, sum(case when MeetsStandard1 = 'E' then 1 else 0 end) as NumOfAllowedExecuses

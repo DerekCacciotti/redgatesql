@@ -2,11 +2,6 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
--- =============================================
--- Author:    dar chen
--- Create date: Feb/25/2015
--- Description: <Report: Capacity Building>
--- =============================================
 CREATE PROCEDURE [dbo].[rspCapacityBuilding]
 (
     @startDt    DATE,
@@ -57,7 +52,8 @@ DECLARE @startDT1 DATE = CONVERT(DATE,DATEADD(MS, 0, DATEADD(MM, DATEDIFF(MM, 0,
 	select pc1id
 		  ,case when levelname in ('Preintake','Preintake-enroll') then 1 else 0 end as PreintakeCount
 		  ,CaseProgram.ProgramFK
-		  ,ProgramCapacity
+		  ,ProgramCapacity,
+		  h.ProgramName
 		from
 			(select * from codeLevel where caseweight is not null) cl
 			left outer join caseprogram on caseprogram.currentLevelFK = cl.codeLevelPK

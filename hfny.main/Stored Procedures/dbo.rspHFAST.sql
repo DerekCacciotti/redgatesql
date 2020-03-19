@@ -275,6 +275,7 @@ BEGIN
 		,DevelopmentalDisability CHAR(1)
 		,SubstanceAbuse CHAR(1)
 		,PC1FamilyArmedForces CHAR(1)
+		,CPSACSReport bit
 		,RowNum  INT
 	)
 	INSERT INTO @tblFollowUpInfo (
@@ -284,6 +285,7 @@ BEGIN
 		, DevelopmentalDisability
 		, SubstanceAbuse
 		, PC1FamilyArmedForces
+		, CPSACSReport
 		, RowNum
 	)
 	SELECT  fu.hvcasefk
@@ -292,6 +294,7 @@ BEGIN
 		   ,pci.DevelopmentalDisability
 		   ,pci.SubstanceAbuse
 		   ,fu.PC1FamilyArmedForces
+		   ,fu.CPSACSReport
 		   ,ROW_NUMBER() OVER (PARTITION BY fu.hvcasefk ORDER BY fu.FollowUPDATE DESC)
 	FROM dbo.FollowUp fu
 	inner join dbo.PC1Issues pci ON pci.PC1IssuesPK = fu.PC1IssuesFK
@@ -553,6 +556,24 @@ BEGIN
 	WHERE DateCompleted < @eDate
     ) sub
 	WHERE sub.[row] = 1
+
+	DECLARE @tblSubstanceAbuseTreatment AS TABLE (
+		HVCaseFK INT,
+		SISubstanceAbuse CHAR(1),
+		RowNum INT
+	)
+
+	INSERT INTO @tblSubstanceAbuseTreatment (
+		HVCaseFK,
+		SISubstanceAbuse,
+		RowNum
+	)
+
+	SELECT HVCaseFK,
+		   SISubstanceAbuse,
+		   ROW_NUMBER() OVER (PARTITION BY HVCaseFK ORDER BY FormDate DESC)
+	FROM CommonAttributes WHERE FormType IN ('KE', 'IN', 'FU-PC1')
+	AND HVCaseFK IN (SELECT HVCaseFK from @tblHomeVisits)
 
 --Begin filling in results table
 -----------------				
@@ -1042,8 +1063,18 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 510 and Detail = 1)
 	)
 -----------------
-	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) 
-	VALUES(520, 'B37', 'In need of substance abuse treatment', 0, 0)
+    INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	SELECT 520, tpid.PC1ID, 0, 1
+	FROM @tblPC1IDs tpid WHERE tpid.hvcasefk in (
+		SELECT DISTINCT sat.hvcasefk FROM @tblFollowUpInfo fui 
+		inner join
+		@tblSubstanceAbuseTreatment sat ON fui.HVCaseFK = sat.HVcaseFK AND sat.RowNum = fui.RowNum AND sat.RowNum = 1
+		WHERE SubstanceAbuse = '1' AND SISubstanceAbuse = '0'
+	)
+	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
+	VALUES(520, 'B37', 'In need of substance abuse treatment', 0, 0,
+		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 520 and Detail = 1)
+	)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	SELECT 530, tpid.PC1ID, 0, 1
@@ -1060,8 +1091,10 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	SELECT 540, tpid.PC1ID, 0, 1
 	FROM @tblPC1IDs tpid WHERE tpid.hvcasefk in (
-		SELECT DISTINCT hvcasefk FROM @tblKempeInfo
-		WHERE MomCPSArea = '05' OR MomCPSArea = '10'
+		SELECT DISTINCT tr.hvcasefk FROM @tblReferrals tr
+		full outer join @tblFollowUpInfo fui on tr.hvcasefk = fui.hvcasefk
+		full outer join @tblKempeInfo ki on tr.hvcasefk = ki.hvcasefk
+		WHERE tr.ReferralSource = '05' OR fui.CPSACSReport = 1 OR MomCPSArea = '5' Or MomCPSArea = '10'
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response)
