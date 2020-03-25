@@ -230,7 +230,13 @@ CREATE TABLE [dbo].[HVLog]
 [VisitLocation] [char] (5) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [VisitStartTime] [datetime] NOT NULL,
 [VisitType] [char] (6) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
-[VisitTypeComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+[VisitTypeComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSCuesFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSHoldingFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSExpressionFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSEmpathyFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSRhythmReciprocityFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSSmilesFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
@@ -805,12 +811,6 @@ GO
 CREATE NONCLUSTERED INDEX [IX_HVLog_VisitStartTime] ON [dbo].[HVLog] ([VisitStartTime]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [IX_HVLog_VisitType] ON [dbo].[HVLog] ([VisitType]) ON [PRIMARY]
-GO
-ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD CONSTRAINT [FK_HVLog_FSWFK] FOREIGN KEY ([FSWFK]) REFERENCES [dbo].[Worker] ([WorkerPK])
-GO
-ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD CONSTRAINT [FK_HVLog_HVCaseFK] FOREIGN KEY ([HVCaseFK]) REFERENCES [dbo].[HVCase] ([HVCasePK])
-GO
-ALTER TABLE [dbo].[HVLog] WITH NOCHECK ADD CONSTRAINT [FK_HVLog_ProgramFK] FOREIGN KEY ([ProgramFK]) REFERENCES [dbo].[HVProgram] ([HVProgramPK])
 GO
 EXEC sp_addextendedproperty N'MS_Description', N'Do not accept SVN changes', 'SCHEMA', N'dbo', 'TABLE', N'HVLog', 'COLUMN', N'HVLogPK'
 GO
