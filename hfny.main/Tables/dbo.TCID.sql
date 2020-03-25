@@ -92,16 +92,17 @@ AS
 
 Declare @PK int
 Declare @UpdatedFormDate datetime 
+Declare @UpdatedEditor char(10)
 Declare @FormTypeValue varchar(2)
 
 select @PK = TCIDPK   FROM inserted
-select @UpdatedFormDate = TCIDFormCompleteDate FROM inserted
+select @UpdatedFormDate = TCDOB, @UpdatedEditor = TCIDEditor FROM inserted
 set @FormTypeValue = 'TC'
 
 BEGIN
 	UPDATE FormReview
-	SET 
-	FormDate=@UpdatedFormDate
+	SET FormDate=@UpdatedFormDate, 
+		FormReviewEditor = @UpdatedEditor
 	WHERE FormFK=@PK 
 	AND FormType=@FormTypeValue
 

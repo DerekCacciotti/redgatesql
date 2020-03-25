@@ -10,7 +10,7 @@ GO
 --              appCodeUsedWhere
 -- =============================================
 
-CREATE procedure [dbo].[spGetCodebyGroup]
+CREATE PROC [dbo].[spGetCodebyGroup]
 @AppCodeGroup varchar(32) = NULL,
 @AppCodeUsedWhere varchar(10) = NULL,
 @AppCode varchar(2)=NULL
@@ -23,11 +23,13 @@ IF @AppCodeUsedWhere Is Null and @AppCode is null begin
 	SELECT AppCode, 
 	AppCodeGroup, 
 	AppCodeText, 
-	AppCodeUsedWhere, 
+	AppCodeUsedWhere,
+	OrderBy,
+	AppCodeSubGroup,
 	codeAppPK
 	FROM codeApp
 	WHERE AppCodeGroup = @AppCodeGroup
-	Order BY AppCode
+	Order BY OrderBy
 end
 
 else if @AppCodeUsedWhere is not null and @AppCode is null begin
@@ -35,11 +37,13 @@ else if @AppCodeUsedWhere is not null and @AppCode is null begin
 	AppCodeGroup, 
 	AppCodeText, 
 	AppCodeUsedWhere, 
+	OrderBy,
+	AppCodeSubGroup,
 	codeAppPK
 	FROM codeApp
 	WHERE AppCodeGroup = @AppCodeGroup and
 	AppCodeUsedWhere like '%'+ @AppCodeUsedWhere+'%'
-	Order BY AppCode
+	Order BY OrderBy
 end
 
 else if @AppCode IS NOT NULL and @AppCodeUsedWhere IS NULL begin
@@ -47,11 +51,13 @@ else if @AppCode IS NOT NULL and @AppCodeUsedWhere IS NULL begin
 	AppCodeGroup, 
 	AppCodeText, 
 	AppCodeUsedWhere, 
+	OrderBy,
+	AppCodeSubGroup,
 	codeAppPK
 	FROM codeApp
 	WHERE AppCodeGroup = @AppCodeGroup and
 	AppCode = @AppCode
-	Order BY AppCode
+	Order BY OrderBy
 end
 
 ELSE IF @AppCode IS NOT NULL and @AppCodeUsedWhere IS NOT NULL begin
@@ -59,18 +65,13 @@ ELSE IF @AppCode IS NOT NULL and @AppCodeUsedWhere IS NOT NULL begin
 	AppCodeGroup, 
 	AppCodeText, 
 	AppCodeUsedWhere, 
+	OrderBy,
+	AppCodeSubGroup,
 	codeAppPK
 	FROM codeApp
 	WHERE AppCodeGroup = @AppCodeGroup and
 	AppCodeUsedWhere like '%'+ @AppCodeUsedWhere+'%' and
 	AppCode = @AppCode
-	Order BY AppCode
+	Order BY OrderBy
 END
-
-
-
-
-
-
-
 GO
