@@ -7,10 +7,14 @@ DECLARE @DaystoLoad int = 30
 SELECT hl.HVLogPK, cp.PC1ID, cp.CurrentFSWFK, hl.VisitStartTime, CONCAT(LTRIM(RTRIM(w.FirstName)), ' ', LTRIM(RTRIM(w.LastName))) AS WorkerName,
 CONCAT(LTRIM(RTRIM(wsup.FirstName)), ' ', LTRIM(RTRIM(wsup.LastName))) AS SupervisorName FROM HVLog hl 
 INNER JOIN CaseProgram cp ON cp.ProgramFK = hl.ProgramFK AND hl.HVCaseFK = cp.HVCaseFK
-INNER JOIN WorkerProgram wp ON wp.WorkerFK = @WorkerFK AND wp.ProgramFK = @ProgramFK
+INNER JOIN WorkerProgram wp ON wp.WorkerFK = hl.FSWFK AND wp.ProgramFK = @ProgramFK
 INNER JOIN Worker w ON w.WorkerPK = wp.WorkerFK
 INNER JOIN Worker wsup ON wsup.WorkerPK = wp.SupervisorFK
-WHERE hl.ProgramFK = @ProgramFK AND hl.FormComplete = 0 AND cp.DischargeDate IS null AND hl.VisitStartTime > DATEADD(day, -@DaystoLoad, getdate())
+WHERE hl.ProgramFK = @ProgramFK 
+		and hl.FSWFK = @WorkerFK 
+		and hl.FormComplete = 0 
+		and cp.DischargeDate IS null 
+		and hl.VisitStartTime > DATEADD(day, -@DaystoLoad, getdate())
 
 --SELECT hl.HVLogPK, cp.PC1ID, cp.CurrentFSWFK, hl.VisitStartTime, CONCAT(LTRIM(RTRIM(w.FirstName)), ' ', LTRIM(RTRIM(w.LastName))) AS WorkerName,
 --CONCAT(LTRIM(RTRIM(wsup.FirstName)), ' ', LTRIM(RTRIM(wsup.LastName))) AS SupervisorName
