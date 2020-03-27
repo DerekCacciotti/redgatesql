@@ -24,11 +24,17 @@ CREATE TABLE [dbo].[HVLog]
 [CDSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CDToys] [bit] NULL,
 [CHEERSCues] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSCuesFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CHEERSHolding] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSHoldingFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CHEERSExpression] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSExpressionFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CHEERSEmpathy] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSEmpathyFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CHEERSRhythmReciprocity] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSRhythmReciprocityFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CHEERSSmiles] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
+[CHEERSSmilesFrequency] [char] (1) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CHEERSOverallStrengths] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CHEERSAreasToFocus] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CIComments] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -539,7 +545,7 @@ BEGIN
       ,[CurriculumOtherSupplementalInformationComments]
       ,[CurriculumOther]
       ,[CurriculumOtherSpecify]
-      ,[CurriculumParentsForLearning]
+    ,[CurriculumParentsForLearning]
       ,[CurriculumPartnersHealthyBaby]
       ,[CurriculumPAT]
       ,[CurriculumPATFocusFathers]
