@@ -229,7 +229,13 @@ CREATE PROCEDURE [dbo].[spEditHVLog](@HVLogPK int=NULL,
 @VisitLocation char(5)=NULL,
 @VisitStartTime datetime=NULL,
 @VisitType char(6)=NULL,
-@VisitTypeComments varchar(max)=NULL)
+@VisitTypeComments varchar(max)=NULL,
+@CHEERSCuesFrequency char(1)=NULL,
+@CHEERSHoldingFrequency char(1)=NULL,
+@CHEERSExpressionFrequency char(1)=NULL,
+@CHEERSEmpathyFrequency char(1)=NULL,
+@CHEERSRhythmReciprocityFrequency char(1)=NULL,
+@CHEERSSmilesFrequency char(1)=NULL)
 AS
 UPDATE HVLog
 SET 
@@ -459,6 +465,12 @@ VisitLengthMinute = @VisitLengthMinute,
 VisitLocation = @VisitLocation, 
 VisitStartTime = @VisitStartTime, 
 VisitType = @VisitType, 
-VisitTypeComments = @VisitTypeComments
+VisitTypeComments = @VisitTypeComments, 
+CHEERSCuesFrequency = @CHEERSCuesFrequency, 
+CHEERSHoldingFrequency = @CHEERSHoldingFrequency, 
+CHEERSExpressionFrequency = @CHEERSExpressionFrequency, 
+CHEERSEmpathyFrequency = @CHEERSEmpathyFrequency, 
+CHEERSRhythmReciprocityFrequency = @CHEERSRhythmReciprocityFrequency, 
+CHEERSSmilesFrequency = @CHEERSSmilesFrequency
 WHERE HVLogPK = @HVLogPK
 GO
