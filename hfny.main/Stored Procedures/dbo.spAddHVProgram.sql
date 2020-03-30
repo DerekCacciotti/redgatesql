@@ -3,10 +3,11 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddHVProgram](@ContractEndDate datetime=NULL,
-@ContractManager char(30)=NULL,
+@ContractManagerFK int=NULL,
 @ContractNumber char(10)=NULL,
 @ContractStartDate datetime=NULL,
 @CountyFK int=NULL,
+@DisplayName varchar(max)=NULL,
 @ExtraField1Description char(30)=NULL,
 @ExtraField2Description char(30)=NULL,
 @ExtraField3Description char(30)=NULL,
@@ -38,10 +39,11 @@ CREATE PROCEDURE [dbo].[spAddHVProgram](@ContractEndDate datetime=NULL,
 AS
 INSERT INTO HVProgram(
 ContractEndDate,
-ContractManager,
+ContractManagerFK,
 ContractNumber,
 ContractStartDate,
 CountyFK,
+DisplayName,
 ExtraField1Description,
 ExtraField2Description,
 ExtraField3Description,
@@ -73,10 +75,11 @@ TargetZip
 )
 VALUES(
 @ContractEndDate,
-@ContractManager,
+@ContractManagerFK,
 @ContractNumber,
 @ContractStartDate,
 @CountyFK,
+@DisplayName,
 @ExtraField1Description,
 @ExtraField2Description,
 @ExtraField3Description,

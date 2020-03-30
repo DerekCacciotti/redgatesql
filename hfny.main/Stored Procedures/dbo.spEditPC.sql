@@ -35,7 +35,14 @@ CREATE PROCEDURE [dbo].[spEditPC](@PCPK int=NULL,
 @RaceSpecify varchar(500)=NULL,
 @TimesMoved int=NULL,
 @YearsInUSA numeric(4, 0)=NULL,
-@PrefersTextMessages bit=NULL)
+@PrefersTextMessages bit=NULL,
+@Race_AmericanIndian bit=NULL,
+@Race_Asian bit=NULL,
+@Race_Black bit=NULL,
+@Race_Hawaiian bit=NULL,
+@Race_White bit=NULL,
+@Race_Hispanic bit=NULL,
+@Race_Other bit=NULL)
 AS
 UPDATE PC
 SET 
@@ -71,6 +78,13 @@ Race = @Race,
 RaceSpecify = @RaceSpecify, 
 TimesMoved = @TimesMoved, 
 YearsInUSA = @YearsInUSA, 
-PrefersTextMessages = @PrefersTextMessages
+PrefersTextMessages = @PrefersTextMessages, 
+Race_AmericanIndian = @Race_AmericanIndian, 
+Race_Asian = @Race_Asian, 
+Race_Black = @Race_Black, 
+Race_Hawaiian = @Race_Hawaiian, 
+Race_White = @Race_White, 
+Race_Hispanic = @Race_Hispanic, 
+Race_Other = @Race_Other
 WHERE PCPK = @PCPK
 GO

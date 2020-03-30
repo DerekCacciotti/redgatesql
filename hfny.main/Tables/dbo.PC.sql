@@ -36,7 +36,14 @@ CREATE TABLE [dbo].[PC]
 [RaceSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TimesMoved] [int] NULL,
 [YearsInUSA] [numeric] (4, 0) NULL,
-[PrefersTextMessages] [bit] NULL
+[PrefersTextMessages] [bit] NULL,
+[Race_AmericanIndian] [bit] NULL,
+[Race_Asian] [bit] NULL,
+[Race_Black] [bit] NULL,
+[Race_Hawaiian] [bit] NULL,
+[Race_White] [bit] NULL,
+[Race_Hispanic] [bit] NULL,
+[Race_Other] [bit] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON

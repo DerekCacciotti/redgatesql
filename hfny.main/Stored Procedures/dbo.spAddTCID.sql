@@ -34,7 +34,14 @@ CREATE PROCEDURE [dbo].[spAddTCID](@BirthTerm char(2)=NULL,
 @MIECHV_Race_Black bit=NULL,
 @MIECHV_Race_Hawaiian bit=NULL,
 @MIECHV_Race_White bit=NULL,
-@MIECHV_Hispanic nvarchar(1)=NULL)
+@MIECHV_Hispanic nvarchar(1)=NULL,
+@Race_AmericanIndian bit=NULL,
+@Race_Asian bit=NULL,
+@Race_Black bit=NULL,
+@Race_Hawaiian bit=NULL,
+@Race_White bit=NULL,
+@Race_Hispanic bit=NULL,
+@Race_Other bit=NULL)
 AS
 INSERT INTO TCID(
 BirthTerm,
@@ -69,7 +76,14 @@ MIECHV_Race_Asian,
 MIECHV_Race_Black,
 MIECHV_Race_Hawaiian,
 MIECHV_Race_White,
-MIECHV_Hispanic
+MIECHV_Hispanic,
+Race_AmericanIndian,
+Race_Asian,
+Race_Black,
+Race_Hawaiian,
+Race_White,
+Race_Hispanic,
+Race_Other
 )
 VALUES(
 @BirthTerm,
@@ -104,7 +118,14 @@ VALUES(
 @MIECHV_Race_Black,
 @MIECHV_Race_Hawaiian,
 @MIECHV_Race_White,
-@MIECHV_Hispanic
+@MIECHV_Hispanic,
+@Race_AmericanIndian,
+@Race_Asian,
+@Race_Black,
+@Race_Hawaiian,
+@Race_White,
+@Race_Hispanic,
+@Race_Other
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]

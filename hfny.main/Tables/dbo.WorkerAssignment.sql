@@ -15,6 +15,32 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
+CREATE TRIGGER [dbo].[tr_delWorkerAssignment] ON [dbo].[WorkerAssignment] AFTER DELETE
+
+AS 
+
+INSERT INTO WorkerAssignmentDeleted
+(
+    WorkerAsskignmentPK,
+    HVCaseFK,
+    ProgramFK,
+    WorkerAssignmentDeleteDate,
+    WorkerAssignmentDeleter,
+    WorkerAssignmentCreateDate,
+    WorkerAssignmentCreator,
+    WorkerAssignmentDate,
+    WorkerAssignmentEditDate,
+    WorkerAssignmentEditor,
+    WorkerFK
+)
+SELECT d.WorkerAssignmentPK, d.HVCaseFK, d.ProgramFK, GETDATE(), NULL, d.WorkerAssignmentCreateDate,
+d.WorkerAssignmentCreator,d.WorkerAssignmentDate, d.WorkerAssignmentEditDate,d.WorkerAssignmentEditor, d.WorkerFK 
+FROM Deleted d WHERE d.WorkerAssignmentPK = d.WorkerAssignmentPK
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 -- create trigger TR_WorkerAssignmentEditDate ON WorkerAssignment
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
