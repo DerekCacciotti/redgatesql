@@ -228,7 +228,13 @@ CREATE PROCEDURE [dbo].[spAddHVLog](@AdditionalComments varchar(max)=NULL,
 @VisitLocation char(5)=NULL,
 @VisitStartTime datetime=NULL,
 @VisitType char(6)=NULL,
-@VisitTypeComments varchar(max)=NULL)
+@VisitTypeComments varchar(max)=NULL,
+@CHEERSCuesFrequency char(1)=NULL,
+@CHEERSHoldingFrequency char(1)=NULL,
+@CHEERSExpressionFrequency char(1)=NULL,
+@CHEERSEmpathyFrequency char(1)=NULL,
+@CHEERSRhythmReciprocityFrequency char(1)=NULL,
+@CHEERSSmilesFrequency char(1)=NULL)
 AS
 INSERT INTO HVLog(
 AdditionalComments,
@@ -457,7 +463,13 @@ VisitLengthMinute,
 VisitLocation,
 VisitStartTime,
 VisitType,
-VisitTypeComments
+VisitTypeComments,
+CHEERSCuesFrequency,
+CHEERSHoldingFrequency,
+CHEERSExpressionFrequency,
+CHEERSEmpathyFrequency,
+CHEERSRhythmReciprocityFrequency,
+CHEERSSmilesFrequency
 )
 VALUES(
 @AdditionalComments,
@@ -686,7 +698,13 @@ VALUES(
 @VisitLocation,
 @VisitStartTime,
 @VisitType,
-@VisitTypeComments
+@VisitTypeComments,
+@CHEERSCuesFrequency,
+@CHEERSHoldingFrequency,
+@CHEERSExpressionFrequency,
+@CHEERSEmpathyFrequency,
+@CHEERSRhythmReciprocityFrequency,
+@CHEERSSmilesFrequency
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
