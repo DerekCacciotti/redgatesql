@@ -41,7 +41,8 @@ CREATE PROCEDURE [dbo].[spEditTCID](@TCIDPK int=NULL,
 @Race_Black bit=NULL,
 @Race_Hawaiian bit=NULL,
 @Race_White bit=NULL,
-@Race_Hispanic bit=NULL)
+@Race_Hispanic bit=NULL,
+@Race_Other bit=NULL)
 AS
 UPDATE TCID
 SET 
@@ -83,6 +84,7 @@ Race_Asian = @Race_Asian,
 Race_Black = @Race_Black, 
 Race_Hawaiian = @Race_Hawaiian, 
 Race_White = @Race_White, 
-Race_Hispanic = @Race_Hispanic
+Race_Hispanic = @Race_Hispanic, 
+Race_Other = @Race_Other
 WHERE TCIDPK = @TCIDPK
 GO
