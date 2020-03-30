@@ -40,7 +40,7 @@ CREATE PROCEDURE [dbo].[spAddTCID](@BirthTerm char(2)=NULL,
 @Race_Black bit=NULL,
 @Race_Hawaiian bit=NULL,
 @Race_White bit=NULL,
-@Race_Hispance bit=NULL)
+@Race_Hispanic bit=NULL)
 AS
 INSERT INTO TCID(
 BirthTerm,
@@ -81,7 +81,7 @@ Race_Asian,
 Race_Black,
 Race_Hawaiian,
 Race_White,
-Race_Hispance
+Race_Hispanic
 )
 VALUES(
 @BirthTerm,
@@ -122,7 +122,7 @@ VALUES(
 @Race_Black,
 @Race_Hawaiian,
 @Race_White,
-@Race_Hispance
+@Race_Hispanic
 )
 
 SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]
