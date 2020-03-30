@@ -42,7 +42,7 @@ CREATE TABLE [dbo].[TCID]
 [Race_Black] [bit] NULL,
 [Race_Hawaiian] [bit] NULL,
 [Race_White] [bit] NULL,
-[Race_Hispance] [bit] NULL
+[Race_Hispanic] [bit] NULL
 ) ON [PRIMARY]
 GO
 SET QUOTED_IDENTIFIER ON
