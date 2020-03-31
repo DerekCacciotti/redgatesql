@@ -22,7 +22,7 @@ GO
 -- Fixed Bug HW963 - Retention Rage Report ... Khalsa 3/20/2014
 -- =============================================
 -- =============================================
-CREATE PROCEDURE [dbo].[rspRetentionRates_MIECHV]
+CREATE PROC [dbo].[rspRetentionRates_MIECHV]
 	-- Add the parameters for the stored procedure here
 	@ProgramFK varchar(max)
 	, @StartDate datetime
@@ -88,12 +88,15 @@ SET NOCOUNT ON;
 		, AgeAtIntake_Under18 int
 		, AgeAtIntake_18UpTo20 int
 		, AgeAtIntake_20UpTo30 int
-		, AgeAtIntake_Over30 int
-		, RaceWhite int
-		, RaceBlack int
-		, RaceHispanic int
-		, RaceOther int
-		, RaceUnknownMissing int
+		, AgeAtIntake_Over30 INT
+        , Race_AmericanIndian BIT 
+		, Race_Asian BIT
+		, Race_Black BIT
+		, Race_Hawaiian BIT
+		, Race_White BIT
+		, Race_Other BIT
+		, Race_Hispanic BIT
+		, RaceSpecify VARCHAR(500)
 		, MarriedAtIntake int
 		, MarriedAtDischarge int
 		, NeverMarriedAtIntake int
@@ -432,8 +435,14 @@ SET NOCOUNT ON;
 				when DischargeDate is not null and datediff(month, IntakeDate, LastHomeVisit) > 12 then 1
 					else 0
 				end as ActiveAt12Months
-			   ,Race
-			   ,carace.AppCodeText as RaceText
+			   ,Race_AmericanIndian
+			   ,Race_Asian
+			   ,Race_Black
+			   ,Race_Hawaiian
+			   ,Race_White
+			   ,Race_Other
+			   ,Race_Hispanic
+			   ,RaceSpecify
 			   ,MaritalStatus
 			   ,MaritalStatusAtIntake
 			   ,case when MomScore = 'U' then 0 else cast(MomScore as int) end as MomScore
@@ -523,7 +532,6 @@ SET NOCOUNT ON;
 			inner join codeLevel cl ON cl.codeLevelPK=CurrentLevelFK
 			inner join dbo.SplitString(@ProgramFK, ',') ss on ss.ListItem = cp.ProgramFK
 			left outer join cteTCInformation tci on tci.HVCaseFK = c.HVCasePK
-			left outer join codeApp carace on carace.AppCode=Race and AppCodeGroup='Race'
 			left outer join (select PBTANF as PC1TANFAtIntake
 									,HVCaseFK 
 							   from CommonAttributes ca
@@ -568,8 +576,14 @@ SET NOCOUNT ON;
 		  , ActiveAt6Months
 		  , ActiveAt9Months
 		  , ActiveAt12Months
-		  , Race
-		  , RaceText
+		  , cteMain1.Race_AmericanIndian
+		  , cteMain1.Race_Asian
+		  , cteMain1.Race_Black
+		  , cteMain1.Race_Hawaiian
+		  , cteMain1.Race_White
+		  , cteMain1.Race_Other
+		  , cteMain1.Race_Hispanic
+		  , cteMain1.RaceSpecify
 		  , MaritalStatus
 		  , MaritalStatusAtIntake
 		  , MomScore
@@ -655,8 +669,14 @@ SET NOCOUNT ON;
 			 , t.ActiveAt6Months
 			 , t.ActiveAt9Months
 			 , t.ActiveAt12Months
-			 , t.Race
-			 , t.RaceText
+			 , t.Race_AmericanIndian
+			 , t.Race_Asian
+			 , t.Race_Black
+			 , t.Race_Hawaiian
+			 , t.Race_White
+			 , t.Race_Other
+			 , t.Race_Hispanic
+			 , t.RaceSpecify
 			 , t.MaritalStatus
 			 , t.MaritalStatusAtIntake
 			 , t.MomScore
@@ -726,11 +746,14 @@ insert into @tblPC1WithStats
 		, AgeAtIntake_18UpTo20
 		, AgeAtIntake_20UpTo30
 		, AgeAtIntake_Over30
-		, RaceWhite
-		, RaceBlack
-		, RaceHispanic
-		, RaceOther
-		, RaceUnknownMissing
+		, Race_AmericanIndian
+		, Race_Asian
+		, Race_Black
+		, Race_Hawaiian
+		, Race_White
+		, Race_Other
+		, Race_Hispanic
+		, RaceSpecify
 		, MarriedAtIntake
 		, MarriedAtDischarge
 		, NeverMarriedAtIntake
@@ -847,11 +870,14 @@ select distinct PC1ID
 		, case when PC1AgeAtIntake between 18 and 19 then 1 else 0 end as AgeAtIntake_18UpTo20
 		, case when PC1AgeAtIntake between 20 and 29 then 1 else 0 end as AgeAtIntake_20UpTo30
 		, case when PC1AgeAtIntake >= 30 then 1 else 0 end as AgeAtIntake_Over30
-		, case when left(RaceText,5)='White' then 1 else 0 end as RaceWhite
-		, case when left(RaceText,5)='Black' then 1 else 0 end as RaceBlack
-		, case when left(RaceText,8)='Hispanic' then 1 else 0 end as RaceHispanic
-		, case when left(RaceText,5) in('Asian','Nativ','Multi','Other') then 1 else 0 end as RaceOther
-		, case when RaceText is null or RaceText='' then 1 else 0 end as RaceUnknownMissing
+		, Race_AmericanIndian
+		, Race_Asian
+		, Race_Black
+		, Race_Hawaiian
+		, Race_White
+		, Race_Other
+		, Race_Hispanic
+		, RaceSpecify
 		, case when MaritalStatusAtIntake = 'Married' then 1 else 0 end as MarriedAtIntake
 		, case when MaritalStatusAtDischarge = 'Married' then 1 else 0 end as MarriedAtDischarge
 		, case when MaritalStatusAtIntake = 'Never married' then 1 else 0 end as NeverMarriedAtIntake
@@ -1439,11 +1465,6 @@ values ('    30 and Over'
 		, @TwelveMonthsAtIntake)
 --#endregion
 --#region Race
---			White
---			Black
---			Hispanic
---			Other
---			Unknown / Missing
 set @LineGroupingLevel = @LineGroupingLevel + 1
 
 insert into @tblResults (LineDescription
@@ -1489,23 +1510,307 @@ values ('Race'
 
 select @AllEnrolledParticipants = count(*)
 from @tblPC1WithStats
-where RaceWhite = 1
+where Race_AmericanIndian = 1
 
 select @ThreeMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 0 and RaceWhite = 1
+where ActiveAt3Months = 0 and Race_AmericanIndian = 1
 
 select @SixMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and RaceWhite = 1
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_AmericanIndian = 1
 
 select @NineMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt9Months = 0 and RaceWhite = 1
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_AmericanIndian = 1
 
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt9Months = 1 and ActiveAt12Months = 0 and RaceWhite = 1
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_AmericanIndian = 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateNineMonths
+						, RetentionRateOneYear
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsNineMonths
+						, EnrolledParticipantsOneYear
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedNineMonths
+						, RunningTotalDischargedOneYear
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNNineMonths
+						, TotalNOneYear
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, NineMonthsIntake
+						, OneYearIntake)
+values ('    American Indian or Alaskan Native'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateNineMonths
+		, @RetentionRateOneYear
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsNineMonths
+		, @EnrolledParticipantsOneYear
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedNineMonths
+		, @RunningTotalDischargedOneYear
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNNineMonths
+		, @TotalNOneYear
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @NineMonthsAtIntake
+		, @TwelveMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where Race_Asian = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and Race_Asian = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_Asian = 1
+
+select @NineMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_Asian = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_Asian = 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateNineMonths
+						, RetentionRateOneYear
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsNineMonths
+						, EnrolledParticipantsOneYear
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedNineMonths
+						, RunningTotalDischargedOneYear
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNNineMonths
+						, TotalNOneYear
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, NineMonthsIntake
+						, OneYearIntake)
+values ('    Asian'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateNineMonths
+		, @RetentionRateOneYear
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsNineMonths
+		, @EnrolledParticipantsOneYear
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedNineMonths
+		, @RunningTotalDischargedOneYear
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNNineMonths
+		, @TotalNOneYear
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @NineMonthsAtIntake
+		, @TwelveMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where Race_Black = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and Race_Black = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_Black = 1
+
+select @NineMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_Black = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_Black = 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateNineMonths
+						, RetentionRateOneYear
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsNineMonths
+						, EnrolledParticipantsOneYear
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedNineMonths
+						, RunningTotalDischargedOneYear
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNNineMonths
+						, TotalNOneYear
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, NineMonthsIntake
+						, OneYearIntake)
+values ('    Black or African-American'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateNineMonths
+		, @RetentionRateOneYear
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsNineMonths
+		, @EnrolledParticipantsOneYear
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedNineMonths
+		, @RunningTotalDischargedOneYear
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNNineMonths
+		, @TotalNOneYear
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @NineMonthsAtIntake
+		, @TwelveMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where Race_Hawaiian = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and Race_Hawaiian = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_Hawaiian = 1
+
+select @NineMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_Hawaiian = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_Hawaiian = 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateNineMonths
+						, RetentionRateOneYear
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsNineMonths
+						, EnrolledParticipantsOneYear
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedNineMonths
+						, RunningTotalDischargedOneYear
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNNineMonths
+						, TotalNOneYear
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, NineMonthsIntake
+						, OneYearIntake)
+values ('    Native Hawaiian or Other Pacific Islander'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateNineMonths
+		, @RetentionRateOneYear
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsNineMonths
+		, @EnrolledParticipantsOneYear
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedNineMonths
+		, @RunningTotalDischargedOneYear
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNNineMonths
+		, @TotalNOneYear
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @NineMonthsAtIntake
+		, @TwelveMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where Race_White = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and Race_White = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_White = 1
+
+select @NineMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_White = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_White = 1
 
 insert into @tblResults (LineDescription
 						, LineGroupingLevel
@@ -1560,165 +1865,23 @@ values ('    White'
 
 select @AllEnrolledParticipants = count(*)
 from @tblPC1WithStats
-where RaceBlack = 1
+where Race_Other = 1
 
 select @ThreeMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 0 and RaceBlack = 1
+where ActiveAt3Months = 0 and Race_Other = 1
 
 select @SixMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and RaceBlack = 1
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_Other = 1
 
 select @NineMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt9Months = 0 and RaceBlack = 1
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_Other = 1
 
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt9Months = 1 and ActiveAt12Months = 0 and RaceBlack = 1
-
-insert into @tblResults (LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateNineMonths
-						, RetentionRateOneYear
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsNineMonths
-						, EnrolledParticipantsOneYear
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedNineMonths
-						, RunningTotalDischargedOneYear
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNNineMonths
-						, TotalNOneYear
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, NineMonthsIntake
-						, OneYearIntake)
-values ('    Black'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateNineMonths
-		, @RetentionRateOneYear
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsNineMonths
-		, @EnrolledParticipantsOneYear
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedNineMonths
-		, @RunningTotalDischargedOneYear
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNNineMonths
-		, @TotalNOneYear
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @NineMonthsAtIntake
-		, @TwelveMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1WithStats
-where RaceHispanic = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 0 and RaceHispanic = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and RaceHispanic = 1
-
-select @NineMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt9Months = 0 and RaceHispanic = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt9Months = 1 and ActiveAt12Months = 0 and RaceHispanic = 1
-
-insert into @tblResults (LineDescription
-						, LineGroupingLevel
-						, DisplayPercentages
-						, TotalEnrolledParticipants
-						, RetentionRateThreeMonths
-						, RetentionRateSixMonths
-						, RetentionRateNineMonths
-						, RetentionRateOneYear
-						, EnrolledParticipantsThreeMonths
-						, EnrolledParticipantsSixMonths
-						, EnrolledParticipantsNineMonths
-						, EnrolledParticipantsOneYear
-						, RunningTotalDischargedThreeMonths
-						, RunningTotalDischargedSixMonths
-						, RunningTotalDischargedNineMonths
-						, RunningTotalDischargedOneYear
-						, TotalNThreeMonths
-						, TotalNSixMonths
-						, TotalNNineMonths
-						, TotalNOneYear
-						, AllParticipants
-						, ThreeMonthsIntake
-						, SixMonthsIntake
-						, NineMonthsIntake
-						, OneYearIntake)
-values ('    Hispanic'
-		, @LineGroupingLevel
-		, 1
-        , @TotalCohortCount
-		, @RetentionRateThreeMonths
-		, @RetentionRateSixMonths
-		, @RetentionRateNineMonths
-		, @RetentionRateOneYear
-		, @EnrolledParticipantsThreeMonths
-		, @EnrolledParticipantsSixMonths
-		, @EnrolledParticipantsNineMonths
-		, @EnrolledParticipantsOneYear
-		, @RunningTotalDischargedThreeMonths
-		, @RunningTotalDischargedSixMonths
-		, @RunningTotalDischargedNineMonths
-		, @RunningTotalDischargedOneYear
-		, @TotalNThreeMonths
-		, @TotalNSixMonths
-		, @TotalNNineMonths
-		, @TotalNOneYear
-		, @AllEnrolledParticipants
-		, @ThreeMonthsAtIntake
-		, @SixMonthsAtIntake
-		, @NineMonthsAtIntake
-		, @TwelveMonthsAtIntake)
-
-select @AllEnrolledParticipants = count(*)
-from @tblPC1WithStats
-where RaceOther = 1
-
-select @ThreeMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 0 and RaceOther = 1
-
-select @SixMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and RaceOther = 1
-
-select @NineMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt9Months = 0 and RaceOther = 1
-
-select @TwelveMonthsAtIntake = count(*)
-from @tblPC1WithStats
-where ActiveAt9Months = 1 and ActiveAt12Months = 0 and RaceOther = 1
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_Other = 1
 
 insert into @tblResults (LineDescription
 						, LineGroupingLevel
@@ -1773,23 +1936,23 @@ values ('    Other'
 
 select @AllEnrolledParticipants = count(*)
 from @tblPC1WithStats
-where RaceUnknownMissing = 1
+where dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1
 
 select @ThreeMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 0 and RaceUnknownMissing = 1
+where ActiveAt3Months = 0 and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1
 
 select @SixMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt3Months = 1 and ActiveAt6Months = 0 and RaceUnknownMissing = 1
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1
 
 select @NineMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt6Months = 1 and ActiveAt9Months = 0 and RaceUnknownMissing = 1
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1
 
 select @TwelveMonthsAtIntake = count(*)
 from @tblPC1WithStats
-where ActiveAt9Months = 1 and ActiveAt12Months = 0 and RaceUnknownMissing = 1
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1
 
 insert into @tblResults (LineDescription
 						, LineGroupingLevel
@@ -1841,6 +2004,264 @@ values ('    Unknown / Missing'
 		, @SixMonthsAtIntake
 		, @NineMonthsAtIntake
 		, @TwelveMonthsAtIntake)
+--#endregion
+--#region Ethnicity
+set @LineGroupingLevel = @LineGroupingLevel + 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateNineMonths
+						, RetentionRateOneYear
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsNineMonths
+						, EnrolledParticipantsOneYear
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedNineMonths
+						, RunningTotalDischargedOneYear
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNNineMonths
+						, TotalNOneYear)
+values ('Ethnicity'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateNineMonths
+		, @RetentionRateOneYear
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsNineMonths
+		, @EnrolledParticipantsOneYear
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedNineMonths
+		, @RunningTotalDischargedOneYear
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNNineMonths
+		, @TotalNOneYear)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where Race_Hispanic = 1
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and Race_Hispanic = 1
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_Hispanic = 1
+
+select @NineMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_Hispanic = 1
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_Hispanic = 1
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateNineMonths
+						, RetentionRateOneYear
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsNineMonths
+						, EnrolledParticipantsOneYear
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedNineMonths
+						, RunningTotalDischargedOneYear
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNNineMonths
+						, TotalNOneYear
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, NineMonthsIntake
+						, OneYearIntake)
+values ('    Hispanic'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateNineMonths
+		, @RetentionRateOneYear
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsNineMonths
+		, @EnrolledParticipantsOneYear
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedNineMonths
+		, @RunningTotalDischargedOneYear
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNNineMonths
+		, @TotalNOneYear
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @NineMonthsAtIntake
+		, @TwelveMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where Race_Hispanic = 0
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and Race_Hispanic = 0
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_Hispanic = 0
+
+select @NineMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_Hispanic = 0
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_Hispanic = 0
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateNineMonths
+						, RetentionRateOneYear
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsNineMonths
+						, EnrolledParticipantsOneYear
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedNineMonths
+						, RunningTotalDischargedOneYear
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNNineMonths
+						, TotalNOneYear
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, NineMonthsIntake
+						, OneYearIntake)
+values ('    Non-Hispanic'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateNineMonths
+		, @RetentionRateOneYear
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsNineMonths
+		, @EnrolledParticipantsOneYear
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedNineMonths
+		, @RunningTotalDischargedOneYear
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNNineMonths
+		, @TotalNOneYear
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @NineMonthsAtIntake
+		, @TwelveMonthsAtIntake)
+
+select @AllEnrolledParticipants = count(*)
+from @tblPC1WithStats
+where Race_Hispanic IS NULL
+
+select @ThreeMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 0 and Race_Hispanic IS NULL
+
+select @SixMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt3Months = 1 and ActiveAt6Months = 0 and Race_Hispanic IS NULL
+
+select @NineMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt6Months = 1 and ActiveAt9Months = 0 and Race_Hispanic IS NULL
+
+select @TwelveMonthsAtIntake = count(*)
+from @tblPC1WithStats
+where ActiveAt9Months = 1 and ActiveAt12Months = 0 and Race_Hispanic IS NULL
+
+insert into @tblResults (LineDescription
+						, LineGroupingLevel
+						, DisplayPercentages
+						, TotalEnrolledParticipants
+						, RetentionRateThreeMonths
+						, RetentionRateSixMonths
+						, RetentionRateNineMonths
+						, RetentionRateOneYear
+						, EnrolledParticipantsThreeMonths
+						, EnrolledParticipantsSixMonths
+						, EnrolledParticipantsNineMonths
+						, EnrolledParticipantsOneYear
+						, RunningTotalDischargedThreeMonths
+						, RunningTotalDischargedSixMonths
+						, RunningTotalDischargedNineMonths
+						, RunningTotalDischargedOneYear
+						, TotalNThreeMonths
+						, TotalNSixMonths
+						, TotalNNineMonths
+						, TotalNOneYear
+						, AllParticipants
+						, ThreeMonthsIntake
+						, SixMonthsIntake
+						, NineMonthsIntake
+						, OneYearIntake)
+values ('    Unknown / Missing'
+		, @LineGroupingLevel
+		, 1
+        , @TotalCohortCount
+		, @RetentionRateThreeMonths
+		, @RetentionRateSixMonths
+		, @RetentionRateNineMonths
+		, @RetentionRateOneYear
+		, @EnrolledParticipantsThreeMonths
+		, @EnrolledParticipantsSixMonths
+		, @EnrolledParticipantsNineMonths
+		, @EnrolledParticipantsOneYear
+		, @RunningTotalDischargedThreeMonths
+		, @RunningTotalDischargedSixMonths
+		, @RunningTotalDischargedNineMonths
+		, @RunningTotalDischargedOneYear
+		, @TotalNThreeMonths
+		, @TotalNSixMonths
+		, @TotalNNineMonths
+		, @TotalNOneYear
+		, @AllEnrolledParticipants
+		, @ThreeMonthsAtIntake
+		, @SixMonthsAtIntake
+		, @NineMonthsAtIntake
+		, @TwelveMonthsAtIntake)
+
 --#endregion
 --#region Marital Status
 --			Married
