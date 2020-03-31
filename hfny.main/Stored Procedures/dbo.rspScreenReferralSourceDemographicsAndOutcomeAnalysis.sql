@@ -21,7 +21,7 @@ INCLUDE ([HVCasePK],[CaseProgress],[EDC],[IntakeDate],[KempeDate],[PC1FK],[TCDOB
 GO
 */
 
-CREATE procedure [dbo].[rspScreenReferralSourceDemographicsAndOutcomeAnalysis]
+CREATE PROC [dbo].[rspScreenReferralSourceDemographicsAndOutcomeAnalysis]
 (
     @programfk varchar(max)    = null,
     @sdate     datetime,
@@ -93,8 +93,14 @@ END
 	  ,ReferralSourceName char(50)
 	  ,PCDOB [datetime] NULL 
 	  ,pcage int
-	  ,babydate [datetime] NULL 
-	  ,Race [char](2) null
+	  ,babydate [datetime] NULL
+      ,Race_AmericanIndian BIT NULL
+	  ,Race_Asian BIT NULL
+	  ,Race_Black BIT NULL
+	  ,Race_Hawaiian BIT NULL
+	  ,Race_White BIT NULL
+	  ,Race_Other BIT NULL
+	  ,Race_Hispanic BIT NULL
 	  ,OBPInHome [char](1) null 
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
@@ -132,7 +138,13 @@ END
 	  ,PCDOB [datetime] null
 	  ,pcage int
 	  ,babydate [datetime] NULL 
-	  ,Race [char](2) null 
+      ,Race_AmericanIndian BIT NULL
+	  ,Race_Asian BIT NULL
+	  ,Race_Black BIT NULL
+	  ,Race_Hawaiian BIT NULL
+	  ,Race_White BIT NULL
+	  ,Race_Other BIT NULL
+	  ,Race_Hispanic BIT NULL
 	  ,OBPInHome [char](1) null 
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
@@ -169,7 +181,13 @@ END
 	  ,PCDOB [datetime] null
 	  ,pcage int
 	  ,babydate [datetime] null
-	  ,Race [char](2) null 
+      ,Race_AmericanIndian BIT NULL
+	  ,Race_Asian BIT NULL
+	  ,Race_Black BIT NULL
+	  ,Race_Hawaiian BIT NULL
+	  ,Race_White BIT NULL
+	  ,Race_Other BIT NULL
+	  ,Race_Hispanic BIT NULL
 	  ,OBPInHome [char](1) null
 	  ,ReceivingPreNatalCare [char](1) null 
 	  ,DischargeReason [char](100) null
@@ -206,7 +224,13 @@ END
 	  ,PCDOB [datetime] null
 	  ,pcage int
 	  ,babydate [datetime] NULL 
-	  ,Race [char](2) null
+      ,Race_AmericanIndian BIT NULL
+	  ,Race_Asian BIT NULL
+	  ,Race_Black BIT NULL
+	  ,Race_Hawaiian BIT NULL
+	  ,Race_White BIT NULL
+	  ,Race_Other BIT NULL
+	  ,Race_Hispanic BIT NULL
 	  ,OBPInHome [char](1) null 
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
@@ -243,7 +267,13 @@ END
 	  ,PCDOB [datetime] NULL	
 	  ,pcage int
 	  ,babydate [datetime] NULL 
-	  ,Race [char](2) null
+      ,Race_AmericanIndian BIT NULL
+	  ,Race_Asian BIT NULL
+	  ,Race_Black BIT NULL
+	  ,Race_Hawaiian BIT NULL
+	  ,Race_White BIT NULL
+	  ,Race_Other BIT NULL
+	  ,Race_Hispanic BIT NULL
 	  ,OBPInHome [char](1) null 
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
@@ -282,8 +312,14 @@ END
 	  ,ReferralSourceName char(50)
 	  ,PCDOB [datetime] null
 	  ,pcage int
-	  ,babydate [datetime] NULL 
-	  ,Race [char](2) null 
+	  ,babydate [datetime] NULL
+      ,Race_AmericanIndian BIT NULL
+	  ,Race_Asian BIT NULL
+	  ,Race_Black BIT NULL
+	  ,Race_Hawaiian BIT NULL
+	  ,Race_White BIT NULL
+	  ,Race_Other BIT NULL
+	  ,Race_Hispanic BIT NULL
 	  ,OBPInHome [char](1) null
 	  ,ReceivingPreNatalCare [char](1) null
 	  ,DischargeReason [char](100) null
@@ -330,7 +366,13 @@ END
 		  ,PC.PCDOB 
 		  ,datediff( d, pc.PCDOB, hvs.ScreenDate) / 365.25 as pcage
 		  ,isnull(h.TCDOB,EDC) + (40-isnull(tcid.GestationalAge, 40))*7 as babydate
-		  ,PC.Race 
+		  ,PC.Race_AmericanIndian
+		  ,pc.Race_Asian
+		  ,pc.Race_Black
+		  ,pc.Race_Hawaiian
+		  ,pc.Race_White
+		  ,pc.Race_Other
+		  ,pc.Race_Hispanic
 		  ,ca.OBPInHome
 		  ,ca.ReceivingPreNatalCare 
 		  ,cd.DischargeReason
@@ -816,164 +858,28 @@ VALUES(4, '    Postnatal 2 or more Weeks After the Birth', 17
 
 
 /*************************************************/
--- add the title for Race/Ethnicity in the row
+-- add the title for Race in the row
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, 'Race / Ethnicity', 18, '', '', '', '', '', '')  
+VALUES(5, 'Race', 18, '', '', '', '', '', '')  
 
-
-
----- calcualte Race/Ethnicity - White, non-Hispanic
-DECLARE @numOfALLScreens46 INT = 0
-DECLARE @numOfTotalPositiveScreens46 INT = 0
-DECLARE @numOfTotalPositiveScreensNotReferred46 INT = 0
-DECLARE @numOfTotalNegativeScreens46 INT = 0
-DECLARE @numOfTotalKempesCompleted46 INT = 0
-DECLARE @numOfTotalEnrolled46 INT = 0
-
---01 = White, non-Hispanic
---02 = Black, non-Hispanic
---03 = Hispanic/Latina/Latino   
---04 = Asian              
---05 = Native American    
---06 = Multiracial        
---07 = Other 
-
-SET @numOfALLScreens46 = (SELECT count(*) FROM #tblMainCohort where Race = '01')
-SET @numOfTotalPositiveScreens46 = (SELECT count(*) FROM #tblMainCohort where Race = '01' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred46 = (SELECT count(*) FROM #tblMainCohort where Race = '01' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens46 = (SELECT count(*) FROM #tblMainCohort where Race = '01' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted46 = (SELECT count(*) FROM #tblMainCohort where Race = '01' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled46 = (SELECT count(*) FROM #tblMainCohort where Race = '01' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
-
-
-INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, '    White, non-Hispanic', 19 
-,CONVERT(VARCHAR,@numOfALLScreens46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalPositiveScreens46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalNegativeScreens46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalKempesCompleted46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalEnrolled46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
-)
-
----- calcualte Race/Ethnicity - Black, non-Hispanic
-DECLARE @numOfALLScreens47 INT = 0
-DECLARE @numOfTotalPositiveScreens47 INT = 0
-DECLARE @numOfTotalPositiveScreensNotReferred47 INT = 0
-DECLARE @numOfTotalNegativeScreens47 INT = 0
-DECLARE @numOfTotalKempesCompleted47 INT = 0
-DECLARE @numOfTotalEnrolled47 INT = 0
-
---02 = Black, non-Hispanic
---03 = Hispanic/Latina/Latino   
---04 = Asian              
---05 = Native American    
---06 = Multiracial        
---07 = Other 
-
-SET @numOfALLScreens47 = (SELECT count(*) FROM #tblMainCohort where Race = '02')
-SET @numOfTotalPositiveScreens47 = (SELECT count(*) FROM #tblMainCohort where Race = '02' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred47 = (SELECT count(*) FROM #tblMainCohort where Race = '02' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens47 = (SELECT count(*) FROM #tblMainCohort where Race = '02' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted47 = (SELECT count(*) FROM #tblMainCohort where Race = '02' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled47 = (SELECT count(*) FROM #tblMainCohort where Race = '02' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
-
-
-INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, '    Black, non-Hispanic', 20 
-,CONVERT(VARCHAR,@numOfALLScreens47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalPositiveScreens47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalNegativeScreens47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalKempesCompleted47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalEnrolled47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
-)
-
-
----- calcualte Race/Ethnicity - Hispanic/Latina/Latino   
-DECLARE @numOfALLScreens48 INT = 0
-DECLARE @numOfTotalPositiveScreens48 INT = 0
-DECLARE @numOfTotalPositiveScreensNotReferred48 INT = 0
-DECLARE @numOfTotalNegativeScreens48 INT = 0
-DECLARE @numOfTotalKempesCompleted48 INT = 0
-DECLARE @numOfTotalEnrolled48 INT = 0
-                                                                      
---04 = Asian              
---05 = Native American    
---06 = Multiracial        
---07 = Other 
-
-SET @numOfALLScreens48 = (SELECT count(*) FROM #tblMainCohort where Race = '03')
-SET @numOfTotalPositiveScreens48 = (SELECT count(*) FROM #tblMainCohort where Race = '03' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred48 = (SELECT count(*) FROM #tblMainCohort where Race = '03' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens48 = (SELECT count(*) FROM #tblMainCohort where Race = '03' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted48 = (SELECT count(*) FROM #tblMainCohort where Race = '03' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled48 = (SELECT count(*) FROM #tblMainCohort where Race = '03' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
-
-
-INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, '    Hispanic/Latina/Latino', 21 
-,CONVERT(VARCHAR,@numOfALLScreens48) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens48 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalPositiveScreens48) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens48 AS FLOAT) * 100/ NULLIF(@numOfALLScreens48,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred48) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred48 AS FLOAT) * 100/ NULLIF(@numOfALLScreens48,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalNegativeScreens48) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens48 AS FLOAT) * 100/ NULLIF(@numOfALLScreens48,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalKempesCompleted48) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted48 AS FLOAT) * 100/ NULLIF(@numOfALLScreens48,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalEnrolled48) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled48 AS FLOAT) * 100/ NULLIF(@numOfALLScreens48,0), 0), 0))  + '%)'
-)
-
-
----- calcualte Race/Ethnicity - Asian   
-DECLARE @numOfALLScreens49 INT = 0
-DECLARE @numOfTotalPositiveScreens49 INT = 0
-DECLARE @numOfTotalPositiveScreensNotReferred49 INT = 0
-DECLARE @numOfTotalNegativeScreens49 INT = 0
-DECLARE @numOfTotalKempesCompleted49 INT = 0
-DECLARE @numOfTotalEnrolled49 INT = 0                                                                     
-         
---05 = Native American    
---06 = Multiracial        
---07 = Other 
-
-SET @numOfALLScreens49 = (SELECT count(*) FROM #tblMainCohort where Race = '04')
-SET @numOfTotalPositiveScreens49 = (SELECT count(*) FROM #tblMainCohort where Race = '04' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred49 = (SELECT count(*) FROM #tblMainCohort where Race = '04' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens49 = (SELECT count(*) FROM #tblMainCohort where Race = '04' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted49 = (SELECT count(*) FROM #tblMainCohort where Race = '04' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled49 = (SELECT count(*) FROM #tblMainCohort where Race = '04' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
-
-
-INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, '    Asian', 22
-,CONVERT(VARCHAR,@numOfALLScreens49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalPositiveScreens49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalNegativeScreens49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalKempesCompleted49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
-,CONVERT(VARCHAR,@numOfTotalEnrolled49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
-)
-
----- calcualte Race/Ethnicity - Native American   
+---- Calculate Race - American Indian   
 DECLARE @numOfALLScreens50 INT = 0
 DECLARE @numOfTotalPositiveScreens50 INT = 0
 DECLARE @numOfTotalPositiveScreensNotReferred50 INT = 0
 DECLARE @numOfTotalNegativeScreens50 INT = 0
 DECLARE @numOfTotalKempesCompleted50 INT = 0
-DECLARE @numOfTotalEnrolled50 INT = 0                                                                     
-         
---05 = Native American    
---06 = Multiracial        
---07 = Other 
+DECLARE @numOfTotalEnrolled50 INT = 0
 
-SET @numOfALLScreens50 = (SELECT count(*) FROM #tblMainCohort where Race = '05')
-SET @numOfTotalPositiveScreens50 = (SELECT count(*) FROM #tblMainCohort where Race = '05' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred50 = (SELECT count(*) FROM #tblMainCohort where Race = '05' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens50 = (SELECT count(*) FROM #tblMainCohort where Race = '05' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted50 = (SELECT count(*) FROM #tblMainCohort where Race = '05' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled50 = (SELECT count(*) FROM #tblMainCohort where Race = '05' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+SET @numOfALLScreens50 = (SELECT count(*) FROM #tblMainCohort where Race_AmericanIndian = 1)
+SET @numOfTotalPositiveScreens50 = (SELECT count(*) FROM #tblMainCohort where Race_AmericanIndian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred50 = (SELECT count(*) FROM #tblMainCohort where Race_AmericanIndian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens50 = (SELECT count(*) FROM #tblMainCohort where Race_AmericanIndian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted50 = (SELECT count(*) FROM #tblMainCohort where Race_AmericanIndian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled50 = (SELECT count(*) FROM #tblMainCohort where Race_AmericanIndian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, '    Native American', 23 
+VALUES(5, '    American Indian or Alaskan Native', 19 
 ,CONVERT(VARCHAR,@numOfALLScreens50) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens50 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens50) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens50 AS FLOAT) * 100/ NULLIF(@numOfALLScreens50,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred50) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred50 AS FLOAT) * 100/ NULLIF(@numOfALLScreens50,0), 0), 0))  + '%)'
@@ -982,27 +888,76 @@ VALUES(5, '    Native American', 23
 ,CONVERT(VARCHAR,@numOfTotalEnrolled50) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled50 AS FLOAT) * 100/ NULLIF(@numOfALLScreens50,0), 0), 0))  + '%)'
 )
 
----- calcualte Race/Ethnicity - Multiracial  
+---- Calculate Race - Asian   
+DECLARE @numOfALLScreens49 INT = 0
+DECLARE @numOfTotalPositiveScreens49 INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferred49 INT = 0
+DECLARE @numOfTotalNegativeScreens49 INT = 0
+DECLARE @numOfTotalKempesCompleted49 INT = 0
+DECLARE @numOfTotalEnrolled49 INT = 0  
+
+SET @numOfALLScreens49 = (SELECT count(*) FROM #tblMainCohort where Race_Asian = 1)
+SET @numOfTotalPositiveScreens49 = (SELECT count(*) FROM #tblMainCohort where Race_Asian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred49 = (SELECT count(*) FROM #tblMainCohort where Race_Asian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens49 = (SELECT count(*) FROM #tblMainCohort where Race_Asian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted49 = (SELECT count(*) FROM #tblMainCohort where Race_Asian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled49 = (SELECT count(*) FROM #tblMainCohort where Race_Asian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(5, '    Asian', 20
+,CONVERT(VARCHAR,@numOfALLScreens49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreens49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreens49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompleted49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolled49) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled49 AS FLOAT) * 100/ NULLIF(@numOfALLScreens49,0), 0), 0))  + '%)'
+)
+
+---- Calculate Race - Black
+DECLARE @numOfALLScreens47 INT = 0
+DECLARE @numOfTotalPositiveScreens47 INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferred47 INT = 0
+DECLARE @numOfTotalNegativeScreens47 INT = 0
+DECLARE @numOfTotalKempesCompleted47 INT = 0
+DECLARE @numOfTotalEnrolled47 INT = 0
+
+SET @numOfALLScreens47 = (SELECT count(*) FROM #tblMainCohort where Race_Black = 1)
+SET @numOfTotalPositiveScreens47 = (SELECT count(*) FROM #tblMainCohort where Race_Black = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred47 = (SELECT count(*) FROM #tblMainCohort where Race_Black = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens47 = (SELECT count(*) FROM #tblMainCohort where Race_Black = 1 and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted47 = (SELECT count(*) FROM #tblMainCohort where Race_Black = 1 and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled47 = (SELECT count(*) FROM #tblMainCohort where Race_Black = 1 and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(5, '    Black or African American', 21
+,CONVERT(VARCHAR,@numOfALLScreens47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreens47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreens47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompleted47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolled47) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled47 AS FLOAT) * 100/ NULLIF(@numOfALLScreens47,0), 0), 0))  + '%)'
+)
+
+---- Calculate Race - Hawaiian  
 DECLARE @numOfALLScreens51 INT = 0
 DECLARE @numOfTotalPositiveScreens51 INT = 0
 DECLARE @numOfTotalPositiveScreensNotReferred51 INT = 0
 DECLARE @numOfTotalNegativeScreens51 INT = 0
 DECLARE @numOfTotalKempesCompleted51 INT = 0
-DECLARE @numOfTotalEnrolled51 INT = 0                                                                     
-         
---06 = Multiracial        
---07 = Other 
+DECLARE @numOfTotalEnrolled51 INT = 0 
 
-SET @numOfALLScreens51 = (SELECT count(*) FROM #tblMainCohort where Race = '06')
-SET @numOfTotalPositiveScreens51 = (SELECT count(*) FROM #tblMainCohort where Race = '06' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred51 = (SELECT count(*) FROM #tblMainCohort where Race = '06' and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens51 = (SELECT count(*) FROM #tblMainCohort where Race = '06' and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted51 = (SELECT count(*) FROM #tblMainCohort where Race = '06' and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled51 = (SELECT count(*) FROM #tblMainCohort where Race = '06' and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+SET @numOfALLScreens51 = (SELECT count(*) FROM #tblMainCohort where Race_Hawaiian = 1)
+SET @numOfTotalPositiveScreens51 = (SELECT count(*) FROM #tblMainCohort where Race_Hawaiian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred51 = (SELECT count(*) FROM #tblMainCohort where Race_Hawaiian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens51 = (SELECT count(*) FROM #tblMainCohort where Race_Hawaiian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted51 = (SELECT count(*) FROM #tblMainCohort where Race_Hawaiian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled51 = (SELECT count(*) FROM #tblMainCohort where Race_Hawaiian = 1 and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, '    Multiracial', 24 
+VALUES(5, '    Native Hawaiian or Other Pacific Islander', 22 
 ,CONVERT(VARCHAR,@numOfALLScreens51) + ' (' + CONVERT(VARCHAR, ROUND(COALESCE(CAST(@numOfALLScreens51 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens51) + ' (' + CONVERT(VARCHAR, ROUND(COALESCE(CAST(@numOfTotalPositiveScreens51 AS FLOAT) * 100/ NULLIF(@numOfALLScreens51,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred51) + ' (' + CONVERT(VARCHAR, ROUND(COALESCE(CAST(@numOfTotalPositiveScreensNotReferred51 AS FLOAT) * 100/ NULLIF(@numOfALLScreens51,0), 0), 0))  + '%)'
@@ -1012,27 +967,51 @@ VALUES(5, '    Multiracial', 24
 )
 
 
----- calcualte Race/Ethnicity - Other  
+---- Calculate Race - White
+DECLARE @numOfALLScreens46 INT = 0
+DECLARE @numOfTotalPositiveScreens46 INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferred46 INT = 0
+DECLARE @numOfTotalNegativeScreens46 INT = 0
+DECLARE @numOfTotalKempesCompleted46 INT = 0
+DECLARE @numOfTotalEnrolled46 INT = 0
+
+SET @numOfALLScreens46 = (SELECT count(*) FROM #tblMainCohort where Race_White = 1)
+SET @numOfTotalPositiveScreens46 = (SELECT count(*) FROM #tblMainCohort where Race_White = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred46 = (SELECT count(*) FROM #tblMainCohort where Race_White = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens46 = (SELECT count(*) FROM #tblMainCohort where Race_White = 1 and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted46 = (SELECT count(*) FROM #tblMainCohort where Race_White = 1 and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled46 = (SELECT count(*) FROM #tblMainCohort where Race_White = 1 and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(5, '    White', 23 
+,CONVERT(VARCHAR,@numOfALLScreens46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreens46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreens46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreens46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompleted46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompleted46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolled46) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolled46 AS FLOAT) * 100/ NULLIF(@numOfALLScreens46,0), 0), 0))  + '%)'
+)
+
+
+---- Calculate Race - Other  
 DECLARE @numOfALLScreens52 INT = 0
 DECLARE @numOfTotalPositiveScreens52 INT = 0
 DECLARE @numOfTotalPositiveScreensNotReferred52 INT = 0
 DECLARE @numOfTotalNegativeScreens52 INT = 0
 DECLARE @numOfTotalKempesCompleted52 INT = 0
-DECLARE @numOfTotalEnrolled52 INT = 0                                                                     
-         
-  
---07 = Other 
+DECLARE @numOfTotalEnrolled52 INT = 0
 
-SET @numOfALLScreens52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race = '07')
-SET @numOfTotalPositiveScreens52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race = '07' AND hvcasepk IN (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race = '07' AND hvcasepk IN (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race = '07' AND hvcasepk IN (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race = '07' AND hvcasepk IN (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race = '07' AND hvcasepk IN (SELECT hvcasepk FROM #tblEnrolled))
+SET @numOfALLScreens52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race_Other = 1)
+SET @numOfTotalPositiveScreens52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race_Other = 1 AND hvcasepk IN (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race_Other = 1 AND hvcasepk IN (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race_Other = 1 AND hvcasepk IN (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race_Other = 1 AND hvcasepk IN (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled52 = (SELECT COUNT(*) FROM #tblMainCohort WHERE Race_Other = 1 AND hvcasepk IN (SELECT hvcasepk FROM #tblEnrolled))
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, '    Other', 25 
+VALUES(5, '    Other', 24 
 ,CONVERT(VARCHAR,@numOfALLScreens52) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens52 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens52) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens52 AS FLOAT) * 100/ NULLIF(@numOfALLScreens52,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred52) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred52 AS FLOAT) * 100/ NULLIF(@numOfALLScreens52,0), 0), 0))  + '%)'
@@ -1042,7 +1021,7 @@ VALUES(5, '    Other', 25
 )
 
 -- Here is the rest of the pc1' race - they did not tell what is their race
----- calcualte Race/Ethnicity - Missing  
+---- Calculate Race - Missing  
 DECLARE @numOfALLScreens53 INT = 0
 DECLARE @numOfTotalPositiveScreens53 INT = 0
 DECLARE @numOfTotalPositiveScreensNotReferred53 INT = 0
@@ -1051,16 +1030,16 @@ DECLARE @numOfTotalKempesCompleted53 INT = 0
 DECLARE @numOfTotalEnrolled53 INT = 0  
 
 
-SET @numOfALLScreens53 = (SELECT count(*) FROM #tblMainCohort where Race is null)
-SET @numOfTotalPositiveScreens53 = (SELECT count(*) FROM #tblMainCohort where Race is null and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
-SET @numOfTotalPositiveScreensNotReferred53 = (SELECT count(*) FROM #tblMainCohort where Race is null and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
-SET @numOfTotalNegativeScreens53 = (SELECT count(*) FROM #tblMainCohort where Race is null and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
-SET @numOfTotalKempesCompleted53 = (SELECT count(*) FROM #tblMainCohort where Race is null and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
-SET @numOfTotalEnrolled53 = (SELECT count(*) FROM #tblMainCohort where Race is null and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+SET @numOfALLScreens53 = (SELECT count(*) FROM #tblMainCohort where dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1)
+SET @numOfTotalPositiveScreens53 = (SELECT count(*) FROM #tblMainCohort where dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferred53 = (SELECT count(*) FROM #tblMainCohort where dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreens53 = (SELECT count(*) FROM #tblMainCohort where dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompleted53 = (SELECT count(*) FROM #tblMainCohort where dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolled53 = (SELECT count(*) FROM #tblMainCohort where dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(5, '    Missing', 26 
+VALUES(5, '    Missing', 25 
 ,CONVERT(VARCHAR,@numOfALLScreens53) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens53 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens53) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens53 AS FLOAT) * 100/ NULLIF(@numOfALLScreens53,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred53) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred53 AS FLOAT) * 100/ NULLIF(@numOfALLScreens53,0), 0), 0))  + '%)'
@@ -1071,9 +1050,92 @@ VALUES(5, '    Missing', 26
 
 
 /*************************************************/
+-- add the title for Race in the row
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(6, 'Ethnicity', 26, '', '', '', '', '', '')  
+
+---- Calculate Ethnicity - Hispanic   
+DECLARE @numOfALLScreensHispanic INT = 0
+DECLARE @numOfTotalPositiveScreensHispanic INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferredHispanic INT = 0
+DECLARE @numOfTotalNegativeScreensHispanic INT = 0
+DECLARE @numOfTotalKempesCompletedHispanic INT = 0
+DECLARE @numOfTotalEnrolledHispanic INT = 0
+
+SET @numOfALLScreensHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 1)
+SET @numOfTotalPositiveScreensHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferredHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 1 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreensHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 1 and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompletedHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 1 and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolledHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 1 and hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(5, '    Hispanic', 27
+,CONVERT(VARCHAR,@numOfALLScreensHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreensHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanic,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferredHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferredHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanic,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreensHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreensHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanic,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompletedHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompletedHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanic,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolledHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolledHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanic,0), 0), 0))  + '%)'
+)
+
+---- Calculate Ethnicity - Non-Hispanic   
+DECLARE @numOfALLScreensNonHispanic INT = 0
+DECLARE @numOfTotalPositiveScreensNonHispanic INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferredNonHispanic INT = 0
+DECLARE @numOfTotalNegativeScreensNonHispanic INT = 0
+DECLARE @numOfTotalKempesCompletedNonHispanic INT = 0
+DECLARE @numOfTotalEnrolledNonHispanic INT = 0
+
+SET @numOfALLScreensNonHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 0)
+SET @numOfTotalPositiveScreensNonHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 0 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferredNonHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 0 and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreensNonHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 0 and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompletedNonHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 0 and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolledNonHispanic = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic = 0 AND hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(5, '    Non-Hispanic', 28
+,CONVERT(VARCHAR,@numOfALLScreensNonHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreensNonHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNonHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNonHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensNonHispanic,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferredNonHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferredNonHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensNonHispanic,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreensNonHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreensNonHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensNonHispanic,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompletedNonHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompletedNonHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensNonHispanic,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolledNonHispanic) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolledNonHispanic AS FLOAT) * 100/ NULLIF(@numOfALLScreensNonHispanic,0), 0), 0))  + '%)'
+)
+
+---- Calculate Ethnicity - Missing   
+DECLARE @numOfALLScreensHispanicMissing INT = 0
+DECLARE @numOfTotalPositiveScreensHispanicMissing INT = 0
+DECLARE @numOfTotalPositiveScreensNotReferredHispanicMissing INT = 0
+DECLARE @numOfTotalNegativeScreensHispanicMissing INT = 0
+DECLARE @numOfTotalKempesCompletedHispanicMissing INT = 0
+DECLARE @numOfTotalEnrolledHispanicMissing INT = 0
+
+SET @numOfALLScreensHispanicMissing = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic IS NULL)
+SET @numOfTotalPositiveScreensHispanicMissing = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic IS NULL and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreens))
+SET @numOfTotalPositiveScreensNotReferredHispanicMissing = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic IS NULL and hvcasepk in (SELECT hvcasepk FROM #tblPositiveScreensNotReferred))
+SET @numOfTotalNegativeScreensHispanicMissing = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic IS NULL and hvcasepk in (SELECT hvcasepk FROM #tblNegativeScreens))
+SET @numOfTotalKempesCompletedHispanicMissing = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic IS NULL and hvcasepk in (SELECT hvcasepk FROM #tblKempesCompleted))
+SET @numOfTotalEnrolledHispanicMissing = (SELECT count(*) FROM #tblMainCohort where Race_Hispanic IS NULL AND hvcasepk in (SELECT hvcasepk FROM #tblEnrolled))
+
+
+INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
+VALUES(5, '    Missing', 29
+,CONVERT(VARCHAR,@numOfALLScreensHispanicMissing) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreensHispanicMissing AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensHispanicMissing) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensHispanicMissing AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanicMissing,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferredHispanicMissing) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferredHispanicMissing AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanicMissing,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalNegativeScreensHispanicMissing) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalNegativeScreensHispanicMissing AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanicMissing,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalKempesCompletedHispanicMissing) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalKempesCompletedHispanicMissing AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanicMissing,0), 0), 0))  + '%)'
+,CONVERT(VARCHAR,@numOfTotalEnrolledHispanicMissing) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalEnrolledHispanicMissing AS FLOAT) * 100/ NULLIF(@numOfALLScreensHispanicMissing,0), 0), 0))  + '%)'
+)
+
+/*************************************************/
 -- add the title for Target Area in the row
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(6, 'Target Area', 27, '', '', '', '', '', '')  
+VALUES(6, 'Target Area', 30, '', '', '', '', '', '')  
 
 ---- calcualte Target Area - Yes  
 DECLARE @numOfALLScreens54 INT = 0
@@ -1093,7 +1155,7 @@ SET @numOfTotalEnrolled54 = (SELECT count(*) FROM #tblMainCohort where TargetAre
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(6, '    Yes', 28 
+VALUES(6, '    Yes', 31 
 ,CONVERT(VARCHAR,@numOfALLScreens54) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens54 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens54) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens54 AS FLOAT) * 100/ NULLIF(@numOfALLScreens54,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred54) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred54 AS FLOAT) * 100/ NULLIF(@numOfALLScreens54,0), 0), 0))  + '%)'
@@ -1120,7 +1182,7 @@ SET @numOfTotalEnrolled55 = (SELECT count(*) FROM #tblMainCohort where TargetAre
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(6, '    No', 29 
+VALUES(6, '    No', 32 
 ,CONVERT(VARCHAR,@numOfALLScreens55) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens55 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens55) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens55 AS FLOAT) * 100/ NULLIF(@numOfALLScreens55,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred55) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred55 AS FLOAT) * 100/ NULLIF(@numOfALLScreens55,0), 0), 0))  + '%)'
@@ -1147,7 +1209,7 @@ SET @numOfTotalEnrolled56 = (SELECT count(*) FROM #tblMainCohort where TargetAre
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(6, '    Unknown', 30 
+VALUES(6, '    Unknown', 33 
 ,CONVERT(VARCHAR,@numOfALLScreens56) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens56 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens56) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens56 AS FLOAT) * 100/ NULLIF(@numOfALLScreens56,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred56) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred56 AS FLOAT) * 100/ NULLIF(@numOfALLScreens56,0), 0), 0))  + '%)'
@@ -1176,7 +1238,7 @@ SET @numOfTotalEnrolled561 = (SELECT count(*) FROM #tblMainCohort where (TargetA
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(6, '    Missing', 31
+VALUES(6, '    Missing', 34
 ,CONVERT(VARCHAR,@numOfALLScreens561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens561,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred561) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred561 AS FLOAT) * 100/ NULLIF(@numOfALLScreens561,0), 0), 0))  + '%)'
@@ -1188,7 +1250,7 @@ VALUES(6, '    Missing', 31
 /*************************************************/
 -- add the title for Biological Parents in the row
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(7, 'OBP In Home', 32, '', '', '', '', '', '')  
+VALUES(7, 'OBP In Home', 35, '', '', '', '', '', '')  
 
 ---- calcualte Biological Parents- Yes  
 DECLARE @numOfALLScreens57 INT = 0
@@ -1208,7 +1270,7 @@ SET @numOfTotalEnrolled57 = (SELECT count(*) FROM #tblMainCohort where OBPInHome
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(7, '    Yes', 33
+VALUES(7, '    Yes', 36
 ,CONVERT(VARCHAR,@numOfALLScreens57) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens57 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens57) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens57 AS FLOAT) * 100/ NULLIF(@numOfALLScreens57,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred57) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred57 AS FLOAT) * 100/ NULLIF(@numOfALLScreens57,0), 0), 0))  + '%)'
@@ -1235,7 +1297,7 @@ SET @numOfTotalEnrolled58 = (SELECT count(*) FROM #tblMainCohort where OBPInHome
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(7, '    No', 34 
+VALUES(7, '    No', 37 
 ,CONVERT(VARCHAR,@numOfALLScreens58) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens58 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens58) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens58 AS FLOAT) * 100/ NULLIF(@numOfALLScreens58,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred58) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred58 AS FLOAT) * 100/ NULLIF(@numOfALLScreens58,0), 0), 0))  + '%)'
@@ -1264,7 +1326,7 @@ SET @numOfTotalEnrolled581 = (SELECT count(*) FROM #tblMainCohort where (OBPInHo
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(7, '    Missing', 35
+VALUES(7, '    Missing', 38
 ,CONVERT(VARCHAR,@numOfALLScreens581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens581,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred581) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred581 AS FLOAT) * 100/ NULLIF(@numOfALLScreens581,0), 0), 0))  + '%)'
@@ -1277,7 +1339,7 @@ VALUES(7, '    Missing', 35
 /*************************************************/
 -- add the title for Prenatal Care in the row
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(8, 'Receiving Prenatal Care', 36, '', '', '', '', '', '')  
+VALUES(8, 'Receiving Prenatal Care', 39, '', '', '', '', '', '')  
 
 ---- calcualte Prenatal Care- Yes  
 DECLARE @numOfALLScreens59 INT = 0
@@ -1297,7 +1359,7 @@ SET @numOfTotalEnrolled59 = (SELECT count(*) FROM #tblMainCohort where Receiving
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(8, '    Yes', 37 
+VALUES(8, '    Yes', 40
 ,CONVERT(VARCHAR,@numOfALLScreens59) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens59 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens59) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens59 AS FLOAT) * 100/ NULLIF(@numOfALLScreens59,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred59) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred59 AS FLOAT) * 100/ NULLIF(@numOfALLScreens59,0), 0), 0))  + '%)'
@@ -1325,7 +1387,7 @@ SET @numOfTotalEnrolled60 = (SELECT count(*) FROM #tblMainCohort where Receiving
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(8, '    No', 38
+VALUES(8, '    No', 41
 ,CONVERT(VARCHAR,@numOfALLScreens60) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens60 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens60) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens60 AS FLOAT) * 100/ NULLIF(@numOfALLScreens60,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred60) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred60 AS FLOAT) * 100/ NULLIF(@numOfALLScreens60,0), 0), 0))  + '%)'
@@ -1353,7 +1415,7 @@ SET @numOfTotalEnrolled61 = (SELECT count(*) FROM #tblMainCohort where Receiving
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(8, '    Unknown', 39 
+VALUES(8, '    Unknown', 42 
 ,CONVERT(VARCHAR,@numOfALLScreens61) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens61 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens61) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens61 AS FLOAT) * 100/ NULLIF(@numOfALLScreens61,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred61) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred61 AS FLOAT) * 100/ NULLIF(@numOfALLScreens61,0), 0), 0))  + '%)'
@@ -1382,7 +1444,7 @@ SET @numOfTotalEnrolled611 = (SELECT count(*) FROM #tblMainCohort where (Receivi
 
 
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(8, '    Missing', 40
+VALUES(8, '    Missing', 43
 ,CONVERT(VARCHAR,@numOfALLScreens611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfALLScreens611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreens611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreens611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens611,0), 0), 0))  + '%)'
 ,CONVERT(VARCHAR,@numOfTotalPositiveScreensNotReferred611) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(@numOfTotalPositiveScreensNotReferred611 AS FLOAT) * 100/ NULLIF(@numOfALLScreens611,0), 0), 0))  + '%)'
@@ -1397,7 +1459,7 @@ VALUES(8, '    Missing', 40
 -- Note how we acheived the dynamic nature(# of ReferralSourceType is not known) of the resultset ... khalsa
 -- add the title for Type of Referral in the row
 INSERT INTO #tblScreenAnalysisSummary([Id],[Title],[SubGroupId],[TotalScreens],[PositiveScreens],[PositiveScreensNotReferred],[NegativeScreens],[KempesCompleted],[Enrolled])
-VALUES(9, 'Type of Referral', 41, '', '', '', '', '', '')  
+VALUES(9, 'Type of Referral', 44, '', '', '', '', '', '')  
 
 
 ;
@@ -1460,7 +1522,7 @@ SELECT
 AppCode
 ,9 as reportIndex
 ,ReferralSourceName
-,ROW_NUMBER() OVER(ORDER BY ReferralSourceName) + 41 AS RowNumber  -- note that there are 37 rows before this one
+,ROW_NUMBER() OVER(ORDER BY ReferralSourceName) + 44 AS RowNumber  -- note that there are 37 rows before this one
 
 ,CONVERT(VARCHAR,countTotal) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(countTotal AS FLOAT) * 100/ NULLIF(@numOfALLScreens,0), 0), 0))  + '%)' as Total
 ,CONVERT(VARCHAR,TotalPositiveScreens) + ' (' + CONVERT(VARCHAR, round(COALESCE(cast(TotalPositiveScreens AS FLOAT) * 100/ NULLIF(countTotal,0), 0), 0))  + '%)' as TotalPositiveScreens
@@ -1677,5 +1739,4 @@ drop table #tblPositiveScreensNotReferred
 drop table #tblNegativeScreens
 drop table #tblKempesCompleted
 drop table #tblEnrolled
-
 GO
