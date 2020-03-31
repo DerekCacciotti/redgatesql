@@ -74,7 +74,13 @@ begin
 					, babydate datetime
 					, testdate datetime
 					, PCDOB datetime
-					, Race char(2)
+					, Race_AmericanIndian bit
+					, Race_Asian bit
+					, Race_Black bit
+					, Race_Hawaiian bit
+					, Race_White bit
+					, Race_Hispanic bit
+					, Race_Other bit
 					, MaritalStatus char(2)
 					, HighestGrade char(2)
 					, IsCurrentlyEmployed char(1)
@@ -117,7 +123,13 @@ begin
 					, babydate datetime
 					, testdate datetime
 					, PCDOB datetime
-					, Race char(2)
+					, Race_AmericanIndian bit
+					, Race_Asian bit
+					, Race_Black bit
+					, Race_Hawaiian bit
+					, Race_White bit
+					, Race_Hispanic bit
+					, Race_Other bit
 					, MaritalStatus char(2)
 					, HighestGrade char(2)
 					, IsCurrentlyEmployed char(1)
@@ -184,7 +196,13 @@ begin
 		, babydate
 		, testdate
 		, PCDOB
-		, Race
+		, Race_AmericanIndian
+		, Race_Asian
+		, Race_Black
+		, Race_Hawaiian
+		, Race_White
+		, Race_Hispanic
+		, Race_Other
 		, MaritalStatus
 		, HighestGrade
 		, IsCurrentlyEmployed
@@ -217,7 +235,13 @@ begin
 				, case when h.IntakeDate is not null then h.IntakeDate
 					else cp.DischargeDate end as testdate
 				, P.PCDOB
-				, P.Race
+				, Race_AmericanIndian
+				, Race_Asian
+				, Race_Black
+				, Race_Hawaiian
+				, Race_White
+				, Race_Hispanic
+				, Race_Other
 				, ca.MaritalStatus
 				, ca.HighestGrade
 				, ca.IsCurrentlyEmployed
@@ -300,7 +324,13 @@ begin
 		, a.babydate
 		, a.testdate
 		, a.PCDOB
-		, a.Race
+		, Race_AmericanIndian
+		, Race_Asian
+		, Race_Black
+		, Race_Hawaiian
+		, Race_White
+		, Race_Hispanic
+		, Race_Other
 		, a.MaritalStatus
 		, a.HighestGrade
 		, a.IsCurrentlyEmployed
@@ -925,38 +955,38 @@ begin
 		select	sum(case when a.Status = '1' then 1 else 0 end) as totalG1
 			, sum(case when a.Status = '2' then 1 else 0 end) as totalG2
 			, sum(case when a.Status = '3' then 1 else 0 end) as totalG3
-			, sum(case when Race = '01' then 1 else 0 end) as race01
-			, sum(case when a.Status = '1' and Race = '01' then 1 else 0 end) as race01G1
-			, sum(case when a.Status = '2' and Race = '01' then 1 else 0 end) as race01G2
-			, sum(case when a.Status = '3' and Race = '01' then 1 else 0 end) as race01G3
-			, sum(case when Race = '02' then 1 else 0 end) as race02
-			, sum(case when a.Status = '1' and Race = '02' then 1 else 0 end) as race02G1
-			, sum(case when a.Status = '2' and Race = '02' then 1 else 0 end) as race02G2
-			, sum(case when a.Status = '3' and Race = '02' then 1 else 0 end) as race02G3
-			, sum(case when Race = '03' then 1 else 0 end) as race03
-			, sum(case when a.Status = '1' and Race = '03' then 1 else 0 end) as race03G1
-			, sum(case when a.Status = '2' and Race = '03' then 1 else 0 end) as race03G2
-			, sum(case when a.Status = '3' and Race = '03' then 1 else 0 end) as race03G3
-			, sum(case when Race = '04' then 1 else 0 end) as race04
-			, sum(case when a.Status = '1' and Race = '04' then 1 else 0 end) as race04G1
-			, sum(case when a.Status = '2' and Race = '04' then 1 else 0 end) as race04G2
-			, sum(case when a.Status = '3' and Race = '04' then 1 else 0 end) as race04G3
-			, sum(case when Race = '05' then 1 else 0 end) as race05
-			, sum(case when a.Status = '1' and Race = '05' then 1 else 0 end) as race05G1
-			, sum(case when a.Status = '2' and Race = '05' then 1 else 0 end) as race05G2
-			, sum(case when a.Status = '3' and Race = '05' then 1 else 0 end) as race05G3
-			, sum(case when Race = '06' then 1 else 0 end) as race06
-			, sum(case when a.Status = '1' and Race = '06' then 1 else 0 end) as race06G1
-			, sum(case when a.Status = '2' and Race = '06' then 1 else 0 end) as race06G2
-			, sum(case when a.Status = '3' and Race = '06' then 1 else 0 end) as race06G3
-			, sum(case when Race = '07' then 1 else 0 end) as race07
-			, sum(case when a.Status = '1' and Race = '07' then 1 else 0 end) as race07G1
-			, sum(case when a.Status = '2' and Race = '07' then 1 else 0 end) as race07G2
-			, sum(case when a.Status = '3' and Race = '07' then 1 else 0 end) as race07G3
-			, sum(case when (Race is null or Race = null) then 1 else 0 end) as race08
-			, sum(case when a.Status = '1' and (Race is null or Race = null) then 1 else 0 end) as race08G1
-			, sum(case when a.Status = '2' and (Race is null or Race = null) then 1 else 0 end) as race08G2
-			, sum(case when a.Status = '3' and (Race is null or Race = null) then 1 else 0 end) as race08G3
+			, sum(case when Race_White = 1 then 1 else 0 end) as race01
+			, sum(case when a.Status = '1' and Race_White = 1 then 1 else 0 end) as race01G1
+			, sum(case when a.Status = '2' and Race_White = 1 then 1 else 0 end) as race01G2
+			, sum(case when a.Status = '3' and Race_White = 1 then 1 else 0 end) as race01G3
+			, sum(case when Race_Black = 1 then 1 else 0 end) as race02
+			, sum(case when a.Status = '1' and Race_Black = 1 then 1 else 0 end) as race02G1
+			, sum(case when a.Status = '2' and Race_Black = 1 then 1 else 0 end) as race02G2
+			, sum(case when a.Status = '3' and Race_Black = 1 then 1 else 0 end) as race02G3
+			, sum(case when Race_Hispanic = 1 then 1 else 0 end) as race03
+			, sum(case when a.Status = '1' and Race_Hispanic = 1 then 1 else 0 end) as race03G1
+			, sum(case when a.Status = '2' and Race_Hispanic = 1 then 1 else 0 end) as race03G2
+			, sum(case when a.Status = '3' and Race_Hispanic = 1 then 1 else 0 end) as race03G3
+			, sum(case when Race_Asian = 1 then 1 else 0 end) as race04
+			, sum(case when a.Status = '1' and Race_Asian = 1 then 1 else 0 end) as race04G1
+			, sum(case when a.Status = '2' and Race_Asian = 1 then 1 else 0 end) as race04G2
+			, sum(case when a.Status = '3' and Race_Asian = 1 then 1 else 0 end) as race04G3
+			, sum(case when Race_AmericanIndian = 1 then 1 else 0 end) as race05
+			, sum(case when a.Status = '1' and Race_AmericanIndian = 1 then 1 else 0 end) as race05G1
+			, sum(case when a.Status = '2' and Race_AmericanIndian = 1 then 1 else 0 end) as race05G2
+			, sum(case when a.Status = '3' and Race_AmericanIndian = 1 then 1 else 0 end) as race05G3
+			, sum(case when Race_Hawaiian = 1 then 1 else 0 end) as race06
+			, sum(case when a.Status = '1' and Race_Hawaiian = 1 then 1 else 0 end) as race06G1
+			, sum(case when a.Status = '2' and Race_Hawaiian = 1 then 1 else 0 end) as race06G2
+			, sum(case when a.Status = '3' and Race_Hawaiian = 1 then 1 else 0 end) as race06G3
+			, sum(case when Race_Other = 1 then 1 else 0 end) as race07
+			, sum(case when a.Status = '1' and Race_Other = 1  then 1 else 0 end) as race07G1
+			, sum(case when a.Status = '2' and Race_Other = 1  then 1 else 0 end) as race07G2
+			, sum(case when a.Status = '3' and Race_Other = 1  then 1 else 0 end) as race07G3
+			, sum(case when dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08
+			, sum(case when a.Status = '1' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G1
+			, sum(case when a.Status = '2' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G2
+			, sum(case when a.Status = '3' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G3
 		from	#cteMain1 as a
 	)
 	,	race2
@@ -968,7 +998,7 @@ begin
 				, null as Refused
 				, '1' as GroupID
 		union all
-		select	'  White, non-Hispanic' as [title]
+		select	'  White' as [title]
 			, race01 as TotalN 
 			, race01G1 as AcceptedFirstVisitEnrolled
 			-- , round(coalesce(cast(race01G1 as float)* 100 / nullif(race01, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
@@ -979,7 +1009,7 @@ begin
 			, '1' as GroupID
 		from	race1
 		union all
-		select	'  Black, non-Hispanic' as [title]
+		select	'  Black' as [title]
 			, race02 as TotalN 
 			, race02G1 as AcceptedFirstVisitEnrolled
 			-- , round(coalesce(cast(race02G1 as float)* 100 / nullif(race02, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
@@ -1023,7 +1053,7 @@ begin
 			, '1' as GroupID
 		from	race1
 		union all
-		select	'  Multiracial' as [title]
+		select	'  Hawaiian' as [title]
 			, race06 as TotalN 
 			, race06G1 as AcceptedFirstVisitEnrolled
 			-- , round(coalesce(cast(race06G1 as float)* 100 / nullif(race06, 0), 0), 0) as AcceptedFirstVisitEnrolledPercent
