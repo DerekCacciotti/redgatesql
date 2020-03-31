@@ -11,6 +11,9 @@ GO
 -- Edited by Benjamin Simmons
 -- Edit Date: 8/17/17
 -- Edit Reason: Optimized report so that it works better on Azure
+-- Edit date: <03/31/2020>
+-- Editor: <Bill O'Brien>
+-- Edit Reason: Update to use new Race fields
 -- =============================================
 CREATE procedure [dbo].[rspProgramDemographics]
     --@programfk2 int = null,
@@ -67,7 +70,13 @@ as
 						 
 	declare @x table (
 		HVCasePK int
-		, [Race] char(2)
+		, Race_AmericanIndian BIT
+		, Race_Asian BIT
+		, Race_Black BIT
+		, Race_Hawaiian BIT
+		, Race_Hispanic BIT
+		, Race_Other BIT
+		, Race_White BIT
 		, [Age] int
 		, [yrEnrolled] int
 		, [Edu] char(2)
@@ -91,7 +100,13 @@ as
 	
 	insert into @x
 	select distinct a.HVCasePK
-					   ,c.Race [Race]
+					   ,c.Race_AmericanIndian
+					   ,c.Race_Asian
+					   ,c.Race_Black
+					   ,c.Race_Hawaiian
+					   ,c.Race_Hispanic
+					   ,c.Race_Other
+					   ,c.Race_White
 					   ,cast(datediff(dd,c.PCDOB,a.IntakeDate)/365.25 as int) [Age]
 					   ,cast(datediff(dd,a.IntakeDate,case
 							when b.DischargeDate is not null and b.DischargeDate <= @enddt2 then
@@ -250,13 +265,13 @@ as
 	)
 	insert into @y
 	select count(*) [n]
-		,sum(case when x.Race = '01' then 1 else 0 end) 
-		,sum(case when x.Race = '02' then 1 else 0 end) 
-		,sum(case when x.Race = '03' then 1 else 0 end) 
-		,sum(case when x.Race = '04' then 1 else 0 end) 
-		,sum(case when x.Race = '05' then 1 else 0 end) 
-		,sum(case when x.Race = '06' then 1 else 0 end) 
-		,sum(case when x.Race = '07' then 1 else 0 end)				 
+		,sum(case when x.Race_White = 1 then 1 else 0 end) 
+		,sum(case when x.Race_Black = 1 then 1 else 0 end) 
+		,sum(case when x.Race_Hispanic = 1 then 1 else 0 end) 
+		,sum(case when x.Race_Asian = 1 then 1 else 0 end) 
+		,sum(case when x.Race_AmericanIndian = 1 then 1 else 0 end) 
+		,sum(case when dbo.fnIsMultiRace(x.Race_AmericanIndian, x.Race_Asian, x.Race_Black, x.Race_Hawaiian, x.Race_White, x.Race_Other) = 1 then 1 else 0 end) 
+		,sum(case when x.Race_Other = 1 then 1 else 0 end)				 
 		,sum(case when x.Age < 18 then 1 else 0 end) 
 		,sum(case when x.Age between 18 and 19 then 1 else 0 end) 
 		,sum(case when x.Age between 20 and 29 then 1 else 0 end) 
@@ -348,5 +363,4 @@ as
 
 		from
 			z
-			
 GO
