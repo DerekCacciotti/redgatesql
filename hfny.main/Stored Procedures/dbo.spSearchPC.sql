@@ -2,10 +2,9 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- exec spSearchPC	'jennifer', 'mott', '19760716', null, null, null, null, 11
 
-CREATE procedure [dbo].[spSearchPC]
+CREATE PROC [dbo].[spSearchPC]
 (
     @PCFirstName      varchar(20)    = null,
     @PCLastName       varchar(30)    = null,
@@ -13,7 +12,6 @@ CREATE procedure [dbo].[spSearchPC]
     @PCPhone          varchar(12)    = null,
     @PCEmergencyPhone varchar(12)    = null,
     @Ethnicity        varchar(30)    = null,
-    @Race             varchar(2)     = null,
     @ProgramFK        int            = null
 )
 
@@ -71,8 +69,7 @@ as
 				   ,pc.pcdob
 				   ,pc.pcphone
 				   ,pc.PCEmergencyPhone
-				   ,pc.race
-				   ,pc.racespecify
+				   ,dbo.fnGetRaceText(pc.Race_AmericanIndian, pc.Race_Asian, pc.Race_Black, pc.Race_Hawaiian, pc.Race_White, pc.Race_Other, pc.RaceSpecify) Race
 				   ,pc.Gender
 		from PC as pc
 		where
@@ -155,8 +152,7 @@ as
 		 ,a.pcdob
 		 ,a.pcphone
 		 ,a.PCEmergencyPhone
-		 ,case when AppCodeText = 'Other' then racespecify else AppCodeText end as race
-		 ,a.racespecify
+		 ,a.Race
 		 ,a.Gender
 		 ,status =
 		  case when b.PCPK is not null then b.LevelName else '' end
@@ -169,7 +165,6 @@ as
 			left outer join zzzPC1 as e on e.pcpk = a.pcpk
 			left outer join zzzPC2 as c on c.pcpk = a.pcpk
 			left outer join zzzOBP as d on d.pcpk = a.pcpk
-			left join codeApp on appcode = a.race and appcodegroup = 'Race'
 	)
 
 	select top 100 pcpk	
@@ -180,8 +175,7 @@ as
 					, pcdob
 					, pcphone
 					, PCEmergencyPhone
-					, race
-					, racespecify
+					, Race
 					, gender
 					, status
 					, roles
