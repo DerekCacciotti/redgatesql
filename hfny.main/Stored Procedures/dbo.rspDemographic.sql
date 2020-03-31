@@ -38,7 +38,13 @@ BEGIN
 		PCDOB DATETIME,
 		PCZip VARCHAR(200),
 		Gender CHAR(2),
-		Race CHAR(2),
+		Race_AmericanIndian bit,
+		Race_Asian bit,
+		Race_Black bit,
+		Race_Hawaiian bit,
+		Race_White bit,
+		Race_Hispanic bit,
+		Race_Other bit,
 		RaceSpecify VARCHAR(500),
 		Ethnicity VARCHAR(500),
 		DischargeDate DATETIME,
@@ -59,7 +65,13 @@ BEGIN
 	    PCDOB,
 		PCZip,
 	    Gender,
-	    Race,
+	    Race_AmericanIndian,
+		Race_Asian,
+		Race_Black,
+		Race_Hawaiian,
+		Race_White,
+		Race_Hispanic,
+		Race_Other,
 	    RaceSpecify,
 	    Ethnicity,
 	    DischargeDate,
@@ -79,7 +91,13 @@ BEGIN
 		p.PCDOB,
 		p.PCZip,
 		p.Gender,
-		p.Race,
+		p.Race_AmericanIndian,
+		p.Race_Asian,
+		p.Race_Black,
+		p.Race_Hawaiian,
+		p.Race_White,
+		p.Race_Hispanic,
+		p.Race_Other,
 		p.RaceSpecify,
 		p.Ethnicity,
 		cp.DischargeDate,
@@ -413,9 +431,9 @@ BEGIN
            LEFT(CONVERT(VARCHAR, c.PCDOB, 120), 10) AS PCDOB,
 		   PCZip,
 		   gender.AppCodeText AS Gender,
-		   race.AppCodeText AS Race,
+		   dbo.fnGetRaceText(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_Other, Race_White, RaceSpecify) AS Race,
            c.RaceSpecify,
-           c.Ethnicity,
+           Case When Race_Hispanic = 1 Then 'Hispanic ' Else '' End + c.Ethnicity As Ethnicity,
 		   edu.AppCodeText AS HighestGrade,
            CASE WHEN ice.IsCurrentlyEmployed = 1 THEN 'Yes' 
 				WHEN ice.IsCurrentlyEmployed = 0 THEN 'No' 
@@ -548,7 +566,6 @@ BEGIN
 		   END As SubstanceAbuse
     FROM @Cohort c
 	LEFT JOIN dbo.codeApp gender ON gender.AppCode = c.Gender AND TRIM(gender.AppCodeGroup) = 'Gender'
-	LEFT JOIN dbo.codeApp race ON race.AppCode = c.Race AND race.AppCodeGroup = 'Race'
 	LEFT JOIN @EducationalEnrollment ee ON c.HVCasePK = ee.HVCaseFK
 	LEFT JOIN @HighestGrade hg ON hg.HVCaseFK = c.HVCasePK
 	LEFT JOIN dbo.codeApp edu ON edu.AppCode = hg.HighestGrade AND TRIM(edu.AppCodeGroup) = 'Education'
