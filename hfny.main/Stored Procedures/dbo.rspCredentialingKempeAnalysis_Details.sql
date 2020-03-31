@@ -67,7 +67,6 @@ as
 							else cp.DischargeDate
 					   end as testdate ,
 					   P.PCDOB ,
-					   P.Race ,
 					   ca.MaritalStatus ,
 					   ca.HighestGrade ,
 					   ca.IsCurrentlyEmployed ,
