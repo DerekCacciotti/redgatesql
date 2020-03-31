@@ -6,6 +6,9 @@ GO
 -- Author:		Bill O'Brien
 -- Create date: 12/4/19
 -- Description:	Complete code for Demographic Report
+-- Edit date: <03/31/2020>
+-- Editor: <Bill O'Brien>
+-- Edit Reason: Update to use new Race fields
 -- =============================================
 CREATE PROC [dbo].[rspDemographic]
 	@StartDate DATETIME,

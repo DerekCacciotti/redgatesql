@@ -12,6 +12,9 @@ GO
 -- rspCredentialingKempeAnalysis_Summary 2, '01/01/2011', '12/31/2011'
 -- rspCredentialingKempeAnalysis_Summary 1, '04/01/2012', '03/31/2013'
 -- rspCredentialingKempeAnalysis_Summary 6, '05/01/2017', '04/30/2018'
+-- Edit date: <03/31/2020>
+-- Editor: <Bill O'Brien>
+-- Edit Reason: Update to use new Race fields
 -- =============================================
 CREATE procedure [dbo].[rspCredentialingKempeAnalysis_Summary] 
 (@programfk varchar(max) = null
