@@ -11,6 +11,8 @@ CREATE procedure [dbo].[pr_UpdateRace]
 
 as
 
+
+--Update the PC1 look to MIECHV values in Intake first then resort to Race value in PC table
 update PC
 --pattern repeats for each field
 --if all miechv race fields are 0 or this particular miechv race field is null, then check PC.Race
@@ -64,8 +66,8 @@ set Race_AmericanIndian = Case When (i.MIECHV_Hispanic = 0 and i.MIECHV_Race_Ame
 	Race_Other = Case When Race = '06' Or Race = '07' Then 1 Else 0 End
 
 from PC
-inner join HVCase hc on hc.PC1FK = pc.PCPK
-inner join Intake i on  i.HVCaseFK = hc.HVCasePK
+left join HVCase hc on hc.PC1FK = pc.PCPK
+left join Intake i on  i.HVCaseFK = hc.HVCasePK
 
 
 update TCID
@@ -115,4 +117,19 @@ set Race_AmericanIndian = Case When (MIECHV_Hispanic = 0 and MIECHV_Race_America
 					End,
 
 	Race_Other = Case When Race = '06' Or Race = '07' Then 1 Else 0 End
+
+----Update all other PCs by excluding those that appear in HVCase.PC1FK
+--update PC
+----pattern repeats for each field
+----if all miechv race fields are 0 or this particular miechv race field is null, then check PC.Race
+----otherwise copy the corresponding miechv race field value
+--set Race_AmericanIndian = Case When Race = '05' Then 1 Else 0 End,
+--    Race_Asian = Case When Race = '04' Then 1 Else 0 End,
+--	Race_Black = Case When Race = '02' Then 1 Else 0 End,
+--	Race_Hispanic = Case When Race = '03' Then 1 Else 0 End,
+--	Race_White = Case When Race = '01' Then 1 Else 0 End,
+--	Race_Other = Case When Race = '06' Or Race = '07' Then 1 Else 0 End
+
+--from PC
+--where PC.PCPK not in (select distinct PC1FK From HVCase)
 GO
