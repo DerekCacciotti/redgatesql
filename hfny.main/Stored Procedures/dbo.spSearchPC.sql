@@ -2,10 +2,9 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-
 -- exec spSearchPC	'jennifer', 'mott', '19760716', null, null, null, null, 11
 
-CREATE procedure [dbo].[spSearchPC]
+CREATE PROC [dbo].[spSearchPC]
 (
     @PCFirstName      varchar(20)    = null,
     @PCLastName       varchar(30)    = null,
@@ -13,7 +12,6 @@ CREATE procedure [dbo].[spSearchPC]
     @PCPhone          varchar(12)    = null,
     @PCEmergencyPhone varchar(12)    = null,
     @Ethnicity        varchar(30)    = null,
-    @Race             varchar(2)     = null,
     @ProgramFK        int            = null
 )
 
