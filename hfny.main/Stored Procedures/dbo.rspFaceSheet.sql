@@ -6,6 +6,7 @@ GO
 -- Author:		<Jay Robohn> <dar chen>
 -- Create date: <Jan 25, 2012>
 -- Description:	<Face Sheet report>
+-- Edit: 03-03-20 WO Remove SSN
 -- =============================================
 CREATE procedure [dbo].[rspFaceSheet]
 (
@@ -79,12 +80,6 @@ begin
 			  ,rtrim(PC1.PCCity)+', '+isnull(PC1.PCState,'NY')+'  '+rtrim(PC1.PCZip) as PC1CSZ
 			  ,PC1.PCPhone
 			  ,PC1.PCCellPhone
-			  ,case
-				   when PC1.SSNo is null then
-					   'Not on file'
-				   else
-					   'On file'
-			   end as SocialSecurityNumberOnFile
 			  ,PC1.PCDOB
 			  ,floor(datediff(day,PC1.PCDOB,getdate())/365.25) as CurrentAge
 			  ,floor(datediff(day,PC1.PCDOB,IntakeDate)/365.25) as AgeAtIntake
@@ -339,7 +334,6 @@ select Main.HVCasePK
 	  ,Main.PC1CSZ
 	  ,Main.PCPhone
 	  ,Main.PCCellPhone
-	  ,Main.SocialSecurityNumberOnFile
 	  ,Main.PCDOB
 	  ,Main.CurrentAge
 	  ,Main.AgeAtIntake

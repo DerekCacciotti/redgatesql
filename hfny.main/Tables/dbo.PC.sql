@@ -34,7 +34,6 @@ CREATE TABLE [dbo].[PC]
 [PCZip] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [Race] [char] (2) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [RaceSpecify] [varchar] (500) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-[SSNo] [varchar] (200) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [TimesMoved] [int] NULL,
 [YearsInUSA] [numeric] (4, 0) NULL,
 [PrefersTextMessages] [bit] NULL,
