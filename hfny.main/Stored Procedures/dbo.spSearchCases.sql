@@ -36,13 +36,13 @@ TCDOB DATETIME,
 WorkerFK INT,
 WorkerName VARCHAR(max),
 IntakeDate datetime,
-Dischargedate DATETIME, 
-CaseProgressBreif VARCHAR(max),
+DischargeDate DATETIME, 
+CaseProgressBrief VARCHAR(max),
 LevelPK INT,
 LevelName VARCHAR(max),
 HasOBP BIT,
 HasPC2 BIT,
-HasDischarageDate BIT,
+HasDischargeDate BIT,
 HasIntakeDate BIT)
 
 
@@ -60,12 +60,12 @@ INSERT INTO @SearchResults
     WorkerName,
     IntakeDate,
     Dischargedate,
-	CaseProgressBreif,
+	CaseProgressBrief,
     LevelPK,
     LevelName,
     HasOBP,
     HasPC2,
-    HasDischarageDate,
+    HasDischargeDate,
     HasIntakeDate
 )
 SELECT hc.HVCasePK,cp.PC1ID,p.PCPK, CONCAT(LTRIM(RTRIM(p.PCFirstName)), ' ', LTRIM(RTRIM(p.PCLastName))),p.PCOldName,p.PCOldName2, p.PCDOB, 
@@ -106,7 +106,9 @@ CASE WHEN hc.IntakeDate IS NOT NULL THEN 1 ELSE 0 END
 							and cp.ProgramFK = isnull(@ProgramFK, cp.ProgramFK)
 
 
-SELECT TOP 100 * FROM @SearchResults sr ORDER BY sr.HasDischarageDate ASC, sr.PC1ID
+SELECT TOP 100 * 
+FROM @SearchResults sr 
+ORDER BY sr.HasDischargeDate ASC, DischargeDate DESC, sr.PC1ID
 
 --as
 --	set nocount on;
