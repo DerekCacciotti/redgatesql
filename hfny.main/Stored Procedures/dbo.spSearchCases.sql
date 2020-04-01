@@ -42,8 +42,8 @@ LevelPK INT,
 LevelName VARCHAR(max),
 HasOBP BIT,
 HasPC2 BIT,
-HasDischargeDate BIT,
-HasIntakeDate BIT)
+HasDischargeDate CHAR(1),
+HasIntakeDate CHAR(1))
 
 
 INSERT INTO @SearchResults
@@ -74,8 +74,8 @@ w.WorkerPK, CONCAT(LTRIM(RTRIM(w.FirstName)), ' ', LTRIM(RTRIM(w.LastName))),
 hc.IntakeDate, cp.DischargeDate,  CAST(hc.CaseProgress AS VARCHAR(MAX)) + '-' + ccp.CaseProgressBrief, 
 cl.codeLevelPK, cl.LevelName, CASE WHEN hc.OBPFK IS NOT NULL THEN 1 ELSE 0 END,
 CASE WHEN hc.PC2FK IS NOT NULL THEN 1 ELSE 0 END,
-CASE WHEN cp.DischargeDate IS NOT NULL THEN 1 ELSE 0 END,
-CASE WHEN hc.IntakeDate IS NOT NULL THEN 1 ELSE 0 END
+CASE WHEN cp.DischargeDate IS NOT NULL THEN '1' ELSE '0' END,
+CASE WHEN hc.IntakeDate IS NOT NULL THEN '1' ELSE '0' END
   from		CaseProgram cp WITH (NOLOCK) 
 				  inner join codeLevel cl on cl.codeLevelPK = cp.CurrentLevelFK
 				  inner join HVCase hc on cp.HVCaseFK = hc.HVCasePK
