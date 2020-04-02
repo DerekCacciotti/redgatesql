@@ -179,6 +179,8 @@ END;
 GO
 ALTER TABLE [dbo].[SupervisionHomeVisitCase] ADD CONSTRAINT [PK_SupervisionHomeVisitCase] PRIMARY KEY CLUSTERED  ([SupervisionHomeVisitCasePK]) ON [PRIMARY]
 GO
+CREATE NONCLUSTERED INDEX [nci_wi_SupervisionHomeVisitCase_22004871E7A6BD91D9D0A039654A3658] ON [dbo].[SupervisionHomeVisitCase] ([HVCaseFK], [ProgramFK]) ON [PRIMARY]
+GO
 CREATE NONCLUSTERED INDEX [nci_wi_SupervisionHomeVisitCase_36D663AB632133D9937D327E9A90B7A3] ON [dbo].[SupervisionHomeVisitCase] ([SupervisionFK]) INCLUDE ([CaseComments], [ChallengingIssuesComments], [ChallengingIssuesStatus], [CHEERSFeedbackComments], [CHEERSFeedbackStatus], [FGPProgressComments], [FGPProgressStatus], [FollowUpHVCase], [HVCaseFK], [HVCPSComments], [HVCPSStatus], [HVReferralsComments], [HVReferralsStatus], [InDepthDiscussion], [LevelChangeComments], [LevelChangeStatus], [MedicalComments], [MedicalStatus], [ProgramFK], [ServicePlanComments], [ServicePlanStatus], [ToolsComments], [ToolsStatus], [TransitionPlanningComments], [TransitionPlanningStatus]) ON [PRIMARY]
 GO
 ALTER TABLE [dbo].[SupervisionHomeVisitCase] ADD CONSTRAINT [FK_SupervisionHomeVisitCase_SupervisionFK] FOREIGN KEY ([SupervisionFK]) REFERENCES [dbo].[Supervision] ([SupervisionPK])
