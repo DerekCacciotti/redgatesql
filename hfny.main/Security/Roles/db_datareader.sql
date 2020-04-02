@@ -1,4 +1,2 @@
-
-EXEC sp_addrolemember N'db_datareader', N'CHSRAdmin'
-EXEC sp_addrolemember N'db_datareader', N'CHSRUser'
+ALTER ROLE [db_datareader] ADD MEMBER [CHSRUser]
 GO
