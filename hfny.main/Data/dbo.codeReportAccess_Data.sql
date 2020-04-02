@@ -1,4 +1,9 @@
 SET IDENTITY_INSERT [dbo].[codeReportAccess] ON
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [ReportFK], [StateFK]) VALUES (643, 0, '2020-02-06 20:53:12.977', 'jrobohn', 3352, 1)
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [ReportFK], [StateFK]) VALUES (644, 1, '2020-02-06 20:53:12.977', 'jrobohn', 3352, 2)
+INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [ReportFK], [StateFK]) VALUES (645, 0, '2020-02-06 20:53:12.977', 'jrobohn', 3352, 3)
+SET IDENTITY_INSERT [dbo].[codeReportAccess] OFF
+SET IDENTITY_INSERT [dbo].[codeReportAccess] ON
 INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [ReportFK], [StateFK]) VALUES (1, 1, '2019-12-11 09:52:43.733', 'bsimmons', 145, 1)
 INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [ReportFK], [StateFK]) VALUES (2, 1, '2019-12-11 09:52:43.733', 'bsimmons', 146, 1)
 INSERT INTO [dbo].[codeReportAccess] ([codeReportAccessPK], [AllowedAccess], [CreateDate], [Creator], [ReportFK], [StateFK]) VALUES (3, 1, '2019-12-11 09:52:43.733', 'bsimmons', 147, 1)
