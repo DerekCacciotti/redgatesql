@@ -989,7 +989,7 @@ begin
 			, sum(case when dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08
 			, sum(case when a.Status = '1' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G1
 			, sum(case when a.Status = '2' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G2
-			, sum(case when a.Status = '3' and dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G3
+			, sum(case when a.Status = '3' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G3
 			, sum(case when dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race09
 			, sum(case when a.Status = '1' and dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race09G1
 			, sum(case when a.Status = '2' and dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race09G2
