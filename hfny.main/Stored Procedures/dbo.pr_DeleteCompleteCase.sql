@@ -2,7 +2,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
 GO
-CREATE PROC [dbo].[pr_DeleteCompleteCase]
+CREATE procedure [dbo].[pr_DeleteCompleteCase]
 (
     @hvcasefk          int,
     @programfk         int,
@@ -577,6 +577,25 @@ begin try
 	close del_cursor;
 	deallocate del_cursor;
 
+	--WorkerAssignmentDeleted
+	declare del_cursor cursor for
+	select wad.WorkerAssignmentDeletedPK
+		from WorkerAssignmentDeleted wad
+		where hvcasefk = @hvcasefk
+			 and ProgramFK = @ProgramFK;
+	open del_cursor
+
+	fetch next from del_cursor into @PK
+
+	while @@FETCH_STATUS = 0
+	begin
+		exec spDelWorkerAssignmentDeleted @WorkerAssignmentDeletedPK = @pk -- int
+
+		fetch next from del_cursor into @PK
+
+	end
+	close del_cursor;
+	deallocate del_cursor;
 
 	--WorkerAssignment
 	declare del_cursor cursor for
