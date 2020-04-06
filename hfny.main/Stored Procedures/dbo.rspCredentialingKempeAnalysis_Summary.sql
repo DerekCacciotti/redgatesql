@@ -989,7 +989,11 @@ begin
 			, sum(case when dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08
 			, sum(case when a.Status = '1' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G1
 			, sum(case when a.Status = '2' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G2
-			, sum(case when a.Status = '3' and dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G3
+			, sum(case when a.Status = '3' and dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race08G3
+			, sum(case when dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race09
+			, sum(case when a.Status = '1' and dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race09G1
+			, sum(case when a.Status = '2' and dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race09G2
+			, sum(case when a.Status = '3' and dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1 then 1 else 0 end) as race09G3
 		from	#cteMain1 as a
 	)
 	,	race2
@@ -1064,6 +1068,14 @@ begin
 			-- , round(coalesce(cast(race06G2 as float)* 100 / nullif(race06, 0), 0), 0) as AcceptedFirstVisitNotEnrolledPercent
 			, race06G3 as Refused
 			-- , round(coalesce(cast(race06G3 as float)* 100 / nullif(race06, 0), 0), 0) as RefusedPercent
+			, '1' as GroupID
+		from	race1
+		union all
+		select	'  Multiracial' as [title]
+			, race09 as TotalN 
+			, race09G1 as AcceptedFirstVisitEnrolled
+			, race09G2 as AcceptedFirstVisitNotEnrolled
+			, race09G3 as Refused
 			, '1' as GroupID
 		from	race1
 		union all
