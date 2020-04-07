@@ -436,7 +436,7 @@ BEGIN
 		   gender.AppCodeText AS Gender,
 		   dbo.fnGetRaceText(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_Other, Race_White, RaceSpecify) AS Race,
            c.RaceSpecify,
-           Case When Race_Hispanic = 1 Then 'Hispanic ' Else '' End + c.Ethnicity As Ethnicity,
+           Case When Race_Hispanic = 1 Then 'Hispanic ' Else 'Non-Hispanic ' End + isNull(c.Ethnicity, '') As Ethnicity,
 		   edu.AppCodeText AS HighestGrade,
            CASE WHEN ice.IsCurrentlyEmployed = 1 THEN 'Yes' 
 				WHEN ice.IsCurrentlyEmployed = 0 THEN 'No' 
