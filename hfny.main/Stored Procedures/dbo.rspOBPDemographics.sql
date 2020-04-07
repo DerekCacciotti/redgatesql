@@ -292,6 +292,7 @@ BEGIN
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_Asian = 1) AS NumInvolvedAsian
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_AmericanIndian = 1) AS NumInvolvedNativeAmerican
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_Other = 1) AS NumInvolvedOtherRace
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1) AS NumInvolvedMultiRacial
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1) AS NumInvolvedUnknownRace
 		--Not Involved OBPs race
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_White = 1) AS NumNotInvolvedWhite
@@ -300,6 +301,7 @@ BEGIN
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_Asian = 1) AS NumNotInvolvedAsian
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_AmericanIndian = 1) AS NumNotInvolvedNativeAmerican
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_Other = 1) AS NumNotInvolvedOtherRace
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1) AS NumNotInvolvedMultiRacial
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1) AS NumNotInvolvedUnknownRace
 		--Involved OBPs marital status
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.MaritalStatus = '01') AS NumInvolvedMarried
