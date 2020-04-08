@@ -434,7 +434,7 @@ BEGIN
            LEFT(CONVERT(VARCHAR, c.PCDOB, 120), 10) AS PCDOB,
 		   PCZip,
 		   gender.AppCodeText AS Gender,
-		   dbo.fnGetRaceText(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_Other, Race_White, RaceSpecify) AS Race,
+		   dbo.fnGetRaceText(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other, '') AS Race,
            c.RaceSpecify,
            Case When Race_Hispanic = 1 Then 'Hispanic ' Else 'Non-Hispanic ' End + isNull(c.Ethnicity, '') As Ethnicity,
 		   edu.AppCodeText AS HighestGrade,
