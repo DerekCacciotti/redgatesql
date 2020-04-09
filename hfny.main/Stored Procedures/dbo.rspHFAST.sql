@@ -94,7 +94,13 @@ BEGIN
 		,PCDOB DATE
 		,Gender CHAR(2)
 		,GenderOBP CHAR(2)
-		,Race CHAR(2)
+		,Race_AmericanIndian BIT
+		,Race_Asian BIT
+		,Race_Black BIT
+		,Race_Hawaiian BIT
+		,Race_Hispanic BIT
+		,Race_Other BIT
+		,Race_White BIT
 		,Ethnicity VARCHAR(MAX)
 		,PC1Relation2TC  INT
 		,RowNum  INT
@@ -112,7 +118,13 @@ BEGIN
 	 ,OBPParticipated 
 	 ,Gender
 	 ,GenderOBP
-	 ,Race
+	 ,Race_AmericanIndian
+     ,Race_Asian
+	 ,Race_Black
+	 ,Race_Hawaiian
+	 ,Race_Hispanic
+	 ,Race_Other
+	 ,Race_White
 	 ,Ethnicity
 	 ,PCDOB
 	 ,PC1Relation2TC
@@ -129,7 +141,13 @@ BEGIN
 		  , hv.OBPParticipated 
 		  , pc.Gender
 		  , obp.Gender
-		  , pc.Race
+		  , pc.Race_AmericanIndian
+		  , pc.Race_Asian
+		  , pc.Race_Black
+		  , pc.Race_Hawaiian
+		  , pc.Race_Hispanic
+		  , pc.Race_Other
+		  , pc.Race_White
 		  , pc.Ethnicity
 		  , pc.PCDOB
 		  , hc.PC1Relation2TC
@@ -1841,7 +1859,7 @@ VALUES(1140, NULL, 'Ethnicity: Number of Primary Participants who are:', 1, 0)
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE Race = '03'
+		WHERE Race_Hispanic = 1
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
@@ -1854,7 +1872,7 @@ VALUES(1140, NULL, 'Ethnicity: Number of Primary Participants who are:', 1, 0)
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE Race <> '03'
+		WHERE Race_Hispanic = 0
 	)
 	
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
@@ -1867,7 +1885,7 @@ VALUES(1140, NULL, 'Ethnicity: Number of Primary Participants who are:', 1, 0)
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE (Race is null or Race = '') and (Ethnicity is null or Ethnicity = '')
+		WHERE (Race_Hispanic is null and (Ethnicity is null or Ethnicity = ''))
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
@@ -1883,7 +1901,7 @@ VALUES(1170, NULL, 'Race: Number of Primary Participants who are:', 1, 0)
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		 SELECT hvcasefk FROM @tblHomeVisits
-		 WHERE Race = '01'
+		 WHERE Race_White = 1
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
@@ -1896,7 +1914,7 @@ VALUES(1170, NULL, 'Race: Number of Primary Participants who are:', 1, 0)
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE Race = '02'
+		WHERE Race_Black = 1
 	)
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
 	VALUES(1190, 'B53', 'African-American', 0, 0,
@@ -1908,7 +1926,7 @@ VALUES(1170, NULL, 'Race: Number of Primary Participants who are:', 1, 0)
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE Race = '04'
+		WHERE Race_Asian = 1
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
@@ -1921,21 +1939,31 @@ VALUES(1170, NULL, 'Race: Number of Primary Participants who are:', 1, 0)
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE Race = '05'
+		WHERE Race_AmericanIndian = 1
 	)
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
 	VALUES(1210, 'B53', 'American Indian/Alaskan Native', 0, 0,
 		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 1210 and Detail = 1) 
 	)
 -----------------
-INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES(1220, 'B53', 'Native Hawaiian/Pacific Islander', 0, 0)
+	INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
+	SELECT 1220, tpid.PC1ID, 0, 1
+	FROM @tblPC1IDs tpid
+	WHERE tpid.hvcasefk in (
+		SELECT hvcasefk FROM @tblHomeVisits
+		WHERE Race_Hawaiian = 1
+	)
+	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
+	VALUES(1220, 'B53', 'Native Hawaiian/Pacific Islander', 0, 0,
+		(SELECT COUNT(*) FROM @tblFinalExport tfe WHERE RowNumber = 1220 and Detail = 1)
+	)
 -----------------
 	INSERT INTO @tblFinalExport (RowNumber, PCID_Response, Header, Detail)
 	SELECT 1230, tpid.PC1ID, 0, 1
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE Race = '06'
+		WHERE dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1
 	)
 
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
@@ -1948,7 +1976,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE Race is null or Race = ' ' 
+		WHERE dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1
 	)
 	
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 
@@ -1961,7 +1989,7 @@ INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail) VALUES
 	FROM @tblPC1IDs tpid
 	WHERE tpid.hvcasefk in (
 		SELECT hvcasefk FROM @tblHomeVisits
-		WHERE Race = '07'
+		WHERE Race_Other = 1
 	)
 	
 	INSERT INTO @tblFinalExport (RowNumber, ItemNumber, Item, Header, Detail, Response) 

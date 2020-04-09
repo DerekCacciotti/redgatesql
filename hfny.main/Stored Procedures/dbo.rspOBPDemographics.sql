@@ -6,6 +6,9 @@ GO
 -- Author:		Benjamin Simmons
 -- Create date: 3/13/18
 -- Description:	This report stored procedure is used to populate the OBP Demographics Report
+-- Edit date: <03/31/2020>
+-- Editor: <Bill O'Brien>
+-- Edit Reason: Update to use new Race fields
 -- =============================================
 CREATE procedure [dbo].[rspOBPDemographics]
 	@ProgramFK	VARCHAR(MAX) = NULL,
@@ -67,7 +70,13 @@ BEGIN
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
-		Race CHAR(2),
+		Race_AmericanIndian BIT,
+		Race_Asian BIT,
+		Race_Black BIT,
+		Race_Hawaiian BIT,
+		Race_Hispanic BIT,
+		Race_Other BIT,
+		Race_White BIT,
 		MaritalStatus CHAR(2),
 		HighestGrade CHAR(2),
 		EducationalEnrollment CHAR(1),
@@ -84,7 +93,13 @@ BEGIN
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
-		Race CHAR(2),
+		Race_AmericanIndian BIT,
+		Race_Asian BIT,
+		Race_Black BIT,
+		Race_Hawaiian BIT,
+		Race_Hispanic BIT,
+		Race_Other BIT,
+		Race_White BIT,
 		MaritalStatus CHAR(2),
 		HighestGrade CHAR(2),
 		EducationalEnrollment CHAR(1),
@@ -101,7 +116,13 @@ BEGIN
 		OBPPK INT,
 		OBPDOB DATETIME,
 		OBPInHome CHAR(1),
-		Race CHAR(2),
+		Race_AmericanIndian BIT,
+		Race_Asian BIT,
+		Race_Black BIT,
+		Race_Hawaiian BIT,
+		Race_Hispanic BIT,
+		Race_Other BIT,
+		Race_White BIT,
 		MaritalStatus CHAR(2),
 		HighestGrade CHAR(2),
 		EducationalEnrollment CHAR(1),
@@ -170,7 +191,8 @@ BEGIN
 
 	--All OBP info
 	INSERT INTO @tblOBPInfo
-	SELECT c.HVCasePK, obp.PCPK, obp.PCDOB, ca.OBPInHome, obp.Race, ca.MaritalStatus, ca.HighestGrade,
+	SELECT c.HVCasePK, obp.PCPK, obp.PCDOB, ca.OBPInHome, obp.Race_AmericanIndian, obp.Race_Asian, obp.Race_Black,
+		obp.Race_Hawaiian, obp.Race_Hispanic, obp.Race_Other, obp.Race_White, ca.MaritalStatus, ca.HighestGrade,
 		ca.EducationalEnrollment, ca.IsCurrentlyEmployed, i.DomesticViolence, k.DadScore, c.TCDOB, c.EDC,
 		--Get the OBP's age in years when the TC was born. Source: https://stackoverflow.com/questions/1572110/how-to-calculate-age-in-years-based-on-date-of-birth-and-getdate
 		(CONVERT(INT,CONVERT(CHAR(8),ISNULL(TCDOB, EDC),112))-CONVERT(char(8),obp.PCDOB,112))/10000 AS OBPAgeAtTCBirth
@@ -196,15 +218,15 @@ BEGIN
 	WHERE [@tblOBPInfo].OBPInHome is null and [@tblOBPInfo].HVCasePK = toi.HVCaseFK	
 	
 	INSERT INTO @tblInvolvedOBPInfo
-	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome,
-           obp.Race, obp.MaritalStatus, obp.HighestGrade, obp.EducationalEnrollment,
+	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome, obp.Race_AmericanIndian, obp.Race_Asian, obp.Race_Black,
+		   obp.Race_Hawaiian, obp.Race_Hispanic, obp.Race_Other, obp.Race_White, obp.MaritalStatus, obp.HighestGrade, obp.EducationalEnrollment,
            obp.IsCurrentlyEmployed, obp.DomesticViolence, obp.DadScore, obp.TCDOB, obp.EDC, obp.OBPAgeAtTCBirth
 		   FROM @tblOBPInfo obp 
 		   INNER JOIN @tblInvolvedOBPs i ON i.HVCasePK = obp.HVCasePK
 
 	INSERT INTO @tblNotInvolvedOBPInfo
-	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome,
-           obp.Race, obp.MaritalStatus, obp.HighestGrade, obp.EducationalEnrollment,
+	SELECT obp.HVCasePK, obp.OBPPK, obp.OBPDOB, obp.OBPInHome, obp.Race_AmericanIndian, obp.Race_Asian, obp.Race_Black,
+		obp.Race_Hawaiian, obp.Race_Hispanic, obp.Race_Other, obp.Race_White, obp.MaritalStatus, obp.HighestGrade, obp.EducationalEnrollment,
            obp.IsCurrentlyEmployed, obp.DomesticViolence, obp.DadScore, obp.TCDOB, obp.EDC, obp.OBPAgeAtTCBirth
 		   FROM @tblOBPInfo obp 
 		   INNER JOIN @tblNotInvolvedOBPs ni ON ni.HVCasePK = obp.HVCasePK
@@ -264,23 +286,23 @@ BEGIN
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.OBPAgeAtTCBirth >= 40) AS NumNotInvolvedOver40
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.OBPDOB IS NULL) AS NumNotInvolvedAgeUnknown
 		--Involved OBPs race
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '01') AS NumInvolvedWhite
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '02') AS NumInvolvedBlack
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '03') AS NumInvolvedHispanic
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '04') AS NumInvolvedAsian
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '05') AS NumInvolvedNativeAmerican
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '06') AS NumInvolvedMultiracial
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race = '07') AS NumInvolvedOtherRace
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race IS NULL OR obp.Race = '') AS NumInvolvedUnknownRace
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_White = 1) AS NumInvolvedWhite
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_Black = 1) AS NumInvolvedBlack
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_Hispanic = 1) AS NumInvolvedHispanic
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_Asian = 1) AS NumInvolvedAsian
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_AmericanIndian = 1) AS NumInvolvedNativeAmerican
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.Race_Other = 1) AS NumInvolvedOtherRace
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1) AS NumInvolvedMultiRacial
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1) AS NumInvolvedUnknownRace
 		--Not Involved OBPs race
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '01') AS NumNotInvolvedWhite
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '02') AS NumNotInvolvedBlack
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '03') AS NumNotInvolvedHispanic
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '04') AS NumNotInvolvedAsian
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '05') AS NumNotInvolvedNativeAmerican
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '06') AS NumNotInvolvedMultiracial
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race = '07') AS NumNotInvolvedOtherRace
-		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race IS NULL OR obp.Race = '') AS NumNotInvolvedUnknownRace
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_White = 1) AS NumNotInvolvedWhite
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_Black = 1) AS NumNotInvolvedBlack
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_Hispanic = 1) AS NumNotInvolvedHispanic
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_Asian = 1) AS NumNotInvolvedAsian
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_AmericanIndian = 1) AS NumNotInvolvedNativeAmerican
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE obp.Race_Other = 1) AS NumNotInvolvedOtherRace
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE dbo.fnIsMultiRace(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1) AS NumNotInvolvedMultiRacial
+		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblNotInvolvedOBPInfo obp WHERE dbo.fnIsRaceMissing(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other) = 1) AS NumNotInvolvedUnknownRace
 		--Involved OBPs marital status
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.MaritalStatus = '01') AS NumInvolvedMarried
 		, (SELECT COUNT(DISTINCT obp.HVCasePK) FROM @tblInvolvedOBPInfo obp WHERE obp.MaritalStatus = '02') AS NumInvolvedNotMarried
@@ -351,5 +373,4 @@ BEGIN
 
 	SELECT * FROM cteResults
 END
-   
 GO

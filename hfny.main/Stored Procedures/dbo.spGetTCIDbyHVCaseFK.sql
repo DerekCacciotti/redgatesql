@@ -1,4 +1,3 @@
-
 SET QUOTED_IDENTIFIER ON
 GO
 SET ANSI_NULLS ON
@@ -8,7 +7,7 @@ GO
 -- Create date: Nov. 12, 2011
 -- Description:	<returns tcid values by HVCaseFk, for twins, triplets, etc.>
 -- =============================================
-CREATE PROCEDURE [dbo].[spGetTCIDbyHVCaseFK](@HVCaseFK int)
+CREATE PROC [dbo].[spGetTCIDbyHVCaseFK](@HVCaseFK int)
 AS
 BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
@@ -29,7 +28,7 @@ BEGIN
       ,[NoImmunization]
       ,[NumberofChildren]
       ,[ProgramFK]
-      ,[Race]
+      ,dbo.fnGetRaceText(Race_AmericanIndian, Race_Asian, Race_Black, Race_Hawaiian, Race_White, Race_Other, RaceSpecify) Race
       ,[RaceSpecify]
       ,[SmokedPregnant]
       ,[TCDOB]
@@ -47,7 +46,4 @@ BEGIN
   FROM [dbo].[TCID]
 	WHERE HVCaseFK=@HVCaseFK
 END
-
-
-
 GO

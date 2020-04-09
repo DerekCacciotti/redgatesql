@@ -31,8 +31,9 @@ SELECT TOP(2500) PC1ID
 ,pc1.PCFirstName as [PC1 First Name]
 ,pc1.PCLastName as [PC1 Last Name]
 ,pc1.PCDOB as [PC1 DOB]
-,pc1.Ethnicity as [PC1Ethnicity]
-,cappr.AppCodeText as [PC1Race]
+,Case When pc1.Race_Hispanic = 1 Then 'Hispanic' Else 'Non-Hispanic' End as [PC1Ethnicity]
+--passed empty string for specify since, specify is its own field
+,dbo.fnGetRaceText(pc1.Race_AmericanIndian, pc1.Race_Asian, pc1.Race_Black, pc1.Race_Hawaiian, pc1.Race_White, pc1.Race_Other, '') as [PC1Race]
 ,pc1.RaceSpecify as [PC1Race Specify]
 ,cappgn.AppCodeText as [Gender]
 ,concat(pc1.PCStreet, ' ', pc1.PCApt, ' ', pc1.PCState) as [Address]
@@ -81,8 +82,9 @@ when '9' then 'Unknown' end as [SSI]
 ,obp.PCEmail as [OBP Email]
 ,obp.BirthCountry as [OBP Birth Country]
 ,obp.YearsInUSA as [OBP Years in US]
-,obp.Ethnicity as [OBPEthnicity]
-,capprobp.AppCodeText as [OBPRace]
+,Case When obp.Race_Hispanic = 1 Then 'Hispanic' Else 'Non-Hispanic' End as [OBPEthnicity]
+--passed empty string for specify since, specify is its own field
+,dbo.fnGetRaceText(obp.Race_AmericanIndian, obp.Race_Asian, obp.Race_Black, obp.Race_Hawaiian, obp.Race_White, obp.Race_Other, '') as [OBPRace]
 ,obp.RaceSpecify as [OBPRace Specify]
 ,pc2.PCFirstName as [PC2 First Name]
 ,pc2.PCLastName as [PC2 Last Name]
@@ -94,8 +96,9 @@ when '9' then 'Unknown' end as [SSI]
 ,pc2.PCEmail as [PC2 Email]
 ,pc2.BirthCountry as [PC2 Birth Country]
 ,pc2.YearsInUSA as [PC2 Years in US]
-,pc2.Ethnicity as [pc2Ethnicity]
-,cappr2.AppCodeText as [pc2Race]
+,Case When pc2.Race_Hispanic = 1 Then 'Hispanic' Else 'Non-Hispanic' End as [pc2Ethnicity]
+--passed empty string for specify since, specify is its own field
+,dbo.fnGetRaceText(pc2.Race_AmericanIndian, pc2.Race_Asian, pc2.Race_Black, pc2.Race_Hawaiian, pc2.Race_White, pc2.Race_Other, '') as [pc2Race]
 ,pc2.RaceSpecify as [pc2Race Specify]
 from @tblCohort c
 inner join CaseProgram on CaseProgram.HVCaseFK = c.HVCasePK
@@ -112,21 +115,10 @@ left outer join CommonAttributes cainpc1 on cainpc1.HVCaseFK = c.HVCasePK and ca
 left outer join codeApp cappms on cappms.AppCodeGroup = 'MaritalStatus' and cappms.AppCode = cakempe.MaritalStatus
 left outer join codeApp capppl on capppl.AppCodeGroup = 'PrimaryLanguage' and capppl.AppCode = cainpc1.PrimaryLanguage
 left outer join codeApp capphg on capphg.AppCodeGroup = 'Education' and capphg.AppCode = cakempe.HighestGrade
-left outer join codeApp cappr on cappr.AppCodeGroup = 'Race' and cappr.AppCode = pc1.Race
 left outer join codeApp cappgn on cappgn.AppCodeGroup = 'Gender' and cappgn.AppCode = pc1.Gender
-left outer join codeApp cappr2 on cappr2.AppCodeGroup = 'Race' and cappr2.AppCode = pc2.Race
 left outer join codeApp cappgn2 on cappgn2.AppCodeGroup = 'Gender' and cappgn2.AppCode = pc2.Gender
-left outer join codeApp capprobp on capprobp.AppCodeGroup = 'Race' and capprobp.AppCode = obp.Race
 left outer join codeApp cappgnobp on cappgnobp.AppCodeGroup = 'Gender' and cappgnobp.AppCode = obp.Gender
 inner join codeLevel cl on cl.codeLevelPK = CaseProgram.CurrentLevelFK
 left outer join codeDischarge cd on cd.DischargeCode=caseprogram.DischargeReason
 order by pc1.PCLastName, pc1.PCFirstName, hc.ScreenDate
-
-
-
-
-
-
-
-
 GO
