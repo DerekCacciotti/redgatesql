@@ -10,6 +10,7 @@ GO
 -- Edited on:   02/22/2019
 -- Edited by:   Chris Papas
 -- Edited Reason: Date math using year returning wrong result.  Switched to days/365.25 and a float to return correct age of PC1
+-- Edit: 03/03/20 WO Remove SSN
 -- =============================================
 CREATE procedure [dbo].[rspActiveEnrolledCaseList]-- Add the parameters for the stored procedure here
     @ProgramFK           varchar(max)    = null,
@@ -60,7 +61,6 @@ as
 		  , a.PC1ID
 		  ,rtrim(PC.PCLastName)+', '+rtrim(PC.PCFirstName) [Name]
 		  ,convert(varchar(12),PC.PCDOB,101) [DOB]
-		  ,PC.SSNo [SSNo]
 		  ,convert(varchar(12),Kempe.KempeDate,101) [KemptDate]
 		  ,convert(varchar(12),HVScreen.ScreenDate,101) [ScreenDate]
 		  ,rtrim(Worker.LastName)+', '+rtrim(Worker.FirstName) [FSW]
@@ -111,7 +111,7 @@ as
 			join HVCase as b on a.HVCaseFK = b.HVCasePK
 			inner join dbo.SplitString(@ProgramFK,',') on a.ProgramFK = listitem
 			inner join dbo.udfCaseFilters(@CaseFiltersPositive, NULL, @ProgramFK) cf on cf.HVCaseFK = a.HVCaseFK
-			-- pc1 name, dob, and SS# = b.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB, PC.SSNo
+			-- pc1 name, dob, and SS# = b.PC1FK <-> PC.PCPK -> PC.PCLastName + PC.PCFirstName, PC.PCDOB
 			join PC on PC.PCPK = b.PC1FK
 			-- screen date = a.HVCaseFK <-> Kempe.HVCaseFK -> Kempe.KempeDate
 			join Kempe on Kempe.HVCaseFK = b.HVCasePK
