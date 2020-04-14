@@ -24,6 +24,17 @@ AS
 Update CaseNote set CaseNote.CaseNoteEditDate= getdate()
 From [CaseNote] INNER JOIN Inserted ON [CaseNote].[CaseNotePK]= Inserted.[CaseNotePK]
 GO
+SET QUOTED_IDENTIFIER ON
+GO
+SET ANSI_NULLS ON
+GO
+CREATE TRIGGER [dbo].[tr_delCaseNote] ON [dbo].[CaseNote] AFTER DELETE AS
+
+DECLARE @caseNotePk INT  = (SELECT d.CaseNotePK FROM Deleted d)
+DECLARE @createdate DATETIME = (SELECT d.CaseNoteCreateDate FROM Deleted d)
+
+UPDATE CaseNoteDeleted SET CaseNoteCreateDate = @createdate WHERE CaseNotePK = @caseNotePk
+GO
 ALTER TABLE [dbo].[CaseNote] ADD CONSTRAINT [PK_CaseNotes] PRIMARY KEY CLUSTERED  ([CaseNotePK]) ON [PRIMARY]
 GO
 CREATE NONCLUSTERED INDEX [nci_wi_CaseNote_0DD622D0101BDAF66E3E2FD861BBC842] ON [dbo].[CaseNote] ([HVCaseFK], [ProgramFK]) INCLUDE ([CaseNoteContents], [CaseNoteCreateDate], [CaseNoteCreator], [CaseNoteDate], [CaseNoteEditDate], [CaseNoteEditor]) ON [PRIMARY]
