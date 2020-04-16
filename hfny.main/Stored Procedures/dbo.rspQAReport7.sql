@@ -37,21 +37,21 @@ DECLARE @Cohort AS TABLE (
 	Worker VARCHAR(50),
 	GestationalAge INT,
 	CurrentLevel VARCHAR(50),
-	YearOneASQCount INT DEFAULT 0,
-	YearOneNotInWindow INT DEFAULT 0,
-	YearOneNotReviewed INT DEFAULT 0,
-	YearTwoASQCount INT DEFAULT 0,
-	YearTwoNotInWindow INT DEFAULT 0,
-	YearTwoNotReviewed INT DEFAULT 0,
-	YearThreeASQCount INT DEFAULT 0,
-	YearThreeNotInWindow INT DEFAULT 0,
-	YearThreeNotReviewed INT DEFAULT 0,
-	YearFourASQCount INT DEFAULT 0,
-	YearFourNotInWindow INT DEFAULT 0,
-	YearFourNotReviewed INT DEFAULT 0,
-	YearFiveASQCount INT DEFAULT 0,
-	YearFiveNotInWindow INT DEFAULT 0,
-	YearFiveNotReviewed INT DEFAULT 0
+	YearOneASQCount INT,
+	YearOneNotInWindow INT,
+	YearOneNotReviewed INT,
+	YearTwoASQCount INT,
+	YearTwoNotInWindow INT,
+	YearTwoNotReviewed INT,
+	YearThreeASQCount INT,
+	YearThreeNotInWindow INT,
+	YearThreeNotReviewed INT,
+	YearFourASQCount INT,
+	YearFourNotInWindow INT,
+	YearFourNotReviewed INT,
+	YearFiveASQCount INT,
+	YearFiveNotInWindow INT,
+	YearFiveNotReviewed INT
 )
 
 INSERT INTO @Cohort (
@@ -411,10 +411,10 @@ SELECT
 	--If there aren't the required number of reviewed and in window asqs, figure out why.
 	--We're pulling TCs that are at least 12 months old, so don't need to check age for 1st year.
 	CASE WHEN YearOneASQCount < 2 THEN
-		CASE WHEN YearOneNotInWindow > 0 AND YearOneNotReviewed = 0 THEN 'Out of Window'
-			 WHEN YearOneNotInWindow = 0 AND YearOneNotReviewed > 0 THEN 'Not Reviewed' 
+		CASE WHEN YearOneNotInWindow > 0 AND YearOneNotReviewed IS NULL THEN 'Out of Window'
+			 WHEN YearOneNotInWindow IS NULL AND YearOneNotReviewed > 0 THEN 'Not Reviewed' 
 			 WHEN YearOneNotInWindow > 0 AND YearOneNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-			 WHEN YearOneNotInWindow = 0 AND YearOneNotReviewed = 0 THEN 'Missing'
+			 WHEN YearOneNotInWindow IS NULL AND YearOneNotReviewed IS NULL THEN 'Missing'
 		END
 	END AS YearOneFailureReason,
 
@@ -422,10 +422,10 @@ SELECT
 		CASE
 		--TC must be at least two years old to fail the two year asq requirement. Pattern continues with 3, 4, 5 year ASQs 
 			WHEN TCAgeInDays > 730 THEN
-				CASE WHEN YearTwoNotInWindow > 0 AND YearTwoNotReviewed = 0 THEN 'Out of Window'
-					 WHEN YearTwoNotInWindow = 0 AND YearTwoNotReviewed > 0 THEN 'Not Reviewed' 
+				CASE WHEN YearTwoNotInWindow > 0 AND YearTwoNotReviewed IS NULL THEN 'Out of Window'
+					 WHEN YearTwoNotInWindow IS NULL AND YearTwoNotReviewed > 0 THEN 'Not Reviewed' 
 					 WHEN YearTwoNotInWindow > 0 AND YearTwoNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-					 WHEN YearTwoNotInWindow = 0 AND YearTwoNotReviewed = 0 THEN 'Missing'
+					 WHEN YearTwoNotInWindow IS NULL AND YearTwoNotReviewed IS NULL THEN 'Missing'
 				END
 		END
 	END AS YearTwoFailureReason,
@@ -433,10 +433,10 @@ SELECT
 	CASE WHEN YearThreeASQCount < 2 THEN
 		CASE
 			WHEN TCAgeInDays > 1095 THEN
-				CASE WHEN YearThreeNotInWindow > 0 AND YearThreeNotReviewed = 0 THEN 'Out of Window'
-					 WHEN YearThreeNotInWindow = 0 AND YearThreeNotReviewed > 0 THEN 'Not Reviewed' 
+				CASE WHEN YearThreeNotInWindow > 0 AND YearThreeNotReviewed IS NULL THEN 'Out of Window'
+					 WHEN YearThreeNotInWindow IS NULL AND YearThreeNotReviewed > 0 THEN 'Not Reviewed' 
 					 WHEN YearThreeNotInWindow > 0 AND YearThreeNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-					 WHEN YearThreeNotInWindow = 0 AND YearThreeNotReviewed = 0 THEN 'Missing'
+					 WHEN YearThreeNotInWindow IS NULL AND YearThreeNotReviewed IS NULL THEN 'Missing'
 				END
 		END
 	END	AS YearThreeFailureReason,
@@ -444,10 +444,10 @@ SELECT
 	CASE WHEN YearFourASQCount < 1 THEN
 		CASE
 			WHEN TCAgeInDays > 1460 THEN
-				CASE WHEN YearFourNotInWindow > 0 AND YearFourNotReviewed = 0 THEN 'Out of Window'
-					 WHEN YearFourNotInWindow = 0 AND YearFourNotReviewed > 0 THEN 'Not Reviewed' 
+				CASE WHEN YearFourNotInWindow > 0 AND YearFourNotReviewed IS NULL THEN 'Out of Window'
+					 WHEN YearFourNotInWindow IS NULL AND YearFourNotReviewed > 0 THEN 'Not Reviewed' 
 					 WHEN YearFourNotInWindow > 0 AND YearFourNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-					 WHEN YearFourNotInWindow = 0 AND YearFourNotReviewed = 0 THEN 'Missing'
+					 WHEN YearFourNotInWindow IS NULL AND YearFourNotReviewed IS NULL THEN 'Missing'
 				END 
 		END
 	END AS YearFiveFailureReason,
@@ -455,10 +455,10 @@ SELECT
 	CASE WHEN YearFiveASQCount < 1 THEN
 		CASE
 			WHEN TCAgeInDays > 1825 THEN
-				CASE WHEN YearFiveNotInWindow > 0 AND YearFiveNotReviewed = 0 THEN 'Out of Window'
-					 WHEN YearFiveNotInWindow = 0 AND YearFiveNotReviewed > 0 THEN 'Not Reviewed' 
+				CASE WHEN YearFiveNotInWindow > 0 AND YearFiveNotReviewed IS NULL THEN 'Out of Window'
+					 WHEN YearFiveNotInWindow IS NULL AND YearFiveNotReviewed > 0 THEN 'Not Reviewed' 
 					 WHEN YearFiveNotInWindow > 0 AND YearFiveNotReviewed > 0 THEN 'Out of Window / Not Reviewed'
-					 WHEN YearFiveNotInWindow = 0 AND YearFiveNotReviewed = 0 THEN 'Missing'
+					 WHEN YearFiveNotInWindow IS NULL AND YearFiveNotReviewed IS NULL THEN 'Missing'
 				END 
 		END
 	END AS YearFiveFailureReason
