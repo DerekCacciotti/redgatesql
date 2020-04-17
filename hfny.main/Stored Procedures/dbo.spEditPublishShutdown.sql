@@ -3,15 +3,15 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spEditPublishShutdown](@PublishShutdownPK int=NULL,
-@PublishShutdownStartDate datetime=NULL,
-@PublishShutdownEndDate datetime=NULL,
+@PublishShutdownStart datetime=NULL,
+@PublishShutdownEnd datetime=NULL,
 @PublishShutdownEditor varchar(max)=NULL,
 @PublishShutdownMessage varchar(max)=NULL)
 AS
 UPDATE PublishShutdown
 SET 
-PublishShutdownStartDate = @PublishShutdownStartDate, 
-PublishShutdownEndDate = @PublishShutdownEndDate, 
+PublishShutdownStart = @PublishShutdownStart, 
+PublishShutdownEnd = @PublishShutdownEnd, 
 PublishShutdownEditor = @PublishShutdownEditor, 
 PublishShutdownMessage = @PublishShutdownMessage
 WHERE PublishShutdownPK = @PublishShutdownPK

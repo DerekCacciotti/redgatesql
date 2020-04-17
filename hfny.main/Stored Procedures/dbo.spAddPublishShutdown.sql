@@ -3,20 +3,20 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROCEDURE [dbo].[spAddPublishShutdown](@PublishShutdownCreator varchar(max)=NULL,
-@PublishShutdownStartDate datetime=NULL,
-@PublishShutdownEndDate datetime=NULL,
+@PublishShutdownStart datetime=NULL,
+@PublishShutdownEnd datetime=NULL,
 @PublishShutdownMessage varchar(max)=NULL)
 AS
 INSERT INTO PublishShutdown(
 PublishShutdownCreator,
-PublishShutdownStartDate,
-PublishShutdownEndDate,
+PublishShutdownStart,
+PublishShutdownEnd,
 PublishShutdownMessage
 )
 VALUES(
 @PublishShutdownCreator,
-@PublishShutdownStartDate,
-@PublishShutdownEndDate,
+@PublishShutdownStart,
+@PublishShutdownEnd,
 @PublishShutdownMessage
 )
 

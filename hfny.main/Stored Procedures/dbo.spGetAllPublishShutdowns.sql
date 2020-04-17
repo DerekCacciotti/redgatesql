@@ -3,5 +3,5 @@ GO
 SET ANSI_NULLS ON
 GO
 CREATE PROC [dbo].[spGetAllPublishShutdowns] AS
-SELECT * FROM PublishShutdown ps ORDER BY ps.PublishShutDownStartDate DESC
+SELECT * FROM PublishShutdown ps ORDER BY ps.PublishShutDownStart DESC
 GO

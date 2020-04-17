@@ -3,8 +3,8 @@ CREATE TABLE [dbo].[PublishShutdown]
 [PublishShutdownPK] [int] NOT NULL IDENTITY(1, 1),
 [PublishShutdownCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
 [PublishShutdownCreateDate] [datetime] NULL,
-[PublishShutdownStartDate] [datetime] NOT NULL,
-[PublishShutdownEndDate] [datetime] NOT NULL,
+[PublishShutdownStart] [datetime] NOT NULL,
+[PublishShutdownEnd] [datetime] NOT NULL,
 [PublishShutdownEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [PublishShutdownEditDate] [datetime] NULL,
 [PublishShutdownMessage] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
