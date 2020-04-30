@@ -6,7 +6,7 @@ CREATE TABLE [dbo].[CaseNoteDeleted]
 [CaseNoteCreateDate] [datetime] NULL,
 [CaseNoteCreator] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CaseNoteDeleteDate] [datetime] NOT NULL,
-[CaseNotesDeleter] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL,
+[CaseNotesDeleter] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
 [CaseNoteDate] [date] NULL,
 [CaseNoteEditDate] [datetime] NULL,
 [CaseNoteEditor] [varchar] (max) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
@@ -14,5 +14,5 @@ CREATE TABLE [dbo].[CaseNoteDeleted]
 [ProgramFK] [int] NOT NULL
 ) ON [PRIMARY]
 GO
-ALTER TABLE [dbo].[CaseNoteDeleted] ADD CONSTRAINT [PK__CaseNote__2537E72D12CE074B] PRIMARY KEY CLUSTERED  ([CaseNoteDeletedPK]) ON [PRIMARY]
+ALTER TABLE [dbo].[CaseNoteDeleted] ADD CONSTRAINT [PK__CaseNote__2537E72DEB738012] PRIMARY KEY CLUSTERED  ([CaseNoteDeletedPK]) ON [PRIMARY]
 GO

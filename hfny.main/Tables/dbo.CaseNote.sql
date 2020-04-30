@@ -30,10 +30,25 @@ SET ANSI_NULLS ON
 GO
 CREATE TRIGGER [dbo].[tr_delCaseNote] ON [dbo].[CaseNote] AFTER DELETE AS
 
-DECLARE @caseNotePk INT  = (SELECT d.CaseNotePK FROM Deleted d)
-DECLARE @createdate DATETIME = (SELECT d.CaseNoteCreateDate FROM Deleted d)
-
-UPDATE CaseNoteDeleted SET CaseNoteCreateDate = @createdate WHERE CaseNotePK = @caseNotePk
+DECLARE @notepk INT = (SELECT Deleted.CaseNotePK FROM Deleted)
+INSERT INTO CaseNoteDeleted
+(
+    CaseNotePK,
+    CaseNoteContents,
+    CaseNoteCreateDate,
+    CaseNoteCreator,
+    CaseNoteDeleteDate,
+    CaseNotesDeleter,
+    CaseNoteDate,
+    CaseNoteEditDate,
+    CaseNoteEditor,
+    HVCaseFK,
+    ProgramFK
+)
+SELECT d.CaseNotePK, d.CaseNoteContents, d.CaseNoteCreateDate, d.CaseNoteCreator, GETDATE(),
+NULL, d.CaseNoteDate, d.CaseNoteEditDate, d.CaseNoteEditor, d.HVCaseFK, d.ProgramFK
+FROM Deleted d 
+WHERE d.CaseNotePK = @notepk
 GO
 ALTER TABLE [dbo].[CaseNote] ADD CONSTRAINT [PK_CaseNotes] PRIMARY KEY CLUSTERED  ([CaseNotePK]) ON [PRIMARY]
 GO
