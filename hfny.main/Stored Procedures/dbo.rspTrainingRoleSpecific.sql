@@ -20,7 +20,6 @@ BEGIN
 	-- SET NOCOUNT ON added to prevent extra result sets from
 	-- interfering with SELECT statements.
 	SET NOCOUNT ON;
-
 DECLARE @cteDetails AS TABLE (
 	RowNumber INT, CurrentRole VARCHAR(15), workerfk INT, WorkerName VARCHAR(35), StartDate DATE
 				, TopicCode DECIMAL(3,1)
@@ -82,7 +81,7 @@ INSERT INTO @cteMAIN ( workerfk ,
 
 
 
---Get Supervisor's in time period for FSS Traomomg
+--Get Supervisor's in time period for FSS Training
 INSERT INTO @cteMAIN ( workerfk ,
                        CurrentRole ,
                        StartDate ,
@@ -268,7 +267,7 @@ INSERT INTO @cteDetails ( RowNumber ,
 
 
 		
-		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FRS'  OR CurrentRole='Supervisor') AND TopicCode IS NULL
+		UPDATE @cteDetails SET TopicCode=10.0 WHERE (CurrentRole='FRS' OR CurrentRole='Supervisor') AND TopicCode IS NULL
 		UPDATE @cteDetails SET TopicCode=11.0 WHERE (CurrentRole='FSS' OR CurrentRole='Supervisor')  AND TopicCode IS NULL
 		UPDATE @cteDetails SET TopicCode=12.0 WHERE (CurrentRole='Supervisor')  AND TopicCode IS NULL
 
@@ -316,8 +315,8 @@ SELECT CurrentRole, cteAggregates.RowNumber, cteAggregates.workerfk
 , 	(SELECT TOP 1 IndividualRating FROM cteAggregates cte WHERE cteAggregates.TopicCode = cte.TopicCode ORDER BY IndividualRating) AS Rating
 , IndividualRating
 ,	CASE cteAggregates.TopicCode 
-		WHEN '10.0' THEN '10-4a. Staff conducting assessments have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
-		WHEN '11.0' THEN '10-4b. Home Visitors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
+		WHEN '10.0' THEN '10-4a. Staff conducting assessments & Supervisors have received intensive role specific training within six months of date of hire to understand the essential components of family assessment'
+		WHEN '11.0' THEN '10-4b. Home Visitors & Supervisors have received intensive role specific training within six months of date of hire to understand the essential components of home visitation'
 		WHEN '12.0' THEN '10-4c. Supervisory staff have received intensive role specific training whithin six months of date of hire to understand the essential components of their role within the home visitation program, as well as the role of the family assessment and home visitation'
 	END AS CSST
 FROM cteAggregates
@@ -326,7 +325,6 @@ group by cteAggregates.RowNumber, cteAggregates.workerfk
 , cteAggregates.WorkerName, cteAggregates.StartDate, cteAggregates.TopicCode, cteAggregates.topicname
 , cteAggregates.TrainingDate, cteAggregates.[Meets target], cteAggregates.TotalWorkers, cteCountMeeting.TopicCode
 , cteCountMeeting.totalmeetingcount, IndividualRating, CurrentRole
-
 
 
 END
