@@ -132,7 +132,7 @@
       </UserDefinedType>
       <View version="1">
         <Include>True</Include>
-        <Expression>TRUE</Expression>
+        <Expression />
       </View>
       <XmlSchemaCollection version="1">
         <Include>True</Include>
